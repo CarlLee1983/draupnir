@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  title: Draupnir API
+  description: AI 服務管理平台 API，建構於 Bifrost AI Gateway 之上
+  version: 0.1.0
+servers:
+  - url: http://localhost:3000
+    description: 本地開發伺服器
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Auth
+      summary: 註冊新用戶
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: 註冊成功
+        '400':
+          description: 驗證失敗或 Email 已存在
+
+  /api/auth/login:
+    post:
+      tags:
+        - Auth
+      summary: 用戶登入
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: 登入成功
+        '401':
+          description: 認證失敗
+
+  /api/user/me:
+    get:
+      tags:
+        - User
+      summary: 取得個人資料
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 成功取得資料
+    put:
+      tags:
+        - User
+      summary: 更新個人資料
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: 更新成功
+
+  /api/organizations:
+    post:
+      tags:
+        - Organization
+      summary: 建立組織
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrgRequest'
+      responses:
+        '201':
+          description: 建立成功
+    get:
+      tags:
+        - Organization
+      summary: 列表組織
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 成功取得列表
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        confirmPassword:
+          type: string
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    UpdateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        phone:
+          type: string
+        bio:
+          type: string
+
+    CreateOrgRequest:
+      type: object
+      required:
+        - name
+        - managerUserId
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        slug:
+          type: string
+        managerUserId:
+          type: string
+          format: uuid

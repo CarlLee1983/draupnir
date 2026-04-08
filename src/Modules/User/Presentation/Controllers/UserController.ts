@@ -5,6 +5,7 @@ import type { GetUserProfileService } from '../../Application/Services/GetUserPr
 import type { UpdateUserProfileService } from '../../Application/Services/UpdateUserProfileService'
 import type { ListUsersService } from '../../Application/Services/ListUsersService'
 import type { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
+import { UpdateUserProfileSchema, ChangeUserStatusSchema } from '../Validators'
 
 export class UserController {
 	constructor(
@@ -29,6 +30,17 @@ export class UserController {
 			return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
 		}
 		const body = await ctx.getJsonBody<Record<string, unknown>>()
+
+		// Zod 驗證
+		const validation = UpdateUserProfileSchema.safeParse(body)
+		if (!validation.success) {
+			return ctx.json({
+				success: false,
+				message: '驗證失敗',
+				error: validation.error.errors[0].message
+			}, 400)
+		}
+
 		const result = await this.updateUserProfileService.execute(auth.userId, body)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
@@ -59,7 +71,18 @@ export class UserController {
 		if (!userId) {
 			return ctx.json({ success: false, message: '缺少使用者 ID', error: 'MISSING_ID' }, 400)
 		}
-		const body = await ctx.getJsonBody<{ status: 'active' | 'suspended' }>()
+		const body = await ctx.getJsonBody<any>()
+
+		// Zod 驗證
+		const validation = ChangeUserStatusSchema.safeParse(body)
+		if (!validation.success) {
+			return ctx.json({
+				success: false,
+				message: '驗證失敗',
+				error: validation.error.errors[0].message
+			}, 400)
+		}
+
 		const result = await this.changeUserStatusService.execute(userId, body)
 		return ctx.json(result, result.success ? 200 : 400)
 	}

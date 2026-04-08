@@ -16,6 +16,7 @@ import type { LogoutUserService } from '../../Application/Services/LogoutUserSer
 import type { RegisterUserRequest } from '../../Application/DTOs/RegisterUserDTO'
 import type { LoginRequest } from '../../Application/DTOs/LoginDTO'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import { RegisterUserSchema, LoginSchema } from '../Validators'
 
 export class AuthController {
   constructor(
@@ -32,6 +33,19 @@ export class AuthController {
   async register(ctx: IHttpContext): Promise<any> {
     try {
       const body = await ctx.getJsonBody() as RegisterUserRequest
+
+      // Zod 驗證
+      const validation = RegisterUserSchema.safeParse(body)
+      if (!validation.success) {
+        return ctx.json(
+          {
+            success: false,
+            message: '驗證失敗',
+            error: validation.error.errors[0].message,
+          },
+          400
+        )
+      }
 
       // 調用應用層服務
       const result = await this.registerUserService.execute(body)
@@ -57,6 +71,19 @@ export class AuthController {
   async login(ctx: IHttpContext): Promise<any> {
     try {
       const body = await ctx.getJsonBody() as LoginRequest
+
+      // Zod 驗證
+      const validation = LoginSchema.safeParse(body)
+      if (!validation.success) {
+        return ctx.json(
+          {
+            success: false,
+            message: '驗證失敗',
+            error: validation.error.errors[0].message,
+          },
+          400
+        )
+      }
 
       // 調用應用層服務
       const result = await this.loginUserService.execute(body)

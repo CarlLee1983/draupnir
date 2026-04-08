@@ -97,3 +97,34 @@ export const registerOrganization = (core: PlanetCore): void => {
 	)
 	void registerOrganizationRoutes(router, controller)
 }
+
+import { ApiKeyController, registerApiKeyRoutes } from '@/Modules/ApiKey'
+
+/**
+ * 註冊 ApiKey 模組
+ */
+export const registerApiKey = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new ApiKeyController(
+		core.container.make('createApiKeyService') as any,
+		core.container.make('listApiKeysService') as any,
+		core.container.make('revokeApiKeyService') as any,
+		core.container.make('updateKeyLabelService') as any,
+		core.container.make('setKeyPermissionsService') as any,
+	)
+	registerApiKeyRoutes(router, controller)
+}
+
+import { DashboardController, registerDashboardRoutes } from '@/Modules/Dashboard'
+
+/**
+ * 註冊 Dashboard 模組
+ */
+export const registerDashboard = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new DashboardController(
+		core.container.make('getDashboardSummaryService') as any,
+		core.container.make('getUsageChartService') as any,
+	)
+	registerDashboardRoutes(router, controller)
+}

@@ -59,3 +59,30 @@ export const healthChecks = sqliteTable('health_checks', {
   timestamp: text('timestamp').default(sql`CURRENT_TIMESTAMP`),
   details: text('details'),
 })
+
+/**
+ * API Keys 表
+ *
+ * 儲存 Draupnir API Key，每個 Key 映射一個 Bifrost Virtual Key
+ */
+export const apiKeys = sqliteTable(
+  'api_keys',
+  {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull(),
+    created_by_user_id: text('created_by_user_id').notNull(),
+    label: text('label').notNull(),
+    key_hash: text('key_hash').notNull().unique(),
+    bifrost_virtual_key_id: text('bifrost_virtual_key_id').notNull(),
+    status: text('status').notNull().default('active'),
+    scope: text('scope').notNull(),
+    expires_at: text('expires_at'),
+    revoked_at: text('revoked_at'),
+    created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+    updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index('idx_api_keys_org_id').on(table.org_id),
+    index('idx_api_keys_key_hash').on(table.key_hash),
+  ],
+)
