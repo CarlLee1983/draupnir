@@ -78,9 +78,10 @@ app/Foundation/Infrastructure/Services/BifrostClient/
 | Rate Limit | `updateRateLimit()` | Phase 4 餘額阻擋 |
 
 **錯誤處理策略：**
-- 網路錯誤：指數退避重試（最多 3 次）
-- 4xx 錯誤：不重試，轉為 `BifrostApiError` 拋出
-- 5xx 錯誤：重試
+- 網路錯誤：指數退避重試（最多 3 次，含 jitter）
+- 429 錯誤：可重試，依 `Retry-After` Header 或指數退避（屬 4xx 但為暫時性限流）
+- 其他 4xx 錯誤：不重試，屬終端錯誤（驗證失敗、認證錯誤等），轉為 `BifrostApiError` 拋出
+- 5xx 錯誤：指數退避重試
 - 所有錯誤帶 request context（endpoint、params）
 
 ### Phase 1 完成標準
@@ -173,8 +174,10 @@ app/Modules/Organization/
 
 **多租戶設計：**
 - User 可屬於多個 Organization
-- 每個請求帶 `X-Organization-Id` Header 標示當前 context
-- Middleware 解析 Header 並注入 `currentOrg` 到 request context
+- 每個請求帶 `X-Organization-Id` Header 標示意圖切換的組織
+- Middleware 必須驗證當前已認證用戶確實為該 Organization 的成員（查詢 Membership），驗證失敗回傳 403
+- 驗證通過後才注入 `currentOrg` 到 request context
+- 禁止僅信任 Header 值 — 組織 context 必須經過伺服器端成員資格檢查
 - Organization 層級角色（`owner`、`admin`、`member`）獨立於系統角色
 
 **模組間通訊：**
@@ -363,9 +366,11 @@ app/Modules/UsageSync/
 ```
 
 **同步機制：**
-- Cron Job 每 5 分鐘執行一次
+- Cron Job 每 5 分鐘執行一次，使用分散式鎖（Redis）防止並行重疊執行
 - 使用 `SyncCursor` 記錄上次同步位置（避免重複處理）
-- 拉取 Bifrost Usage Logs → 轉為本地 `UsageRecord` → 依定價規則計算 Credit 消耗 → 呼叫 `DeductCredit`
+- 每筆 Bifrost Usage Log 以 `bifrostLogId` 作為冪等鍵（idempotency key），重複處理時自動跳過
+- 同步流程在單一資料庫交易內完成：寫入 `UsageRecord` + 呼叫 `DeductCredit` + 推進 `SyncCursor`，任一步驟失敗則整體 rollback
+- 流程：拉取 Bifrost Usage Logs → 過濾已處理（依冪等鍵）→ 在交易中批次寫入 UsageRecord + 計算扣款 + 推進 Cursor
 
 **定價規則：**
 
