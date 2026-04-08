@@ -1,10 +1,17 @@
-const VALID_TIMEZONES = Intl.supportedValuesOf('timeZone')
+function isValidTimezone(tz: string): boolean {
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone: tz })
+    return true
+  } catch {
+    return false
+  }
+}
 
 export class Timezone {
   private readonly value: string
 
   constructor(timezone: string) {
-    if (!VALID_TIMEZONES.includes(timezone)) {
+    if (!isValidTimezone(timezone)) {
       throw new Error(`無效的時區: ${timezone}`)
     }
     this.value = timezone
