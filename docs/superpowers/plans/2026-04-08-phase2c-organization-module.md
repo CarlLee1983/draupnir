@@ -25,6 +25,7 @@
 - `src/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository.ts`
 - `src/Modules/Organization/Domain/Repositories/IOrganizationInvitationRepository.ts`
 - `src/Modules/Organization/Application/DTOs/OrganizationDTO.ts`
+- `src/Modules/Organization/Application/Services/OrgAuthorizationHelper.ts` — 租戶隔離授權檢查
 - `src/Modules/Organization/Application/Services/CreateOrganizationService.ts`
 - `src/Modules/Organization/Application/Services/UpdateOrganizationService.ts`
 - `src/Modules/Organization/Application/Services/ListOrganizationsService.ts`
@@ -876,6 +877,91 @@ git commit -m "feat: [org] 新增 Organization Repositories（介面+實作）�
 
 ---
 
+### Task 3.5: OrgAuthorizationHelper — 租戶隔離授權
+
+**Files:**
+- Create: `src/Modules/Organization/Application/Services/OrgAuthorizationHelper.ts`
+
+所有 org service 操作前需驗證呼叫者有權操作目標組織。此 helper 提供統一的租戶隔離檢查。
+
+- [ ] **Step 1: 建立 OrgAuthorizationHelper**
+
+```typescript
+// src/Modules/Organization/Application/Services/OrgAuthorizationHelper.ts
+import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+
+export interface OrgAuthResult {
+  authorized: boolean
+  membership?: { role: string; userId: string }
+  error?: string
+}
+
+export class OrgAuthorizationHelper {
+  constructor(private memberRepository: IOrganizationMemberRepository) {}
+
+  /**
+   * 驗證使用者是否為指定組織的成員
+   * systemRole 為系統層級角色（如 'admin'），Admin 可跨組織操作
+   */
+  async requireOrgMembership(
+    orgId: string,
+    callerUserId: string,
+    callerSystemRole: string,
+  ): Promise<OrgAuthResult> {
+    // 系統 Admin 可操作任何組織
+    if (callerSystemRole === 'admin') {
+      return { authorized: true }
+    }
+
+    const membership = await this.memberRepository.findByUserId(callerUserId)
+    if (!membership || membership.organizationId !== orgId) {
+      return { authorized: false, error: 'NOT_ORG_MEMBER' }
+    }
+
+    return {
+      authorized: true,
+      membership: { role: membership.role, userId: membership.userId },
+    }
+  }
+
+  /**
+   * 驗證使用者是否為指定組織的 Manager（或系統 Admin）
+   */
+  async requireOrgManager(
+    orgId: string,
+    callerUserId: string,
+    callerSystemRole: string,
+  ): Promise<OrgAuthResult> {
+    if (callerSystemRole === 'admin') {
+      return { authorized: true }
+    }
+
+    const membership = await this.memberRepository.findByUserId(callerUserId)
+    if (!membership || membership.organizationId !== orgId) {
+      return { authorized: false, error: 'NOT_ORG_MEMBER' }
+    }
+
+    if (!membership.isManager()) {
+      return { authorized: false, error: 'NOT_ORG_MANAGER' }
+    }
+
+    return {
+      authorized: true,
+      membership: { role: membership.role, userId: membership.userId },
+    }
+  }
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add src/Modules/Organization/Application/Services/OrgAuthorizationHelper.ts
+git commit -m "feat: [org] 新增 OrgAuthorizationHelper 租戶隔離授權"
+```
+
+---
+
 ### Task 4: CreateOrganizationService
 
 **Files:**
@@ -1106,6 +1192,7 @@ Expected: FAIL
 // src/Modules/Organization/Application/Services/InviteMemberService.ts
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import { OrganizationInvitation } from '../../Domain/Entities/OrganizationInvitation'
 import type { InviteMemberRequest, OrganizationResponse } from '../DTOs/OrganizationDTO'
 
@@ -1113,10 +1200,17 @@ export class InviteMemberService {
   constructor(
     private orgRepository: IOrganizationRepository,
     private invitationRepository: IOrganizationInvitationRepository,
+    private orgAuth: OrgAuthorizationHelper,
   ) {}
 
-  async execute(orgId: string, invitedByUserId: string, request: InviteMemberRequest): Promise<OrganizationResponse> {
+  async execute(orgId: string, invitedByUserId: string, callerSystemRole: string, request: InviteMemberRequest): Promise<OrganizationResponse> {
     try {
+      // 租戶隔離：驗證呼叫者是該組織的 Manager 或系統 Admin
+      const authResult = await this.orgAuth.requireOrgManager(orgId, invitedByUserId, callerSystemRole)
+      if (!authResult.authorized) {
+        return { success: false, message: '權限不足', error: authResult.error }
+      }
+
       if (!request.email || !request.email.trim()) {
         return { success: false, message: '電子郵件不能為空', error: 'EMAIL_REQUIRED' }
       }
@@ -1184,10 +1278,12 @@ import { OrganizationMemberRepository } from '../Infrastructure/Repositories/Org
 import { OrganizationInvitationRepository } from '../Infrastructure/Repositories/OrganizationInvitationRepository'
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
+import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
 
 describe('AcceptInvitationService', () => {
   let acceptService: AcceptInvitationService
   let inviteService: InviteMemberService
+  let registerService: RegisterUserService
   let orgId: string
   let managerId: string
   let newUserId: string
@@ -1199,10 +1295,11 @@ describe('AcceptInvitationService', () => {
     const orgRepo = new OrganizationRepository(db)
     const memberRepo = new OrganizationMemberRepository(db)
     const invitationRepo = new OrganizationInvitationRepository(db)
+    const orgAuth = new OrgAuthorizationHelper(memberRepo)
 
-    const registerService = new RegisterUserService(authRepo)
+    registerService = new RegisterUserService(authRepo)
     const createOrgService = new CreateOrganizationService(orgRepo, memberRepo, authRepo)
-    inviteService = new InviteMemberService(orgRepo, invitationRepo)
+    inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
     acceptService = new AcceptInvitationService(invitationRepo, memberRepo, authRepo)
 
     // 建立 manager 和組織
@@ -1217,7 +1314,7 @@ describe('AcceptInvitationService', () => {
   })
 
   it('已註冊使用者應成功加入組織', async () => {
-    const inviteResult = await inviteService.execute(orgId, managerId, { email: 'new@example.com' })
+    const inviteResult = await inviteService.execute(orgId, managerId, 'admin', { email: 'new@example.com' })
     const token = inviteResult.data!.token as string
 
     const result = await acceptService.execute(newUserId, { token })
@@ -1226,12 +1323,26 @@ describe('AcceptInvitationService', () => {
 
   it('已屬於組織的使用者應被拒絕', async () => {
     // manager 已在組織中
-    const inviteResult = await inviteService.execute(orgId, managerId, { email: 'manager@example.com' })
+    const inviteResult = await inviteService.execute(orgId, managerId, 'admin', { email: 'manager@example.com' })
     const token = inviteResult.data!.token as string
 
     const result = await acceptService.execute(managerId, { token })
     expect(result.success).toBe(false)
     expect(result.error).toBe('USER_ALREADY_IN_ORG')
+  })
+
+  it('email 不匹配的使用者不能接受邀請', async () => {
+    // 邀請 new@example.com，但用 other 帳號嘗試接受
+    const inviteResult = await inviteService.execute(orgId, managerId, 'admin', { email: 'new@example.com' })
+    const token = inviteResult.data!.token as string
+
+    // 建立另一個不同 email 的使用者
+    const otherResult = await registerService.execute({ email: 'other@example.com', password: 'StrongPass123' })
+    const otherUserId = otherResult.data!.id
+
+    const result = await acceptService.execute(otherUserId, { token })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('EMAIL_MISMATCH')
   })
 
   it('無效 Token 應回傳錯誤', async () => {
@@ -1285,13 +1396,18 @@ export class AcceptInvitationService {
         return { success: false, message: '找不到使用者', error: 'USER_NOT_FOUND' }
       }
 
-      // 3. 檢查使用者是否已屬於其他組織
+      // 3. 驗證接受者 email 與邀請 email 一致（防止 token 被他人冒用）
+      if (user.emailValue.toLowerCase() !== invitation.email.toLowerCase()) {
+        return { success: false, message: '此邀請不是發給您的', error: 'EMAIL_MISMATCH' }
+      }
+
+      // 5. 檢查使用者是否已屬於其他組織
       const existingMembership = await this.memberRepository.findByUserId(userId)
       if (existingMembership) {
         return { success: false, message: '您已屬於其他組織', error: 'USER_ALREADY_IN_ORG' }
       }
 
-      // 4. 加入組織
+      // 6. 加入組織
       const member = OrganizationMember.create(
         uuidv4(),
         invitation.organizationId,
@@ -1300,7 +1416,7 @@ export class AcceptInvitationService {
       )
       await this.memberRepository.save(member)
 
-      // 5. 標記邀請為已接受
+      // 7. 標記邀請為已接受
       await this.invitationRepository.markAsAccepted(invitation.id)
 
       return {
@@ -1423,13 +1539,23 @@ Expected: FAIL
 ```typescript
 // src/Modules/Organization/Application/Services/RemoveMemberService.ts
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import type { OrganizationResponse } from '../DTOs/OrganizationDTO'
 
 export class RemoveMemberService {
-  constructor(private memberRepository: IOrganizationMemberRepository) {}
+  constructor(
+    private memberRepository: IOrganizationMemberRepository,
+    private orgAuth: OrgAuthorizationHelper,
+  ) {}
 
-  async execute(orgId: string, targetUserId: string, requesterId: string): Promise<OrganizationResponse> {
+  async execute(orgId: string, targetUserId: string, requesterId: string, requesterSystemRole: string): Promise<OrganizationResponse> {
     try {
+      // 租戶隔離：驗證呼叫者是該組織的 Manager 或系統 Admin
+      const authResult = await this.orgAuth.requireOrgManager(orgId, requesterId, requesterSystemRole)
+      if (!authResult.authorized) {
+        return { success: false, message: '權限不足', error: authResult.error }
+      }
+
       if (targetUserId === requesterId) {
         return { success: false, message: '不能移除自己', error: 'CANNOT_REMOVE_SELF' }
       }
@@ -1461,13 +1587,23 @@ export class RemoveMemberService {
 ```typescript
 // src/Modules/Organization/Application/Services/ListMembersService.ts
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import type { OrganizationResponse } from '../DTOs/OrganizationDTO'
 
 export class ListMembersService {
-  constructor(private memberRepository: IOrganizationMemberRepository) {}
+  constructor(
+    private memberRepository: IOrganizationMemberRepository,
+    private orgAuth: OrgAuthorizationHelper,
+  ) {}
 
-  async execute(orgId: string): Promise<OrganizationResponse> {
+  async execute(orgId: string, callerUserId: string, callerSystemRole: string): Promise<OrganizationResponse> {
     try {
+      // 租戶隔離：驗證呼叫者是該組織的成員或系統 Admin
+      const authResult = await this.orgAuth.requireOrgMembership(orgId, callerUserId, callerSystemRole)
+      if (!authResult.authorized) {
+        return { success: false, message: '權限不足', error: authResult.error }
+      }
+
       const members = await this.memberRepository.findByOrgId(orgId)
       return {
         success: true,

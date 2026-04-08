@@ -1235,65 +1235,105 @@ git commit -m "feat: [user] 完成 User 模組 — Controller、Routes、Service
 - Modify: `src/Modules/Auth/Application/Services/RegisterUserService.ts`
 - Modify: `src/Modules/Auth/Infrastructure/Providers/AuthServiceProvider.ts`
 
-- [ ] **Step 1: 更新 RegisterUserService**
-
-新增 `IUserProfileRepository` 依賴，註冊後自動建立 Profile：
+- [ ] **Step 1: 更新 RegisterUserService — 原子性建立 auth + profile**
 
 ```typescript
 // src/Modules/Auth/Application/Services/RegisterUserService.ts
+// 新增 import
 import type { IUserProfileRepository } from '@/Modules/User/Domain/Repositories/IUserProfileRepository'
 import { UserProfile } from '@/Modules/User/Domain/Aggregates/UserProfile'
 
 export class RegisterUserService {
   constructor(
     private authRepository: IAuthRepository,
-    private userProfileRepository?: IUserProfileRepository,  // 選填，向後相容
+    private userProfileRepository: IUserProfileRepository,  // 必填，確保原子性
   ) {}
 
   async execute(request: RegisterUserRequest): Promise<RegisterUserResponse> {
-    // ... 既有邏輯不變 ...
-    // 在 step 5（保存到資料庫）之後加入：
+    // ... 既有驗證邏輯不變 ...
 
-    // 6. 自動建立 User Profile
-    if (this.userProfileRepository) {
-      const profile = UserProfile.createDefault(user.id, request.email)
-      await this.userProfileRepository.save(profile)
+    // 建立 User 和 Profile 為一個邏輯原子操作
+    // 若 profile 建立失敗，回滾 auth user
+    try {
+      // 4. 創建新用戶
+      const userId = uuidv4()
+      const user = await User.create(userId, email, request.password)
+
+      // 5. 保存到資料庫
+      await this.authRepository.save(user)
+
+      // 6. 建立 User Profile（原子性保證）
+      try {
+        const profile = UserProfile.createDefault(user.id, request.email)
+        await this.userProfileRepository.save(profile)
+      } catch (profileError) {
+        // Profile 建立失敗 → 回滾 auth user
+        await this.authRepository.delete(user.id)
+        throw profileError
+      }
+
+      // 7. 返回成功回應
+      return {
+        success: true,
+        message: '用戶註冊成功',
+        data: { id: user.id, email: user.emailValue, role: user.role },
+      }
+    } catch (error: any) {
+      return {
+        success: false,
+        message: error.message || '註冊失敗',
+        error: error.message,
+      }
     }
-
-    // 7. 返回成功回應
-    // ... 原本的 return ...
   }
 }
 ```
 
-- [ ] **Step 2: 更新 AuthServiceProvider — 注入 Profile Repository**
+- [ ] **Step 2: 更新 AuthServiceProvider — 強制注入 Profile Repository**
 
-在 `registerUserService` 的工廠函式中：
+注意：UserServiceProvider 必須在 AuthServiceProvider 之前（或同時）註冊 `userProfileRepository`。更新 `bootstrap.ts` 中的註冊順序：UserServiceProvider 移到 AuthServiceProvider 之前。
 
 ```typescript
+// src/Modules/Auth/Infrastructure/Providers/AuthServiceProvider.ts
 container.bind('registerUserService', (c: IContainer) => {
   const repository = c.make('authRepository') as IAuthRepository
-  // 嘗試取得 userProfileRepository（可能尚未註冊）
-  let profileRepo: IUserProfileRepository | undefined
-  try {
-    profileRepo = c.make('userProfileRepository') as IUserProfileRepository
-  } catch {
-    // User 模組尚未載入時忽略
-  }
+  const profileRepo = c.make('userProfileRepository') as IUserProfileRepository
   return new RegisterUserService(repository, profileRepo)
 })
 ```
 
-- [ ] **Step 3: 執行所有 Auth 測試確認無破壞**
+```typescript
+// src/bootstrap.ts 中的順序調整
+core.register(createGravitoServiceProvider(new HealthServiceProvider()))
+core.register(createGravitoServiceProvider(new FoundationServiceProvider()))
+core.register(createGravitoServiceProvider(new UserServiceProvider()))      // User 先註冊 repository
+core.register(createGravitoServiceProvider(new AuthServiceProvider()))      // Auth 依賴 userProfileRepository
+```
 
-Run: `bun test src/Modules/Auth/__tests__/`
-Expected: PASS（profileRepo 為 undefined 時既有行為不變）
+- [ ] **Step 3: 更新 Auth 測試 — 注入 UserProfileRepository**
 
-- [ ] **Step 4: Commit**
+既有測試需要更新，因為 `RegisterUserService` 現在必須有 `userProfileRepository`：
+
+```typescript
+// 在所有使用 RegisterUserService 的測試 beforeEach 中：
+import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+
+const db = new MemoryDatabaseAccess()
+const authRepo = new AuthRepository(db)
+const profileRepo = new UserProfileRepository(db)
+const registerService = new RegisterUserService(authRepo, profileRepo)
+```
+
+- [ ] **Step 4: 執行所有測試確認通過**
+
+Run: `bun test`
+Expected: PASS
+
+- [ ] **Step 5: Commit**
 
 ```bash
-git add src/Modules/Auth/Application/Services/RegisterUserService.ts src/Modules/Auth/Infrastructure/Providers/AuthServiceProvider.ts
-git commit -m "feat: [auth] 註冊時自動建立 User Profile"
+git add src/Modules/Auth/Application/Services/RegisterUserService.ts src/Modules/Auth/Infrastructure/Providers/AuthServiceProvider.ts src/bootstrap.ts src/Modules/Auth/__tests__/
+git commit -m "feat: [auth] 註冊時原子性建立 auth user + profile（失敗回滾）"
 ```
 
 ---

@@ -51,7 +51,7 @@ Phase 2 完成完整的使用者身份管理系統，包含三大模組：
 
 #### API Endpoints
 
-- `POST /api/auth/password-reset/request` — body: `{ email }` → 回傳 `{ token, expiresAt }`
+- `POST /api/auth/password-reset/request` — body: `{ email }` → 回傳泛型成功訊息（不含 token，防止帳戶枚舉）。僅非 production 環境透過 `_debugToken` 內部欄位回傳 token 供測試用。
 - `POST /api/auth/password-reset/execute` — body: `{ token, newPassword, confirmPassword }`
 
 ### RBAC 三角色
@@ -104,7 +104,7 @@ Phase 2 完成完整的使用者身份管理系統，包含三大模組：
 
 ### 跨模組協作
 
-- User Profile 在註冊時自動建立（Auth 模組觸發），初始值為空白 Profile + email 作為 displayName
+- User Profile 在註冊時**原子性**建立（Auth 模組觸發）。若 Profile 建立失敗，Auth User 會回滾刪除，確保不會產生孤兒記錄。初始值為空白 Profile + email 作為 displayName。
 - `ChangeUserStatusService` 同時更新 Auth User status 和撤銷所有 Token（停用時）
 
 ---
@@ -161,10 +161,19 @@ Phase 2 完成完整的使用者身份管理系統，包含三大模組：
 | DELETE | `/api/organizations/:id/members/:userId` | MANAGER / ADMIN | 移除成員 |
 | PATCH | `/api/organizations/:id/members/:userId/role` | ADMIN | 變更成員角色 |
 
+### 租戶隔離授權
+
+- **OrgAuthorizationHelper** — 統一的租戶隔離檢查，所有 org service 操作前呼叫
+- `requireOrgMembership(orgId, callerUserId, callerSystemRole)` — 驗證呼叫者為組織成員或系統 Admin
+- `requireOrgManager(orgId, callerUserId, callerSystemRole)` — 驗證呼叫者為組織 Manager 或系統 Admin
+- 系統 Admin 可跨組織操作（不受租戶限制）
+- 非組織成員嘗試操作其他組織時回傳 403
+
 ### 跨模組協作
 
 - 建立 Organization 時驗證 Manager userId 存在（查 Auth Repository）
 - 接受邀請時檢查使用者是否已屬於其他 Organization（一對一限制）
+- 接受邀請時驗證接受者 email 與邀請 email 一致（防止 token 被他人冒用）
 - Organization 停用時，所屬成員的 API Key 也應受影響（Phase 3 串接）
 
 ---

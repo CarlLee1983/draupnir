@@ -831,11 +831,9 @@ export interface RequestPasswordResetRequest {
 export interface RequestPasswordResetResponse {
   success: boolean
   message: string
-  data?: {
-    token: string
-    expiresAt: string
-  }
   error?: string
+  /** 僅非 production 環境回傳，供開發測試用 */
+  _debugToken?: string
 }
 
 export interface ExecutePasswordResetRequest {
@@ -895,20 +893,25 @@ describe('RequestPasswordResetService', () => {
     })
   })
 
-  it('應成功產生重設 Token', async () => {
+  it('無論 email 是否存在都回傳泛型成功訊息（防止枚舉）', async () => {
     const result = await service.execute({ email: 'user@example.com' })
     expect(result.success).toBe(true)
-    expect(result.data?.token).toBeTruthy()
-    expect(result.data?.expiresAt).toBeTruthy()
+    expect(result.message).toBe('若此電子郵件已註冊，將收到重設指示')
+    // 公開 response 不應包含 token
+    expect(result.data).toBeUndefined()
   })
 
-  it('不存在的 email 也應回傳成功（防止 email 枚舉）', async () => {
+  it('不存在的 email 也應回傳相同的泛型成功訊息', async () => {
     const result = await service.execute({ email: 'nobody@example.com' })
     expect(result.success).toBe(true)
-    // 但不應有 token data（由前端處理）
-    // 注意：API-only 模式下我們仍回傳 token，因為沒有 email 發送
-    // 若 email 不存在則回傳成功但無 data
+    expect(result.message).toBe('若此電子郵件已註冊，將收到重設指示')
     expect(result.data).toBeUndefined()
+  })
+
+  it('內部應正確建立 Token（透過 _debugToken 僅開發模式可見）', async () => {
+    const result = await service.execute({ email: 'user@example.com' })
+    // _debugToken 僅在非 production 環境存在
+    expect(result._debugToken).toBeTruthy()
   })
 
   it('空的 email 應回傳錯誤', async () => {
@@ -946,12 +949,13 @@ export class RequestPasswordResetService {
         return { success: false, message: '電子郵件不能為空', error: 'EMAIL_REQUIRED' }
       }
 
+      const GENERIC_MESSAGE = '若此電子郵件已註冊，將收到重設指示'
       const email = new Email(request.email)
       const user = await this.authRepository.findByEmail(email)
 
       if (!user) {
-        // 不透露 email 是否存在（但 API-only 模式下不回傳 token）
-        return { success: true, message: '若此電子郵件已註冊，將收到重設指示' }
+        // 不透露 email 是否存在 — 回傳泛型訊息
+        return { success: true, message: GENERIC_MESSAGE }
       }
 
       // 清除該使用者過期的重設 Token
@@ -961,13 +965,13 @@ export class RequestPasswordResetService {
       const resetToken = PasswordResetToken.create(user.id)
       await this.tokenRepository.save(resetToken)
 
+      // 安全設計：公開 response 不包含 token
+      // 僅在非 production 環境透過 _debugToken 回傳，供開發測試
+      const isProduction = process.env.NODE_ENV === 'production'
       return {
         success: true,
-        message: '密碼重設 Token 已產生',
-        data: {
-          token: resetToken.getToken(),
-          expiresAt: resetToken.getExpiresAt().toISOString(),
-        },
+        message: GENERIC_MESSAGE,
+        ...(!isProduction && { _debugToken: resetToken.getToken() }),
       }
     } catch (error: any) {
       return { success: false, message: error.message || '請求失敗', error: error.message }
@@ -1037,7 +1041,7 @@ describe('ExecutePasswordResetService', () => {
 
   it('應成功重設密碼', async () => {
     const requestResult = await requestService.execute({ email: 'user@example.com' })
-    const token = requestResult.data!.token
+    const token = requestResult._debugToken!
 
     const result = await executeService.execute({
       token,
@@ -1058,7 +1062,7 @@ describe('ExecutePasswordResetService', () => {
   it('用舊密碼登入應失敗', async () => {
     const requestResult = await requestService.execute({ email: 'user@example.com' })
     await executeService.execute({
-      token: requestResult.data!.token,
+      token: requestResult._debugToken!,
       newPassword: 'NewPassword456',
       confirmPassword: 'NewPassword456',
     })
@@ -1092,7 +1096,7 @@ describe('ExecutePasswordResetService', () => {
 
   it('Token 使用後不能重複使用', async () => {
     const requestResult = await requestService.execute({ email: 'user@example.com' })
-    const token = requestResult.data!.token
+    const token = requestResult._debugToken!
 
     // 第一次使用
     await executeService.execute({
@@ -1221,7 +1225,11 @@ async requestPasswordReset(ctx: IHttpContext): Promise<any> {
   try {
     const body = await ctx.getJsonBody() as { email: string }
     const result = await this.requestPasswordResetService.execute(body)
-    return ctx.json(result, result.success ? 200 : 400)
+    // _debugToken 不進 JSON body，改用 response header（僅非 production）
+    const { _debugToken, ...publicResult } = result
+    // 注意：實際實作中可透過自訂 Response 加 header
+    // 此處簡化為 JSON response，_debugToken 已從 body 移除
+    return ctx.json(publicResult, result.success ? 200 : 400)
   } catch (error: any) {
     return ctx.json({ success: false, message: '請求失敗', error: error.message }, 400)
   }
