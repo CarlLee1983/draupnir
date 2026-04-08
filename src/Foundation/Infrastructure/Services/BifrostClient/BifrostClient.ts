@@ -105,8 +105,8 @@ export class BifrostClient {
     )
   }
 
-  private toQueryString(params: Record<string, unknown>): string {
-    return Object.entries(params)
+  private toQueryString(params: object): string {
+    return Object.entries(params as Record<string, unknown>)
       .filter(([, value]) => value !== undefined && value !== null)
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
       .join('&')

@@ -38,7 +38,7 @@ describe('BifrostClient', () => {
         message: 'Virtual key created',
         virtual_key: { id: 'vk-123', name: 'test-key', value: 'bifrost_vk_xxx', is_active: true, provider_configs: [] },
       }
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse)))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.createVirtualKey({ name: 'test-key' })
 
@@ -61,7 +61,7 @@ describe('BifrostClient', () => {
           { id: 'vk-2', name: 'key-2', is_active: false, provider_configs: [] },
         ],
       }
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse)))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.listVirtualKeys()
 
@@ -76,7 +76,7 @@ describe('BifrostClient', () => {
         message: 'ok',
         virtual_key: { id: 'vk-1', name: 'key-1', is_active: true, provider_configs: [] },
       }
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse)))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.getVirtualKey('vk-1')
 
@@ -86,7 +86,7 @@ describe('BifrostClient', () => {
     })
 
     it('should throw BifrostApiError on 404', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(404, { error: 'not found' })))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(404, { error: 'not found' }))) as any
 
       try {
         await client.getVirtualKey('vk-nonexistent')
@@ -104,7 +104,7 @@ describe('BifrostClient', () => {
         message: 'updated',
         virtual_key: { id: 'vk-1', name: 'updated-key', is_active: true, provider_configs: [] },
       }
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse)))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.updateVirtualKey('vk-1', { name: 'updated-key' })
 
@@ -116,7 +116,7 @@ describe('BifrostClient', () => {
 
   describe('deleteVirtualKey', () => {
     it('should delete a virtual key', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, { message: 'deleted' })))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, { message: 'deleted' }))) as any
 
       await client.deleteVirtualKey('vk-1')
 
@@ -134,7 +134,7 @@ describe('BifrostClient', () => {
           object: 'chat.completion', timestamp: '2026-04-08T00:00:00Z', latency: 1.0, cost: 0.02,
         }],
       }
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse)))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.getLogs({ virtual_key_ids: 'vk-1', limit: 100 })
 
@@ -153,7 +153,7 @@ describe('BifrostClient', () => {
           { id: 'anthropic/claude-3', name: 'Claude 3', context_length: 200000 },
         ],
       }
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse)))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.listModels()
 
@@ -164,7 +164,7 @@ describe('BifrostClient', () => {
 
   describe('request headers', () => {
     it('should include Authorization and Content-Type headers', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, { virtual_keys: [] })))
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, { virtual_keys: [] }))) as any
 
       await client.listVirtualKeys()
 

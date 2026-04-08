@@ -5,13 +5,7 @@ import type {
   CreateVirtualKeyRequest,
   UpdateVirtualKeyRequest,
   BifrostLogEntry,
-  BifrostLogsQuery,
-  BifrostLogsResponse,
   BifrostModel,
-  BifrostModelsResponse,
-  BifrostProviderConfig,
-  BifrostRateLimit,
-  BifrostBudget,
 } from '@/Foundation/Infrastructure/Services/BifrostClient/types'
 
 describe('Bifrost API Types', () => {
