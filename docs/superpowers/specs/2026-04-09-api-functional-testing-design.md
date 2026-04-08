@@ -15,7 +15,7 @@ Draupnir 目前的測試層級：
 
 | 決策項目 | 選擇 | 理由 |
 |----------|------|------|
-| 執行環境 | 本地 MemoryDB + 未來可打真實環境 | 本地快速回歸；真實環境驗證部署 |
+| 執行環境 | 本地 MemoryDB（外部環境需先建立隔離機制） | 本地快速回歸；外部環境待隔離就緒後啟用 |
 | 測試生成 | 完全自動生成 | spec 驅動，零人工介入 |
 | 狀態依賴 | 獨立 endpoint 測試 + 流程鏈測試 | 獨立測試覆蓋 schema，流程鏈覆蓋業務邏輯 |
 | 測試框架 | Bun test | 與現有單元測試統一，流程鏈邏輯用 TS 最靈活 |
@@ -110,15 +110,67 @@ for (const operation of spec.operations) {
 
 ### Auth 狀態解決
 
-需要 auth 的 endpoint，測試前自動 register + login 取得 token：
+測試框架維護兩組認證身份，依 endpoint 的權限需求自動選用：
 
 ```typescript
-async function ensureAuth(): Promise<string> {
-  if (cachedToken) return cachedToken
+type AuthRole = 'user' | 'admin'
+
+interface AuthIdentity {
+  token: string
+  userId: string
+  role: AuthRole
+}
+
+const identities: Record<AuthRole, AuthIdentity | null> = {
+  user: null,
+  admin: null,
+}
+
+async function ensureAuth(role: AuthRole = 'user'): Promise<AuthIdentity> {
+  if (identities[role]) return identities[role]
+
+  const email = `test-${role}@feature.test`
+  const password = 'SecurePass123'
+
   await client.post('/api/auth/register', { email, password })
   const res = await client.post('/api/auth/login', { email, password })
-  cachedToken = res.json.data.accessToken
-  return cachedToken
+
+  // admin 身份需要在 MemoryDB 中直接設置 role
+  // 透過 x-test-admin-seed endpoint 或測試專用 seed 機制
+  if (role === 'admin') {
+    await seedAdminRole(res.json.data.user.id)
+  }
+
+  identities[role] = {
+    token: res.json.data.accessToken,
+    userId: res.json.data.user.id,
+    role,
+  }
+  return identities[role]
+}
+```
+
+**角色自動選用邏輯**：Spec Walker 解析 endpoint 的 middleware 資訊（透過 `x-test-role` 擴展欄位），自動決定用哪個身份：
+
+```yaml
+/api/organizations:
+  post:
+    x-test-role: admin    # Spec Walker 會用 admin 身份測試此 endpoint
+  get:
+    x-test-role: admin
+/api/organizations/{id}:
+  get:
+    x-test-role: user     # 一般 requireAuth 用 user 即可
+```
+
+**Admin seed 機制**：本地 MemoryDB 環境下，測試啟動時透過一個內部 seed 函數直接設置用戶角色。這不是 HTTP endpoint，而是測試基礎設施的一部分，避免在 production code 中開後門。
+
+```typescript
+// tests/Feature/lib/admin-seed.ts
+async function seedAdminRole(userId: string): Promise<void> {
+  // 方案 1：直接操作 MemoryDB（僅本地測試可用）
+  // 方案 2：透過 test-only env flag 啟用的 seed endpoint
+  // 實作時依據 bootstrap 架構選擇最合適的方式
 }
 ```
 
@@ -136,8 +188,10 @@ async function ensureAuth(): Promise<string> {
 
 `$.authUserId` 是內建變數，由 `ensureAuth()` 執行 register + login 後自動注入 context。內建變數清單：
 
-- `$.authUserId` — 自動認證用戶的 user ID
-- `$.authToken` — 自動認證用戶的 access token
+- `$.authUserId` — 自動認證用戶（user role）的 user ID
+- `$.authToken` — 自動認證用戶（user role）的 access token
+- `$.adminUserId` — 自動認證管理員（admin role）的 user ID
+- `$.adminToken` — 自動認證管理員（admin role）的 access token
 
 ## Flow Runner — 流程鏈測試
 
@@ -169,7 +223,7 @@ x-test-flows:
         extract:
           token: "$.data.accessToken"
 
-      - operation: get-/api/user/me
+      - operation: get-/api/users/me
         auth: "$.token"
         expect:
           status: 200
@@ -177,34 +231,25 @@ x-test-flows:
             data.email: "flow-auth@feature.test"
 
   org-flow:
-    description: 組織建立與列表
+    description: 組織建立與列表（需要 admin 權限）
+    setup: admin    # Flow Runner 自動用 admin 身份，跳過手動 register/login
     steps:
-      - operation: post-/api/auth/register
-        body:
-          email: "flow-org@feature.test"
-          password: "SecurePass123"
-        extract:
-          userId: "$.data.user.id"
-
-      - operation: post-/api/auth/login
-        body:
-          email: "flow-org@feature.test"
-          password: "SecurePass123"
-        extract:
-          token: "$.data.accessToken"
-
       - operation: post-/api/organizations
-        auth: "$.token"
+        auth: "$.adminToken"
         body:
           name: "Test Organization"
-          managerUserId: "$.userId"
+          managerUserId: "$.adminUserId"
         expect:
           status: 201
+        extract:
+          orgId: "$.data.id"
 
       - operation: get-/api/organizations
-        auth: "$.token"
+        auth: "$.adminToken"
         expect:
           status: 200
+          body:
+            data: { length: 1 }
 ```
 
 ### Flow Runner 邏輯
@@ -279,7 +324,7 @@ export function setupTestServer() {
       ['bun', 'run', 'src/index.ts'],
       { env: { ...process.env, PORT: '3001', ORM: 'memory' } }
     )
-    await waitForReady(BASE_URL + '/api/health', 10_000)
+    await waitForReady(BASE_URL + '/health', 10_000)
   })
 
   afterAll(() => {
@@ -293,12 +338,24 @@ export function setupTestServer() {
 ```bash
 # 本地（預設）— 自動啟動 MemoryDB server
 bun test tests/Feature/
+```
 
-# 打 staging
-API_BASE_URL=https://staging.example.com bun test tests/Feature/
+**外部環境限制**：目前功能性測試僅支援本地 MemoryDB 環境。測試會執行寫入操作（register、create org 等），在無隔離機制的環境下會產生殘留資料且重複執行會失敗。
 
-# 打 production
-API_BASE_URL=https://api.example.com bun test tests/Feature/
+未來若需支援外部環境（staging），必須先滿足以下前提：
+
+1. **專用測試租戶** — 隔離的 database/schema，不影響真實資料
+2. **Cleanup hook** — 每次測試執行後自動清除測試建立的資料
+3. **冪等性** — 測試使用動態生成的唯一 email/name，避免重複衝突
+
+在上述機制就緒前，`API_BASE_URL` 環境變數保留但不啟用，test-server.ts 中加入防護：
+
+```typescript
+if (process.env.API_BASE_URL) {
+  throw new Error(
+    '外部環境測試尚未就緒。需要先實作測試租戶隔離與 cleanup 機制。'
+  )
+}
 ```
 
 ## Schema 驗證
@@ -360,7 +417,7 @@ addFormats(ajv)
 ## 執行指令
 
 ```bash
-# 跑所有功能性測試
+# 跑所有功能性測試（含一致性檢查）
 bun test tests/Feature/
 
 # 只跑 schema 驗證
@@ -369,21 +426,104 @@ bun test tests/Feature/api-spec.test.ts
 # 只跑流程鏈
 bun test tests/Feature/api-flows.test.ts
 
-# 打 staging
-API_BASE_URL=https://staging.example.com bun test tests/Feature/
+# 只跑路由/Spec 一致性檢查
+bun test tests/Feature/api-parity.test.ts
+```
+
+## 路由/Spec 一致性檢查
+
+### 問題
+
+`openapi.yaml` 是手動維護的，與實際路由已經脫節。若不解決，Spec Walker 會產生假綠燈 — 未定義的路由不會被測試。
+
+### 現有 Spec 缺漏的路由
+
+對比實際路由檔案，以下 endpoint 在 `openapi.yaml` 中缺漏：
+
+| 模組 | 缺漏路由 | 來源檔案 |
+|------|---------|---------|
+| Auth | `POST /api/auth/refresh` | auth.routes.ts |
+| Auth | `POST /api/auth/logout` | auth.routes.ts |
+| User | `GET /api/users/me`（spec 寫的是 `/api/user/me`，實際是 `/api/users/me`） | user.routes.ts |
+| User | `PUT /api/users/me`（同上路徑不一致） | user.routes.ts |
+| User | `GET /api/users`（admin） | user.routes.ts |
+| User | `GET /api/users/:id`（admin） | user.routes.ts |
+| User | `PATCH /api/users/:id/status`（admin） | user.routes.ts |
+| Org | `GET /api/organizations/:id` | organization.routes.ts |
+| Org | `PUT /api/organizations/:id`（admin） | organization.routes.ts |
+| Org | `PATCH /api/organizations/:id/status`（admin） | organization.routes.ts |
+| Org | `GET /api/organizations/:id/members` | organization.routes.ts |
+| Org | `POST /api/organizations/:id/invitations` | organization.routes.ts |
+| Org | `GET /api/organizations/:id/invitations` | organization.routes.ts |
+| Org | `DELETE /api/organizations/:id/invitations/:invId` | organization.routes.ts |
+| Org | `POST /api/invitations/:token/accept` | organization.routes.ts |
+| Org | `DELETE /api/organizations/:id/members/:userId` | organization.routes.ts |
+| Org | `PATCH /api/organizations/:id/members/:userId/role`（admin） | organization.routes.ts |
+| ApiKey | `POST /api/organizations/:orgId/keys` | apikey.routes.ts |
+| ApiKey | `GET /api/organizations/:orgId/keys` | apikey.routes.ts |
+| ApiKey | `POST /api/keys/:keyId/revoke` | apikey.routes.ts |
+| ApiKey | `PATCH /api/keys/:keyId/label` | apikey.routes.ts |
+| ApiKey | `PUT /api/keys/:keyId/permissions` | apikey.routes.ts |
+| Dashboard | `GET /api/organizations/:orgId/dashboard` | dashboard.routes.ts |
+| Dashboard | `GET /api/organizations/:orgId/dashboard/usage` | dashboard.routes.ts |
+| Health | `GET /health` | health.routes.ts |
+| Health | `GET /health/history` | health.routes.ts |
+
+### 一致性檢查機制
+
+新增一個獨立測試檔案 `api-parity.test.ts`，在 CI 中確保 spec 與路由不會 drift：
+
+```typescript
+// tests/Feature/api-parity.test.ts
+import { describe, it, expect } from 'bun:test'
+
+describe('OpenAPI Spec / Route 一致性', () => {
+  it('所有已註冊路由都在 openapi.yaml 中有定義', () => {
+    const specRoutes = parseOpenAPI('docs/openapi.yaml').operations
+      .map(op => `${op.method.toUpperCase()} ${op.path}`)
+
+    const actualRoutes = extractRoutesFromSource()
+    // 從 *.routes.ts 檔案中靜態解析 router.get/post/put/delete 呼叫
+
+    const missing = actualRoutes.filter(r => !specRoutes.includes(r))
+    expect(missing).toEqual([])
+  })
+
+  it('openapi.yaml 中定義的路由都實際存在', () => {
+    // 反向檢查：spec 有但 code 沒有的幽靈路由
+    const orphaned = specRoutes.filter(r => !actualRoutes.includes(r))
+    expect(orphaned).toEqual([])
+  })
+})
+```
+
+### 檔案結構更新
+
+```
+tests/Feature/
+├── api-spec.test.ts          # Spec Walker：endpoint 獨立測試
+├── api-flows.test.ts         # Flow Runner：流程鏈測試
+├── api-parity.test.ts        # 路由/Spec 一致性檢查
+└── lib/
+    ├── ...（同前）
+    └── route-extractor.ts    # 從 *.routes.ts 靜態解析已註冊路由
 ```
 
 ## OpenAPI Spec 補完清單
 
 實作時需要對 `docs/openapi.yaml` 做的修改：
 
-1. 新增 `x-test-flows`（auth-flow、org-flow）
-2. 補上 response body schema（RegisterResponse、LoginResponse 等）
-3. 需要前置資料的 endpoint 加 `x-test-setup`
+1. **補齊缺漏路由**（見上方表格，共 24 個缺漏 endpoint）
+2. 新增 `x-test-flows`（auth-flow、org-flow、apikey-flow）
+3. 補上 response body schema（RegisterResponse、LoginResponse 等）
+4. 需要前置資料的 endpoint 加 `x-test-setup`
+5. 需要特定角色的 endpoint 加 `x-test-role`
+6. 修正路徑不一致：`/api/user/me` → `/api/users/me`
 
 ## 未來擴展
 
-- **真實環境測試資料策略**：固定 prefix / 專用測試租戶（已延後）
-- **CI 整合**：GitHub Actions 中跑功能性測試
+- **外部環境支援**：專用測試租戶 + cleanup hook + 冪等測試資料，就緒後解鎖 `API_BASE_URL`
+- **CI 整合**：GitHub Actions 中跑功能性測試 + 一致性檢查
 - **覆蓋率追蹤**：追蹤 spec 中有多少 endpoint 被測試覆蓋
 - **效能基準**：在流程鏈中記錄 response time
+- **Spec 自動生成**：從路由檔案自動產生 OpenAPI spec，徹底消除手動維護的 drift 風險
