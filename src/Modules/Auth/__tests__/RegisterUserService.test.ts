@@ -7,14 +7,17 @@ import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
+import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
 
 describe('RegisterUserService Integration Test', () => {
   let service: RegisterUserService
   let repository: IAuthRepository
 
   beforeEach(() => {
-    repository = new AuthRepository(new MemoryDatabaseAccess())
-    service = new RegisterUserService(repository)
+    const db = new MemoryDatabaseAccess()
+    repository = new AuthRepository(db)
+    const profileRepo = new UserProfileRepository(db)
+    service = new RegisterUserService(repository, profileRepo)
   })
 
   it('應該成功註冊新用戶', async () => {

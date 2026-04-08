@@ -21,8 +21,8 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
 
   core.register(createGravitoServiceProvider(new HealthServiceProvider()))
   core.register(createGravitoServiceProvider(new FoundationServiceProvider()))
-  core.register(createGravitoServiceProvider(new AuthServiceProvider()))
   core.register(createGravitoServiceProvider(new UserServiceProvider()))
+  core.register(createGravitoServiceProvider(new AuthServiceProvider()))
 
   await core.bootstrap()
   await registerRoutes(core)

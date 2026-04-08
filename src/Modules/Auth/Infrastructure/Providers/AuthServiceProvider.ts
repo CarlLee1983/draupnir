@@ -11,6 +11,7 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
+import type { IUserProfileRepository } from '@/Modules/User/Domain/Repositories/IUserProfileRepository'
 import { RegisterUserService } from '../../Application/Services/RegisterUserService'
 import { LoginUserService } from '../../Application/Services/LoginUserService'
 import { JwtTokenService } from '../../Application/Services/JwtTokenService'
@@ -56,7 +57,8 @@ export class AuthServiceProvider extends ModuleServiceProvider {
 
     container.bind('registerUserService', (c: IContainer) => {
       const repository = c.make('authRepository') as IAuthRepository
-      return new RegisterUserService(repository)
+      const profileRepo = c.make('userProfileRepository') as IUserProfileRepository
+      return new RegisterUserService(repository, profileRepo)
     })
 
     container.bind('loginUserService', (c: IContainer) => {

@@ -6,6 +6,7 @@ import { AuthTokenRepository } from '@/Modules/Auth/Infrastructure/Repositories/
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
 
 describe('ChangeUserStatusService', () => {
   let service: ChangeUserStatusService
@@ -18,7 +19,8 @@ describe('ChangeUserStatusService', () => {
     authTokenRepo = new AuthTokenRepository(db)
     service = new ChangeUserStatusService(authRepo, authTokenRepo)
 
-    const registerService = new RegisterUserService(authRepo)
+    const profileRepo = new UserProfileRepository(db)
+    const registerService = new RegisterUserService(authRepo, profileRepo)
     await registerService.execute({ email: 'user@example.com', password: 'StrongPass123' })
   })
 

@@ -22,6 +22,7 @@ import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepo
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 
 describe('認證流程 E2E 測試', () => {
@@ -63,7 +64,8 @@ describe('認證流程 E2E 測試', () => {
     tokenRepository = new AuthTokenRepository(db)
     jwtService = new JwtTokenService()
 
-    registerService = new RegisterUserService(authRepository)
+    const profileRepo = new UserProfileRepository(db)
+    registerService = new RegisterUserService(authRepository, profileRepo)
     loginService = new LoginUserService(authRepository, tokenRepository, jwtService)
     refreshService = new RefreshTokenService(authRepository, tokenRepository, jwtService)
     logoutService = new LogoutUserService(tokenRepository)

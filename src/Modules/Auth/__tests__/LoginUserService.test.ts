@@ -12,6 +12,7 @@ import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepo
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
 import { Email } from '../Domain/ValueObjects/Email'
+import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
 
 describe('LoginUserService Integration Test', () => {
   let registerService: RegisterUserService
@@ -25,7 +26,8 @@ describe('LoginUserService Integration Test', () => {
     repository = new AuthRepository(db)
     tokenRepository = new AuthTokenRepository(db)
     jwtTokenService = new JwtTokenService()
-    registerService = new RegisterUserService(repository)
+    const profileRepo = new UserProfileRepository(db)
+    registerService = new RegisterUserService(repository, profileRepo)
     loginService = new LoginUserService(repository, tokenRepository, jwtTokenService)
 
     // 建立測試用戶

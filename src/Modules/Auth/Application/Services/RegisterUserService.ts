@@ -12,11 +12,16 @@
 import { v4 as uuidv4 } from 'uuid'
 import type { RegisterUserRequest, RegisterUserResponse } from '../DTOs/RegisterUserDTO'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
+import type { IUserProfileRepository } from '@/Modules/User/Domain/Repositories/IUserProfileRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { User } from '../../Domain/Aggregates/User'
+import { UserProfile } from '@/Modules/User/Domain/Aggregates/UserProfile'
 
 export class RegisterUserService {
-  constructor(private authRepository: IAuthRepository) {}
+  constructor(
+    private authRepository: IAuthRepository,
+    private userProfileRepository: IUserProfileRepository,
+  ) {}
 
   /**
    * 執行用戶註冊
@@ -53,7 +58,17 @@ export class RegisterUserService {
       // 5. 保存到資料庫
       await this.authRepository.save(user)
 
-      // 6. 返回成功回應（不包含密碼）
+      // 6. 建立 User Profile（原子性保證）
+      try {
+        const profile = UserProfile.createDefault(user.id, request.email)
+        await this.userProfileRepository.save(profile)
+      } catch (profileError) {
+        // Profile 建立失敗 → 回滾 auth user
+        await this.authRepository.delete(user.id)
+        throw profileError
+      }
+
+      // 7. 返回成功回應（不包含密碼）
       return {
         success: true,
         message: '用戶註冊成功',
