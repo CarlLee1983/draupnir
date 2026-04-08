@@ -12,6 +12,7 @@ import { Password } from '../ValueObjects/Password'
 
 export enum UserRole {
   ADMIN = 'admin',
+  MANAGER = 'manager',
   USER = 'user',
 }
 

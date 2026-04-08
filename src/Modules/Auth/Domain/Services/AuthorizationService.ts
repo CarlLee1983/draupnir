@@ -41,10 +41,11 @@ export class AuthorizationService {
 
   /**
    * 檢查用戶角色等級（用於跨角色檢查）
-   * 返回：admin > user > guest
+   * 返回：admin > manager > user > guest
    */
   getRoleLevel(role: Role): number {
-    if (role.isAdmin()) return 3
+    if (role.isAdmin()) return 4
+    if (role.isManager()) return 3
     if (role.isUser()) return 2
     return 1
   }

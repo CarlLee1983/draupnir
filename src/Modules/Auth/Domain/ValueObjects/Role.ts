@@ -11,6 +11,7 @@ import { Permission, PermissionType } from './Permission'
 
 export enum RoleType {
   ADMIN = 'admin',
+  MANAGER = 'manager',
   USER = 'user',
   GUEST = 'guest',
 }
@@ -70,6 +71,33 @@ export class Role {
           PermissionType.PRODUCT_READ,
           PermissionType.PRODUCT_UPDATE,
           PermissionType.PRODUCT_DELETE,
+          PermissionType.PRODUCT_LIST
+        )
+        break
+
+      case RoleType.MANAGER:
+        // 管理者權限（介於 admin 與 user 之間）
+        permissions.push(
+          // 使用者管理（可讀、列表，但不可刪除或管理系統）
+          PermissionType.USER_CREATE,
+          PermissionType.USER_READ,
+          PermissionType.USER_UPDATE,
+          PermissionType.USER_LIST,
+          // 訂單管理
+          PermissionType.ORDER_CREATE,
+          PermissionType.ORDER_READ,
+          PermissionType.ORDER_UPDATE,
+          PermissionType.ORDER_CANCEL,
+          PermissionType.ORDER_LIST,
+          // 支付管理
+          PermissionType.PAYMENT_CREATE,
+          PermissionType.PAYMENT_READ,
+          PermissionType.PAYMENT_PROCESS,
+          PermissionType.PAYMENT_LIST,
+          // 產品管理
+          PermissionType.PRODUCT_CREATE,
+          PermissionType.PRODUCT_READ,
+          PermissionType.PRODUCT_UPDATE,
           PermissionType.PRODUCT_LIST
         )
         break
@@ -139,6 +167,13 @@ export class Role {
    */
   isUser(): boolean {
     return this.value === RoleType.USER
+  }
+
+  /**
+   * 檢查角色是否為管理者
+   */
+  isManager(): boolean {
+    return this.value === RoleType.MANAGER
   }
 
   /**
