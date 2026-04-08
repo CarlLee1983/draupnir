@@ -227,7 +227,30 @@ export default class CreatePricingRulesTable implements Migration {
 }
 ```
 
-- [ ] **Step 6: 更新 Drizzle schema**
+- [ ] **Step 6: 建立 quarantined_logs migration（隔離無法映射的 Bifrost log）**
+
+```typescript
+// database/migrations/2026_04_09_000006_create_quarantined_logs_table.ts
+import { type Migration, Schema } from '@gravito/atlas'
+
+export default class CreateQuarantinedLogsTable implements Migration {
+  async up(): Promise<void> {
+    await Schema.create('quarantined_logs', (table) => {
+      table.string('id').primary()
+      table.string('bifrost_log_id').unique()
+      table.string('reason')
+      table.text('raw_data')
+      table.timestamp('created_at')
+    })
+  }
+
+  async down(): Promise<void> {
+    await Schema.dropIfExists('quarantined_logs')
+  }
+}
+```
+
+- [ ] **Step 7: 更新 Drizzle schema**
 
 在 `src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts` 末尾新增：
 
@@ -317,16 +340,31 @@ export const pricingRules = sqliteTable('pricing_rules', {
 })
 ```
 
-- [ ] **Step 7: 執行 migration 並驗證**
+Add quarantined_logs to schema:
+
+```typescript
+/**
+ * Quarantined Logs 表（無法映射的 Bifrost log 隔離區）
+ */
+export const quarantinedLogs = sqliteTable('quarantined_logs', {
+  id: text('id').primaryKey(),
+  bifrost_log_id: text('bifrost_log_id').notNull().unique(),
+  reason: text('reason').notNull(),
+  raw_data: text('raw_data').notNull(),
+  created_at: text('created_at').notNull(),
+})
+```
+
+- [ ] **Step 8: 執行 migration 並驗證**
 
 Run: `bun migrate`
-Expected: 5 new tables created, no errors
+Expected: 6 new tables created, no errors
 
-- [ ] **Step 8: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
 git add database/migrations/2026_04_09_*.ts src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts
-git commit -m "feat: [p4] 建立 Credit System 所需的 5 張資料表"
+git commit -m "feat: [p4] 建立 Credit System 所需的 6 張資料表（含 quarantined_logs）"
 ```
 
 ---
@@ -1788,7 +1826,7 @@ async findSuspendedByOrgId(orgId: string, reason: string): Promise<ApiKey[]> {
 - [ ] **Step 5: 建立 api_keys 表 migration 更新（新增欄位）**
 
 ```typescript
-// database/migrations/2026_04_09_000006_add_suspension_fields_to_api_keys.ts
+// database/migrations/2026_04_09_000007_add_suspension_fields_to_api_keys.ts
 import { type Migration, Schema } from '@gravito/atlas'
 
 export default class AddSuspensionFieldsToApiKeys implements Migration {
@@ -1817,29 +1855,74 @@ export default class AddSuspensionFieldsToApiKeys implements Migration {
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
 
+/**
+ * 餘額耗盡阻擋服務 — 補償式狀態轉換
+ *
+ * 策略：先持久化本地意圖（PENDING_SUSPEND），再操作遠端（Bifrost），
+ * 最後確認本地狀態（SUSPENDED_NO_CREDIT）。
+ * 若遠端失敗，本地保持 PENDING_SUSPEND，由排程重試。
+ * 若本地確認失敗，遠端已阻擋但本地可由重試修復。
+ */
 export class HandleBalanceDepletedService {
   constructor(
     private readonly apiKeyRepo: IApiKeyRepository,
     private readonly bifrostClient: BifrostClient,
   ) {}
 
-  async execute(orgId: string): Promise<void> {
+  async execute(orgId: string): Promise<{ processed: number; failed: number }> {
     const activeKeys = await this.apiKeyRepo.findActiveByOrgId(orgId)
+    let processed = 0
+    let failed = 0
 
     for (const key of activeKeys) {
-      const currentRateLimit = { rpm: key.scope.getRateLimitRpm(), tpm: key.scope.getRateLimitTpm() }
-      const suspended = key.suspend('CREDIT_DEPLETED', currentRateLimit)
+      try {
+        // Step 1: 本地先標記為 PENDING_SUSPEND + 快照 rate limit
+        const currentRateLimit = { rpm: key.scope.getRateLimitRpm(), tpm: key.scope.getRateLimitTpm() }
+        const pendingSuspend = key.suspend('CREDIT_DEPLETED', currentRateLimit)
+        await this.apiKeyRepo.update(pendingSuspend)
 
-      await this.bifrostClient.updateVirtualKey(key.bifrostVirtualKeyId, {
-        rate_limit: {
-          token_max_limit: 0,
-          token_reset_duration: '1h',
-          request_max_limit: 0,
-          request_reset_duration: '1h',
-        },
-      })
+        // Step 2: 遠端 Bifrost 阻擋
+        await this.bifrostClient.updateVirtualKey(key.bifrostVirtualKeyId, {
+          rate_limit: {
+            token_max_limit: 0,
+            token_reset_duration: '1h',
+            request_max_limit: 0,
+            request_reset_duration: '1h',
+          },
+        })
 
-      await this.apiKeyRepo.update(suspended)
+        // Step 3: 本地確認完成（狀態已在 step 1 設好，此處可加 confirmed_at）
+        processed++
+      } catch (error: unknown) {
+        // 遠端失敗：本地已標記 PENDING_SUSPEND，排程重試時會重新嘗試
+        // 不 rollback 本地狀態 — 寧可本地多阻擋也不漏阻擋
+        console.error(`Key ${key.id} 阻擋失敗，將由排程重試:`, error)
+        failed++
+      }
+    }
+
+    return { processed, failed }
+  }
+
+  /**
+   * 重試失敗的阻擋（由排程呼叫）
+   * 查找 SUSPENDED_NO_CREDIT 但可能未同步到 Bifrost 的 key
+   */
+  async retryPending(orgId: string): Promise<void> {
+    const suspendedKeys = await this.apiKeyRepo.findSuspendedByOrgId(orgId, 'CREDIT_DEPLETED')
+    for (const key of suspendedKeys) {
+      try {
+        await this.bifrostClient.updateVirtualKey(key.bifrostVirtualKeyId, {
+          rate_limit: {
+            token_max_limit: 0,
+            token_reset_duration: '1h',
+            request_max_limit: 0,
+            request_reset_duration: '1h',
+          },
+        })
+      } catch {
+        // 下次重試
+      }
     }
   }
 }
@@ -1850,31 +1933,53 @@ export class HandleBalanceDepletedService {
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
 
+/**
+ * 充值恢復服務 — 補償式狀態轉換
+ *
+ * 策略：先操作遠端恢復（Bifrost），成功後再清除本地凍結狀態。
+ * 若遠端失敗，本地保持 SUSPENDED_NO_CREDIT 不變，由重試修復。
+ * 若本地清除失敗，遠端已恢復但本地可由重試修復。
+ */
 export class HandleCreditToppedUpService {
   constructor(
     private readonly apiKeyRepo: IApiKeyRepository,
     private readonly bifrostClient: BifrostClient,
   ) {}
 
-  async execute(orgId: string): Promise<void> {
+  async execute(orgId: string): Promise<{ processed: number; failed: number }> {
     const suspendedKeys = await this.apiKeyRepo.findSuspendedByOrgId(orgId, 'CREDIT_DEPLETED')
+    let processed = 0
+    let failed = 0
 
     for (const key of suspendedKeys) {
-      const preFreeze = key.preFreezeRateLimit
-      if (preFreeze && (preFreeze.rpm != null || preFreeze.tpm != null)) {
-        await this.bifrostClient.updateVirtualKey(key.bifrostVirtualKeyId, {
-          rate_limit: {
-            token_max_limit: preFreeze.tpm ?? 100000,
-            token_reset_duration: '1h',
-            request_max_limit: preFreeze.rpm ?? null,
-            request_reset_duration: preFreeze.rpm ? '1m' : null,
-          },
-        })
-      }
+      try {
+        const preFreeze = key.preFreezeRateLimit
 
-      const restored = key.unsuspend()
-      await this.apiKeyRepo.update(restored)
+        // Step 1: 先恢復遠端 Bifrost rate limit
+        if (preFreeze && (preFreeze.rpm != null || preFreeze.tpm != null)) {
+          await this.bifrostClient.updateVirtualKey(key.bifrostVirtualKeyId, {
+            rate_limit: {
+              token_max_limit: preFreeze.tpm ?? 100000,
+              token_reset_duration: '1h',
+              request_max_limit: preFreeze.rpm ?? null,
+              request_reset_duration: preFreeze.rpm ? '1m' : null,
+            },
+          })
+        }
+
+        // Step 2: 遠端成功後，清除本地凍結狀態
+        const restored = key.unsuspend()
+        await this.apiKeyRepo.update(restored)
+        processed++
+      } catch (error: unknown) {
+        // 遠端失敗：本地保持 SUSPENDED_NO_CREDIT，不恢復
+        // 排程重試會再次嘗試
+        console.error(`Key ${key.id} 恢復失敗，將由排程重試:`, error)
+        failed++
+      }
     }
+
+    return { processed, failed }
   }
 }
 ```
@@ -2317,6 +2422,7 @@ const OVERLAP_WINDOW_MS = 10 * 60 * 1000 // 10 分鐘
 interface SyncResult {
   processedCount: number
   skippedCount: number
+  quarantinedCount: number
   events: unknown[]
 }
 
@@ -2333,121 +2439,183 @@ export class SyncBifrostUsageService {
   ) {}
 
   async execute(): Promise<SyncResult> {
-    const cursor = await this.syncCursorRepo.findByType('bifrost_usage')
-    const fetchFrom = cursor?.lastSyncedAt
-      ? new Date(cursor.lastSyncedAt.getTime() - OVERLAP_WINDOW_MS).toISOString()
-      : undefined
-
-    const response = await this.bifrostClient.getLogs({
-      start_time: fetchFrom,
-      sort_by: 'timestamp',
-      order: 'asc',
-      limit: 500,
-    })
-
-    const allLogs = response.logs
-    if (allLogs.length === 0) {
-      return { processedCount: 0, skippedCount: 0, events: [] }
+    // 1. 取得 DB 層級的同步鎖（防止手動觸發與 cron 並行）
+    const lockAcquired = await this.acquireSyncLock()
+    if (!lockAcquired) {
+      return { processedCount: 0, skippedCount: 0, quarantinedCount: 0, events: [] }
     }
 
-    // 冪等去重
-    const existingIds = new Set<string>()
-    for (const log of allLogs) {
-      if (await this.usageRecordRepo.existsByBifrostLogId(log.id)) {
-        existingIds.add(log.id)
-      }
-    }
+    try {
+      const cursor = await this.syncCursorRepo.findByType('bifrost_usage')
+      const fetchFrom = cursor?.lastSyncedAt
+        ? new Date(cursor.lastSyncedAt.getTime() - OVERLAP_WINDOW_MS).toISOString()
+        : undefined
 
-    const newLogs = allLogs.filter((l) => !existingIds.has(l.id))
-    if (newLogs.length === 0) {
-      return { processedCount: 0, skippedCount: allLogs.length, events: [] }
-    }
+      const response = await this.bifrostClient.getLogs({
+        start_time: fetchFrom,
+        sort_by: 'timestamp',
+        order: 'asc',
+        limit: 500,
+      })
 
-    // 載入定價規則
-    const rules = await this.pricingRuleRepo.findAllActive()
-    const calculator = new UsagePricingCalculator(rules)
-
-    // 在交易內執行
-    const allEvents: unknown[] = []
-
-    await this.db.transaction(async (tx) => {
-      const txUsageRepo = this.usageRecordRepo.withTransaction(tx)
-      const txCursorRepo = this.syncCursorRepo.withTransaction(tx)
-      const txAccountRepo = this.creditAccountRepo.withTransaction(tx)
-      const txCreditTxRepo = this.creditTxRepo.withTransaction(tx)
-
-      // 按 orgId 分組扣款
-      const orgDeductions = new Map<string, string>()
-
-      for (const log of newLogs) {
-        // 查詢 apiKey → orgId 映射
-        const apiKeyRow = await tx
-          .table('api_keys')
-          .where('bifrost_virtual_key_id', '=', log.virtual_key_id ?? '')
-          .first()
-
-        const orgId = (apiKeyRow?.org_id as string) ?? 'unknown'
-        const apiKeyId = (apiKeyRow?.id as string) ?? 'unknown'
-
-        const creditCost = calculator.calculate(
-          log.model,
-          log.input_tokens ?? 0,
-          log.output_tokens ?? 0,
-        )
-
-        const record = UsageRecord.create({
-          id: crypto.randomUUID(),
-          bifrostLogId: log.id,
-          apiKeyId,
-          orgId,
-          model: log.model,
-          inputTokens: log.input_tokens ?? 0,
-          outputTokens: log.output_tokens ?? 0,
-          creditCost,
-          occurredAt: new Date(log.timestamp),
-        })
-
-        await txUsageRepo.save(record)
-
-        // 累計 orgId 扣款
-        const current = orgDeductions.get(orgId) ?? '0'
-        const { Balance } = await import('@/Modules/Credit/Domain/ValueObjects/Balance')
-        orgDeductions.set(orgId, Balance.fromString(current).add(creditCost).toString())
+      const allLogs = response.logs
+      if (allLogs.length === 0) {
+        return { processedCount: 0, skippedCount: 0, quarantinedCount: 0, events: [] }
       }
 
-      // 執行扣款
-      for (const [orgId, totalAmount] of orgDeductions) {
-        const result = await this.creditDeductionService.deduct({
-          accountRepo: txAccountRepo,
-          transactionRepo: txCreditTxRepo,
-          orgId,
-          amount: totalAmount,
-          referenceType: 'usage_sync',
-          referenceId: `sync-${new Date().toISOString()}`,
-        })
-        if (result.events.length > 0) {
-          allEvents.push(...result.events)
+      // 載入定價規則（交易外，唯讀快取）
+      const rules = await this.pricingRuleRepo.findAllActive()
+      const calculator = new UsagePricingCalculator(rules)
+
+      // 所有核心邏輯在單一 DB 交易內執行
+      const allEvents: unknown[] = []
+      let processedCount = 0
+      let skippedCount = 0
+      let quarantinedCount = 0
+
+      await this.db.transaction(async (tx) => {
+        const txUsageRepo = this.usageRecordRepo.withTransaction(tx)
+        const txCursorRepo = this.syncCursorRepo.withTransaction(tx)
+        const txAccountRepo = this.creditAccountRepo.withTransaction(tx)
+        const txCreditTxRepo = this.creditTxRepo.withTransaction(tx)
+
+        // 按 orgId 分組扣款
+        const orgDeductions = new Map<string, string>()
+
+        for (const log of allLogs) {
+          // 交易內冪等檢查（防止並行 race condition）
+          if (await txUsageRepo.existsByBifrostLogId(log.id)) {
+            skippedCount++
+            continue
+          }
+
+          // 查詢 apiKey → orgId 映射（必須存在，否則隔離）
+          const apiKeyRow = await tx
+            .table('api_keys')
+            .where('bifrost_virtual_key_id', '=', log.virtual_key_id ?? '')
+            .first()
+
+          if (!apiKeyRow) {
+            // 無法映射的 log 不寫入 usage_records，記錄到隔離表
+            await tx.table('quarantined_logs').insert({
+              id: crypto.randomUUID(),
+              bifrost_log_id: log.id,
+              reason: 'UNMAPPED_VIRTUAL_KEY',
+              raw_data: JSON.stringify(log),
+              created_at: new Date().toISOString(),
+            })
+            quarantinedCount++
+            continue
+          }
+
+          const orgId = apiKeyRow.org_id as string
+          const apiKeyId = apiKeyRow.id as string
+
+          const creditCost = calculator.calculate(
+            log.model,
+            log.input_tokens ?? 0,
+            log.output_tokens ?? 0,
+          )
+
+          const record = UsageRecord.create({
+            id: crypto.randomUUID(),
+            bifrostLogId: log.id,
+            apiKeyId,
+            orgId,
+            model: log.model,
+            inputTokens: log.input_tokens ?? 0,
+            outputTokens: log.output_tokens ?? 0,
+            creditCost,
+            occurredAt: new Date(log.timestamp),
+          })
+
+          await txUsageRepo.save(record)
+          processedCount++
+
+          // 累計 orgId 扣款
+          const current = orgDeductions.get(orgId) ?? '0'
+          const { Balance } = await import('@/Modules/Credit/Domain/ValueObjects/Balance')
+          orgDeductions.set(orgId, Balance.fromString(current).add(creditCost).toString())
         }
-      }
 
-      // 推進 cursor
-      const lastLog = newLogs[newLogs.length - 1]
-      const newCursor = cursor
-        ? cursor.advance(new Date(lastLog.timestamp), lastLog.id)
-        : SyncCursor.create('bifrost_usage', new Date(lastLog.timestamp), lastLog.id)
+        // 執行扣款（必須全部成功，否則整個交易 rollback）
+        for (const [orgId, totalAmount] of orgDeductions) {
+          const result = await this.creditDeductionService.deduct({
+            accountRepo: txAccountRepo,
+            transactionRepo: txCreditTxRepo,
+            orgId,
+            amount: totalAmount,
+            referenceType: 'usage_sync',
+            referenceId: `sync-${new Date().toISOString()}`,
+          })
+          if (!result.success) {
+            throw new Error(`扣款失敗: orgId=${orgId}, error=${result.error}`)
+          }
+          if (result.events.length > 0) {
+            allEvents.push(...result.events)
+          }
+        }
 
-      if (cursor) {
-        await txCursorRepo.update(newCursor)
-      } else {
-        await txCursorRepo.save(newCursor)
-      }
-    })
+        // 推進 cursor（只有全部成功才推進）
+        if (processedCount > 0 || skippedCount > 0) {
+          const lastLog = allLogs[allLogs.length - 1]
+          const newCursor = cursor
+            ? cursor.advance(new Date(lastLog.timestamp), lastLog.id)
+            : SyncCursor.create('bifrost_usage', new Date(lastLog.timestamp), lastLog.id)
 
-    return {
-      processedCount: newLogs.length,
-      skippedCount: existingIds.size,
-      events: allEvents,
+          if (cursor) {
+            await txCursorRepo.update(newCursor)
+          } else {
+            await txCursorRepo.save(newCursor)
+          }
+        }
+      })
+
+      return { processedCount, skippedCount, quarantinedCount, events: allEvents }
+    } finally {
+      await this.releaseSyncLock()
     }
+  }
+
+  /**
+   * DB 層級同步鎖 — 使用 sync_cursors 表的行鎖
+   * 嘗試 INSERT 一個 lock row，若已存在且未過期則搶鎖失敗
+   */
+  private async acquireSyncLock(): Promise<boolean> {
+    try {
+      const existing = await this.db.table('sync_cursors')
+        .where('cursor_type', '=', 'bifrost_usage_lock')
+        .first()
+
+      if (existing) {
+        const lockedAt = new Date(existing.updated_at as string)
+        const lockAge = Date.now() - lockedAt.getTime()
+        // 鎖超過 5 分鐘視為過期（可能是 crash 殘留）
+        if (lockAge < 5 * 60 * 1000) return false
+      }
+
+      // 搶鎖（upsert）
+      if (existing) {
+        await this.db.table('sync_cursors')
+          .where('cursor_type', '=', 'bifrost_usage_lock')
+          .update({ updated_at: new Date().toISOString() })
+      } else {
+        await this.db.table('sync_cursors').insert({
+          id: crypto.randomUUID(),
+          cursor_type: 'bifrost_usage_lock',
+          updated_at: new Date().toISOString(),
+        })
+      }
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  private async releaseSyncLock(): Promise<void> {
+    await this.db.table('sync_cursors')
+      .where('cursor_type', '=', 'bifrost_usage_lock')
+      .delete()
   }
 }
 ```
