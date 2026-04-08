@@ -2,6 +2,7 @@ import { PlanetCore, defineConfig } from '@gravito/core'
 import { buildConfig } from '../config/index'
 import { createGravitoServiceProvider } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { HealthServiceProvider } from './Modules/Health/Infrastructure/Providers/HealthServiceProvider'
+import { FoundationServiceProvider } from './Foundation/Infrastructure/Providers/FoundationServiceProvider'
 import { AuthServiceProvider } from './Modules/Auth/Infrastructure/Providers/AuthServiceProvider'
 import { registerRoutes } from './routes'
 import { initializeRegistry } from './wiring/RepositoryRegistry'
@@ -18,6 +19,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   const core = new PlanetCore(config)
 
   core.register(createGravitoServiceProvider(new HealthServiceProvider()))
+  core.register(createGravitoServiceProvider(new FoundationServiceProvider()))
   core.register(createGravitoServiceProvider(new AuthServiceProvider()))
 
   await core.bootstrap()
