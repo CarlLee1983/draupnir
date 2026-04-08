@@ -73,3 +73,27 @@ export const registerUser = (core: PlanetCore): void => {
 	)
 	registerUserRoutes(router, controller)
 }
+
+import { OrganizationController, registerOrganizationRoutes } from '@/Modules/Organization'
+
+/**
+ * 註冊 Organization 模組
+ */
+export const registerOrganization = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new OrganizationController(
+		core.container.make('createOrganizationService') as any,
+		core.container.make('updateOrganizationService') as any,
+		core.container.make('listOrganizationsService') as any,
+		core.container.make('inviteMemberService') as any,
+		core.container.make('acceptInvitationService') as any,
+		core.container.make('removeMemberService') as any,
+		core.container.make('listMembersService') as any,
+		core.container.make('changeOrgMemberRoleService') as any,
+		core.container.make('getOrganizationService') as any,
+		core.container.make('changeOrgStatusService') as any,
+		core.container.make('listInvitationsService') as any,
+		core.container.make('cancelInvitationService') as any,
+	)
+	void registerOrganizationRoutes(router, controller)
+}

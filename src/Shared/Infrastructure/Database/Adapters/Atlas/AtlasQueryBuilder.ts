@@ -29,7 +29,10 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 	private limitValue: number | null = null
 	private offsetValue: number | null = null
 
-	constructor(private tableName: string) {}
+	constructor(
+		private tableName: string,
+		private connection?: any,
+	) {}
 
 	/**
 	 * 添加 WHERE 條件
@@ -51,7 +54,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 	 */
 	async first(): Promise<Record<string, unknown> | null> {
 		try {
-			let query = (getDB() as any).table(this.tableName)
+			let query = (this.connection ?? getDB()).table(this.tableName)
 
 			// 應用 WHERE 條件
 			for (const cond of this.whereConditions) {
@@ -83,7 +86,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 	 */
 	async select(): Promise<Record<string, unknown>[]> {
 		try {
-			let query = (getDB() as any).table(this.tableName)
+			let query = (this.connection ?? getDB()).table(this.tableName)
 
 			// 應用 WHERE 條件
 			for (const cond of this.whereConditions) {
@@ -120,7 +123,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 	 */
 	async insert(data: Record<string, unknown>): Promise<void> {
 		try {
-			await (getDB() as any).table(this.tableName).insert(data)
+			await (this.connection ?? getDB()).table(this.tableName).insert(data)
 		} catch (error) {
 			console.error(`Error in insert(): ${error}`)
 			throw error
@@ -134,7 +137,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 	 */
 	async update(data: Record<string, unknown>): Promise<void> {
 		try {
-			let query = (getDB() as any).table(this.tableName)
+			let query = (this.connection ?? getDB()).table(this.tableName)
 
 			// 應用 WHERE 條件
 			for (const cond of this.whereConditions) {
@@ -153,7 +156,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 	 */
 	async delete(): Promise<void> {
 		try {
-			let query = (getDB() as any).table(this.tableName)
+			let query = (this.connection ?? getDB()).table(this.tableName)
 
 			// 應用 WHERE 條件
 			for (const cond of this.whereConditions) {
@@ -209,7 +212,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 	 */
 	async count(): Promise<number> {
 		try {
-			let query = (getDB() as any).table(this.tableName)
+			let query = (this.connection ?? getDB()).table(this.tableName)
 
 			// 應用 WHERE 條件
 			for (const cond of this.whereConditions) {

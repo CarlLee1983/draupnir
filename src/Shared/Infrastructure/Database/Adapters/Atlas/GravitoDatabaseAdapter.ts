@@ -33,6 +33,32 @@ class AtlasDatabaseAccess implements IDatabaseAccess {
 	table(name: string): IQueryBuilder {
 		return new AtlasQueryBuilder(name)
 	}
+
+	async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+		return getDB().transaction(async (connection: any) => {
+			const txAccess = new AtlasTransactionAccess(connection)
+			return fn(txAccess)
+		})
+	}
+}
+
+/**
+ * Transaction-scoped Atlas DatabaseAccess
+ *
+ * 在交易中使用的 IDatabaseAccess 實現，所有查詢都透過同一 connection 執行。
+ *
+ * @internal
+ */
+class AtlasTransactionAccess implements IDatabaseAccess {
+	constructor(private readonly connection: any) {}
+
+	table(name: string): IQueryBuilder {
+		return new AtlasQueryBuilder(name, this.connection)
+	}
+
+	async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+		return fn(this)
+	}
 }
 
 /**

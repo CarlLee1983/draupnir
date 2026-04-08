@@ -134,6 +134,19 @@ export interface IDatabaseAccess {
 	 * @returns IQueryBuilder 實例，可鏈式調用
 	 */
 	table(name: string): IQueryBuilder
+
+	/**
+	 * 在資料庫交易中執行回呼函式
+	 *
+	 * 成功時自動 commit，錯誤時自動 rollback。
+	 * 回呼接收一個 transaction-scoped 的 IDatabaseAccess 實例，
+	 * 所有在此實例上的操作都在同一交易中執行。
+	 *
+	 * @template T - 回呼回傳值型別
+	 * @param fn - 交易邏輯
+	 * @returns 回呼的回傳值
+	 */
+	transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T>
 }
 
 /**

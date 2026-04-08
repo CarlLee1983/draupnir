@@ -161,4 +161,8 @@ export class MemoryDatabaseAccess implements IDatabaseAccess {
 	table(name: string): IQueryBuilder {
 		return new MemoryQueryBuilder(name, this.store)
 	}
+
+	async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+		return fn(this)
+	}
 }

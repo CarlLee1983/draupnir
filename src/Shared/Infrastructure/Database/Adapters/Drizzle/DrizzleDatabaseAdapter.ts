@@ -38,6 +38,34 @@ class DrizzleDatabaseAccess implements IDatabaseAccess {
 
     return new DrizzleQueryBuilder(db, name, tableSchema)
   }
+
+  async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+    const db = getDrizzleInstance()
+    return db.transaction(async (txDb) => {
+      const txAccess = new DrizzleTransactionAccess(txDb)
+      return fn(txAccess)
+    })
+  }
+}
+
+/**
+ * Transaction-scoped Drizzle DatabaseAccess
+ * @internal
+ */
+class DrizzleTransactionAccess implements IDatabaseAccess {
+  constructor(private readonly txDb: any) {}
+
+  table(name: string): IQueryBuilder {
+    const tableSchema = (schema as any)[name]
+    if (!tableSchema) {
+      throw new Error(`Table "${name}" not found in schema. Available tables: ${Object.keys(schema).join(', ')}`)
+    }
+    return new DrizzleQueryBuilder(this.txDb, name, tableSchema)
+  }
+
+  async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+    return fn(this)
+  }
 }
 
 /**
