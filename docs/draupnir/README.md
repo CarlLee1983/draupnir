@@ -6,6 +6,7 @@
 
 | 內容 | 位置 |
 |------|------|
+| **開發指南**（命令、架構、環境變數、模組新增） | [`DEVELOPMENT.md`](./DEVELOPMENT.md) |
 | **Commands 完整列表** | [`COMMANDS.md`](./COMMANDS.md) |
 | **DDD 架構圖表** | [`architecture/`](./architecture/) |
 | **工程知識與模式** | [`knowledge/`](./knowledge/) |
