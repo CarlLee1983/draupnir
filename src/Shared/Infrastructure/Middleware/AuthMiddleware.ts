@@ -85,13 +85,17 @@ export class AuthMiddleware {
    * 期望格式：Authorization: Bearer <token>
    */
   private extractToken(ctx: IHttpContext): string | null {
-    const header = ctx.headers?.authorization || ctx.headers?.Authorization
+    const header =
+      ctx.getHeader('authorization') ??
+      ctx.getHeader('Authorization') ??
+      ctx.headers?.authorization ??
+      ctx.headers?.Authorization
     if (!header) {
       return null
     }
 
     const parts = header.split(' ')
-    if (parts.length !== 2 || parts[0] !== 'Bearer') {
+    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
       return null
     }
 

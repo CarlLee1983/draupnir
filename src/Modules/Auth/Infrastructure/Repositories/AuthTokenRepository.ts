@@ -84,13 +84,14 @@ export class AuthTokenRepository implements IAuthTokenRepository {
       })
   }
 
-  async isRevoked(tokenHash: string): Promise<boolean> {
-    const record = await this.findByHash(tokenHash)
-    if (!record) {
-      return true // 如果找不到記錄，視為已撤銷
-    }
-    return record.revokedAt !== undefined
-  }
+	async isRevoked(tokenHash: string): Promise<boolean> {
+		const record = await this.findByHash(tokenHash)
+		if (!record) {
+			// 找不到記錄視為已撤銷（fail-closed）：缺少記錄不應授予存取權
+			return true
+		}
+		return record.revokedAt !== undefined
+	}
 
   async revokeAllByUserId(userId: string): Promise<void> {
     await this.db

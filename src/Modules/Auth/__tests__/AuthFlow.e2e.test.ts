@@ -43,6 +43,7 @@ describe('認證流程 E2E 測試', () => {
       getJsonBody: async <T>() => ({} as T),
       getBody: async <T>() => ({} as T),
       getHeader: () => undefined,
+      getPathname: () => '/',
       getParam: () => undefined,
       getQuery: () => undefined,
       params: {},

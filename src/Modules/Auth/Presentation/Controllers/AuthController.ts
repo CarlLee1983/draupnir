@@ -41,7 +41,7 @@ export class AuthController {
           {
             success: false,
             message: '驗證失敗',
-            error: validation.error.errors[0].message,
+            error: validation.error.issues[0].message,
           },
           400
         )
@@ -79,7 +79,7 @@ export class AuthController {
           {
             success: false,
             message: '驗證失敗',
-            error: validation.error.errors[0].message,
+            error: validation.error.issues[0].message,
           },
           400
         )
@@ -146,8 +146,9 @@ export class AuthController {
         )
       }
 
-      // 從 Header 提取 Token
-      const authHeader = ctx.headers?.authorization || ctx.headers?.Authorization
+      // 從 Header 提取 Token（與 AuthMiddleware.extractToken 使用相同邏輯）
+      const authHeader =
+        ctx.getHeader('authorization') ?? ctx.getHeader('Authorization') ?? undefined
       if (!authHeader) {
         return ctx.json(
           {
@@ -159,7 +160,18 @@ export class AuthController {
         )
       }
 
-      const token = authHeader.replace('Bearer ', '')
+      const parts = authHeader.split(' ')
+      if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
+        return ctx.json(
+          {
+            success: false,
+            message: '無效的 Authorization 格式',
+            error: 'INVALID_AUTH_HEADER',
+          },
+          400
+        )
+      }
+      const token = parts[1]
 
       // 調用應用層服務
       const result = await this.logoutUserService.execute({ token })

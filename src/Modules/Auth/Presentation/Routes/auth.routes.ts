@@ -7,6 +7,7 @@
 
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { AuthController } from '../Controllers/AuthController'
+import { attachJwt } from '../Middleware/RoleMiddleware'
 
 /**
  * 註冊 Auth 模組路由
@@ -22,6 +23,6 @@ export async function registerAuthRoutes(
   router.post('/api/auth/login', (ctx) => controller.login(ctx))
   router.post('/api/auth/refresh', (ctx) => controller.refresh(ctx))
 
-  // 受保護端點（需要認證）
-  router.post('/api/auth/logout', (ctx) => controller.logout(ctx))
+  // 受保護端點（需要認證；先解析 JWT 再交給 controller）
+  router.post('/api/auth/logout', [attachJwt()], (ctx) => controller.logout(ctx))
 }
