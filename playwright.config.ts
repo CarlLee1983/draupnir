@@ -17,7 +17,8 @@ export default defineConfig({
 		httpCredentials: undefined,
 	},
 	webServer: {
-		command: 'PORT=3001 ORM=memory bun run src/index.ts',
+		command:
+			'bun run build:frontend && PORT=3001 ORM=memory SERVE_VITE_BUILD=true bun run src/index.ts',
 		port: 3001,
 		reuseExistingServer: false,
 		stdout: 'ignore',

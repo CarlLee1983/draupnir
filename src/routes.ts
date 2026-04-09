@@ -2,7 +2,7 @@ import type { PlanetCore } from '@gravito/core'
 import {
   registerHealth,
   registerAuth,
-  registerUser,
+  registerProfile,
   registerOrganization,
   registerApiKey,
   registerDashboard,
@@ -14,6 +14,7 @@ import {
   registerSdkApi,
   registerDocs,
 } from './wiring'
+import { registerPageRoutes } from './Pages/page-routes'
 
 export async function registerRoutes(core: PlanetCore) {
   core.router.get('/api', async (ctx) => {
@@ -26,7 +27,7 @@ export async function registerRoutes(core: PlanetCore) {
 
   registerHealth(core)
   registerAuth(core)
-  registerUser(core)
+  registerProfile(core)
   registerOrganization(core)
   registerContract(core)
   registerAppModule(core)
@@ -37,5 +38,6 @@ export async function registerRoutes(core: PlanetCore) {
   registerCredit(core)
   registerSdkApi(core)
   await registerDocs(core)
+  registerPageRoutes(core)
   console.log('✅ Routes registered')
 }

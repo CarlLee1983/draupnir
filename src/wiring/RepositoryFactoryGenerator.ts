@@ -136,7 +136,7 @@ export function registerRepositoriesInBatch(
  *
  * 方式 1：分別註冊（推薦，清晰）
  * ```typescript
- * // src/Modules/User/Infrastructure/Providers/registerUserRepositories.ts
+ * // src/Modules/Profile/Infrastructure/Providers/registerUserRepositories.ts
  * import { createRepositoryFactory } from '@/wiring/RepositoryFactoryGenerator'
  *
  * export function registerUserRepositories(): void {

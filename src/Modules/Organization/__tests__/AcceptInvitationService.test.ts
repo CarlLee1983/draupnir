@@ -8,7 +8,7 @@ import { OrganizationMemberRepository } from '../Infrastructure/Repositories/Org
 import { OrganizationInvitationRepository } from '../Infrastructure/Repositories/OrganizationInvitationRepository'
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
-import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
 import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 

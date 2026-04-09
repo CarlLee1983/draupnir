@@ -22,7 +22,7 @@ import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepo
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { RoleType } from '../Domain/ValueObjects/Role'
 

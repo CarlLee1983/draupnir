@@ -11,6 +11,8 @@ node_modules/
 # Testing
 /coverage
 /dist
+playwright-report/
+test-results/
 
 # IDEs
 .vscode/
@@ -30,6 +32,7 @@ yarn-error.log*
 # Build outputs
 /build
 /out
+public/build/
 .next/
 .nuxt/
 dist/

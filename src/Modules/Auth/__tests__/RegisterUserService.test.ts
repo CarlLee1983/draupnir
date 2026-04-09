@@ -7,7 +7,7 @@ import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
-import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { RoleType } from '../Domain/ValueObjects/Role'
 
 describe('RegisterUserService Integration Test', () => {

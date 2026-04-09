@@ -54,7 +54,7 @@ async function start() {
 🚀 Next Steps:
 
   1. Review the module structure:
-     open src/Modules/User/
+     open src/Modules/Profile/
 
   2. Read the documentation:
      open docs/ARCHITECTURE.md

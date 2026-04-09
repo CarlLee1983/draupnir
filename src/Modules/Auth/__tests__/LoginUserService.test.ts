@@ -12,7 +12,7 @@ import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepo
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
 import { Email } from '../Domain/ValueObjects/Email'
-import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { RoleType } from '../Domain/ValueObjects/Role'
 
 describe('LoginUserService Integration Test', () => {

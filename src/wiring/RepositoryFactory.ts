@@ -102,7 +102,7 @@ export function getDatabaseAccess() {
  * 每個模組在自己的 registerXRepositories.ts 中定義工廠：
  *
  * ```typescript
- * // src/Modules/User/Infrastructure/Providers/registerUserRepositories.ts
+ * // src/Modules/Profile/Infrastructure/Providers/registerUserRepositories.ts
  * import { getCurrentORM, getDatabaseAccess } from '@/wiring/RepositoryFactory'
  * import { getRegistry } from '@/wiring/RepositoryRegistry'
  *
@@ -124,7 +124,7 @@ export function getDatabaseAccess() {
  * 在 ServiceProvider 中使用 Registry：
  *
  * ```typescript
- * // src/Modules/User/Infrastructure/Providers/UserServiceProvider.ts
+ * // src/Modules/Profile/Infrastructure/Providers/ProfileServiceProvider.ts
  * override register(container: IContainer): void {
  *   container.singleton('userRepository', () => {
  *     const registry = getRegistry()

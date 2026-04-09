@@ -5,7 +5,7 @@ import { OrganizationRepository } from '../Infrastructure/Repositories/Organizat
 import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
-import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 describe('CreateOrganizationService', () => {

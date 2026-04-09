@@ -11,12 +11,14 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
-import type { IUserProfileRepository } from '@/Modules/User/Domain/Repositories/IUserProfileRepository'
+import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import { RegisterUserService } from '../../Application/Services/RegisterUserService'
 import { LoginUserService } from '../../Application/Services/LoginUserService'
 import { JwtTokenService } from '../../Application/Services/JwtTokenService'
 import { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
 import { LogoutUserService } from '../../Application/Services/LogoutUserService'
+import { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
+import { ListUsersService } from '../../Application/Services/ListUsersService'
 import { AuthRepository } from '../Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Repositories/AuthTokenRepository'
 import { ScryptPasswordHasher } from '../Services/PasswordHasher'
@@ -57,7 +59,7 @@ export class AuthServiceProvider extends ModuleServiceProvider {
 
     container.bind('registerUserService', (c: IContainer) => {
       const repository = c.make('authRepository') as IAuthRepository
-      const profileRepo = c.make('userProfileRepository') as IUserProfileRepository
+      const profileRepo = c.make('profileRepository') as IUserProfileRepository
       const passwordHasher = c.make('passwordHasher') as ScryptPasswordHasher
       return new RegisterUserService(repository, profileRepo, passwordHasher)
     })
@@ -80,6 +82,18 @@ export class AuthServiceProvider extends ModuleServiceProvider {
     container.bind('logoutUserService', (c: IContainer) => {
       const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
       return new LogoutUserService(authTokenRepository)
+    })
+
+    container.bind('changeUserStatusService', (c: IContainer) => {
+      const authRepository = c.make('authRepository') as IAuthRepository
+      const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
+      return new ChangeUserStatusService(authRepository, authTokenRepository)
+    })
+
+    container.bind('listUsersService', (c: IContainer) => {
+      const authRepository = c.make('authRepository') as IAuthRepository
+      const profileRepo = c.make('profileRepository') as IUserProfileRepository
+      return new ListUsersService(authRepository, profileRepo)
     })
 
     configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)

@@ -16,8 +16,12 @@ export type { IAuthRepository } from './Domain/Repositories/IAuthRepository'
 // Application
 export type { RegisterUserRequest, RegisterUserResponse } from './Application/DTOs/RegisterUserDTO'
 export type { LoginRequest, LoginResponse } from './Application/DTOs/LoginDTO'
+export type { ChangeUserStatusRequest, ChangeUserStatusResponse } from './Application/DTOs/UserStatusDTO'
+export type { ListUsersQuery, ListUsersResponse, UserListItemDTO } from './Application/DTOs/UserListDTO'
 export { RegisterUserService } from './Application/Services/RegisterUserService'
 export { LoginUserService } from './Application/Services/LoginUserService'
+export { ChangeUserStatusService } from './Application/Services/ChangeUserStatusService'
+export { ListUsersService } from './Application/Services/ListUsersService'
 
 // Infrastructure（單一 AuthRepository，實作由上層 IDatabaseAccess 指定）
 export { AuthRepository } from './Infrastructure/Repositories/AuthRepository'
