@@ -10,6 +10,7 @@ import { AssignContractService } from '../../Application/Services/AssignContract
 import { TerminateContractService } from '../../Application/Services/TerminateContractService'
 import { RenewContractService } from '../../Application/Services/RenewContractService'
 import { HandleContractExpiryService } from '../../Application/Services/HandleContractExpiryService'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { ListContractsService } from '../../Application/Services/ListContractsService'
 import { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
 
@@ -65,6 +66,7 @@ export class ContractServiceProvider extends ModuleServiceProvider {
     container.bind('listContractsService', (c: IContainer) => {
       return new ListContractsService(
         c.make('contractRepository') as ContractRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
       )
     })
 

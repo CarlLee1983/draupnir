@@ -86,6 +86,8 @@ function fallbackPathParam(pathname: string, name: string): string | undefined {
 		if (m?.[1]) return decodeURIComponent(m[1])
 		m = /^\/api\/keys\/([^/]+)(?:\/|$)/.exec(pathname)
 		if (m?.[1]) return decodeURIComponent(m[1])
+		m = /^\/member\/api-keys\/([^/]+)\/revoke(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
 	}
 	if (name === 'token') {
 		const m = /^\/api\/invitations\/([^/]+)(?:\/|$)/.exec(pathname)

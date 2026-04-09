@@ -1,14 +1,25 @@
 // src/Modules/Contract/Application/Services/ListContractsService.ts
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import type { ContractListResponse } from '../DTOs/ContractDTO'
 
 export class ListContractsService {
-  constructor(private readonly contractRepo: IContractRepository) {}
+  constructor(
+    private readonly contractRepo: IContractRepository,
+    private readonly orgAuth: OrgAuthorizationHelper,
+  ) {}
 
-  async execute(targetId: string, callerRole: string): Promise<ContractListResponse> {
+  async execute(targetId: string, callerUserId: string, callerSystemRole: string): Promise<ContractListResponse> {
     try {
-      if (callerRole !== 'admin') {
-        return { success: false, message: '僅管理者可檢視合約列表', error: 'FORBIDDEN' }
+      if (callerSystemRole !== 'admin') {
+        const authResult = await this.orgAuth.requireOrgMembership(targetId, callerUserId, callerSystemRole)
+        if (!authResult.authorized) {
+          return {
+            success: false,
+            message: '無權檢視此組織的合約',
+            error: authResult.error ?? 'NOT_ORG_MEMBER',
+          }
+        }
       }
 
       const contracts = await this.contractRepo.findByTargetId(targetId)

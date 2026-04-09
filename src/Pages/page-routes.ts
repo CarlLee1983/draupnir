@@ -9,6 +9,13 @@ import { ViteTagHelper, type ViteManifest } from './ViteTagHelper'
 import { injectSharedData } from './SharedDataMiddleware'
 import { AdminDashboardPage } from './Admin/AdminDashboardPage'
 import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
+import { MemberDashboardPage } from './Member/MemberDashboardPage'
+import { MemberApiKeysPage } from './Member/MemberApiKeysPage'
+import { MemberApiKeyCreatePage } from './Member/MemberApiKeyCreatePage'
+import { MemberApiKeyRevokeHandler } from './Member/MemberApiKeyRevokeHandler'
+import { MemberUsagePage } from './Member/MemberUsagePage'
+import { MemberContractsPage } from './Member/MemberContractsPage'
+import { MemberSettingsPage } from './Member/MemberSettingsPage'
 
 function loadViteManifest(): ViteManifest | undefined {
   const root = process.cwd()
@@ -82,7 +89,45 @@ export function registerPageRoutes(core: PlanetCore): void {
   const summaryService = core.container.make('getDashboardSummaryService') as GetDashboardSummaryService
   const adminDashboard = new AdminDashboardPage(inertia, summaryService)
 
+  const memberDashboard = new MemberDashboardPage(
+    inertia,
+    summaryService,
+    core.container.make('getBalanceService') as any,
+  )
+  const memberApiKeys = new MemberApiKeysPage(
+    inertia,
+    core.container.make('listApiKeysService') as any,
+  )
+  const memberApiKeyCreate = new MemberApiKeyCreatePage(
+    inertia,
+    core.container.make('createApiKeyService') as any,
+  )
+  const memberApiKeyRevoke = new MemberApiKeyRevokeHandler(core.container.make('revokeApiKeyService') as any)
+  const memberUsage = new MemberUsagePage(
+    inertia,
+    core.container.make('getUsageChartService') as any,
+  )
+  const memberContracts = new MemberContractsPage(
+    inertia,
+    core.container.make('listContractsService') as any,
+  )
+  const memberSettings = new MemberSettingsPage(
+    inertia,
+    core.container.make('getProfileService') as any,
+    core.container.make('updateProfileService') as any,
+  )
+
   core.router.get('/admin/dashboard', withInertiaPage((ctx) => adminDashboard.handle(ctx)))
+
+  core.router.get('/member/dashboard', withInertiaPage((ctx) => memberDashboard.handle(ctx)))
+  core.router.get('/member/api-keys', withInertiaPage((ctx) => memberApiKeys.handle(ctx)))
+  core.router.get('/member/api-keys/create', withInertiaPage((ctx) => memberApiKeyCreate.handle(ctx)))
+  core.router.post('/member/api-keys', withInertiaPage((ctx) => memberApiKeyCreate.store(ctx)))
+  core.router.post('/member/api-keys/:keyId/revoke', withInertiaPage((ctx) => memberApiKeyRevoke.handle(ctx)))
+  core.router.get('/member/usage', withInertiaPage((ctx) => memberUsage.handle(ctx)))
+  core.router.get('/member/contracts', withInertiaPage((ctx) => memberContracts.handle(ctx)))
+  core.router.get('/member/settings', withInertiaPage((ctx) => memberSettings.handle(ctx)))
+  core.router.put('/member/settings', withInertiaPage((ctx) => memberSettings.update(ctx)))
 
   if (useBuiltFrontendAssets()) {
     const staticDir = resolve(process.cwd(), 'public')

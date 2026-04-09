@@ -119,7 +119,7 @@ export class ContractController {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
     const query = ctx.get('validated') as ListContractsQueryParams
-    const result = await this.listService.execute(query.targetId, auth.role)
+    const result = await this.listService.execute(query.targetId, auth.userId, auth.role)
     return ctx.json(result)
   }
 

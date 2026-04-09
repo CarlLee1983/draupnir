@@ -1,0 +1,54 @@
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
+import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+
+function mapContractRow(dto: Record<string, unknown>) {
+  const terms = dto.terms as {
+    creditQuota: number
+    validityPeriod: { startDate: string; endDate: string }
+  }
+  const id = dto.id as string
+  return {
+    id,
+    name: `合約 ${id.slice(0, 8)}`,
+    status: dto.status as 'draft' | 'active' | 'expired' | 'terminated',
+    startDate: terms.validityPeriod.startDate,
+    endDate: terms.validityPeriod.endDate,
+    creditQuota: String(terms.creditQuota),
+  }
+}
+
+export class MemberContractsPage {
+  constructor(
+    private readonly inertia: InertiaService,
+    private readonly listService: ListContractsService,
+  ) {}
+
+  async handle(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.redirect('/login')
+
+    const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
+    if (!orgId) {
+      return this.inertia.render(ctx, 'Member/Contracts/Index', {
+        orgId: null,
+        contracts: [],
+        error: '請先選擇組織',
+      })
+    }
+
+    const result = await this.listService.execute(orgId, auth.userId, auth.role)
+
+    const contracts =
+      result.success && result.data
+        ? result.data.map((c) => mapContractRow(c as Record<string, unknown>))
+        : []
+
+    return this.inertia.render(ctx, 'Member/Contracts/Index', {
+      orgId,
+      contracts,
+      error: result.success ? null : result.message,
+    })
+  }
+}
