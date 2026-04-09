@@ -294,10 +294,10 @@ Dashboard 在 Phase 3 先做用量部分（從 Bifrost 即時拉取），Phase 4
 
 ### Phase 3 完成標準
 
-- [ ] API Key 完整生命週期：建立 → 使用 → 停用 → 刪除
-- [ ] Draupnir Key 與 Bifrost Virtual Key 正確同步
-- [ ] Key 權限設定可限制模型與速率
-- [ ] Dashboard API 回傳正確的用量聚合資料
+- [x] API Key 完整生命週期：建立 → 使用 → 停用 → 刪除
+- [x] Draupnir Key 與 Bifrost Virtual Key 正確同步
+- [x] Key 權限設定可限制模型與速率
+- [x] Dashboard API 回傳正確的用量聚合資料
 - [ ] 測試覆蓋率 ≥ 80%
 
 ---
