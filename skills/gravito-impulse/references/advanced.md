@@ -15,7 +15,7 @@ router.post('/users', validateRequest(CreateUserRequest), (ctx) => controller.cr
 router.patch('/users/:id', validateRequest(CreateUserRequest, { partial: true }), (ctx) => controller.update(ctx))
 ```
 
-驗證通過後，結果存入 `ctx.var.validated`（型別為 `unknown`，Controller 中需手動 cast）。
+驗證通過後，結果存入 `ctx` 並可透過 `ctx.get('validated')` 取出（型別為 `unknown`，Controller 中需手動 cast）。
 
 > **注意：** 若框架的 `router.post(path, RequestClass, handler)` 已原生支援 FormRequest 類別作為第二參數，通常不需要手動使用 `validateRequest`。兩者選其一即可，不要重複使用。
 
@@ -77,14 +77,7 @@ BlueprintGenerator.isZodSchema(someValue)   // boolean
 
 ## `SchemaCache` 進階
 
-`SchemaCache` 使用 `WeakMap` 快取「schema 物件 → 對應 validator」的對應，避免每次請求重複解析。
-
-```typescript
-import { SchemaCache, ZodValidator } from '@gravito/impulse'
-
-// 初始化（應用程式啟動時執行一次）
-SchemaCache.registerValidators([new ZodValidator()])
-```
+`SchemaCache` 使用 `WeakMap` 快取「schema 物件 → 對應 validator」的對應，避免每次請求重複解析。初始化方式見 `references/setup.md`。
 
 當 schema 物件被 GC 回收後，對應的快取條目自動清除，不會造成記憶體洩漏。若需在 HMR 環境下強制清除所有快取，請使用 `Impulse.clearAllCaches()`（見 `references/setup.md`）。
 

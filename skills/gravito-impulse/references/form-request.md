@@ -103,9 +103,7 @@ redirect() {
 
 ## 在 Controller 中取得已驗證資料
 
-`@gravito/impulse` 與 `@gravito/core` 搭配使用。`GravitoContext` 來自 `@gravito/core`（HTTP 框架層），`@gravito/impulse` 在驗證通過後將結果寫入 `ctx`。
-
-框架在驗證通過後將結果寫入 `ctx` 的 `'validated'` 欄位：
+`@gravito/impulse` 與 `@gravito/core` 搭配使用。`GravitoContext` 來自 `@gravito/core`（HTTP 框架層）。驗證通過後，結果存入 `ctx` 的 `'validated'` 欄位：
 
 ```typescript
 import type { GravitoContext } from '@gravito/core'

@@ -56,6 +56,7 @@ export class ListUsersRequest extends FormRequest {
 | `DataExtractor` | 手動從 ctx 取出原始資料 |
 | `BlueprintGenerator` | 將 schema 轉為前端 JSON metadata |
 | `Impulse` | `Impulse.clearAllCaches()`（HMR 用） |
+| `IsZodSchema` / `InferZodType` / `ValidationResult` | 型別工具（編譯期推導用） |
 
 ## 決策樹
 
@@ -78,4 +79,4 @@ export class ListUsersRequest extends FormRequest {
 - ❌ 忘記呼叫 `SchemaCache.registerValidators(...)` — `FormRequest` 驗證會靜默失敗或拋出 "No validator found"。
 - ❌ `source = 'query'`（沒有 `as const`）— TypeScript 推斷為 `string` 而非字面型別。
 - ❌ query/param 來源使用數字 schema 但不加 `z.coerce` — query string 永遠是字串。
-- ❌ 在 `transform` 中改變欄位結構後忘記同步調整 schema — `transform` 先執行，結果再交給 schema 驗證。
+- ❌ `transform` 相關問題 — 詳見 `references/form-request.md`。
