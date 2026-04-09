@@ -13,5 +13,6 @@
 | [`module-boundaries.md`](./module-boundaries.md) | bounded context 與模組切分 |
 | [`context-dependency-map.md`](./context-dependency-map.md) | 模組依賴矩陣 |
 | [`layer-decision-rules.md`](./layer-decision-rules.md) | 分層判斷規則 |
+| [`domain-events.md`](./domain-events.md) | Domain Events 實踐與使用指南 |
 | [`ddd-testing-anti-patterns.md`](./ddd-testing-anti-patterns.md) | 測試策略與常見反模式 |
 | [`auth-ddd-refactor-lessons.md`](./auth-ddd-refactor-lessons.md) | Auth DDD 重構經驗與可重用規則 |
