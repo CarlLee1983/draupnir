@@ -1506,6 +1506,118 @@ paths:
         '500':
           description: 查詢失敗
 
+  # === CLI API (Device Flow & Proxy) ===
+  /cli/device-code:
+    post:
+      tags: [CliApi]
+      summary: 初始化 CLI 裝置授權流程 (Device Flow)
+      responses:
+        '200':
+          description: 成功產生裝置碼與驗證碼
+        '500':
+          description: 系統錯誤
+
+  /cli/authorize:
+    post:
+      tags: [CliApi]
+      summary: 使用者在瀏覽器端授權 CLI 裝置 (需登入)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userCode]
+              properties:
+                userCode:
+                  type: string
+                  description: CLI 顯示的 8 位驗證碼
+      responses:
+        '200':
+          description: 授權成功
+        '400':
+          description: 請求錯誤
+        '401':
+          description: 未登入
+        '404':
+          description: 無效的驗證碼
+
+  /cli/token:
+    post:
+      tags: [CliApi]
+      summary: CLI 輪詢換取 JWT Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [deviceCode]
+              properties:
+                deviceCode:
+                  type: string
+      responses:
+        '200':
+          description: 登入成功，回傳 Token
+        '400':
+          description: 請求錯誤
+        '410':
+          description: 裝置碼已過期
+        '428':
+          description: 等待授權中 (Precondition Required)
+
+  /cli/proxy:
+    post:
+      tags: [CliApi]
+      summary: CLI AI 請求代理 (轉發至 Bifrost)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, messages]
+              properties:
+                model:
+                  type: string
+                messages:
+                  type: array
+                  items:
+                    type: object
+      responses:
+        '200':
+          description: AI 請求成功
+        '401':
+          description: 未授權
+
+  /cli/logout:
+    post:
+      tags: [CliApi]
+      summary: 撤銷目前的 CLI Session
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 撤銷成功
+        '401':
+          description: 未授權
+
+  /cli/logout-all:
+    post:
+      tags: [CliApi]
+      summary: 撤銷所有 CLI Session
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 撤銷成功
+        '401':
+          description: 未授權
+
 components:
   securitySchemes:
     bearerAuth:
