@@ -37,7 +37,7 @@ export class UserController {
 			return ctx.json({
 				success: false,
 				message: '驗證失敗',
-				error: validation.error.errors[0].message
+				error: validation.error.issues[0].message
 			}, 400)
 		}
 
@@ -79,7 +79,7 @@ export class UserController {
 			return ctx.json({
 				success: false,
 				message: '驗證失敗',
-				error: validation.error.errors[0].message
+				error: validation.error.issues[0].message
 			}, 400)
 		}
 

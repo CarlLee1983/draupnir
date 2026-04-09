@@ -2,7 +2,7 @@ import { z } from 'zod'
 
 export const ChangeUserStatusSchema = z.object({
   status: z.enum(['active', 'suspended'], {
-    errorMap: () => ({ message: '無效的狀態值' })
+    error: '無效的狀態值'
   })
 })
 

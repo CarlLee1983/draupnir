@@ -9,7 +9,7 @@ export const UpdateUserProfileSchema = z.object({
   bio: z.string().max(255, '個人簡介太長').nullable().optional(),
   timezone: z.string().optional(),
   locale: z.string().optional(),
-  notificationPreferences: z.record(z.any()).optional(),
+  notificationPreferences: z.record(z.string(), z.any()).optional(),
 })
 
 export type UpdateUserProfileParams = z.infer<typeof UpdateUserProfileSchema>

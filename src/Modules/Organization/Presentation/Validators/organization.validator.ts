@@ -18,6 +18,6 @@ export const UpdateOrganizationSchema = z.object({
 
 export const ChangeOrgStatusSchema = z.object({
   status: z.enum(['active', 'suspended'], {
-    errorMap: () => ({ message: '無效的狀態值' })
+    error: '無效的狀態值'
   })
 })

@@ -43,11 +43,15 @@ export class OrganizationController {
 		// Zod 驗證
 		const validation = CreateOrganizationSchema.safeParse(body)
 		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.errors[0].message
-			}, 400)
+			const first = validation.error.issues[0]
+			return ctx.json(
+				{
+					success: false,
+					message: '驗證失敗',
+					error: first?.message ?? '驗證失敗',
+				},
+				400,
+			)
 		}
 
 		const result = await this.createOrgService.execute(body)
@@ -81,7 +85,7 @@ export class OrganizationController {
 			return ctx.json({
 				success: false,
 				message: '驗證失敗',
-				error: validation.error.errors[0].message
+				error: validation.error.issues[0].message
 			}, 400)
 		}
 
@@ -100,7 +104,7 @@ export class OrganizationController {
 			return ctx.json({
 				success: false,
 				message: '驗證失敗',
-				error: validation.error.errors[0].message
+				error: validation.error.issues[0].message
 			}, 400)
 		}
 
@@ -130,7 +134,7 @@ export class OrganizationController {
 			return ctx.json({
 				success: false,
 				message: '驗證失敗',
-				error: validation.error.errors[0].message
+				error: validation.error.issues[0].message
 			}, 400)
 		}
 
@@ -150,7 +154,7 @@ export class OrganizationController {
 			return ctx.json({
 				success: false,
 				message: '驗證失敗',
-				error: validation.error.errors[0].message
+				error: validation.error.issues[0].message
 			}, 400)
 		}
 
@@ -180,7 +184,7 @@ export class OrganizationController {
 			return ctx.json({
 				success: false,
 				message: '驗證失敗',
-				error: validation.error.errors[0].message
+				error: validation.error.issues[0].message
 			}, 400)
 		}
 
