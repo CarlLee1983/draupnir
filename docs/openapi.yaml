@@ -602,6 +602,142 @@ paths:
         '422':
           description: 驗證失敗
 
+  /api/organizations/{orgId}/app-keys:
+    post:
+      tags: [AppApiKey]
+      summary: 配發應用層級 App API Key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IssueAppApiKeyRequest'
+      responses:
+        '201':
+          description: 建立成功
+        '400':
+          description: 請求錯誤
+        '422':
+          description: 驗證失敗
+    get:
+      tags: [AppApiKey]
+      summary: 列表 App API Keys
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+
+  /api/app-keys/{keyId}/rotate:
+    post:
+      tags: [AppApiKey]
+      summary: 輪換 App API Key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+        '404':
+          description: 找不到 Key
+
+  /api/app-keys/{keyId}/revoke:
+    post:
+      tags: [AppApiKey]
+      summary: 撤銷 App API Key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+        '404':
+          description: 找不到 Key
+
+  /api/app-keys/{keyId}/scope:
+    put:
+      tags: [AppApiKey]
+      summary: 更新 App API Key Scope 與綁定模組
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAppApiKeyScopeRequest'
+      responses:
+        '200':
+          description: 成功
+        '404':
+          description: 找不到 Key
+
+  /api/app-keys/{keyId}/usage:
+    get:
+      tags: [AppApiKey]
+      summary: 查詢 App API Key 用量
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+        '404':
+          description: 找不到 Key
+
   /api/organizations/{orgId}/dashboard:
     get:
       tags: [Dashboard]
@@ -1238,6 +1374,42 @@ components:
       required: [permissions]
       properties:
         permissions:
+          type: array
+          items:
+            type: string
+
+    IssueAppApiKeyRequest:
+      type: object
+      required: [label]
+      properties:
+        label:
+          type: string
+        scope:
+          type: string
+          enum: [read, write, admin]
+        rotationPolicy:
+          type: object
+          properties:
+            autoRotate:
+              type: boolean
+            rotationIntervalDays:
+              type: integer
+            gracePeriodHours:
+              type: integer
+        boundModuleIds:
+          type: array
+          items:
+            type: string
+        expiresAt:
+          type: string
+
+    SetAppApiKeyScopeRequest:
+      type: object
+      properties:
+        scope:
+          type: string
+          enum: [read, write, admin]
+        boundModuleIds:
           type: array
           items:
             type: string

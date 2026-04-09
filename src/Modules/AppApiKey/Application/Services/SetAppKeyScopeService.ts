@@ -1,0 +1,49 @@
+import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import { AppKeyScope } from '../../Domain/ValueObjects/AppKeyScope'
+import { BoundModules } from '../../Domain/ValueObjects/BoundModules'
+import type { SetAppKeyScopeRequest, AppApiKeyResponse } from '../DTOs/AppApiKeyDTO'
+
+export class SetAppKeyScopeService {
+	constructor(
+		private readonly appApiKeyRepository: IAppApiKeyRepository,
+		private readonly orgAuth: OrgAuthorizationHelper,
+	) {}
+
+	async execute(request: SetAppKeyScopeRequest): Promise<AppApiKeyResponse> {
+		try {
+			const key = await this.appApiKeyRepository.findById(request.keyId)
+			if (!key) {
+				return { success: false, message: 'App Key 不存在', error: 'KEY_NOT_FOUND' }
+			}
+
+			const authResult = await this.orgAuth.requireOrgMembership(
+				key.orgId,
+				request.callerUserId,
+				request.callerSystemRole,
+			)
+			if (!authResult.authorized) {
+				return {
+					success: false,
+					message: '你不是此組織的成員',
+					error: authResult.error ?? 'NOT_ORG_MEMBER',
+				}
+			}
+
+			let updated = key
+			if (request.scope) {
+				updated = updated.updateScope(AppKeyScope.from(request.scope))
+			}
+			if (request.boundModuleIds) {
+				updated = updated.updateBoundModules(BoundModules.from(request.boundModuleIds))
+			}
+
+			await this.appApiKeyRepository.update(updated)
+
+			return { success: true, message: 'Scope 更新成功', data: updated.toDTO() }
+		} catch (error: unknown) {
+			const message = error instanceof Error ? error.message : '更新失敗'
+			return { success: false, message, error: message }
+		}
+	}
+}

@@ -16,6 +16,11 @@ export const CORE_APP_MODULE_SPECS = [
 		name: 'api_keys',
 		description: '組織 API 金鑰管理',
 	},
+	{
+		id: '00000000-0000-4000-8000-000000000004',
+		name: 'app_api_keys',
+		description: '應用層級 API 金鑰（SDK/CLI）',
+	},
 ] as const
 
 export type CoreAppModuleName = (typeof CORE_APP_MODULE_SPECS)[number]['name']

@@ -195,3 +195,21 @@ export const registerAppModule = (core: PlanetCore): void => {
 	const checkAccessService = core.container.make('checkModuleAccessService') as CheckModuleAccessService
 	setCheckModuleAccessService(checkAccessService)
 }
+
+import { AppApiKeyController, registerAppApiKeyRoutes } from '@/Modules/AppApiKey'
+
+/**
+ * 註冊 AppApiKey 模組
+ */
+export const registerAppApiKey = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new AppApiKeyController(
+		core.container.make('issueAppKeyService') as any,
+		core.container.make('listAppKeysService') as any,
+		core.container.make('rotateAppKeyService') as any,
+		core.container.make('revokeAppKeyService') as any,
+		core.container.make('setAppKeyScopeService') as any,
+		core.container.make('getAppKeyUsageService') as any,
+	)
+	registerAppApiKeyRoutes(router, controller)
+}
