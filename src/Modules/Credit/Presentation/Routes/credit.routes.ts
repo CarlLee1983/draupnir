@@ -7,4 +7,5 @@ export function registerCreditRoutes(router: IModuleRouter, controller: CreditCo
   router.get('/api/organizations/:orgId/credits/balance', [requireAuth()], (ctx) => controller.getBalance(ctx))
   router.get('/api/organizations/:orgId/credits/transactions', [requireAuth()], (ctx) => controller.getTransactions(ctx))
   router.post('/api/organizations/:orgId/credits/topup', [requireAuth(), createRoleMiddleware('admin')], (ctx) => controller.topUp(ctx))
+  router.post('/api/organizations/:orgId/credits/refund', [requireAuth(), createRoleMiddleware('admin')], (ctx) => controller.refund(ctx))
 }

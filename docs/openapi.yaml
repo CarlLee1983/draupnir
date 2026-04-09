@@ -641,6 +641,43 @@ paths:
         '201':
           description: 儲值成功
 
+  /api/organizations/{orgId}/credits/refund:
+    post:
+      tags: [Credit]
+      summary: 組織點數退款
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: string
+                  description: 退款金額
+                referenceType:
+                  type: string
+                  description: 關聯類型
+                referenceId:
+                  type: string
+                  description: 關聯 ID
+                description:
+                  type: string
+                  description: 退款說明
+      responses:
+        '200':
+          description: 退款成功
+
 components:
   securitySchemes:
     bearerAuth:

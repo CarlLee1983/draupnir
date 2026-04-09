@@ -7,7 +7,13 @@ import { CreditDeductionService } from '../../Domain/Services/CreditDeductionSer
 import { TopUpCreditService } from '../../Application/Services/TopUpCreditService'
 import { GetBalanceService } from '../../Application/Services/GetBalanceService'
 import { GetTransactionHistoryService } from '../../Application/Services/GetTransactionHistoryService'
+import { RefundCreditService } from '../../Application/Services/RefundCreditService'
+import { HandleBalanceDepletedService } from '../../Application/Services/HandleBalanceDepletedService'
+import { HandleCreditToppedUpService } from '../../Application/Services/HandleCreditToppedUpService'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 
 export class CreditServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
@@ -39,9 +45,46 @@ export class CreditServiceProvider extends ModuleServiceProvider {
         c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
       )
     })
+
+    container.bind('refundCreditService', (c: IContainer) => {
+      return new RefundCreditService(
+        c.make('creditAccountRepository') as CreditAccountRepository,
+        c.make('creditTransactionRepository') as CreditTransactionRepository,
+        db,
+      )
+    })
+
+    container.bind('handleBalanceDepletedService', (c: IContainer) => {
+      return new HandleBalanceDepletedService(
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('bifrostClient') as BifrostClient,
+      )
+    })
+
+    container.bind('handleCreditToppedUpService', (c: IContainer) => {
+      return new HandleCreditToppedUpService(
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('bifrostClient') as BifrostClient,
+      )
+    })
   }
 
-  override boot(_context: unknown): void {
+  override boot(core: any): void {
+    const container = core?.container ?? core
+    const dispatcher = DomainEventDispatcher.getInstance()
+
+    dispatcher.on('credit.balance_depleted', async (event) => {
+      const handler = container.make('handleBalanceDepletedService') as HandleBalanceDepletedService
+      const orgId = event.data.orgId as string
+      await handler.execute(orgId)
+    })
+
+    dispatcher.on('credit.topped_up', async (event) => {
+      const handler = container.make('handleCreditToppedUpService') as HandleCreditToppedUpService
+      const orgId = event.data.orgId as string
+      await handler.execute(orgId)
+    })
+
     console.log('💰 [Credit] Module loaded')
   }
 }

@@ -4,12 +4,14 @@ import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddlewar
 import type { TopUpCreditService } from '../../Application/Services/TopUpCreditService'
 import type { GetBalanceService } from '../../Application/Services/GetBalanceService'
 import type { GetTransactionHistoryService } from '../../Application/Services/GetTransactionHistoryService'
+import type { RefundCreditService } from '../../Application/Services/RefundCreditService'
 
 export class CreditController {
   constructor(
     private readonly topUpService: TopUpCreditService,
     private readonly getBalanceService: GetBalanceService,
     private readonly getTransactionHistoryService: GetTransactionHistoryService,
+    private readonly refundService: RefundCreditService,
   ) {}
 
   async getBalance(ctx: IHttpContext): Promise<Response> {
@@ -41,6 +43,25 @@ export class CreditController {
     const result = await this.topUpService.execute({
       orgId,
       amount: body.amount ?? '0',
+      description: body.description,
+      callerUserId: auth.userId,
+      callerSystemRole: auth.role,
+    })
+    const status = result.success ? 200 : 400
+    return ctx.json(result, status)
+  }
+
+  async refund(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    const orgId = ctx.getParam('orgId')
+    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
+    const body = await ctx.getJsonBody<{ amount?: string; referenceType?: string; referenceId?: string; description?: string }>()
+    const result = await this.refundService.execute({
+      orgId,
+      amount: body.amount ?? '0',
+      referenceType: body.referenceType,
+      referenceId: body.referenceId,
       description: body.description,
       callerUserId: auth.userId,
       callerSystemRole: auth.role,

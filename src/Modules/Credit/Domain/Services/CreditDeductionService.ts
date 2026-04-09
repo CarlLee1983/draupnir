@@ -6,6 +6,7 @@ import { CreditTransaction } from '../Entities/CreditTransaction'
 import { TransactionType } from '../ValueObjects/TransactionType'
 import { BalanceLow } from '../Events/BalanceLow'
 import { BalanceDepleted } from '../Events/BalanceDepleted'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { DomainEvent } from '@/Shared/Domain/DomainEvent'
 
 interface DeductParams {
@@ -60,6 +61,8 @@ export class CreditDeductionService {
     } else if (updated.isBalanceLow()) {
       events.push(new BalanceLow(account.id, account.orgId, updated.balance))
     }
+
+    await DomainEventDispatcher.getInstance().dispatchAll(events)
 
     return { success: true, newBalance: updated.balance, events }
   }

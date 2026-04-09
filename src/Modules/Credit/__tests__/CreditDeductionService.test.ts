@@ -1,10 +1,11 @@
 // src/Modules/Credit/__tests__/CreditDeductionService.test.ts
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { CreditDeductionService } from '../Domain/Services/CreditDeductionService'
 import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
 import { CreditTransactionRepository } from '../Infrastructure/Repositories/CreditTransactionRepository'
 import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 
 describe('CreditDeductionService', () => {
   let db: MemoryDatabaseAccess
@@ -13,6 +14,7 @@ describe('CreditDeductionService', () => {
   let service: CreditDeductionService
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     db = new MemoryDatabaseAccess()
     accountRepo = new CreditAccountRepository(db)
     txRepo = new CreditTransactionRepository(db)
@@ -25,6 +27,10 @@ describe('CreditDeductionService', () => {
       updated_at: new Date().toISOString(),
     })
     await accountRepo.save(account)
+  })
+
+  afterEach(() => {
+    DomainEventDispatcher.resetForTesting()
   })
 
   it('應正確扣款並建立交易紀錄', async () => {

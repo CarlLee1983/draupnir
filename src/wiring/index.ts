@@ -146,6 +146,7 @@ export const registerCredit = (core: PlanetCore): void => {
 		core.container.make('topUpCreditService') as any,
 		core.container.make('getBalanceService') as any,
 		core.container.make('getTransactionHistoryService') as any,
+		core.container.make('refundCreditService') as any,
 	)
 	registerCreditRoutes(router, controller)
 }
