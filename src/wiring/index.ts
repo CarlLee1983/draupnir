@@ -42,6 +42,8 @@ export const registerDocs = (core: PlanetCore): Promise<void> => {
 }
 
 import { AuthController, registerAuthRoutes } from '@/Modules/Auth'
+import { registerTestSeedRoutes } from '@/Modules/Auth/Presentation/Routes/test-seed.routes'
+import { getCurrentDatabaseAccess } from './CurrentDatabaseAccess'
 
 /**
  * 註冊 Auth 模組
@@ -53,7 +55,11 @@ export const registerAuth = (core: PlanetCore): void => {
 	const refreshTokenService = core.container.make('refreshTokenService') as any
 	const logoutUserService = core.container.make('logoutUserService') as any
 	const controller = new AuthController(registerService, loginService, refreshTokenService, logoutUserService)
-	registerAuthRoutes(router, controller)
+	void registerAuthRoutes(router, controller)
+
+	if (getCurrentORM() === 'memory') {
+		registerTestSeedRoutes(router, getCurrentDatabaseAccess())
+	}
 }
 
 import { UserController, registerUserRoutes } from '@/Modules/User'
@@ -127,4 +133,19 @@ export const registerDashboard = (core: PlanetCore): void => {
 		core.container.make('getUsageChartService') as any,
 	)
 	registerDashboardRoutes(router, controller)
+}
+
+import { CreditController, registerCreditRoutes } from '@/Modules/Credit'
+
+/**
+ * 註冊 Credit 模組
+ */
+export const registerCredit = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new CreditController(
+		core.container.make('topUpCreditService') as any,
+		core.container.make('getBalanceService') as any,
+		core.container.make('getTransactionHistoryService') as any,
+	)
+	registerCreditRoutes(router, controller)
 }

@@ -8,6 +8,7 @@ import { UserServiceProvider } from './Modules/User/Infrastructure/Providers/Use
 import { OrganizationServiceProvider } from './Modules/Organization/Infrastructure/Providers/OrganizationServiceProvider'
 import { ApiKeyServiceProvider } from './Modules/ApiKey/Infrastructure/Providers/ApiKeyServiceProvider'
 import { DashboardServiceProvider } from './Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
+import { CreditServiceProvider } from './Modules/Credit/Infrastructure/Providers/CreditServiceProvider'
 import { registerRoutes } from './routes'
 import { initializeRegistry } from './wiring/RepositoryRegistry'
 import { getCurrentORM } from './wiring/RepositoryFactory'
@@ -29,6 +30,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   core.register(createGravitoServiceProvider(new OrganizationServiceProvider()))
   core.register(createGravitoServiceProvider(new ApiKeyServiceProvider()))
   core.register(createGravitoServiceProvider(new DashboardServiceProvider()))
+  core.register(createGravitoServiceProvider(new CreditServiceProvider()))
 
   await core.bootstrap()
   await registerRoutes(core)
