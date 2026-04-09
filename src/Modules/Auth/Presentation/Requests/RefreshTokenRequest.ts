@@ -1,6 +1,5 @@
 // src/Modules/Auth/Presentation/Requests/RefreshTokenRequest.ts
-import { FormRequest } from '@gravito/impulse'
-import { z } from 'zod'
+import { FormRequest, z } from '@gravito/impulse'
 
 export class RefreshTokenRequest extends FormRequest {
   schema = z.object({

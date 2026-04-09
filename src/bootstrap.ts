@@ -1,4 +1,5 @@
 import { PlanetCore, defineConfig } from '@gravito/core'
+import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { buildConfig } from '../config/index'
 import { createGravitoServiceProvider } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { HealthServiceProvider } from './Modules/Health/Infrastructure/Providers/HealthServiceProvider'
@@ -16,6 +17,9 @@ import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 
 export async function bootstrap(port = 3000): Promise<PlanetCore> {
+  // 註冊表單驗證器
+  SchemaCache.registerValidators([new ZodValidator()])
+
   const configObj = buildConfig(port)
   initializeRegistry()
   const db = new DatabaseAccessBuilder(getCurrentORM()).getDatabaseAccess()

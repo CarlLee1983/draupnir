@@ -1,28 +1,11 @@
-/**
- * Auth 模組路由
- *
- * 框架無關的路由定義
- * 使用 IModuleRouter 介面實現框架解耦
- */
-
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { AuthController } from '../Controllers/AuthController'
 import { attachJwt } from '../Middleware/RoleMiddleware'
+import { LoginRequest, RegisterRequest, RefreshTokenRequest } from '../Requests'
 
-/**
- * 註冊 Auth 模組路由
- * @param router 框架無關的模組路由器
- * @param controller 認證控制器
- */
-export async function registerAuthRoutes(
-  router: IModuleRouter,
-  controller: AuthController
-): Promise<void> {
-  // 公開端點（無需認證）
-  router.post('/api/auth/register', (ctx) => controller.register(ctx))
-  router.post('/api/auth/login', (ctx) => controller.login(ctx))
-  router.post('/api/auth/refresh', (ctx) => controller.refresh(ctx))
-
-  // 受保護端點（需要認證；先解析 JWT 再交給 controller）
+export async function registerAuthRoutes(router: IModuleRouter, controller: AuthController): Promise<void> {
+  router.post('/api/auth/register', RegisterRequest, (ctx) => controller.register(ctx))
+  router.post('/api/auth/login', LoginRequest, (ctx) => controller.login(ctx))
+  router.post('/api/auth/refresh', RefreshTokenRequest, (ctx) => controller.refresh(ctx))
   router.post('/api/auth/logout', [attachJwt()], (ctx) => controller.logout(ctx))
 }

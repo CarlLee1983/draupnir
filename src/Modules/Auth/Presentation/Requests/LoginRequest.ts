@@ -1,6 +1,5 @@
 // src/Modules/Auth/Presentation/Requests/LoginRequest.ts
-import { FormRequest } from '@gravito/impulse'
-import { z } from 'zod'
+import { FormRequest, z } from '@gravito/impulse'
 
 export class LoginRequest extends FormRequest {
   schema = z.object({
