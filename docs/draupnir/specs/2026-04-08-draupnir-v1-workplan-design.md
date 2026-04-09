@@ -408,12 +408,23 @@ interface PricingRule {
 
 ### Phase 4 完成標準
 
-- [ ] Credit 充值、扣款、退款流程正確
-- [ ] 餘額不足時自動阻擋 Bifrost Key，充值後自動恢復
+- [x] Credit 充值、扣款、退款流程正確
+- [x] 餘額不足時自動阻擋 Bifrost Key，充值後自動恢復
 - [ ] 用量同步 Cron Job 穩定運行
 - [ ] 定價規則可配置，計算結果正確
 - [ ] 用量異常偵測可觸發告警
 - [ ] 測試覆蓋率 ≥ 80%
+
+#### Phase 4 驗收註記（2026-04-09）
+
+| 條件 | 狀態 | 說明 |
+|------|------|------|
+| Credit 充值／扣款／退款 | **通過** | `TopUpCreditService`、`CreditDeductionService`、`RefundCreditService` + 帳戶／交易領域邏輯；`bun test src/Modules/Credit/__tests__/` 44 項全數通過。 |
+| 餘額阻擋／恢復 Bifrost Key | **通過（範圍內）** | 餘額**耗盡**（扣款後 ≤ 0）時派發 `BalanceDepleted` → `HandleBalanceDepletedService` 將 Bifrost `rate_limit` 置零並標記 Key；充值派發 `CreditToppedUp` → `HandleCreditToppedUpService` 還原 limit 並 `unsuspend`。整合情境見 `CreditEventFlow.integration.test.ts`。註：領域上扣款可將餘額扣至負數（見 `Balance` 測試），尚未見「單筆扣款前餘額不足即拒絕」的閘道；若規格意指「耗盡後阻擋」，則已符合。 |
+| 用量同步 Cron | **未驗收** | `src/` 內無 `UsageSync` 模組、無 `schedule.add`／Horizon 註冊；僅設計與計畫見 `docs/draupnir/specs/2026-04-08-p4-credit-system-design.md`、`docs/draupnir/plans/2026-04-09-p4-credit-system.md`。 |
+| 定價規則可配置 | **未驗收** | 雖有 `pricing_rules` migration／Drizzle schema 線索，尚無 `UsagePricingCalculator`、管理 API 或 OpenAPI 路由；無法驗證「可配置且計算正確」。 |
+| 用量異常告警 | **未驗收** | 無 `DetectUsageAnomalyService`／`UsageAnomalyDetected` 等實作與測試。 |
+| Phase 4 覆蓋率 ≥ 80% | **未驗收** | Credit 子模組測試完整；含 UsageSync／定價／異常的 Phase 4 整體覆蓋率待上述能力落地後再跑 `bun test --coverage` 核銷。 |
 
 ---
 
