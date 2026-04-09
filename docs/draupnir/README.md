@@ -31,6 +31,14 @@
 | [`2026-04-09-p4-credit-system.md`](./plans/2026-04-09-p4-credit-system.md) | P4 Credit 系統實作計畫 |
 | [`2026-04-09-api-functional-testing.md`](./plans/2026-04-09-api-functional-testing.md) | API 功能性測試實作計畫 |
 
+## 專案知識（`knowledge/`）
+
+長期可重複引用的工程知識，不放在 `specs/` 以免混淆一次性規格。
+
+| 檔案 | 主題 |
+|------|------|
+| [`README.md`](./knowledge/README.md) | 知識索引 |
+
 ## 審查紀錄（`reviews/`）
 
 | 檔案 | 說明 |
