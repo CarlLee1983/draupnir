@@ -16,6 +16,7 @@ import { AppModuleServiceProvider } from './Modules/AppModule/Infrastructure/Pro
 import { AppApiKeyServiceProvider } from './Modules/AppApiKey'
 import { DevPortalServiceProvider } from './Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
+import { CliApiServiceProvider } from './Modules/CliApi/Infrastructure/Providers/CliApiServiceProvider'
 import { registerRoutes } from './routes'
 import { initializeRegistry } from './wiring/RepositoryRegistry'
 import { getCurrentORM } from './wiring/RepositoryFactory'
@@ -48,6 +49,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   core.register(createGravitoServiceProvider(new AppApiKeyServiceProvider()))
   core.register(createGravitoServiceProvider(new DevPortalServiceProvider()))
   core.register(createGravitoServiceProvider(new SdkApiServiceProvider()))
+  core.register(createGravitoServiceProvider(new CliApiServiceProvider()))
 
   await core.bootstrap()
   await (core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService).execute()

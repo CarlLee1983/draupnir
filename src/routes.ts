@@ -12,6 +12,7 @@ import {
   registerAppApiKey,
   registerDevPortal,
   registerSdkApi,
+  registerCliApi,
   registerDocs,
 } from './wiring'
 import { registerPageRoutes } from './Pages/page-routes'
@@ -37,6 +38,7 @@ export async function registerRoutes(core: PlanetCore) {
   registerDashboard(core)
   registerCredit(core)
   registerSdkApi(core)
+  registerCliApi(core)
   await registerDocs(core)
   registerPageRoutes(core)
   console.log('✅ Routes registered')

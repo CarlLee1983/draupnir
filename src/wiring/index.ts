@@ -250,3 +250,20 @@ export const registerSdkApi = (core: PlanetCore): void => {
 	const appAuthMiddleware = core.container.make('appAuthMiddleware') as AppAuthMiddleware
 	registerSdkApiRoutes(router, controller, appAuthMiddleware)
 }
+
+import { CliApiController, registerCliApiRoutes } from '@/Modules/CliApi'
+
+/**
+ * 註冊 CliApi 模組
+ */
+export const registerCliApi = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new CliApiController(
+		core.container.make('initiateDeviceFlowService') as any,
+		core.container.make('authorizeDeviceService') as any,
+		core.container.make('exchangeDeviceCodeService') as any,
+		core.container.make('proxyCliRequestService') as any,
+		core.container.make('revokeCliSessionService') as any,
+	)
+	registerCliApiRoutes(router, controller)
+}
