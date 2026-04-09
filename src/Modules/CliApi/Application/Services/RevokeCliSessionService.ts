@@ -26,7 +26,7 @@ export class RevokeCliSessionService {
 
   async executeRevokeAll(request: RevokeAllRequest): Promise<RevokeCliSessionResponse> {
     try {
-      await this.authTokenRepository.revokeAll(request.userId)
+      await this.authTokenRepository.revokeAllByUserId(request.userId)
       return { success: true, message: '所有 CLI session 已撤銷' }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '撤銷失敗'

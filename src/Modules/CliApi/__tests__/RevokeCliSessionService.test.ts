@@ -8,7 +8,7 @@ function createMockAuthTokenRepo(): IAuthTokenRepository {
     save: vi.fn().mockResolvedValue(undefined),
     findByUserId: vi.fn().mockResolvedValue([]),
     isRevoked: vi.fn().mockResolvedValue(false),
-    revokeAll: vi.fn().mockResolvedValue(undefined),
+    revokeAllByUserId: vi.fn().mockResolvedValue(undefined),
     revoke: vi.fn().mockResolvedValue(undefined),
     deleteExpired: vi.fn().mockResolvedValue(0),
   } as unknown as IAuthTokenRepository
@@ -37,7 +37,7 @@ describe('RevokeCliSessionService', () => {
       userId: 'user-1',
     })
     expect(result.success).toBe(true)
-    expect(mockRepo.revokeAll).toHaveBeenCalledWith('user-1')
+    expect(mockRepo.revokeAllByUserId).toHaveBeenCalledWith('user-1')
   })
 
   it('should handle revocation errors gracefully', async () => {
