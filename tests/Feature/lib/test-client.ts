@@ -22,7 +22,7 @@ export class TestClient {
 
 	async request(
 		operation: { method: string; path: string },
-		options: { body?: unknown; auth?: string | null },
+		options: { body?: unknown; auth?: string | null; headers?: Record<string, string> },
 	): Promise<TestResponse> {
 		const headers: Record<string, string> = {}
 		const hasBody = options.body !== undefined && options.body !== null
@@ -31,6 +31,11 @@ export class TestClient {
 		}
 		if (options.auth) {
 			headers.authorization = `Bearer ${options.auth}`
+		}
+		if (options.headers) {
+			for (const [key, value] of Object.entries(options.headers)) {
+				headers[key] = value
+			}
 		}
 
 		const url = `${this.baseURL}${operation.path}`

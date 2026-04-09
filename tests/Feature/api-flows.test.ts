@@ -30,6 +30,15 @@ function parseOperationId(opId: string): { method: string; path: string } {
 	}
 }
 
+function buildRequestHeaders(path: string, context: Record<string, unknown>): Record<string, string> | undefined {
+	if (!path.startsWith('/api/organizations/{')) return undefined
+	const organizationId = context.id ?? context.orgId
+	if (organizationId === undefined || organizationId === null) return undefined
+	return {
+		'x-organization-id': String(organizationId),
+	}
+}
+
 for (const [flowName, flow] of Object.entries(spec.flows)) {
 	describe(`流程鏈: ${flow.description}`, () => {
 		it('完成所有步驟', async () => {
@@ -65,7 +74,8 @@ for (const [flowName, flow] of Object.entries(spec.flows)) {
 
 				const auth = step.auth ? (resolveRef(step.auth, context) as string) : undefined
 
-				const res = await client.request({ method, path }, { body, auth })
+				const headers = buildRequestHeaders(path, context)
+				const res = await client.request({ method, path }, { body, auth, headers })
 
 				if (step.expect?.status) {
 					if (res.status !== step.expect.status) {

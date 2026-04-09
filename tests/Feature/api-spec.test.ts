@@ -26,7 +26,7 @@ beforeEach(() => {
 
 async function getAuthForOperation(op: Operation): Promise<string | null> {
 	if (!op.requiresAuth) return null
-	const role = op.testRole === 'admin' ? 'admin' : 'user'
+	const role = op.testRole === 'admin' || op.path.startsWith('/api/organizations/{') ? 'admin' : 'user'
 	const identity = await ensureAuth(client, role)
 	return identity.token
 }
@@ -113,10 +113,6 @@ async function resolvePathWithCtx(op: Operation): Promise<{
 	return { path: substitutePath(op.path, setupCtx), setupCtx }
 }
 
-async function resolvePath(op: Operation): Promise<string> {
-	return (await resolvePathWithCtx(op)).path
-}
-
 function buildRequestBody(op: Operation, setupCtx: Record<string, unknown>): unknown | undefined {
 	let body = buildValidRequest(op.requestSchema, { onlyRequired: true }) as Record<string, unknown>
 	if (op.method === 'post' && op.path === '/api/organizations') {
@@ -135,15 +131,29 @@ function buildRequestBody(op: Operation, setupCtx: Record<string, unknown>): unk
 	return undefined
 }
 
+function buildRequestHeaders(op: Operation, setupCtx: Record<string, unknown>): Record<string, string> | undefined {
+	const orgRoute = op.path.startsWith('/api/organizations/{')
+	if (!orgRoute) return undefined
+
+	const organizationId = setupCtx.id ?? setupCtx.orgId
+	if (organizationId === undefined || organizationId === null) return undefined
+
+	return {
+		'x-organization-id': String(organizationId),
+	}
+}
+
 async function prepareAuthedCall(op: Operation): Promise<{
 	auth: string | null
 	path: string
 	requestBody: unknown | undefined
+	headers: Record<string, string> | undefined
 }> {
 	const auth = await getAuthForOperation(op)
 	const { path, setupCtx } = await resolvePathWithCtx(op)
 	const requestBody = buildRequestBody(op, setupCtx)
-	return { auth, path, requestBody }
+	const headers = buildRequestHeaders(op, setupCtx)
+	return { auth, path, requestBody, headers }
 }
 
 function hasPathParams(path: string): boolean {
@@ -159,16 +169,20 @@ for (const op of spec.operations) {
 
 	describe(`${op.method.toUpperCase()} ${op.path}`, () => {
 		it(`回傳 ${op.successStatus}`, async () => {
-			const { auth, path, requestBody } = await prepareAuthedCall(op)
-			const res = await client.request({ method: op.method, path }, { body: requestBody, auth })
+			const { auth, path, requestBody, headers } = await prepareAuthedCall(op)
+			const res = await client.request({ method: op.method, path }, { body: requestBody, auth, headers })
 			expect(res.status).toBe(op.successStatus)
 		})
 
 		if (op.responseSchema) {
 			it('response 結構符合 OpenAPI spec', async () => {
-				const { auth, path, requestBody } = await prepareAuthedCall(op)
-				const res = await client.request({ method: op.method, path }, { body: requestBody, auth })
-				const validation = validateSchema(res.json, op.responseSchema as Record<string, unknown>, spec.componentSchemas)
+				const { auth, path, requestBody, headers } = await prepareAuthedCall(op)
+				const res = await client.request({ method: op.method, path }, { body: requestBody, auth, headers })
+				const validation = validateSchema(
+					res.json,
+					op.responseSchema as Record<string, unknown>,
+					spec.componentSchemas,
+				)
 				if (!validation.valid) {
 					throw new Error(
 						`Schema validation failed:\n${validation.errors.map((e) => `  - ${e.instancePath}: ${e.message}`).join('\n')}`,
@@ -181,7 +195,8 @@ for (const op of spec.operations) {
 			it('未帶 token 回傳 401', async () => {
 				const { path, setupCtx } = await resolvePathWithCtx(op)
 				const requestBody = buildRequestBody(op, setupCtx)
-				const res = await client.request({ method: op.method, path }, { body: requestBody, auth: null })
+				const headers = buildRequestHeaders(op, setupCtx)
+				const res = await client.request({ method: op.method, path }, { body: requestBody, auth: null, headers })
 				expect(res.status).toBe(401)
 			})
 		}
@@ -193,8 +208,9 @@ for (const op of spec.operations) {
 		if (op.requiredFields.length > 0 && !skipRequiredBodyTest) {
 			it('缺少必填欄位回傳 400', async () => {
 				const auth = await getAuthForOperation(op)
-				const path = await resolvePath(op)
-				const res = await client.request({ method: op.method, path }, { body: {}, auth })
+				const { path, setupCtx } = await resolvePathWithCtx(op)
+				const headers = buildRequestHeaders(op, setupCtx)
+				const res = await client.request({ method: op.method, path }, { body: {}, auth, headers })
 				expect(res.status).toBe(400)
 			})
 		}

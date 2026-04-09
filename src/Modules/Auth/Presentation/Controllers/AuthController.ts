@@ -16,7 +16,7 @@ import type { LogoutUserService } from '../../Application/Services/LogoutUserSer
 import type { RegisterUserRequest } from '../../Application/DTOs/RegisterUserDTO'
 import type { LoginRequest } from '../../Application/DTOs/LoginDTO'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import { RegisterUserSchema, LoginSchema } from '../Validators'
+import { RegisterUserSchema, LoginSchema, RefreshTokenSchema } from '../Validators'
 
 export class AuthController {
   constructor(
@@ -110,8 +110,20 @@ export class AuthController {
     try {
       const body = await ctx.getJsonBody() as { refreshToken: string }
 
+      const validation = RefreshTokenSchema.safeParse(body)
+      if (!validation.success) {
+        return ctx.json(
+          {
+            success: false,
+            message: '驗證失敗',
+            error: validation.error.issues[0].message,
+          },
+          400,
+        )
+      }
+
       // 調用應用層服務
-      const result = await this.refreshTokenService.execute(body)
+      const result = await this.refreshTokenService.execute(validation.data)
 
       // 返回回應
       return ctx.json(result, result.success ? 200 : 401)

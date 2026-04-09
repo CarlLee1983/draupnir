@@ -19,3 +19,9 @@ export const RegisterUserSchema = z.object({
 })
 
 export type RegisterUserParams = z.infer<typeof RegisterUserSchema>
+
+export const RefreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, 'Refresh Token 不能為空'),
+})
+
+export type RefreshTokenParams = z.infer<typeof RefreshTokenSchema>

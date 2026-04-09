@@ -209,12 +209,12 @@ Auth Middleware ──(依賴)──→ Organization（解析當前組織 contex
 
 ### Phase 2 完成標準
 
-- [ ] 註冊、登入、登出、Token 刷新全流程可用
-- [ ] RBAC 權限檢查 Middleware 正常運作
-- [ ] 多租戶 Organization 切換正常
-- [ ] 所有 API 有 Zod 輸入驗證
+- [x] 註冊、登入、登出、Token 刷新全流程可用
+- [x] RBAC 權限檢查 Middleware 正常運作
+- [x] 多租戶 Organization 切換正常（移除 user_id unique 約束、findByUserAndOrgId、X-Organization-Id header）
+- [x] 所有 API 有 Zod 輸入驗證（Auth RefreshToken、User params/query、Org params 全面導入）
 - [ ] 測試覆蓋率 ≥ 80%
-- [ ] API 文件（OpenAPI）更新
+- [x] API 文件（OpenAPI）更新（所有 org 路由加入 X-Organization-Id header 定義）
 
 ---
 

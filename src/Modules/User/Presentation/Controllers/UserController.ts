@@ -5,7 +5,12 @@ import type { GetUserProfileService } from '../../Application/Services/GetUserPr
 import type { UpdateUserProfileService } from '../../Application/Services/UpdateUserProfileService'
 import type { ListUsersService } from '../../Application/Services/ListUsersService'
 import type { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
-import { UpdateUserProfileSchema, ChangeUserStatusSchema } from '../Validators'
+import {
+	UpdateUserProfileSchema,
+	ChangeUserStatusSchema,
+	ListUsersQuerySchema,
+	UserIdSchema,
+} from '../Validators'
 
 export class UserController {
 	constructor(
@@ -46,30 +51,54 @@ export class UserController {
 	}
 
 	async listUsers(ctx: IHttpContext): Promise<Response> {
-		const request = {
+		const validation = ListUsersQuerySchema.safeParse({
 			role: ctx.getQuery('role'),
 			status: ctx.getQuery('status'),
 			keyword: ctx.getQuery('keyword'),
-			page: ctx.getQuery('page') ? Number(ctx.getQuery('page')) : undefined,
-			limit: ctx.getQuery('limit') ? Number(ctx.getQuery('limit')) : undefined,
+			page: ctx.getQuery('page'),
+			limit: ctx.getQuery('limit'),
+		})
+		if (!validation.success) {
+			return ctx.json(
+				{
+					success: false,
+					message: '驗證失敗',
+					error: validation.error.issues[0]?.message ?? '驗證失敗',
+				},
+				400,
+			)
 		}
-		const result = await this.listUsersService.execute(request)
+		const result = await this.listUsersService.execute(validation.data)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
 
 	async getUser(ctx: IHttpContext): Promise<Response> {
-		const userId = ctx.getParam('id')
-		if (!userId) {
-			return ctx.json({ success: false, message: '缺少使用者 ID', error: 'MISSING_ID' }, 400)
+		const validation = UserIdSchema.safeParse({ id: ctx.getParam('id') })
+		if (!validation.success) {
+			return ctx.json(
+				{
+					success: false,
+					message: '驗證失敗',
+					error: validation.error.issues[0]?.message ?? '無效的使用者 ID',
+				},
+				400,
+			)
 		}
-		const result = await this.getUserProfileService.execute(userId)
+		const result = await this.getUserProfileService.execute(validation.data.id)
 		return ctx.json(result, result.success ? 200 : 404)
 	}
 
 	async changeUserStatus(ctx: IHttpContext): Promise<Response> {
-		const userId = ctx.getParam('id')
-		if (!userId) {
-			return ctx.json({ success: false, message: '缺少使用者 ID', error: 'MISSING_ID' }, 400)
+		const idValidation = UserIdSchema.safeParse({ id: ctx.getParam('id') })
+		if (!idValidation.success) {
+			return ctx.json(
+				{
+					success: false,
+					message: '驗證失敗',
+					error: idValidation.error.issues[0]?.message ?? '無效的使用者 ID',
+				},
+				400,
+			)
 		}
 		const body = await ctx.getJsonBody<any>()
 
@@ -83,7 +112,7 @@ export class UserController {
 			}, 400)
 		}
 
-		const result = await this.changeUserStatusService.execute(userId, body)
+		const result = await this.changeUserStatusService.execute(idValidation.data.id, body)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
 }
