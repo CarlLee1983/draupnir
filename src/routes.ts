@@ -25,11 +25,11 @@ export async function registerRoutes(core: PlanetCore) {
   registerAuth(core)
   registerUser(core)
   registerOrganization(core)
+  registerContract(core)
+  registerAppModule(core)
   registerApiKey(core)
   registerDashboard(core)
   registerCredit(core)
-  registerContract(core)
-  registerAppModule(core)
   await registerDocs(core)
   console.log('✅ Routes registered')
 }

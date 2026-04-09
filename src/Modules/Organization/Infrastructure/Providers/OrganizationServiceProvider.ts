@@ -21,6 +21,7 @@ import { GetOrganizationService } from '../../Application/Services/GetOrganizati
 import { ChangeOrgStatusService } from '../../Application/Services/ChangeOrgStatusService'
 import { ListInvitationsService } from '../../Application/Services/ListInvitationsService'
 import { CancelInvitationService } from '../../Application/Services/CancelInvitationService'
+import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 export class OrganizationServiceProvider extends ModuleServiceProvider {
 	override register(container: IContainer): void {
@@ -40,6 +41,7 @@ export class OrganizationServiceProvider extends ModuleServiceProvider {
 				c.make('organizationMemberRepository') as IOrganizationMemberRepository,
 				c.make('authRepository') as IAuthRepository,
 				db as IDatabaseAccess,
+				c.make('provisionOrganizationDefaultsService') as ProvisionOrganizationDefaultsService,
 			)
 		})
 

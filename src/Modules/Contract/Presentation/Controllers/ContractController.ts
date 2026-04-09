@@ -9,6 +9,7 @@ import type { TerminateContractService } from '../../Application/Services/Termin
 import type { RenewContractService } from '../../Application/Services/RenewContractService'
 import type { ListContractsService } from '../../Application/Services/ListContractsService'
 import type { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
+import type { HandleContractExpiryService } from '../../Application/Services/HandleContractExpiryService'
 import type {
   CreateContractParams,
   UpdateContractParams,
@@ -27,6 +28,7 @@ export class ContractController {
     private readonly renewService: RenewContractService,
     private readonly listService: ListContractsService,
     private readonly getDetailService: GetContractDetailService,
+    private readonly handleContractExpiryService: HandleContractExpiryService,
   ) {}
 
   async create(ctx: IHttpContext): Promise<Response> {
@@ -100,6 +102,17 @@ export class ContractController {
     const body = ctx.get('validated') as RenewContractParams
     const result = await this.renewService.execute(contractId, body.terms, auth.userId, auth.role)
     return ctx.json(result, result.success ? 200 : 400)
+  }
+
+  /** 管理員觸發：處理即將到期事件與已過期合約（供 Cron 或手動呼叫） */
+  async handleExpiry(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (auth.role !== 'admin') {
+      return ctx.json({ success: false, message: '僅管理者可執行', error: 'FORBIDDEN' }, 403)
+    }
+    const counts = await this.handleContractExpiryService.execute()
+    return ctx.json({ success: true, message: '已處理合約到期檢查', data: counts })
   }
 
   async list(ctx: IHttpContext): Promise<Response> {

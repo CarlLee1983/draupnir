@@ -6,6 +6,7 @@ import { OrganizationMemberRepository } from '../Infrastructure/Repositories/Org
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 describe('CreateOrganizationService', () => {
 	let service: CreateOrganizationService
@@ -18,7 +19,7 @@ describe('CreateOrganizationService', () => {
 		const profileRepo = new UserProfileRepository(db)
 		const orgRepo = new OrganizationRepository(db)
 		const memberRepo = new OrganizationMemberRepository(db)
-		service = new CreateOrganizationService(orgRepo, memberRepo, authRepo, db)
+		service = new CreateOrganizationService(orgRepo, memberRepo, authRepo, db, new ProvisionOrganizationDefaultsService())
 
 		const registerService = new RegisterUserService(authRepo, profileRepo)
 		const result = await registerService.execute({ email: 'manager@example.com', password: 'StrongPass123' })

@@ -11,6 +11,7 @@ import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthR
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
 import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
+import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 describe('RemoveMemberService', () => {
 	let removeService: RemoveMemberService
@@ -28,7 +29,7 @@ describe('RemoveMemberService', () => {
 		const orgAuth = new OrgAuthorizationHelper(memberRepo)
 
 		const registerService = new RegisterUserService(authRepo, profileRepo)
-		const createOrgService = new CreateOrganizationService(orgRepo, memberRepo, authRepo, db)
+		const createOrgService = new CreateOrganizationService(orgRepo, memberRepo, authRepo, db, new ProvisionOrganizationDefaultsService())
 		const inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
 		const acceptService = new AcceptInvitationService(invitationRepo, memberRepo, authRepo, db)
 		removeService = new RemoveMemberService(memberRepo, orgAuth, db)

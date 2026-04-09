@@ -721,6 +721,17 @@ paths:
           description: 驗證失敗
 
   # === Contract 合約管理 ===
+  /api/contracts/handle-expiry:
+    post:
+      tags: [Contract]
+      summary: 執行合約到期檢查（即將到期事件、已過期標記）
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 處理完成
+
   /api/contracts:
     post:
       tags: [Contract]

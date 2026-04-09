@@ -167,6 +167,7 @@ export const registerContract = (core: PlanetCore): void => {
 		core.container.make('renewContractService') as any,
 		core.container.make('listContractsService') as any,
 		core.container.make('getContractDetailService') as any,
+		core.container.make('handleContractExpiryService') as any,
 	)
 	registerContractRoutes(router, controller)
 }

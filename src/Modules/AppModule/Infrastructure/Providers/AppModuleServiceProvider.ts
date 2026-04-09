@@ -10,6 +10,8 @@ import { CheckModuleAccessService } from '../../Application/Services/CheckModule
 import { ListModulesService } from '../../Application/Services/ListModulesService'
 import { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
 import { ListOrgSubscriptionsService } from '../../Application/Services/ListOrgSubscriptionsService'
+import { EnsureCoreAppModulesService } from '../../Application/Services/EnsureCoreAppModulesService'
+import { ProvisionOrganizationDefaultsService } from '../../Application/Services/ProvisionOrganizationDefaultsService'
 import type { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
 
 export class AppModuleServiceProvider extends ModuleServiceProvider {
@@ -18,6 +20,12 @@ export class AppModuleServiceProvider extends ModuleServiceProvider {
 
     container.singleton('appModuleRepository', () => new AppModuleRepository(db))
     container.singleton('moduleSubscriptionRepository', () => new ModuleSubscriptionRepository(db))
+
+    container.singleton('ensureCoreAppModulesService', (c: IContainer) => {
+      return new EnsureCoreAppModulesService(c.make('appModuleRepository') as AppModuleRepository)
+    })
+
+    container.singleton('provisionOrganizationDefaultsService', () => new ProvisionOrganizationDefaultsService())
 
     container.bind('registerModuleService', (c: IContainer) => {
       return new RegisterModuleService(

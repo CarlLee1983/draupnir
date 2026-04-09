@@ -17,6 +17,7 @@ import { initializeRegistry } from './wiring/RepositoryRegistry'
 import { getCurrentORM } from './wiring/RepositoryFactory'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
+import type { EnsureCoreAppModulesService } from './Modules/AppModule/Application/Services/EnsureCoreAppModulesService'
 
 export async function bootstrap(port = 3000): Promise<PlanetCore> {
   // 註冊表單驗證器
@@ -41,6 +42,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   core.register(createGravitoServiceProvider(new AppModuleServiceProvider()))
 
   await core.bootstrap()
+  await (core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService).execute()
   await registerRoutes(core)
   core.registerGlobalErrorHandlers()
   return core

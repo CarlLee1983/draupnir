@@ -9,6 +9,7 @@ import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthR
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
 import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
+import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 describe('InviteMemberService', () => {
 	let inviteService: InviteMemberService
@@ -24,7 +25,7 @@ describe('InviteMemberService', () => {
 		const invitationRepo = new OrganizationInvitationRepository(db)
 		const orgAuth = new OrgAuthorizationHelper(memberRepo)
 
-		const createOrgService = new CreateOrganizationService(orgRepo, memberRepo, authRepo, db)
+		const createOrgService = new CreateOrganizationService(orgRepo, memberRepo, authRepo, db, new ProvisionOrganizationDefaultsService())
 		inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
 
 		const registerService = new RegisterUserService(authRepo, profileRepo)

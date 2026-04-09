@@ -13,6 +13,8 @@ import {
 export function registerContractRoutes(router: IModuleRouter, controller: ContractController): void {
   const adminAuth = [createRoleMiddleware('admin')]
 
+  router.post('/api/contracts/handle-expiry', adminAuth, (ctx) => controller.handleExpiry(ctx))
+
   router.post('/api/contracts', adminAuth, CreateContractRequest, (ctx) => controller.create(ctx))
   router.get('/api/contracts', adminAuth, ListContractsRequest, (ctx) => controller.list(ctx))
   router.get('/api/contracts/:contractId', adminAuth, (ctx) => controller.getDetail(ctx))

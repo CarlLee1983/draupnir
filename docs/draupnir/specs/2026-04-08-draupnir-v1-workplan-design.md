@@ -545,13 +545,26 @@ Request 進入
 
 ### Phase 5 完成標準
 
-- [ ] 合約 CRUD 完整，生命週期管理正確
-- [ ] 合約可指派至 Organization / User
-- [ ] 到期通知與停用流程正常
-- [ ] 模組註冊、訂閱、取消流程正確
-- [ ] ModuleAccessMiddleware 正確阻擋無權限請求
+- [x] 合約 CRUD 完整，生命週期管理正確
+- [x] 合約可指派至 Organization / User
+- [x] 到期通知與停用流程正常（見下方註記）
+- [x] 模組註冊、訂閱、取消流程正確
+- [x] ModuleAccessMiddleware 正確阻擋無權限請求（見下方註記）
 - [ ] 模組使用量獨立追蹤
-- [ ] 測試覆蓋率 ≥ 80%
+- [ ] 測試覆蓋率 ≥ 80%（待以 `bun test --coverage` 對全專案驗證）
+
+#### Phase 5 完成註記（2026-04-09）
+
+| 項目 | 狀態 | 說明 |
+|------|------|------|
+| 合約 CRUD／生命週期 | 已落地 | 建立、列表、詳情、更新、啟用、終止、續約、指派；無獨立 `DELETE`，以 `terminate` 結束。 |
+| Org／User 指派 | 已落地 | `ContractTarget` + `AssignContractService`；`CheckModuleAccessService` 目前以路由 `:orgId` 為準，user 級合約與「僅 JWT、路徑無 org」之端點未全面閉環。 |
+| 到期與停用 | 部分自動化 | `HandleContractExpiryService` 發送 `ContractExpiring`／`ContractExpired`、將過期合約標為 `EXPIRED`；管理員可 `POST /api/contracts/handle-expiry`（或由外部 Cron 呼叫）。**尚未**：實際對使用者／管理者之通知通道（email 等）、內建排程 Worker。 |
+| AppModule 流程 | 已落地 | 註冊、訂閱、取消與列表 API 及領域測試。 |
+| ModuleAccessMiddleware | 已落地 | 已掛於 `dashboard`、`credit`、`api_keys` 之 **`/api/organizations/:orgId/...`** 路由；admin 略過檢查。`/api/keys/:keyId/...` 仍無 org 路徑參數，未掛此 middleware。 |
+| 新組織預設開通 | 已落地 | `ProvisionOrganizationDefaultsService` 於建立 Organization 交易內寫入內建模組、ACTIVE 合約與訂閱；啟動時 `EnsureCoreAppModulesService` 種子內建模組。 |
+| 模組用量獨立追蹤 | **未做** | 尚無 `TrackModuleUsage` 實作；`usage_records` 等未依 AppModule 維度區隔。 |
+| 測試 | 增量 | 新增／調整之單元測試與現有 Feature 通過；**80% 覆蓋率**需專案級 coverage 報告確認。 |
 
 ---
 

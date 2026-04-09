@@ -6,6 +6,7 @@ import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRe
 import { Organization } from '../../Domain/Aggregates/Organization'
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 import type { CreateOrganizationRequest, OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 export class CreateOrganizationService {
 	constructor(
@@ -13,6 +14,7 @@ export class CreateOrganizationService {
 		private memberRepository: IOrganizationMemberRepository,
 		private authRepository: IAuthRepository,
 		private db: IDatabaseAccess,
+		private readonly provisionOrganizationDefaults: ProvisionOrganizationDefaultsService,
 	) {}
 
 	async execute(request: CreateOrganizationRequest): Promise<OrganizationResponse> {
@@ -40,6 +42,7 @@ export class CreateOrganizationService {
 				await txOrgRepo.save(org)
 				const member = OrganizationMember.create(uuidv4(), orgId, request.managerUserId, 'manager')
 				await txMemberRepo.save(member)
+				await this.provisionOrganizationDefaults.execute(tx, orgId, request.managerUserId)
 			})
 
 			return { success: true, message: '組織建立成功', data: org.toDTO() }
