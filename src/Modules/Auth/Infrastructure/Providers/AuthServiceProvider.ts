@@ -17,12 +17,13 @@ import { LoginUserService } from '../../Application/Services/LoginUserService'
 import { JwtTokenService } from '../../Application/Services/JwtTokenService'
 import { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
 import { LogoutUserService } from '../../Application/Services/LogoutUserService'
-import { AuthorizationService } from '../../Domain/Services/AuthorizationService'
 import { AuthRepository } from '../Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Repositories/AuthTokenRepository'
+import { ScryptPasswordHasher } from '../Services/PasswordHasher'
 import { getRegistry } from '@/wiring/RepositoryRegistry'
 import { getCurrentORM } from '@/wiring/RepositoryFactory'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import { configureAuthMiddleware } from '../../Presentation/Middleware/RoleMiddleware'
 
 export class AuthServiceProvider extends ModuleServiceProvider {
   /**
@@ -45,12 +46,11 @@ export class AuthServiceProvider extends ModuleServiceProvider {
       return new AuthTokenRepository(db)
     })
 
-    // 2. 註冊 Domain Services
-    container.singleton('authorizationService', () => {
-      return new AuthorizationService()
+    container.singleton('passwordHasher', () => {
+      return new ScryptPasswordHasher()
     })
 
-    // 3. 註冊 Application Services
+    // 2. 註冊 Application Services
     container.singleton('jwtTokenService', () => {
       return new JwtTokenService()
     })
@@ -58,14 +58,16 @@ export class AuthServiceProvider extends ModuleServiceProvider {
     container.bind('registerUserService', (c: IContainer) => {
       const repository = c.make('authRepository') as IAuthRepository
       const profileRepo = c.make('userProfileRepository') as IUserProfileRepository
-      return new RegisterUserService(repository, profileRepo)
+      const passwordHasher = c.make('passwordHasher') as ScryptPasswordHasher
+      return new RegisterUserService(repository, profileRepo, passwordHasher)
     })
 
     container.bind('loginUserService', (c: IContainer) => {
       const authRepository = c.make('authRepository') as IAuthRepository
       const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
       const jwtTokenService = c.make('jwtTokenService')
-      return new LoginUserService(authRepository, authTokenRepository, jwtTokenService)
+      const passwordHasher = c.make('passwordHasher') as ScryptPasswordHasher
+      return new LoginUserService(authRepository, authTokenRepository, jwtTokenService, passwordHasher)
     })
 
     container.bind('refreshTokenService', (c: IContainer) => {
@@ -79,6 +81,8 @@ export class AuthServiceProvider extends ModuleServiceProvider {
       const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
       return new LogoutUserService(authTokenRepository)
     })
+
+    configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
   }
 
   /**

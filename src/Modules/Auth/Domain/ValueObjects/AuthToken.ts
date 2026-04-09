@@ -19,6 +19,7 @@ export interface TokenPayload {
   email: string
   role: string
   permissions: string[]
+  jti: string
   iat: number
   exp: number
   type: TokenType

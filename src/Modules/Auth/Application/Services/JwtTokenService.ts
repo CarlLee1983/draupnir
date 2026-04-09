@@ -10,6 +10,7 @@
  */
 
 import jwt from 'jsonwebtoken'
+import { randomUUID } from 'node:crypto'
 import { AuthToken, TokenType, type TokenPayload } from '../../Domain/ValueObjects/AuthToken'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
@@ -31,6 +32,7 @@ export class JwtTokenService {
     const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXPIRES_IN * 1000)
     const tokenPayload: TokenPayload = {
       ...payload,
+      jti: randomUUID(),
       type: TokenType.ACCESS,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
@@ -48,6 +50,7 @@ export class JwtTokenService {
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN * 1000)
     const tokenPayload: TokenPayload = {
       ...payload,
+      jti: randomUUID(),
       type: TokenType.REFRESH,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),

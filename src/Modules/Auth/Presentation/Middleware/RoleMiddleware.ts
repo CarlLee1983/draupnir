@@ -1,14 +1,17 @@
 // src/Modules/Auth/Presentation/Middleware/RoleMiddleware.ts
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import { AuthTokenRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthTokenRepository'
-import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 
 let jwtParser: AuthMiddleware | null = null
 
+export function configureAuthMiddleware(tokenRepository: IAuthTokenRepository): void {
+	jwtParser = new AuthMiddleware(tokenRepository)
+}
+
 function getJwtParser(): AuthMiddleware {
 	if (!jwtParser) {
-		jwtParser = new AuthMiddleware(new AuthTokenRepository(getCurrentDatabaseAccess()))
+		jwtParser = new AuthMiddleware()
 	}
 	return jwtParser
 }

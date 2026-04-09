@@ -13,6 +13,7 @@ import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
 import { Email } from '../Domain/ValueObjects/Email'
 import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { RoleType } from '../Domain/ValueObjects/Role'
 
 describe('LoginUserService Integration Test', () => {
   let registerService: RegisterUserService
@@ -48,6 +49,10 @@ describe('LoginUserService Integration Test', () => {
     expect(result.data?.accessToken).toBeTruthy()
     expect(result.data?.refreshToken).toBeTruthy()
     expect(result.data?.user.email).toBe('user@example.com')
+    expect(result.data?.user.role).toBe(RoleType.MEMBER)
+
+    const payload = jwtTokenService.verify(result.data!.accessToken)
+    expect(payload?.role).toBe(RoleType.MEMBER)
   })
 
   it('應該拒絕不存在的用戶', async () => {

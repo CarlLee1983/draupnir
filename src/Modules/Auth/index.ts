@@ -5,8 +5,9 @@
  */
 
 // Domain
-export { User, UserRole, UserStatus } from './Domain/Aggregates/User'
+export { User, UserStatus } from './Domain/Aggregates/User'
 export type { UserProps } from './Domain/Aggregates/User'
+export { Role, RoleType } from './Domain/ValueObjects/Role'
 export { Email } from './Domain/ValueObjects/Email'
 export { Password } from './Domain/ValueObjects/Password'
 export { AuthToken } from './Domain/ValueObjects/AuthToken'

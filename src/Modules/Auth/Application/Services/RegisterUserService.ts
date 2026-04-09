@@ -16,11 +16,15 @@ import type { IUserProfileRepository } from '@/Modules/User/Domain/Repositories/
 import { Email } from '../../Domain/ValueObjects/Email'
 import { User } from '../../Domain/Aggregates/User'
 import { UserProfile } from '@/Modules/User/Domain/Aggregates/UserProfile'
+import { Password } from '../../Domain/ValueObjects/Password'
+import { Role } from '../../Domain/ValueObjects/Role'
+import { ScryptPasswordHasher } from '../../Infrastructure/Services/PasswordHasher'
 
 export class RegisterUserService {
   constructor(
     private authRepository: IAuthRepository,
     private userProfileRepository: IUserProfileRepository,
+    private passwordHasher: ScryptPasswordHasher = new ScryptPasswordHasher(),
   ) {}
 
   /**
@@ -51,9 +55,15 @@ export class RegisterUserService {
         }
       }
 
-      // 4. 創建新用戶（密碼會被加密）
+      // 4. 創建新用戶（密碼由應用層加密）
       const userId = uuidv4()
-      const user = await User.create(userId, email, request.password)
+      const hashedPassword = await this.passwordHasher.hash(request.password)
+      const user = User.create(
+        userId,
+        email,
+        Password.fromHashed(hashedPassword),
+        Role.member(),
+      )
 
       // 5. 保存到資料庫
       await this.authRepository.save(user)
@@ -75,7 +85,7 @@ export class RegisterUserService {
         data: {
           id: user.id,
           email: user.emailValue,
-          role: user.role,
+          role: user.role.getValue(),
         },
       }
     } catch (error: any) {

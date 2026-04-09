@@ -1,5 +1,5 @@
 // src/Modules/CliApi/__tests__/MemoryDeviceCodeStore.test.ts
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
 import { DeviceCode } from '../Domain/ValueObjects/DeviceCode'
 

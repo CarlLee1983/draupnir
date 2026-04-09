@@ -28,7 +28,14 @@ export class ChangeUserStatusService {
       return {
         success: true,
         message: `帳戶已${request.status === 'suspended' ? '停用' : '啟用'}`,
-        data: user.toDTO(),
+        data: {
+          id: user.id,
+          email: user.emailValue,
+          role: user.role.getValue(),
+          status: user.status,
+          createdAt: user.createdAt.toISOString(),
+          updatedAt: user.updatedAt.toISOString(),
+        },
       }
     } catch (error: any) {
       return { success: false, message: error.message || '操作失敗', error: error.message }

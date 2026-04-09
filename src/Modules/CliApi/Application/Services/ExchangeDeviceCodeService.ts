@@ -1,0 +1,113 @@
+// src/Modules/CliApi/Application/Services/ExchangeDeviceCodeService.ts
+import type { IDeviceCodeStore } from '../../Domain/Ports/IDeviceCodeStore'
+import { DeviceCodeStatus } from '../../Domain/ValueObjects/DeviceCode'
+import type { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import type { ExchangeDeviceCodeRequest, ExchangeDeviceCodeResponse } from '../DTOs/DeviceFlowDTO'
+import { createHash } from 'crypto'
+
+export class ExchangeDeviceCodeService {
+  constructor(
+    private readonly store: IDeviceCodeStore,
+    private readonly jwtService: JwtTokenService,
+    private readonly authTokenRepository: IAuthTokenRepository,
+  ) {}
+
+  async execute(request: ExchangeDeviceCodeRequest): Promise<ExchangeDeviceCodeResponse> {
+    try {
+      const deviceCode = await this.store.findByDeviceCode(request.deviceCode)
+
+      // findByDeviceCode returns null for expired entries
+      if (!deviceCode) {
+        return {
+          success: false,
+          message: '無效或已過期的 device code',
+          error: 'invalid_device_code',
+        }
+      }
+
+      if (deviceCode.isExpired()) {
+        return {
+          success: false,
+          message: 'Device code 已過期，請重新申請',
+          error: 'expired',
+        }
+      }
+
+      if (deviceCode.status === DeviceCodeStatus.CONSUMED) {
+        return {
+          success: false,
+          message: '此 device code 已被使用',
+          error: 'invalid_device_code',
+        }
+      }
+
+      if (deviceCode.status === DeviceCodeStatus.PENDING) {
+        return {
+          success: false,
+          message: '等待使用者授權中',
+          error: 'authorization_pending',
+        }
+      }
+
+      // Status is AUTHORIZED -- issue tokens
+      const userId = deviceCode.userId!
+      const email = deviceCode.userEmail!
+      const role = deviceCode.userRole!
+
+      const accessTokenObj = this.jwtService.signAccessToken({
+        userId,
+        email,
+        role,
+        permissions: [],
+      })
+
+      const refreshTokenObj = this.jwtService.signRefreshToken({
+        userId,
+        email,
+        role,
+        permissions: [],
+      })
+
+      // Save tokens for revocation tracking
+      const accessTokenStr = accessTokenObj.getValue()
+      const accessTokenHash = createHash('sha256').update(accessTokenStr).digest('hex')
+      await this.authTokenRepository.save({
+        id: `${userId}_cli_access_${Date.now()}`,
+        userId,
+        tokenHash: accessTokenHash,
+        type: 'access',
+        expiresAt: accessTokenObj.getExpiresAt(),
+        createdAt: new Date(),
+      })
+
+      const refreshTokenStr = refreshTokenObj.getValue()
+      const refreshTokenHash = createHash('sha256').update(refreshTokenStr).digest('hex')
+      await this.authTokenRepository.save({
+        id: `${userId}_cli_refresh_${Date.now()}`,
+        userId,
+        tokenHash: refreshTokenHash,
+        type: 'refresh',
+        expiresAt: refreshTokenObj.getExpiresAt(),
+        createdAt: new Date(),
+      })
+
+      // Mark device code as consumed
+      const consumed = deviceCode.consume()
+      await this.store.update(consumed)
+
+      return {
+        success: true,
+        message: 'CLI 登入成功',
+        data: {
+          accessToken: accessTokenStr,
+          refreshToken: refreshTokenStr,
+          user: { id: userId, email, role },
+        },
+      }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Token 交換失敗'
+      return { success: false, message, error: message }
+    }
+  }
+}

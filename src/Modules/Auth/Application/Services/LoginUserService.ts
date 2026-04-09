@@ -14,12 +14,14 @@ import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenR
 import { Email } from '../../Domain/ValueObjects/Email'
 import { JwtTokenService } from './JwtTokenService'
 import { createHash } from 'crypto'
+import { ScryptPasswordHasher } from '../../Infrastructure/Services/PasswordHasher'
 
 export class LoginUserService {
   constructor(
     private authRepository: IAuthRepository,
     private authTokenRepository: IAuthTokenRepository,
-    private jwtTokenService: JwtTokenService
+    private jwtTokenService: JwtTokenService = new JwtTokenService(),
+    private passwordHasher: ScryptPasswordHasher = new ScryptPasswordHasher(),
   ) {}
 
   /**
@@ -59,7 +61,10 @@ export class LoginUserService {
       }
 
       // 4. 驗證密碼
-      const passwordMatches = await user.verifyPassword(request.password)
+      const passwordMatches = await this.passwordHasher.verify(
+        user.password.getHashed(),
+        request.password,
+      )
       if (!passwordMatches) {
         return {
           success: false,
@@ -72,14 +77,14 @@ export class LoginUserService {
       const accessTokenObj = this.jwtTokenService.signAccessToken({
         userId: user.id,
         email: user.emailValue,
-        role: user.role,
+        role: user.role.getValue(),
         permissions: [], // 暫時空權限，可在應用中擴充
       })
 
       const refreshTokenObj = this.jwtTokenService.signRefreshToken({
         userId: user.id,
         email: user.emailValue,
-        role: user.role,
+        role: user.role.getValue(),
         permissions: [],
       })
 
@@ -116,7 +121,7 @@ export class LoginUserService {
           user: {
             id: user.id,
             email: user.emailValue,
-            role: user.role,
+            role: user.role.getValue(),
           },
         },
       }

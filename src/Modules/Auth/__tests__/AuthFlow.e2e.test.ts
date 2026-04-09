@@ -24,6 +24,7 @@ import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRep
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { RoleType } from '../Domain/ValueObjects/Role'
 
 describe('認證流程 E2E 測試', () => {
   let registerService: RegisterUserService
@@ -80,6 +81,7 @@ describe('認證流程 E2E 測試', () => {
       password: 'SecurePassword123',
     })
     expect(registerResult.success).toBe(true)
+    expect(registerResult.data?.role).toBe(RoleType.MEMBER)
 
     // 步驟 2：用戶登入
     const loginResult = await loginService.execute({
@@ -89,6 +91,7 @@ describe('認證流程 E2E 測試', () => {
     expect(loginResult.success).toBe(true)
     expect(loginResult.data?.accessToken).toBeTruthy()
     expect(loginResult.data?.refreshToken).toBeTruthy()
+    expect(loginResult.data?.user.role).toBe(RoleType.MEMBER)
 
     const accessToken = loginResult.data!.accessToken
     const refreshToken = loginResult.data!.refreshToken
@@ -98,6 +101,7 @@ describe('認證流程 E2E 測試', () => {
     expect(payload).toBeTruthy()
     expect(payload?.userId).toBe(loginResult.data?.user.id)
     expect(payload?.email).toBe('user@example.com')
+    expect(payload?.role).toBe(RoleType.MEMBER)
     expect(payload?.type).toBe('access')
 
     // 步驟 4：使用中間件驗證 Token
@@ -227,7 +231,7 @@ describe('認證流程 E2E 測試', () => {
     const expiredPayload = {
       userId: 'test-user',
       email: 'test@example.com',
-      role: 'user',
+      role: RoleType.MEMBER,
       permissions: [],
       iat: Math.floor(Date.now() / 1000) - 1000, // 1000 秒前
       exp: Math.floor(Date.now() / 1000) - 1, // 1 秒前已過期

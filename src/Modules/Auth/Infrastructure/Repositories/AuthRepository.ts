@@ -11,14 +11,17 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import { User } from '../../Domain/Aggregates/User'
-import type { Email } from '../../Domain/ValueObjects/Email'
+import { Email } from '../../Domain/ValueObjects/Email'
+import { Password } from '../../Domain/ValueObjects/Password'
+import { Role } from '../../Domain/ValueObjects/Role'
+import { UserStatus } from '../../Domain/Aggregates/User'
 
 export class AuthRepository implements IAuthRepository {
 	constructor(private readonly db: IDatabaseAccess) {}
 
 	async findById(id: string): Promise<User | null> {
 		const row = await this.db.table('users').where('id', '=', id).first()
-		return row ? User.fromDatabase(row) : null
+		return row ? this.mapRowToUser(row) : null
 	}
 
 	async findByEmail(email: Email): Promise<User | null> {
@@ -26,7 +29,7 @@ export class AuthRepository implements IAuthRepository {
 			.table('users')
 			.where('email', '=', email.getValue())
 			.first()
-		return row ? User.fromDatabase(row) : null
+		return row ? this.mapRowToUser(row) : null
 	}
 
 	async emailExists(email: Email): Promise<boolean> {
@@ -39,10 +42,11 @@ export class AuthRepository implements IAuthRepository {
 
 	async save(user: User): Promise<void> {
 		const existing = await this.findById(user.id)
+		const row = this.mapUserToRow(user)
 		if (existing) {
-			await this.db.table('users').where('id', '=', user.id).update(user.toDatabaseRow())
+			await this.db.table('users').where('id', '=', user.id).update(row)
 		} else {
-			await this.db.table('users').insert(user.toDatabaseRow())
+			await this.db.table('users').insert(row)
 		}
 	}
 
@@ -55,6 +59,57 @@ export class AuthRepository implements IAuthRepository {
 		if (offset) query = query.offset(offset)
 		if (limit) query = query.limit(limit)
 		const rows = await query.select()
-		return rows.map((row) => User.fromDatabase(row))
+		return rows.map((row) => this.mapRowToUser(row))
+	}
+
+	private mapRowToUser(row: Record<string, unknown>): User {
+		return User.reconstitute({
+			id: String(row.id),
+			email: new Email(String(row.email)),
+			password: Password.fromHashed(String(row.password)),
+			role: this.mapRole(row.role),
+			status: this.mapStatus(row.status),
+			createdAt: this.toDate(row.created_at),
+			updatedAt: this.toDate(row.updated_at),
+		})
+	}
+
+	private mapUserToRow(user: User): Record<string, unknown> {
+		return {
+			id: user.id,
+			email: user.emailValue,
+			password: user.password.getHashed(),
+			role: user.role.getValue(),
+			status: user.status,
+			created_at: user.createdAt.toISOString(),
+			updated_at: user.updatedAt.toISOString(),
+		}
+	}
+
+	private mapRole(role: unknown): Role {
+		if (role === 'user' || role === 'guest') {
+			return Role.member()
+		}
+
+		if (typeof role === 'string') {
+			return new Role(role)
+		}
+
+		return Role.member()
+	}
+
+	private mapStatus(status: unknown): UserStatus {
+		switch (status) {
+			case UserStatus.INACTIVE:
+				return UserStatus.INACTIVE
+			case UserStatus.SUSPENDED:
+				return UserStatus.SUSPENDED
+			default:
+				return UserStatus.ACTIVE
+		}
+	}
+
+	private toDate(value: unknown): Date {
+		return value instanceof Date ? new Date(value) : new Date(String(value))
 	}
 }

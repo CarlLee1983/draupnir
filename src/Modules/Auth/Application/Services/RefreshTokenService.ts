@@ -12,7 +12,6 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import { JwtTokenService, type TokenSignPayload } from './JwtTokenService'
 import { Email } from '../../Domain/ValueObjects/Email'
-import { Role } from '../../Domain/ValueObjects/Role'
 import { createHash } from 'crypto'
 
 export interface RefreshTokenRequest {
@@ -75,14 +74,11 @@ export class RefreshTokenService {
       }
 
       // 4. 簽發新 Access Token
-      const role = new Role(user.role)
-      const permissions = role.getPermissions().map((p) => p.getValue())
-
       const tokenPayload: TokenSignPayload = {
         userId: user.id,
         email: user.emailValue,
-        role: user.role,
-        permissions,
+        role: user.role.getValue(),
+        permissions: [],
       }
 
       const newAccessToken = this.jwtService.signAccessToken(tokenPayload)

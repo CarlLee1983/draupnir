@@ -8,6 +8,7 @@ import { RegisterUserService } from '../Application/Services/RegisterUserService
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { UserProfileRepository } from '@/Modules/User/Infrastructure/Repositories/UserProfileRepository'
+import { RoleType } from '../Domain/ValueObjects/Role'
 
 describe('RegisterUserService Integration Test', () => {
   let service: RegisterUserService
@@ -30,6 +31,7 @@ describe('RegisterUserService Integration Test', () => {
     expect(result.message).toBe('用戶註冊成功')
     expect(result.data?.id).toBeTruthy()
     expect(result.data?.email).toBe('newuser@example.com')
+    expect(result.data?.role).toBe(RoleType.MEMBER)
   })
 
   it('應該拒絕已存在的電子郵件', async () => {
