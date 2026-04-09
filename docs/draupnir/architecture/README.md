@@ -283,8 +283,8 @@ A: 見 [`layer-decision-rules.md`](../knowledge/layer-decision-rules.md) 的「�
 
 ### 驗證與評審
 
-- `docs/superpowers/specs/2026-04-09-v1-architecture-review.md` — V1 架構評審
-- `docs/superpowers/specs/2026-04-09-v1-verification-checklist.md` — 驗證清單
+- [`../specs/2026-04-09-v1-architecture-review.md`](../specs/2026-04-09-v1-architecture-review.md) — V1 架構評審
+- [`../reviews/2026-04-09-v1-verification-checklist.md`](../reviews/2026-04-09-v1-verification-checklist.md) — 驗證清單（歷史版本）
 
 ---
 

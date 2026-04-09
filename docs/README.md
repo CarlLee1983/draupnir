@@ -30,4 +30,4 @@
 ## 維護備註
 
 - 若更新 Bifrost 規格：將官方 `openapi.json` 覆寫至 `docs/reference/bifrost/openapi.json`，再執行 `scripts/convert_openapi.js`；輸出目錄為 `docs/reference/bifrost-api/`。
-- 舊路徑 `docs/Bifrost_API_Final/`、`docs/superpowers/` 已整併至上述結構；書籤與腳本請改為新路徑。
+- ✅ 舊路徑 `docs/Bifrost_API_Final/` 已移除；`docs/superpowers/` 已整合至 `docs/draupnir/`（2026-04-10）

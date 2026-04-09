@@ -22,6 +22,8 @@
 
 ## 設計規格（`specs/`）
 
+### 功能設計規格
+
 | 檔案 | 主題 |
 |------|------|
 | [`2026-04-08-draupnir-v1-workplan-design.md`](./specs/2026-04-08-draupnir-v1-workplan-design.md) | v1 整體工作計畫設計 |
@@ -29,9 +31,19 @@
 | [`2026-04-08-p4-credit-system-design.md`](./specs/2026-04-08-p4-credit-system-design.md) | Credit 系統設計 |
 | [`2026-04-09-api-functional-testing-design.md`](./specs/2026-04-09-api-functional-testing-design.md) | API 功能性測試架構設計 |
 
+### 架構評審與驗證
+
+| 檔案 | 主題 |
+|------|------|
+| [`2026-04-09-v1-architecture-review.md`](./specs/2026-04-09-v1-architecture-review.md) | V1 架構評審報告（Codex 對抗審查） |
+| [`2026-04-09-impulse-validation-design.md`](./specs/2026-04-09-impulse-validation-design.md) | Impulse 驗證系統設計 |
+| [`2026-04-09-v1.1-improvements-summary.md`](./specs/2026-04-09-v1.1-improvements-summary.md) | V1.1 改進摘要 |
+
 ## 實作計畫（`plans/`）
 
 適合代理依序執行；內文常引用 `superpowers:*` **技能名稱**（非本倉庫路徑）。
+
+### Phase 1-4 基礎實作
 
 | 檔案 | 主題 |
 |------|------|
@@ -42,6 +54,31 @@
 | [`2026-04-08-phase3-key-management.md`](./plans/2026-04-08-phase3-key-management.md) | Phase 3 API Key 管理 |
 | [`2026-04-09-p4-credit-system.md`](./plans/2026-04-09-p4-credit-system.md) | P4 Credit 系統實作計畫 |
 | [`2026-04-09-api-functional-testing.md`](./plans/2026-04-09-api-functional-testing.md) | API 功能性測試實作計畫 |
+
+### Phase 6 應用分發（應用管理、SDK、CLI、Portal）
+
+| 檔案 | 主題 |
+|------|------|
+| [`2026-04-09-phase6-app-api-key.md`](./plans/2026-04-09-phase6-app-api-key.md) | Phase 6 應用程式 API 密鑰 |
+| [`2026-04-09-phase6-cli-api.md`](./plans/2026-04-09-phase6-cli-api.md) | Phase 6 CLI 命令 API |
+| [`2026-04-09-phase6-sdk-api.md`](./plans/2026-04-09-phase6-sdk-api.md) | Phase 6 SDK API 端點 |
+| [`2026-04-09-phase6-dev-portal.md`](./plans/2026-04-09-phase6-dev-portal.md) | Phase 6 Developer Portal 實作 |
+
+### Phase 7 前端與管理後台
+
+| 檔案 | 主題 |
+|------|------|
+| [`2026-04-09-phase7a-frontend-infrastructure.md`](./plans/2026-04-09-phase7a-frontend-infrastructure.md) | Phase 7a 前端基礎建設（Inertia.js + React） |
+| [`2026-04-09-phase7b-member-portal.md`](./plans/2026-04-09-phase7b-member-portal.md) | Phase 7b 會員 Portal 實作 |
+| [`2026-04-09-phase7c-admin-portal.md`](./plans/2026-04-09-phase7c-admin-portal.md) | Phase 7c 管理員 Portal 實作 |
+
+### 其他計畫
+
+| 檔案 | 主題 |
+|------|------|
+| [`2026-04-09-auth-ddd-refactor.md`](./plans/2026-04-09-auth-ddd-refactor.md) | Auth 模組 DDD 重構計畫 |
+| [`2026-04-09-gravito-impulse-skill.md`](./plans/2026-04-09-gravito-impulse-skill.md) | Gravito Impulse Skill 建置 |
+| [`2026-04-09-impulse-validation.md`](./plans/2026-04-09-impulse-validation.md) | Impulse 驗證系統實作計畫 |
 
 ## 專案知識（`knowledge/`）
 
@@ -56,3 +93,4 @@
 | 檔案 | 說明 |
 |------|------|
 | [`2026-04-09-adversarial-review-fixes.md`](./reviews/2026-04-09-adversarial-review-fixes.md) | Codex 對抗審查後之修正紀錄 |
+| [`2026-04-09-v1-verification-checklist.md`](./reviews/2026-04-09-v1-verification-checklist.md) | V1 驗收清單（歷史版本，詳細版見 VERIFICATION_CHECKLIST.md） |
