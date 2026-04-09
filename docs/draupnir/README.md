@@ -2,6 +2,14 @@
 
 本資料夾集中存放 **Draupnir 產品與工程規劃**（規格、計畫、審查、路線圖）。
 
+## ⚡ 快速參考
+
+| 內容 | 位置 |
+|------|------|
+| **Commands 完整列表** | [`COMMANDS.md`](./COMMANDS.md) |
+| **DDD 架構圖表** | [`architecture/`](./architecture/) |
+| **工程知識與模式** | [`knowledge/`](./knowledge/) |
+
 ## 架構文件（`architecture/`）
 
 **新增！** V1.1 完整架構圖表與設計決策說明
