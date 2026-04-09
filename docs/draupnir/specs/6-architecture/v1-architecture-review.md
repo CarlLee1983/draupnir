@@ -712,7 +712,6 @@ Draupnir V1 展現了**扎實的軟體工程基礎**：
 
 ### C. 相關文件
 
-- [Verification Checklist](2026-04-09-v1-verification-checklist.md)
 - [AGENTS.md](../../AGENTS.md) — 架構指南
 - [docs/README.md](../../README.md) — 文件索引
 
