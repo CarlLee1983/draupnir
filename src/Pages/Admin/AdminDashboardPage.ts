@@ -1,43 +1,38 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-
-export interface AdminDashboardSummary {
-  totalKeys: number
-  activeKeys: number
-  totalUsage: number
-  creditBalance: number
-}
+import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
+import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
+import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
+import { requireAdmin } from './helpers/requireAdmin'
 
 export class AdminDashboardPage {
   constructor(
     private readonly inertia: InertiaService,
-    private readonly summaryService: GetDashboardSummaryService,
+    private readonly listUsersService: ListUsersService,
+    private readonly listOrgsService: ListOrganizationsService,
+    private readonly listAdminContractsService: ListAdminContractsService,
   ) {}
 
   async handle(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth || auth.role !== 'admin') {
-      return ctx.redirect('/login')
-    }
+    const check = requireAdmin(ctx)
+    if (!check.ok) return check.response!
 
-    const orgId = ctx.getQuery('orgId')
-    let summary: AdminDashboardSummary | null = null
-    if (orgId) {
-      const result = await this.summaryService.execute(orgId, auth.userId, auth.role)
-      if (result.success && result.data) {
-        summary = {
-          totalKeys: result.data.totalKeys,
-          activeKeys: result.data.activeKeys,
-          totalUsage: result.data.usage.totalRequests,
-          creditBalance: 0,
-        }
-      }
+    const auth = check.auth!
+
+    const [usersResult, orgsResult, contractsResult] = await Promise.all([
+      this.listUsersService.execute({ page: 1, limit: 1 }),
+      this.listOrgsService.execute(1, 1),
+      this.listAdminContractsService.execute({ callerRole: auth.role, page: 1, limit: 1 }),
+    ])
+
+    const totals = {
+      users: usersResult.success ? usersResult.data?.meta?.total ?? 0 : 0,
+      organizations: orgsResult.success ? orgsResult.data?.meta?.total ?? 0 : 0,
+      contracts: contractsResult.success ? contractsResult.data?.meta?.total ?? 0 : 0,
     }
 
     return this.inertia.render(ctx, 'Admin/Dashboard/Index', {
-      summary,
+      totals,
     })
   }
 }

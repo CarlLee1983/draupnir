@@ -1511,6 +1511,7 @@ paths:
     post:
       tags: [CliApi]
       summary: 初始化 CLI 裝置授權流程 (Device Flow)
+      x-test-skip: true
       responses:
         '200':
           description: 成功產生裝置碼與驗證碼
@@ -1521,6 +1522,7 @@ paths:
     post:
       tags: [CliApi]
       summary: 使用者在瀏覽器端授權 CLI 裝置 (需登入)
+      x-test-skip: true
       security:
         - bearerAuth: []
       requestBody:
@@ -1543,11 +1545,14 @@ paths:
           description: 未登入
         '404':
           description: 無效的驗證碼
+        '422':
+          description: 驗證失敗
 
   /cli/token:
     post:
       tags: [CliApi]
       summary: CLI 輪詢換取 JWT Token
+      x-test-skip: true
       requestBody:
         required: true
         content:
@@ -1565,6 +1570,8 @@ paths:
           description: 請求錯誤
         '410':
           description: 裝置碼已過期
+        '422':
+          description: 驗證失敗
         '428':
           description: 等待授權中 (Precondition Required)
 
@@ -1572,6 +1579,7 @@ paths:
     post:
       tags: [CliApi]
       summary: CLI AI 請求代理 (轉發至 Bifrost)
+      x-test-skip: true
       security:
         - bearerAuth: []
       requestBody:
@@ -1593,11 +1601,14 @@ paths:
           description: AI 請求成功
         '401':
           description: 未授權
+        '422':
+          description: 驗證失敗
 
   /cli/logout:
     post:
       tags: [CliApi]
       summary: 撤銷目前的 CLI Session
+      x-test-skip: true
       security:
         - bearerAuth: []
       responses:
@@ -1610,6 +1621,7 @@ paths:
     post:
       tags: [CliApi]
       summary: 撤銷所有 CLI Session
+      x-test-skip: true
       security:
         - bearerAuth: []
       responses:

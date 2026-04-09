@@ -21,6 +21,7 @@ class MockContractRepo implements IContractRepository {
     return null
   }
   async findByTargetId() { return [] }
+  async findAllOrdered() { return [...this.contracts.values()] }
   async findExpiring() { return [] }
   async findExpired() { return [] }
   async save(c: ContractType) { this.contracts.set(c.id, c) }

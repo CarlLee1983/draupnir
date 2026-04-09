@@ -27,6 +27,11 @@ export class ContractRepository implements IContractRepository {
     return rows.map((row) => Contract.fromDatabase(row))
   }
 
+  async findAllOrdered(): Promise<Contract[]> {
+    const rows = await this.db.table('contracts').orderBy('created_at', 'DESC').select()
+    return rows.map((row) => Contract.fromDatabase(row))
+  }
+
   async findExpiring(days: number): Promise<Contract[]> {
     const now = new Date()
     const threshold = new Date()

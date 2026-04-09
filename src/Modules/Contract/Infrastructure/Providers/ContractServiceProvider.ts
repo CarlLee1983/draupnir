@@ -13,6 +13,7 @@ import { HandleContractExpiryService } from '../../Application/Services/HandleCo
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { ListContractsService } from '../../Application/Services/ListContractsService'
 import { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
+import { ListAdminContractsService } from '../../Application/Services/ListAdminContractsService'
 
 export class ContractServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
@@ -74,6 +75,10 @@ export class ContractServiceProvider extends ModuleServiceProvider {
       return new GetContractDetailService(
         c.make('contractRepository') as ContractRepository,
       )
+    })
+
+    container.bind('listAdminContractsService', (c: IContainer) => {
+      return new ListAdminContractsService(c.make('contractRepository') as ContractRepository)
     })
   }
 

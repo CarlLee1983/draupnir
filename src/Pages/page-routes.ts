@@ -8,6 +8,17 @@ import { InertiaService } from './InertiaService'
 import { ViteTagHelper, type ViteManifest } from './ViteTagHelper'
 import { injectSharedData } from './SharedDataMiddleware'
 import { AdminDashboardPage } from './Admin/AdminDashboardPage'
+import { AdminUsersPage } from './Admin/AdminUsersPage'
+import { AdminUserDetailPage } from './Admin/AdminUserDetailPage'
+import { AdminOrganizationsPage } from './Admin/AdminOrganizationsPage'
+import { AdminOrganizationDetailPage } from './Admin/AdminOrganizationDetailPage'
+import { AdminContractsPage } from './Admin/AdminContractsPage'
+import { AdminContractCreatePage } from './Admin/AdminContractCreatePage'
+import { AdminContractDetailPage } from './Admin/AdminContractDetailPage'
+import { AdminModulesPage } from './Admin/AdminModulesPage'
+import { AdminModuleCreatePage } from './Admin/AdminModuleCreatePage'
+import { AdminApiKeysPage } from './Admin/AdminApiKeysPage'
+import { AdminUsageSyncPage } from './Admin/AdminUsageSyncPage'
 import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
 import { MemberDashboardPage } from './Member/MemberDashboardPage'
 import { MemberApiKeysPage } from './Member/MemberApiKeysPage'
@@ -87,7 +98,58 @@ export function registerPageRoutes(core: PlanetCore): void {
   const inertia = createInertiaService()
 
   const summaryService = core.container.make('getDashboardSummaryService') as GetDashboardSummaryService
-  const adminDashboard = new AdminDashboardPage(inertia, summaryService)
+
+  const adminDashboard = new AdminDashboardPage(
+    inertia,
+    core.container.make('listUsersService') as any,
+    core.container.make('listOrganizationsService') as any,
+    core.container.make('listAdminContractsService') as any,
+  )
+
+  const adminUsers = new AdminUsersPage(inertia, core.container.make('listUsersService') as any)
+  const adminUserDetail = new AdminUserDetailPage(
+    inertia,
+    core.container.make('getProfileService') as any,
+    core.container.make('authRepository') as any,
+    core.container.make('changeUserStatusService') as any,
+  )
+  const adminOrgs = new AdminOrganizationsPage(
+    inertia,
+    core.container.make('listOrganizationsService') as any,
+  )
+  const adminOrgDetail = new AdminOrganizationDetailPage(
+    inertia,
+    core.container.make('getOrganizationService') as any,
+    core.container.make('listMembersService') as any,
+  )
+  const adminContracts = new AdminContractsPage(
+    inertia,
+    core.container.make('listAdminContractsService') as any,
+  )
+  const adminContractCreate = new AdminContractCreatePage(
+    inertia,
+    core.container.make('createContractService') as any,
+  )
+  const adminContractDetail = new AdminContractDetailPage(
+    inertia,
+    core.container.make('getContractDetailService') as any,
+    core.container.make('activateContractService') as any,
+    core.container.make('terminateContractService') as any,
+  )
+  const adminModules = new AdminModulesPage(
+    inertia,
+    core.container.make('listModulesService') as any,
+  )
+  const adminModuleCreate = new AdminModuleCreatePage(
+    inertia,
+    core.container.make('registerModuleService') as any,
+  )
+  const adminApiKeys = new AdminApiKeysPage(
+    inertia,
+    core.container.make('listApiKeysService') as any,
+    core.container.make('listOrganizationsService') as any,
+  )
+  const adminUsageSync = new AdminUsageSyncPage(inertia)
 
   const memberDashboard = new MemberDashboardPage(
     inertia,
@@ -117,7 +179,23 @@ export function registerPageRoutes(core: PlanetCore): void {
     core.container.make('updateProfileService') as any,
   )
 
+  // Admin routes（靜態路徑需先於 :id 動態段註冊）
   core.router.get('/admin/dashboard', withInertiaPage((ctx) => adminDashboard.handle(ctx)))
+  core.router.get('/admin/users', withInertiaPage((ctx) => adminUsers.handle(ctx)))
+  core.router.get('/admin/users/:id', withInertiaPage((ctx) => adminUserDetail.handle(ctx)))
+  core.router.post('/admin/users/:id/status', withInertiaPage((ctx) => adminUserDetail.postStatus(ctx)))
+  core.router.get('/admin/organizations', withInertiaPage((ctx) => adminOrgs.handle(ctx)))
+  core.router.get('/admin/organizations/:id', withInertiaPage((ctx) => adminOrgDetail.handle(ctx)))
+  core.router.get('/admin/contracts', withInertiaPage((ctx) => adminContracts.handle(ctx)))
+  core.router.get('/admin/contracts/create', withInertiaPage((ctx) => adminContractCreate.handle(ctx)))
+  core.router.post('/admin/contracts', withInertiaPage((ctx) => adminContractCreate.store(ctx)))
+  core.router.get('/admin/contracts/:id', withInertiaPage((ctx) => adminContractDetail.handle(ctx)))
+  core.router.post('/admin/contracts/:id/action', withInertiaPage((ctx) => adminContractDetail.postAction(ctx)))
+  core.router.get('/admin/modules', withInertiaPage((ctx) => adminModules.handle(ctx)))
+  core.router.get('/admin/modules/create', withInertiaPage((ctx) => adminModuleCreate.handle(ctx)))
+  core.router.post('/admin/modules', withInertiaPage((ctx) => adminModuleCreate.store(ctx)))
+  core.router.get('/admin/api-keys', withInertiaPage((ctx) => adminApiKeys.handle(ctx)))
+  core.router.get('/admin/usage-sync', withInertiaPage((ctx) => adminUsageSync.handle(ctx)))
 
   core.router.get('/member/dashboard', withInertiaPage((ctx) => memberDashboard.handle(ctx)))
   core.router.get('/member/api-keys', withInertiaPage((ctx) => memberApiKeys.handle(ctx)))

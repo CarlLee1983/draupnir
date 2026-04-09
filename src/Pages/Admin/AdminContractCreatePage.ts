@@ -1,0 +1,82 @@
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
+import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
+import { requireAdmin } from './helpers/requireAdmin'
+
+export class AdminContractCreatePage {
+  constructor(
+    private readonly inertia: InertiaService,
+    private readonly createContractService: CreateContractService,
+  ) {}
+
+  async handle(ctx: IHttpContext): Promise<Response> {
+    const check = requireAdmin(ctx)
+    if (!check.ok) return check.response!
+
+    return this.inertia.render(ctx, 'Admin/Contracts/Create', {
+      formError: null,
+    })
+  }
+
+  /** POST /admin/contracts — Inertia 建立合約（沿用 JWT） */
+  async store(ctx: IHttpContext): Promise<Response> {
+    const check = requireAdmin(ctx)
+    if (!check.ok) return check.response!
+    const auth = check.auth!
+
+    const body = await ctx.getJsonBody<{
+      targetType?: string
+      targetId?: string
+      terms?: {
+        creditQuota?: number
+        allowedModules?: string[]
+        rateLimit?: { rpm?: number; tpm?: number }
+        validityPeriod?: { startDate?: string; endDate?: string }
+      }
+    }>()
+
+    const targetType = body.targetType === 'user' ? 'user' : 'organization'
+    const targetId = typeof body.targetId === 'string' ? body.targetId.trim() : ''
+    const terms = body.terms
+
+    if (
+      !targetId ||
+      !terms?.validityPeriod?.startDate ||
+      !terms.validityPeriod.endDate ||
+      typeof terms.creditQuota !== 'number' ||
+      !terms.allowedModules?.length
+    ) {
+      return this.inertia.render(ctx, 'Admin/Contracts/Create', {
+        formError: '請填寫完整欄位（含目標與條款）',
+      })
+    }
+
+    const result = await this.createContractService.execute({
+      targetType,
+      targetId,
+      terms: {
+        creditQuota: terms.creditQuota,
+        allowedModules: terms.allowedModules,
+        rateLimit: {
+          rpm: Number(terms.rateLimit?.rpm ?? 0),
+          tpm: Number(terms.rateLimit?.tpm ?? 0),
+        },
+        validityPeriod: {
+          startDate: terms.validityPeriod.startDate,
+          endDate: terms.validityPeriod.endDate,
+        },
+      },
+      callerUserId: auth.userId,
+      callerSystemRole: auth.role,
+    })
+
+    if (result.success && result.data && typeof (result.data as { id?: string }).id === 'string') {
+      const id = (result.data as { id: string }).id
+      return ctx.redirect(`/admin/contracts/${id}`)
+    }
+
+    return this.inertia.render(ctx, 'Admin/Contracts/Create', {
+      formError: result.message ?? '建立失敗',
+    })
+  }
+}

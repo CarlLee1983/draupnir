@@ -1,0 +1,38 @@
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
+import type { ListModulesService } from '@/Modules/AppModule/Application/Services/ListModulesService'
+import { requireAdmin } from './helpers/requireAdmin'
+
+export class AdminModulesPage {
+  constructor(
+    private readonly inertia: InertiaService,
+    private readonly listService: ListModulesService,
+  ) {}
+
+  async handle(ctx: IHttpContext): Promise<Response> {
+    const check = requireAdmin(ctx)
+    if (!check.ok) return check.response!
+
+    const result = await this.listService.execute()
+
+    const modules =
+      result.success && result.data
+        ? result.data.map((m) => {
+            const row = m as Record<string, unknown>
+            const t = String(row.type ?? 'free')
+            return {
+              id: row.id as string,
+              key: row.name as string,
+              name: row.name as string,
+              type: (t === 'paid' ? 'PAID' : 'FREE') as 'FREE' | 'PAID',
+              description: String(row.description ?? ''),
+            }
+          })
+        : []
+
+    return this.inertia.render(ctx, 'Admin/Modules/Index', {
+      modules,
+      error: result.success ? null : result.message,
+    })
+  }
+}
