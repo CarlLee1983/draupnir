@@ -2,11 +2,13 @@
 
 本資料夾集中存放 **Draupnir 產品與工程規劃**（規格、計畫、審查、路線圖）。
 
-## ⚡ 快速參考
+## ⚡ 快速參考（核心文件）
 
 | 內容 | 位置 |
 |------|------|
-| **開發指南**（命令、架構、環境變數、模組新增） | [`DEVELOPMENT.md`](./DEVELOPMENT.md) |
+| **架構概覽與模組指南** | [`ARCHITECTURE_SUMMARY.md`](./ARCHITECTURE_SUMMARY.md) ⭐ |
+| **設計決策彙總** | [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) ⭐ |
+| **開發指南**（命令、環境變數、模組新增） | [`DEVELOPMENT.md`](./DEVELOPMENT.md) |
 | **Commands 完整列表** | [`COMMANDS.md`](./COMMANDS.md) |
 | **DDD 架構圖表** | [`architecture/`](./architecture/) |
 | **工程知識與模式** | [`knowledge/`](./knowledge/) |
@@ -48,46 +50,10 @@
 | [`2026-04-09-impulse-validation-design.md`](./specs/2026-04-09-impulse-validation-design.md) | Impulse 驗證系統設計 |
 | [`2026-04-09-v1.1-improvements-summary.md`](./specs/2026-04-09-v1.1-improvements-summary.md) | V1.1 改進摘要 |
 
-## 實作計畫（`plans/`）
+## ℹ️ 關於實作計畫
 
-適合代理依序執行；內文常引用 `superpowers:*` **技能名稱**（非本倉庫路徑）。
-
-### Phase 1-4 基礎實作
-
-| 檔案 | 主題 |
-|------|------|
-| [`2026-04-08-phase1-foundation.md`](./plans/2026-04-08-phase1-foundation.md) | Phase 1 基礎建設 |
-| [`2026-04-08-phase2a-auth-completion.md`](./plans/2026-04-08-phase2a-auth-completion.md) | Phase 2a 認證補齊 |
-| [`2026-04-08-phase2b-user-module.md`](./plans/2026-04-08-phase2b-user-module.md) | Phase 2b User 模組 |
-| [`2026-04-08-phase2c-organization-module.md`](./plans/2026-04-08-phase2c-organization-module.md) | Phase 2c Organization 模組 |
-| [`2026-04-08-phase3-key-management.md`](./plans/2026-04-08-phase3-key-management.md) | Phase 3 API Key 管理 |
-| [`2026-04-09-p4-credit-system.md`](./plans/2026-04-09-p4-credit-system.md) | P4 Credit 系統實作計畫 |
-| [`2026-04-09-api-functional-testing.md`](./plans/2026-04-09-api-functional-testing.md) | API 功能性測試實作計畫 |
-
-### Phase 6 應用分發（應用管理、SDK、CLI、Portal）
-
-| 檔案 | 主題 |
-|------|------|
-| [`2026-04-09-phase6-app-api-key.md`](./plans/2026-04-09-phase6-app-api-key.md) | Phase 6 應用程式 API 密鑰 |
-| [`2026-04-09-phase6-cli-api.md`](./plans/2026-04-09-phase6-cli-api.md) | Phase 6 CLI 命令 API |
-| [`2026-04-09-phase6-sdk-api.md`](./plans/2026-04-09-phase6-sdk-api.md) | Phase 6 SDK API 端點 |
-| [`2026-04-09-phase6-dev-portal.md`](./plans/2026-04-09-phase6-dev-portal.md) | Phase 6 Developer Portal 實作 |
-
-### Phase 7 前端與管理後台
-
-| 檔案 | 主題 |
-|------|------|
-| [`2026-04-09-phase7a-frontend-infrastructure.md`](./plans/2026-04-09-phase7a-frontend-infrastructure.md) | Phase 7a 前端基礎建設（Inertia.js + React） |
-| [`2026-04-09-phase7b-member-portal.md`](./plans/2026-04-09-phase7b-member-portal.md) | Phase 7b 會員 Portal 實作 |
-| [`2026-04-09-phase7c-admin-portal.md`](./plans/2026-04-09-phase7c-admin-portal.md) | Phase 7c 管理員 Portal 實作 |
-
-### 其他計畫
-
-| 檔案 | 主題 |
-|------|------|
-| [`2026-04-09-auth-ddd-refactor.md`](./plans/2026-04-09-auth-ddd-refactor.md) | Auth 模組 DDD 重構計畫 |
-| [`2026-04-09-gravito-impulse-skill.md`](./plans/2026-04-09-gravito-impulse-skill.md) | Gravito Impulse Skill 建置 |
-| [`2026-04-09-impulse-validation.md`](./plans/2026-04-09-impulse-validation.md) | Impulse 驗證系統實作計畫 |
+實作計畫文檔（`plans/`）在完成實作後已歸檔刪除，以保持文件庫精簡。  
+**核心設計內容** 已彙整到 [`ARCHITECTURE_SUMMARY.md`](./ARCHITECTURE_SUMMARY.md) 和 [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md)。
 
 ## 專案知識（`knowledge/`）
 
