@@ -1,11 +1,38 @@
 import type { PlanetCore } from '@gravito/core'
 import type { GravitoContext } from '@gravito/core'
-import { resolve } from 'node:path'
 import { readFileSync } from 'node:fs'
+
 import { fromGravitoContext, type IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { InertiaService } from './InertiaService'
 import { ViteTagHelper, type ViteManifest } from './ViteTagHelper'
+
+// 替代 node:path.resolve() 的實現（包括路徑正規化）
+function joinPath(...parts: string[]): string {
+  const joined = parts.map((p) => p.replace(/\/$/, '')).join('/')
+  // 簡單的路徑正規化：移除 "./" 和合併 "//"
+  return joined
+    .replace(/\/+/g, '/') // 合併多個斜杠
+    .replace(/\/\.(?=\/|$)/g, '') // 移除 "/./"
+}
+
+// 用於路徑驗證的正規化函數
+function normalizePath(path: string): string {
+  // 更嚴格的路徑正規化，用於安全檢查
+  const parts = path.split('/')
+  const normalized = []
+  for (const part of parts) {
+    if (part === '' || part === '.') {
+      continue
+    }
+    if (part === '..') {
+      normalized.pop()
+    } else {
+      normalized.push(part)
+    }
+  }
+  return normalized.join('/')
+}
 import { injectSharedData } from './SharedDataMiddleware'
 import { AdminDashboardPage } from './Admin/AdminDashboardPage'
 import { AdminUsersPage } from './Admin/AdminUsersPage'
@@ -31,8 +58,8 @@ import { MemberSettingsPage } from './Member/MemberSettingsPage'
 function loadViteManifest(): ViteManifest | undefined {
   const root = process.cwd()
   const candidates = [
-    resolve(root, 'public/build/.vite/manifest.json'),
-    resolve(root, 'public/build/manifest.json'),
+    joinPath(root, 'public/build/.vite/manifest.json'),
+    joinPath(root, 'public/build/manifest.json'),
   ]
   for (const p of candidates) {
     const m = ViteTagHelper.loadManifest(p)
@@ -62,8 +89,8 @@ function createInertiaService(): InertiaService {
   const viteHelper = new ViteTagHelper(tagEnv, devServerUrl, manifest)
   const viteTags = viteHelper.generateTags(['resources/js/app.tsx', 'resources/css/app.css'])
 
-  const viewDir = resolve(process.cwd(), 'src/views')
-  const templateContent = readFileSync(resolve(viewDir, 'app.html'), 'utf-8')
+  const viewDir = joinPath(process.cwd(), 'src/views')
+  const templateContent = readFileSync(joinPath(viewDir, 'app.html'), 'utf-8')
 
   const renderTemplate = (data: Record<string, unknown>): string => {
     let html = templateContent
@@ -208,7 +235,7 @@ export function registerPageRoutes(core: PlanetCore): void {
   core.router.put('/member/settings', withInertiaPage((ctx) => memberSettings.update(ctx)))
 
   if (useBuiltFrontendAssets()) {
-    const staticDir = resolve(process.cwd(), 'public')
+    const staticDir = joinPath(process.cwd(), 'public')
     core.router.get('/build/*', async (c: GravitoContext) => {
       const url = new URL(c.req.url)
       const pathname = decodeURIComponent(url.pathname)
@@ -216,9 +243,11 @@ export function registerPageRoutes(core: PlanetCore): void {
         return new Response('Not Found', { status: 404 })
       }
       const relative = pathname.replace(/^\/+/, '')
-      const filePath = resolve(staticDir, relative)
-      const normalized = resolve(staticDir)
-      if (!filePath.startsWith(normalized)) {
+      const filePath = joinPath(staticDir, relative)
+      const normalizedStatic = normalizePath(staticDir)
+      const normalizedFilePath = normalizePath(filePath)
+      // 檢查歸一化的路徑是否在靜態目錄下
+      if (!normalizedFilePath.startsWith(normalizedStatic)) {
         return new Response('Forbidden', { status: 403 })
       }
       try {
