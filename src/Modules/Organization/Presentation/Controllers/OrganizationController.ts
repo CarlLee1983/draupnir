@@ -12,17 +12,19 @@ import type { GetOrganizationService } from '../../Application/Services/GetOrgan
 import type { ChangeOrgStatusService } from '../../Application/Services/ChangeOrgStatusService'
 import type { ListInvitationsService } from '../../Application/Services/ListInvitationsService'
 import type { CancelInvitationService } from '../../Application/Services/CancelInvitationService'
+import type {
+  CreateOrganizationParams,
+  UpdateOrganizationParams,
+  ChangeOrgStatusParams,
+  InviteMemberParams,
+  AcceptInvitationParams,
+  ChangeMemberRoleParams,
+} from '../Requests'
 import {
-	CreateOrganizationSchema,
-	UpdateOrganizationSchema,
-	ChangeOrgStatusSchema,
-	InviteMemberSchema,
-	AcceptInvitationSchema,
-	ChangeMemberRoleSchema,
-	OrganizationIdSchema,
-	OrganizationMemberParamsSchema,
-	OrganizationInvitationParamsSchema,
-} from '../Validators'
+  OrganizationIdSchema,
+  OrganizationMemberParamsSchema,
+  OrganizationInvitationParamsSchema,
+} from '../Requests'
 
 function resolveCurrentOrganizationId(ctx: IHttpContext): string | null {
 	const currentOrg = ctx.get<{ organizationId?: string }>('currentOrg')
@@ -113,22 +115,7 @@ export class OrganizationController {
 	) {}
 
 	async create(ctx: IHttpContext): Promise<Response> {
-		const body = await ctx.getJsonBody<any>()
-
-		// Zod 驗證
-		const validation = CreateOrganizationSchema.safeParse(body)
-		if (!validation.success) {
-			const first = validation.error.issues[0]
-			return ctx.json(
-				{
-					success: false,
-					message: '驗證失敗',
-					error: first?.message ?? '驗證失敗',
-				},
-				400,
-			)
-		}
-
+		const body = ctx.get('validated') as CreateOrganizationParams
 		const result = await this.createOrgService.execute(body)
 		return ctx.json(result, result.success ? 201 : 400)
 	}
@@ -151,39 +138,19 @@ export class OrganizationController {
 	}
 
 	async update(ctx: IHttpContext): Promise<Response> {
-		const orgId = ctx.getParam('id')
-		if (!orgId) return ctx.json({ success: false, message: '缺少 ID' }, 400)
-		const body = await ctx.getJsonBody<any>()
-
-		// Zod 驗證
-		const validation = UpdateOrganizationSchema.safeParse(body)
-		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.issues[0].message
-			}, 400)
-		}
-
+		const validated = validateOrganizationId(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
+		const body = ctx.get('validated') as UpdateOrganizationParams
 		const result = await this.updateOrgService.execute(orgId, body)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
 
 	async changeStatus(ctx: IHttpContext): Promise<Response> {
-		const orgId = ctx.getParam('id')
-		if (!orgId) return ctx.json({ success: false, message: '缺少 ID' }, 400)
-		const body = await ctx.getJsonBody<any>()
-
-		// Zod 驗證
-		const validation = ChangeOrgStatusSchema.safeParse(body)
-		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.issues[0].message
-			}, 400)
-		}
-
+		const validated = validateOrganizationId(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
+		const body = ctx.get('validated') as ChangeOrgStatusParams
 		const result = await this.changeOrgStatusService.execute(orgId, body.status)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
@@ -204,18 +171,7 @@ export class OrganizationController {
 		const validated = validateOrganizationId(ctx)
 		if (!validated.ok) return validated.response
 		const orgId = validated.orgId
-		const body = await ctx.getJsonBody<any>()
-
-		// Zod 驗證
-		const validation = InviteMemberSchema.safeParse(body)
-		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.issues[0].message
-			}, 400)
-		}
-
+		const body = ctx.get('validated') as InviteMemberParams
 		const result = await this.inviteMemberService.execute(orgId, auth.userId, auth.role, body)
 		return ctx.json(result, result.success ? 201 : 400)
 	}
@@ -223,20 +179,8 @@ export class OrganizationController {
 	async acceptInvitation(ctx: IHttpContext): Promise<Response> {
 		const auth = AuthMiddleware.getAuthContext(ctx)
 		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const token = ctx.getParam('token')
-		if (!token) return ctx.json({ success: false, message: '缺少 Token' }, 400)
-
-		// Zod 驗證
-		const validation = AcceptInvitationSchema.safeParse({ token })
-		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.issues[0].message
-			}, 400)
-		}
-
-		const result = await this.acceptInvitationService.execute(auth.userId, { token })
+		const body = ctx.get('validated') as AcceptInvitationParams
+		const result = await this.acceptInvitationService.execute(auth.userId, body)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
 
@@ -256,18 +200,7 @@ export class OrganizationController {
 		if (!validated.ok) return validated.response
 		const orgId = validated.orgId
 		const userId = validated.userId
-		const body = await ctx.getJsonBody<any>()
-
-		// Zod 驗證
-		const validation = ChangeMemberRoleSchema.safeParse(body)
-		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.issues[0].message
-			}, 400)
-		}
-
+		const body = ctx.get('validated') as ChangeMemberRoleParams
 		const result = await this.changeRoleService.execute(orgId, userId, body.role)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
