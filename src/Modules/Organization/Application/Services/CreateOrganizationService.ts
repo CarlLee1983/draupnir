@@ -26,11 +26,6 @@ export class CreateOrganizationService {
 				return { success: false, message: '指定的 Manager 不存在', error: 'MANAGER_NOT_FOUND' }
 			}
 
-			const existingMembership = await this.memberRepository.findByUserId(request.managerUserId)
-			if (existingMembership) {
-				return { success: false, message: '該使用者已屬於其他組織', error: 'USER_ALREADY_IN_ORG' }
-			}
-
 			const orgId = uuidv4()
 			const org = Organization.create(orgId, request.name, request.description || '', request.slug)
 

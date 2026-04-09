@@ -13,8 +13,8 @@ export class ChangeOrgMemberRoleService {
 		try {
 			new OrgMemberRole(newRole)
 
-			const member = await this.memberRepository.findByUserId(targetUserId)
-			if (!member || member.organizationId !== orgId) {
+			const member = await this.memberRepository.findByUserAndOrgId(targetUserId, orgId)
+			if (!member) {
 				return { success: false, message: '找不到成員', error: 'MEMBER_NOT_FOUND' }
 			}
 

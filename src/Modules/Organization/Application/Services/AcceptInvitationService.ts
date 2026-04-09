@@ -37,9 +37,9 @@ export class AcceptInvitationService {
 				return { success: false, message: '此邀請不是發給您的', error: 'EMAIL_MISMATCH' }
 			}
 
-			const existingMembership = await this.memberRepository.findByUserId(userId)
+			const existingMembership = await this.memberRepository.findByUserAndOrgId(userId, invitation.organizationId)
 			if (existingMembership) {
-				return { success: false, message: '您已屬於其他組織', error: 'USER_ALREADY_IN_ORG' }
+				return { success: false, message: '您已屬於此組織', error: 'USER_ALREADY_IN_ORG' }
 			}
 
 			const member = OrganizationMember.create(

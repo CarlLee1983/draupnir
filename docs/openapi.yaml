@@ -147,6 +147,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Organization-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
       x-test-setup:
         - operation: post-/api/auth/register
           body: { email: "setup-user@feature.test", password: "SecurePass123" }
@@ -241,6 +247,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Organization-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: 成功
@@ -255,6 +267,12 @@ paths:
       parameters:
         - name: id
           in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Organization-Id
+          in: header
           required: true
           schema:
             type: string
@@ -276,6 +294,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Organization-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: 成功
@@ -289,6 +313,12 @@ paths:
       parameters:
         - name: id
           in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: X-Organization-Id
+          in: header
           required: true
           schema:
             type: string
@@ -314,6 +344,12 @@ paths:
           schema:
             type: string
             format: uuid
+        - name: X-Organization-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         '200':
           description: 成功
@@ -330,6 +366,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: X-Organization-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
         - name: invId
           in: path
           required: true
@@ -367,6 +409,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: X-Organization-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
         - name: userId
           in: path
           required: true
@@ -389,6 +437,12 @@ paths:
           required: true
           schema:
             type: string
+        - name: X-Organization-Id
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
         - name: userId
           in: path
           required: true

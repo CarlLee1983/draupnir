@@ -21,3 +21,21 @@ export const ChangeOrgStatusSchema = z.object({
     error: '無效的狀態值'
   })
 })
+
+export const OrganizationIdSchema = z.object({
+  id: z.string().uuid('無效的組織 ID'),
+})
+
+export const OrganizationMemberParamsSchema = z.object({
+  id: z.string().uuid('無效的組織 ID'),
+  userId: z.string().uuid('無效的使用者 ID'),
+})
+
+export const OrganizationInvitationParamsSchema = z.object({
+  id: z.string().uuid('無效的組織 ID'),
+  invId: z.string().min(1, '邀請 ID 不能為空'),
+})
+
+export const OrganizationAuthHeaderSchema = z.object({
+  organizationId: z.string().uuid('無效的組織 ID'),
+})

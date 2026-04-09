@@ -18,8 +18,8 @@ export class OrgAuthorizationHelper {
 			return { authorized: true }
 		}
 
-		const membership = await this.memberRepository.findByUserId(callerUserId)
-		if (!membership || membership.organizationId !== orgId) {
+		const membership = await this.memberRepository.findByUserAndOrgId(callerUserId, orgId)
+		if (!membership) {
 			return { authorized: false, error: 'NOT_ORG_MEMBER' }
 		}
 
@@ -38,8 +38,8 @@ export class OrgAuthorizationHelper {
 			return { authorized: true }
 		}
 
-		const membership = await this.memberRepository.findByUserId(callerUserId)
-		if (!membership || membership.organizationId !== orgId) {
+		const membership = await this.memberRepository.findByUserAndOrgId(callerUserId, orgId)
+		if (!membership) {
 			return { authorized: false, error: 'NOT_ORG_MEMBER' }
 		}
 

@@ -18,8 +18,83 @@ import {
 	ChangeOrgStatusSchema,
 	InviteMemberSchema,
 	AcceptInvitationSchema,
-	ChangeMemberRoleSchema
+	ChangeMemberRoleSchema,
+	OrganizationIdSchema,
+	OrganizationMemberParamsSchema,
+	OrganizationInvitationParamsSchema,
 } from '../Validators'
+
+function resolveCurrentOrganizationId(ctx: IHttpContext): string | null {
+	const currentOrg = ctx.get<{ organizationId?: string }>('currentOrg')
+	if (currentOrg?.organizationId) {
+		return currentOrg.organizationId
+	}
+	return ctx.getParam('id') ?? ctx.getParam('orgId') ?? null
+}
+
+function validateOrganizationId(ctx: IHttpContext): { ok: true; orgId: string } | { ok: false; response: Response } {
+	const validation = OrganizationIdSchema.safeParse({ id: resolveCurrentOrganizationId(ctx) })
+	if (!validation.success) {
+		return {
+			ok: false,
+			response: ctx.json(
+				{
+					success: false,
+					message: '驗證失敗',
+					error: validation.error.issues[0]?.message ?? '無效的組織 ID',
+				},
+				400,
+			),
+		}
+	}
+	return { ok: true, orgId: validation.data.id }
+}
+
+function validateOrganizationMemberParams(
+	ctx: IHttpContext,
+): { ok: true; orgId: string; userId: string } | { ok: false; response: Response } {
+	const validation = OrganizationMemberParamsSchema.safeParse({
+		id: resolveCurrentOrganizationId(ctx),
+		userId: ctx.getParam('userId'),
+	})
+	if (!validation.success) {
+		return {
+			ok: false,
+			response: ctx.json(
+				{
+					success: false,
+					message: '驗證失敗',
+					error: validation.error.issues[0]?.message ?? '參數無效',
+				},
+				400,
+			),
+		}
+	}
+	return { ok: true, orgId: validation.data.id, userId: validation.data.userId }
+}
+
+function validateInvitationParams(
+	ctx: IHttpContext,
+): { ok: true; orgId: string; invId: string } | { ok: false; response: Response } {
+	const validation = OrganizationInvitationParamsSchema.safeParse({
+		id: resolveCurrentOrganizationId(ctx),
+		invId: ctx.getParam('invId'),
+	})
+	if (!validation.success) {
+		return {
+			ok: false,
+			response: ctx.json(
+				{
+					success: false,
+					message: '驗證失敗',
+					error: validation.error.issues[0]?.message ?? '參數無效',
+				},
+				400,
+			),
+		}
+	}
+	return { ok: true, orgId: validation.data.id, invId: validation.data.invId }
+}
 
 export class OrganizationController {
 	constructor(
@@ -68,8 +143,9 @@ export class OrganizationController {
 	async get(ctx: IHttpContext): Promise<Response> {
 		const auth = AuthMiddleware.getAuthContext(ctx)
 		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const orgId = ctx.getParam('id')
-		if (!orgId) return ctx.json({ success: false, message: '缺少 ID' }, 400)
+		const validated = validateOrganizationId(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
 		const result = await this.getOrgService.execute(orgId, auth.userId, auth.role)
 		return ctx.json(result, result.success ? 200 : 404)
 	}
@@ -115,8 +191,9 @@ export class OrganizationController {
 	async listMembers(ctx: IHttpContext): Promise<Response> {
 		const auth = AuthMiddleware.getAuthContext(ctx)
 		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const orgId = ctx.getParam('id')
-		if (!orgId) return ctx.json({ success: false, message: '缺少 ID' }, 400)
+		const validated = validateOrganizationId(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
 		const result = await this.listMembersService.execute(orgId, auth.userId, auth.role)
 		return ctx.json(result, 200)
 	}
@@ -124,8 +201,9 @@ export class OrganizationController {
 	async invite(ctx: IHttpContext): Promise<Response> {
 		const auth = AuthMiddleware.getAuthContext(ctx)
 		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const orgId = ctx.getParam('id')
-		if (!orgId) return ctx.json({ success: false, message: '缺少 ID' }, 400)
+		const validated = validateOrganizationId(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
 		const body = await ctx.getJsonBody<any>()
 
 		// Zod 驗證
@@ -165,17 +243,19 @@ export class OrganizationController {
 	async removeMember(ctx: IHttpContext): Promise<Response> {
 		const auth = AuthMiddleware.getAuthContext(ctx)
 		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const orgId = ctx.getParam('id')
-		const userId = ctx.getParam('userId')
-		if (!orgId || !userId) return ctx.json({ success: false, message: '缺少參數' }, 400)
+		const validated = validateOrganizationMemberParams(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
+		const userId = validated.userId
 		const result = await this.removeMemberService.execute(orgId, userId, auth.userId, auth.role)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
 
 	async changeMemberRole(ctx: IHttpContext): Promise<Response> {
-		const orgId = ctx.getParam('id')
-		const userId = ctx.getParam('userId')
-		if (!orgId || !userId) return ctx.json({ success: false, message: '缺少參數' }, 400)
+		const validated = validateOrganizationMemberParams(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
+		const userId = validated.userId
 		const body = await ctx.getJsonBody<any>()
 
 		// Zod 驗證
@@ -195,8 +275,9 @@ export class OrganizationController {
 	async listInvitations(ctx: IHttpContext): Promise<Response> {
 		const auth = AuthMiddleware.getAuthContext(ctx)
 		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const orgId = ctx.getParam('id')
-		if (!orgId) return ctx.json({ success: false, message: '缺少 ID' }, 400)
+		const validated = validateOrganizationId(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
 		const result = await this.listInvitationsService.execute(orgId, auth.userId, auth.role)
 		return ctx.json(result, 200)
 	}
@@ -204,9 +285,10 @@ export class OrganizationController {
 	async cancelInvitation(ctx: IHttpContext): Promise<Response> {
 		const auth = AuthMiddleware.getAuthContext(ctx)
 		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const orgId = ctx.getParam('id')
-		const invId = ctx.getParam('invId')
-		if (!orgId || !invId) return ctx.json({ success: false, message: '缺少參數' }, 400)
+		const validated = validateInvitationParams(ctx)
+		if (!validated.ok) return validated.response
+		const orgId = validated.orgId
+		const invId = validated.invId
 		const result = await this.cancelInvitationService.execute(orgId, invId, auth.userId, auth.role)
 		return ctx.json(result, result.success ? 200 : 400)
 	}

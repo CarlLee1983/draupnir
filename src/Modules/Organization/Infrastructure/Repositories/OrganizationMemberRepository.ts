@@ -10,6 +10,15 @@ export class OrganizationMemberRepository implements IOrganizationMemberReposito
 		return row ? OrganizationMember.fromDatabase(row) : null
 	}
 
+	async findByUserAndOrgId(userId: string, orgId: string): Promise<OrganizationMember | null> {
+		const row = await this.db
+			.table('organization_members')
+			.where('user_id', '=', userId)
+			.where('organization_id', '=', orgId)
+			.first()
+		return row ? OrganizationMember.fromDatabase(row) : null
+	}
+
 	async findByOrgId(orgId: string, limit?: number, offset?: number): Promise<OrganizationMember[]> {
 		let query = this.db.table('organization_members').where('organization_id', '=', orgId)
 		if (offset != null && offset > 0) {

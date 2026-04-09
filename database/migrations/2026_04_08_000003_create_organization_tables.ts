@@ -18,7 +18,7 @@ export default class CreateOrganizationTables implements Migration {
 		await Schema.create('organization_members', (table) => {
 			table.string('id').primary()
 			table.string('organization_id')
-			table.string('user_id').unique()
+			table.string('user_id')
 			table.string('role').default('member')
 			table.timestamp('joined_at')
 			table.timestamp('created_at')
