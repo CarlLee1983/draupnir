@@ -5,12 +5,8 @@ import type { GetUserProfileService } from '../../Application/Services/GetUserPr
 import type { UpdateUserProfileService } from '../../Application/Services/UpdateUserProfileService'
 import type { ListUsersService } from '../../Application/Services/ListUsersService'
 import type { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
-import {
-	UpdateUserProfileSchema,
-	ChangeUserStatusSchema,
-	ListUsersQuerySchema,
-	UserIdSchema,
-} from '../Validators'
+import type { UpdateProfileParams, ListUsersQueryParams, ChangeStatusParams } from '../Requests'
+import { UserIdSchema } from '../Requests'
 
 export class UserController {
 	constructor(
@@ -34,41 +30,14 @@ export class UserController {
 		if (!auth) {
 			return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
 		}
-		const body = await ctx.getJsonBody<Record<string, unknown>>()
-
-		// Zod 驗證
-		const validation = UpdateUserProfileSchema.safeParse(body)
-		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.issues[0].message
-			}, 400)
-		}
-
+		const body = ctx.get('validated') as UpdateProfileParams
 		const result = await this.updateUserProfileService.execute(auth.userId, body)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
 
 	async listUsers(ctx: IHttpContext): Promise<Response> {
-		const validation = ListUsersQuerySchema.safeParse({
-			role: ctx.getQuery('role'),
-			status: ctx.getQuery('status'),
-			keyword: ctx.getQuery('keyword'),
-			page: ctx.getQuery('page'),
-			limit: ctx.getQuery('limit'),
-		})
-		if (!validation.success) {
-			return ctx.json(
-				{
-					success: false,
-					message: '驗證失敗',
-					error: validation.error.issues[0]?.message ?? '驗證失敗',
-				},
-				400,
-			)
-		}
-		const result = await this.listUsersService.execute(validation.data)
+		const query = ctx.get('validated') as ListUsersQueryParams
+		const result = await this.listUsersService.execute(query)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
 
@@ -100,18 +69,7 @@ export class UserController {
 				400,
 			)
 		}
-		const body = await ctx.getJsonBody<any>()
-
-		// Zod 驗證
-		const validation = ChangeUserStatusSchema.safeParse(body)
-		if (!validation.success) {
-			return ctx.json({
-				success: false,
-				message: '驗證失敗',
-				error: validation.error.issues[0].message
-			}, 400)
-		}
-
+		const body = ctx.get('validated') as ChangeStatusParams
 		const result = await this.changeUserStatusService.execute(idValidation.data.id, body)
 		return ctx.json(result, result.success ? 200 : 400)
 	}
