@@ -8,7 +8,7 @@ export function extractRoutesFromSource(): string[] {
 	const glob = new Bun.Glob('src/Modules/*/Presentation/Routes/*.routes.ts')
 	const routeFiles = [...glob.scanSync(process.cwd())]
 
-	const routePattern = /router\.(get|post|put|patch|delete)\(\s*['"`]([^'"`]+)['"`]/g
+	const routePattern = /router\.(get|post|put|patch|delete)\s*\(\s*['"`]([^'"`]+)['"`]/g
 
 	for (const file of routeFiles) {
 		const content = readFileSync(file, 'utf-8')

@@ -100,7 +100,8 @@ export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
 	// 解析查詢參數
 	const query = (() => {
 		try {
-			const url = new URL(ctx.req.url)
+			const u = ctx.req.url
+			const url = u.startsWith('http') ? new URL(u) : new URL(u, 'http://localhost')
 			const result: Record<string, string | undefined> = {}
 			url.searchParams.forEach((value, key) => {
 				result[key] = value

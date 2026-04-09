@@ -206,12 +206,12 @@ for (const op of spec.operations) {
 			op.method === 'post' && op.path === '/api/auth/refresh' && op.requiredFields.includes('refreshToken')
 
 		if (op.requiredFields.length > 0 && !skipRequiredBodyTest) {
-			it('缺少必填欄位回傳 400', async () => {
+			it('缺少必填欄位回傳 422', async () => {
 				const auth = await getAuthForOperation(op)
 				const { path, setupCtx } = await resolvePathWithCtx(op)
 				const headers = buildRequestHeaders(op, setupCtx)
 				const res = await client.request({ method: op.method, path }, { body: {}, auth, headers })
-				expect(res.status).toBe(400)
+				expect(res.status).toBe(422)
 			})
 		}
 	})

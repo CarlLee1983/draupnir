@@ -45,7 +45,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegisterResponse'
-        '400':
+        '422':
           description: 驗證失敗或 Email 已存在
 
   /api/auth/login:
@@ -67,6 +67,8 @@ paths:
                 $ref: '#/components/schemas/LoginResponse'
         '401':
           description: 認證失敗
+        '422':
+          description: 驗證失敗
 
   /api/auth/refresh:
     post:
@@ -87,6 +89,8 @@ paths:
                 $ref: '#/components/schemas/RefreshResponse'
         '401':
           description: Refresh Token 無效
+        '422':
+          description: 驗證失敗
 
   /api/auth/logout:
     post:
@@ -121,6 +125,8 @@ paths:
       responses:
         '200':
           description: 更新成功
+        '422':
+          description: 驗證失敗
 
   /api/users:
     get:
@@ -132,6 +138,8 @@ paths:
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/users/{id}:
     get:
@@ -185,6 +193,8 @@ paths:
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/organizations:
     post:
@@ -202,6 +212,8 @@ paths:
       responses:
         '201':
           description: 建立成功
+        '422':
+          description: 驗證失敗
     get:
       tags: [Organization]
       summary: 列表組織
@@ -253,9 +265,17 @@ paths:
           schema:
             type: string
             format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrgRequest'
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/organizations/{id}/status:
     patch:
@@ -277,9 +297,17 @@ paths:
           schema:
             type: string
             format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeOrgStatusRequest'
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/organizations/{id}/members:
     get:
@@ -332,6 +360,8 @@ paths:
       responses:
         '201':
           description: 邀請成功
+        '422':
+          description: 驗證失敗
     get:
       tags: [Organization]
       summary: 列表邀請
@@ -393,9 +423,17 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptInvitationRequest'
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/organizations/{id}/members/{userId}:
     delete:
@@ -448,9 +486,17 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeMemberRoleRequest'
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/organizations/{orgId}/keys:
     post:
@@ -474,6 +520,8 @@ paths:
       responses:
         '201':
           description: 建立成功
+        '422':
+          description: 驗證失敗
     get:
       tags: [ApiKey]
       summary: 列表 API Keys
@@ -527,6 +575,8 @@ paths:
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/keys/{keyId}/permissions:
     put:
@@ -549,6 +599,8 @@ paths:
       responses:
         '200':
           description: 成功
+        '422':
+          description: 驗證失敗
 
   /api/organizations/{orgId}/dashboard:
     get:
@@ -640,6 +692,8 @@ paths:
       responses:
         '201':
           description: 儲值成功
+        '422':
+          description: 驗證失敗
 
   /api/organizations/{orgId}/credits/refund:
     post:
@@ -659,24 +713,399 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [amount]
-              properties:
-                amount:
-                  type: string
-                  description: 退款金額
-                referenceType:
-                  type: string
-                  description: 關聯類型
-                referenceId:
-                  type: string
-                  description: 關聯 ID
-                description:
-                  type: string
-                  description: 退款說明
+              $ref: '#/components/schemas/RefundRequest'
       responses:
         '200':
           description: 退款成功
+        '422':
+          description: 驗證失敗
+
+  # === Contract 合約管理 ===
+  /api/contracts:
+    post:
+      tags: [Contract]
+      summary: 建立合約
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetType, targetId, terms]
+              properties:
+                targetType:
+                  type: string
+                  enum: [organization, user]
+                targetId:
+                  type: string
+                terms:
+                  $ref: '#/components/schemas/ContractTerms'
+      responses:
+        '201':
+          description: 合約建立成功
+        '422':
+          description: 驗證失敗
+    get:
+      tags: [Contract]
+      summary: 列出合約
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: targetId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 合約列表
+
+  /api/contracts/{contractId}:
+    get:
+      tags: [Contract]
+      summary: 合約詳情
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      x-test-setup:
+        - operation: post-/api/contracts
+          body:
+            targetType: organization
+            targetId: "$.adminUserId"
+            terms:
+              creditQuota: 1000
+              allowedModules: ["chat"]
+              rateLimit: { rpm: 60, tpm: 100000 }
+              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+          extract:
+            contractId: "$.data.id"
+      responses:
+        '200':
+          description: 合約詳情
+    put:
+      tags: [Contract]
+      summary: 更新合約條款（僅 DRAFT）
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      x-test-setup:
+        - operation: post-/api/contracts
+          body:
+            targetType: organization
+            targetId: "$.adminUserId"
+            terms:
+              creditQuota: 1000
+              allowedModules: ["chat"]
+              rateLimit: { rpm: 60, tpm: 100000 }
+              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+          extract:
+            contractId: "$.data.id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [terms]
+              properties:
+                terms:
+                  $ref: '#/components/schemas/ContractTerms'
+      responses:
+        '200':
+          description: 合約更新成功
+        '422':
+          description: 驗證失敗
+
+  /api/contracts/{contractId}/activate:
+    post:
+      tags: [Contract]
+      summary: 啟用合約
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      x-test-setup:
+        - operation: post-/api/contracts
+          body:
+            targetType: organization
+            targetId: "$.adminUserId"
+            terms:
+              creditQuota: 1000
+              allowedModules: ["chat"]
+              rateLimit: { rpm: 60, tpm: 100000 }
+              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+          extract:
+            contractId: "$.data.id"
+      responses:
+        '200':
+          description: 合約已啟用
+
+  /api/contracts/{contractId}/terminate:
+    post:
+      tags: [Contract]
+      summary: 終止合約
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      x-test-setup:
+        - operation: post-/api/contracts
+          body:
+            targetType: organization
+            targetId: "$.adminUserId"
+            terms:
+              creditQuota: 1000
+              allowedModules: ["chat"]
+              rateLimit: { rpm: 60, tpm: 100000 }
+              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+          extract:
+            contractId: "$.data.id"
+        - operation: post-/api/contracts/{contractId}/activate
+          extract: {}
+      responses:
+        '200':
+          description: 合約已終止
+
+  /api/contracts/{contractId}/renew:
+    post:
+      tags: [Contract]
+      summary: 續約
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      x-test-setup:
+        - operation: post-/api/contracts
+          body:
+            targetType: organization
+            targetId: "$.adminUserId"
+            terms:
+              creditQuota: 1000
+              allowedModules: ["chat"]
+              rateLimit: { rpm: 60, tpm: 100000 }
+              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+          extract:
+            contractId: "$.data.id"
+        - operation: post-/api/contracts/{contractId}/activate
+          extract: {}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [terms]
+              properties:
+                terms:
+                  $ref: '#/components/schemas/ContractTerms'
+      responses:
+        '200':
+          description: 續約成功
+        '422':
+          description: 驗證失敗
+
+  /api/contracts/{contractId}/assign:
+    post:
+      tags: [Contract]
+      summary: 指派合約至目標
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      x-test-setup:
+        - operation: post-/api/contracts
+          body:
+            targetType: organization
+            targetId: "$.adminUserId"
+            terms:
+              creditQuota: 1000
+              allowedModules: ["chat"]
+              rateLimit: { rpm: 60, tpm: 100000 }
+              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+          extract:
+            contractId: "$.data.id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetType, targetId]
+              properties:
+                targetType:
+                  type: string
+                  enum: [organization, user]
+                targetId:
+                  type: string
+      responses:
+        '200':
+          description: 合約指派成功
+        '422':
+          description: 驗證失敗
+
+  # === AppModule 模組管理 ===
+  /api/modules:
+    post:
+      tags: [AppModule]
+      summary: 註冊模組（admin）
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                type:
+                  type: string
+                  enum: [free, paid]
+      responses:
+        '201':
+          description: 模組註冊成功
+        '422':
+          description: 驗證失敗
+    get:
+      tags: [AppModule]
+      summary: 列出所有模組
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 模組列表
+
+  /api/modules/{moduleId}:
+    get:
+      tags: [AppModule]
+      summary: 模組詳情
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      x-test-setup:
+        - operation: post-/api/modules
+          auth: admin
+          body:
+            name: "test-module"
+            type: "free"
+          extract:
+            moduleId: "$.data.id"
+      responses:
+        '200':
+          description: 模組詳情
+
+  /api/organizations/{orgId}/modules/subscribe:
+    post:
+      tags: [AppModule]
+      summary: 訂閱模組
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [moduleId]
+              properties:
+                moduleId:
+                  type: string
+      responses:
+        '201':
+          description: 訂閱成功
+        '422':
+          description: 驗證失敗
+
+  /api/organizations/{orgId}/modules/{moduleId}:
+    delete:
+      tags: [AppModule]
+      summary: 取消訂閱模組
+      x-test-role: admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: moduleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 取消訂閱成功
+
+  /api/organizations/{orgId}/modules:
+    get:
+      tags: [AppModule]
+      summary: 列出組織已訂閱模組
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 訂閱列表
 
 components:
   securitySchemes:
@@ -748,6 +1177,14 @@ components:
           type: string
           enum: [active, inactive, suspended]
 
+    ChangeOrgStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, suspended]
+
     InvitationRequest:
       type: object
       required: [email, role]
@@ -755,6 +1192,20 @@ components:
         email:
           type: string
           format: email
+        role:
+          type: string
+
+    AcceptInvitationRequest:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    ChangeMemberRoleRequest:
+      type: object
+      required: [role]
+      properties:
         role:
           type: string
 
@@ -841,10 +1292,49 @@ components:
       required: [amount]
       properties:
         amount:
-          type: number
-          minimum: 1
+          type: string
         description:
           type: string
+
+    RefundRequest:
+      type: object
+      required: [amount, referenceType, referenceId]
+      properties:
+        amount:
+          type: string
+        referenceType:
+          type: string
+        referenceId:
+          type: string
+        description:
+          type: string
+
+    ContractTerms:
+      type: object
+      required: [creditQuota, allowedModules, rateLimit, validityPeriod]
+      properties:
+        creditQuota:
+          type: number
+        allowedModules:
+          type: array
+          items:
+            type: string
+        rateLimit:
+          type: object
+          properties:
+            rpm:
+              type: number
+            tpm:
+              type: number
+        validityPeriod:
+          type: object
+          properties:
+            startDate:
+              type: string
+              format: date-time
+            endDate:
+              type: string
+              format: date-time
 
     HealthResponse:
       type: object
