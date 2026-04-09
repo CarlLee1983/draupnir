@@ -51,12 +51,24 @@ export class TestClient {
 		return { status: res.status, json, headers: res.headers }
 	}
 
-	async post(path: string, body: unknown): Promise<TestResponse> {
-		return this.request({ method: 'post', path }, { body })
+	async post(path: string, body: unknown, options?: { headers?: Record<string, string> }): Promise<TestResponse> {
+		return this.request({ method: 'post', path }, { body, headers: options?.headers })
 	}
 
 	async get(path: string, auth?: string): Promise<TestResponse> {
 		return this.request({ method: 'get', path }, { auth })
+	}
+
+	async put(path: string, body: unknown, options?: { headers?: Record<string, string> }): Promise<TestResponse> {
+		return this.request({ method: 'put', path }, { body, headers: options?.headers })
+	}
+
+	async patch(path: string, body: unknown, options?: { headers?: Record<string, string> }): Promise<TestResponse> {
+		return this.request({ method: 'patch', path }, { body, headers: options?.headers })
+	}
+
+	async delete(path: string, options?: { headers?: Record<string, string> }): Promise<TestResponse> {
+		return this.request({ method: 'delete', path }, { headers: options?.headers })
 	}
 
 	formatError(info: ErrorInfo): string {
