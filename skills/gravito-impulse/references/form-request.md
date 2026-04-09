@@ -59,6 +59,8 @@ export class AdminOnlyRequest extends FormRequest {
 }
 ```
 
+`authorizationMessage()` 為選用的可覆寫方法，回傳型別為 `string`，其內容會出現在 403 錯誤回應的 `message` 欄位。若未覆寫，框架將使用預設訊息。
+
 ### `transform(data)`
 
 在驗證之前對原始資料做預處理。執行順序：`transform → validate`。
@@ -97,7 +99,11 @@ redirect() {
 }
 ```
 
+> **注意**：非 SSR（API）模式下，驗證失敗不會執行跳轉，框架改為回傳 HTTP 422 並在 response body 附帶錯誤詳情。`redirect()` 僅在 SSR 渲染情境下生效。
+
 ## 在 Controller 中取得已驗證資料
+
+`@gravito/impulse` 與 `@gravito/core` 搭配使用。`GravitoContext` 來自 `@gravito/core`（HTTP 框架層），`@gravito/impulse` 在驗證通過後將結果寫入 `ctx`。
 
 框架在驗證通過後將結果寫入 `ctx` 的 `'validated'` 欄位：
 
@@ -121,6 +127,8 @@ const result = await request.validate(ctx)
 
 if (!result.success) {
   return ctx.json({ errors: result.errors }, 422)
+  // result.errors 的結構
+  // Array<{ field: string; message: string; code?: string }>
 }
 
 const data = result.data  // 已驗證的資料
