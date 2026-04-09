@@ -5,6 +5,7 @@ import type { TopUpCreditService } from '../../Application/Services/TopUpCreditS
 import type { GetBalanceService } from '../../Application/Services/GetBalanceService'
 import type { GetTransactionHistoryService } from '../../Application/Services/GetTransactionHistoryService'
 import type { RefundCreditService } from '../../Application/Services/RefundCreditService'
+import type { TopUpParams, RefundParams } from '../Requests'
 
 export class CreditController {
   constructor(
@@ -39,16 +40,15 @@ export class CreditController {
     if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
-    const body = await ctx.getJsonBody<{ amount?: string; description?: string }>()
+    const body = ctx.get('validated') as TopUpParams
     const result = await this.topUpService.execute({
       orgId,
-      amount: body.amount ?? '0',
+      amount: body.amount,
       description: body.description,
       callerUserId: auth.userId,
       callerSystemRole: auth.role,
     })
-    const status = result.success ? 200 : 400
-    return ctx.json(result, status)
+    return ctx.json(result, result.success ? 200 : 400)
   }
 
   async refund(ctx: IHttpContext): Promise<Response> {
@@ -56,17 +56,16 @@ export class CreditController {
     if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
-    const body = await ctx.getJsonBody<{ amount?: string; referenceType?: string; referenceId?: string; description?: string }>()
+    const body = ctx.get('validated') as RefundParams
     const result = await this.refundService.execute({
       orgId,
-      amount: body.amount ?? '0',
+      amount: body.amount,
       referenceType: body.referenceType,
       referenceId: body.referenceId,
       description: body.description,
       callerUserId: auth.userId,
       callerSystemRole: auth.role,
     })
-    const status = result.success ? 200 : 400
-    return ctx.json(result, status)
+    return ctx.json(result, result.success ? 200 : 400)
   }
 }
