@@ -1442,12 +1442,80 @@ paths:
         '200':
           description: 訂閱列表
 
+  /sdk/v1/chat/completions:
+    post:
+      tags: [SdkApi]
+      summary: App API Key 代理 chat completions（OpenAI 相容，轉發 Bifrost）
+      security:
+        - appApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: OpenAI chat completions 相容本文（model、messages 等）
+      responses:
+        '200':
+          description: Bifrost 成功回應本文
+        '400':
+          description: 缺少 model/messages 等
+        '401':
+          description: 缺少或無效的 App API Key
+        '403':
+          description: scope 或綁定模組不足
+        '502':
+          description: Bifrost 回傳錯誤
+
+  /sdk/v1/usage:
+    get:
+      tags: [SdkApi]
+      summary: 查詢目前 App Key 對應 Virtual Key 的用量統計
+      security:
+        - appApiKeyAuth: []
+      parameters:
+        - name: start_date
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 用量統計
+        '401':
+          description: 缺少或無效的 App API Key
+        '500':
+          description: 查詢失敗
+
+  /sdk/v1/balance:
+    get:
+      tags: [SdkApi]
+      summary: 查詢 App Key 所屬組織的 Credit 餘額
+      security:
+        - appApiKeyAuth: []
+      responses:
+        '200':
+          description: 餘額與狀態
+        '401':
+          description: 缺少或無效的 App API Key
+        '500':
+          description: 查詢失敗
+
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    appApiKeyAuth:
+      type: http
+      scheme: bearer
+      description: App API Key（Bearer drp_app_…）
 
   schemas:
     RegisterRequest:

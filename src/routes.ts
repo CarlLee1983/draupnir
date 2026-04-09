@@ -11,6 +11,7 @@ import {
   registerAppModule,
   registerAppApiKey,
   registerDevPortal,
+  registerSdkApi,
   registerDocs,
 } from './wiring'
 
@@ -34,6 +35,7 @@ export async function registerRoutes(core: PlanetCore) {
   registerApiKey(core)
   registerDashboard(core)
   registerCredit(core)
+  registerSdkApi(core)
   await registerDocs(core)
   console.log('✅ Routes registered')
 }

@@ -230,3 +230,23 @@ export const registerDevPortal = (core: PlanetCore): void => {
 	)
 	registerDevPortalRoutes(router, controller)
 }
+
+import {
+	SdkApiController,
+	registerSdkApiRoutes,
+	AppAuthMiddleware,
+} from '@/Modules/SdkApi'
+
+/**
+ * 註冊 SdkApi 模組（App API Key Bearer /sdk/v1）
+ */
+export const registerSdkApi = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new SdkApiController(
+		core.container.make('proxyModelCall') as any,
+		core.container.make('queryUsage') as any,
+		core.container.make('queryBalance') as any,
+	)
+	const appAuthMiddleware = core.container.make('appAuthMiddleware') as AppAuthMiddleware
+	registerSdkApiRoutes(router, controller, appAuthMiddleware)
+}
