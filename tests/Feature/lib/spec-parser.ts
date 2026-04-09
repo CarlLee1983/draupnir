@@ -13,6 +13,7 @@ export interface Operation {
 	successStatus: number
 	testRole: string | null
 	testSetup: TestSetupStep[] | null
+	testSkip: boolean
 }
 
 export interface TestSetupStep {
@@ -102,6 +103,7 @@ export function parseOpenAPI(specPath: string): ParsedSpec {
 				successStatus,
 				testRole: (op['x-test-role'] as string) ?? null,
 				testSetup: (op['x-test-setup'] as TestSetupStep[]) ?? null,
+				testSkip: (op['x-test-skip'] as boolean) ?? false,
 			})
 		}
 	}

@@ -183,6 +183,7 @@ function hasPathParams(path: string): boolean {
 }
 
 for (const op of spec.operations) {
+	if (op.testSkip) continue
 	// SDK 路由需 Bearer drp_app_…；自動化 walker 僅提供 JWT，且配發 App Key 會呼叫 Bifrost（feature server 未模擬）
 	if (op.path.startsWith('/sdk/v')) continue
 	if (hasPathParams(op.path) && !op.testSetup) continue
