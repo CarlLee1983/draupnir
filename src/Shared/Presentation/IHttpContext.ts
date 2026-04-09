@@ -77,8 +77,14 @@ function fallbackPathParam(pathname: string, name: string): string | undefined {
 		const m = /^\/api\/organizations\/([^/]+)(?:\/|$)/.exec(pathname)
 		if (m?.[1]) return decodeURIComponent(m[1])
 	}
+	if (name === 'appId') {
+		const m = /^\/api\/dev-portal\/apps\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+	}
 	if (name === 'keyId') {
-		const m = /^\/api\/keys\/([^/]+)(?:\/|$)/.exec(pathname)
+		let m = /^\/api\/dev-portal\/apps\/[^/]+\/keys\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+		m = /^\/api\/keys\/([^/]+)(?:\/|$)/.exec(pathname)
 		if (m?.[1]) return decodeURIComponent(m[1])
 	}
 	if (name === 'token') {

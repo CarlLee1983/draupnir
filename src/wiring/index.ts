@@ -213,3 +213,20 @@ export const registerAppApiKey = (core: PlanetCore): void => {
 	)
 	registerAppApiKeyRoutes(router, controller)
 }
+
+import { DevPortalController, registerDevPortalRoutes } from '@/Modules/DevPortal'
+
+/**
+ * 註冊 DevPortal 模組
+ */
+export const registerDevPortal = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new DevPortalController(
+		core.container.make('registerAppService') as any,
+		core.container.make('listAppsService') as any,
+		core.container.make('manageAppKeysService') as any,
+		core.container.make('configureWebhookService') as any,
+		core.container.make('getApiDocsService') as any,
+	)
+	registerDevPortalRoutes(router, controller)
+}

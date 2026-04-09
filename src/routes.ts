@@ -10,6 +10,7 @@ import {
   registerContract,
   registerAppModule,
   registerAppApiKey,
+  registerDevPortal,
   registerDocs,
 } from './wiring'
 
@@ -29,6 +30,7 @@ export async function registerRoutes(core: PlanetCore) {
   registerContract(core)
   registerAppModule(core)
   registerAppApiKey(core)
+  registerDevPortal(core)
   registerApiKey(core)
   registerDashboard(core)
   registerCredit(core)

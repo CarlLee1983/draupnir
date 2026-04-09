@@ -738,6 +738,199 @@ paths:
         '404':
           description: 找不到 Key
 
+  /api/dev-portal/apps:
+    post:
+      tags: [DevPortal]
+      summary: 註冊 Developer Portal Application
+      x-test-role: admin
+      x-test-setup:
+        - operation: post-/api/organizations
+          body: { name: "DevPortal Setup Org", managerUserId: "$.adminUserId" }
+          extract:
+            orgId: "$.data.id"
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [orgId, name]
+              properties:
+                orgId:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+                redirectUris:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: 建立成功
+        '400':
+          description: 請求錯誤
+        '401':
+          description: 未授權
+        '422':
+          description: 驗證失敗
+    get:
+      tags: [DevPortal]
+      summary: 列出組織下的 Applications
+      x-test-role: admin
+      x-test-setup:
+        - operation: post-/api/organizations
+          body: { name: "DevPortal List Org", managerUserId: "$.adminUserId" }
+          extract:
+            orgId: "$.data.id"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 請求錯誤
+        '401':
+          description: 未授權
+        '422':
+          description: 驗證失敗
+
+  /api/dev-portal/apps/{appId}/keys:
+    post:
+      tags: [DevPortal]
+      summary: 透過 Application 配發 App API Key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label:
+                  type: string
+                scope:
+                  type: string
+                boundModules:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: 建立成功
+        '400':
+          description: 請求錯誤
+        '401':
+          description: 未授權
+    get:
+      tags: [DevPortal]
+      summary: 列出組織下 App API Keys（經 Application 授權）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+        '401':
+          description: 未授權
+
+  /api/dev-portal/apps/{appId}/keys/{keyId}/revoke:
+    post:
+      tags: [DevPortal]
+      summary: 撤銷 App API Key（經 Application 授權）
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 請求錯誤
+        '401':
+          description: 未授權
+        '404':
+          description: 找不到資源
+
+  /api/dev-portal/apps/{appId}/webhook:
+    put:
+      tags: [DevPortal]
+      summary: 設定 Application Webhook 與事件訂閱
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [webhookUrl, eventTypes]
+              properties:
+                webhookUrl:
+                  type: string
+                eventTypes:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: 成功
+        '400':
+          description: 請求錯誤
+        '401':
+          description: 未授權
+
+  /api/dev-portal/docs:
+    get:
+      tags: [DevPortal]
+      summary: Developer Portal API 文件摘要
+      responses:
+        '200':
+          description: 成功
+
   /api/organizations/{orgId}/dashboard:
     get:
       tags: [Dashboard]

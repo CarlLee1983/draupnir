@@ -118,6 +118,10 @@ async function resolvePathWithCtx(op: Operation): Promise<{
 	if (op.path === '/api/contracts' && op.method === 'get') {
 		queryParams.append('targetId', (setupCtx.id as string) ?? (setupCtx.adminUserId as string))
 	}
+	if (op.path === '/api/dev-portal/apps' && op.method === 'get') {
+		const org = (setupCtx.orgId as string) ?? (setupCtx.id as string)
+		if (org) queryParams.append('orgId', org)
+	}
 
 	const qs = queryParams.toString()
 	if (qs) {
@@ -135,6 +139,10 @@ function buildRequestBody(op: Operation, setupCtx: Record<string, unknown>): unk
 			managerUserId: setupCtx.adminUserId,
 			name: (body.name as string) || `Org ${crypto.randomUUID().slice(0, 8)}`,
 		}
+	}
+	if (op.method === 'post' && op.path === '/api/dev-portal/apps') {
+		const oid = setupCtx.orgId as string | undefined
+		if (oid) body = { ...body, orgId: oid }
 	}
 	const m = op.method.toLowerCase()
 	if (m === 'get' || m === 'delete' || m === 'head') {
