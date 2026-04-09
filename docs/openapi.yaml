@@ -530,6 +530,63 @@ paths:
         '200':
           description: 成功
 
+  /api/organizations/{orgId}/credits/balance:
+    get:
+      tags: [Credit]
+      summary: 查詢組織點數餘額
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{orgId}/credits/transactions:
+    get:
+      tags: [Credit]
+      summary: 查詢點數交易紀錄
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{orgId}/credits/topup:
+    post:
+      tags: [Credit]
+      summary: 組織點數儲值
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopupRequest'
+      responses:
+        '201':
+          description: 儲值成功
+
 components:
   securitySchemes:
     bearerAuth:
@@ -687,6 +744,16 @@ components:
           properties:
             accessToken:
               type: string
+
+    TopupRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 1
+        description:
+          type: string
 
     HealthResponse:
       type: object

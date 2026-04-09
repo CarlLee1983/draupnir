@@ -86,12 +86,24 @@ app/Foundation/Infrastructure/Services/BifrostClient/
 
 ### Phase 1 完成標準
 
-- [ ] `bun dev` 可正常啟動
-- [ ] `bun test` 全部通過，覆蓋率 ≥ 80%
-- [ ] BifrostClient 所有方法有單元測試
-- [ ] CI Pipeline 綠燈
-- [ ] `.env.example` 文件完整
-- [ ] 團隊完成 Code Review 並對 DDD 分層達成共識
+#### 驗收條件
+
+- [x] 啟動驗收：`bun run dev` 可正常啟動，且 `Health` 與基礎路由可回應
+- [x] 品質驗收：`bun run typecheck`、`bun run lint`、`bun run build` 全部通過
+- [x] 測試驗收：`bun test` 全部通過，整體覆蓋率 ≥ 80%
+- [x] BifrostClient 驗收：核心能力皆有單元測試，包含：
+  - [x] `createVirtualKey()`
+  - [x] `listVirtualKeys()`
+  - [x] `deleteVirtualKey()`
+  - [x] `getUsageLogs()`
+  - [x] `getUsageSummary()`
+  - [x] `listModels()`
+  - [x] `updateRateLimit()`
+  - [x] retry / error handling 行為
+- [x] 基礎建設驗收：Foundation service / provider 已完成註冊，且 `BifrostClient` 可透過容器注入使用
+- [x] 環境驗收：`.env.example` 已完整列出啟動與 Bifrost 連線所需變數
+- [ ] CI 驗收：Pipeline 綠燈，且至少包含 lint → test → build
+- [ ] 協作驗收：團隊完成 Code Review，並對 DDD 分層與 Foundation / Modules 邊界達成共識
 
 ---
 

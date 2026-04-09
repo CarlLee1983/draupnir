@@ -10,8 +10,9 @@
 
 **Reference:** 
 - Starter: `/Users/carl/Dev/CMG/gravito-ddd-starter/`
-- Bifrost API docs: `docs/Bifrost_API_Final/`
-- OpenAPI spec: `docs/openapi.json`
+- Bifrost API docs: `docs/reference/bifrost-api/`
+- Bifrost OpenAPI (reference): `docs/reference/bifrost/openapi.json`
+- Draupnir OpenAPI (source): `docs/openapi.yaml`
 
 ---
 

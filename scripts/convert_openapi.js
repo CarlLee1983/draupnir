@@ -1,8 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const INPUT_FILE = path.join(__dirname, '../docs/Bifrost_API/openapi.json');
-const OUTPUT_DIR = path.join(__dirname, '../docs/Bifrost_API_Final');
+const INPUT_FILE = path.join(__dirname, '../docs/reference/bifrost/openapi.json');
+const OUTPUT_DIR = path.join(__dirname, '../docs/reference/bifrost-api');
 
 // 讀取 OpenAPI JSON
 const openapi = JSON.parse(fs.readFileSync(INPUT_FILE, 'utf8'));

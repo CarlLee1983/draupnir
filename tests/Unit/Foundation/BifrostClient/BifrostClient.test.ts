@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
 import { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
 import { BifrostApiError } from '@/Foundation/Infrastructure/Services/BifrostClient/errors'
 import type { BifrostClientConfig } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClientConfig'
-import type { VirtualKeyResponse, VirtualKeyListResponse, BifrostLogsResponse, BifrostModelsResponse } from '@/Foundation/Infrastructure/Services/BifrostClient/types'
+import type { VirtualKeyResponse, VirtualKeyListResponse, BifrostLogsResponse, BifrostLogsStats, BifrostModelsResponse } from '@/Foundation/Infrastructure/Services/BifrostClient/types'
 
 const TEST_CONFIG: BifrostClientConfig = {
   baseUrl: 'https://bifrost.test',
@@ -142,6 +142,26 @@ describe('BifrostClient', () => {
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toContain('virtual_key_ids=vk-1')
       expect(url).toContain('limit=100')
+    })
+  })
+
+  describe('getLogsStats', () => {
+    it('should fetch usage summary stats', async () => {
+      const mockResponse: BifrostLogsStats = {
+        total_requests: 150,
+        total_cost: 3.45,
+        total_tokens: 50000,
+        avg_latency: 0.8,
+      }
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
+
+      const result = await client.getLogsStats({ virtual_key_ids: 'vk-1' })
+
+      expect(result.total_requests).toBe(150)
+      expect(result.total_cost).toBe(3.45)
+      const url = (globalThis.fetch as any).mock.calls[0][0] as string
+      expect(url).toContain('/api/logs/stats')
+      expect(url).toContain('virtual_key_ids=vk-1')
     })
   })
 

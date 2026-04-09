@@ -8,7 +8,7 @@
 
 **Tech Stack:** Bun, TypeScript, Gravito DDD (`@gravito/core`, `@gravito/atlas`, `@gravito/horizon`, `@gravito/signal`), Drizzle ORM (SQLite), Vitest
 
-**Spec:** `docs/superpowers/specs/2026-04-08-p4-credit-system-design.md`
+**Spec:** `docs/draupnir/specs/2026-04-08-p4-credit-system-design.md`
 
 ---
 
