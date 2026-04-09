@@ -150,3 +150,47 @@ export const registerCredit = (core: PlanetCore): void => {
 	)
 	registerCreditRoutes(router, controller)
 }
+
+import { ContractController, registerContractRoutes } from '@/Modules/Contract'
+
+/**
+ * 註冊 Contract 模組
+ */
+export const registerContract = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new ContractController(
+		core.container.make('createContractService') as any,
+		core.container.make('activateContractService') as any,
+		core.container.make('updateContractService') as any,
+		core.container.make('assignContractService') as any,
+		core.container.make('terminateContractService') as any,
+		core.container.make('renewContractService') as any,
+		core.container.make('listContractsService') as any,
+		core.container.make('getContractDetailService') as any,
+	)
+	registerContractRoutes(router, controller)
+}
+
+import { AppModuleController, registerAppModuleRoutes } from '@/Modules/AppModule'
+import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
+import type { CheckModuleAccessService } from '@/Modules/AppModule/Application/Services/CheckModuleAccessService'
+
+/**
+ * 註冊 AppModule 模組
+ */
+export const registerAppModule = (core: PlanetCore): void => {
+	const router = createGravitoModuleRouter(core)
+	const controller = new AppModuleController(
+		core.container.make('registerModuleService') as any,
+		core.container.make('subscribeModuleService') as any,
+		core.container.make('unsubscribeModuleService') as any,
+		core.container.make('listModulesService') as any,
+		core.container.make('getModuleDetailService') as any,
+		core.container.make('listOrgSubscriptionsService') as any,
+	)
+	registerAppModuleRoutes(router, controller)
+
+	// 初始化 ModuleAccessMiddleware
+	const checkAccessService = core.container.make('checkModuleAccessService') as CheckModuleAccessService
+	setCheckModuleAccessService(checkAccessService)
+}

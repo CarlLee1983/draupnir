@@ -6,7 +6,7 @@
       "name": "draupnir",
       "dependencies": {
         "@gravito/atlas": "^2.0.0",
-        "@gravito/core": "^2.0.0",
+        "@gravito/core": "^3.0.1",
         "@gravito/impulse": "^2.0.0",
         "@gravito/plasma": "^2.0.0",
         "@gravito/prism": "^3.1.1",
@@ -174,7 +174,7 @@
 
     "@gravito/chromatic": ["@gravito/chromatic@1.0.0", "", {}, "sha512-5FPXxhnZEOe44QXR30mBTZ65H3c2uP2OmMnSTyMAl1toiL+a04pJGNCg/ukfhKDQeSAlF8jsqFW25aPQjgmprA=="],
 
-    "@gravito/core": ["@gravito/core@2.0.6", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-HdVEXf15zxrIJYzlPiqZLfo5W/O++tSTvJ2Uny7VtOO8siMnezmNh+5bZ65+tl3Crw5bJxeMqpP5AKAgw94uyA=="],
+    "@gravito/core": ["@gravito/core@3.0.1", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-4pX0Zlaa7W/rTbziALtvAWyW3LEjWdwFNlmRlilkZieAYTbSSOJdgmLDpNGLcC8uSc1kMm11eZaXUhF2Pz+Arw=="],
 
     "@gravito/impulse": ["@gravito/impulse@2.0.0", "", { "dependencies": { "@gravito/core": "^2.0.6", "zod": "^3.23.0" }, "peerDependencies": { "@gravito/photon": "^2.0.0" } }, "sha512-noYotohPK9dQPujZPfrfSUQ6wnQ1MB+8Eiv6qaS0teMaaSA8OOBRFe8N0fPNZ2BaZ3+kqj4Ar/wLyzog2hPi7A=="],
 
@@ -936,7 +936,15 @@
 
     "@esbuild-kit/core-utils/esbuild": ["esbuild@0.18.20", "", { "optionalDependencies": { "@esbuild/android-arm": "0.18.20", "@esbuild/android-arm64": "0.18.20", "@esbuild/android-x64": "0.18.20", "@esbuild/darwin-arm64": "0.18.20", "@esbuild/darwin-x64": "0.18.20", "@esbuild/freebsd-arm64": "0.18.20", "@esbuild/freebsd-x64": "0.18.20", "@esbuild/linux-arm": "0.18.20", "@esbuild/linux-arm64": "0.18.20", "@esbuild/linux-ia32": "0.18.20", "@esbuild/linux-loong64": "0.18.20", "@esbuild/linux-mips64el": "0.18.20", "@esbuild/linux-ppc64": "0.18.20", "@esbuild/linux-riscv64": "0.18.20", "@esbuild/linux-s390x": "0.18.20", "@esbuild/linux-x64": "0.18.20", "@esbuild/netbsd-x64": "0.18.20", "@esbuild/openbsd-x64": "0.18.20", "@esbuild/sunos-x64": "0.18.20", "@esbuild/win32-arm64": "0.18.20", "@esbuild/win32-ia32": "0.18.20", "@esbuild/win32-x64": "0.18.20" }, "bin": { "esbuild": "bin/esbuild" } }, "sha512-ceqxoedUrcayh7Y7ZX6NdbbDzGROiyVBgC4PriJThBKSVPWnnFHZAkfI1lJT8QFkOwH4qOS2SJkS4wvpGl8BpA=="],
 
+    "@gravito/atlas/@gravito/core": ["@gravito/core@2.0.6", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-HdVEXf15zxrIJYzlPiqZLfo5W/O++tSTvJ2Uny7VtOO8siMnezmNh+5bZ65+tl3Crw5bJxeMqpP5AKAgw94uyA=="],
+
+    "@gravito/impulse/@gravito/core": ["@gravito/core@2.0.6", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-HdVEXf15zxrIJYzlPiqZLfo5W/O++tSTvJ2Uny7VtOO8siMnezmNh+5bZ65+tl3Crw5bJxeMqpP5AKAgw94uyA=="],
+
     "@gravito/impulse/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
+
+    "@gravito/plasma/@gravito/core": ["@gravito/core@2.0.6", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-HdVEXf15zxrIJYzlPiqZLfo5W/O++tSTvJ2Uny7VtOO8siMnezmNh+5bZ65+tl3Crw5bJxeMqpP5AKAgw94uyA=="],
+
+    "@gravito/stream/@gravito/core": ["@gravito/core@2.0.6", "", { "dependencies": { "zod": "^4.3.6" } }, "sha512-HdVEXf15zxrIJYzlPiqZLfo5W/O++tSTvJ2Uny7VtOO8siMnezmNh+5bZ65+tl3Crw5bJxeMqpP5AKAgw94uyA=="],
 
     "cliui/string-width": ["string-width@4.2.3", "", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, "sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g=="],
 
@@ -1017,6 +1025,8 @@
     "@esbuild-kit/core-utils/esbuild/@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.18.20", "", { "os": "win32", "cpu": "ia32" }, "sha512-Wv7QBi3ID/rROT08SABTS7eV4hX26sVduqDOTe1MvGMjNd3EjOz4b7zeexIR62GTIEKrfJXKL9LFxTYgkyeu7g=="],
 
     "@esbuild-kit/core-utils/esbuild/@esbuild/win32-x64": ["@esbuild/win32-x64@0.18.20", "", { "os": "win32", "cpu": "x64" }, "sha512-kTdfRcSiDfQca/y9QIkng02avJ+NCaQvrMejlsB3RRv5sE9rRoeBPISaZpKxHELzRxZyLvNts1P27W3wV+8geQ=="],
+
+    "@gravito/impulse/@gravito/core/zod": ["zod@4.3.6", "", {}, "sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg=="],
 
     "cliui/string-width/is-fullwidth-code-point": ["is-fullwidth-code-point@3.0.0", "", {}, "sha512-zymm5+u+sCsSWyD9qNaejV3DFvhCKclKdizYaJUuHA83RLjb7nSuGnddCHGv0hk+KY7BMAlsWeK4Ueg6EV6XQg=="],
 

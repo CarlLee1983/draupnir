@@ -66,7 +66,8 @@ async function runSetup(op: Operation): Promise<Record<string, unknown>> {
 	const auth = context.adminToken as string
 
 	for (const step of op.testSetup) {
-		const { method, path } = parseOperationId(step.operation)
+		const { method, path: rawPath } = parseOperationId(step.operation)
+		const path = substitutePath(rawPath, context)
 		let body = resolveRefs({ ...step.body }, context) as Record<string, unknown>
 
 		if (step.operation === 'post-/api/auth/register') {
@@ -110,7 +111,20 @@ async function resolvePathWithCtx(op: Operation): Promise<{
 	setupCtx: Record<string, unknown>
 }> {
 	const setupCtx = await runSetup(op)
-	return { path: substitutePath(op.path, setupCtx), setupCtx }
+	let path = substitutePath(op.path, setupCtx)
+
+	// 如果有必填查詢參數，自動加入 dummy 值
+	const queryParams = new URLSearchParams()
+	if (op.path === '/api/contracts' && op.method === 'get') {
+		queryParams.append('targetId', (setupCtx.id as string) ?? (setupCtx.adminUserId as string))
+	}
+
+	const qs = queryParams.toString()
+	if (qs) {
+		path += `?${qs}`
+	}
+
+	return { path, setupCtx }
 }
 
 function buildRequestBody(op: Operation, setupCtx: Record<string, unknown>): unknown | undefined {

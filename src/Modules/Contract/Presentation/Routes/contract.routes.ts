@@ -11,14 +11,14 @@ import {
 } from '../Requests'
 
 export function registerContractRoutes(router: IModuleRouter, controller: ContractController): void {
-  router.group('/api/contracts', (r) => {
-    r.post('/',        [createRoleMiddleware('admin')], CreateContractRequest, (ctx) => controller.create(ctx))
-    r.get ('/',        [createRoleMiddleware('admin')], ListContractsRequest,   (ctx) => controller.list(ctx))
-    r.get ('/:contractId', [createRoleMiddleware('admin')], (ctx) => controller.getDetail(ctx))
-    r.put ('/:contractId', [createRoleMiddleware('admin')], UpdateContractRequest, (ctx) => controller.update(ctx))
-    r.post('/:contractId/activate', [createRoleMiddleware('admin')], (ctx) => controller.activate(ctx))
-    r.post('/:contractId/terminate', [createRoleMiddleware('admin')], (ctx) => controller.terminate(ctx))
-    r.post('/:contractId/renew', [createRoleMiddleware('admin')], RenewContractRequest, (ctx) => controller.renew(ctx))
-    r.post('/:contractId/assign', [createRoleMiddleware('admin')], AssignContractRequest, (ctx) => controller.assign(ctx))
-  })
+  const adminAuth = [createRoleMiddleware('admin')]
+
+  router.post('/api/contracts', adminAuth, CreateContractRequest, (ctx) => controller.create(ctx))
+  router.get('/api/contracts', adminAuth, ListContractsRequest, (ctx) => controller.list(ctx))
+  router.get('/api/contracts/:contractId', adminAuth, (ctx) => controller.getDetail(ctx))
+  router.put('/api/contracts/:contractId', adminAuth, UpdateContractRequest, (ctx) => controller.update(ctx))
+  router.post('/api/contracts/:contractId/activate', adminAuth, (ctx) => controller.activate(ctx))
+  router.post('/api/contracts/:contractId/terminate', adminAuth, (ctx) => controller.terminate(ctx))
+  router.post('/api/contracts/:contractId/renew', adminAuth, RenewContractRequest, (ctx) => controller.renew(ctx))
+  router.post('/api/contracts/:contractId/assign', adminAuth, AssignContractRequest, (ctx) => controller.assign(ctx))
 }

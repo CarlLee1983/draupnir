@@ -13,8 +13,8 @@ export class CreateContractRequest extends FormRequest {
         tpm: z.number().int().min(0),
       }),
       validityPeriod: z.object({
-        startDate: z.string().datetime(),
-        endDate: z.string().datetime(),
+        startDate: z.string().min(1),
+        endDate: z.string().min(1),
       }),
     }),
   })

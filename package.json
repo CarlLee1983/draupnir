@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@gravito/atlas": "^2.0.0",
-    "@gravito/core": "^2.0.0",
+    "@gravito/core": "^3.0.1",
     "@gravito/impulse": "^2.0.0",
     "@gravito/plasma": "^2.0.0",
     "@gravito/prism": "^3.1.1",

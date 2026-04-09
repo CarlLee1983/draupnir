@@ -41,7 +41,11 @@ function generateValue(fieldName: string, prop: PropertySchema): unknown {
 
 	if (prop.type === 'boolean') return true
 	if (prop.type === 'integer' || prop.type === 'number') return 1
-	if (prop.type === 'array') return []
+	if (prop.type === 'array') {
+		const items = (prop as any).items as PropertySchema | undefined
+		if (items) return [generateValue('item', items)]
+		return ['default']
+	}
 
 	if (prop.type === 'string') {
 		if (prop.enum?.length) {
@@ -56,6 +60,9 @@ function generateValue(fieldName: string, prop: PropertySchema): unknown {
 		}
 		if (prop.format === 'uuid') {
 			return crypto.randomUUID()
+		}
+		if (prop.format === 'date-time' || prop.format === 'date') {
+			return '2026-06-15T00:00:00.000Z'
 		}
 		if (prop.minLength) {
 			return 'A'.repeat(prop.minLength + 4)

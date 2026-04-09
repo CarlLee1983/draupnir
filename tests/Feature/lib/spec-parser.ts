@@ -68,7 +68,7 @@ export function parseOpenAPI(specPath: string): ParsedSpec {
 				| undefined
 			const reqJson = reqBody?.['application/json']?.schema
 			if (reqJson) {
-				requestSchema = resolveSchema(reqJson, componentSchemas)
+				requestSchema = resolveSchema(reqJson as Record<string, unknown>, componentSchemas)
 				requiredFields = (requestSchema?.required as string[]) ?? []
 			}
 
@@ -84,7 +84,7 @@ export function parseOpenAPI(specPath: string): ParsedSpec {
 						| undefined
 					const respSchema = respContent?.['application/json']?.schema
 					if (respSchema) {
-						responseSchema = resolveSchema(respSchema, componentSchemas)
+						responseSchema = resolveSchema(respSchema as Record<string, unknown>, componentSchemas)
 					}
 					break
 				}
@@ -115,9 +115,30 @@ function resolveSchema(
 	schema: Record<string, unknown>,
 	componentSchemas: Record<string, Record<string, unknown>>,
 ): Record<string, unknown> {
+	if (!schema) return {}
+
 	if (schema.$ref && typeof schema.$ref === 'string') {
 		const name = schema.$ref.split('/').pop()!
-		return componentSchemas[name] ?? schema
+		const resolved = componentSchemas[name]
+		if (resolved) {
+			return resolveSchema(resolved, componentSchemas)
+		}
+		return schema
 	}
-	return schema
+
+	const result = { ...schema }
+
+	if (result.properties && typeof result.properties === 'object') {
+		const props = { ...(result.properties as Record<string, unknown>) }
+		for (const [key, prop] of Object.entries(props)) {
+			props[key] = resolveSchema(prop as Record<string, unknown>, componentSchemas)
+		}
+		result.properties = props
+	}
+
+	if (result.items && typeof result.items === 'object') {
+		result.items = resolveSchema(result.items as Record<string, unknown>, componentSchemas)
+	}
+
+	return result
 }

@@ -7,6 +7,8 @@ import {
   registerApiKey,
   registerDashboard,
   registerCredit,
+  registerContract,
+  registerAppModule,
   registerDocs,
 } from './wiring'
 
@@ -26,6 +28,8 @@ export async function registerRoutes(core: PlanetCore) {
   registerApiKey(core)
   registerDashboard(core)
   registerCredit(core)
+  registerContract(core)
+  registerAppModule(core)
   await registerDocs(core)
   console.log('✅ Routes registered')
 }

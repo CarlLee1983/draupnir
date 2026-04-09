@@ -786,7 +786,7 @@ paths:
               creditQuota: 1000
               allowedModules: ["chat"]
               rateLimit: { rpm: 60, tpm: 100000 }
-              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+              validityPeriod: { startDate: "2026-01-01T00:00:00.000Z", endDate: "2026-12-31T00:00:00.000Z" }
           extract:
             contractId: "$.data.id"
       responses:
@@ -813,7 +813,7 @@ paths:
               creditQuota: 1000
               allowedModules: ["chat"]
               rateLimit: { rpm: 60, tpm: 100000 }
-              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+              validityPeriod: { startDate: "2026-01-01T00:00:00.000Z", endDate: "2026-12-31T00:00:00.000Z" }
           extract:
             contractId: "$.data.id"
       requestBody:
@@ -854,7 +854,7 @@ paths:
               creditQuota: 1000
               allowedModules: ["chat"]
               rateLimit: { rpm: 60, tpm: 100000 }
-              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+              validityPeriod: { startDate: "2026-01-01T00:00:00.000Z", endDate: "2026-12-31T00:00:00.000Z" }
           extract:
             contractId: "$.data.id"
       responses:
@@ -883,7 +883,7 @@ paths:
               creditQuota: 1000
               allowedModules: ["chat"]
               rateLimit: { rpm: 60, tpm: 100000 }
-              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+              validityPeriod: { startDate: "2026-01-01T00:00:00.000Z", endDate: "2026-12-31T00:00:00.000Z" }
           extract:
             contractId: "$.data.id"
         - operation: post-/api/contracts/{contractId}/activate
@@ -914,7 +914,7 @@ paths:
               creditQuota: 1000
               allowedModules: ["chat"]
               rateLimit: { rpm: 60, tpm: 100000 }
-              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+              validityPeriod: { startDate: "2026-01-01T00:00:00.000Z", endDate: "2026-12-31T00:00:00.000Z" }
           extract:
             contractId: "$.data.id"
         - operation: post-/api/contracts/{contractId}/activate
@@ -957,7 +957,7 @@ paths:
               creditQuota: 1000
               allowedModules: ["chat"]
               rateLimit: { rpm: 60, tpm: 100000 }
-              validityPeriod: { startDate: "2026-01-01", endDate: "2026-12-31" }
+              validityPeriod: { startDate: "2026-01-01T00:00:00.000Z", endDate: "2026-12-31T00:00:00.000Z" }
           extract:
             contractId: "$.data.id"
       requestBody:
@@ -1010,18 +1010,13 @@ paths:
     get:
       tags: [AppModule]
       summary: 列出所有模組
-      security:
-        - bearerAuth: []
       responses:
         '200':
           description: 模組列表
-
   /api/modules/{moduleId}:
     get:
       tags: [AppModule]
       summary: 模組詳情
-      security:
-        - bearerAuth: []
       parameters:
         - name: moduleId
           in: path
@@ -1032,7 +1027,7 @@ paths:
         - operation: post-/api/modules
           auth: admin
           body:
-            name: "test-module"
+            name: "test-module-setup"
             type: "free"
           extract:
             moduleId: "$.data.id"
@@ -1328,6 +1323,7 @@ components:
               type: number
         validityPeriod:
           type: object
+          required: [startDate, endDate]
           properties:
             startDate:
               type: string
