@@ -2,6 +2,18 @@
 
 本資料夾集中存放 **Draupnir 產品與工程規劃**（規格、計畫、審查、路線圖）。
 
+## 架構文件（`architecture/`）
+
+**新增！** V1.1 完整架構圖表與設計決策說明
+
+| 檔案 | 內容 |
+|------|------|
+| [`architecture/README.md`](./architecture/README.md) | 🏛️ 架構導航索引 |
+| [`architecture/ddd-layered-architecture.md`](./architecture/ddd-layered-architecture.md) | DDD 四層架構圖 + 13 模組評分 |
+| [`architecture/module-dependency-map.md`](./architecture/module-dependency-map.md) | 模組依賴圖 + 耦合度分析 |
+| [`architecture/entity-relationship-overview.md`](./architecture/entity-relationship-overview.md) | ER 圖 + 資料庫映射 |
+| [`architecture/auth-flow-diagrams.md`](./architecture/auth-flow-diagrams.md) | 認證流程圖 (JWT、API Key、OAuth) |
+
 ## 路線圖
 
 | 檔案 | 說明 |
