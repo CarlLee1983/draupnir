@@ -6,7 +6,14 @@ import type { AuthorizeDeviceService } from '../../Application/Services/Authoriz
 import type { ExchangeDeviceCodeService } from '../../Application/Services/ExchangeDeviceCodeService'
 import type { ProxyCliRequestService } from '../../Application/Services/ProxyCliRequestService'
 import type { RevokeCliSessionService } from '../../Application/Services/RevokeCliSessionService'
-import { createHash } from 'crypto'
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 export class CliApiController {
   constructor(
@@ -86,7 +93,7 @@ export class CliApiController {
       return ctx.json({ success: false, message: '無法取得 token', error: 'TOKEN_MISSING' }, 400)
     }
 
-    const tokenHash = createHash('sha256').update(token).digest('hex')
+    const tokenHash = await sha256(token)
     const result = await this.revokeService.execute({
       userId: auth.userId,
       tokenHash,

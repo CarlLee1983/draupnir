@@ -1,6 +1,12 @@
-import { createHash } from 'crypto'
-import { v4 as uuidv4 } from 'uuid'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
@@ -21,7 +27,7 @@ export class AcceptInvitationService {
 				return { success: false, message: 'Token 不能為空', error: 'TOKEN_REQUIRED' }
 			}
 
-			const tokenHash = createHash('sha256').update(request.token).digest('hex')
+			const tokenHash = await sha256(request.token)
 			const invitation = await this.invitationRepository.findByTokenHash(tokenHash)
 
 			if (!invitation || !invitation.isPending()) {
@@ -43,7 +49,7 @@ export class AcceptInvitationService {
 			}
 
 			const member = OrganizationMember.create(
-				uuidv4(),
+				crypto.randomUUID(),
 				invitation.organizationId,
 				userId,
 				invitation.role,

@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
@@ -28,7 +27,7 @@ export class CreateOrganizationService {
 				return { success: false, message: '指定的 Manager 不存在', error: 'MANAGER_NOT_FOUND' }
 			}
 
-			const orgId = uuidv4()
+			const orgId = crypto.randomUUID()
 			const org = Organization.create(orgId, request.name, request.description || '', request.slug)
 
 			const existingSlug = await this.orgRepository.findBySlug(org.slug)
@@ -40,7 +39,7 @@ export class CreateOrganizationService {
 				const txOrgRepo = this.orgRepository.withTransaction(tx)
 				const txMemberRepo = this.memberRepository.withTransaction(tx)
 				await txOrgRepo.save(org)
-				const member = OrganizationMember.create(uuidv4(), orgId, request.managerUserId, 'manager')
+				const member = OrganizationMember.create(crypto.randomUUID(), orgId, request.managerUserId, 'manager')
 				await txMemberRepo.save(member)
 				await this.provisionOrganizationDefaults.execute(tx, orgId, request.managerUserId)
 			})

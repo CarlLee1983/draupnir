@@ -12,7 +12,14 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
-import { createHash } from 'crypto'
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 export interface AuthContext {
   userId: string
@@ -51,7 +58,7 @@ export class AuthMiddleware {
 
       // 3. 檢查 Token 是否被撤銷（如果提供了 Repository）
       if (this.authTokenRepository) {
-        const tokenHash = this.hashToken(token)
+        const tokenHash = await this.hashToken(token)
         const isRevoked = await this.authTokenRepository.isRevoked(tokenHash)
         if (isRevoked) {
           ctx.set('authError', 'TOKEN_REVOKED')
@@ -126,7 +133,7 @@ export class AuthMiddleware {
   /**
    * 計算 Token Hash
    */
-  private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex')
+  private async hashToken(token: string): Promise<string> {
+    return sha256(token)
   }
 }

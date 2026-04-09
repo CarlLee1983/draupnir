@@ -37,7 +37,7 @@ export class InviteMemberService {
 			}
 
 			const role = request.role || 'member'
-			const invitation = OrganizationInvitation.create(orgId, request.email, role, invitedByUserId)
+			const invitation = await OrganizationInvitation.create(orgId, request.email, role, invitedByUserId)
 			await this.invitationRepository.save(invitation)
 
 			return {

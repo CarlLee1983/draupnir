@@ -1,7 +1,12 @@
-import { createHash, randomBytes } from 'crypto'
-import { v4 as uuidv4 } from 'uuid'
-
 const EXPIRY_DAYS = 7
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 interface OrganizationInvitationProps {
 	id: string
@@ -23,16 +28,18 @@ export class OrganizationInvitation {
 		this.props = props
 	}
 
-	static create(
+	static async create(
 		organizationId: string,
 		email: string,
 		role: string,
 		invitedByUserId: string,
-	): OrganizationInvitation {
-		const token = randomBytes(32).toString('hex')
-		const tokenHash = createHash('sha256').update(token).digest('hex')
+	): Promise<OrganizationInvitation> {
+		const buffer = new Uint8Array(32)
+		crypto.getRandomValues(buffer)
+		const token = Array.from(buffer).map((b) => b.toString(16).padStart(2, '0')).join('')
+		const tokenHash = await sha256(token)
 		return new OrganizationInvitation({
-			id: uuidv4(),
+			id: crypto.randomUUID(),
 			organizationId,
 			email: email.toLowerCase(),
 			token,

@@ -12,7 +12,14 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import { JwtTokenService, type TokenSignPayload } from './JwtTokenService'
 import { Email } from '../../Domain/ValueObjects/Email'
-import { createHash } from 'crypto'
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 export interface RefreshTokenRequest {
   refreshToken: string
@@ -52,7 +59,7 @@ export class RefreshTokenService {
       }
 
       // 2. 檢查 Token 是否被撤銷
-      const tokenHash = this.hashToken(request.refreshToken)
+      const tokenHash = await this.hashToken(request.refreshToken)
       const isRevoked = await this.authTokenRepository.isRevoked(tokenHash)
       if (isRevoked) {
         return {
@@ -86,7 +93,7 @@ export class RefreshTokenService {
 
       // 保存新的 Access Token 到倉庫
       const newAccessTokenStr = newAccessToken.getValue()
-      const newAccessTokenHash = this.hashToken(newAccessTokenStr)
+      const newAccessTokenHash = await this.hashToken(newAccessTokenStr)
       await this.authTokenRepository.save({
         id: `${user.id}_access_refresh_${Date.now()}`,
         userId: user.id,
@@ -116,7 +123,7 @@ export class RefreshTokenService {
   /**
    * 計算 Token Hash
    */
-  private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex')
+  private async hashToken(token: string): Promise<string> {
+    return sha256(token)
   }
 }

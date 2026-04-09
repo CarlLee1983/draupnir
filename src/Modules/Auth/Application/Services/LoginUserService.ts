@@ -13,8 +13,15 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { JwtTokenService } from './JwtTokenService'
-import { createHash } from 'crypto'
 import { ScryptPasswordHasher } from '../../Infrastructure/Services/PasswordHasher'
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 export class LoginUserService {
   constructor(
@@ -90,7 +97,7 @@ export class LoginUserService {
 
       // 6. 保存 Token 到倉庫（用於撤銷追蹤）
       const accessTokenStr = accessTokenObj.getValue()
-      const accessTokenHash = createHash('sha256').update(accessTokenStr).digest('hex')
+      const accessTokenHash = await sha256(accessTokenStr)
       await this.authTokenRepository.save({
         id: `${user.id}_access_${Date.now()}`,
         userId: user.id,
@@ -101,7 +108,7 @@ export class LoginUserService {
       })
 
       const refreshTokenStr = refreshTokenObj.getValue()
-      const refreshTokenHash = createHash('sha256').update(refreshTokenStr).digest('hex')
+      const refreshTokenHash = await sha256(refreshTokenStr)
       await this.authTokenRepository.save({
         id: `${user.id}_refresh_${Date.now()}`,
         userId: user.id,

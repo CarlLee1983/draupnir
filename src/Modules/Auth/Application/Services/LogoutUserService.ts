@@ -8,7 +8,14 @@
  */
 
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
-import { createHash } from 'crypto'
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 export interface LogoutRequest {
   token: string
@@ -38,7 +45,7 @@ export class LogoutUserService {
       }
 
       // 2. 計算 Token Hash
-      const tokenHash = this.hashToken(request.token)
+      const tokenHash = await this.hashToken(request.token)
 
       // 3. 檢查 Token 是否存在
       const tokenRecord = await this.authTokenRepository.findByHash(tokenHash)
@@ -89,7 +96,7 @@ export class LogoutUserService {
   /**
    * 計算 Token Hash
    */
-  private hashToken(token: string): string {
-    return createHash('sha256').update(token).digest('hex')
+  private async hashToken(token: string): Promise<string> {
+    return sha256(token)
   }
 }

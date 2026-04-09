@@ -38,8 +38,8 @@ describe('OrganizationMember Entity', () => {
 })
 
 describe('OrganizationInvitation Entity', () => {
-	it('應成功建立邀請', () => {
-		const invitation = OrganizationInvitation.create('org-1', 'new@example.com', 'member', 'inviter-1')
+	it('應成功建立邀請', async () => {
+		const invitation = await OrganizationInvitation.create('org-1', 'new@example.com', 'member', 'inviter-1')
 		expect(invitation.organizationId).toBe('org-1')
 		expect(invitation.email).toBe('new@example.com')
 		expect(invitation.status).toBe('pending')
@@ -47,8 +47,8 @@ describe('OrganizationInvitation Entity', () => {
 		expect(invitation.isExpired()).toBe(false)
 	})
 
-	it('getTokenHash 應回傳 SHA-256', () => {
-		const invitation = OrganizationInvitation.create('org-1', 'new@example.com', 'member', 'inviter-1')
+	it('getTokenHash 應回傳 SHA-256', async () => {
+		const invitation = await OrganizationInvitation.create('org-1', 'new@example.com', 'member', 'inviter-1')
 		expect(invitation.getTokenHash()).toMatch(/^[a-f0-9]{64}$/)
 	})
 })

@@ -4,7 +4,14 @@ import { DeviceCodeStatus } from '../../Domain/ValueObjects/DeviceCode'
 import type { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import type { ExchangeDeviceCodeRequest, ExchangeDeviceCodeResponse } from '../DTOs/DeviceFlowDTO'
-import { createHash } from 'crypto'
+
+async function sha256(str: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const data = encoder.encode(str)
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
+}
 
 export class ExchangeDeviceCodeService {
   constructor(
@@ -71,7 +78,7 @@ export class ExchangeDeviceCodeService {
 
       // Save tokens for revocation tracking
       const accessTokenStr = accessTokenObj.getValue()
-      const accessTokenHash = createHash('sha256').update(accessTokenStr).digest('hex')
+      const accessTokenHash = await sha256(accessTokenStr)
       await this.authTokenRepository.save({
         id: `${userId}_cli_access_${Date.now()}`,
         userId,
@@ -82,7 +89,7 @@ export class ExchangeDeviceCodeService {
       })
 
       const refreshTokenStr = refreshTokenObj.getValue()
-      const refreshTokenHash = createHash('sha256').update(refreshTokenStr).digest('hex')
+      const refreshTokenHash = await sha256(refreshTokenStr)
       await this.authTokenRepository.save({
         id: `${userId}_cli_refresh_${Date.now()}`,
         userId,

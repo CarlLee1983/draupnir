@@ -9,7 +9,6 @@
  * - 持久化到資料庫
  */
 
-import { v4 as uuidv4 } from 'uuid'
 import type { RegisterUserRequest, RegisterUserResponse } from '../DTOs/RegisterUserDTO'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
@@ -56,7 +55,7 @@ export class RegisterUserService {
       }
 
       // 4. 創建新用戶（密碼由應用層加密）
-      const userId = uuidv4()
+      const userId = crypto.randomUUID()
       const hashedPassword = await this.passwordHasher.hash(request.password)
       const user = User.create(
         userId,
