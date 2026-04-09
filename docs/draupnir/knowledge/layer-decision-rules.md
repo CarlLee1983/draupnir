@@ -174,3 +174,61 @@ Infrastructure 層回答的是「怎麼跟外部世界連接」。
 
 如果四個答案都是否定的，通常該拆。
 
+---
+
+## 特殊情境：讀取層與代理層無需 Domain
+
+有些模組天生沒有 Domain 層，這是合理的設計。
+
+### Dashboard（讀取聚合）
+
+Dashboard 是應用層的純讀取視圖，不應有 Domain 層，因為：
+
+1. **無業務不變式** — Dashboard 只是多個 Repository 的數據聚合，沒有「允許或禁止什麼」的規則
+2. **無狀態轉換** — 完全是讀操作，無 Aggregate Root、Entity、Value Object
+3. **應用層職責** — 決定哪些數據聚合、如何格式化，這些都屬於 Use Case 編排
+4. **CQRS 讀側** — 符合 CQRS 「讀側無 Domain」的設計思想
+
+正確的結構：
+```
+Dashboard/
+  Application/
+    Services/GetDashboardSummaryService    ← 聚合邏輯
+    DTOs/DashboardDTO
+  Infrastructure/
+    Services/UsageAggregator                ← 查詢邏輯
+    Providers/DashboardServiceProvider
+  Presentation/Controllers
+```
+
+### SdkApi（認證代理）
+
+SdkApi 是 API 閘道層，負責應用級認證與請求代理，不應有 Domain 層，因為：
+
+1. **無核心業務邏輯** — 只是驗證 AppApiKey、代理請求到 Bifrost
+2. **中間件職責** — 屬於 Application Service 的授權檢查部分
+3. **無持久化對象** — 沒有自己的 Aggregate 或 Entity
+4. **認證代理** — 屬於 Infrastructure 與 Presentation 的交界點
+
+正確的結構：
+```
+SdkApi/
+  Application/
+    UseCases/AuthenticateApp             ← 驗證邏輯（Application 層）
+    UseCases/ProxyModelCall              ← 代理邏輯（Application 層）
+  Infrastructure/
+    Middleware/AppAuthMiddleware         ← 框架整合（Infrastructure）
+    Providers/SdkApiServiceProvider
+  Presentation/Controllers
+```
+
+### 判斷模組是否需要 Domain 層
+
+問這三個問題：
+
+1. **有沒有不變式？** — 有則需要 Domain（如 Credit.balance > 0）
+2. **有沒有聚合根？** — 有則需要 Domain（如 Organization、User）
+3. **有沒有規則會改變？** — 有則需要 Domain（如「額度不能超過配額」）
+
+若全部答「沒有」，那就不需要 Domain 層。Dashboard 和 SdkApi 都符合這個模式。
+
