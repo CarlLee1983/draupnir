@@ -23,6 +23,9 @@ export interface IHttpContext {
 	/** 取得路由參數 */
 	getParam(name: string): string | undefined
 
+	/** 請求路徑 pathname（不含 query），供路由參數備援解析 */
+	getPathname(): string
+
 	/** 取得查詢參數 */
 	getQuery(name: string): string | undefined
 
@@ -59,6 +62,40 @@ export interface IHttpContext {
  *   controller.create(fromGravitoContext(ctx))
  * )
  */
+
+/** Gravito 2 在部分情境下不會填入 req.param；由 pathname 備援解析 */
+function fallbackPathParam(pathname: string, name: string): string | undefined {
+	if (!pathname) return undefined
+	if (name === 'id') {
+		let m = /^\/api\/users\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1] && m[1] !== 'me') return decodeURIComponent(m[1])
+		m = /^\/api\/organizations\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+		return undefined
+	}
+	if (name === 'orgId') {
+		const m = /^\/api\/organizations\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+	}
+	if (name === 'keyId') {
+		const m = /^\/api\/keys\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+	}
+	if (name === 'token') {
+		const m = /^\/api\/invitations\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+	}
+	if (name === 'invId') {
+		const m = /\/invitations\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+	}
+	if (name === 'userId') {
+		const m = /\/members\/([^/]+)(?:\/|$)/.exec(pathname)
+		if (m?.[1]) return decodeURIComponent(m[1])
+	}
+	return undefined
+}
+
 export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
 	// 解析查詢參數
 	const query = (() => {
@@ -90,17 +127,45 @@ export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
 		return JSON.parse(await req.text()) as T
 	}
 
-	const ctxParams = ((ctx as unknown as { params?: Record<string, string | undefined> })
+	// Gravito 2：動態路由參數在 ctx.req.param() / ctx.req.params()，非 ctx.params
+	const legacyParams = ((ctx as unknown as { params?: Record<string, string | undefined> })
 		.params ?? {}) as Record<string, string | undefined>
+	const routeParams = (() => {
+		try {
+			const p = ctx.req.params()
+			return p as Record<string, string | undefined>
+		} catch {
+			return legacyParams
+		}
+	})()
+
+	function resolvePathname(): string {
+		const u = ctx.req.url
+		try {
+			if (u.startsWith('http://') || u.startsWith('https://')) {
+				return new URL(u).pathname
+			}
+			return u.split('?')[0] || ''
+		} catch {
+			return u.split('?')[0] || ''
+		}
+	}
 
 	return {
 		getBodyText: () => ctx.req.text(),
 		getJsonBody: getJsonBodyFn,
 		getBody: getJsonBodyFn,
 		getHeader: (name) => ctx.req.header(name),
-		getParam: (name) => ctxParams[name],
+		getParam: (name) => {
+			const direct = ctx.req.param(name)
+			if (direct != null && direct !== '') return direct
+			const leg = legacyParams[name]
+			if (leg != null && leg !== '') return leg
+			return fallbackPathParam(resolvePathname(), name)
+		},
+		getPathname: () => resolvePathname(),
 		getQuery: (name) => query[name],
-		params: ctxParams,
+		params: Object.keys(routeParams).length > 0 ? routeParams : legacyParams,
 		query,
 		headers,
 		json: (data, statusCode) => ctx.json(data, statusCode as any),

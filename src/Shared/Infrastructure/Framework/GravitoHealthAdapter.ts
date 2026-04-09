@@ -24,10 +24,18 @@ import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Rep
  * @example
  * registerHealthWithGravito(core)
  */
+function tryMake<T>(core: PlanetCore, key: string): T | undefined {
+	try {
+		return core.container.make<T>(key as never)
+	} catch {
+		return undefined
+	}
+}
+
 export function registerHealthWithGravito(core: PlanetCore): void {
-	// 從 PlanetCore 取得原始服務（可能為 undefined）
-	const rawRedis = core.container.make<RedisClientContract | undefined>('redis')
-	const rawCache = core.container.make<CacheManager | undefined>('cache')
+	// 從 PlanetCore 取得原始服務（可能未註冊，例如 ORM=memory 精簡啟動）
+	const rawRedis = tryMake<RedisClientContract>(core, 'redis')
+	const rawCache = tryMake<CacheManager>(core, 'cache')
 
 	// 適配為框架無關的介面（null 表示未設定）
 	const redis = rawRedis ? new GravitoRedisAdapter(rawRedis) : null
