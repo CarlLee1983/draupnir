@@ -1,4 +1,4 @@
-export const KeyStatusValues = ['pending', 'active', 'revoked'] as const
+export const KeyStatusValues = ['pending', 'active', 'revoked', 'suspended_no_credit'] as const
 export type KeyStatusType = (typeof KeyStatusValues)[number]
 
 export class KeyStatus {
@@ -14,6 +14,10 @@ export class KeyStatus {
 
 	static revoked(): KeyStatus {
 		return new KeyStatus('revoked')
+	}
+
+	static suspendedNoCredit(): KeyStatus {
+		return new KeyStatus('suspended_no_credit')
 	}
 
 	static from(value: string): KeyStatus {
@@ -33,6 +37,10 @@ export class KeyStatus {
 
 	isRevoked(): boolean {
 		return this.value === 'revoked'
+	}
+
+	isSuspendedNoCredit(): boolean {
+		return this.value === 'suspended_no_credit'
 	}
 
 	getValue(): KeyStatusType {

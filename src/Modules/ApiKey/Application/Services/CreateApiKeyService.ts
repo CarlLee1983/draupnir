@@ -82,7 +82,7 @@ export class CreateApiKeyService {
 				}
 			} catch (bifrostError: unknown) {
 				const activatedEntry = await this.apiKeyRepository.findById(keyId)
-				const virtualKeyId = activatedEntry?.toDTO().bifrostVirtualKeyId
+				const virtualKeyId = activatedEntry?.toDTO().bifrostVirtualKeyId as string | undefined
 				if (virtualKeyId) {
 					await this.bifrostSync.deleteVirtualKey(virtualKeyId).catch(() => {})
 				}

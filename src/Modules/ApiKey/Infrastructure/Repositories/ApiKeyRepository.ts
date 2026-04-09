@@ -22,6 +22,25 @@ export class ApiKeyRepository implements IApiKeyRepository {
 		return rows.map((row) => ApiKey.fromDatabase(row))
 	}
 
+	async findActiveByOrgId(orgId: string): Promise<ApiKey[]> {
+		const rows = await this.db
+			.table('api_keys')
+			.where('org_id', '=', orgId)
+			.where('status', '=', 'active')
+			.select()
+		return rows.map((row) => ApiKey.fromDatabase(row))
+	}
+
+	async findSuspendedByOrgId(orgId: string, reason: string): Promise<ApiKey[]> {
+		const rows = await this.db
+			.table('api_keys')
+			.where('org_id', '=', orgId)
+			.where('status', '=', 'suspended_no_credit')
+			.where('suspension_reason', '=', reason)
+			.select()
+		return rows.map((row) => ApiKey.fromDatabase(row))
+	}
+
 	async findByKeyHash(keyHash: string): Promise<ApiKey | null> {
 		const row = await this.db.table('api_keys').where('key_hash', '=', keyHash).first()
 		return row ? ApiKey.fromDatabase(row) : null

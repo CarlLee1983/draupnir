@@ -8,10 +8,29 @@ servers:
     description: 本地開發伺服器
 
 paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: 健康檢查
+      responses:
+        '200':
+          description: 健康狀態
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/history:
+    get:
+      tags: [Health]
+      summary: 健康檢查歷史
+      responses:
+        '200':
+          description: 歷史紀錄
+
   /api/auth/register:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: 註冊新用戶
       requestBody:
         required: true
@@ -22,13 +41,16 @@ paths:
       responses:
         '201':
           description: 註冊成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
         '400':
           description: 驗證失敗或 Email 已存在
 
   /api/auth/login:
     post:
-      tags:
-        - Auth
+      tags: [Auth]
       summary: 用戶登入
       requestBody:
         required: true
@@ -39,13 +61,46 @@ paths:
       responses:
         '200':
           description: 登入成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
         '401':
           description: 認證失敗
 
-  /api/user/me:
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: 刷新 Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: 刷新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '401':
+          description: Refresh Token 無效
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: 登出
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: 登出成功
+
+  /api/users/me:
     get:
-      tags:
-        - User
+      tags: [User]
       summary: 取得個人資料
       security:
         - bearerAuth: []
@@ -53,8 +108,7 @@ paths:
         '200':
           description: 成功取得資料
     put:
-      tags:
-        - User
+      tags: [User]
       summary: 更新個人資料
       security:
         - bearerAuth: []
@@ -68,13 +122,71 @@ paths:
         '200':
           description: 更新成功
 
+  /api/users:
+    get:
+      tags: [User]
+      summary: 列表所有用戶
+      security:
+        - bearerAuth: []
+      x-test-role: admin
+      responses:
+        '200':
+          description: 成功
+
+  /api/users/{id}:
+    get:
+      tags: [User]
+      summary: 取得指定用戶
+      security:
+        - bearerAuth: []
+      x-test-role: admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      x-test-setup:
+        - operation: post-/api/auth/register
+          body: { email: "setup-user@feature.test", password: "SecurePass123" }
+          extract:
+            id: "$.data.id"
+      responses:
+        '200':
+          description: 成功
+
+  /api/users/{id}/status:
+    patch:
+      tags: [User]
+      summary: 變更用戶狀態
+      security:
+        - bearerAuth: []
+      x-test-role: admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeStatusRequest'
+      responses:
+        '200':
+          description: 成功
+
   /api/organizations:
     post:
-      tags:
-        - Organization
+      tags: [Organization]
       summary: 建立組織
       security:
         - bearerAuth: []
+      x-test-role: admin
       requestBody:
         required: true
         content:
@@ -85,14 +197,338 @@ paths:
         '201':
           description: 建立成功
     get:
-      tags:
-        - Organization
+      tags: [Organization]
       summary: 列表組織
       security:
         - bearerAuth: []
+      x-test-role: admin
       responses:
         '200':
           description: 成功取得列表
+
+  /api/organizations/{id}:
+    get:
+      tags: [Organization]
+      summary: 取得指定組織
+      security:
+        - bearerAuth: []
+      x-test-role: admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      x-test-setup:
+        - operation: post-/api/organizations
+          body: { name: "Setup Org", managerUserId: "$.adminUserId" }
+          extract:
+            id: "$.data.id"
+      responses:
+        '200':
+          description: 成功
+    put:
+      tags: [Organization]
+      summary: 更新組織
+      security:
+        - bearerAuth: []
+      x-test-role: admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{id}/status:
+    patch:
+      tags: [Organization]
+      summary: 變更組織狀態
+      security:
+        - bearerAuth: []
+      x-test-role: admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{id}/members:
+    get:
+      tags: [Organization]
+      summary: 列表組織成員
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{id}/invitations:
+    post:
+      tags: [Organization]
+      summary: 邀請成員
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationRequest'
+      responses:
+        '201':
+          description: 邀請成功
+    get:
+      tags: [Organization]
+      summary: 列表邀請
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{id}/invitations/{invId}:
+    delete:
+      tags: [Organization]
+      summary: 取消邀請
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: invId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /api/invitations/{token}/accept:
+    post:
+      tags: [Organization]
+      summary: 接受邀請
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{id}/members/{userId}:
+    delete:
+      tags: [Organization]
+      summary: 移除成員
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{id}/members/{userId}/role:
+    patch:
+      tags: [Organization]
+      summary: 變更成員角色
+      security:
+        - bearerAuth: []
+      x-test-role: admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{orgId}/keys:
+    post:
+      tags: [ApiKey]
+      summary: 建立 API Key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKeyRequest'
+      responses:
+        '201':
+          description: 建立成功
+    get:
+      tags: [ApiKey]
+      summary: 列表 API Keys
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/keys/{keyId}/revoke:
+    post:
+      tags: [ApiKey]
+      summary: 撤銷 API Key
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+
+  /api/keys/{keyId}/label:
+    patch:
+      tags: [ApiKey]
+      summary: 更新 API Key 標籤
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateKeyLabelRequest'
+      responses:
+        '200':
+          description: 成功
+
+  /api/keys/{keyId}/permissions:
+    put:
+      tags: [ApiKey]
+      summary: 設定 API Key 權限
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: keyId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetKeyPermissionsRequest'
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{orgId}/dashboard:
+    get:
+      tags: [Dashboard]
+      summary: Dashboard 摘要
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
+
+  /api/organizations/{orgId}/dashboard/usage:
+    get:
+      tags: [Dashboard]
+      summary: 使用量統計
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 成功
 
 components:
   securitySchemes:
@@ -104,9 +540,7 @@ components:
   schemas:
     RegisterRequest:
       type: object
-      required:
-        - email
-        - password
+      required: [email, password]
       properties:
         email:
           type: string
@@ -119,14 +553,19 @@ components:
 
     LoginRequest:
       type: object
-      required:
-        - email
-        - password
+      required: [email, password]
       properties:
         email:
           type: string
           format: email
         password:
+          type: string
+
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
           type: string
 
     UpdateProfileRequest:
@@ -141,9 +580,7 @@ components:
 
     CreateOrgRequest:
       type: object
-      required:
-        - name
-        - managerUserId
+      required: [name, managerUserId]
       properties:
         name:
           type: string
@@ -154,3 +591,177 @@ components:
         managerUserId:
           type: string
           format: uuid
+
+    ChangeStatusRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+
+    InvitationRequest:
+      type: object
+      required: [email, role]
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+
+    CreateApiKeyRequest:
+      type: object
+      required: [label]
+      properties:
+        label:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    UpdateKeyLabelRequest:
+      type: object
+      required: [label]
+      properties:
+        label:
+          type: string
+
+    SetKeyPermissionsRequest:
+      type: object
+      required: [permissions]
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
+
+    RegisterResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+            email:
+              type: string
+              format: email
+            role:
+              type: string
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            user:
+              type: object
+              properties:
+                id:
+                  type: string
+                email:
+                  type: string
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+
+    RefreshResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        status:
+          type: string
+        timestamp:
+          type: string
+        checks:
+          type: object
+          additionalProperties: true
+        message:
+          type: string
+
+x-test-flows:
+  auth-flow:
+    description: 完整認證流程
+    steps:
+      - operation: post-/api/auth/register
+        body:
+          email: "flow-auth@feature.test"
+          password: "SecurePass123"
+        expect:
+          status: 201
+        extract:
+          userId: "$.data.id"
+
+      - operation: post-/api/auth/login
+        body:
+          email: "flow-auth@feature.test"
+          password: "SecurePass123"
+        expect:
+          status: 200
+          body:
+            data.accessToken: { exists: true }
+            data.refreshToken: { exists: true }
+        extract:
+          token: "$.data.accessToken"
+          refreshToken: "$.data.refreshToken"
+
+      - operation: get-/api/users/me
+        auth: "$.token"
+        expect:
+          status: 200
+
+      - operation: post-/api/auth/refresh
+        body:
+          refreshToken: "$.refreshToken"
+        expect:
+          status: 200
+          body:
+            data.accessToken: { exists: true }
+        extract:
+          newToken: "$.data.accessToken"
+
+      - operation: post-/api/auth/logout
+        auth: "$.token"
+        expect:
+          status: 200
+
+  org-flow:
+    description: 組織建立與列表（需要 admin 權限）
+    setup: admin
+    steps:
+      - operation: post-/api/organizations
+        auth: "$.adminToken"
+        body:
+          name: "Test Organization"
+          managerUserId: "$.adminUserId"
+        expect:
+          status: 201
+
+      - operation: get-/api/organizations
+        auth: "$.adminToken"
+        expect:
+          status: 200

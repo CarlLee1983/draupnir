@@ -12,6 +12,9 @@ interface ApiKeyProps {
 	readonly bifrostVirtualKeyId: string
 	readonly status: KeyStatus
 	readonly scope: KeyScope
+	readonly suspensionReason: string | null
+	readonly preFreezeRateLimit: string | null // JSON string
+	readonly suspendedAt: Date | null
 	readonly expiresAt: Date | null
 	readonly revokedAt: Date | null
 	readonly createdAt: Date
@@ -47,6 +50,9 @@ export class ApiKey {
 			bifrostVirtualKeyId: params.bifrostVirtualKeyId,
 			status: KeyStatus.pending(),
 			scope: params.scope ?? KeyScope.unrestricted(),
+			suspensionReason: null,
+			preFreezeRateLimit: null,
+			suspendedAt: null,
 			expiresAt: params.expiresAt ?? null,
 			revokedAt: null,
 			createdAt: new Date(),
@@ -67,6 +73,9 @@ export class ApiKey {
 			bifrostVirtualKeyId: row.bifrost_virtual_key_id as string,
 			status: KeyStatus.from(row.status as string),
 			scope: KeyScope.fromJSON(scopeJson),
+			suspensionReason: (row.suspension_reason as string) ?? null,
+			preFreezeRateLimit: (row.pre_freeze_rate_limit as string) ?? null,
+			suspendedAt: row.suspended_at ? new Date(row.suspended_at as string) : null,
 			expiresAt: row.expires_at ? new Date(row.expires_at as string) : null,
 			revokedAt: row.revoked_at ? new Date(row.revoked_at as string) : null,
 			createdAt: new Date(row.created_at as string),
@@ -96,6 +105,30 @@ export class ApiKey {
 			...this.props,
 			status: KeyStatus.revoked(),
 			revokedAt: new Date(),
+			updatedAt: new Date(),
+		})
+	}
+
+	suspend(reason: string, currentRateLimit: { rpm: number | null; tpm: number | null }): ApiKey {
+		if (this.props.status.isSuspendedNoCredit()) return this
+		return new ApiKey({
+			...this.props,
+			status: KeyStatus.suspendedNoCredit(),
+			suspensionReason: reason,
+			preFreezeRateLimit: JSON.stringify(currentRateLimit),
+			suspendedAt: new Date(),
+			updatedAt: new Date(),
+		})
+	}
+
+	unsuspend(): ApiKey {
+		if (!this.props.status.isSuspendedNoCredit()) return this
+		return new ApiKey({
+			...this.props,
+			status: KeyStatus.active(),
+			suspensionReason: null,
+			preFreezeRateLimit: null,
+			suspendedAt: null,
 			updatedAt: new Date(),
 		})
 	}
@@ -143,6 +176,13 @@ export class ApiKey {
 	get scope(): KeyScope {
 		return this.props.scope
 	}
+	get preFreezeRateLimit(): { rpm: number | null; tpm: number | null } | null {
+		if (!this.props.preFreezeRateLimit) return null
+		return JSON.parse(this.props.preFreezeRateLimit)
+	}
+	get suspensionReason(): string | null {
+		return this.props.suspensionReason
+	}
 	get expiresAt(): Date | null {
 		return this.props.expiresAt
 	}
@@ -166,6 +206,9 @@ export class ApiKey {
 			bifrost_virtual_key_id: this.props.bifrostVirtualKeyId,
 			status: this.props.status.getValue(),
 			scope: JSON.stringify(this.props.scope.toJSON()),
+			suspension_reason: this.props.suspensionReason,
+			pre_freeze_rate_limit: this.props.preFreezeRateLimit,
+			suspended_at: this.props.suspendedAt?.toISOString() ?? null,
 			expires_at: this.props.expiresAt?.toISOString() ?? null,
 			revoked_at: this.props.revokedAt?.toISOString() ?? null,
 			created_at: this.props.createdAt.toISOString(),
@@ -183,6 +226,8 @@ export class ApiKey {
 			bifrostVirtualKeyId: this.props.bifrostVirtualKeyId,
 			status: this.props.status.getValue(),
 			scope: this.props.scope.toJSON(),
+			suspensionReason: this.props.suspensionReason,
+			suspendedAt: this.props.suspendedAt?.toISOString() ?? null,
 			expiresAt: this.props.expiresAt?.toISOString() ?? null,
 			revokedAt: this.props.revokedAt?.toISOString() ?? null,
 			createdAt: this.props.createdAt.toISOString(),
