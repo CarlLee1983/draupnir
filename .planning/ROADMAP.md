@@ -35,12 +35,13 @@ Decimal phases appear between their surrounding integers in numeric order.
 ### Phase 2: Business-Layer Migration
 **Goal**: All application services and wire functions use `ILLMGatewayClient` — no file under `src/Modules/` or `src/Foundation/Application/` has a constructor parameter typed as `BifrostClient`.
 **Depends on**: Phase 1
-**Requirements**: MIGRATE-01, MIGRATE-02, MIGRATE-03, MIGRATE-04, MIGRATE-05, MIGRATE-06, WIRE-02, WIRE-03, WIRE-04, WIRE-05, WIRE-06, TEST-01, TEST-03
+**Requirements**: MIGRATE-01, MIGRATE-02, MIGRATE-03, MIGRATE-04, MIGRATE-05, MIGRATE-06, MIGRATE-07, MIGRATE-08, MIGRATE-09, WIRE-02, WIRE-03, WIRE-04, WIRE-05, WIRE-06, TEST-01, TEST-03
 **Success Criteria** (what must be TRUE):
-  1. `AppKeyBifrostSync`, `ApiKeyBifrostSync`, `GetAppKeyUsageService`, `QueryUsage`, and `UsageAggregator` each accept `ILLMGatewayClient` in their constructor — no `BifrostClient` type reference in their source files
-  2. `wireAppApiKey`, `wireApiKey`, `wireSdkApi`, and `wireDashboard` resolve `llmGatewayClient` from the container (not `bifrostClient`) when constructing the migrated services
-  3. All tests that previously mocked `BifrostClient` now mock `ILLMGatewayClient` or use `MockGatewayClient` — the old `vi.fn()` mocks of concrete Bifrost methods are gone from those files
-  4. Full Bun unit + feature test suite passes (including `routes-connectivity.test.ts` and `routes-existence.test.ts`) — all HTTP routes respond correctly
+  1. `AppKeyBifrostSync`, `ApiKeyBifrostSync`, `GetAppKeyUsageService`, `QueryUsage`, `UsageAggregator`, `HandleBalanceDepletedService`, and `HandleCreditToppedUpService` each accept `ILLMGatewayClient` in their constructor — no `BifrostClient` type reference in their source files
+  2. `wireAppApiKey`, `wireApiKey`, `wireSdkApi`, `wireDashboard`, and `wireCredit` resolve `llmGatewayClient` from the container (not `bifrostClient`) when constructing the migrated services
+  3. `ApiKeyBifrostSync.syncPermissions` uses `ILLMGatewayClient.updateKey({providerConfigs, rateLimit})` and preserves the existing model-allowlist + rate-limit sync behavior
+  4. All tests that previously mocked `BifrostClient` now mock `ILLMGatewayClient` or use `MockGatewayClient` — the old `vi.fn()` mocks of concrete Bifrost methods are gone from those files
+  5. Full Bun unit + feature test suite passes (including `routes-connectivity.test.ts` and `routes-existence.test.ts`) — all HTTP routes respond correctly
 **UI hint**: no
 **Plans**: TBD
 

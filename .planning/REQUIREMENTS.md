@@ -33,11 +33,14 @@
 ### Business-Layer Migration (MIGRATE)
 
 - [ ] **MIGRATE-01**: `AppKeyBifrostSync` constructor parameter type changes from `BifrostClient` to `ILLMGatewayClient`, and all method calls use the new interface vocabulary
-- [ ] **MIGRATE-02**: `ApiKeyBifrostSync` (the `ApiKey` module sibling missing from the original spec) migrates the same way
+- [ ] **MIGRATE-02**: `ApiKeyBifrostSync.createVirtualKey` + `.deactivateVirtualKey` + `.deleteVirtualKey` migrate to `ILLMGatewayClient` (the `ApiKey` module sibling missing from the original spec)
 - [ ] **MIGRATE-03**: `GetAppKeyUsageService` migrates to `ILLMGatewayClient` and uses camelCase query types
 - [ ] **MIGRATE-04**: `QueryUsage` (SdkApi UseCase) migrates to `ILLMGatewayClient`
-- [ ] **MIGRATE-05**: `UsageAggregator` (Dashboard) migrates to `ILLMGatewayClient` and stops passing snake_case query parameters
+- [ ] **MIGRATE-05**: `UsageAggregator.getStats` and `UsageAggregator.getLogs` (Dashboard) migrate to `ILLMGatewayClient` — uses the multi-key array form of `getUsageStats` and the new `getUsageLogs` method; stops passing snake_case query parameters
 - [ ] **MIGRATE-06**: Any remaining direct `BifrostClient` imports in application layer are removed (verified by `grep`)
+- [ ] **MIGRATE-07**: `HandleBalanceDepletedService` (Credit module) migrates from `BifrostClient.updateVirtualKey({rate_limit: {...}})` to `ILLMGatewayClient.updateKey({rateLimit: {...}})`; retry loop uses `GatewayError.retryable` flag to classify failures
+- [ ] **MIGRATE-08**: `HandleCreditToppedUpService` (Credit module) migrates from `BifrostClient.updateVirtualKey({rate_limit: {...}})` to `ILLMGatewayClient.updateKey({rateLimit: {...}})` to restore rate limits after credit top-up
+- [ ] **MIGRATE-09**: `ApiKeyBifrostSync.syncPermissions` migrates from `BifrostClient.updateVirtualKey({provider_configs, rate_limit})` to `ILLMGatewayClient.updateKey({providerConfigs, rateLimit})` — preserves the existing model-allowlist and rate-limit sync behavior
 
 ### Domain Rename (RENAME)
 
@@ -128,6 +131,9 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | MIGRATE-04 | Phase 2 | Pending |
 | MIGRATE-05 | Phase 2 | Pending |
 | MIGRATE-06 | Phase 2 | Pending |
+| MIGRATE-07 | Phase 2 | Pending |
+| MIGRATE-08 | Phase 2 | Pending |
+| MIGRATE-09 | Phase 2 | Pending |
 | RENAME-01 | Phase 3 | Pending |
 | RENAME-02 | Phase 3 | Pending |
 | RENAME-03 | Phase 3 | Pending |
@@ -149,10 +155,10 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | QUAL-05 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 41 total
-- Mapped to phases: 41/41 ✓
+- v1 requirements: 44 total
+- Mapped to phases: 44/44 ✓
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-10 — traceability populated by gsd-roadmapper*
+*Last updated: 2026-04-10 — amended during Phase 1 discussion to add MIGRATE-07/08/09 (Credit module + syncPermissions)*
