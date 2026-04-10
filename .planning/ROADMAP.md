@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Full Bun unit + feature test suite passes unchanged (existing `BifrostClient` path untouched)
 **Plans**: 4 plans
 Plans:
-- [ ] 01-01-PLAN.md — Interface contracts: ILLMGatewayClient, DTOs, GatewayError, barrel export
+- [x] 01-01-PLAN.md — Interface contracts: ILLMGatewayClient, DTOs, GatewayError, barrel export
 - [ ] 01-02-PLAN.md — BifrostGatewayAdapter implementation + unit tests
 - [ ] 01-03-PLAN.md — MockGatewayClient implementation + unit tests
 - [ ] 01-04-PLAN.md — DI registration in FoundationServiceProvider + human verification

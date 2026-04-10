@@ -7,10 +7,10 @@
 
 ### Interface & Types (IFACE)
 
-- [ ] **IFACE-01**: `ILLMGatewayClient` interface exists at `src/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient.ts` with methods `createKey`, `updateKey`, `deleteKey`, `getUsageStats`
-- [ ] **IFACE-02**: DTO types (`CreateKeyRequest`, `UpdateKeyRequest`, `KeyResponse`, `UsageQuery`, `UsageStats`) exist at `src/Foundation/Infrastructure/Services/LLMGateway/types.ts` with `readonly` fields and camelCase naming only
-- [ ] **IFACE-03**: `GatewayError` class exists at `src/Foundation/Infrastructure/Services/LLMGateway/errors.ts` exposing `statusCode` and optional `originalError`, and is the single error type adapters re-throw
-- [ ] **IFACE-04**: A barrel export `src/Foundation/Infrastructure/Services/LLMGateway/index.ts` exposes the interface, types, and errors as the public API of the abstraction layer
+- [x] **IFACE-01**: `ILLMGatewayClient` interface exists at `src/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient.ts` with methods `createKey`, `updateKey`, `deleteKey`, `getUsageStats`
+- [x] **IFACE-02**: DTO types (`CreateKeyRequest`, `UpdateKeyRequest`, `KeyResponse`, `UsageQuery`, `UsageStats`) exist at `src/Foundation/Infrastructure/Services/LLMGateway/types.ts` with `readonly` fields and camelCase naming only
+- [x] **IFACE-03**: `GatewayError` class exists at `src/Foundation/Infrastructure/Services/LLMGateway/errors.ts` exposing `statusCode` and optional `originalError`, and is the single error type adapters re-throw
+- [x] **IFACE-04**: A barrel export `src/Foundation/Infrastructure/Services/LLMGateway/index.ts` exposes the interface, types, and errors as the public API of the abstraction layer
 
 ### Adapters (ADAPT)
 
@@ -109,10 +109,10 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IFACE-01 | Phase 1 | Pending |
-| IFACE-02 | Phase 1 | Pending |
-| IFACE-03 | Phase 1 | Pending |
-| IFACE-04 | Phase 1 | Pending |
+| IFACE-01 | Phase 1 | Complete |
+| IFACE-02 | Phase 1 | Complete |
+| IFACE-03 | Phase 1 | Complete |
+| IFACE-04 | Phase 1 | Complete |
 | ADAPT-01 | Phase 1 | Pending |
 | ADAPT-02 | Phase 1 | Pending |
 | ADAPT-03 | Phase 1 | Pending |
