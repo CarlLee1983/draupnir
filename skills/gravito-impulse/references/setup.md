@@ -1,18 +1,18 @@
 # Setup
 
-`@gravito/impulse` 需要在應用程式啟動時完成一次性初始化，才能讓 `FormRequest` 的驗證系統正常運作。
+`@gravito/impulse` requires a one-time initialization at application startup for the `FormRequest` validation system to function correctly.
 
-## 安裝
+## Installation
 
 ```bash
 npm install @gravito/impulse
-# 或
+# or
 bun add @gravito/impulse
 ```
 
-## 初始化（必要）
+## Initialization (Required)
 
-在應用程式入口呼叫，執行一次即可：
+Call at the application entry point, execution once is enough:
 
 ```typescript
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
@@ -20,7 +20,7 @@ import { SchemaCache, ZodValidator } from '@gravito/impulse'
 SchemaCache.registerValidators([new ZodValidator()])
 ```
 
-若使用 Valibot：
+If using Valibot:
 
 ```typescript
 import { SchemaCache, ValibotValidator } from '@gravito/impulse'
@@ -28,17 +28,17 @@ import { SchemaCache, ValibotValidator } from '@gravito/impulse'
 SchemaCache.registerValidators([new ValibotValidator()])
 ```
 
-同時使用兩種驗證器：
+Using both validators simultaneously:
 
 ```typescript
 SchemaCache.registerValidators([new ZodValidator(), new ValibotValidator()])
 ```
 
-`SchemaCache` 使用 `WeakMap` 快取 schema → validator 的對應，避免重複解析開銷。
+`SchemaCache` uses a `WeakMap` to cache schema → validator mappings, avoiding repeated parsing overhead.
 
-## HMR / 開發模式下清除快取
+## Clearing Cache in HMR / Development Mode
 
-Hot Module Replacement 重載模組後，舊的 FormRequest 實例和 schema 編譯快取可能殘留。呼叫：
+After Hot Module Replacement reloads modules, old FormRequest instances and schema compilation caches might remain. Call:
 
 ```typescript
 import { Impulse } from '@gravito/impulse'
@@ -46,4 +46,4 @@ import { Impulse } from '@gravito/impulse'
 Impulse.clearAllCaches()
 ```
 
-強制重新實例化所有 `FormRequest` 並重新編譯 schema。通常放在 HMR handler 或 dev server hook 中。
+This forces re-instantiation of all `FormRequest`s and re-compilation of schemas. Usually placed in an HMR handler or dev server hook.
