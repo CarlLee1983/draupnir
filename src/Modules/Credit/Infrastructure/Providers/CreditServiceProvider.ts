@@ -12,7 +12,7 @@ import { HandleBalanceDepletedService } from '../../Application/Services/HandleB
 import { HandleCreditToppedUpService } from '../../Application/Services/HandleCreditToppedUpService'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 
 export class CreditServiceProvider extends ModuleServiceProvider {
@@ -57,14 +57,14 @@ export class CreditServiceProvider extends ModuleServiceProvider {
     container.bind('handleBalanceDepletedService', (c: IContainer) => {
       return new HandleBalanceDepletedService(
         c.make('apiKeyRepository') as IApiKeyRepository,
-        c.make('bifrostClient') as BifrostClient,
+        c.make('llmGatewayClient') as ILLMGatewayClient,
       )
     })
 
     container.bind('handleCreditToppedUpService', (c: IContainer) => {
       return new HandleCreditToppedUpService(
         c.make('apiKeyRepository') as IApiKeyRepository,
-        c.make('bifrostClient') as BifrostClient,
+        c.make('llmGatewayClient') as ILLMGatewayClient,
       )
     })
   }

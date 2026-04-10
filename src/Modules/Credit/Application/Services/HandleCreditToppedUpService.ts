@@ -1,18 +1,18 @@
 // src/Modules/Credit/Application/Services/HandleCreditToppedUpService.ts
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 
 /**
  * 充值恢復服務 — 補償式狀態轉換
  *
- * 策略：先操作遠端恢復（Bifrost），成功後再清除本地凍結狀態。
+ * 策略：先操作遠端恢復（Gateway），成功後再清除本地凍結狀態。
  * 若遠端失敗，本地保持 SUSPENDED_NO_CREDIT 不變，由重試修復。
  * 若本地清除失敗，遠端已恢復但本地可由重試修復。
  */
 export class HandleCreditToppedUpService {
   constructor(
     private readonly apiKeyRepo: IApiKeyRepository,
-    private readonly bifrostClient: BifrostClient,
+    private readonly gatewayClient: ILLMGatewayClient,
   ) {}
 
   async execute(orgId: string): Promise<{ processed: number; failed: number }> {
@@ -24,14 +24,13 @@ export class HandleCreditToppedUpService {
       try {
         const preFreeze = key.preFreezeRateLimit
 
-        // Step 1: 先恢復遠端 Bifrost rate limit
+        // Step 1: 先恢復遠端 Gateway rate limit
         if (preFreeze && (preFreeze.rpm != null || preFreeze.tpm != null)) {
-          await this.bifrostClient.updateVirtualKey(key.bifrostVirtualKeyId, {
-            rate_limit: {
-              token_max_limit: preFreeze.tpm ?? 100000,
-              token_reset_duration: '1h',
-              request_max_limit: preFreeze.rpm ?? null,
-              request_reset_duration: preFreeze.rpm ? '1m' : null,
+          await this.gatewayClient.updateKey(key.bifrostVirtualKeyId, {
+            rateLimit: {
+              tokenMaxLimit: preFreeze.tpm ?? 100000,
+              tokenResetDuration: '1h',
+              ...(preFreeze.rpm != null && { requestMaxLimit: preFreeze.rpm, requestResetDuration: '1m' }),
             },
           })
         }
