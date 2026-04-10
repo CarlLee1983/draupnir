@@ -15,7 +15,7 @@
 ### Adapters (ADAPT)
 
 - [ ] **ADAPT-01**: `BifrostGatewayAdapter` exists at `src/Foundation/Infrastructure/Services/LLMGateway/implementations/BifrostGatewayAdapter.ts`, implements `ILLMGatewayClient`, and wraps an injected `BifrostClient`
-- [ ] **ADAPT-02**: `BifrostGatewayAdapter` converts snake_case ↔ camelCase at the boundary for all four methods (no snake_case leaks out through the interface)
+- [ ] **ADAPT-02**: `BifrostGatewayAdapter` converts snake_case ↔ camelCase at the boundary for all five methods (no snake_case leaks out through the interface)
 - [ ] **ADAPT-03**: `BifrostGatewayAdapter` catches Bifrost-specific errors and re-throws them as `GatewayError` with preserved `statusCode` and `originalError`
 - [ ] **ADAPT-04**: `MockGatewayClient` exists at `src/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient.ts`, implements `ILLMGatewayClient` with in-memory behavior (no HTTP), and is usable in tests
 - [ ] **ADAPT-05**: Unit tests cover `BifrostGatewayAdapter` request/response mapping and error translation (`tests/Unit/Foundation/LLMGateway/BifrostGatewayAdapter.test.ts`)

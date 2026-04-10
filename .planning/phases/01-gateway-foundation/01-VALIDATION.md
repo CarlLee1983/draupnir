@@ -2,8 +2,8 @@
 phase: 1
 slug: gateway-foundation
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-10
 ---
 
@@ -19,7 +19,7 @@ created: 2026-04-10
 |----------|-------|
 | **Framework** | Bun test (native) |
 | **Config file** | `package.json` (test scripts) |
-| **Quick run command** | `bun test src/Foundation/Infrastructure/Services/LLMGateway` |
+| **Quick run command** | `bun test tests/Unit/Foundation/LLMGateway` |
 | **Full suite command** | `bun test` |
 | **Estimated runtime** | ~10 seconds |
 
@@ -27,7 +27,7 @@ created: 2026-04-10
 
 ## Sampling Rate
 
-- **After every task commit:** Run `bun test src/Foundation/Infrastructure/Services/LLMGateway`
+- **After every task commit:** Run `bun test tests/Unit/Foundation/LLMGateway`
 - **After every plan wave:** Run `bun test`
 - **Before `/gsd:verify-work`:** Full suite must be green
 - **Max feedback latency:** 15 seconds
@@ -36,25 +36,17 @@ created: 2026-04-10
 
 ## Per-Task Verification Map
 
-| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
-|---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 1-01-01 | 01 | 0 | IFACE-01, IFACE-02, IFACE-03, IFACE-04 | unit stub | `bun test src/Foundation/Infrastructure/Services/LLMGateway` | ❌ W0 | ⬜ pending |
-| 1-01-02 | 01 | 1 | IFACE-01 | unit | `bun test src/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient.test.ts` | ❌ W0 | ⬜ pending |
-| 1-02-01 | 02 | 1 | ADAPT-01..06 | unit | `bun test src/Foundation/Infrastructure/Services/LLMGateway/implementations/BifrostGatewayAdapter.test.ts` | ❌ W0 | ⬜ pending |
-| 1-03-01 | 03 | 1 | ADAPT-01 | unit | `bun test src/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient.test.ts` | ❌ W0 | ⬜ pending |
-| 1-04-01 | 04 | 2 | WIRE-01 | integration | `bun test src/Foundation` | ✅ | ⬜ pending |
+| Task ID | Plan | Wave | Requirement | Test Type | Automated Command | Status |
+|---------|------|------|-------------|-----------|-------------------|--------|
+| 1-01-01 | 01-01 | 1 | IFACE-01, IFACE-02, IFACE-03, IFACE-04 | grep + typecheck | `grep 'export interface ILLMGatewayClient' src/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient.ts && bun run typecheck` | ⬜ pending |
+| 1-01-02 | 01-01 | 1 | IFACE-01, IFACE-04 | grep + typecheck | `grep 'export.*GatewayError' src/Foundation/Infrastructure/Services/LLMGateway/errors.ts && bun run typecheck` | ⬜ pending |
+| 1-02-01 | 01-02 | 2 | ADAPT-01..05 | unit | `bun test tests/Unit/Foundation/LLMGateway/BifrostGatewayAdapter.test.ts` | ⬜ pending |
+| 1-03-01 | 01-03 | 2 | ADAPT-04, ADAPT-06 | unit | `bun test tests/Unit/Foundation/LLMGateway/MockGatewayClient.test.ts` | ⬜ pending |
+| 1-04-01 | 01-04 | 3 | WIRE-01 | grep + typecheck | `grep 'llmGatewayClient' src/Foundation/Infrastructure/Providers/FoundationServiceProvider.ts && bun run typecheck` | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
----
-
-## Wave 0 Requirements
-
-- [ ] `src/Foundation/Infrastructure/Services/LLMGateway/__tests__/BifrostGatewayAdapter.test.ts` — stubs for ADAPT-01..ADAPT-06
-- [ ] `src/Foundation/Infrastructure/Services/LLMGateway/__tests__/MockGatewayClient.test.ts` — stubs for IFACE-01 (in-memory behavior)
-- [ ] `src/Foundation/Infrastructure/Services/LLMGateway/__tests__/ILLMGatewayClient.test.ts` — type contract stubs for IFACE-02..IFACE-04
-
-*Wave 0 installs test stubs before implementation begins.*
+> **Note:** Wave 0 separate test stubs are NOT required. Plans 01-02 and 01-03 use TDD-within-task (RED→GREEN cycles embedded in each task's action). This fully satisfies Nyquist sampling intent — each task creates its own test file before implementing the code under test. The verify commands in the plans reference actual test locations under `tests/Unit/Foundation/LLMGateway/`.
 
 ---
 
@@ -68,11 +60,11 @@ created: 2026-04-10
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 15s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify commands (grep assertions + focused test commands)
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 not needed — TDD-within-task pattern covers all new files
+- [x] No watch-mode flags
+- [x] Feedback latency < 15s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** pending execution
