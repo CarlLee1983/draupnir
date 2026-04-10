@@ -16,6 +16,9 @@ Need a locale strategy?
 Need translation catalogs?
   → references/catalogs.md
 
+Need catalog folder layout and key naming rules?
+  → references/catalog-structure.md
+
 Need pluralization or formatting rules?
   → references/formatting.md
 
@@ -36,6 +39,15 @@ Need validation and error-message translation?
 
 Need utility helpers for locale resolution?
   → references/helpers.md
+
+Need profile-based locale persistence flow?
+  → references/profile-flow.md
+```
+
+## Core exports
+
+```typescript
+import { OrbitCosmos, Locale, Translator } from '@gravito/cosmos'
 ```
 
 ## Minimal workflow
@@ -64,3 +76,5 @@ Need utility helpers for locale resolution?
 - `references/middleware.md`
 - `references/validation.md`
 - `references/helpers.md`
+- `references/catalog-structure.md`
+- `references/profile-flow.md`

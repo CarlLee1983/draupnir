@@ -6,7 +6,7 @@ description: >
   and rate limiting.
 ---
 
-# @gravito/stasis 🧊
+# @gravito/stasis
 
 `@gravito/stasis` is the standard caching layer for Gravito. It supports multiple drivers (Memory, Redis, File), hybrid tiered caching, and distributed concurrency controls.
 
@@ -45,6 +45,21 @@ const data = await cache.remember('users:list', 3600, async () => {
 // Atomic "Add" (Only set if not exists)
 const success = await cache.add('lock:job:1', true, 60)
 ```
+
+## Core exports
+
+```typescript
+import { OrbitStasis } from '@gravito/stasis'
+// Access via container:
+const cache = core.container.make('cache')
+const localCache = cache.store('local')
+```
+
+## Common pitfalls
+
+- Memory-based locks only work in single-process mode; use Redis driver for multi-instance production.
+- `remember()` TTL is in seconds, not milliseconds.
+- File driver is not recommended for distributed locks.
 
 ## References
 

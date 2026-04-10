@@ -52,6 +52,12 @@ import {
 } from '@gravito/core'
 ```
 
+## Common pitfalls
+
+- Do not confuse `singleton()` (created once), `bind()` (new per call), `scoped()` (per request), and `instance()` (pre-built).
+- Bootstrap order matters: register services before `core.bootstrap()`, register routes after.
+- Use ServiceMap augmentation to get typed `make()` resolution.
+
 ## References
 
 - **PlanetCore bootstrap & lifecycle**: `references/planet-core.md`

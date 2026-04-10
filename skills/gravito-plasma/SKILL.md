@@ -6,7 +6,7 @@ description: >
   and Redis streams.
 ---
 
-# @gravito/plasma 🪐
+# @gravito/plasma
 
 `@gravito/plasma` is the high-performance Redis integration for Gravito, built on **Bun.redis**. It provides a Laravel-style fluent API for distributed state, locks, and messaging.
 
@@ -45,6 +45,18 @@ const [val1, val2] = await Redis.pipeline()
   .get('key2')
   .exec()
 ```
+
+## Core exports
+
+```typescript
+import { Redis, OrbitPlasma } from '@gravito/plasma'
+```
+
+## Common pitfalls
+
+- Ensure `connections` and `default` names match in config.
+- Without explicit connection switching, all operations go to the `default` connection.
+- Use pipelines (`Redis.pipeline()...exec()`) to batch commands and reduce network round-trips.
 
 ## References
 

@@ -32,96 +32,14 @@ router.post('/users', CreateUserRequest, (ctx) => controller.create(ctx))
 const body = ctx.get('validated') as CreateUserParams
 ```
 
-## 1. Setup & Initialization
-
-One-time initialization is required at application startup:
+## Core exports
 
 ```typescript
+import { FormRequest, z } from '@gravito/impulse'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
-
-// Register validators (Required)
-SchemaCache.registerValidators([new ZodValidator()])
-```
-
-In HMR (Development Mode) environments, clear the cache when reloading modules:
-```typescript
-import { Impulse } from '@gravito/impulse'
-Impulse.clearAllCaches()
-```
-
-See `references/setup.md` for details.
-
-## 2. FormRequest Core Abstractions
-
-### Data Source `source`
-`source` determines which part of the request data is taken from. It must use `as const`:
-
-| Value | Taken from | Use Case |
-|---|---|---|
-| `'json'` (Default) | Request body (JSON) | POST / PUT / PATCH |
-| `'form'` | FormData | multipart/form-data |
-| `'query'` | URL query string | GET filtering / pagination |
-| `'param'` | Route parameters | `:id`, `:slug` |
-
-```typescript
-export class ListUsersRequest extends FormRequest {
-  source = 'query' as const
-  schema = z.object({
-    page: z.coerce.number().int().min(1).default(1),
-  })
-}
-```
-
-### Lifecycle Hooks
-- `authorize(ctx)`: Returns `false` to throw 403. Override `authorizationMessage()` for custom messages.
-- `transform(data)`: Pre-process raw data before validation (e.g., `toLowerCase()`).
-- `messages()`: Override messages for specific fields or error codes. Format: `'field.code'` or `'field'`.
-- `redirect()`: URL to jump to when validation fails in SSR mode.
-
-See `references/form-request.md` for details.
-
-## 3. Zod Schema & Type Inference
-
-`@gravito/impulse` re-exports `z` (Zod); it is recommended to import directly from this package.
-
-### Common Patterns
-- **Number Conversion**: `z.coerce.number()` (Required for query string/param).
-- **Shared Schemas**: It is recommended to define reused IDs or parameters in separate files.
-- **Error Codes**: Validation failure returns HTTP 422, with error format `Array<{ field: string, message: string, code?: string }>`.
-
-See `references/zod.md` for details.
-
-## 4. Advanced Tools
-
-### `validateRequest` Middleware
-Use `FormRequest` directly as a Gravito route middleware:
-```typescript
 import { validateRequest } from '@gravito/impulse'
-import { CreateUserRequest } from './Requests/CreateUserRequest'
-
-// Validated data is stored in ctx.get('validated')
-router.post('/users', validateRequest(CreateUserRequest), (ctx) => controller.create(ctx))
-
-// Partial validation (Commonly used for PATCH)
-router.patch('/users/:id', validateRequest(CreateUserRequest, { partial: true }), (ctx) => controller.update(ctx))
+import { DataExtractor, BlueprintGenerator, Impulse } from '@gravito/impulse'
 ```
-
-### `BlueprintGenerator`
-Convert Zod schema to JSON metadata for frontend consumption, used for dynamic form generation:
-```typescript
-import { BlueprintGenerator } from '@gravito/impulse'
-const blueprint = BlueprintGenerator.generateBlueprint(mySchema, 'json')
-```
-
-### `DataExtractor`
-Used for custom data extraction logic from `ctx`, supporting `json`, `form`, `query`, `param`.
-
-### Type Utilities
-- `IsZodSchema<T>`: Compile-time check.
-- `InferZodType<T>`: Equivalent to `z.infer<T>`.
-- `ValidationResult<T>`: Encapsulates `{ success: boolean, data?: T, errors?: [...] }`.
-
-See `references/advanced.md` for details.
 
 ## Decision Tree
 

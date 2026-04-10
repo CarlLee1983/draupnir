@@ -6,7 +6,7 @@ description: >
   generating static sites (SSG), or using the optimized {{image}} helper.
 ---
 
-# @gravito/prism 💎
+# @gravito/prism
 
 `@gravito/prism` is the standard view layer for Gravito. It combines a Blade-inspired template engine with automatic image optimization and Static Site Generation (SSG).
 
@@ -45,6 +45,20 @@ router.get('/', (ctx) => {
   return ctx.html(view.render('welcome', { user: { name: 'Carl' } }))
 })
 ```
+
+## Core exports
+
+```typescript
+import { OrbitPrism } from '@gravito/prism'
+// Access via context: ctx.get('view')
+// Or container: core.container.make('view')
+```
+
+## Common pitfalls
+
+- `{{ }}` is HTML-escaped by default; use `{!! !!}` only for trusted content.
+- Dot notation maps to subdirectories: `'admin.dashboard'` resolves to `VIEW_DIR/admin/dashboard.html`.
+- Call `view.clearCache()` during HMR development to avoid stale templates.
 
 ## References
 

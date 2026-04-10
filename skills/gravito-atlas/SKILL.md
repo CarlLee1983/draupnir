@@ -94,6 +94,12 @@ await DB.transaction(async (tx) => {
 const row = await DB.sql`SELECT * FROM users WHERE email = ${email}`.first()
 ```
 
+## Core exports
+
+```typescript
+import { DB, Schema, Model, OrbitAtlas } from '@gravito/atlas'
+```
+
 ## Common pitfalls
 
 - ❌ String-interpolating user input into raw SQL — always use `` DB.sql`…` `` or parameterized builder methods.
