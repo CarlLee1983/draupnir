@@ -148,13 +148,13 @@ function createMockInertia(): { inertia: InertiaService; lastCall: { component: 
 
 ### Pattern 2: Auth Context Injection for requireAdmin/requireMember
 
-Page handlers call `AuthMiddleware.getAuthContext(ctx)`. Tests must supply this via `ctx.get('auth:context')` (or whatever key AuthMiddleware uses).
+Page handlers call `AuthMiddleware.getAuthContext(ctx)`. Tests must supply this via `ctx.get('auth')` (confirmed from `AuthMiddleware.ts` line 77: `ctx.set('auth', authContext)`).
 
 ```typescript
 // Authenticated admin context
 const ctx = createMockContext({
   get: <T>(key: string) => {
-    if (key === 'auth:context') {
+    if (key === 'auth') {
       return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
     }
     return undefined
@@ -165,7 +165,7 @@ const ctx = createMockContext({
 ### Pattern 3: Testing Unauthenticated Paths
 
 ```typescript
-// Unauthenticated — get() returns undefined for auth:context
+// Unauthenticated — get() returns undefined for 'auth'
 const ctx = createMockContext()  // no auth in store
 const page = new AdminDashboardPage(mockInertia, mockListUsers, mockListOrgs, mockContracts)
 const response = await page.handle(ctx)
@@ -257,7 +257,7 @@ PUT  /member/settings
 
 | Problem | Don't Build | Use Instead | Why |
 |---------|-------------|-------------|-----|
-| Auth context in tests | Custom auth middleware mock | `ctx.get('auth:context')` set directly | AuthMiddleware.getAuthContext reads from ctx store |
+| Auth context in tests | Custom auth middleware mock | `ctx.get('auth')` set directly | AuthMiddleware.getAuthContext reads from ctx store |
 | HTTP response assertions | Parse HTML body | Assert on mock InertiaService capture | InertiaService rendering is already tested separately |
 | Service mocks | Complex factory | Direct `{ execute: mock(() => ...) }` object | Page classes accept interfaces, not concrete types |
 
@@ -273,8 +273,8 @@ PUT  /member/settings
 **Warning signs:** All auth-guarded pages redirect to `/login` even when auth is injected.
 
 ```typescript
-// Verify this key name from AuthMiddleware source before using
-ctx.get('auth:context')  // or the actual key used by AuthMiddleware
+// Confirmed from AuthMiddleware.ts line 77: ctx.set('auth', authContext)
+ctx.get('auth')
 ```
 
 ### Pitfall 2: Service mock shape must match interface
@@ -434,10 +434,9 @@ Step 2.6: SKIPPED (no external dependencies — this phase is code and tests onl
 
 ## Open Questions
 
-1. **AuthMiddleware key name for test setup**
-   - What we know: `AuthMiddleware.getAuthContext(ctx)` calls `ctx.get(someKey)`.
-   - What's unclear: The exact key string (e.g., `'auth:context'`, `'authContext'`, etc.) — must be read from `AuthMiddleware.ts` before writing tests.
-   - Recommendation: First task in Wave 0 is to read `src/Shared/Infrastructure/Middleware/AuthMiddleware.ts` and extract the store key.
+1. **AuthMiddleware key name for test setup** — RESOLVED
+   - Confirmed: `AuthMiddleware.ts` line 77 uses `ctx.set('auth', authContext)`. The key is `'auth'`.
+   - All plan test helpers use `key === 'auth'` correctly.
 
 2. **Test server setup for routes-existence page route additions**
    - What we know: `setupTestServer()` starts a Bun server; `warmInertiaService()` must run or page routes will 500.
