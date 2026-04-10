@@ -40,3 +40,10 @@ Current shared-data flow:
 3. `InertiaService.render()` merges shared props with page-specific props
 
 Keep this flow stable so pages only describe page data, not transport concerns.
+
+## Operational checklist
+
+- confirm the dev-server URL matches your frontend toolchain
+- confirm asset version changes when the client bundle changes
+- confirm the root view can boot without browser-only globals
+- confirm shared data stays small and serializable

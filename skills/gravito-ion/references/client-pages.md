@@ -39,3 +39,8 @@ export default function Dashboard() {
 - keep page data shaped by the server
 - keep navigation links simple and declarative
 - keep client-side state local unless it must survive navigation
+
+## Vue note
+
+If the app uses Vue pages instead of React, the same rule applies: page components should render
+the server-provided payload and avoid re-fetching the same page data.

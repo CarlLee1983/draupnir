@@ -30,6 +30,21 @@ Need client page conventions?
 
 Need shared-data or page-state rules?
   → references/shared-data.md
+
+Need page component structure?
+  → references/page-shape.md
+
+Need navigation and link rules?
+  → references/navigation.md
+
+Need flash message handling?
+  → references/flash.md
+
+Need SSR and asset versioning checklist?
+  → references/versioning.md
+
+Need Vue page conventions?
+  → references/vue-pages.md
 ```
 
 ## Core exports
@@ -62,3 +77,8 @@ import { IonOrbit } from '@gravito/ion'
 - `references/draupnir-patterns.md`
 - `references/client-pages.md`
 - `references/shared-data.md`
+- `references/page-shape.md`
+- `references/navigation.md`
+- `references/flash.md`
+- `references/versioning.md`
+- `references/vue-pages.md`
