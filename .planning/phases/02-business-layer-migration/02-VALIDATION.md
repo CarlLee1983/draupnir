@@ -38,10 +38,10 @@ created: 2026-04-10
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 2-01-01 | 01 | 1 | MIGRATE-01 | unit | `bun test src/Modules/ApiKey/__tests__/ApiKeyBifrostSync.test.ts` | ✅ | ⬜ pending |
-| 2-01-02 | 01 | 1 | TEST-01 | unit | `bun test src/Modules/ApiKey/__tests__/` | ✅ | ⬜ pending |
-| 2-02-01 | 02 | 1 | MIGRATE-02 | unit | `bun test src/Modules/AppApiKey/__tests__/` | ✅ | ⬜ pending |
-| 2-02-02 | 02 | 1 | TEST-01 | unit | `bun test src/Modules/AppApiKey/__tests__/` | ✅ | ⬜ pending |
+| 2-01-01 | 01 | 1 | MIGRATE-01 | unit | `bun test src/Modules/AppApiKey/__tests__/AppKeyBifrostSync.test.ts` | ✅ | ⬜ pending |
+| 2-01-02 | 01 | 1 | TEST-01 | unit | `bun test src/Modules/AppApiKey/__tests__/` | ✅ | ⬜ pending |
+| 2-02-01 | 02 | 1 | MIGRATE-02 | unit | `bun test src/Modules/ApiKey/__tests__/ApiKeyBifrostSync.test.ts` | ✅ | ⬜ pending |
+| 2-02-02 | 02 | 1 | TEST-01 | unit | `bun test src/Modules/ApiKey/__tests__/` | ✅ | ⬜ pending |
 | 2-03-01 | 03 | 1 | MIGRATE-03,MIGRATE-04 | unit | `bun test src/Modules/Credit/__tests__/` | ✅ | ⬜ pending |
 | 2-03-02 | 03 | 1 | TEST-01 | unit | `bun test src/Modules/Credit/__tests__/` | ✅ | ⬜ pending |
 | 2-04-01 | 04 | 1 | MIGRATE-05,MIGRATE-06 | unit | `bun test src/Modules/Dashboard/__tests__/` | ✅ | ⬜ pending |
