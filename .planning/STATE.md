@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete — ready for verification
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-04-10T07:28:14.785Z"
+stopped_at: Completed 02-business-layer-migration 02-02-PLAN.md
+last_updated: "2026-04-10T07:29:33.119Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 5
+  completed_plans: 7
 ---
 
 # Project State
@@ -50,6 +50,7 @@ Plan: 4 of 4
 | Phase 01-gateway-foundation P01-02 | 10 | 1 tasks | 2 files |
 | Phase 01-gateway-foundation P01-03 | 8 | 1 tasks | 2 files |
 | Phase 01-gateway-foundation P01-04 | 5 | 1 tasks | 1 files |
+| Phase 02-business-layer-migration P02 | 8 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,7 @@ Recent decisions affecting current work:
 - [Phase 01-gateway-foundation]: seedUsageStats/seedUsageLogs 為實例方法（非建構子參數），允許 reset() 正確還原零值預設
 - [Phase 01-gateway-foundation]: MockGatewayClient value 格式統一為 mock_raw_key_000001（底線、零填補），符合 D-14 規格
 - [Phase 01-gateway-foundation]: llmGatewayClient singleton resolves bifrostClient from container (c.make) to share instance — bifrostClient registration preserved until Phase 3
+- [Phase 02-business-layer-migration]: MockGatewayClient.updateKey 需要 store 內存在的 keyId，測試需在 beforeEach 呼叫 mock.createKey() 並以回傳 id 作為 bifrostVirtualKeyId
 
 ### Pending Todos
 
@@ -78,6 +80,6 @@ None yet. Note for Phase 4 planning: confirm Bun workspace `workspace:*` protoco
 
 ## Session Continuity
 
-Last session: 2026-04-10T07:28:14.783Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-04-10T07:29:26.149Z
+Stopped at: Completed 02-business-layer-migration 02-02-PLAN.md
 Resume file: None

@@ -25,7 +25,7 @@
 
 - [x] **WIRE-01**: Main `ServiceProvider` (or project bootstrap) registers `llmGatewayClient` as a singleton bound to `BifrostGatewayAdapter`, which itself receives the singleton `bifrostClient`
 - [ ] **WIRE-02**: `wireAppApiKey` resolves `llmGatewayClient` from the container and passes it to services that previously received `bifrostClient`
-- [ ] **WIRE-03**: `wireApiKey` is updated the same way for the separate `ApiKey` module
+- [x] **WIRE-03**: `wireApiKey` is updated the same way for the separate `ApiKey` module
 - [x] **WIRE-04**: `wireSdkApi` is updated for the `QueryUsage` injection (but **not** `ProxyModelCall` — see SDK-05)
 - [ ] **WIRE-05**: `wireDashboard` is updated for `UsageAggregator`
 - [ ] **WIRE-06**: No application-layer constructor type signature references `BifrostClient` after this requirement is complete
@@ -33,14 +33,14 @@
 ### Business-Layer Migration (MIGRATE)
 
 - [ ] **MIGRATE-01**: `AppKeyBifrostSync` constructor parameter type changes from `BifrostClient` to `ILLMGatewayClient`, and all method calls use the new interface vocabulary
-- [ ] **MIGRATE-02**: `ApiKeyBifrostSync.createVirtualKey` + `.deactivateVirtualKey` + `.deleteVirtualKey` migrate to `ILLMGatewayClient` (the `ApiKey` module sibling missing from the original spec)
+- [x] **MIGRATE-02**: `ApiKeyBifrostSync.createVirtualKey` + `.deactivateVirtualKey` + `.deleteVirtualKey` migrate to `ILLMGatewayClient` (the `ApiKey` module sibling missing from the original spec)
 - [ ] **MIGRATE-03**: `GetAppKeyUsageService` migrates to `ILLMGatewayClient` and uses camelCase query types
 - [x] **MIGRATE-04**: `QueryUsage` (SdkApi UseCase) migrates to `ILLMGatewayClient`
 - [ ] **MIGRATE-05**: `UsageAggregator.getStats` and `UsageAggregator.getLogs` (Dashboard) migrate to `ILLMGatewayClient` — uses the multi-key array form of `getUsageStats` and the new `getUsageLogs` method; stops passing snake_case query parameters
 - [ ] **MIGRATE-06**: Any remaining direct `BifrostClient` imports in application layer are removed (verified by `grep`)
 - [ ] **MIGRATE-07**: `HandleBalanceDepletedService` (Credit module) migrates from `BifrostClient.updateVirtualKey({rate_limit: {...}})` to `ILLMGatewayClient.updateKey({rateLimit: {...}})`; retry loop uses `GatewayError.retryable` flag to classify failures
 - [ ] **MIGRATE-08**: `HandleCreditToppedUpService` (Credit module) migrates from `BifrostClient.updateVirtualKey({rate_limit: {...}})` to `ILLMGatewayClient.updateKey({rateLimit: {...}})` to restore rate limits after credit top-up
-- [ ] **MIGRATE-09**: `ApiKeyBifrostSync.syncPermissions` migrates from `BifrostClient.updateVirtualKey({provider_configs, rate_limit})` to `ILLMGatewayClient.updateKey({providerConfigs, rateLimit})` — preserves the existing model-allowlist and rate-limit sync behavior
+- [x] **MIGRATE-09**: `ApiKeyBifrostSync.syncPermissions` migrates from `BifrostClient.updateVirtualKey({provider_configs, rate_limit})` to `ILLMGatewayClient.updateKey({providerConfigs, rateLimit})` — preserves the existing model-allowlist and rate-limit sync behavior
 
 ### Domain Rename (RENAME)
 
@@ -121,19 +121,19 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | ADAPT-06 | Phase 1 | Complete |
 | WIRE-01 | Phase 1 | Complete |
 | WIRE-02 | Phase 2 | Pending |
-| WIRE-03 | Phase 2 | Pending |
+| WIRE-03 | Phase 2 | Complete |
 | WIRE-04 | Phase 2 | Complete |
 | WIRE-05 | Phase 2 | Pending |
 | WIRE-06 | Phase 2 | Pending |
 | MIGRATE-01 | Phase 2 | Pending |
-| MIGRATE-02 | Phase 2 | Pending |
+| MIGRATE-02 | Phase 2 | Complete |
 | MIGRATE-03 | Phase 2 | Pending |
 | MIGRATE-04 | Phase 2 | Complete |
 | MIGRATE-05 | Phase 2 | Pending |
 | MIGRATE-06 | Phase 2 | Pending |
 | MIGRATE-07 | Phase 2 | Pending |
 | MIGRATE-08 | Phase 2 | Pending |
-| MIGRATE-09 | Phase 2 | Pending |
+| MIGRATE-09 | Phase 2 | Complete |
 | RENAME-01 | Phase 3 | Pending |
 | RENAME-02 | Phase 3 | Pending |
 | RENAME-03 | Phase 3 | Pending |
