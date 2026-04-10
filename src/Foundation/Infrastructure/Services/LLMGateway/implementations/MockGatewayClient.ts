@@ -1,15 +1,17 @@
 /**
- * Stateful in-memory implementation of ILLMGatewayClient for use in tests.
+ * Stateful in-memory test double for ILLMGatewayClient.
  *
  * @remarks
- * This class MUST NOT be imported in runtime src/ code — tests only.
+ * USE IN TEST FILES ONLY. Never import from runtime src/ code.
+ * Import directly from this file path, not from the barrel index.ts.
  * Enforced by CI grep check in package.json `check:no-mock-in-src` script.
  *
  * Features:
- * - Stateful in-memory key store with monotonic ID generator
- * - `calls` getter for asserting received requests without vi.fn wrappers
- * - `failNext(error)` for single-shot failure injection (FIFO queue)
- * - Seeded UsageStats and LogEntry fixtures configurable at construction
+ * - Stateful key management (Map-backed, monotonic IDs)
+ * - Call tracking via `.calls` getter (readonly arrays per method)
+ * - Single-shot failure injection via `.failNext(error)` (FIFO queue)
+ * - Reset capability via `.reset()` for clean test isolation
+ * - Seed methods `.seedUsageStats()` and `.seedUsageLogs()` to configure return values
  */
 
 import type { GatewayError } from '../errors'
@@ -44,6 +46,15 @@ export class MockGatewayClient implements ILLMGatewayClient {
   private idCounter = 0
   private readonly failQueue: GatewayError[] = []
 
+  private seededStats: UsageStats = {
+    totalRequests: 0,
+    totalCost: 0,
+    totalTokens: 0,
+    avgLatency: 0,
+  }
+
+  private seededLogs: readonly LogEntry[] = []
+
   private readonly _calls: {
     createKey: CreateKeyRequest[]
     updateKey: { keyId: string; request: UpdateKeyRequest }[]
@@ -57,16 +68,6 @@ export class MockGatewayClient implements ILLMGatewayClient {
     getUsageStats: [],
     getUsageLogs: [],
   }
-
-  constructor(
-    private readonly seedStats: UsageStats = {
-      totalRequests: 0,
-      totalCost: 0,
-      totalTokens: 0,
-      avgLatency: 0,
-    },
-    private readonly seedLogs: readonly LogEntry[] = [],
-  ) {}
 
   /** Read-only snapshot of all received calls per method. */
   get calls(): CallLog {
@@ -87,6 +88,39 @@ export class MockGatewayClient implements ILLMGatewayClient {
     this.failQueue.push(error)
   }
 
+  /**
+   * Configure the UsageStats to be returned by getUsageStats().
+   * Replaces previous seeded value.
+   */
+  seedUsageStats(stats: UsageStats): void {
+    this.seededStats = stats
+  }
+
+  /**
+   * Configure the LogEntry array to be returned by getUsageLogs().
+   * Replaces previous seeded value.
+   */
+  seedUsageLogs(logs: readonly LogEntry[]): void {
+    this.seededLogs = logs
+  }
+
+  /**
+   * Reset mock to initial state: clear keys, call records, fail queue, and seeds.
+   * Useful in beforeEach() to reuse a single instance across tests.
+   */
+  reset(): void {
+    this.keys.clear()
+    this.idCounter = 0
+    this.failQueue.length = 0
+    this.seededStats = { totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }
+    this.seededLogs = []
+    this._calls.createKey.length = 0
+    this._calls.updateKey.length = 0
+    this._calls.deleteKey.length = 0
+    this._calls.getUsageStats.length = 0
+    this._calls.getUsageLogs.length = 0
+  }
+
   private generateId(): string {
     this.idCounter++
     return `mock_vk_${String(this.idCounter).padStart(6, '0')}`
@@ -102,6 +136,7 @@ export class MockGatewayClient implements ILLMGatewayClient {
     this.maybeThrow()
     this._calls.createKey.push(request)
     const id = this.generateId()
+    const rawValue = `mock_raw_key_${String(this.idCounter).padStart(6, '0')}`
     const key: StoredKey = {
       id,
       name: request.name,
@@ -113,7 +148,7 @@ export class MockGatewayClient implements ILLMGatewayClient {
     return {
       id: key.id,
       name: key.name,
-      value: `mock-key-value-${id}`,
+      value: rawValue,
       isActive: key.isActive,
     }
   }
@@ -149,12 +184,12 @@ export class MockGatewayClient implements ILLMGatewayClient {
   async getUsageStats(keyIds: readonly string[], query?: UsageQuery): Promise<UsageStats> {
     this.maybeThrow()
     this._calls.getUsageStats.push({ keyIds, query })
-    return { ...this.seedStats }
+    return { ...this.seededStats }
   }
 
   async getUsageLogs(keyIds: readonly string[], query?: UsageQuery): Promise<readonly LogEntry[]> {
     this.maybeThrow()
     this._calls.getUsageLogs.push({ keyIds, query })
-    return [...this.seedLogs]
+    return [...this.seededLogs]
   }
 }
