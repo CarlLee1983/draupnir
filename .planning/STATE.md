@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete — ready for verification
-stopped_at: Completed 02-business-layer-migration 02-02-PLAN.md
-last_updated: "2026-04-10T07:29:33.119Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-04-10T07:29:42.067Z"
 progress:
   total_phases: 5
   completed_phases: 1
@@ -51,6 +51,7 @@ Plan: 4 of 4
 | Phase 01-gateway-foundation P01-03 | 8 | 1 tasks | 2 files |
 | Phase 01-gateway-foundation P01-04 | 5 | 1 tasks | 1 files |
 | Phase 02-business-layer-migration P02 | 8 | 2 tasks | 6 files |
+| Phase 02 P03 | 12 | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,7 @@ Recent decisions affecting current work:
 - [Phase 01-gateway-foundation]: MockGatewayClient value 格式統一為 mock_raw_key_000001（底線、零填補），符合 D-14 規格
 - [Phase 01-gateway-foundation]: llmGatewayClient singleton resolves bifrostClient from container (c.make) to share instance — bifrostClient registration preserved until Phase 3
 - [Phase 02-business-layer-migration]: MockGatewayClient.updateKey 需要 store 內存在的 keyId，測試需在 beforeEach 呼叫 mock.createKey() 並以回傳 id 作為 bifrostVirtualKeyId
+- [Phase 02]: HandleCreditToppedUpService.retryPending 不存在，不需套用 D-P02（deferred per CONTEXT.md）
 
 ### Pending Todos
 
@@ -80,6 +82,6 @@ None yet. Note for Phase 4 planning: confirm Bun workspace `workspace:*` protoco
 
 ## Session Continuity
 
-Last session: 2026-04-10T07:29:26.149Z
-Stopped at: Completed 02-business-layer-migration 02-02-PLAN.md
+Last session: 2026-04-10T07:29:42.065Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
