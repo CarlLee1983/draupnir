@@ -1,14 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
-import { BifrostApiError } from '@/Foundation/Infrastructure/Services/BifrostClient/errors'
-import type { BifrostClientConfig } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClientConfig'
+import { BifrostClient, BifrostApiError } from '@draupnir/bifrost-sdk'
+import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
 import { BifrostGatewayAdapter } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/BifrostGatewayAdapter'
 import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway/errors'
 import type {
   VirtualKeyResponse,
   BifrostLogsResponse,
   BifrostLogsStats,
-} from '@/Foundation/Infrastructure/Services/BifrostClient/types'
+} from '@draupnir/bifrost-sdk'
 
 const TEST_CONFIG: BifrostClientConfig = {
   baseUrl: 'https://bifrost.test',
@@ -16,6 +15,7 @@ const TEST_CONFIG: BifrostClientConfig = {
   timeoutMs: 5000,
   maxRetries: 0,
   retryBaseDelayMs: 1,
+  proxyBaseUrl: 'https://bifrost.test',
 }
 
 function mockFetchResponse(status: number, body: unknown): Response {
@@ -173,7 +173,9 @@ describe('BifrostGatewayAdapter', () => {
 
   describe('deleteKey', () => {
     it('should call deleteVirtualKey with the given keyId', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, { message: 'deleted' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(200, { message: 'deleted' })),
+      ) as any
 
       await adapter.deleteKey('vk-1')
 
@@ -197,7 +199,10 @@ describe('BifrostGatewayAdapter', () => {
       }
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockStats))) as any
 
-      await adapter.getUsageStats(['vk-1', 'vk-2'], { startTime: '2024-01-01', endTime: '2024-12-31' })
+      await adapter.getUsageStats(['vk-1', 'vk-2'], {
+        startTime: '2024-01-01',
+        endTime: '2024-12-31',
+      })
 
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toContain('virtual_key_ids=vk-1%2Cvk-2')
@@ -359,7 +364,9 @@ describe('BifrostGatewayAdapter', () => {
 
   describe('error translation', () => {
     it('should translate BifrostApiError 404 to GatewayError NOT_FOUND (retryable: false)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(404, { error: 'not found' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(404, { error: 'not found' })),
+      ) as any
 
       try {
         await adapter.getUsageStats(['vk-1'])
@@ -373,7 +380,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 401 to GatewayError UNAUTHORIZED (retryable: false)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(401, { error: 'unauthorized' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(401, { error: 'unauthorized' })),
+      ) as any
 
       try {
         await adapter.createKey({ name: 'test' })
@@ -386,7 +395,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 403 to GatewayError UNAUTHORIZED (retryable: false)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(403, { error: 'forbidden' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(403, { error: 'forbidden' })),
+      ) as any
 
       try {
         await adapter.deleteKey('vk-1')
@@ -399,7 +410,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 422 to GatewayError VALIDATION (retryable: false)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(422, { error: 'validation error' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(422, { error: 'validation error' })),
+      ) as any
 
       try {
         await adapter.createKey({ name: 'test' })
@@ -412,7 +425,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 400 to GatewayError VALIDATION (retryable: false)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(400, { error: 'bad request' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(400, { error: 'bad request' })),
+      ) as any
 
       try {
         await adapter.updateKey('vk-1', { isActive: true })
@@ -425,7 +440,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 429 to GatewayError RATE_LIMITED (retryable: true)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(429, { error: 'too many requests' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(429, { error: 'too many requests' })),
+      ) as any
 
       try {
         await adapter.createKey({ name: 'test' })
@@ -438,7 +455,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 502 to GatewayError NETWORK (retryable: true)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(502, { error: 'bad gateway' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(502, { error: 'bad gateway' })),
+      ) as any
 
       try {
         await adapter.getUsageLogs(['vk-1'])
@@ -451,7 +470,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 503 to GatewayError NETWORK (retryable: true)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(503, { error: 'service unavailable' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(503, { error: 'service unavailable' })),
+      ) as any
 
       try {
         await adapter.getUsageLogs(['vk-1'])
@@ -464,7 +485,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate BifrostApiError 504 to GatewayError NETWORK (retryable: true)', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(504, { error: 'gateway timeout' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(504, { error: 'gateway timeout' })),
+      ) as any
 
       try {
         await adapter.getUsageLogs(['vk-1'])
@@ -503,7 +526,9 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should preserve originalError in GatewayError', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(404, { error: 'not found' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(404, { error: 'not found' })),
+      ) as any
 
       try {
         await adapter.deleteKey('vk-missing')

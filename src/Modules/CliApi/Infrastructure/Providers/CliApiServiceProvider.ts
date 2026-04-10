@@ -8,7 +8,7 @@ import { ProxyCliRequestService } from '../../Application/Services/ProxyCliReque
 import { RevokeCliSessionService } from '../../Application/Services/RevokeCliSessionService'
 import type { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
-import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
+import type { BifrostClient } from '@draupnir/bifrost-sdk'
 
 const CLI_VERIFICATION_URI = process.env.CLI_VERIFICATION_URI || 'http://localhost:3000/cli/verify'
 
@@ -24,9 +24,7 @@ export class CliApiServiceProvider extends ModuleServiceProvider {
     })
 
     container.bind('authorizeDeviceService', (c: IContainer) => {
-      return new AuthorizeDeviceService(
-        c.make('deviceCodeStore') as MemoryDeviceCodeStore,
-      )
+      return new AuthorizeDeviceService(c.make('deviceCodeStore') as MemoryDeviceCodeStore)
     })
 
     container.bind('exchangeDeviceCodeService', (c: IContainer) => {
@@ -43,9 +41,7 @@ export class CliApiServiceProvider extends ModuleServiceProvider {
     })
 
     container.bind('revokeCliSessionService', (c: IContainer) => {
-      return new RevokeCliSessionService(
-        c.make('authTokenRepository') as IAuthTokenRepository,
-      )
+      return new RevokeCliSessionService(c.make('authTokenRepository') as IAuthTokenRepository)
     })
   }
 

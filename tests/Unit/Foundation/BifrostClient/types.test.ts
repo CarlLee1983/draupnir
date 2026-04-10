@@ -6,7 +6,7 @@ import type {
   UpdateVirtualKeyRequest,
   BifrostLogEntry,
   BifrostModel,
-} from '@/Foundation/Infrastructure/Services/BifrostClient/types'
+} from '@draupnir/bifrost-sdk'
 
 describe('Bifrost API Types', () => {
   it('should allow creating a valid CreateVirtualKeyRequest', () => {

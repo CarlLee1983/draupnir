@@ -1,3 +1,8 @@
-export { BifrostClient, BifrostApiError, isBifrostApiError, createBifrostClientConfig } from './Infrastructure/Services/BifrostClient'
-export type { BifrostClientConfig } from './Infrastructure/Services/BifrostClient'
+export {
+  BifrostClient,
+  BifrostApiError,
+  isBifrostApiError,
+  createBifrostClientConfig,
+} from '@draupnir/bifrost-sdk'
+export type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
 export { FoundationServiceProvider } from './Infrastructure/Providers/FoundationServiceProvider'

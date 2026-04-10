@@ -1,12 +1,18 @@
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import { BifrostClient } from '../Services/BifrostClient/BifrostClient'
-import { createBifrostClientConfig } from '../Services/BifrostClient/BifrostClientConfig'
 import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/BifrostGatewayAdapter'
+import {
+  BifrostClient,
+  createBifrostClientConfig,
+  type BifrostClientConfig,
+} from '@draupnir/bifrost-sdk'
 
 export class FoundationServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
-    container.singleton('bifrostClient', () => {
-      const config = createBifrostClientConfig()
+    container.singleton('bifrostConfig', () => {
+      return createBifrostClientConfig()
+    })
+    container.singleton('bifrostClient', (c: IContainer) => {
+      const config = c.make('bifrostConfig') as BifrostClientConfig
       return new BifrostClient(config)
     })
     container.singleton('llmGatewayClient', (c: IContainer) => {

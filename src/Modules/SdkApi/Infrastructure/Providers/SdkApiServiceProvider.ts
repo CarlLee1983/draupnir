@@ -2,6 +2,7 @@ import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/
 import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositories/IAppApiKeyRepository'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
+import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
 import { AuthenticateApp } from '../../Application/UseCases/AuthenticateApp'
 import { ProxyModelCall } from '../../Application/UseCases/ProxyModelCall'
 import { QueryUsage } from '../../Application/UseCases/QueryUsage'
@@ -18,12 +19,9 @@ export class SdkApiServiceProvider extends ModuleServiceProvider {
       return new AppAuthMiddleware(c.make('authenticateApp') as AuthenticateApp)
     })
 
-    container.bind('proxyModelCall', () => {
-      const bifrostBaseUrl = (process.env.BIFROST_API_URL ?? 'http://localhost:8787').replace(
-        /\/+$/,
-        '',
-      )
-      return new ProxyModelCall(bifrostBaseUrl)
+    container.bind('proxyModelCall', (c: IContainer) => {
+      const config = c.make('bifrostConfig') as BifrostClientConfig
+      return new ProxyModelCall(config.proxyBaseUrl)
     })
 
     container.bind('queryUsage', (c: IContainer) => {

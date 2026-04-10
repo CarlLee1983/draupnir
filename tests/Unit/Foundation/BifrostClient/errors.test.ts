@@ -1,10 +1,16 @@
 import { describe, it, expect } from 'bun:test'
-import { BifrostApiError, isBifrostApiError } from '@/Foundation/Infrastructure/Services/BifrostClient/errors'
+import { BifrostApiError, isBifrostApiError } from '@draupnir/bifrost-sdk'
 
 describe('BifrostApiError', () => {
   it('should create error with status, endpoint, and message', () => {
-    const error = new BifrostApiError(404, '/api/governance/virtual-keys/vk-1', 'Virtual key not found')
-    expect(error.message).toBe('Bifrost API error 404 on /api/governance/virtual-keys/vk-1: Virtual key not found')
+    const error = new BifrostApiError(
+      404,
+      '/api/governance/virtual-keys/vk-1',
+      'Virtual key not found',
+    )
+    expect(error.message).toBe(
+      'Bifrost API error 404 on /api/governance/virtual-keys/vk-1: Virtual key not found',
+    )
     expect(error.status).toBe(404)
     expect(error.endpoint).toBe('/api/governance/virtual-keys/vk-1')
     expect(error.name).toBe('BifrostApiError')
