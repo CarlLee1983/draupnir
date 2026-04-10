@@ -62,6 +62,8 @@
 | 檔案 | 主題 |
 |------|------|
 | [`README.md`](./knowledge/README.md) | 知識索引 |
+| [`knowledge/coding-conventions.md`](./knowledge/coding-conventions.md) | 命名慣例、程式碼風格、Biome、TypeScript strict、Error 處理、Function Design（normative） |
+| [`knowledge/tech-stack.md`](./knowledge/tech-stack.md) | 完整技術棧版本、配置、環境變數、build 輸出、平台要求 |
 | [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md) | 原始碼 JSDoc／註解規範（normative） |
 | [`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md) | Inertia 頁面層（`src/Pages`）架構與擴充檢查清單 |
 

@@ -16,5 +16,7 @@
 | [`domain-events.md`](./domain-events.md) | Domain Events 實踐與使用指南 |
 | [`ddd-testing-anti-patterns.md`](./ddd-testing-anti-patterns.md) | 測試策略與常見反模式 |
 | [`auth-ddd-refactor-lessons.md`](./auth-ddd-refactor-lessons.md) | Auth DDD 重構經驗與可重用規則 |
+| [`coding-conventions.md`](./coding-conventions.md) | 命名慣例、Biome 風格、TypeScript strict、Error 處理、Validation、Function Design、Immutability |
+| [`tech-stack.md`](./tech-stack.md) | 完整技術棧列表、依賴版本、配置檔、環境變數、build 輸出、平台需求 |
 | [`jsdoc-standards.md`](./jsdoc-standards.md) | 原始碼 JSDoc／註解規範（與 Biome 格式化對齊） |
 | [`pages-inertia-architecture.md`](./pages-inertia-architecture.md) | `src/Pages` Inertia 路由、DI 綁定與檔案導覽 |

@@ -1,29 +1,37 @@
 # AGENTS.md
 
-This file provides guidance for AI coding agents working in this repository (for example Cursor, Claude Code, and similar tools).
+Guidance for AI coding agents. All project documentation lives in [`docs/draupnir/`](./docs/draupnir/).
 
-## Language Policy
+**See [`docs/draupnir/README.md`](./docs/draupnir/README.md) for**:
+- Project overview & current milestone
+- Constraints (no new deps, routes unchanged, immutability, etc.)
+- Architecture, DDD patterns, coding conventions
+- Technology stack, environment variables
+- Development commands and testing setup
 
-Documentation and code comments use **English** or **Traditional Chinese (Taiwan)**. No other languages permitted in project files.
+## Custom Skills & Knowledge Guides
 
-## Project Overview
+Project-specific guidance in [`skills/`](./skills/):
+- Each directory contains a `SKILL.md` with detailed guidance on Gravito framework modules and patterns
+- Examples: `gravito-impulse` (validation), `gravito-prism` (DI), `gravito-scaffold` (generators), `gravito-sentinel` (middleware)
+- Read the `SKILL.md` in each `skills/<module>/` folder for usage examples and best practices
 
-Draupnir is an AI Service Management Platform built on top of the Bifrost AI Gateway. It handles authentication, API key management, usage tracking, credit system, and organization management. Built with the Gravito DDD framework running on Bun with TypeScript.
+<!-- GSD:workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
 
-## Documentation
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
 
-詳細文件索引：[`docs/draupnir/`](./docs/draupnir/) — 包含架構、設計規格、實作計畫、工程知識。快速導航見 [`docs/draupnir/README.md`](./docs/draupnir/README.md)。
+Use these entry points:
+- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd:debug` for investigation and bug fixing
+- `/gsd:execute-phase` for planned phase work
 
-| 位置 | 內容 |
-|------|------|
-| [`docs/draupnir/architecture/`](./docs/draupnir/architecture/) | 架構圖表：DDD 四層、模組依賴、ER、認證流程 |
-| [`docs/draupnir/knowledge/`](./docs/draupnir/knowledge/) | DDD 模式、分層規則、Repository、Domain Events、測試策略 |
-| [`docs/draupnir/specs/`](./docs/draupnir/specs/) | 功能規格、設計決策、架構評審 |
-| [`docs/draupnir/plans/`](./docs/draupnir/plans/) | Phase 1-7 實作計畫 |
-| [`docs/draupnir/ROADMAP.md`](./docs/draupnir/ROADMAP.md) | 進度與技術決策表 |
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- GSD:workflow-end -->
 
-## Quick Reference
+<!-- GSD:profile-start -->
+## Developer Profile
 
-**For commands, module structure, environment variables, and testing setup:** [`docs/draupnir/DEVELOPMENT.md`](./docs/draupnir/DEVELOPMENT.md)
-
-**For commands only:** [`docs/draupnir/COMMANDS.md`](./docs/draupnir/COMMANDS.md)
+> Profile not yet configured. Run `/gsd:profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- GSD:profile-end -->
