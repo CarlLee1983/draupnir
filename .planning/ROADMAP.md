@@ -68,9 +68,9 @@ Plans:
 **UI hint**: no
 **Plans**: 3 plans
 Plans:
-- [ ] 03-01-PLAN.md — Domain aggregates: ApiKey.ts + AppApiKey.ts props/params/getters/fromDatabase/toDatabaseRow (Wave 1)
-- [ ] 03-02-PLAN.md — Sync services + events: ApiKeyBifrostSync, AppKeyBifrostSync, AppApiKeyEvents, 3 call sites (Wave 2, parallel)
-- [ ] 03-03-PLAN.md — DTOs + app services + all test files: SdkApiDTO, 7 services, ~15 test files, final grep verification (Wave 2, parallel)
+- [x] 03-01-PLAN.md — Domain aggregates: ApiKey.ts + AppApiKey.ts props/params/getters/fromDatabase/toDatabaseRow (Wave 1)
+- [x] 03-02-PLAN.md — Sync services + events: ApiKeyBifrostSync, AppKeyBifrostSync, AppApiKeyEvents, 3 call sites (Wave 2, parallel)
+- [x] 03-03-PLAN.md — DTOs + app services + all test files: SdkApiDTO, 7 services, ~15 test files, final grep verification (Wave 2, parallel)
 
 ### Phase 4: SDK Extraction
 **Goal**: `BifrostClient` lives in `packages/bifrost-sdk/` as a standalone Bun workspace package; `src/Foundation/Infrastructure/Services/BifrostClient/` is deleted; all imports in Draupnir and the adapter use the workspace package.

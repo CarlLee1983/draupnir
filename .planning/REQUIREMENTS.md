@@ -44,10 +44,10 @@
 
 ### Domain Rename (RENAME)
 
-- [ ] **RENAME-01**: TS field `bifrostVirtualKeyId` → `gatewayKeyId` in `src/Modules/AppApiKey/Domain/Aggregates/AppApiKey.ts` (and value objects, if any)
-- [ ] **RENAME-02**: TS field `bifrostVirtualKeyId` → `gatewayKeyId` in `src/Modules/ApiKey/Domain/Aggregates/ApiKey.ts`
-- [ ] **RENAME-03**: Repository layer (`AppApiKeyRepository`, `ApiKeyRepository`, multi-ORM implementations) maps `gatewayKeyId` ↔ existing DB column `bifrost_virtual_key_id` — no DB migration
-- [ ] **RENAME-04**: All call sites across modules and tests updated to `gatewayKeyId`; no references to `bifrostVirtualKeyId` remain in TS source (verified by `grep`)
+- [x] **RENAME-01**: TS field `bifrostVirtualKeyId` → `gatewayKeyId` in `src/Modules/AppApiKey/Domain/Aggregates/AppApiKey.ts` (and value objects, if any)
+- [x] **RENAME-02**: TS field `bifrostVirtualKeyId` → `gatewayKeyId` in `src/Modules/ApiKey/Domain/Aggregates/ApiKey.ts`
+- [x] **RENAME-03**: Repository layer (`AppApiKeyRepository`, `ApiKeyRepository`, multi-ORM implementations) maps `gatewayKeyId` ↔ existing DB column `bifrost_virtual_key_id` — no DB migration
+- [x] **RENAME-04**: All call sites across modules and tests updated to `gatewayKeyId`; no references to `bifrostVirtualKeyId` remain in TS source (verified by `grep`)
 
 ### SDK Extraction (SDK)
 
@@ -134,10 +134,10 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | MIGRATE-07 | Phase 2 | Complete |
 | MIGRATE-08 | Phase 2 | Complete |
 | MIGRATE-09 | Phase 2 | Complete |
-| RENAME-01 | Phase 3 | Pending |
-| RENAME-02 | Phase 3 | Pending |
-| RENAME-03 | Phase 3 | Pending |
-| RENAME-04 | Phase 3 | Pending |
+| RENAME-01 | Phase 3 | Complete |
+| RENAME-02 | Phase 3 | Complete |
+| RENAME-03 | Phase 3 | Complete |
+| RENAME-04 | Phase 3 | Complete |
 | SDK-01 | Phase 4 | Pending |
 | SDK-02 | Phase 4 | Pending |
 | SDK-03 | Phase 4 | Pending |
