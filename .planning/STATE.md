@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 01-gateway-foundation/01-03-PLAN.md
-last_updated: "2026-04-10T05:56:55.426Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 01-gateway-foundation/01-04-PLAN.md — awaiting human-verify checkpoint
+last_updated: "2026-04-10T06:01:27.956Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -49,6 +49,7 @@ Plan: 4 of 4
 | Phase 01-gateway-foundation P01-01 | 7 | 2 tasks | 6 files |
 | Phase 01-gateway-foundation P01-02 | 10 | 1 tasks | 2 files |
 | Phase 01-gateway-foundation P01-03 | 8 | 1 tasks | 2 files |
+| Phase 01-gateway-foundation P01-04 | 5 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,7 @@ Recent decisions affecting current work:
 - [Phase 01-gateway-foundation]: 'processing' Bifrost log status mapped conservatively to 'error' in LogEntry to match LogEntry type constraint
 - [Phase 01-gateway-foundation]: seedUsageStats/seedUsageLogs 為實例方法（非建構子參數），允許 reset() 正確還原零值預設
 - [Phase 01-gateway-foundation]: MockGatewayClient value 格式統一為 mock_raw_key_000001（底線、零填補），符合 D-14 規格
+- [Phase 01-gateway-foundation]: llmGatewayClient singleton resolves bifrostClient from container (c.make) to share instance — bifrostClient registration preserved until Phase 3
 
 ### Pending Todos
 
@@ -76,6 +78,6 @@ None yet. Note for Phase 4 planning: confirm Bun workspace `workspace:*` protoco
 
 ## Session Continuity
 
-Last session: 2026-04-10T05:56:55.424Z
-Stopped at: Completed 01-gateway-foundation/01-03-PLAN.md
+Last session: 2026-04-10T06:01:27.954Z
+Stopped at: Completed 01-gateway-foundation/01-04-PLAN.md — awaiting human-verify checkpoint
 Resume file: None

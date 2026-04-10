@@ -12,7 +12,7 @@ This milestone decouples Draupnir's business layer from the `BifrostClient` conc
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Gateway Foundation** - Define the interface, adapter, mock, and register the singleton — no business-layer changes yet
+- [x] **Phase 1: Gateway Foundation** - Define the interface, adapter, mock, and register the singleton — no business-layer changes yet (completed 2026-04-10)
 - [ ] **Phase 2: Business-Layer Migration** - Migrate all application services and wire functions to inject `ILLMGatewayClient`; rewrite tests to mock the interface
 - [ ] **Phase 3: Domain Rename** - Rename `bifrostVirtualKeyId` → `gatewayKeyId` in TS domain aggregates and repositories; no DB migration
 - [ ] **Phase 4: SDK Extraction** - Move `BifrostClient` into `packages/bifrost-sdk/` Bun workspace package; update all imports
@@ -35,7 +35,7 @@ Plans:
 - [x] 01-01-PLAN.md — Interface contracts: ILLMGatewayClient, DTOs, GatewayError, barrel export
 - [x] 01-02-PLAN.md — BifrostGatewayAdapter implementation + unit tests
 - [x] 01-03-PLAN.md — MockGatewayClient implementation + unit tests
-- [ ] 01-04-PLAN.md — DI registration in FoundationServiceProvider + human verification
+- [x] 01-04-PLAN.md — DI registration in FoundationServiceProvider + human verification
 
 ### Phase 2: Business-Layer Migration
 **Goal**: All application services and wire functions use `ILLMGatewayClient` — no file under `src/Modules/` or `src/Foundation/Application/` has a constructor parameter typed as `BifrostClient`.
@@ -95,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Gateway Foundation | 0/4 | Not started | - |
+| 1. Gateway Foundation | 4/4 | Complete   | 2026-04-10 |
 | 2. Business-Layer Migration | 0/TBD | Not started | - |
 | 3. Domain Rename | 0/TBD | Not started | - |
 | 4. SDK Extraction | 0/TBD | Not started | - |

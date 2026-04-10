@@ -23,7 +23,7 @@
 
 ### Wiring (WIRE)
 
-- [ ] **WIRE-01**: Main `ServiceProvider` (or project bootstrap) registers `llmGatewayClient` as a singleton bound to `BifrostGatewayAdapter`, which itself receives the singleton `bifrostClient`
+- [x] **WIRE-01**: Main `ServiceProvider` (or project bootstrap) registers `llmGatewayClient` as a singleton bound to `BifrostGatewayAdapter`, which itself receives the singleton `bifrostClient`
 - [ ] **WIRE-02**: `wireAppApiKey` resolves `llmGatewayClient` from the container and passes it to services that previously received `bifrostClient`
 - [ ] **WIRE-03**: `wireApiKey` is updated the same way for the separate `ApiKey` module
 - [ ] **WIRE-04**: `wireSdkApi` is updated for the `QueryUsage` injection (but **not** `ProxyModelCall` — see SDK-05)
@@ -119,7 +119,7 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | ADAPT-04 | Phase 1 | Complete |
 | ADAPT-05 | Phase 1 | Complete |
 | ADAPT-06 | Phase 1 | Complete |
-| WIRE-01 | Phase 1 | Pending |
+| WIRE-01 | Phase 1 | Complete |
 | WIRE-02 | Phase 2 | Pending |
 | WIRE-03 | Phase 2 | Pending |
 | WIRE-04 | Phase 2 | Pending |
