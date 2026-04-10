@@ -12,8 +12,7 @@ export function extractRoutesFromSource(): string[] {
 
 	for (const file of routeFiles) {
 		const content = readFileSync(file, 'utf-8')
-		let match: RegExpExecArray | null
-		while ((match = routePattern.exec(content)) !== null) {
+		for (const match of content.matchAll(routePattern)) {
 			const method = match[1].toUpperCase()
 			const path = match[2]
 			if (path.includes('__test__')) continue

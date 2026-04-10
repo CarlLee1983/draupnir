@@ -14,7 +14,7 @@ import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
  * @internal
  */
 function getDB(): any {
-	// biome-ignore lint/style/noCommaOperator: Required for dynamic import
+	// biome-ignore lint/complexity/noCommaOperator: Required for dynamic import
 	return (require('@gravito/atlas'), require('@gravito/atlas')).DB
 }
 
