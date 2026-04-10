@@ -32,20 +32,48 @@ core.router
 
 // Named routes
 core.router.get('/users/:id', handler).name('users.show')
-const url = core.router.url('users.show', { id: 42 })  // '/users/42'
 
-// RESTful resource (index/create/store/show/edit/update/destroy)
-core.router.resource('photos', PhotoController)
-core.router.resource('photos', PhotoController, {
-  only: ['index', 'show', 'store', 'destroy']
-})
+// URL generation
+const url = core.router.url('users.show', { id: '42' })  // '/users/42'
+const searchUrl = core.router.url('users.index', { query: 'john' }) // '/users?query=john'
 
-// Proxy / gateway forward
-core.router.forward('get', '/external', 'https://api.partner.com/data')
-core.router.forward('all', '/proxy/:path*', 'https://upstream.svc')
+// Route constraints
+core.router.get('/users/:id', handler).where('id', /[0-9]+/)
+core.router.get('/users/:id', handler).whereUuid('id')
+```
 
-// Route model binding
-core.router.bind('user', async (id) => await userRepo.findById(id))
+## Route object
+
+The `Route` object returned from registration allows you to add constraints and metadata.
+
+```typescript
+const route = core.router.get('/profile', handler)
+
+route.name('profile')
+route.middleware(auth)
+route.domain('admin.gravito.dev')
+```
+
+## FormRequest validation
+
+Gravito supports class-based request validation (typically using `@gravito/impulse` for the implementation).
+
+```typescript
+import { FormRequest } from '@gravito/impulse'
+import { z } from 'zod'
+
+class StoreUserRequest extends FormRequest {
+  authorize() { return true }
+  rules() {
+    return {
+      email: z.string().email(),
+      password: z.string().min(8),
+    }
+  }
+}
+
+// Register with validation
+core.router.post('/users', StoreUserRequest, [UserController, 'store'])
 ```
 
 ## Handler shapes

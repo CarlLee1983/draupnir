@@ -10,7 +10,7 @@ description: >
 
 # @gravito/core
 
-`@gravito/core` is the Gravito HTTP micro-kernel. `PlanetCore` is the central orchestrator: it manages routing, a DI container, middleware, and Orbit (plugin) integration.
+`@gravito/core` is the Gravito HTTP micro-kernel. `PlanetCore` is the central orchestrator: it manages routing, a DI container, middleware, orbits (plugins), hooks, events, and configuration.
 
 ## Decision tree
 
@@ -21,14 +21,20 @@ Bootstrapping the app / installing orbits?
 Registering or resolving services (DI)?
   → references/container.md
 
-Defining HTTP routes?
+Defining HTTP routes or middleware?
   → references/router.md
 
 Writing a ServiceProvider?
   → references/service-provider.md
 
-Handling requests / building responses?
+Handling requests / cookies / session?
   → references/context.md
+
+Decoupling logic with hooks or events?
+  → references/hooks-and-events.md
+
+Managing app configuration or env vars?
+  → references/config.md
 ```
 
 ## Key exports
@@ -40,8 +46,9 @@ import {
   ServiceProvider, type Container,
   type GravitoContext, type GravitoMiddleware,
   Router, Route,
-  HookManager, EventManager,
+  HookManager, EventManager, ConfigManager,
   getCookie, setCookie, deleteCookie,
+  type Hasher, BunHasher,
 } from '@gravito/core'
 ```
 
@@ -52,4 +59,6 @@ import {
 - **Router & routing**: `references/router.md`
 - **ServiceProvider lifecycle**: `references/service-provider.md`
 - **GravitoContext (request/response)**: `references/context.md`
+- **Hooks & Events**: `references/hooks-and-events.md`
+- **Configuration (ConfigManager)**: `references/config.md`
 - **Project-specific conventions**: `references/project-conventions.md`

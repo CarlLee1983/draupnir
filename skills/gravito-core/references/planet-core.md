@@ -51,7 +51,29 @@ core.config     // ConfigManager — typed config access
 core.logger     // Logger — application logger
 core.events     // EventManager — event dispatch/listen
 core.hooks      // HookManager — action/filter hooks
-core.hasher     // BunHasher — password hashing
+core.hasher     // BunHasher — password hashing (bcrypt/argon2id)
+```
+
+## BunHasher
+
+A wrapper for native password hashing.
+
+```typescript
+const hash = await core.hasher.make('secret')
+const isValid = await core.hasher.check('secret', hash)
+```
+
+## defineConfig structure
+
+`defineConfig` is used to structure initial configuration and metadata.
+
+```typescript
+const config = defineConfig({
+  config: { ... },          // Initial configuration values
+  metadata: { ... },        // Application metadata (name, version, etc.)
+  logging: { ... },         // Logging configuration
+  adapterOptions: { ... },  // Adapter-specific options (e.g., Bun.serve)
+})
 ```
 
 ## Orbit interface
