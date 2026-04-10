@@ -4,22 +4,22 @@ import { readFileSync } from 'fs'
  * Extract registered routes from *.routes.ts source files.
  */
 export function extractRoutesFromSource(): string[] {
-	const routes: string[] = []
-	const glob = new Bun.Glob('src/Modules/*/Presentation/Routes/*.routes.ts')
-	const routeFiles = [...glob.scanSync(process.cwd())]
+  const routes: string[] = []
+  const glob = new Bun.Glob('src/Modules/*/Presentation/Routes/*.routes.ts')
+  const routeFiles = [...glob.scanSync(process.cwd())]
 
-	const routePattern = /router\.(get|post|put|patch|delete)\s*\(\s*['"`]([^'"`]+)['"`]/g
+  const routePattern = /router\.(get|post|put|patch|delete)\s*\(\s*['"`]([^'"`]+)['"`]/g
 
-	for (const file of routeFiles) {
-		const content = readFileSync(file, 'utf-8')
-		for (const match of content.matchAll(routePattern)) {
-			const method = match[1].toUpperCase()
-			const path = match[2]
-			if (path.includes('__test__')) continue
-			const normalizedPath = path.replace(/:(\w+)/g, '{$1}')
-			routes.push(`${method} ${normalizedPath}`)
-		}
-	}
+  for (const file of routeFiles) {
+    const content = readFileSync(file, 'utf-8')
+    for (const match of content.matchAll(routePattern)) {
+      const method = match[1].toUpperCase()
+      const path = match[2]
+      if (path.includes('__test__')) continue
+      const normalizedPath = path.replace(/:(\w+)/g, '{$1}')
+      routes.push(`${method} ${normalizedPath}`)
+    }
+  }
 
-	return routes.sort()
+  return routes.sort()
 }

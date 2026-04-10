@@ -11,18 +11,17 @@ beforeAll(() => {
 })
 
 describe('Routes Connectivity Verification', () => {
-
   describe('Health Module Routes', () => {
     it('GET /health 應該返回健康狀態', async () => {
       const response = await client.get('/health')
       expect(response.status).toBe(200)
-      expect(response.data).toHaveProperty('success')
+      expect(response.json).toHaveProperty('success')
     })
 
     it('GET /health/history 應該返回健康檢查歷史', async () => {
       const response = await client.get('/health/history')
       expect(response.status).toBe(200)
-      expect(response.data).toHaveProperty('success')
+      expect(response.json).toHaveProperty('success')
     })
   })
 
@@ -53,9 +52,13 @@ describe('Routes Connectivity Verification', () => {
     })
 
     it('POST /api/auth/logout 應該接受認證請求', async () => {
-      const response = await client.post('/api/auth/logout', {}, {
-        headers: { Authorization: 'Bearer test-token' },
-      })
+      const response = await client.post(
+        '/api/auth/logout',
+        {},
+        {
+          headers: { Authorization: 'Bearer test-token' },
+        },
+      )
       expect([200, 400, 401]).toContain(response.status)
     })
   })
@@ -319,8 +322,8 @@ describe('Routes Connectivity Verification', () => {
     it('GET /api 應該返回 API 信息', async () => {
       const response = await client.get('/api')
       expect(response.status).toBe(200)
-      expect(response.data).toHaveProperty('success', true)
-      expect(response.data).toHaveProperty('message', 'Draupnir API')
+      expect(response.json).toHaveProperty('success', true)
+      expect(response.json).toHaveProperty('message', 'Draupnir API')
     })
   })
 })
