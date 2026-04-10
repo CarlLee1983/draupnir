@@ -44,3 +44,4 @@ Need integration rules with the web layer?
 - `references/catalogs.md`
 - `references/formatting.md`
 - `references/integration.md`
+- `references/draupnir-patterns.md`

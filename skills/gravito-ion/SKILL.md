@@ -21,6 +21,9 @@ Need deferred or merged props?
 
 Need SSR configuration or fallback behavior?
   → references/ssr.md
+
+Need project-specific integration patterns?
+  → references/draupnir-patterns.md
 ```
 
 ## Core exports
@@ -50,3 +53,4 @@ import { IonOrbit } from '@gravito/ion'
 - `references/responses.md`
 - `references/props.md`
 - `references/ssr.md`
+- `references/draupnir-patterns.md`
