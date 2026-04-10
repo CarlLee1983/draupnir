@@ -2,6 +2,10 @@
 
 This file provides guidance for AI coding agents working in this repository (for example Cursor, Claude Code, and similar tools).
 
+## Language Policy
+
+Documentation and code comments use **English** or **Traditional Chinese (Taiwan)**. No other languages permitted in project files.
+
 ## Project Overview
 
 Draupnir is an AI Service Management Platform built on top of the Bifrost AI Gateway. It handles authentication, API key management, usage tracking, credit system, and organization management. Built with the Gravito DDD framework running on Bun with TypeScript.
