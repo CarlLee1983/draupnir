@@ -1,8 +1,8 @@
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 
 interface CreateVirtualKeyResult {
-  bifrostVirtualKeyId: string
-  bifrostKeyValue: string
+  gatewayKeyId: string
+  gatewayKeyValue: string
 }
 
 export class AppKeyBifrostSync {
@@ -14,16 +14,16 @@ export class AppKeyBifrostSync {
       customerId: orgId,
     })
     return {
-      bifrostVirtualKeyId: vk.id,
-      bifrostKeyValue: vk.value ?? '',
+      gatewayKeyId: vk.id,
+      gatewayKeyValue: vk.value ?? '',
     }
   }
 
-  async deactivateVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
-    await this.gatewayClient.updateKey(bifrostVirtualKeyId, { isActive: false })
+  async deactivateVirtualKey(gatewayKeyId: string): Promise<void> {
+    await this.gatewayClient.updateKey(gatewayKeyId, { isActive: false })
   }
 
-  async deleteVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
-    await this.gatewayClient.deleteKey(bifrostVirtualKeyId)
+  async deleteVirtualKey(gatewayKeyId: string): Promise<void> {
+    await this.gatewayClient.deleteKey(gatewayKeyId)
   }
 }

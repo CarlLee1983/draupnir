@@ -2,8 +2,8 @@ import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLM
 import type { KeyScope } from '../../Domain/ValueObjects/KeyScope'
 
 interface CreateVirtualKeyResult {
-  bifrostVirtualKeyId: string
-  bifrostKeyValue: string
+  gatewayKeyId: string
+  gatewayKeyValue: string
 }
 
 export class ApiKeyBifrostSync {
@@ -12,12 +12,12 @@ export class ApiKeyBifrostSync {
   async createVirtualKey(label: string, orgId: string): Promise<CreateVirtualKeyResult> {
     const vk = await this.gatewayClient.createKey({ name: label, customerId: orgId })
     return {
-      bifrostVirtualKeyId: vk.id,
-      bifrostKeyValue: vk.value ?? '',
+      gatewayKeyId: vk.id,
+      gatewayKeyValue: vk.value ?? '',
     }
   }
 
-  async syncPermissions(bifrostVirtualKeyId: string, scope: KeyScope): Promise<void> {
+  async syncPermissions(gatewayKeyId: string, scope: KeyScope): Promise<void> {
     const allowedModels = scope.getAllowedModels()
     const rpm = scope.getRateLimitRpm()
     const tpm = scope.getRateLimitTpm()
@@ -35,17 +35,17 @@ export class ApiKeyBifrostSync {
           }
         : undefined
 
-    await this.gatewayClient.updateKey(bifrostVirtualKeyId, {
+    await this.gatewayClient.updateKey(gatewayKeyId, {
       providerConfigs,
       rateLimit,
     })
   }
 
-  async deactivateVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
-    await this.gatewayClient.updateKey(bifrostVirtualKeyId, { isActive: false })
+  async deactivateVirtualKey(gatewayKeyId: string): Promise<void> {
+    await this.gatewayClient.updateKey(gatewayKeyId, { isActive: false })
   }
 
-  async deleteVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
-    await this.gatewayClient.deleteKey(bifrostVirtualKeyId)
+  async deleteVirtualKey(gatewayKeyId: string): Promise<void> {
+    await this.gatewayClient.deleteKey(gatewayKeyId)
   }
 }
