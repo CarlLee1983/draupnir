@@ -99,7 +99,11 @@ Plans:
   4. Playwright E2E suite (`bun run test:e2e`) passes unchanged — all critical user flows verified
   5. `.planning/codebase/CONCERNS.md` items #1 (Bifrost coupling), #2 (snake_case leakage), and #3 (missing abstraction) are updated to reflect resolved state with phase references
 **UI hint**: no
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Fix residual violations + quality-gate diff verification (grep, lint, typecheck, any/ts-ignore, route baseline)
+- [ ] 05-02-PLAN.md — CONCERNS.md: mark items #1, #2, #3 Resolved and #6 Partially Resolved
+- [ ] 05-03-PLAN.md — Playwright E2E checkpoint: automated attempt + human verification
 
 ## Progress
 
@@ -111,5 +115,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 1. Gateway Foundation | 4/4 | Complete   | 2026-04-10 |
 | 2. Business-Layer Migration | 3/5 | Complete    | 2026-04-10 |
 | 3. Domain Rename | 3/3 | Complete | 2026-04-10 |
-| 4. SDK Extraction | 0/2 | Not started | - |
-| 5. Final Verification | 0/TBD | Not started | - |
+| 4. SDK Extraction | 2/2 | Complete | 2026-04-10 |
+| 5. Final Verification | 0/3 | Not started | - |
