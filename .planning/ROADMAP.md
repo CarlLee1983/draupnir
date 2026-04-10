@@ -13,8 +13,8 @@ This milestone decouples Draupnir's business layer from the `BifrostClient` conc
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Gateway Foundation** - Define the interface, adapter, mock, and register the singleton — no business-layer changes yet (completed 2026-04-10)
-- [ ] **Phase 2: Business-Layer Migration** - Migrate all application services and wire functions to inject `ILLMGatewayClient`; rewrite tests to mock the interface
-- [ ] **Phase 3: Domain Rename** - Rename `bifrostVirtualKeyId` → `gatewayKeyId` in TS domain aggregates and repositories; no DB migration
+- [x] **Phase 2: Business-Layer Migration** - Migrate all application services and wire functions to inject `ILLMGatewayClient`; rewrite tests to mock the interface (completed 2026-04-10)
+- [x] **Phase 3: Domain Rename** - Rename `bifrostVirtualKeyId` → `gatewayKeyId` in TS domain aggregates and repositories; no DB migration (completed 2026-04-10)
 - [ ] **Phase 4: SDK Extraction** - Move `BifrostClient` into `packages/bifrost-sdk/` Bun workspace package; update all imports
 - [ ] **Phase 5: Final Verification** - Grep-verify zero business-layer Bifrost imports, run full lint/typecheck/unit/feature/E2E, update CONCERNS.md
 
@@ -83,7 +83,10 @@ Plans:
   4. The hardcoded Bifrost proxy URL previously in `SdkApiServiceProvider` is now sourced from `bifrost-sdk` config; `ProxyModelCall` continues to work and its existing tests pass
   5. Full Bun unit + feature test suite passes with the new import paths
 **UI hint**: no
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 04-01-PLAN.md — SDK package scaffold: create packages/bifrost-sdk/, copy source files, add proxyBaseUrl to config, smoke test
+- [ ] 04-02-PLAN.md — Import rewiring: update all src/ and test imports to @draupnir/bifrost-sdk, update scripts, delete old directory
 
 ### Phase 5: Final Verification
 **Goal**: The milestone is provably complete — zero gateway-specific imports in business layer, all quality gates pass, and CONCERNS.md reflects the resolved state.
@@ -106,7 +109,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Gateway Foundation | 4/4 | Complete   | 2026-04-10 |
-| 2. Business-Layer Migration | 3/5 | In Progress|  |
-| 3. Domain Rename | 0/3 | Not started | - |
-| 4. SDK Extraction | 0/TBD | Not started | - |
+| 2. Business-Layer Migration | 3/5 | Complete    | 2026-04-10 |
+| 3. Domain Rename | 3/3 | Complete | 2026-04-10 |
+| 4. SDK Extraction | 0/2 | Not started | - |
 | 5. Final Verification | 0/TBD | Not started | - |
