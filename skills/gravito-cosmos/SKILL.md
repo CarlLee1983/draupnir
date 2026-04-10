@@ -21,6 +21,12 @@ Need pluralization or formatting rules?
 
 Need integration rules with the web layer?
   → references/integration.md
+
+Need project-specific locale patterns?
+  → references/draupnir-patterns.md
+
+Need catalog file shapes or client/server sync?
+  → references/client-server.md
 ```
 
 ## Minimal workflow
@@ -45,3 +51,4 @@ Need integration rules with the web layer?
 - `references/formatting.md`
 - `references/integration.md`
 - `references/draupnir-patterns.md`
+- `references/client-server.md`

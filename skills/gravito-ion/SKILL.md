@@ -24,6 +24,12 @@ Need SSR configuration or fallback behavior?
 
 Need project-specific integration patterns?
   → references/draupnir-patterns.md
+
+Need client page conventions?
+  → references/client-pages.md
+
+Need shared-data or page-state rules?
+  → references/shared-data.md
 ```
 
 ## Core exports
@@ -54,3 +60,5 @@ import { IonOrbit } from '@gravito/ion'
 - `references/props.md`
 - `references/ssr.md`
 - `references/draupnir-patterns.md`
+- `references/client-pages.md`
+- `references/shared-data.md`

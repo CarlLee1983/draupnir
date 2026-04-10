@@ -21,6 +21,8 @@ Good places to connect localization:
 - shared page props for React pages
 - flash messages and validation errors
 - server-side email or notification content
+- Inertia page payloads when the route is rendered through `@gravito/ion`
+- route middleware that needs to choose locale before rendering
 
 ## Avoid
 
