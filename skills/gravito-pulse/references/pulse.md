@@ -2,6 +2,8 @@
 
 `@gravito/pulse` is the command-line interface for managing the Gravito ecosystem. It provides tools for scaffolding and interacts with `PlanetCore` via the `orbit` command.
 
+For generated project and module structure, use `gravito-scaffold`.
+
 ## 1. Installation
 
 ```bash
