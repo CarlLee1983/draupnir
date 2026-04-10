@@ -48,7 +48,13 @@ Plans:
   4. All tests that previously mocked `BifrostClient` now mock `ILLMGatewayClient` or use `MockGatewayClient` — the old `vi.fn()` mocks of concrete Bifrost methods are gone from those files
   5. Full Bun unit + feature test suite passes (including `routes-connectivity.test.ts` and `routes-existence.test.ts`) — all HTTP routes respond correctly
 **UI hint**: no
-**Plans**: TBD
+**Plans**: 5 plans
+Plans:
+- [ ] 02-01-PLAN.md — AppApiKey module: AppKeyBifrostSync + GetAppKeyUsageService + AppApiKeyServiceProvider + tests
+- [ ] 02-02-PLAN.md — ApiKey module: ApiKeyBifrostSync (incl. syncPermissions field translation) + ApiKeyServiceProvider + tests
+- [ ] 02-03-PLAN.md — Credit module: HandleBalanceDepletedService (D-P02 retryable) + HandleCreditToppedUpService + CreditServiceProvider + tests
+- [ ] 02-04-PLAN.md — SdkApi module: QueryUsage + SdkApiServiceProvider (queryUsage only) + tests
+- [ ] 02-05-PLAN.md — Dashboard module: UsageAggregator + UsageQuery widening + GetUsageChartService + DashboardServiceProvider + tests
 
 ### Phase 3: Domain Rename
 **Goal**: The gateway-specific field name `bifrostVirtualKeyId` no longer exists in TypeScript source; all domain aggregates, repositories, and call sites use `gatewayKeyId`, while the DB column `bifrost_virtual_key_id` is unchanged.
@@ -96,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Gateway Foundation | 4/4 | Complete   | 2026-04-10 |
-| 2. Business-Layer Migration | 0/TBD | Not started | - |
+| 2. Business-Layer Migration | 0/5 | Not started | - |
 | 3. Domain Rename | 0/TBD | Not started | - |
 | 4. SDK Extraction | 0/TBD | Not started | - |
 | 5. Final Verification | 0/TBD | Not started | - |
