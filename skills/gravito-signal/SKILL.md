@@ -27,6 +27,12 @@ Need transport-specific behavior or delivery rules?
 
 Need send-time workflow, error handling, or testing?
   -> references/workflow.md
+
+Need notification-style mail examples or project-specific rules?
+  -> references/draupnir-patterns.md
+
+Need message composition recipes?
+  -> references/message-recipes.md
 ```
 
 ## Core exports
@@ -58,3 +64,5 @@ import type { IMail } from '@gravito/signal'
 - `references/preview.md`
 - `references/transports.md`
 - `references/workflow.md`
+- `references/draupnir-patterns.md`
+- `references/message-recipes.md`

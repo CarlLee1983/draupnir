@@ -21,6 +21,15 @@ Need Gate / Policy / RBAC rules?
 
 Need the full login -> refresh -> logout flow?
   -> references/flows.md
+
+Need route protection or 401/403 rules?
+  -> references/route-protection.md
+
+Need token storage or revocation rules?
+  -> references/token-storage.md
+
+Need project-specific auth patterns?
+  -> references/draupnir-patterns.md
 ```
 
 ## Core exports
@@ -49,3 +58,6 @@ import { SentinelOrbit, auth, gate, Policy } from '@gravito/sentinel'
 - `references/auth.md`
 - `references/authorization.md`
 - `references/flows.md`
+- `references/route-protection.md`
+- `references/token-storage.md`
+- `references/draupnir-patterns.md`

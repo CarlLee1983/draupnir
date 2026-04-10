@@ -15,6 +15,27 @@ if (!success) {
 }
 ```
 
+## Draupnir usage
+
+Rate limiting is useful around:
+
+- login endpoints
+- invitation endpoints
+- API-key creation / rotation flows
+- expensive admin actions
+
+## Key design
+
+- include the actor in the key when the action is user-scoped
+- include the IP address when the action is anonymous
+- use a separate key family per route or feature
+
+## Failure handling
+
+- return `429` when the quota is exhausted
+- keep the response short and deterministic
+- do not leak internal counters or store identifiers in the message
+
 ## 2. Checking Status
 
 You can check how many attempts are remaining without incrementing the counter.

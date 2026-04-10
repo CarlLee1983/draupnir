@@ -66,3 +66,25 @@ await cache.tags(['users', 'profiles']).set('user:1', data, 3600)
 // Invalidate all items with the 'users' tag
 await cache.tags('users').flush()
 ```
+
+## 6. Project patterns
+
+`Draupnir` uses cache as shared infrastructure for:
+
+- health checks
+- hot lookup data
+- rate limit counters
+- shared configuration snapshots
+
+When a cache value is used by more than one route or module, prefer:
+
+1. a stable key namespace
+2. a short TTL for volatile data
+3. explicit invalidation when source data changes
+
+## 7. Common operation mistakes
+
+- using cache as a primary database
+- forgetting to invalidate after writes
+- mixing unrelated data under the same key prefix
+- relying on cache hit behavior without a fallback read path

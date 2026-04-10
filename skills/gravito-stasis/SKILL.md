@@ -24,6 +24,12 @@ Using distributed locks for concurrency?
 
 Implementing rate limiting?
   → See references/rate-limiting.md
+
+Need project-specific cache patterns?
+  → See references/draupnir-patterns.md
+
+Need concurrency or cache key rules?
+  → See references/key-patterns.md
 ```
 
 ## Minimal Example
@@ -47,3 +53,5 @@ const success = await cache.add('lock:job:1', true, 60)
 - **Distributed Locks**: `references/locks.md`
 - **Rate Limiting**: `references/rate-limiting.md`
 - **Advanced (Tiered/Predictive)**: `references/advanced.md`
+- **Draupnir patterns**: `references/draupnir-patterns.md`
+- **Key patterns**: `references/key-patterns.md`

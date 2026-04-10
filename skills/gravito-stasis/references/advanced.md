@@ -67,3 +67,14 @@ class MyDbProvider implements CacheStorageProvider {
   async clear() { ... }
 }
 ```
+
+## Draupnir guidance
+
+Prefer the built-in Redis-backed path for shared production state. Use custom providers only when
+you need a test double or a very specific storage backend that the project already depends on.
+
+## Common mistakes
+
+- promoting predictive caching before the cache keys and invalidation rules are stable
+- using a circuit breaker as a substitute for fixing Redis connectivity
+- treating tiered caching as free consistency

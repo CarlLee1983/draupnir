@@ -45,3 +45,15 @@ const result = await cache.restoreLock('process-invoice:123', ownerToken).releas
 | `file` | ❌ Not recommended | N/A |
 
 > **Warning**: Memory-based locks only work within a single process. For production "Galaxy" deployments with multiple Satellites, **always use the Redis driver** for locks.
+
+## Draupnir uses
+
+- serializing critical updates to shared counters
+- protecting background sync jobs
+- avoiding duplicate work when multiple workers try the same task
+
+## Rules
+
+- keep the locked section as small as possible
+- always release the lock in `finally`
+- avoid holding locks across slow network calls unless the flow really needs it
