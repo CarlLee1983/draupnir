@@ -53,15 +53,51 @@ describe('@draupnir/bifrost-sdk smoke', () => {
   })
 
   it('createBifrostClientConfig throws without baseUrl', () => {
-    expect(() => createBifrostClientConfig({ masterKey: 'test-key' })).toThrow(
-      'BIFROST_API_URL is required',
-    )
+    const originalBaseUrl = process.env.BIFROST_API_URL
+    const originalMasterKey = process.env.BIFROST_MASTER_KEY
+    delete process.env.BIFROST_API_URL
+    delete process.env.BIFROST_MASTER_KEY
+
+    try {
+      expect(() => createBifrostClientConfig({ masterKey: 'test-key' })).toThrow(
+        'BIFROST_API_URL is required',
+      )
+    } finally {
+      if (originalBaseUrl !== undefined) {
+        process.env.BIFROST_API_URL = originalBaseUrl
+      } else {
+        delete process.env.BIFROST_API_URL
+      }
+      if (originalMasterKey !== undefined) {
+        process.env.BIFROST_MASTER_KEY = originalMasterKey
+      } else {
+        delete process.env.BIFROST_MASTER_KEY
+      }
+    }
   })
 
   it('createBifrostClientConfig throws without masterKey', () => {
-    expect(() =>
-      createBifrostClientConfig({ baseUrl: 'https://test.example.com' }),
-    ).toThrow('BIFROST_MASTER_KEY is required')
+    const originalBaseUrl = process.env.BIFROST_API_URL
+    const originalMasterKey = process.env.BIFROST_MASTER_KEY
+    delete process.env.BIFROST_API_URL
+    delete process.env.BIFROST_MASTER_KEY
+
+    try {
+      expect(() =>
+        createBifrostClientConfig({ baseUrl: 'https://test.example.com' }),
+      ).toThrow('BIFROST_MASTER_KEY is required')
+    } finally {
+      if (originalBaseUrl !== undefined) {
+        process.env.BIFROST_API_URL = originalBaseUrl
+      } else {
+        delete process.env.BIFROST_API_URL
+      }
+      if (originalMasterKey !== undefined) {
+        process.env.BIFROST_MASTER_KEY = originalMasterKey
+      } else {
+        delete process.env.BIFROST_MASTER_KEY
+      }
+    }
   })
 
   it('BifrostApiError is constructable with correct properties', () => {
