@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete — ready for verification
-stopped_at: Completed 02-01-PLAN.md — AppApiKey module migrated to ILLMGatewayClient
-last_updated: "2026-04-10T07:30:16.780Z"
+stopped_at: Completed 02-05-PLAN.md — Dashboard module migrated to ILLMGatewayClient
+last_updated: "2026-04-10T07:40:39.661Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -52,6 +52,7 @@ Plan: 4 of 4
 | Phase 01-gateway-foundation P01-04 | 5 | 1 tasks | 1 files |
 | Phase 02-business-layer-migration P02 | 8 | 2 tasks | 6 files |
 | Phase 02 P03 | 12 | 2 tasks | 6 files |
+| Phase 02-business-layer-migration P05 | 10 | 3 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,7 @@ Recent decisions affecting current work:
 - [Phase 02-business-layer-migration]: MockGatewayClient.updateKey 需要 store 內存在的 keyId，測試需在 beforeEach 呼叫 mock.createKey() 並以回傳 id 作為 bifrostVirtualKeyId
 - [Phase 02]: HandleCreditToppedUpService.retryPending 不存在，不需套用 D-P02（deferred per CONTEXT.md）
 - [Phase 02]: RevokeAppKeyService/RotateAppKeyService 測試因 AppKeyBifrostSync 建構子簽章變更同步遷移至 MockGatewayClient（Rule 1 auto-fix）
+- [Phase 02-business-layer-migration]: UsageQuery 擴充 providers/models/limit 欄位以解決 TypeScript strict mode 阻擋問題；BifrostGatewayAdapter 條件式轉發新欄位
 
 ### Pending Todos
 
@@ -83,6 +85,6 @@ None yet. Note for Phase 4 planning: confirm Bun workspace `workspace:*` protoco
 
 ## Session Continuity
 
-Last session: 2026-04-10T07:30:12.232Z
-Stopped at: Completed 02-01-PLAN.md — AppApiKey module migrated to ILLMGatewayClient
+Last session: 2026-04-10T07:40:39.657Z
+Stopped at: Completed 02-05-PLAN.md — Dashboard module migrated to ILLMGatewayClient
 Resume file: None

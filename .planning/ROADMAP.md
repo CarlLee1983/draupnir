@@ -54,7 +54,7 @@ Plans:
 - [x] 02-02-PLAN.md — ApiKey module: ApiKeyBifrostSync (incl. syncPermissions field translation) + ApiKeyServiceProvider + tests
 - [x] 02-03-PLAN.md — Credit module: HandleBalanceDepletedService (D-P02 retryable) + HandleCreditToppedUpService + CreditServiceProvider + tests
 - [x] 02-04-PLAN.md — SdkApi module: QueryUsage + SdkApiServiceProvider (queryUsage only) + tests
-- [ ] 02-05-PLAN.md — Dashboard module: UsageAggregator + UsageQuery widening + GetUsageChartService + DashboardServiceProvider + tests
+- [x] 02-05-PLAN.md — Dashboard module: UsageAggregator + UsageQuery widening + GetUsageChartService + DashboardServiceProvider + tests
 
 ### Phase 3: Domain Rename
 **Goal**: The gateway-specific field name `bifrostVirtualKeyId` no longer exists in TypeScript source; all domain aggregates, repositories, and call sites use `gatewayKeyId`, while the DB column `bifrost_virtual_key_id` is unchanged.
