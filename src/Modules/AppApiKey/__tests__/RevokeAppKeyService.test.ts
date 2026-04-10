@@ -39,7 +39,7 @@ describe('RevokeAppKeyService', () => {
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Revoke Test',
-      bifrostVirtualKeyId: 'mock_vk_000001',
+      gatewayKeyId: 'mock_vk_000001',
       rawKey: 'drp_app_revoke123',
     })
     await appKeyRepo.save(key.activate())

@@ -51,7 +51,7 @@ describe('GetUsageChartService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Key 1',
-      bifrostVirtualKeyId: 'bfr-vk-1',
+      gatewayKeyId: 'bfr-vk-1',
       rawKey: 'drp_sk_1',
     })
     await apiKeyRepo.save(key.activate())

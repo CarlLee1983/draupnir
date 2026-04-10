@@ -35,7 +35,7 @@ describe('RevokeApiKeyService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Active Key',
-      bifrostVirtualKeyId: seededKey.id,
+      gatewayKeyId: seededKey.id,
       rawKey: 'drp_sk_active',
     })
     await apiKeyRepo.save(key.activate())

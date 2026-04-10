@@ -35,7 +35,7 @@ describe('SetKeyPermissionsService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
-      bifrostVirtualKeyId: seededKey.id,
+      gatewayKeyId: seededKey.id,
       rawKey: 'drp_sk_test',
     })
     await apiKeyRepo.save(key.activate())

@@ -91,7 +91,7 @@ describe('SdkApi Integration', () => {
       orgId: 'org-int-1',
       issuedByUserId: 'user-1',
       label: 'Integration Test Key',
-      bifrostVirtualKeyId: 'bfr-vk-int-1',
+      gatewayKeyId: 'bfr-vk-int-1',
       rawKey,
       scope: AppKeyScope.write(),
       boundModules: BoundModules.empty(),

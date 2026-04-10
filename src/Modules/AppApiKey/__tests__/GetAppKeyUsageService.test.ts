@@ -35,7 +35,7 @@ describe('GetAppKeyUsageService', () => {
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Usage Test',
-      bifrostVirtualKeyId: 'bfr-vk-usage',
+      gatewayKeyId: 'bfr-vk-usage',
       rawKey: 'drp_app_usage123',
     })
     await appKeyRepo.save(key.activate())

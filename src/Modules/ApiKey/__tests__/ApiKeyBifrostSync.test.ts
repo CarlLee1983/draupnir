@@ -18,8 +18,8 @@ describe('ApiKeyBifrostSync', () => {
 
   it('createVirtualKey 應呼叫 gateway 並回傳 ID 及 key value', async () => {
     const result = await sync.createVirtualKey('My Key', 'org-1')
-    expect(result.bifrostVirtualKeyId).toBe('mock_vk_000001')
-    expect(result.bifrostKeyValue).toBe('mock_raw_key_000001')
+    expect(result.gatewayKeyId).toBe('mock_vk_000001')
+    expect(result.gatewayKeyValue).toBe('mock_raw_key_000001')
     expect(mock.calls.createKey[0].name).toBe('My Key')
     expect(mock.calls.createKey[0].customerId).toBe('org-1')
   })

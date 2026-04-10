@@ -36,7 +36,7 @@ describe('RotateAppKeyService', () => {
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Rotate Test',
-      bifrostVirtualKeyId: 'bfr-vk-original',
+      gatewayKeyId: 'bfr-vk-original',
       rawKey: 'drp_app_original123',
     })
     await appKeyRepo.save(key.activate())
@@ -63,7 +63,7 @@ describe('RotateAppKeyService', () => {
     })
     const updated = await appKeyRepo.findById('appkey-rotate')
     expect(updated?.previousKeyHash).toBeTruthy()
-    expect(updated?.previousBifrostVirtualKeyId).toBe('bfr-vk-original')
+    expect(updated?.previousGatewayKeyId).toBe('bfr-vk-original')
   })
 
   it('Key 不存在應回傳錯誤', async () => {

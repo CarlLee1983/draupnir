@@ -10,77 +10,77 @@ import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/Organ
 import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
 
 describe('SetAppKeyScopeService', () => {
-	let service: SetAppKeyScopeService
-	let db: MemoryDatabaseAccess
-	let appKeyRepo: AppApiKeyRepository
+  let service: SetAppKeyScopeService
+  let db: MemoryDatabaseAccess
+  let appKeyRepo: AppApiKeyRepository
 
-	beforeEach(async () => {
-		db = new MemoryDatabaseAccess()
-		appKeyRepo = new AppApiKeyRepository(db)
-		const orgRepo = new OrganizationRepository(db)
-		const memberRepo = new OrganizationMemberRepository(db)
-		const orgAuth = new OrgAuthorizationHelper(memberRepo)
-		service = new SetAppKeyScopeService(appKeyRepo, orgAuth)
+  beforeEach(async () => {
+    db = new MemoryDatabaseAccess()
+    appKeyRepo = new AppApiKeyRepository(db)
+    const orgRepo = new OrganizationRepository(db)
+    const memberRepo = new OrganizationMemberRepository(db)
+    const orgAuth = new OrgAuthorizationHelper(memberRepo)
+    service = new SetAppKeyScopeService(appKeyRepo, orgAuth)
 
-		const org = Organization.create('org-1', 'Test Org', 'test')
-		await orgRepo.save(org)
-		const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
-		await memberRepo.save(member)
+    const org = Organization.create('org-1', 'Test Org', 'test')
+    await orgRepo.save(org)
+    const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
+    await memberRepo.save(member)
 
-		const key = await AppApiKey.create({
-			id: 'appkey-scope',
-			orgId: 'org-1',
-			issuedByUserId: 'user-1',
-			label: 'Scope Test',
-			bifrostVirtualKeyId: 'bfr-vk-scope',
-			rawKey: 'drp_app_scope123',
-		})
-		await appKeyRepo.save(key.activate())
-	})
+    const key = await AppApiKey.create({
+      id: 'appkey-scope',
+      orgId: 'org-1',
+      issuedByUserId: 'user-1',
+      label: 'Scope Test',
+      gatewayKeyId: 'bfr-vk-scope',
+      rawKey: 'drp_app_scope123',
+    })
+    await appKeyRepo.save(key.activate())
+  })
 
-	it('應成功更新 scope', async () => {
-		const result = await service.execute({
-			keyId: 'appkey-scope',
-			callerUserId: 'user-1',
-			callerSystemRole: 'user',
-			scope: 'admin',
-		})
-		expect(result.success).toBe(true)
-		expect(result.data?.scope).toBe('admin')
-	})
+  it('應成功更新 scope', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-scope',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+      scope: 'admin',
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.scope).toBe('admin')
+  })
 
-	it('應成功更新綁定模組', async () => {
-		const result = await service.execute({
-			keyId: 'appkey-scope',
-			callerUserId: 'user-1',
-			callerSystemRole: 'user',
-			boundModuleIds: ['mod-1', 'mod-2'],
-		})
-		expect(result.success).toBe(true)
-		expect(result.data?.boundModules).toEqual(['mod-1', 'mod-2'])
-	})
+  it('應成功更新綁定模組', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-scope',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+      boundModuleIds: ['mod-1', 'mod-2'],
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.boundModules).toEqual(['mod-1', 'mod-2'])
+  })
 
-	it('應同時更新 scope 和綁定模組', async () => {
-		const result = await service.execute({
-			keyId: 'appkey-scope',
-			callerUserId: 'user-1',
-			callerSystemRole: 'user',
-			scope: 'write',
-			boundModuleIds: ['mod-3'],
-		})
-		expect(result.success).toBe(true)
-		expect(result.data?.scope).toBe('write')
-		expect(result.data?.boundModules).toEqual(['mod-3'])
-	})
+  it('應同時更新 scope 和綁定模組', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-scope',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+      scope: 'write',
+      boundModuleIds: ['mod-3'],
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.scope).toBe('write')
+    expect(result.data?.boundModules).toEqual(['mod-3'])
+  })
 
-	it('Key 不存在應回傳錯誤', async () => {
-		const result = await service.execute({
-			keyId: 'nonexistent',
-			callerUserId: 'user-1',
-			callerSystemRole: 'user',
-			scope: 'admin',
-		})
-		expect(result.success).toBe(false)
-		expect(result.error).toBe('KEY_NOT_FOUND')
-	})
+  it('Key 不存在應回傳錯誤', async () => {
+    const result = await service.execute({
+      keyId: 'nonexistent',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+      scope: 'admin',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('KEY_NOT_FOUND')
+  })
 })

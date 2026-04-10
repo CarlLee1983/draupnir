@@ -11,7 +11,7 @@ describe('QueryUsage', () => {
   const authContext: AppAuthContext = {
     appKeyId: 'appkey-1',
     orgId: 'org-1',
-    bifrostVirtualKeyId: 'bfr-vk-1',
+    gatewayKeyId: 'bfr-vk-1',
     scope: 'read',
     boundModuleIds: [],
   }

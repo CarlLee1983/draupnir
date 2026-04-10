@@ -37,7 +37,7 @@ describe('GetDashboardSummaryService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Key 1',
-      bifrostVirtualKeyId: 'bfr-vk-1',
+      gatewayKeyId: 'bfr-vk-1',
       rawKey: 'drp_sk_1',
     })
     const key2 = await ApiKey.create({
@@ -45,7 +45,7 @@ describe('GetDashboardSummaryService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Key 2',
-      bifrostVirtualKeyId: 'bfr-vk-2',
+      gatewayKeyId: 'bfr-vk-2',
       rawKey: 'drp_sk_2',
     })
     await apiKeyRepo.save(key1.activate())

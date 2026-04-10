@@ -37,7 +37,7 @@ describe('HandleBalanceDepletedService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
-      bifrostVirtualKeyId: 'mock_vk_000001',
+      gatewayKeyId: 'mock_vk_000001',
       rawKey: 'drp_sk_test_12345678901234567890123456789012',
       scope: KeyScope.fromJSON({
         rate_limit_rpm: 60,
@@ -64,7 +64,7 @@ describe('HandleBalanceDepletedService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
-      bifrostVirtualKeyId: 'mock_vk_000001',
+      gatewayKeyId: 'mock_vk_000001',
       rawKey: 'drp_sk_test_12345678901234567890123456789012',
     })
     const activeKey = mockKey.activate()
@@ -84,7 +84,7 @@ describe('HandleBalanceDepletedService', () => {
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
-      bifrostVirtualKeyId: 'mock_vk_000001',
+      gatewayKeyId: 'mock_vk_000001',
       rawKey: 'drp_sk_test_12345678901234567890123456789012',
     })
     const activeKey = mockKey.activate()
