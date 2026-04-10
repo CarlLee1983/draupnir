@@ -30,7 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `MockGatewayClient` unit tests pass and verify in-memory behavior with no HTTP calls
   4. `llmGatewayClient` singleton resolves from the DI container and returns a `BifrostGatewayAdapter` instance
   5. Full Bun unit + feature test suite passes unchanged (existing `BifrostClient` path untouched)
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 01-01-PLAN.md — Interface contracts: ILLMGatewayClient, DTOs, GatewayError, barrel export
+- [ ] 01-02-PLAN.md — BifrostGatewayAdapter implementation + unit tests
+- [ ] 01-03-PLAN.md — MockGatewayClient implementation + unit tests
+- [ ] 01-04-PLAN.md — DI registration in FoundationServiceProvider + human verification
 
 ### Phase 2: Business-Layer Migration
 **Goal**: All application services and wire functions use `ILLMGatewayClient` — no file under `src/Modules/` or `src/Foundation/Application/` has a constructor parameter typed as `BifrostClient`.
@@ -90,7 +95,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Gateway Foundation | 0/TBD | Not started | - |
+| 1. Gateway Foundation | 0/4 | Not started | - |
 | 2. Business-Layer Migration | 0/TBD | Not started | - |
 | 3. Domain Rename | 0/TBD | Not started | - |
 | 4. SDK Extraction | 0/TBD | Not started | - |
