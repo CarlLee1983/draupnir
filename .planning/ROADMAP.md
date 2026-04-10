@@ -66,7 +66,11 @@ Plans:
   3. `grep -r bifrostVirtualKeyId src/` returns zero matches
   4. Full Bun unit + feature test suite passes unchanged
 **UI hint**: no
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 03-01-PLAN.md — Domain aggregates: ApiKey.ts + AppApiKey.ts props/params/getters/fromDatabase/toDatabaseRow (Wave 1)
+- [ ] 03-02-PLAN.md — Sync services + events: ApiKeyBifrostSync, AppKeyBifrostSync, AppApiKeyEvents, 3 call sites (Wave 2, parallel)
+- [ ] 03-03-PLAN.md — DTOs + app services + all test files: SdkApiDTO, 7 services, ~15 test files, final grep verification (Wave 2, parallel)
 
 ### Phase 4: SDK Extraction
 **Goal**: `BifrostClient` lives in `packages/bifrost-sdk/` as a standalone Bun workspace package; `src/Foundation/Infrastructure/Services/BifrostClient/` is deleted; all imports in Draupnir and the adapter use the workspace package.
@@ -103,6 +107,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 |-------|----------------|--------|-----------|
 | 1. Gateway Foundation | 4/4 | Complete   | 2026-04-10 |
 | 2. Business-Layer Migration | 3/5 | In Progress|  |
-| 3. Domain Rename | 0/TBD | Not started | - |
+| 3. Domain Rename | 0/3 | Not started | - |
 | 4. SDK Extraction | 0/TBD | Not started | - |
 | 5. Final Verification | 0/TBD | Not started | - |
