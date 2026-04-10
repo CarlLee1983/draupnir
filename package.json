@@ -13,7 +13,7 @@
     "test:watch": "bun test src tests --watch",
     "test:coverage": "bun test --coverage",
     "test:unit": "bun test tests/Unit/",
-    "test:integration": "bun test tests/Integration/",
+    "test:integration": "bun test src --filter integration",
     "test:feature": "bun test tests/Feature/",
     "test:user": "bun test tests/ --filter User",
     "test:e2e": "playwright test",
@@ -49,7 +49,8 @@
     "build:frontend": "vite build",
     "preview:frontend": "vite preview",
     "dev:all": "bun run dev & bun run dev:frontend",
-    "typecheck:frontend": "tsc --project tsconfig.frontend.json --noEmit"
+    "typecheck:frontend": "tsc --project tsconfig.frontend.json --noEmit",
+    "check:no-mock-in-src": "! grep -r 'MockGatewayClient' src/ --include='*.ts' -l | grep -v '__tests__' | grep -v 'LLMGateway'"
   },
   "dependencies": {
     "@gravito/atlas": "^2.0.0",
