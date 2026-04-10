@@ -1,6 +1,6 @@
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositories/IAppApiKeyRepository'
-import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
 import { AuthenticateApp } from '../../Application/UseCases/AuthenticateApp'
 import { ProxyModelCall } from '../../Application/UseCases/ProxyModelCall'
@@ -9,30 +9,33 @@ import { QueryBalance } from '../../Application/UseCases/QueryBalance'
 import { AppAuthMiddleware } from '../Middleware/AppAuthMiddleware'
 
 export class SdkApiServiceProvider extends ModuleServiceProvider {
-	override register(container: IContainer): void {
-		container.singleton('authenticateApp', (c: IContainer) => {
-			return new AuthenticateApp(c.make('appApiKeyRepository') as IAppApiKeyRepository)
-		})
+  override register(container: IContainer): void {
+    container.singleton('authenticateApp', (c: IContainer) => {
+      return new AuthenticateApp(c.make('appApiKeyRepository') as IAppApiKeyRepository)
+    })
 
-		container.singleton('appAuthMiddleware', (c: IContainer) => {
-			return new AppAuthMiddleware(c.make('authenticateApp') as AuthenticateApp)
-		})
+    container.singleton('appAuthMiddleware', (c: IContainer) => {
+      return new AppAuthMiddleware(c.make('authenticateApp') as AuthenticateApp)
+    })
 
-		container.bind('proxyModelCall', () => {
-			const bifrostBaseUrl = (process.env.BIFROST_API_URL ?? 'http://localhost:8787').replace(/\/+$/, '')
-			return new ProxyModelCall(bifrostBaseUrl)
-		})
+    container.bind('proxyModelCall', () => {
+      const bifrostBaseUrl = (process.env.BIFROST_API_URL ?? 'http://localhost:8787').replace(
+        /\/+$/,
+        '',
+      )
+      return new ProxyModelCall(bifrostBaseUrl)
+    })
 
-		container.bind('queryUsage', (c: IContainer) => {
-			return new QueryUsage(c.make('bifrostClient') as BifrostClient)
-		})
+    container.bind('queryUsage', (c: IContainer) => {
+      return new QueryUsage(c.make('llmGatewayClient') as ILLMGatewayClient)
+    })
 
-		container.bind('queryBalance', (c: IContainer) => {
-			return new QueryBalance(c.make('creditAccountRepository') as ICreditAccountRepository)
-		})
-	}
+    container.bind('queryBalance', (c: IContainer) => {
+      return new QueryBalance(c.make('creditAccountRepository') as ICreditAccountRepository)
+    })
+  }
 
-	override boot(_context: unknown): void {
-		console.log('🔌 [SdkApi] Module loaded')
-	}
+  override boot(_context: unknown): void {
+    console.log('🔌 [SdkApi] Module loaded')
+  }
 }
