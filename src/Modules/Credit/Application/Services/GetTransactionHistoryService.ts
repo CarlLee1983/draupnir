@@ -2,7 +2,7 @@
 import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
 import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { TransactionHistoryResponse } from '../DTOs/CreditDTO'
+import { CreditTransactionPresenter, type TransactionHistoryResponse } from '../DTOs/CreditDTO'
 
 export class GetTransactionHistoryService {
   constructor(
@@ -19,7 +19,11 @@ export class GetTransactionHistoryService {
     limit = 20,
   ): Promise<TransactionHistoryResponse> {
     try {
-      const authResult = await this.orgAuth.requireOrgMembership(orgId, callerUserId, callerSystemRole)
+      const authResult = await this.orgAuth.requireOrgMembership(
+        orgId,
+        callerUserId,
+        callerSystemRole,
+      )
       if (!authResult.authorized) {
         return { success: false, message: '無權存取', error: 'NOT_ORG_MEMBER' }
       }
@@ -43,7 +47,7 @@ export class GetTransactionHistoryService {
         success: true,
         message: '查詢成功',
         data: {
-          transactions: transactions.map((t) => t.toDTO()),
+          transactions: transactions.map((t) => CreditTransactionPresenter.fromEntity(t)),
           total,
           page,
           limit,

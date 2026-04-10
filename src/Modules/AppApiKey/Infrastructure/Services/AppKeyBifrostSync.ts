@@ -1,11 +1,7 @@
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { IAppKeyBifrostSync, CreateVirtualKeyResult } from '../../Application/Ports/IAppKeyBifrostSync'
 
-interface CreateVirtualKeyResult {
-  gatewayKeyId: string
-  gatewayKeyValue: string
-}
-
-export class AppKeyBifrostSync {
+export class AppKeyBifrostSync implements IAppKeyBifrostSync {
   constructor(private readonly gatewayClient: ILLMGatewayClient) {}
 
   async createVirtualKey(label: string, orgId: string): Promise<CreateVirtualKeyResult> {

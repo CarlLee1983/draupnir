@@ -1,32 +1,38 @@
 /**
  * AuthController
- * 認證模組的控制器
+ * HTTP adapter for the Auth module.
  *
- * 責任：
- * - 解析 HTTP 請求
- * - 調用應用層服務
- * - 返回 HTTP 回應
+ * Responsibilities:
+ * - Read validated HTTP input
+ * - Invoke application services
+ * - Map results to HTTP responses
  */
 
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { RegisterUserService } from '../../Application/Services/RegisterUserService'
-import type { LoginUserService } from '../../Application/Services/LoginUserService'
-import type { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
-import type { LogoutUserService } from '../../Application/Services/LogoutUserService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import type { LoginParams, RegisterParams, RefreshTokenParams } from '../Requests'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { LoginUserService } from '../../Application/Services/LoginUserService'
+import type { LogoutUserService } from '../../Application/Services/LogoutUserService'
+import type { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
+import type { RegisterUserService } from '../../Application/Services/RegisterUserService'
+import type { LoginParams, RefreshTokenParams, RegisterParams } from '../Requests'
 
+/**
+ * Controller handling authentication-related HTTP requests.
+ */
 export class AuthController {
+  /**
+   * Creates an instance of AuthController.
+   */
   constructor(
     private registerUserService: RegisterUserService,
     private loginUserService: LoginUserService,
     private refreshTokenService: RefreshTokenService,
-    private logoutUserService: LogoutUserService
+    private logoutUserService: LogoutUserService,
   ) {}
 
   /**
-   * 註冊用戶端點
-   * POST /api/auth/register
+   * Handles user registration requests.
+   * `POST /api/auth/register`
    */
   async register(ctx: IHttpContext): Promise<Response> {
     const body = ctx.get('validated') as RegisterParams
@@ -35,8 +41,8 @@ export class AuthController {
   }
 
   /**
-   * 登入用戶端點
-   * POST /api/auth/login
+   * Handles user sign-in requests.
+   * `POST /api/auth/login`
    */
   async login(ctx: IHttpContext): Promise<Response> {
     const body = ctx.get('validated') as LoginParams
@@ -46,8 +52,8 @@ export class AuthController {
   }
 
   /**
-   * 刷新 Token 端點
-   * POST /api/auth/refresh
+   * Handles access token refresh requests using a refresh token.
+   * `POST /api/auth/refresh`
    */
   async refresh(ctx: IHttpContext): Promise<Response> {
     const body = ctx.get('validated') as RefreshTokenParams
@@ -57,9 +63,9 @@ export class AuthController {
   }
 
   /**
-   * 登出用戶端點
-   * POST /api/auth/logout
-   * 需要 Authorization: Bearer <token>
+   * Handles sign-out requests by revoking the current access token.
+   * `POST /api/auth/logout`
+   * Requires `Authorization: Bearer <token>`.
    */
   async logout(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.isAuthenticated(ctx)
@@ -74,7 +80,10 @@ export class AuthController {
 
     const parts = authHeader.split(' ')
     if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
-      return ctx.json({ success: false, message: '無效的 Authorization 格式', error: 'INVALID_AUTH_HEADER' }, 400)
+      return ctx.json(
+        { success: false, message: '無效的 Authorization 格式', error: 'INVALID_AUTH_HEADER' },
+        400,
+      )
     }
     const token = parts[1]
 

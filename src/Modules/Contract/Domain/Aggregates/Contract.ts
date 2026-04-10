@@ -104,41 +104,36 @@ export class Contract {
     return this.props.terms.hasModule(moduleName)
   }
 
-  get id(): string { return this.props.id }
-  get targetType(): ContractTargetType { return this.props.target.getType() }
-  get targetId(): string { return this.props.target.getId() }
-  get status(): string { return this.props.status.toString() }
-  get terms(): ContractTerm { return this.props.terms }
-  get createdBy(): string { return this.props.createdBy }
-  get createdAt(): Date { return this.props.createdAt }
-  get updatedAt(): Date { return this.props.updatedAt }
-
-  isActive(): boolean { return this.props.status.isActive() }
-  isDraft(): boolean { return this.props.status.isDraft() }
-
-  toDatabaseRow(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      target_type: this.props.target.getType(),
-      target_id: this.props.target.getId(),
-      status: this.props.status.toString(),
-      terms: JSON.stringify(this.props.terms.toJSON()),
-      created_by: this.props.createdBy,
-      created_at: this.props.createdAt.toISOString(),
-      updated_at: this.props.updatedAt.toISOString(),
-    }
+  get id(): string {
+    return this.props.id
+  }
+  get targetType(): ContractTargetType {
+    return this.props.target.getType()
+  }
+  get targetId(): string {
+    return this.props.target.getId()
+  }
+  get status(): string {
+    return this.props.status.toString()
+  }
+  get terms(): ContractTerm {
+    return this.props.terms
+  }
+  get createdBy(): string {
+    return this.props.createdBy
+  }
+  get createdAt(): Date {
+    return this.props.createdAt
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt
   }
 
-  toDTO(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      targetType: this.props.target.getType(),
-      targetId: this.props.target.getId(),
-      status: this.props.status.toString(),
-      terms: this.props.terms.toJSON(),
-      createdBy: this.props.createdBy,
-      createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString(),
-    }
+  isActive(): boolean {
+    return this.props.status.isActive()
   }
+  isDraft(): boolean {
+    return this.props.status.isDraft()
+  }
+
 }

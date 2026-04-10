@@ -38,7 +38,10 @@ export class CliApiController {
 
     const body = await ctx.getJsonBody<{ userCode?: string }>()
     if (!body.userCode) {
-      return ctx.json({ success: false, message: '缺少 userCode', error: 'USER_CODE_REQUIRED' }, 422)
+      return ctx.json(
+        { success: false, message: '缺少 userCode', error: 'USER_CODE_REQUIRED' },
+        422,
+      )
     }
 
     const result = await this.authorizeService.execute({
@@ -55,7 +58,10 @@ export class CliApiController {
   async exchangeToken(ctx: IHttpContext): Promise<Response> {
     const body = await ctx.getJsonBody<{ deviceCode?: string }>()
     if (!body.deviceCode) {
-      return ctx.json({ success: false, message: '缺少 deviceCode', error: 'DEVICE_CODE_REQUIRED' }, 422)
+      return ctx.json(
+        { success: false, message: '缺少 deviceCode', error: 'DEVICE_CODE_REQUIRED' },
+        422,
+      )
     }
 
     const result = await this.exchangeService.execute({ deviceCode: body.deviceCode })
@@ -70,7 +76,10 @@ export class CliApiController {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
 
-    const body = await ctx.getJsonBody<{ model?: string; messages?: Array<{ role: string; content: string }> }>()
+    const body = await ctx.getJsonBody<{
+      model?: string
+      messages?: Array<{ role: string; content: string }>
+    }>()
 
     const result = await this.proxyService.execute({
       userId: auth.userId,

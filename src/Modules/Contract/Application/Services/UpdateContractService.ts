@@ -1,6 +1,6 @@
 // src/Modules/Contract/Application/Services/UpdateContractService.ts
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import type { UpdateContractRequest, ContractResponse } from '../DTOs/ContractDTO'
+import { ContractPresenter, type UpdateContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
 
 export class UpdateContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
@@ -22,7 +22,7 @@ export class UpdateContractService {
       return {
         success: true,
         message: '合約已更新',
-        data: updated.toDTO(),
+        data: ContractPresenter.fromEntity(updated),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '更新合約失敗'

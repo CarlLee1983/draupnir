@@ -26,8 +26,9 @@ export class RefundCreditService {
 
   async execute(request: RefundRequest): Promise<CreditResponse> {
     try {
-      const amount = Balance.fromString(request.amount)
-      if (amount.isNegativeOrZero()) {
+      try {
+        Balance.fromPositiveAmount(request.amount)
+      } catch {
         return { success: false, message: '退款金額必須為正數', error: 'INVALID_AMOUNT' }
       }
 

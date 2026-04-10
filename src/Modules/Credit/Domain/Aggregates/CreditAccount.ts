@@ -1,9 +1,4 @@
-// src/Modules/Credit/Domain/Aggregates/CreditAccount.ts
 import { Balance } from '../ValueObjects/Balance'
-import { CreditDeductedEvent } from '../Events/CreditDeductedEvent'
-import { CreditToppedUpEvent } from '../Events/CreditToppedUpEvent'
-import { LowBalanceAlertEvent } from '../Events/LowBalanceAlertEvent'
-import type { DomainEvent } from '@/Shared/Domain/DomainEvent'
 
 interface CreditAccountProps {
   readonly id: string
@@ -17,11 +12,9 @@ interface CreditAccountProps {
 
 export class CreditAccount {
   private readonly props: CreditAccountProps
-  private readonly domainEvents: DomainEvent[] = []
 
-  private constructor(props: CreditAccountProps, events: DomainEvent[] = []) {
+  private constructor(props: CreditAccountProps) {
     this.props = props
-    this.domainEvents = events
   }
 
   static create(id: string, orgId: string): CreditAccount {
@@ -33,7 +26,7 @@ export class CreditAccount {
       status: 'active',
       createdAt: new Date(),
       updatedAt: new Date(),
-    }, [])
+    })
   }
 
   static fromDatabase(row: Record<string, unknown>): CreditAccount {
@@ -45,92 +38,25 @@ export class CreditAccount {
       status: row.status as 'active' | 'frozen',
       createdAt: new Date(row.created_at as string),
       updatedAt: new Date(row.updated_at as string),
-    }, [])
+    })
   }
 
-  applyTopUp(
-    amount: string,
-    source: 'purchase' | 'manual_topup' | 'promotion' | 'refund' = 'purchase',
-  ): CreditAccount {
+  applyTopUp(amount: string): CreditAccount {
     const newBalance = this.props.balance.add(amount)
-    const updatedAt = new Date()
-    const newAccount = new CreditAccount({
+    return new CreditAccount({
       ...this.props,
       balance: newBalance,
-      updatedAt,
-    }, [...this.domainEvents])
-
-    // 發佈充值事件
-    newAccount.addDomainEvent(
-      new CreditToppedUpEvent(
-        this.props.id,
-        this.props.orgId,
-        amount,
-        newBalance.toString(),
-        source,
-      ),
-    )
-
-    return newAccount
+      updatedAt: new Date(),
+    })
   }
 
-  applyDeduction(
-    amount: string,
-    reason: 'api_call' | 'manual_deduction' | 'refund_reversal' = 'api_call',
-  ): CreditAccount {
+  applyDeduction(amount: string): CreditAccount {
     const newBalance = this.props.balance.subtract(amount)
-    const updatedAt = new Date()
-    const newAccount = new CreditAccount({
+    return new CreditAccount({
       ...this.props,
       balance: newBalance,
-      updatedAt,
-    }, [...this.domainEvents])
-
-    // 發佈扣除事件
-    newAccount.addDomainEvent(
-      new CreditDeductedEvent(
-        this.props.id,
-        this.props.orgId,
-        amount,
-        newBalance.toString(),
-        reason,
-      ),
-    )
-
-    // 若低於閾值，發佈低額度警告
-    if (newBalance.isLessThanOrEqual(this.props.lowBalanceThreshold.toString())) {
-      const percentage =
-        newBalance.toString() === '0'
-          ? 0
-          : Math.round(
-              (parseFloat(newBalance.toString()) /
-                parseFloat(this.props.lowBalanceThreshold.toString())) *
-                100,
-            )
-      newAccount.addDomainEvent(
-        new LowBalanceAlertEvent(
-          this.props.id,
-          this.props.orgId,
-          newBalance.toString(),
-          this.props.lowBalanceThreshold.toString(),
-          percentage,
-        ),
-      )
-    }
-
-    return newAccount
-  }
-
-  private addDomainEvent(event: DomainEvent): void {
-    this.domainEvents.push(event)
-  }
-
-  getDomainEvents(): DomainEvent[] {
-    return [...this.domainEvents]
-  }
-
-  clearDomainEvents(): void {
-    this.domainEvents.length = 0
+      updatedAt: new Date(),
+    })
   }
 
   isBalanceLow(): boolean {

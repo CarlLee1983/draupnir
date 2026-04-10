@@ -1,37 +1,44 @@
 export class BoundModules {
-	private constructor(private readonly moduleIds: readonly string[]) {}
+  private constructor(private readonly moduleIds: readonly string[]) {}
 
-	static empty(): BoundModules {
-		return new BoundModules([])
-	}
+  static empty(): BoundModules {
+    return new BoundModules([])
+  }
 
-	static from(moduleIds: string[]): BoundModules {
-		const unique = [...new Set(moduleIds)]
-		return new BoundModules(unique)
-	}
+  static from(moduleIds: string[]): BoundModules {
+    const unique = [...new Set(moduleIds)]
+    return new BoundModules(unique)
+  }
 
-	static fromJSON(json: string[]): BoundModules {
-		return BoundModules.from(json)
-	}
+  static fromJSON(json: string[]): BoundModules {
+    return BoundModules.from(json)
+  }
 
-	getModuleIds(): readonly string[] {
-		return this.moduleIds
-	}
+  getModuleIds(): readonly string[] {
+    return this.moduleIds
+  }
 
-	isEmpty(): boolean {
-		return this.moduleIds.length === 0
-	}
+  isEmpty(): boolean {
+    return this.moduleIds.length === 0
+  }
 
-	includes(moduleId: string): boolean {
-		return this.moduleIds.includes(moduleId)
-	}
+  includes(moduleId: string): boolean {
+    return this.moduleIds.includes(moduleId)
+  }
 
-	allowsAccess(moduleId: string): boolean {
-		if (this.isEmpty()) return true
-		return this.includes(moduleId)
-	}
+  allowsAccess(moduleId: string): boolean {
+    if (this.isEmpty()) return true
+    return this.includes(moduleId)
+  }
 
-	toJSON(): string[] {
-		return [...this.moduleIds]
-	}
+  toJSON(): string[] {
+    return [...this.moduleIds]
+  }
+
+  equals(other: unknown): boolean {
+    if (!(other instanceof BoundModules)) return false
+    if (this.moduleIds.length !== other.moduleIds.length) return false
+    const otherSet = new Set(other.moduleIds)
+    return this.moduleIds.every((id) => otherSet.has(id))
+  }
 }

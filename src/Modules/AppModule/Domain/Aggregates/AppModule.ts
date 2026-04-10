@@ -1,6 +1,17 @@
 // src/Modules/AppModule/Domain/Aggregates/AppModule.ts
+/**
+ * AppModule
+ * Domain Aggregate: represents a functional capability or product unit within the system.
+ *
+ * Responsibilities:
+ * - Define module identity and categorization
+ * - Manage module lifecycle (active, deprecated)
+ * - Determine billing nature (free vs paid)
+ */
+
 import { ModuleType, type ModuleTypeValue } from '../ValueObjects/ModuleType'
 
+/** Properties defining an AppModule's state. */
 interface AppModuleProps {
   readonly id: string
   readonly name: string
@@ -10,6 +21,10 @@ interface AppModuleProps {
   readonly createdAt: Date
 }
 
+/**
+ * AppModule Aggregate Root
+ * Represents a registered capability available for organization subscription.
+ */
 export class AppModule {
   private readonly props: AppModuleProps
 
@@ -17,6 +32,9 @@ export class AppModule {
     this.props = props
   }
 
+  /**
+   * Creates a new application module.
+   */
   static create(params: {
     id?: string
     name: string
@@ -24,7 +42,7 @@ export class AppModule {
     type: ModuleTypeValue
   }): AppModule {
     if (!params.name || params.name.trim().length === 0) {
-      throw new Error('模組名稱不可為空')
+      throw new Error('Module name cannot be empty')
     }
     return new AppModule({
       id: params.id ?? crypto.randomUUID(),
@@ -36,6 +54,7 @@ export class AppModule {
     })
   }
 
+  /** Reconstitutes a module from a database record. */
   static fromDatabase(row: Record<string, unknown>): AppModule {
     return new AppModule({
       id: row.id as string,
@@ -47,6 +66,7 @@ export class AppModule {
     })
   }
 
+  /** Marks the module as deprecated, typically to prevent new subscriptions. */
   deprecate(): AppModule {
     return new AppModule({
       ...this.props,
@@ -54,36 +74,25 @@ export class AppModule {
     })
   }
 
+  /** Unique identifier. */
   get id(): string { return this.props.id }
+  /** Internal canonical name. */
   get name(): string { return this.props.name }
+  /** Human-readable description of capabilities. */
   get description(): string { return this.props.description }
+  /** Module category (free, paid, etc). */
   get type(): string { return this.props.type.toString() }
+  /** Current lifecycle status. */
   get status(): string { return this.props.status }
+  /** Date of registration. */
   get createdAt(): Date { return this.props.createdAt }
 
+  /** Returns true if the module is currently operational. */
   isActive(): boolean { return this.props.status === 'active' }
+  /** Returns true if the module entails no billing cost. */
   isFree(): boolean { return this.props.type.isFree() }
+  /** Returns true if the module requires an active subscription or credit. */
   isPaid(): boolean { return this.props.type.isPaid() }
 
-  toDatabaseRow(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      name: this.props.name,
-      description: this.props.description,
-      type: this.props.type.toString(),
-      status: this.props.status,
-      created_at: this.props.createdAt.toISOString(),
-    }
-  }
-
-  toDTO(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      name: this.props.name,
-      description: this.props.description,
-      type: this.props.type.toString(),
-      status: this.props.status,
-      createdAt: this.props.createdAt.toISOString(),
-    }
-  }
 }
+

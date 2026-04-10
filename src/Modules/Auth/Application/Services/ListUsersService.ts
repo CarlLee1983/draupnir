@@ -1,14 +1,36 @@
-import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
-import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
-import type { ListUsersQuery, ListUsersResponse, UserListItemDTO } from '../DTOs/UserListDTO'
-import { UserProfileMapper } from '@/Modules/Profile/Infrastructure/Mappers/UserProfileMapper'
+/**
+ * ListUsersService
+ * Application service: admin-style user directory with optional filters and pagination.
+ *
+ * Responsibilities:
+ * - Load users and profiles, join display metadata (name, avatar)
+ * - Filter by role, status, and keyword (email / display name)
+ * - Sort by `createdAt` descending and apply page/limit
+ *
+ * Implementation note: loads full user and profile sets from repositories, then filters in
+ * memory. Suitable for modest datasets; consider DB-level paging if lists grow large.
+ */
 
+import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
+import { UserProfileMapper } from '@/Modules/Profile/Infrastructure/Mappers/UserProfileMapper'
+import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
+import type { ListUsersQuery, ListUsersResponse, UserListItemDTO } from '../DTOs/UserListDTO'
+
+/**
+ * Service for retrieving and filtering a list of users.
+ */
 export class ListUsersService {
+  /**
+   * Creates an instance of ListUsersService.
+   */
   constructor(
     private authRepository: IAuthRepository,
     private profileRepository: IUserProfileRepository,
   ) {}
 
+  /**
+   * Returns a paginated list of users matching the query parameters.
+   */
   async execute(request: ListUsersQuery): Promise<ListUsersResponse> {
     try {
       const page = request.page ?? 1

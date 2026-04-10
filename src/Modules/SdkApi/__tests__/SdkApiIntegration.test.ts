@@ -12,6 +12,7 @@ import { QueryBalance } from '../Application/UseCases/QueryBalance'
 import { SdkApiController } from '../Presentation/Controllers/SdkApiController'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 
 function createMockCtx(options: {
   authHeader?: string
@@ -45,6 +46,8 @@ function createMockCtx(options: {
   } as unknown as IHttpContext
 }
 
+const hashingService = new KeyHashingService()
+
 describe('SdkApi Integration', () => {
   let db: MemoryDatabaseAccess
   let repo: AppApiKeyRepository
@@ -56,7 +59,7 @@ describe('SdkApi Integration', () => {
     db = new MemoryDatabaseAccess()
     repo = new AppApiKeyRepository(db)
 
-    const authenticateApp = new AuthenticateApp(repo)
+    const authenticateApp = new AuthenticateApp(repo, hashingService)
     middleware = new AppAuthMiddleware(authenticateApp)
 
     const mockFetch = vi.fn().mockResolvedValue(
@@ -86,13 +89,14 @@ describe('SdkApi Integration', () => {
 
     controller = new SdkApiController(proxyModelCall, queryUsage, queryBalance)
 
-    const key = await AppApiKey.create({
+    const keyHash = await hashingService.hash(rawKey)
+    const key = AppApiKey.create({
       id: 'appkey-int-1',
       orgId: 'org-int-1',
       issuedByUserId: 'user-1',
       label: 'Integration Test Key',
       gatewayKeyId: 'bfr-vk-int-1',
-      rawKey,
+      keyHash,
       scope: AppKeyScope.write(),
       boundModules: BoundModules.empty(),
     })

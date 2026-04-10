@@ -1,21 +1,41 @@
+/**
+ * CreateApiKeyService
+ * Application service: handles the secure generation and registration of API keys.
+ *
+ * Responsibilities:
+ * - Verify user's organization membership
+ * - Generate the unique API key string and its secure hash
+ * - Register the key in the gateway (Bifrost)
+ * - Persist the API key aggregate
+ * - Handle rollback of gateway registration if persistence fails
+ */
+
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { ApiKeyBifrostSync } from '../../Infrastructure/Services/ApiKeyBifrostSync'
+import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
+import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
 import { ApiKey } from '../../Domain/Aggregates/ApiKey'
 import { KeyScope } from '../../Domain/ValueObjects/KeyScope'
-import type { CreateApiKeyRequest, ApiKeyCreatedResponse } from '../DTOs/ApiKeyDTO'
+import { ApiKeyPresenter, type CreateApiKeyRequest, type ApiKeyCreatedResponse } from '../DTOs/ApiKeyDTO'
 
+/**
+ * Service responsible for creating new API keys and syncing them with the gateway.
+ */
 export class CreateApiKeyService {
   constructor(
     private readonly apiKeyRepository: IApiKeyRepository,
     private readonly orgAuth: OrgAuthorizationHelper,
-    private readonly bifrostSync: ApiKeyBifrostSync,
+    private readonly bifrostSync: IBifrostKeySync,
+    private readonly keyHashingService: IKeyHashingService,
   ) {}
 
+  /**
+   * Executes the API key creation workflow.
+   */
   async execute(request: CreateApiKeyRequest): Promise<ApiKeyCreatedResponse> {
     try {
       if (!request.label || !request.label.trim()) {
-        return { success: false, message: 'Key 標籤不能為空', error: 'LABEL_REQUIRED' }
+        return { success: false, message: 'Key label is required', error: 'LABEL_REQUIRED' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -26,7 +46,7 @@ export class CreateApiKeyService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -39,14 +59,15 @@ export class CreateApiKeyService {
 
       const keyId = crypto.randomUUID()
       const rawKey = `drp_sk_${crypto.randomUUID().replace(/-/g, '')}`
+      const hashedKey = await this.keyHashingService.hash(rawKey)
 
-      const pendingKey = await ApiKey.create({
+      const pendingKey = ApiKey.create({
         id: keyId,
         orgId: request.orgId,
         createdByUserId: request.createdByUserId,
         label: request.label,
         gatewayKeyId: '',
-        rawKey,
+        keyHash: hashedKey,
         scope,
         expiresAt: request.expiresAt ? new Date(request.expiresAt) : null,
       })
@@ -58,13 +79,13 @@ export class CreateApiKeyService {
           request.orgId,
         )
 
-        const activatedKey = await ApiKey.create({
+        const activatedKey = ApiKey.create({
           id: keyId,
           orgId: request.orgId,
           createdByUserId: request.createdByUserId,
           label: request.label,
           gatewayKeyId,
-          rawKey,
+          keyHash: hashedKey,
           scope,
           expiresAt: request.expiresAt ? new Date(request.expiresAt) : null,
         })
@@ -81,12 +102,12 @@ export class CreateApiKeyService {
 
         return {
           success: true,
-          message: 'API Key 建立成功（請立即記錄 rawKey，此後將無法再次取得）',
-          data: { ...finalKey.toDTO(), rawKey },
+          message: 'API Key established successfully (Please record the rawKey now, it cannot be retrieved again)',
+          data: { ...ApiKeyPresenter.fromEntity(finalKey), rawKey },
         }
       } catch (bifrostError: unknown) {
         const activatedEntry = await this.apiKeyRepository.findById(keyId)
-        const virtualKeyId = activatedEntry?.toDTO().gatewayKeyId as string | undefined
+        const virtualKeyId = activatedEntry?.gatewayKeyId
         if (virtualKeyId) {
           await this.bifrostSync.deleteVirtualKey(virtualKeyId).catch(() => {})
         }
@@ -94,8 +115,9 @@ export class CreateApiKeyService {
         throw bifrostError
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '建立失敗'
+      const message = error instanceof Error ? error.message : 'Establishment failed'
       return { success: false, message, error: message }
     }
   }
 }
+

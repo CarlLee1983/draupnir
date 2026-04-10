@@ -10,6 +10,9 @@ import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organizat
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 describe('RevokeAppKeyService', () => {
   let service: RevokeAppKeyService
@@ -34,13 +37,14 @@ describe('RevokeAppKeyService', () => {
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
     await memberRepo.save(member)
 
-    const key = await AppApiKey.create({
+    const keyHash = await hashingService.hash('drp_app_revoke123')
+    const key = AppApiKey.create({
       id: 'appkey-revoke',
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Revoke Test',
       gatewayKeyId: 'mock_vk_000001',
-      rawKey: 'drp_app_revoke123',
+      keyHash,
     })
     await appKeyRepo.save(key.activate())
   })

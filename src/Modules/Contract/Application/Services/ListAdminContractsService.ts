@@ -1,5 +1,6 @@
 // src/Modules/Contract/Application/Services/ListAdminContractsService.ts
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
+import { ContractPresenter } from '../DTOs/ContractDTO'
 
 export interface ListAdminContractsQuery {
   callerRole: string
@@ -37,7 +38,7 @@ export class ListAdminContractsService {
       const total = filtered.length
       const offset = (page - 1) * limit
       const slice = filtered.slice(offset, offset + limit)
-      const contracts = slice.map((c) => c.toDTO())
+      const contracts = slice.map((c) => ContractPresenter.fromEntity(c))
 
       return {
         success: true,

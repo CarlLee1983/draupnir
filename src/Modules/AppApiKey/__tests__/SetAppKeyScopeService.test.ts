@@ -8,6 +8,9 @@ import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastruct
 import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 describe('SetAppKeyScopeService', () => {
   let service: SetAppKeyScopeService
@@ -27,13 +30,14 @@ describe('SetAppKeyScopeService', () => {
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
     await memberRepo.save(member)
 
-    const key = await AppApiKey.create({
+    const keyHash = await hashingService.hash('drp_app_scope123')
+    const key = AppApiKey.create({
       id: 'appkey-scope',
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Scope Test',
       gatewayKeyId: 'bfr-vk-scope',
-      rawKey: 'drp_app_scope123',
+      keyHash,
     })
     await appKeyRepo.save(key.activate())
   })

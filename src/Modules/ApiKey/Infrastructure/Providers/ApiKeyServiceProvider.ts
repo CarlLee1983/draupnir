@@ -5,6 +5,7 @@ import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLM
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { ApiKeyRepository } from '../Repositories/ApiKeyRepository'
 import { ApiKeyBifrostSync } from '../Services/ApiKeyBifrostSync'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { CreateApiKeyService } from '../../Application/Services/CreateApiKeyService'
 import { ListApiKeysService } from '../../Application/Services/ListApiKeysService'
 import { RevokeApiKeyService } from '../../Application/Services/RevokeApiKeyService'
@@ -21,11 +22,14 @@ export class ApiKeyServiceProvider extends ModuleServiceProvider {
       return new ApiKeyBifrostSync(c.make('llmGatewayClient') as ILLMGatewayClient)
     })
 
+    container.singleton('keyHashingService', () => new KeyHashingService())
+
     container.bind('createApiKeyService', (c: IContainer) => {
       return new CreateApiKeyService(
         c.make('apiKeyRepository') as IApiKeyRepository,
         c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
         c.make('apiKeyBifrostSync') as ApiKeyBifrostSync,
+        c.make('keyHashingService') as KeyHashingService,
       )
     })
 

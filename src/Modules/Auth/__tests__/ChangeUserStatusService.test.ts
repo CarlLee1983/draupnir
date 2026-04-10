@@ -1,12 +1,13 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { ChangeUserStatusService } from '../Application/Services/ChangeUserStatusService'
-import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
-import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepository'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
+import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
+import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 
 describe('ChangeUserStatusService', () => {
   let service: ChangeUserStatusService
@@ -20,7 +21,7 @@ describe('ChangeUserStatusService', () => {
     service = new ChangeUserStatusService(authRepo, authTokenRepo)
 
     const profileRepo = new UserProfileRepository(db)
-    const registerService = new RegisterUserService(authRepo, profileRepo)
+    const registerService = new RegisterUserService(authRepo, profileRepo, new ScryptPasswordHasher())
     await registerService.execute({ email: 'user@example.com', password: 'StrongPass123' })
   })
 

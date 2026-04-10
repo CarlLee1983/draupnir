@@ -1,13 +1,13 @@
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { UsageAggregator } from '../../Infrastructure/Services/UsageAggregator'
+import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import type { DashboardSummaryResponse } from '../DTOs/DashboardDTO'
 
 export class GetDashboardSummaryService {
   constructor(
     private readonly apiKeyRepository: IApiKeyRepository,
     private readonly orgAuth: OrgAuthorizationHelper,
-    private readonly usageAggregator: UsageAggregator,
+    private readonly usageAggregator: IUsageAggregator,
   ) {}
 
   async execute(

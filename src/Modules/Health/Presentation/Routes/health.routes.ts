@@ -22,21 +22,18 @@ import type { HealthController } from '../Controllers/HealthController'
  * @param router - 框架無關的模組路由介面
  * @param controller - 已組裝的控制器實例（依賴已注入）
  */
-export function registerHealthRoutes(
-	router: IModuleRouter,
-	controller: HealthController,
-): void {
-	/**
-	 * GET /health
-	 * 執行健康檢查
-	 * 返回: { success, status, timestamp, checks, message }
-	 */
-	router.get('/health', (ctx) => controller.check(ctx))
+export function registerHealthRoutes(router: IModuleRouter, controller: HealthController): void {
+  /**
+   * GET /health
+   * 執行健康檢查
+   * 返回: { success, status, timestamp, checks, message }
+   */
+  router.get('/health', (ctx) => controller.check(ctx))
 
-	/**
-	 * GET /health/history?limit=10
-	 * 獲取健康檢查歷史
-	 * 參數: limit (可選, 預設 10, 最多 100)
-	 */
-	router.get('/health/history', (ctx) => controller.history(ctx))
+  /**
+   * GET /health/history?limit=10
+   * 獲取健康檢查歷史
+   * 參數: limit (可選, 預設 10, 最多 100)
+   */
+  router.get('/health/history', (ctx) => controller.history(ctx))
 }

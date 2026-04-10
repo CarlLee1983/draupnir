@@ -6,7 +6,9 @@ export class BalanceDepleted extends DomainEvent {
     super(accountId, 'credit.balance_depleted', { orgId })
   }
 
-  get orgId(): string { return this.data.orgId as string }
+  get orgId(): string {
+    return this.data.orgId as string
+  }
 
   toJSON(): Record<string, unknown> {
     return {

@@ -16,11 +16,11 @@ import bootstrap from './bootstrap'
  * @returns {Promise<PlanetCore>} 初始化完成的 Gravito 核心實例
  */
 export async function createApp() {
-	// 從環境變數或預設值取得連接埠
-	const port = (process.env.PORT as unknown as number) || 3000
+  // 從環境變數或預設值取得連接埠
+  const port = (process.env.PORT as unknown as number) || 3000
 
-	// 執行完整的啟動流程
-	const core = await bootstrap(port)
+  // 執行完整的啟動流程
+  const core = await bootstrap(port)
 
-	return core
+  return core
 }

@@ -2,13 +2,25 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import type { ChangeUserStatusRequest, ChangeUserStatusResponse } from '../DTOs/UserStatusDTO'
 
+/**
+ * Service for modifying a user's account status (e.g., activating or suspending).
+ */
 export class ChangeUserStatusService {
+  /**
+   * Creates an instance of ChangeUserStatusService.
+   */
   constructor(
     private authRepository: IAuthRepository,
     private authTokenRepository: IAuthTokenRepository,
   ) {}
 
-  async execute(userId: string, request: ChangeUserStatusRequest): Promise<ChangeUserStatusResponse> {
+  /**
+   * Updates a user's status and revokes tokens if suspended.
+   */
+  async execute(
+    userId: string,
+    request: ChangeUserStatusRequest,
+  ): Promise<ChangeUserStatusResponse> {
     try {
       const user = await this.authRepository.findById(userId)
       if (!user) {

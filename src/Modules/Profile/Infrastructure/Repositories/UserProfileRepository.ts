@@ -1,20 +1,38 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IUserProfileRepository, UserProfileFilters } from '../../Domain/Repositories/IUserProfileRepository'
+import type {
+  IUserProfileRepository,
+  UserProfileFilters,
+} from '../../Domain/Repositories/IUserProfileRepository'
 import { UserProfile } from '../../Domain/Aggregates/UserProfile'
 import { UserProfileMapper } from '../Mappers/UserProfileMapper'
 
+/**
+ * Implementation of IUserProfileRepository using a database access layer.
+ */
 export class UserProfileRepository implements IUserProfileRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
+  /**
+   * Finds a user profile by unique identifier.
+   * @param id - User ID.
+   */
   async findById(id: string): Promise<UserProfile | null> {
     const row = await this.db.table('user_profiles').where('id', '=', id).first()
     return row ? UserProfileMapper.fromDatabase(row as Record<string, unknown>) : null
   }
 
+  /**
+   * Persists a new user profile.
+   * @param profile - The profile instance to save.
+   */
   async save(profile: UserProfile): Promise<void> {
     await this.db.table('user_profiles').insert(UserProfileMapper.toDatabaseRow(profile))
   }
 
+  /**
+   * Updates an existing user profile.
+   * @param profile - The profile instance with updated data.
+   */
   async update(profile: UserProfile): Promise<void> {
     await this.db
       .table('user_profiles')
@@ -22,7 +40,17 @@ export class UserProfileRepository implements IUserProfileRepository {
       .update(UserProfileMapper.toDatabaseRow(profile))
   }
 
-  async findAll(filters?: UserProfileFilters, limit?: number, offset?: number): Promise<UserProfile[]> {
+  /**
+   * Finds all user profiles matching the criteria.
+   * @param filters - Search filters.
+   * @param limit - Max results.
+   * @param offset - Pagination offset.
+   */
+  async findAll(
+    filters?: UserProfileFilters,
+    limit?: number,
+    offset?: number,
+  ): Promise<UserProfile[]> {
     let query = this.db.table('user_profiles')
 
     if (filters?.keyword) {
@@ -37,6 +65,10 @@ export class UserProfileRepository implements IUserProfileRepository {
     return rows.map((row) => UserProfileMapper.fromDatabase(row as Record<string, unknown>))
   }
 
+  /**
+   * Counts the total number of profiles matching the criteria.
+   * @param filters - Search filters.
+   */
   async count(filters?: UserProfileFilters): Promise<number> {
     let query = this.db.table('user_profiles')
     if (filters?.keyword) {
@@ -45,3 +77,4 @@ export class UserProfileRepository implements IUserProfileRepository {
     return query.count()
   }
 }
+

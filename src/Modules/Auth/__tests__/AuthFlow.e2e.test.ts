@@ -1,30 +1,31 @@
 /**
- * Auth 認證流程 E2E 測試
+ * End-to-end style tests for the auth flow.
  *
- * 測試場景：
- * 1. 用戶註冊
- * 2. 用戶登入（獲取 Access + Refresh Token）
- * 3. 使用 Access Token 檢查認證狀態
- * 4. Token 接近過期時刷新
- * 5. 登出（Token 撤銷）
- * 6. 使用已撤銷的 Token 被拒絕
+ * Scenarios:
+ * 1. Register
+ * 2. Login (access + refresh tokens)
+ * 3. Authenticated access with access token
+ * 4. Refresh near expiry
+ * 5. Logout (revocation)
+ * 6. Rejected after revocation
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { RegisterUserService } from '../Application/Services/RegisterUserService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService'
 import { LoginUserService } from '../Application/Services/LoginUserService'
-import { RefreshTokenService } from '../Application/Services/RefreshTokenService'
 import { LogoutUserService } from '../Application/Services/LogoutUserService'
-import { JwtTokenService } from '../Application/Services/JwtTokenService'
+import { RefreshTokenService } from '../Application/Services/RefreshTokenService'
+import { RegisterUserService } from '../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepository'
+import { RoleType } from '../Domain/ValueObjects/Role'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { RoleType } from '../Domain/ValueObjects/Role'
+import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 
 describe('認證流程 E2E 測試', () => {
   let registerService: RegisterUserService
@@ -41,8 +42,8 @@ describe('認證流程 E2E 測試', () => {
     const state: Record<string, any> = {}
     return {
       getBodyText: async () => '',
-      getJsonBody: async <T>() => ({} as T),
-      getBody: async <T>() => ({} as T),
+      getJsonBody: async <T>() => ({}) as T,
+      getBody: async <T>() => ({}) as T,
       getHeader: () => undefined,
       getPathname: () => '/',
       getParam: () => undefined,
@@ -67,8 +68,9 @@ describe('認證流程 E2E 測試', () => {
     jwtService = new JwtTokenService()
 
     const profileRepo = new UserProfileRepository(db)
-    registerService = new RegisterUserService(authRepository, profileRepo)
-    loginService = new LoginUserService(authRepository, tokenRepository, jwtService)
+    const passwordHasher = new ScryptPasswordHasher()
+    registerService = new RegisterUserService(authRepository, profileRepo, passwordHasher)
+    loginService = new LoginUserService(authRepository, tokenRepository, jwtService, passwordHasher)
     refreshService = new RefreshTokenService(authRepository, tokenRepository, jwtService)
     logoutService = new LogoutUserService(tokenRepository)
     middleware = new AuthMiddleware(tokenRepository)
@@ -216,7 +218,6 @@ describe('認證流程 E2E 測試', () => {
     ctx1 = createMockContext()
     ctx1.headers = { authorization: `Bearer ${token1}` }
 
-
     await middleware.handle(ctx1)
     expect(AuthMiddleware.isAuthenticated(ctx1)).toBe(false)
 
@@ -238,7 +239,10 @@ describe('認證流程 E2E 測試', () => {
       type: 'access',
     }
     const jwt = await import('jsonwebtoken')
-    const expiredToken = jwt.sign(expiredPayload, process.env.JWT_SECRET || 'your-secret-key-change-in-production')
+    const expiredToken = jwt.sign(
+      expiredPayload,
+      process.env.JWT_SECRET || 'your-secret-key-change-in-production',
+    )
 
     const ctx = createMockContext()
     ctx.headers = {

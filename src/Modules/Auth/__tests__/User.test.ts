@@ -1,8 +1,8 @@
 /**
- * User 聚合根單元測試
+ * User aggregate root unit tests.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { User, UserStatus } from '../Domain/Aggregates/User'
 import { Email } from '../Domain/ValueObjects/Email'
 import { Password } from '../Domain/ValueObjects/Password'
@@ -22,12 +22,7 @@ describe('User Aggregate Root', () => {
 
   it('應該識別管理員', () => {
     const email = new Email('admin@example.com')
-    const user = User.create(
-      'admin-id',
-      email,
-      Password.fromHashed('salt:hash'),
-      Role.admin(),
-    )
+    const user = User.create('admin-id', email, Password.fromHashed('salt:hash'), Role.admin())
 
     expect(user.isAdmin()).toBe(true)
   })

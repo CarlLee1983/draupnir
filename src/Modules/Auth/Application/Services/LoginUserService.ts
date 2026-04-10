@@ -1,20 +1,34 @@
 /**
  * LoginUserService
- * 應用層服務：負責用戶登入業務邏輯
+ * Application service: user sign-in use case.
  *
- * 責任：
- * - 查找用戶
- * - 驗證密碼
- * - 生成認證令牌
+ * Responsibilities:
+ * - Resolve user by email
+ * - Verify password
+ * - Issue auth tokens
  */
 
-import type { LoginRequest, LoginResponse } from '../DTOs/LoginDTO'
+/**
+ * LoginUserService
+ * Application service: authenticates users and issues domain tokens.
+ *
+ * Responsibilities:
+ * - Resolve user by email
+ * - Verify password against stored hash
+ * - Issue access and refresh tokens
+ * - Persist token hashes for revocation tracking
+ */
+
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
-import { JwtTokenService } from './JwtTokenService'
-import { ScryptPasswordHasher } from '../../Infrastructure/Services/PasswordHasher'
+import type { IPasswordHasher } from '../Ports/IPasswordHasher'
+import type { LoginRequest, LoginResponse } from '../DTOs/LoginDTO'
+import type { IJwtTokenService } from '../Ports/IJwtTokenService'
 
+/**
+ * Computes a SHA-256 hash of a string.
+ */
 async function sha256(str: string): Promise<string> {
   const encoder = new TextEncoder()
   const data = encoder.encode(str)
@@ -23,51 +37,54 @@ async function sha256(str: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+/**
+ * Service responsible for authenticating users and issuing access/refresh tokens.
+ */
 export class LoginUserService {
   constructor(
     private authRepository: IAuthRepository,
     private authTokenRepository: IAuthTokenRepository,
-    private jwtTokenService: JwtTokenService = new JwtTokenService(),
-    private passwordHasher: ScryptPasswordHasher = new ScryptPasswordHasher(),
+    private jwtTokenService: IJwtTokenService,
+    private passwordHasher: IPasswordHasher,
   ) {}
 
   /**
-   * 執行用戶登入
+   * Executes the login workflow.
    */
   async execute(request: LoginRequest): Promise<LoginResponse> {
     try {
-      // 1. 驗證輸入
+      // 1. Validate input
       const validation = this.validateInput(request)
       if (!validation.isValid) {
         return {
           success: false,
-          message: validation.error || '驗證失敗',
+          message: validation.error || 'Validation failed',
           error: validation.error,
         }
       }
 
-      // 2. 根據電子郵件查找用戶
+      // 2. Find user by email
       const email = new Email(request.email)
       const user = await this.authRepository.findByEmail(email)
 
       if (!user) {
         return {
           success: false,
-          message: '電子郵件或密碼錯誤',
+          message: 'Invalid email or password',
           error: 'INVALID_CREDENTIALS',
         }
       }
 
-      // 3. 檢查用戶是否被暫停
+      // 3. Check if user is suspended
       if (user.isSuspended()) {
         return {
           success: false,
-          message: '此帳戶已被暫停',
+          message: 'This account has been suspended',
           error: 'ACCOUNT_SUSPENDED',
         }
       }
 
-      // 4. 驗證密碼
+      // 4. Verify password
       const passwordMatches = await this.passwordHasher.verify(
         user.password.getHashed(),
         request.password,
@@ -75,17 +92,17 @@ export class LoginUserService {
       if (!passwordMatches) {
         return {
           success: false,
-          message: '電子郵件或密碼錯誤',
+          message: 'Invalid email or password',
           error: 'INVALID_CREDENTIALS',
         }
       }
 
-      // 5. 生成認證令牌
+      // 5. Generate authentication tokens
       const accessTokenObj = this.jwtTokenService.signAccessToken({
         userId: user.id,
         email: user.emailValue,
         role: user.role.getValue(),
-        permissions: [], // 暫時空權限，可在應用中擴充
+        permissions: [],
       })
 
       const refreshTokenObj = this.jwtTokenService.signRefreshToken({
@@ -95,7 +112,7 @@ export class LoginUserService {
         permissions: [],
       })
 
-      // 6. 保存 Token 到倉庫（用於撤銷追蹤）
+      // 6. Persist token hash (for revocation tracking)
       const accessTokenStr = accessTokenObj.getValue()
       const accessTokenHash = await sha256(accessTokenStr)
       await this.authTokenRepository.save({
@@ -118,10 +135,10 @@ export class LoginUserService {
         createdAt: new Date(),
       })
 
-      // 7. 返回成功回應
+      // 7. Return successful response
       return {
         success: true,
-        message: '登入成功',
+        message: 'Login successful',
         data: {
           accessToken: accessTokenStr,
           refreshToken: refreshTokenObj.getValue(),
@@ -135,27 +152,28 @@ export class LoginUserService {
     } catch (error: any) {
       return {
         success: false,
-        message: error.message || '登入失敗',
+        message: error.message || 'Login failed',
         error: error.message,
       }
     }
   }
 
   /**
-   * 驗證輸入資料
+   * Performs basic validation on the login request.
    */
   private validateInput(request: LoginRequest): {
     isValid: boolean
     error?: string
   } {
     if (!request.email || !request.email.trim()) {
-      return { isValid: false, error: '電子郵件不能為空' }
+      return { isValid: false, error: 'Email is required' }
     }
 
     if (!request.password || !request.password.trim()) {
-      return { isValid: false, error: '密碼不能為空' }
+      return { isValid: false, error: 'Password is required' }
     }
 
     return { isValid: true }
   }
 }
+

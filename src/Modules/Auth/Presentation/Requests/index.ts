@@ -1,4 +1,8 @@
 // src/Modules/Auth/Presentation/Requests/index.ts
-export { LoginRequest, type LoginParams } from './LoginRequest'
-export { RegisterRequest, type RegisterParams } from './RegisterRequest'
-export { RefreshTokenRequest, type RefreshTokenParams } from './RefreshTokenRequest'
+/**
+ * Public surface for Auth module request validators.
+ */
+
+export { type LoginParams, LoginRequest } from './LoginRequest'
+export { type RefreshTokenParams, RefreshTokenRequest } from './RefreshTokenRequest'
+export { type RegisterParams, RegisterRequest } from './RegisterRequest'

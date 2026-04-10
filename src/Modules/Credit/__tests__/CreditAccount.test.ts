@@ -33,8 +33,11 @@ describe('CreditAccount', () => {
 
   it('applyDeduction 應減少餘額', () => {
     const account = CreditAccount.fromDatabase({
-      id: 'acc-1', org_id: 'org-1', balance: '100',
-      low_balance_threshold: '10', status: 'active',
+      id: 'acc-1',
+      org_id: 'org-1',
+      balance: '100',
+      low_balance_threshold: '10',
+      status: 'active',
       created_at: '2026-01-01T00:00:00.000Z',
       updated_at: '2026-01-01T00:00:00.000Z',
     })
@@ -44,8 +47,11 @@ describe('CreditAccount', () => {
 
   it('isBalanceLow 應依閾值判斷', () => {
     const account = CreditAccount.fromDatabase({
-      id: 'acc-1', org_id: 'org-1', balance: '5',
-      low_balance_threshold: '10', status: 'active',
+      id: 'acc-1',
+      org_id: 'org-1',
+      balance: '5',
+      low_balance_threshold: '10',
+      status: 'active',
       created_at: '2026-01-01T00:00:00.000Z',
       updated_at: '2026-01-01T00:00:00.000Z',
     })
@@ -54,8 +60,11 @@ describe('CreditAccount', () => {
 
   it('isBalanceDepleted 應正確判斷', () => {
     const account = CreditAccount.fromDatabase({
-      id: 'acc-1', org_id: 'org-1', balance: '0',
-      low_balance_threshold: '10', status: 'active',
+      id: 'acc-1',
+      org_id: 'org-1',
+      balance: '0',
+      low_balance_threshold: '10',
+      status: 'active',
       created_at: '2026-01-01T00:00:00.000Z',
       updated_at: '2026-01-01T00:00:00.000Z',
     })

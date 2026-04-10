@@ -129,7 +129,7 @@ export class ContractController {
     const contractId = ctx.getParam('contractId')
     if (!contractId) return ctx.json({ success: false, message: '缺少 contractId' }, 400)
     const result = await this.getDetailService.execute(contractId, auth.role)
-    const status = result.success ? 200 : (result.error === 'NOT_FOUND' ? 404 : 400)
+    const status = result.success ? 200 : result.error === 'NOT_FOUND' ? 404 : 400
     return ctx.json(result, status)
   }
 }

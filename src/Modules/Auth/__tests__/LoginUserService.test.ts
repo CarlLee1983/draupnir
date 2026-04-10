@@ -1,19 +1,20 @@
 /**
- * LoginUserService 整合測試
+ * LoginUserService integration tests.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { RegisterUserService } from '../Application/Services/RegisterUserService'
+import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService'
 import { LoginUserService } from '../Application/Services/LoginUserService'
-import { JwtTokenService } from '../Application/Services/JwtTokenService'
+import { RegisterUserService } from '../Application/Services/RegisterUserService'
+import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepository'
+import { Email } from '../Domain/ValueObjects/Email'
+import { RoleType } from '../Domain/ValueObjects/Role'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
-import { Email } from '../Domain/ValueObjects/Email'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
-import { RoleType } from '../Domain/ValueObjects/Role'
 
 describe('LoginUserService Integration Test', () => {
   let registerService: RegisterUserService
@@ -28,8 +29,9 @@ describe('LoginUserService Integration Test', () => {
     tokenRepository = new AuthTokenRepository(db)
     jwtTokenService = new JwtTokenService()
     const profileRepo = new UserProfileRepository(db)
-    registerService = new RegisterUserService(repository, profileRepo)
-    loginService = new LoginUserService(repository, tokenRepository, jwtTokenService)
+    const passwordHasher = new ScryptPasswordHasher()
+    registerService = new RegisterUserService(repository, profileRepo, passwordHasher)
+    loginService = new LoginUserService(repository, tokenRepository, jwtTokenService, passwordHasher)
 
     // 建立測試用戶
     await registerService.execute({

@@ -39,7 +39,9 @@ describe('ContractStatus', () => {
 
   test('DRAFT → EXPIRED 非法', () => {
     const draft = ContractStatus.draft()
-    expect(() => draft.transitionTo(ContractStatus.expired())).toThrow('無法從 draft 轉換至 expired')
+    expect(() => draft.transitionTo(ContractStatus.expired())).toThrow(
+      '無法從 draft 轉換至 expired',
+    )
   })
 
   test('EXPIRED → ACTIVE 非法', () => {

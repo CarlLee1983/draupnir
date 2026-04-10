@@ -1,4 +1,22 @@
 // src/Modules/Credit/Application/DTOs/CreditDTO.ts
+import type { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
+
+export class CreditTransactionPresenter {
+  static fromEntity(entity: CreditTransaction): Record<string, unknown> {
+    return {
+      id: entity.id,
+      creditAccountId: entity.creditAccountId,
+      type: entity.type,
+      amount: entity.amount,
+      balanceAfter: entity.balanceAfter,
+      referenceType: entity.referenceType,
+      referenceId: entity.referenceId,
+      description: entity.description,
+      createdAt: entity.createdAt.toISOString(),
+    }
+  }
+}
+
 export interface TopUpRequest {
   orgId: string
   amount: string

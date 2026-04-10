@@ -1,3 +1,6 @@
+/**
+ * Request payload for updating a user profile.
+ */
 export interface UpdateUserProfileRequest {
   displayName?: string
   avatarUrl?: string | null
@@ -8,6 +11,9 @@ export interface UpdateUserProfileRequest {
   notificationPreferences?: Record<string, unknown>
 }
 
+/**
+ * Data Transfer Object representing a user profile.
+ */
 export interface UserProfileDTO {
   id: string
   displayName: string
@@ -21,6 +27,9 @@ export interface UserProfileDTO {
   updatedAt: string
 }
 
+/**
+ * Standard response structure for profile operations.
+ */
 export interface UserProfileResponse {
   success: boolean
   message: string
@@ -28,6 +37,9 @@ export interface UserProfileResponse {
   error?: string
 }
 
+/**
+ * Request payload for listing users with filters and pagination.
+ */
 export interface ListUsersRequest {
   role?: string
   status?: string
@@ -36,6 +48,9 @@ export interface ListUsersRequest {
   limit?: number
 }
 
+/**
+ * Standard response structure for listing users.
+ */
 export interface ListUsersResponse {
   success: boolean
   message: string
@@ -50,3 +65,4 @@ export interface ListUsersResponse {
   }
   error?: string
 }
+

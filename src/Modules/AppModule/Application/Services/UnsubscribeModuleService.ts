@@ -2,7 +2,7 @@
 import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 import { ModuleAccessRevoked } from '../../Domain/Events/ModuleAccessRevoked'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import type { ModuleResponse } from '../DTOs/AppModuleDTO'
+import { ModuleSubscriptionPresenter, type ModuleResponse } from '../DTOs/AppModuleDTO'
 
 export class UnsubscribeModuleService {
   constructor(private readonly subscriptionRepo: IModuleSubscriptionRepository) {}
@@ -27,7 +27,7 @@ export class UnsubscribeModuleService {
       return {
         success: true,
         message: '已取消訂閱',
-        data: cancelled.toDTO(),
+        data: ModuleSubscriptionPresenter.fromEntity(cancelled),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '取消訂閱失敗'

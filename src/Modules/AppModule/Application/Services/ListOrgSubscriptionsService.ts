@@ -1,6 +1,6 @@
 // src/Modules/AppModule/Application/Services/ListOrgSubscriptionsService.ts
 import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
-import type { ModuleListResponse } from '../DTOs/AppModuleDTO'
+import { ModuleSubscriptionPresenter, type ModuleListResponse } from '../DTOs/AppModuleDTO'
 
 export class ListOrgSubscriptionsService {
   constructor(private readonly subscriptionRepo: IModuleSubscriptionRepository) {}
@@ -11,7 +11,7 @@ export class ListOrgSubscriptionsService {
       return {
         success: true,
         message: '查詢成功',
-        data: subscriptions.map((s) => s.toDTO()),
+        data: subscriptions.map((s) => ModuleSubscriptionPresenter.fromEntity(s)),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '查詢失敗'

@@ -1,5 +1,33 @@
 // src/Modules/AppModule/Application/DTOs/AppModuleDTO.ts
 import type { ModuleTypeValue } from '../../Domain/ValueObjects/ModuleType'
+import type { AppModule } from '../../Domain/Aggregates/AppModule'
+import type { ModuleSubscription } from '../../Domain/Entities/ModuleSubscription'
+
+export class AppModulePresenter {
+  static fromEntity(entity: AppModule): Record<string, unknown> {
+    return {
+      id: entity.id,
+      name: entity.name,
+      description: entity.description,
+      type: entity.type,
+      status: entity.status,
+      createdAt: entity.createdAt.toISOString(),
+    }
+  }
+}
+
+export class ModuleSubscriptionPresenter {
+  static fromEntity(entity: ModuleSubscription): Record<string, unknown> {
+    return {
+      id: entity.id,
+      orgId: entity.orgId,
+      moduleId: entity.moduleId,
+      status: entity.status,
+      subscribedAt: entity.subscribedAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
+    }
+  }
+}
 
 export interface RegisterModuleRequest {
   name: string

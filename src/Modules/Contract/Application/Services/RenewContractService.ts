@@ -2,7 +2,7 @@
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { Contract } from '../../Domain/Aggregates/Contract'
 import type { ContractTermProps } from '../../Domain/Entities/ContractTerm'
-import type { ContractResponse } from '../DTOs/ContractDTO'
+import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
 export class RenewContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
@@ -44,7 +44,7 @@ export class RenewContractService {
       return {
         success: true,
         message: '合約已續約',
-        data: newContract.toDTO(),
+        data: ContractPresenter.fromEntity(newContract),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '續約失敗'

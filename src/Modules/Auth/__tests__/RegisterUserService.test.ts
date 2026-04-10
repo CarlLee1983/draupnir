@@ -1,14 +1,15 @@
 /**
- * RegisterUserService 整合測試
+ * RegisterUserService integration tests.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
-import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { RoleType } from '../Domain/ValueObjects/Role'
+import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
+import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 
 describe('RegisterUserService Integration Test', () => {
   let service: RegisterUserService
@@ -18,7 +19,7 @@ describe('RegisterUserService Integration Test', () => {
     const db = new MemoryDatabaseAccess()
     repository = new AuthRepository(db)
     const profileRepo = new UserProfileRepository(db)
-    service = new RegisterUserService(repository, profileRepo)
+    service = new RegisterUserService(repository, profileRepo, new ScryptPasswordHasher())
   })
 
   it('應該成功註冊新用戶', async () => {

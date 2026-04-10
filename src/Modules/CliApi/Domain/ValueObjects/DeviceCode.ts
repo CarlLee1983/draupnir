@@ -1,10 +1,23 @@
 // src/Modules/CliApi/Domain/ValueObjects/DeviceCode.ts
+/**
+ * DeviceCode
+ * Domain Value Object: represents an OAuth 2.0 Device Authorization code.
+ *
+ * Responsibilities:
+ * - Generate human-readable user codes
+ * - Manage device flow status (pending, authorized, consumed)
+ * - Track temporal validity (expiration)
+ * - Store authorization context (userId, role) after user verification
+ */
+
+/** Possible states for a device flow authorization request. */
 export enum DeviceCodeStatus {
   PENDING = 'pending',
   AUTHORIZED = 'authorized',
   CONSUMED = 'consumed',
 }
 
+/** Properties defining a DeviceCode's state. */
 interface DeviceCodeProps {
   readonly deviceCode: string
   readonly userCode: string
@@ -17,6 +30,7 @@ interface DeviceCodeProps {
   readonly createdAt: Date
 }
 
+/** Parameters for creating a new DeviceCode. */
 interface CreateDeviceCodeParams {
   deviceCode: string
   userCode: string
@@ -24,6 +38,10 @@ interface CreateDeviceCodeParams {
   expiresAt: Date
 }
 
+/**
+ * DeviceCode Value Object
+ * Handles the logic for device-based authorization requests.
+ */
 export class DeviceCode {
   private readonly props: DeviceCodeProps
 
@@ -31,6 +49,9 @@ export class DeviceCode {
     this.props = props
   }
 
+  /**
+   * Creates a new pending device authorization request.
+   */
   static create(params: CreateDeviceCodeParams): DeviceCode {
     return new DeviceCode({
       deviceCode: params.deviceCode,
@@ -45,6 +66,9 @@ export class DeviceCode {
     })
   }
 
+  /**
+   * Generates a short, human-friendly alphanumeric code for user entry.
+   */
   static generateUserCode(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'
     const bytes = crypto.getRandomValues(new Uint8Array(8))
@@ -53,16 +77,21 @@ export class DeviceCode {
       .join('')
   }
 
+  /** Returns true if the current time has passed the expiration deadline. */
   isExpired(): boolean {
     return this.props.expiresAt.getTime() <= Date.now()
   }
 
+  /**
+   * Transitions the device request to authorized state.
+   * Invoked after successful user authentication on a separate device.
+   */
   authorize(userId: string, email: string, role: string): DeviceCode {
     if (this.isExpired()) {
-      throw new Error('Device code 已過期')
+      throw new Error('Device code has expired')
     }
     if (this.props.status !== DeviceCodeStatus.PENDING) {
-      throw new Error('此 device code 已被授權')
+      throw new Error('This device code has already been authorized or consumed')
     }
     return new DeviceCode({
       ...this.props,
@@ -73,9 +102,12 @@ export class DeviceCode {
     })
   }
 
+  /**
+   * Marks the code as consumed, typically after successful token exchange.
+   */
   consume(): DeviceCode {
     if (this.props.status !== DeviceCodeStatus.AUTHORIZED) {
-      throw new Error('只有已授權的 device code 可以被消費')
+      throw new Error('Only authorized device codes can be consumed')
     }
     return new DeviceCode({
       ...this.props,
@@ -83,41 +115,24 @@ export class DeviceCode {
     })
   }
 
-  get deviceCode(): string {
-    return this.props.deviceCode
-  }
-  get userCode(): string {
-    return this.props.userCode
-  }
-  get verificationUri(): string {
-    return this.props.verificationUri
-  }
-  get status(): DeviceCodeStatus {
-    return this.props.status
-  }
-  get userId(): string | null {
-    return this.props.userId
-  }
-  get userEmail(): string | null {
-    return this.props.userEmail
-  }
-  get userRole(): string | null {
-    return this.props.userRole
-  }
-  get expiresAt(): Date {
-    return this.props.expiresAt
-  }
-  get createdAt(): Date {
-    return this.props.createdAt
-  }
+  /** Unique device-side identifier. */
+  get deviceCode(): string { return this.props.deviceCode }
+  /** Human-readable code for user entry. */
+  get userCode(): string { return this.props.userCode }
+  /** Target URI for user verification. */
+  get verificationUri(): string { return this.props.verificationUri }
+  /** Current state of the flow. */
+  get status(): DeviceCodeStatus { return this.props.status }
+  /** ID of the authorized user (null if pending). */
+  get userId(): string | null { return this.props.userId }
+  /** Email of the authorized user. */
+  get userEmail(): string | null { return this.props.userEmail }
+  /** System role of the authorized user. */
+  get userRole(): string | null { return this.props.userRole }
+  /** Expiration deadline. */
+  get expiresAt(): Date { return this.props.expiresAt }
+  /** Creation timestamp. */
+  get createdAt(): Date { return this.props.createdAt }
 
-  toDTO(): Record<string, unknown> {
-    return {
-      deviceCode: this.props.deviceCode,
-      userCode: this.props.userCode,
-      verificationUri: this.props.verificationUri,
-      status: this.props.status,
-      expiresAt: this.props.expiresAt.toISOString(),
-    }
-  }
 }
+

@@ -1,13 +1,13 @@
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { ApiKeyBifrostSync } from '../../Infrastructure/Services/ApiKeyBifrostSync'
-import type { RevokeApiKeyRequest, ApiKeyResponse } from '../DTOs/ApiKeyDTO'
+import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
+import { ApiKeyPresenter, type RevokeApiKeyRequest, type ApiKeyResponse } from '../DTOs/ApiKeyDTO'
 
 export class RevokeApiKeyService {
   constructor(
     private readonly apiKeyRepository: IApiKeyRepository,
     private readonly orgAuth: OrgAuthorizationHelper,
-    private readonly bifrostSync: ApiKeyBifrostSync,
+    private readonly bifrostSync: IBifrostKeySync,
   ) {}
 
   async execute(request: RevokeApiKeyRequest): Promise<ApiKeyResponse> {
@@ -41,7 +41,7 @@ export class RevokeApiKeyService {
       const revoked = apiKey.revoke()
       await this.apiKeyRepository.update(revoked)
 
-      return { success: true, message: 'Key 已撤銷', data: revoked.toDTO() }
+      return { success: true, message: 'Key 已撤銷', data: ApiKeyPresenter.fromEntity(revoked) }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '撤銷失敗'
       return { success: false, message, error: message }

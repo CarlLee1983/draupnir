@@ -41,7 +41,7 @@ export class AppModuleController {
     const moduleId = ctx.getParam('moduleId')
     if (!moduleId) return ctx.json({ success: false, message: '缺少 moduleId' }, 400)
     const result = await this.getDetailService.execute(moduleId)
-    const status = result.success ? 200 : (result.error === 'NOT_FOUND' ? 404 : 400)
+    const status = result.success ? 200 : result.error === 'NOT_FOUND' ? 404 : 400
     return ctx.json(result, status)
   }
 

@@ -3,16 +3,23 @@
  * 不可變的健康狀態值物件
  */
 
+import { ValueObject } from '@/Shared/Domain/ValueObject'
+
 export type HealthStatusType = 'healthy' | 'degraded' | 'unhealthy'
 
-export class HealthStatus {
-  readonly value: HealthStatusType
+export class HealthStatus extends ValueObject {
+  private readonly value: HealthStatusType
 
-  constructor(value: HealthStatusType) {
+  private constructor(value: HealthStatusType) {
+    super()
     if (!['healthy', 'degraded', 'unhealthy'].includes(value)) {
       throw new Error(`Invalid health status: ${value}`)
     }
     this.value = value
+  }
+
+  get rawValue(): HealthStatusType {
+    return this.value
   }
 
   /**
@@ -39,7 +46,7 @@ export class HealthStatus {
   /**
    * 值相等性檢查
    */
-  equals(other: any): boolean {
+  equals(other: ValueObject): boolean {
     return other instanceof HealthStatus && other.value === this.value
   }
 
@@ -63,5 +70,9 @@ export class HealthStatus {
 
   static unhealthy(): HealthStatus {
     return new HealthStatus('unhealthy')
+  }
+
+  static from(value: string): HealthStatus {
+    return new HealthStatus(value as HealthStatusType)
   }
 }

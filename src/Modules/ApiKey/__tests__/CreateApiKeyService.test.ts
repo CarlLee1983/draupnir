@@ -10,6 +10,9 @@ import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Re
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 describe('CreateApiKeyService', () => {
   let service: CreateApiKeyService
@@ -25,7 +28,7 @@ describe('CreateApiKeyService', () => {
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     gatewayMock = new MockGatewayClient()
     const sync = new ApiKeyBifrostSync(gatewayMock)
-    service = new CreateApiKeyService(apiKeyRepo, orgAuth, sync)
+    service = new CreateApiKeyService(apiKeyRepo, orgAuth, sync, hashingService)
 
     const org = Organization.create('org-1', 'Test Org', 'test')
     await orgRepo.save(org)
@@ -87,7 +90,7 @@ describe('CreateApiKeyService', () => {
     const failSync = new ApiKeyBifrostSync(failMock)
     const memberRepo = new OrganizationMemberRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
-    const failService = new CreateApiKeyService(apiKeyRepo, orgAuth, failSync)
+    const failService = new CreateApiKeyService(apiKeyRepo, orgAuth, failSync, hashingService)
 
     const result = await failService.execute({
       orgId: 'org-1',

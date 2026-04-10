@@ -1,6 +1,6 @@
 // src/Modules/AppModule/Application/Services/GetModuleDetailService.ts
 import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
-import type { ModuleResponse } from '../DTOs/AppModuleDTO'
+import { AppModulePresenter, type ModuleResponse } from '../DTOs/AppModuleDTO'
 
 export class GetModuleDetailService {
   constructor(private readonly moduleRepo: IAppModuleRepository) {}
@@ -14,7 +14,7 @@ export class GetModuleDetailService {
       return {
         success: true,
         message: '查詢成功',
-        data: module.toDTO(),
+        data: AppModulePresenter.fromEntity(module),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '查詢失敗'

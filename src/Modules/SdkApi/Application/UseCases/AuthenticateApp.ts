@@ -1,5 +1,5 @@
-import { KeyHash } from '@/Modules/ApiKey/Domain/ValueObjects/KeyHash'
 import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositories/IAppApiKeyRepository'
+import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
 import type { AppAuthContext } from '../DTOs/SdkApiDTO'
 
 interface AuthenticateResult {
@@ -10,7 +10,10 @@ interface AuthenticateResult {
 }
 
 export class AuthenticateApp {
-  constructor(private readonly appApiKeyRepo: IAppApiKeyRepository) {}
+  constructor(
+    private readonly appApiKeyRepo: IAppApiKeyRepository,
+    private readonly keyHashingService: IKeyHashingService,
+  ) {}
 
   async execute(rawKey: string): Promise<AuthenticateResult> {
     try {
@@ -18,8 +21,7 @@ export class AuthenticateApp {
         return { success: false, error: 'INVALID_KEY_FORMAT', message: '無效的 App Key 格式' }
       }
 
-      const keyHashVo = await KeyHash.fromRawKey(rawKey)
-      const keyHash = keyHashVo.getValue()
+      const keyHash = await this.keyHashingService.hash(rawKey)
 
       let appKey = await this.appApiKeyRepo.findByKeyHash(keyHash)
 

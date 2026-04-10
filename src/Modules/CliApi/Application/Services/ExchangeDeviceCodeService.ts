@@ -1,7 +1,7 @@
 // src/Modules/CliApi/Application/Services/ExchangeDeviceCodeService.ts
 import type { IDeviceCodeStore } from '../../Domain/Ports/IDeviceCodeStore'
 import { DeviceCodeStatus } from '../../Domain/ValueObjects/DeviceCode'
-import type { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
+import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import type { ExchangeDeviceCodeRequest, ExchangeDeviceCodeResponse } from '../DTOs/DeviceFlowDTO'
 
@@ -16,7 +16,7 @@ async function sha256(str: string): Promise<string> {
 export class ExchangeDeviceCodeService {
   constructor(
     private readonly store: IDeviceCodeStore,
-    private readonly jwtService: JwtTokenService,
+    private readonly jwtService: IJwtTokenService,
     private readonly authTokenRepository: IAuthTokenRepository,
   ) {}
 

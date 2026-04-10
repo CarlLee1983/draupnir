@@ -63,34 +63,27 @@ export class ModuleSubscription {
     })
   }
 
-  get id(): string { return this.props.id }
-  get orgId(): string { return this.props.orgId }
-  get moduleId(): string { return this.props.moduleId }
-  get status(): string { return this.props.status.toString() }
-  get subscribedAt(): Date { return this.props.subscribedAt }
-  get updatedAt(): Date { return this.props.updatedAt }
-
-  isActive(): boolean { return this.props.status.isActive() }
-
-  toDatabaseRow(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      org_id: this.props.orgId,
-      module_id: this.props.moduleId,
-      status: this.props.status.toString(),
-      subscribed_at: this.props.subscribedAt.toISOString(),
-      updated_at: this.props.updatedAt.toISOString(),
-    }
+  get id(): string {
+    return this.props.id
+  }
+  get orgId(): string {
+    return this.props.orgId
+  }
+  get moduleId(): string {
+    return this.props.moduleId
+  }
+  get status(): string {
+    return this.props.status.toString()
+  }
+  get subscribedAt(): Date {
+    return this.props.subscribedAt
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt
   }
 
-  toDTO(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      orgId: this.props.orgId,
-      moduleId: this.props.moduleId,
-      status: this.props.status.toString(),
-      subscribedAt: this.props.subscribedAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString(),
-    }
+  isActive(): boolean {
+    return this.props.status.isActive()
   }
+
 }

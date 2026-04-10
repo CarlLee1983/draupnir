@@ -1,6 +1,6 @@
 // src/Modules/Contract/Application/Services/TerminateContractService.ts
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import type { ContractResponse } from '../DTOs/ContractDTO'
+import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
 export class TerminateContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
@@ -22,7 +22,7 @@ export class TerminateContractService {
       return {
         success: true,
         message: '合約已終止',
-        data: terminated.toDTO(),
+        data: ContractPresenter.fromEntity(terminated),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '終止合約失敗'

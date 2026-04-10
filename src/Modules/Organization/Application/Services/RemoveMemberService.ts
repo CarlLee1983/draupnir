@@ -1,60 +1,61 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import { OrgMembershipRules } from '../../Domain/Services/OrgMembershipRules'
 import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import type { OrganizationResponse } from '../DTOs/OrganizationDTO'
 
 export class RemoveMemberService {
-	constructor(
-		private memberRepository: IOrganizationMemberRepository,
-		private orgAuth: OrgAuthorizationHelper,
-		private db: IDatabaseAccess,
-	) {}
+  constructor(
+    private memberRepository: IOrganizationMemberRepository,
+    private orgAuth: OrgAuthorizationHelper,
+    private db: IDatabaseAccess,
+  ) {}
 
-	async execute(
-		orgId: string,
-		targetUserId: string,
-		requesterId: string,
-		requesterSystemRole: string,
-	): Promise<OrganizationResponse> {
-		try {
-			const authResult = await this.orgAuth.requireOrgManager(orgId, requesterId, requesterSystemRole)
-			if (!authResult.authorized) {
-				return { success: false, message: '權限不足', error: authResult.error }
-			}
+  async execute(
+    orgId: string,
+    targetUserId: string,
+    requesterId: string,
+    requesterSystemRole: string,
+  ): Promise<OrganizationResponse> {
+    try {
+      const authResult = await this.orgAuth.requireOrgManager(
+        orgId,
+        requesterId,
+        requesterSystemRole,
+      )
+      if (!authResult.authorized) {
+        return { success: false, message: '權限不足', error: authResult.error }
+      }
 
-			if (targetUserId === requesterId) {
-				return { success: false, message: '不能移除自己', error: 'CANNOT_REMOVE_SELF' }
-			}
+      if (targetUserId === requesterId) {
+        return { success: false, message: '不能移除自己', error: 'CANNOT_REMOVE_SELF' }
+      }
 
-			const member = await this.memberRepository.findByUserAndOrgId(targetUserId, orgId)
-			if (!member) {
-				return { success: false, message: '找不到成員', error: 'MEMBER_NOT_FOUND' }
-			}
+      const member = await this.memberRepository.findByUserAndOrgId(targetUserId, orgId)
+      if (!member) {
+        return { success: false, message: '找不到成員', error: 'MEMBER_NOT_FOUND' }
+      }
 
-			await this.db.transaction(async (tx) => {
-				const txMemberRepo = this.memberRepository.withTransaction(tx)
-				if (member.isManager()) {
-					const managerCount = await txMemberRepo.countManagersByOrgId(orgId)
-					if (managerCount <= 1) {
-						throw new LastManagerError()
-					}
-				}
-				await txMemberRepo.remove(member.id)
-			})
+      await this.db.transaction(async (tx) => {
+        const txMemberRepo = this.memberRepository.withTransaction(tx)
+        if (member.isManager()) {
+          const managerCount = await txMemberRepo.countManagersByOrgId(orgId)
+          OrgMembershipRules.assertNotLastManager(member, managerCount)
+        }
+        await txMemberRepo.remove(member.id)
+      })
 
-			return { success: true, message: '成員已移除' }
-		} catch (error: unknown) {
-			if (error instanceof LastManagerError) {
-				return { success: false, message: '不能移除最後一個 Manager', error: 'CANNOT_REMOVE_LAST_MANAGER' }
-			}
-			const message = error instanceof Error ? error.message : '移除失敗'
-			return { success: false, message, error: message }
-		}
-	}
-}
-
-class LastManagerError extends Error {
-	constructor() {
-		super('CANNOT_REMOVE_LAST_MANAGER')
-	}
+      return { success: true, message: '成員已移除' }
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message.includes('last manager')) {
+        return {
+          success: false,
+          message: '不能移除最後一個 Manager',
+          error: 'CANNOT_REMOVE_LAST_MANAGER',
+        }
+      }
+      const message = error instanceof Error ? error.message : '移除失敗'
+      return { success: false, message, error: message }
+    }
+  }
 }

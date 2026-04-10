@@ -1,6 +1,8 @@
 // src/Modules/AppModule/__tests__/AppModule.test.ts
 import { describe, test, expect } from 'bun:test'
 import { AppModule } from '../Domain/Aggregates/AppModule'
+import { AppModuleMapper } from '../Infrastructure/Mappers/AppModuleMapper'
+import { AppModulePresenter } from '../Application/DTOs/AppModuleDTO'
 
 describe('AppModule', () => {
   test('建立模組', () => {
@@ -40,18 +42,18 @@ describe('AppModule', () => {
     expect(paid.isPaid()).toBe(true)
   })
 
-  test('fromDatabase 與 toDatabaseRow 往返', () => {
+  test('fromDatabase 與 AppModuleMapper 往返', () => {
     const original = AppModule.create({ name: 'embedding', type: 'paid', description: '向量嵌入' })
-    const row = original.toDatabaseRow()
+    const row = AppModuleMapper.toDatabaseRow(original)
     const restored = AppModule.fromDatabase(row)
     expect(restored.id).toBe(original.id)
     expect(restored.name).toBe('embedding')
     expect(restored.type).toBe('paid')
   })
 
-  test('toDTO 輸出', () => {
+  test('AppModulePresenter 輸出', () => {
     const mod = AppModule.create({ name: 'chat', type: 'free' })
-    const dto = mod.toDTO()
+    const dto = AppModulePresenter.fromEntity(mod)
     expect(dto.name).toBe('chat')
     expect(dto.type).toBe('free')
     expect(dto.status).toBe('active')

@@ -23,45 +23,31 @@ export class ContractServiceProvider extends ModuleServiceProvider {
     container.singleton('contractEnforcementService', () => new ContractEnforcementService())
 
     container.bind('createContractService', (c: IContainer) => {
-      return new CreateContractService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new CreateContractService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('activateContractService', (c: IContainer) => {
-      return new ActivateContractService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new ActivateContractService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('updateContractService', (c: IContainer) => {
-      return new UpdateContractService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new UpdateContractService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('assignContractService', (c: IContainer) => {
-      return new AssignContractService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new AssignContractService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('terminateContractService', (c: IContainer) => {
-      return new TerminateContractService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new TerminateContractService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('renewContractService', (c: IContainer) => {
-      return new RenewContractService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new RenewContractService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('handleContractExpiryService', (c: IContainer) => {
-      return new HandleContractExpiryService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new HandleContractExpiryService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('listContractsService', (c: IContainer) => {
@@ -72,9 +58,7 @@ export class ContractServiceProvider extends ModuleServiceProvider {
     })
 
     container.bind('getContractDetailService', (c: IContainer) => {
-      return new GetContractDetailService(
-        c.make('contractRepository') as ContractRepository,
-      )
+      return new GetContractDetailService(c.make('contractRepository') as ContractRepository)
     })
 
     container.bind('listAdminContractsService', (c: IContainer) => {

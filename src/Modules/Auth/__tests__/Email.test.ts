@@ -1,8 +1,8 @@
 /**
- * Email 值物件單元測試
+ * Email value object unit tests.
  */
 
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { Email } from '../Domain/ValueObjects/Email'
 
 describe('Email Value Object', () => {

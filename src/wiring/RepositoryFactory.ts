@@ -40,16 +40,16 @@ export type ORMType = 'memory' | 'drizzle' | 'atlas' | 'prisma'
  * const orm = getCurrentORM()  // 'memory' | 'drizzle' | ...
  */
 export function getCurrentORM(): ORMType {
-	const orm = process.env.ORM || 'memory'
-	const validORMs: ORMType[] = ['memory', 'drizzle', 'atlas', 'prisma']
+  const orm = process.env.ORM || 'memory'
+  const validORMs: ORMType[] = ['memory', 'drizzle', 'atlas', 'prisma']
 
-	if (!validORMs.includes(orm as ORMType)) {
-		console.warn(`❌ 不支援的 ORM: "${orm}"，使用預設 "memory"`)
-		return 'memory'
-	}
+  if (!validORMs.includes(orm as ORMType)) {
+    console.warn(`❌ 不支援的 ORM: "${orm}"，使用預設 "memory"`)
+    return 'memory'
+  }
 
-	console.log(`📦 已選擇 ORM: ${orm}`)
-	return orm as ORMType
+  console.log(`📦 已選擇 ORM: ${orm}`)
+  return orm as ORMType
 }
 
 /**
@@ -72,28 +72,30 @@ export function getCurrentORM(): ORMType {
  * }
  */
 export function getDatabaseAccess() {
-	const orm = getCurrentORM()
+  const orm = getCurrentORM()
 
-	if (orm === 'memory') {
-		return undefined
-	}
+  if (orm === 'memory') {
+    return undefined
+  }
 
-	if (orm === 'drizzle') {
-		const { createDrizzleDatabaseAccess } = require('@/Shared/Infrastructure/Database/Adapters/Drizzle')
-		return createDrizzleDatabaseAccess()
-	}
+  if (orm === 'drizzle') {
+    const {
+      createDrizzleDatabaseAccess,
+    } = require('@/Shared/Infrastructure/Database/Adapters/Drizzle')
+    return createDrizzleDatabaseAccess()
+  }
 
-	if (orm === 'atlas') {
-		const { createAtlasDatabaseAccess } = require('@/Shared/Infrastructure/Database/Adapters/Atlas')
-		return createAtlasDatabaseAccess()
-	}
+  if (orm === 'atlas') {
+    const { createAtlasDatabaseAccess } = require('@/Shared/Infrastructure/Database/Adapters/Atlas')
+    return createAtlasDatabaseAccess()
+  }
 
-	if (orm === 'prisma') {
-		// TODO: 實現 Prisma 適配器
-		throw new Error('❌ Prisma 適配器尚未實現')
-	}
+  if (orm === 'prisma') {
+    // TODO: 實現 Prisma 適配器
+    throw new Error('❌ Prisma 適配器尚未實現')
+  }
 
-	throw new Error(`❌ 不支援的 ORM: "${orm}"`)
+  throw new Error(`❌ 不支援的 ORM: "${orm}"`)
 }
 
 /**

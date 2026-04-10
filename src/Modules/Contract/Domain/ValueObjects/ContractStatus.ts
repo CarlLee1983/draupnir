@@ -50,10 +50,18 @@ export class ContractStatus extends ValueObject {
     return target
   }
 
-  isDraft(): boolean { return this.value === 'draft' }
-  isActive(): boolean { return this.value === 'active' }
-  isExpired(): boolean { return this.value === 'expired' }
-  isTerminated(): boolean { return this.value === 'terminated' }
+  isDraft(): boolean {
+    return this.value === 'draft'
+  }
+  isActive(): boolean {
+    return this.value === 'active'
+  }
+  isExpired(): boolean {
+    return this.value === 'expired'
+  }
+  isTerminated(): boolean {
+    return this.value === 'terminated'
+  }
 
   equals(other: ValueObject): boolean {
     if (!(other instanceof ContractStatus)) return false

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { GetUsageChartService } from '../Application/Services/GetUsageChartService'
 import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
@@ -9,6 +9,7 @@ import { UsageAggregator } from '../Infrastructure/Services/UsageAggregator'
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import type { LogEntry } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 
 const sampleLog: LogEntry = {
   timestamp: '2026-04-08T10:00:00Z',
@@ -22,6 +23,13 @@ const sampleLog: LogEntry = {
   cost: 0.03,
   status: 'success',
 }
+
+const hashingService = new KeyHashingService()
+let key1Hash: string
+
+beforeAll(async () => {
+  key1Hash = await hashingService.hash('drp_sk_1')
+})
 
 function createMockAggregator(): UsageAggregator {
   const gatewayMock = new MockGatewayClient()
@@ -46,13 +54,13 @@ describe('GetUsageChartService', () => {
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
     await memberRepo.save(member)
 
-    const key = await ApiKey.create({
+    const key = ApiKey.create({
       id: 'key-1',
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Key 1',
       gatewayKeyId: 'bfr-vk-1',
-      rawKey: 'drp_sk_1',
+      keyHash: key1Hash,
     })
     await apiKeyRepo.save(key.activate())
   })

@@ -8,6 +8,9 @@ import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Servi
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { ApiKey } from '../Domain/Aggregates/ApiKey'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 describe('SetKeyPermissionsService', () => {
   let service: SetKeyPermissionsService
@@ -30,13 +33,14 @@ describe('SetKeyPermissionsService', () => {
     // Seed gateway mock so syncPermissions can find the key
     const seededKey = await gatewayMock.createKey({ name: 'Test Key', isActive: true })
 
-    const key = await ApiKey.create({
+    const keyHash = await hashingService.hash('drp_sk_test')
+    const key = ApiKey.create({
       id: 'key-1',
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
       gatewayKeyId: seededKey.id,
-      rawKey: 'drp_sk_test',
+      keyHash,
     })
     await apiKeyRepo.save(key.activate())
   })

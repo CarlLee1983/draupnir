@@ -1,14 +1,17 @@
 /**
  * LogoutUserService
- * 登出服務
+ * Signs the user out by revoking tokens.
  *
- * 責任：
- * - Token 加入黑名單
- * - 清除用戶會話
+ * Responsibilities:
+ * - Revoke tokens (blacklist)
+ * - End the user session for the given token
  */
 
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 
+/**
+ * Computes a SHA-256 hash of a string.
+ */
 async function sha256(str: string): Promise<string> {
   const encoder = new TextEncoder()
   const data = encoder.encode(str)
@@ -17,21 +20,34 @@ async function sha256(str: string): Promise<string> {
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+/**
+ * Request payload for the logout operation.
+ */
 export interface LogoutRequest {
+  /** The raw JWT token to be revoked. */
   token: string
 }
 
+/**
+ * Response payload returned after a logout attempt.
+ */
 export interface LogoutResponse {
+  /** Indicates if the logout was successful. */
   success: boolean
+  /** Descriptive message about the result. */
   message: string
+  /** Error code or message if the operation failed. */
   error?: string
 }
 
+/**
+ * Service responsible for revoking user authentication tokens.
+ */
 export class LogoutUserService {
   constructor(private authTokenRepository: IAuthTokenRepository) {}
 
   /**
-   * 執行登出
+   * Revokes a single authentication token.
    */
   async execute(request: LogoutRequest): Promise<LogoutResponse> {
     try {
@@ -74,7 +90,7 @@ export class LogoutUserService {
   }
 
   /**
-   * 登出所有設備（撤銷用戶的所有 Token）
+   * Signs out all devices by revoking every token associated with a user.
    */
   async logoutAllDevices(userId: string): Promise<LogoutResponse> {
     try {
@@ -94,7 +110,7 @@ export class LogoutUserService {
   }
 
   /**
-   * 計算 Token Hash
+   * Computes SHA-256 hash of the raw token for secure storage/lookup.
    */
   private async hashToken(token: string): Promise<string> {
     return sha256(token)

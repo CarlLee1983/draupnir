@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { Password } from '../Domain/ValueObjects/Password'
 import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 

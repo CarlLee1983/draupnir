@@ -1,115 +1,145 @@
 /**
- * Auth 資料倉儲實現 (ORM 無關)
+ * Auth repository implementation (ORM-agnostic).
  *
- * 設計：
- * - 依賴 IDatabaseAccess（由上層注入；實作由 Shared 的 DatabaseAccessBuilder / 適配器指定）
- * - 完全實現 IAuthRepository，僅透過 Port 抽象，無底層 if (db) 分支
- *
- * @see docs/05-Database-ORM/ORM_TRANSPARENT_DESIGN.md
+ * Design:
+ * - Depends on `IDatabaseAccess` injected from wiring (concrete adapter from Shared).
+ * - Implements `IAuthRepository` only through the database port (no `if (db)` branching).
  */
 
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { User, UserStatus } from '../../Domain/Aggregates/User'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
-import { User } from '../../Domain/Aggregates/User'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
 import { Role } from '../../Domain/ValueObjects/Role'
-import { UserStatus } from '../../Domain/Aggregates/User'
 
+/**
+ * Concrete implementation of IAuthRepository using an ORM-agnostic database access layer.
+ */
 export class AuthRepository implements IAuthRepository {
-	constructor(private readonly db: IDatabaseAccess) {}
+  /**
+   * Creates an instance of AuthRepository.
+   */
+  constructor(private readonly db: IDatabaseAccess) {}
 
-	async findById(id: string): Promise<User | null> {
-		const row = await this.db.table('users').where('id', '=', id).first()
-		return row ? this.mapRowToUser(row) : null
-	}
+  /**
+   * Finds a user by their unique identifier.
+   */
+  async findById(id: string): Promise<User | null> {
+    const row = await this.db.table('users').where('id', '=', id).first()
+    return row ? this.mapRowToUser(row) : null
+  }
 
-	async findByEmail(email: Email): Promise<User | null> {
-		const row = await this.db
-			.table('users')
-			.where('email', '=', email.getValue())
-			.first()
-		return row ? this.mapRowToUser(row) : null
-	}
+  /**
+   * Finds a user by their registered email address.
+   */
+  async findByEmail(email: Email): Promise<User | null> {
+    const row = await this.db.table('users').where('email', '=', email.getValue()).first()
+    return row ? this.mapRowToUser(row) : null
+  }
 
-	async emailExists(email: Email): Promise<boolean> {
-		const count = await this.db
-			.table('users')
-			.where('email', '=', email.getValue())
-			.count()
-		return count > 0
-	}
+  /**
+   * Checks if a user with the given email already exists in the system.
+   */
+  async emailExists(email: Email): Promise<boolean> {
+    const count = await this.db.table('users').where('email', '=', email.getValue()).count()
+    return count > 0
+  }
 
-	async save(user: User): Promise<void> {
-		const existing = await this.findById(user.id)
-		const row = this.mapUserToRow(user)
-		if (existing) {
-			await this.db.table('users').where('id', '=', user.id).update(row)
-		} else {
-			await this.db.table('users').insert(row)
-		}
-	}
+  /**
+   * Persists a user aggregate to the database (upsert).
+   */
+  async save(user: User): Promise<void> {
+    const existing = await this.findById(user.id)
+    const row = this.mapUserToRow(user)
+    if (existing) {
+      await this.db.table('users').where('id', '=', user.id).update(row)
+    } else {
+      await this.db.table('users').insert(row)
+    }
+  }
 
-	async delete(id: string): Promise<void> {
-		await this.db.table('users').where('id', '=', id).delete()
-	}
+  /**
+   * Deletes a user account from the system.
+   */
+  async delete(id: string): Promise<void> {
+    await this.db.table('users').where('id', '=', id).delete()
+  }
 
-	async findAll(limit?: number, offset?: number): Promise<User[]> {
-		let query = this.db.table('users')
-		if (offset) query = query.offset(offset)
-		if (limit) query = query.limit(limit)
-		const rows = await query.select()
-		return rows.map((row) => this.mapRowToUser(row))
-	}
+  /**
+   * Retrieves all users in the system with optional pagination.
+   */
+  async findAll(limit?: number, offset?: number): Promise<User[]> {
+    let query = this.db.table('users')
+    if (offset) query = query.offset(offset)
+    if (limit) query = query.limit(limit)
+    const rows = await query.select()
+    return rows.map((row) => this.mapRowToUser(row))
+  }
 
-	private mapRowToUser(row: Record<string, unknown>): User {
-		return User.reconstitute({
-			id: String(row.id),
-			email: new Email(String(row.email)),
-			password: Password.fromHashed(String(row.password)),
-			role: this.mapRole(row.role),
-			status: this.mapStatus(row.status),
-			createdAt: this.toDate(row.created_at),
-			updatedAt: this.toDate(row.updated_at),
-		})
-	}
+  /**
+   * Maps a raw database row to a User aggregate.
+   */
+  private mapRowToUser(row: Record<string, unknown>): User {
+    return User.reconstitute({
+      id: String(row.id),
+      email: new Email(String(row.email)),
+      password: Password.fromHashed(String(row.password)),
+      role: this.mapRole(row.role),
+      status: this.mapStatus(row.status),
+      createdAt: this.toDate(row.created_at),
+      updatedAt: this.toDate(row.updated_at),
+    })
+  }
 
-	private mapUserToRow(user: User): Record<string, unknown> {
-		return {
-			id: user.id,
-			email: user.emailValue,
-			password: user.password.getHashed(),
-			role: user.role.getValue(),
-			status: user.status,
-			created_at: user.createdAt.toISOString(),
-			updated_at: user.updatedAt.toISOString(),
-		}
-	}
+  /**
+   * Maps a User aggregate to a raw database row for persistence.
+   */
+  private mapUserToRow(user: User): Record<string, unknown> {
+    return {
+      id: user.id,
+      email: user.emailValue,
+      password: user.password.getHashed(),
+      role: user.role.getValue(),
+      status: user.status,
+      created_at: user.createdAt.toISOString(),
+      updated_at: user.updatedAt.toISOString(),
+    }
+  }
 
-	private mapRole(role: unknown): Role {
-		if (role === 'user' || role === 'guest') {
-			return Role.member()
-		}
+  /**
+   * Maps a raw role string to a Role value object.
+   */
+  private mapRole(role: unknown): Role {
+    if (role === 'user' || role === 'guest') {
+      return Role.member()
+    }
 
-		if (typeof role === 'string') {
-			return new Role(role)
-		}
+    if (typeof role === 'string') {
+      return new Role(role)
+    }
 
-		return Role.member()
-	}
+    return Role.member()
+  }
 
-	private mapStatus(status: unknown): UserStatus {
-		switch (status) {
-			case UserStatus.INACTIVE:
-				return UserStatus.INACTIVE
-			case UserStatus.SUSPENDED:
-				return UserStatus.SUSPENDED
-			default:
-				return UserStatus.ACTIVE
-		}
-	}
+  /**
+   * Maps a raw status string to a UserStatus enum value.
+   */
+  private mapStatus(status: unknown): UserStatus {
+    switch (status) {
+      case UserStatus.INACTIVE:
+        return UserStatus.INACTIVE
+      case UserStatus.SUSPENDED:
+        return UserStatus.SUSPENDED
+      default:
+        return UserStatus.ACTIVE
+    }
+  }
 
-	private toDate(value: unknown): Date {
-		return value instanceof Date ? new Date(value) : new Date(String(value))
-	}
+  /**
+   * Safely converts a database value to a JavaScript Date object.
+   */
+  private toDate(value: unknown): Date {
+    return value instanceof Date ? new Date(value) : new Date(String(value))
+  }
 }

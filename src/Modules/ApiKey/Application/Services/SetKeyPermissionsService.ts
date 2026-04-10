@@ -1,14 +1,14 @@
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { ApiKeyBifrostSync } from '../../Infrastructure/Services/ApiKeyBifrostSync'
+import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
 import { KeyScope } from '../../Domain/ValueObjects/KeyScope'
-import type { SetKeyPermissionsRequest, ApiKeyResponse } from '../DTOs/ApiKeyDTO'
+import { ApiKeyPresenter, type SetKeyPermissionsRequest, type ApiKeyResponse } from '../DTOs/ApiKeyDTO'
 
 export class SetKeyPermissionsService {
   constructor(
     private readonly apiKeyRepository: IApiKeyRepository,
     private readonly orgAuth: OrgAuthorizationHelper,
-    private readonly bifrostSync: ApiKeyBifrostSync,
+    private readonly bifrostSync: IBifrostKeySync,
   ) {}
 
   async execute(request: SetKeyPermissionsRequest): Promise<ApiKeyResponse> {
@@ -41,7 +41,7 @@ export class SetKeyPermissionsService {
       await this.apiKeyRepository.update(updated)
       await this.bifrostSync.syncPermissions(apiKey.gatewayKeyId, newScope)
 
-      return { success: true, message: '權限已更新', data: updated.toDTO() }
+      return { success: true, message: '權限已更新', data: ApiKeyPresenter.fromEntity(updated) }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '更新失敗'
       return { success: false, message, error: message }

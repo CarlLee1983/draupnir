@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
 import { ExchangeDeviceCodeService } from '../Application/Services/ExchangeDeviceCodeService'
 import { DeviceCode } from '../Domain/ValueObjects/DeviceCode'
-import { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
+import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 
 function createMockAuthTokenRepo(): IAuthTokenRepository {

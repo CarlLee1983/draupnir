@@ -46,54 +46,54 @@ import { getDatabaseAccess } from './RepositoryFactory'
  * - Drizzle/Prisma/Atlas：初始化並返回對應的 IDatabaseAccess 實現
  */
 export class DatabaseAccessBuilder {
-	private orm: ORMType
-	private dbInstance: IDatabaseAccess
+  private orm: ORMType
+  private dbInstance: IDatabaseAccess
 
-	/**
-	 * 初始化 DatabaseAccessBuilder
-	 *
-	 * @param orm 選擇的 ORM 類型
-	 *
-	 * 行為：
-	 * - 若 orm='memory'：注入 MemoryDatabaseAccess（內存表，同上層預設）
-	 * - 若 orm='drizzle'：初始化 Drizzle DatabaseAccess
-	 * - 若 orm='prisma'：初始化 Prisma DatabaseAccess
-	 * - 若 orm='atlas'：初始化 Atlas DatabaseAccess
-	 */
-	constructor(orm: ORMType) {
-		this.orm = orm
-		this.dbInstance =
-			orm === 'memory' ? new MemoryDatabaseAccess() : (getDatabaseAccess() as IDatabaseAccess)
-	}
+  /**
+   * 初始化 DatabaseAccessBuilder
+   *
+   * @param orm 選擇的 ORM 類型
+   *
+   * 行為：
+   * - 若 orm='memory'：注入 MemoryDatabaseAccess（內存表，同上層預設）
+   * - 若 orm='drizzle'：初始化 Drizzle DatabaseAccess
+   * - 若 orm='prisma'：初始化 Prisma DatabaseAccess
+   * - 若 orm='atlas'：初始化 Atlas DatabaseAccess
+   */
+  constructor(orm: ORMType) {
+    this.orm = orm
+    this.dbInstance =
+      orm === 'memory' ? new MemoryDatabaseAccess() : (getDatabaseAccess() as IDatabaseAccess)
+  }
 
-	/**
-	 * 取得應該注入給 Repository 的 IDatabaseAccess
-	 *
-	 * 行為：
-	 * - Memory 模式：返回 MemoryDatabaseAccess
-	 * - 其他 ORM：返回對應的 IDatabaseAccess 實現
-	 *
-	 * Repository 僅依賴 IDatabaseAccess，不再在底層做 if (db) 分支。
-	 *
-	 * @returns IDatabaseAccess（必為非 undefined）
-	 */
-	getDatabaseAccess(): IDatabaseAccess {
-		return this.dbInstance
-	}
+  /**
+   * 取得應該注入給 Repository 的 IDatabaseAccess
+   *
+   * 行為：
+   * - Memory 模式：返回 MemoryDatabaseAccess
+   * - 其他 ORM：返回對應的 IDatabaseAccess 實現
+   *
+   * Repository 僅依賴 IDatabaseAccess，不再在底層做 if (db) 分支。
+   *
+   * @returns IDatabaseAccess（必為非 undefined）
+   */
+  getDatabaseAccess(): IDatabaseAccess {
+    return this.dbInstance
+  }
 
-	/**
-	 * 取得當前選擇的 ORM 類型
-	 */
-	getORM(): ORMType {
-		return this.orm
-	}
+  /**
+   * 取得當前選擇的 ORM 類型
+   */
+  getORM(): ORMType {
+    return this.orm
+  }
 
-	/**
-	 * 列出支援的 ORM
-	 */
-	static listSupportedORMs(): ORMType[] {
-		return ['memory', 'drizzle', 'atlas', 'prisma']
-	}
+  /**
+   * 列出支援的 ORM
+   */
+  static listSupportedORMs(): ORMType[] {
+    return ['memory', 'drizzle', 'atlas', 'prisma']
+  }
 }
 
 /**
@@ -104,5 +104,5 @@ export class DatabaseAccessBuilder {
  * registerUserRepositories(db)
  */
 export function createDatabaseAccess(orm: ORMType): IDatabaseAccess {
-	return new DatabaseAccessBuilder(orm).getDatabaseAccess()
+  return new DatabaseAccessBuilder(orm).getDatabaseAccess()
 }

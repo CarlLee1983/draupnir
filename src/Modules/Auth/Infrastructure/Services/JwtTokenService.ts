@@ -1,31 +1,31 @@
 /**
  * JwtTokenService
- * JWT Token 簽發和驗證服務
+ * Issues and verifies JWT access and refresh tokens.
  *
- * 責任：
- * - 簽發 Access Token（15 分鐘）
- * - 簽發 Refresh Token（7 天）
- * - 驗證 Token 簽名和過期時間
- * - 解析 Token 負載
+ * Responsibilities:
+ * - Sign access tokens (15 minutes)
+ * - Sign refresh tokens (7 days)
+ * - Verify token signature and expiry
+ * - Decode token payloads
  */
 
 import jwt from 'jsonwebtoken'
-import { AuthToken, TokenType, type TokenPayload } from '../../Domain/ValueObjects/AuthToken'
+import { AuthToken, type TokenPayload, TokenType } from '../../Domain/ValueObjects/AuthToken'
+import type { IJwtTokenService, TokenSignPayload } from '../../Application/Ports/IJwtTokenService'
 
+/** Secret key used for signing JWTs. */
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
-const ACCESS_TOKEN_EXPIRES_IN = 15 * 60 // 15 分鐘
-const REFRESH_TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60 // 7 天
+/** Access token expiration time in seconds (15 minutes). */
+const ACCESS_TOKEN_EXPIRES_IN = 15 * 60
+/** Refresh token expiration time in seconds (7 days). */
+const REFRESH_TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60
 
-export interface TokenSignPayload {
-  userId: string
-  email: string
-  role: string
-  permissions: string[]
-}
-
-export class JwtTokenService {
+/**
+ * Service for managing JSON Web Tokens (JWT).
+ */
+export class JwtTokenService implements IJwtTokenService {
   /**
-   * 簽發 Access Token
+   * Signs a new access token.
    */
   signAccessToken(payload: TokenSignPayload): AuthToken {
     const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXPIRES_IN * 1000)
@@ -43,7 +43,7 @@ export class JwtTokenService {
   }
 
   /**
-   * 簽發 Refresh Token
+   * Signs a new refresh token.
    */
   signRefreshToken(payload: TokenSignPayload): AuthToken {
     const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN * 1000)
@@ -61,8 +61,7 @@ export class JwtTokenService {
   }
 
   /**
-   * 驗證 Token
-   * @returns Token 負載或 null（如果無效或已過期）
+   * Verifies a token's signature and expiration.
    */
   verify(token: string): TokenPayload | null {
     try {
@@ -74,7 +73,8 @@ export class JwtTokenService {
   }
 
   /**
-   * 解析 Token 而不驗證簽名（用於獲取信息但不驗證真偽）
+   * Decodes a token without verifying the signature.
+   * Use this only when the signature has been verified or verification is not required.
    */
   decode(token: string): TokenPayload | null {
     try {
@@ -86,7 +86,7 @@ export class JwtTokenService {
   }
 
   /**
-   * 檢查 Token 是否有效且未過期
+   * Checks if a token is valid (signature is correct and not expired).
    */
   isValid(token: string): boolean {
     const payload = this.verify(token)
@@ -97,7 +97,7 @@ export class JwtTokenService {
   }
 
   /**
-   * 取得 Token 的剩餘過期時間（毫秒）
+   * Calculates the remaining time until the token expires.
    */
   getTimeToExpire(token: string): number {
     const payload = this.decode(token)
@@ -109,7 +109,7 @@ export class JwtTokenService {
   }
 
   /**
-   * 檢查 Token 是否即將過期（少於 60 秒）
+   * Checks if the token is close to expiring (less than 60 seconds remaining).
    */
   isAboutToExpire(token: string): boolean {
     return this.getTimeToExpire(token) < 60 * 1000

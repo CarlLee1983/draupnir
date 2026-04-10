@@ -1,67 +1,80 @@
 /**
  * IAuthTokenRepository
  *
- * Token 倉庫介面 - 用於儲存 Token 記錄和管理黑名單
+ * Token persistence port for issued tokens and revocation (logout / blacklist).
  *
- * 責任：
- * - 儲存簽發的 Token 記錄
- * - 管理 Token 黑名單（登出）
- * - 查詢 Token 狀態
+ * Responsibilities:
+ * - Persist issued token fingerprints
+ * - Revoke tokens and query revocation state
  */
 
+/**
+ * Representation of a persisted authentication token record.
+ */
 export interface TokenRecord {
+  /** Unique identifier for the token record. */
   id: string
+  /** ID of the user the token belongs to. */
   userId: string
+  /** SHA-256 hash of the raw token. */
   tokenHash: string
+  /** Type of token (access vs refresh). */
   type: 'access' | 'refresh'
+  /** Expiration timestamp of the token. */
   expiresAt: Date
+  /** Timestamp of when the token was revoked, if applicable. */
   revokedAt?: Date
+  /** Timestamp of when the token record was created. */
   createdAt: Date
 }
 
+/**
+ * Port for managing persistence of authentication tokens.
+ * Used for tracking revocation status and supporting features like "logout from all devices".
+ */
 export interface IAuthTokenRepository {
   /**
-   * 儲存 Token 記錄
+   * Persists a token record to the store.
    */
   save(record: TokenRecord): Promise<void>
 
   /**
-   * 根據 Token Hash 查找記錄
+   * Finds a token record by its SHA-256 hash.
    */
   findByHash(tokenHash: string): Promise<TokenRecord | null>
 
   /**
-   * 根據用戶 ID 取得所有有效的 Token
+   * Retrieves all active (non-revoked and unexpired) tokens for a user.
    */
   findByUserId(userId: string): Promise<TokenRecord[]>
 
   /**
-   * 根據用戶 ID 取得所有已撤銷的 Token
+   * Retrieves all revoked token records associated with a user.
    */
   findRevokedByUserId(userId: string): Promise<TokenRecord[]>
 
   /**
-   * 撤銷 Token（將其加入黑名單）
+   * Marks a token as revoked.
    */
   revoke(tokenHash: string): Promise<void>
 
   /**
-   * 檢查 Token 是否已被撤銷
+   * Checks if a token hash is present in the blacklist or explicitly revoked.
    */
   isRevoked(tokenHash: string): Promise<boolean>
 
   /**
-   * 根據用戶 ID 撤銷所有 Token（登出所有設備）
+   * Revokes every active token for a given user.
    */
   revokeAllByUserId(userId: string): Promise<void>
 
   /**
-   * 清理過期的 Token 記錄
+   * Deletes token records that have naturally expired from the store.
    */
   cleanupExpired(): Promise<void>
 
   /**
-   * 刪除 Token 記錄
+   * Hard-deletes a specific token record from the store.
    */
   delete(id: string): Promise<void>
 }

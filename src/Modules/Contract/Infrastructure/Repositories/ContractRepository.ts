@@ -2,6 +2,7 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { Contract } from '../../Domain/Aggregates/Contract'
+import { ContractMapper } from '../Mappers/ContractMapper'
 
 export class ContractRepository implements IContractRepository {
   constructor(private readonly db: IDatabaseAccess) {}
@@ -12,7 +13,8 @@ export class ContractRepository implements IContractRepository {
   }
 
   async findActiveByTargetId(targetId: string): Promise<Contract | null> {
-    const row = await this.db.table('contracts')
+    const row = await this.db
+      .table('contracts')
       .where('target_id', '=', targetId)
       .where('status', '=', 'active')
       .first()
@@ -20,7 +22,8 @@ export class ContractRepository implements IContractRepository {
   }
 
   async findByTargetId(targetId: string): Promise<Contract[]> {
-    const rows = await this.db.table('contracts')
+    const rows = await this.db
+      .table('contracts')
       .where('target_id', '=', targetId)
       .orderBy('created_at', 'DESC')
       .select()
@@ -40,9 +43,7 @@ export class ContractRepository implements IContractRepository {
     // 查詢 ACTIVE 且即將到期的合約
     // terms 欄位為 JSON，包含 validityPeriod.endDate
     // 在 memory ORM 中需特殊處理
-    const rows = await this.db.table('contracts')
-      .where('status', '=', 'active')
-      .select()
+    const rows = await this.db.table('contracts').where('status', '=', 'active').select()
 
     return rows
       .map((row) => Contract.fromDatabase(row))
@@ -54,9 +55,7 @@ export class ContractRepository implements IContractRepository {
 
   async findExpired(): Promise<Contract[]> {
     const now = new Date()
-    const rows = await this.db.table('contracts')
-      .where('status', '=', 'active')
-      .select()
+    const rows = await this.db.table('contracts').where('status', '=', 'active').select()
 
     return rows
       .map((row) => Contract.fromDatabase(row))
@@ -67,10 +66,10 @@ export class ContractRepository implements IContractRepository {
   }
 
   async save(contract: Contract): Promise<void> {
-    await this.db.table('contracts').insert(contract.toDatabaseRow())
+    await this.db.table('contracts').insert(ContractMapper.toDatabaseRow(contract))
   }
 
   async update(contract: Contract): Promise<void> {
-    await this.db.table('contracts').where('id', '=', contract.id).update(contract.toDatabaseRow())
+    await this.db.table('contracts').where('id', '=', contract.id).update(ContractMapper.toDatabaseRow(contract))
   }
 }

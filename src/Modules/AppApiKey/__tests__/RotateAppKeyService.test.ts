@@ -10,6 +10,9 @@ import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organizat
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 describe('RotateAppKeyService', () => {
   let service: RotateAppKeyService
@@ -24,20 +27,21 @@ describe('RotateAppKeyService', () => {
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     const gatewayMock = new MockGatewayClient()
     const sync = new AppKeyBifrostSync(gatewayMock)
-    service = new RotateAppKeyService(appKeyRepo, orgAuth, sync)
+    service = new RotateAppKeyService(appKeyRepo, orgAuth, sync, hashingService)
 
     const org = Organization.create('org-1', 'Test Org', 'test')
     await orgRepo.save(org)
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
     await memberRepo.save(member)
 
-    const key = await AppApiKey.create({
+    const keyHash = await hashingService.hash('drp_app_original123')
+    const key = AppApiKey.create({
       id: 'appkey-rotate',
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Rotate Test',
       gatewayKeyId: 'bfr-vk-original',
-      rawKey: 'drp_app_original123',
+      keyHash,
     })
     await appKeyRepo.save(key.activate())
   })

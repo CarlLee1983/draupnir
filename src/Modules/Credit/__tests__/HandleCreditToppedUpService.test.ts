@@ -1,10 +1,19 @@
 // src/Modules/Credit/__tests__/HandleCreditToppedUpService.test.ts
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
 import { HandleCreditToppedUpService } from '../Application/Services/HandleCreditToppedUpService'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
 import { KeyScope } from '@/Modules/ApiKey/Domain/ValueObjects/KeyScope'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
+const TEST_RAW_KEY = 'drp_sk_test_12345678901234567890123456789012'
+let testKeyHash: string
+
+beforeAll(async () => {
+  testKeyHash = await hashingService.hash(TEST_RAW_KEY)
+})
 
 describe('HandleCreditToppedUpService', () => {
   let apiKeyRepo: IApiKeyRepository
@@ -30,13 +39,13 @@ describe('HandleCreditToppedUpService', () => {
   })
 
   it('應恢復所有因餘額不足而凍結的 keys', async () => {
-    const mockKey = await ApiKey.create({
+    const mockKey = ApiKey.create({
       id: 'key-1',
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
       gatewayKeyId: 'mock_vk_000001',
-      rawKey: 'drp_sk_test_12345678901234567890123456789012',
+      keyHash: testKeyHash,
       scope: KeyScope.fromJSON({
         rate_limit_rpm: 60,
         rate_limit_tpm: 100000,
@@ -66,13 +75,13 @@ describe('HandleCreditToppedUpService', () => {
   })
 
   it('Gateway 恢復失敗時應記錄失敗但不清除本地凍結狀態', async () => {
-    const mockKey = await ApiKey.create({
+    const mockKey = ApiKey.create({
       id: 'key-1',
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
       gatewayKeyId: 'mock_vk_000001',
-      rawKey: 'drp_sk_test_12345678901234567890123456789012',
+      keyHash: testKeyHash,
       scope: KeyScope.fromJSON({
         rate_limit_rpm: 60,
         rate_limit_tpm: 100000,

@@ -14,17 +14,17 @@ import { createApp } from './app'
  * 應用啟動並顯示歡迎訊息
  */
 async function start() {
-	// 初始化應用（DDD 啟動流程）
-	const core = await createApp()
+  // 初始化應用（DDD 啟動流程）
+  const core = await createApp()
 
-	// 產生 Bun.serve 設定並手動啟動 HTTP 伺服器
-	const port = (core.config.get<number>('PORT') ?? 3000) as number
-	const baseUrl = `http://localhost:${port}`
-	const { core: _liftoffCore, ...serveConfig } = core.liftoff(port)
-	const server = Bun.serve(serveConfig as any)
+  // 產生 Bun.serve 設定並手動啟動 HTTP 伺服器
+  const port = (core.config.get<number>('PORT') ?? 3000) as number
+  const baseUrl = `http://localhost:${port}`
+  const { core: _liftoffCore, ...serveConfig } = core.liftoff(port)
+  const server = Bun.serve(serveConfig as any)
 
-	// 顯示啟動成功訊息
-	console.log(`
+  // 顯示啟動成功訊息
+  console.log(`
 ╔════════════════════════════════════════════════════════════════╗
 ║          🚀 Gravito DDD Starter - Running                      ║
 ╚════════════════════════════════════════════════════════════════╝
@@ -78,11 +78,11 @@ async function start() {
 	🐛 Having trouble? Check docs/TROUBLESHOOTING.md for common issues.
 `)
 
-	return server
+  return server
 }
 
 // 執行啟動流程
 await start().catch((error) => {
-	console.error('❌ Application startup failed:', error)
-	process.exit(1)
+  console.error('❌ Application startup failed:', error)
+  process.exit(1)
 })

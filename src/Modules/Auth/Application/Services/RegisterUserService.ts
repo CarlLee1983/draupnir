@@ -1,33 +1,39 @@
 /**
  * RegisterUserService
- * 應用層服務：負責用戶註冊業務邏輯
+ * Application service: user registration use case.
  *
- * 責任：
- * - 驗證輸入
- * - 檢查電子郵件是否已存在
- * - 創建新用戶聚合根
- * - 持久化到資料庫
+ * Responsibilities:
+ * - Validate input
+ * - Ensure email is not already registered
+ * - Create the User aggregate
+ * - Persist to the database (and default profile)
  */
 
-import type { RegisterUserRequest, RegisterUserResponse } from '../DTOs/RegisterUserDTO'
-import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
-import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
-import { Email } from '../../Domain/ValueObjects/Email'
-import { User } from '../../Domain/Aggregates/User'
 import { UserProfile } from '@/Modules/Profile/Domain/Aggregates/UserProfile'
+import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
+import { User } from '../../Domain/Aggregates/User'
+import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
+import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
 import { Role } from '../../Domain/ValueObjects/Role'
-import { ScryptPasswordHasher } from '../../Infrastructure/Services/PasswordHasher'
+import type { IPasswordHasher } from '../Ports/IPasswordHasher'
+import type { RegisterUserRequest, RegisterUserResponse } from '../DTOs/RegisterUserDTO'
 
+/**
+ * Service responsible for registering new users in the system.
+ */
 export class RegisterUserService {
+  /**
+   * Creates an instance of RegisterUserService.
+   */
   constructor(
     private authRepository: IAuthRepository,
     private userProfileRepository: IUserProfileRepository,
-    private passwordHasher: ScryptPasswordHasher = new ScryptPasswordHasher(),
+    private passwordHasher: IPasswordHasher,
   ) {}
 
   /**
-   * 執行用戶註冊
+   * Executes the registration workflow.
    */
   async execute(request: RegisterUserRequest): Promise<RegisterUserResponse> {
     try {
@@ -57,12 +63,7 @@ export class RegisterUserService {
       // 4. 創建新用戶（密碼由應用層加密）
       const userId = crypto.randomUUID()
       const hashedPassword = await this.passwordHasher.hash(request.password)
-      const user = User.create(
-        userId,
-        email,
-        Password.fromHashed(hashedPassword),
-        Role.member(),
-      )
+      const user = User.create(userId, email, Password.fromHashed(hashedPassword), Role.member())
 
       // 5. 保存到資料庫
       await this.authRepository.save(user)
@@ -98,7 +99,7 @@ export class RegisterUserService {
   }
 
   /**
-   * 驗證輸入資料
+   * Performs basic validation on the registration request.
    */
   private validateInput(request: RegisterUserRequest): {
     isValid: boolean

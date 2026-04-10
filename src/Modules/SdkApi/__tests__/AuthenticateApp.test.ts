@@ -5,25 +5,29 @@ import { AppApiKeyRepository } from '@/Modules/AppApiKey/Infrastructure/Reposito
 import { AppApiKey } from '@/Modules/AppApiKey/Domain/Aggregates/AppApiKey'
 import { AppKeyScope } from '@/Modules/AppApiKey/Domain/ValueObjects/AppKeyScope'
 import { BoundModules } from '@/Modules/AppApiKey/Domain/ValueObjects/BoundModules'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 
 describe('AuthenticateApp', () => {
   let useCase: AuthenticateApp
   let db: MemoryDatabaseAccess
   let repo: AppApiKeyRepository
+  let hashingService: KeyHashingService
   const rawKey = 'drp_app_testauthkey123'
 
   beforeEach(async () => {
     db = new MemoryDatabaseAccess()
     repo = new AppApiKeyRepository(db)
-    useCase = new AuthenticateApp(repo)
+    hashingService = new KeyHashingService()
+    useCase = new AuthenticateApp(repo, hashingService)
 
-    const key = await AppApiKey.create({
+    const keyHash = await hashingService.hash(rawKey)
+    const key = AppApiKey.create({
       id: 'appkey-auth-1',
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Test SDK Key',
       gatewayKeyId: 'bfr-vk-app-1',
-      rawKey,
+      keyHash,
       scope: AppKeyScope.write(),
       boundModules: BoundModules.from(['mod-1', 'mod-2']),
     })
@@ -65,26 +69,30 @@ describe('AuthenticateApp', () => {
   })
 
   it('已過期的 Key 應認證失敗', async () => {
-    const expiredKey = await AppApiKey.create({
+    const expiredRawKey = 'drp_app_expiredkey'
+    const expiredKeyHash = await hashingService.hash(expiredRawKey)
+    const expiredKey = AppApiKey.create({
       id: 'appkey-expired',
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Expired Key',
       gatewayKeyId: 'bfr-vk-exp',
-      rawKey: 'drp_app_expiredkey',
+      keyHash: expiredKeyHash,
       expiresAt: new Date(Date.now() - 86400000),
     })
     const activated = expiredKey.activate()
     await repo.save(activated)
 
-    const result = await useCase.execute('drp_app_expiredkey')
+    const result = await useCase.execute(expiredRawKey)
     expect(result.success).toBe(false)
     expect(result.error).toBe('KEY_EXPIRED')
   })
 
   it('grace period 內的舊 Key 應認證成功', async () => {
+    const newRawKey = 'drp_app_newkeyrotated'
+    const newHashedKey = await hashingService.hash(newRawKey)
     const key = await repo.findById('appkey-auth-1')
-    const rotated = await key!.rotate('drp_app_newkeyrotated', 'bfr-vk-new')
+    const rotated = key!.rotate(newHashedKey, 'bfr-vk-new')
     await repo.update(rotated)
 
     const result = await useCase.execute(rawKey)

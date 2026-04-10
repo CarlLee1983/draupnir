@@ -1,14 +1,13 @@
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { UsageAggregator } from '../../Infrastructure/Services/UsageAggregator'
+import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import type { UsageChartQuery, UsageChartResponse } from '../DTOs/DashboardDTO'
-import type { UsageQuery } from '@/Foundation/Infrastructure/Services/LLMGateway'
 
 export class GetUsageChartService {
   constructor(
     private readonly apiKeyRepository: IApiKeyRepository,
     private readonly orgAuth: OrgAuthorizationHelper,
-    private readonly usageAggregator: UsageAggregator,
+    private readonly usageAggregator: IUsageAggregator,
   ) {}
 
   async execute(query: UsageChartQuery): Promise<UsageChartResponse> {
@@ -43,7 +42,7 @@ export class GetUsageChartService {
         }
       }
 
-      const usageQuery: UsageQuery = {
+      const usageQuery: Record<string, unknown> = {
         startTime: query.startTime,
         endTime: query.endTime,
         providers: query.providers,

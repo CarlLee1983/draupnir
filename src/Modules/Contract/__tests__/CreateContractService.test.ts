@@ -20,10 +20,16 @@ class InMemoryContractRepository implements IContractRepository {
     return [...this.contracts.values()].filter((c) => c.targetId === targetId)
   }
   async findAllOrdered(): Promise<Contract[]> {
-    return [...this.contracts.values()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    return [...this.contracts.values()].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    )
   }
-  async findExpiring(): Promise<Contract[]> { return [] }
-  async findExpired(): Promise<Contract[]> { return [] }
+  async findExpiring(): Promise<Contract[]> {
+    return []
+  }
+  async findExpired(): Promise<Contract[]> {
+    return []
+  }
   async save(contract: Contract): Promise<void> {
     this.contracts.set(contract.id, contract)
   }

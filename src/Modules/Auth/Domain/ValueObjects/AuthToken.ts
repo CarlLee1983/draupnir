@@ -1,41 +1,66 @@
 /**
- * AuthToken 值物件
+ * AuthToken value object.
  *
- * 責任：
- * - JWT 令牌的封裝
- * - 令牌過期時間管理
- * - 令牌類型管理（Access、Refresh）
+ * Responsibilities:
+ * - Wrap raw JWT string with metadata.
+ * - Track expiry and token kind (access vs refresh).
  *
- * 注：實際的 JWT 簽發和驗證由 JwtTokenService 負責
+ * Signing and verification are implemented by `JwtTokenService` (application layer).
  */
 
+/**
+ * Enumeration of authentication token types.
+ */
 export enum TokenType {
+  /** Short-lived token used for accessing protected resources. */
   ACCESS = 'access',
+  /** Long-lived token used to obtain new access tokens. */
   REFRESH = 'refresh',
 }
 
+/**
+ * Structure of the decoded JWT payload.
+ */
 export interface TokenPayload {
+  /** Unique identifier of the user. */
   userId: string
+  /** User's email address. */
   email: string
+  /** User's assigned role. */
   role: string
+  /** List of permissions assigned to the user. */
   permissions: string[]
+  /** JWT ID: unique identifier for this specific token. */
   jti: string
+  /** Issued at: unix timestamp of when the token was created. */
   iat: number
+  /** Expiration: unix timestamp of when the token expires. */
   exp: number
+  /** The type of this token. */
   type: TokenType
 }
 
+/**
+ * Value object representing an authentication token.
+ */
 export class AuthToken {
+  /** The raw JWT string. */
   private readonly token: string
+  /** Date and time when the token expires. */
   private readonly expiresAt: Date
+  /** The type of the token (access or refresh). */
   private readonly type: TokenType
+  /** Optional decoded payload data. */
   private readonly payload?: TokenPayload
 
+  /**
+   * Creates an instance of AuthToken.
+   */
   constructor(
     token: string,
     expiresAt: Date,
     type: TokenType = TokenType.ACCESS,
-    payload?: TokenPayload
+    payload?: TokenPayload,
   ) {
     this.token = token
     this.expiresAt = expiresAt
@@ -44,58 +69,65 @@ export class AuthToken {
   }
 
   /**
-   * 取得令牌字符串
+   * Gets the raw JWT string value.
    */
   getValue(): string {
     return this.token
   }
 
   /**
-   * 取得過期時間
+   * Gets the expiration instant of the token.
    */
   getExpiresAt(): Date {
     return this.expiresAt
   }
 
   /**
-   * 取得令牌類型
+   * Gets the token type (access or refresh).
    */
   getType(): TokenType {
     return this.type
   }
 
   /**
-   * 取得令牌負載（如果可用）
+   * Gets the decoded payload data, if available.
    */
   getPayload(): TokenPayload | undefined {
     return this.payload
   }
 
   /**
-   * 檢查令牌是否已過期
+   * Checks if the token is currently expired.
    */
   isExpired(): boolean {
     return new Date() > this.expiresAt
   }
 
   /**
-   * 檢查是否為 Access Token
+   * Checks if this is an access token.
    */
   isAccessToken(): boolean {
     return this.type === TokenType.ACCESS
   }
 
   /**
-   * 檢查是否為 Refresh Token
+   * Checks if this is a refresh token.
    */
   isRefreshToken(): boolean {
     return this.type === TokenType.REFRESH
   }
 
   /**
-   * 轉換為字符串
+   * Returns the string representation of the token (the raw JWT).
    */
   toString(): string {
     return this.token
+  }
+
+  /**
+   * Checks structural equality based on the raw token string.
+   */
+  equals(other: unknown): boolean {
+    return other instanceof AuthToken && other.token === this.token
   }
 }

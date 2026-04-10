@@ -7,7 +7,7 @@ import { ExchangeDeviceCodeService } from '../../Application/Services/ExchangeDe
 import { ProxyCliRequestService } from '../../Application/Services/ProxyCliRequestService'
 import { RevokeCliSessionService } from '../../Application/Services/RevokeCliSessionService'
 import type { ICliProxyClient } from '../../Application/Services/ProxyCliRequestService'
-import type { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
+import type { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 
 const CLI_VERIFICATION_URI = process.env.CLI_VERIFICATION_URI || 'http://localhost:3000/cli/verify'

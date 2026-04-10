@@ -28,8 +28,11 @@ describe('GetTransactionHistoryService', () => {
     service = new GetTransactionHistoryService(accountRepo, txRepo, orgAuth)
 
     const account = CreditAccount.fromDatabase({
-      id: 'acc-1', org_id: 'org-1', balance: '1000',
-      low_balance_threshold: '100', status: 'active',
+      id: 'acc-1',
+      org_id: 'org-1',
+      balance: '1000',
+      low_balance_threshold: '100',
+      status: 'active',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })

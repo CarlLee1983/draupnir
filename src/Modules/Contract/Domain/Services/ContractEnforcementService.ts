@@ -2,7 +2,10 @@
 import type { Contract } from '../Aggregates/Contract'
 
 export class ContractEnforcementService {
-  checkModuleAccess(contract: Contract | null, moduleName: string): { allowed: boolean; reason?: string } {
+  checkModuleAccess(
+    contract: Contract | null,
+    moduleName: string,
+  ): { allowed: boolean; reason?: string } {
     if (!contract) {
       return { allowed: false, reason: '無有效合約' }
     }

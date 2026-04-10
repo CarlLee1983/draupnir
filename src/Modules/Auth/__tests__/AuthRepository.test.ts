@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
-import { Email } from '../Domain/ValueObjects/Email'
-import { Role, RoleType } from '../Domain/ValueObjects/Role'
 import { User, UserStatus } from '../Domain/Aggregates/User'
+import { Email } from '../Domain/ValueObjects/Email'
 import { Password } from '../Domain/ValueObjects/Password'
+import { Role, RoleType } from '../Domain/ValueObjects/Role'
+import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 
 describe('AuthRepository', () => {

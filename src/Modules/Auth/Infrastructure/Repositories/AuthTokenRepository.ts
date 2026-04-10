@@ -1,19 +1,31 @@
 /**
  * AuthTokenRepository
- * Token 倉庫實現（ORM 無關）
+ * ORM-agnostic implementation of `IAuthTokenRepository`.
  *
- * 設計：
- * - 依賴 IDatabaseAccess（由上層注入）
- * - 完全實現 IAuthTokenRepository
- * - 參考 AuthRepository 模式
+ * Design:
+ * - Depends on `IDatabaseAccess` from wiring
+ * - Mirrors the `AuthRepository` port/adapter style
  */
 
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IAuthTokenRepository, TokenRecord } from '../../Domain/Repositories/IAuthTokenRepository'
+import type {
+  IAuthTokenRepository,
+  TokenRecord,
+} from '../../Domain/Repositories/IAuthTokenRepository'
 
+/**
+ * Concrete implementation of IAuthTokenRepository using an ORM-agnostic database access layer.
+ * Manages persistence of JWT tokens for revocation and rotation purposes.
+ */
 export class AuthTokenRepository implements IAuthTokenRepository {
+  /**
+   * Creates an instance of AuthTokenRepository.
+   */
   constructor(private readonly db: IDatabaseAccess) {}
 
+  /**
+   * Persists a token record (upsert).
+   */
   async save(record: TokenRecord): Promise<void> {
     const existing = await this.db
       .table('auth_tokens')
@@ -21,17 +33,14 @@ export class AuthTokenRepository implements IAuthTokenRepository {
       .first()
 
     if (existing) {
-      await this.db
-        .table('auth_tokens')
-        .where('token_hash', '=', record.tokenHash)
-        .update({
-          user_id: record.userId,
-          token_hash: record.tokenHash,
-          type: record.type,
-          expires_at: record.expiresAt.toISOString(),
-          revoked_at: record.revokedAt?.toISOString(),
-          created_at: record.createdAt.toISOString(),
-        })
+      await this.db.table('auth_tokens').where('token_hash', '=', record.tokenHash).update({
+        user_id: record.userId,
+        token_hash: record.tokenHash,
+        type: record.type,
+        expires_at: record.expiresAt.toISOString(),
+        revoked_at: record.revokedAt?.toISOString(),
+        created_at: record.createdAt.toISOString(),
+      })
     } else {
       await this.db.table('auth_tokens').insert({
         id: record.id,
@@ -45,15 +54,18 @@ export class AuthTokenRepository implements IAuthTokenRepository {
     }
   }
 
+  /**
+   * Finds a token record by its SHA-256 hash.
+   */
   async findByHash(tokenHash: string): Promise<TokenRecord | null> {
-    const row = await this.db
-      .table('auth_tokens')
-      .where('token_hash', '=', tokenHash)
-      .first()
+    const row = await this.db.table('auth_tokens').where('token_hash', '=', tokenHash).first()
 
     return row ? this.mapToRecord(row) : null
   }
 
+  /**
+   * Retrieves all active (non-revoked and unexpired) tokens for a user.
+   */
   async findByUserId(userId: string): Promise<TokenRecord[]> {
     const rows = await this.db
       .table('auth_tokens')
@@ -65,6 +77,9 @@ export class AuthTokenRepository implements IAuthTokenRepository {
     return rows.map((row) => this.mapToRecord(row))
   }
 
+  /**
+   * Retrieves all revoked token records for a specific user.
+   */
   async findRevokedByUserId(userId: string): Promise<TokenRecord[]> {
     const rows = await this.db
       .table('auth_tokens')
@@ -75,24 +90,31 @@ export class AuthTokenRepository implements IAuthTokenRepository {
     return rows.map((row) => this.mapToRecord(row))
   }
 
+  /**
+   * Marks a specific token as revoked.
+   */
   async revoke(tokenHash: string): Promise<void> {
-    await this.db
-      .table('auth_tokens')
-      .where('token_hash', '=', tokenHash)
-      .update({
-        revoked_at: new Date().toISOString(),
-      })
+    await this.db.table('auth_tokens').where('token_hash', '=', tokenHash).update({
+      revoked_at: new Date().toISOString(),
+    })
   }
 
-	async isRevoked(tokenHash: string): Promise<boolean> {
-		const record = await this.findByHash(tokenHash)
-		if (!record) {
-			// 找不到記錄視為已撤銷（fail-closed）：缺少記錄不應授予存取權
-			return true
-		}
-		return record.revokedAt !== undefined
-	}
+  /**
+   * Checks if a token hash is currently revoked.
+   * Fails closed: if no record is found, it is treated as revoked/untrusted.
+   */
+  async isRevoked(tokenHash: string): Promise<boolean> {
+    const record = await this.findByHash(tokenHash)
+    if (!record) {
+      // 找不到記錄視為已撤銷（fail-closed）：缺少記錄不應授予存取權
+      return true
+    }
+    return record.revokedAt !== undefined
+  }
 
+  /**
+   * Revokes all active tokens for a user, effectively signing them out of all devices.
+   */
   async revokeAllByUserId(userId: string): Promise<void> {
     await this.db
       .table('auth_tokens')
@@ -103,22 +125,22 @@ export class AuthTokenRepository implements IAuthTokenRepository {
       })
   }
 
+  /**
+   * Physically removes expired tokens from the database to save space.
+   */
   async cleanupExpired(): Promise<void> {
-    await this.db
-      .table('auth_tokens')
-      .where('expires_at', '<', new Date().toISOString())
-      .delete()
-  }
-
-  async delete(id: string): Promise<void> {
-    await this.db
-      .table('auth_tokens')
-      .where('id', '=', id)
-      .delete()
+    await this.db.table('auth_tokens').where('expires_at', '<', new Date().toISOString()).delete()
   }
 
   /**
-   * 將資料庫行對應到 TokenRecord
+   * Hard-deletes a single token record by its primary key.
+   */
+  async delete(id: string): Promise<void> {
+    await this.db.table('auth_tokens').where('id', '=', id).delete()
+  }
+
+  /**
+   * Maps a raw database row to a TokenRecord structure.
    */
   private mapToRecord(row: any): TokenRecord {
     return {

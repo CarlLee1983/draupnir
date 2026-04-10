@@ -1,19 +1,37 @@
+/**
+ * GetProfileService
+ * Application service: retrieves a user's detailed profile information.
+ *
+ * Responsibilities:
+ * - Fetch user profile data from the repository using UID
+ * - Ensure the profile exists before returning
+ * - Map the domain aggregate to a DTO for presentation
+ */
+
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
 import type { UserProfileResponse } from '../DTOs/UserProfileDTO'
 import { UserProfileMapper } from '../../Infrastructure/Mappers/UserProfileMapper'
 
+/**
+ * Service for retrieving a user profile.
+ */
 export class GetProfileService {
   constructor(private profileRepository: IUserProfileRepository) {}
 
+  /**
+   * Retrieves a user profile by ID.
+   */
   async execute(userId: string): Promise<UserProfileResponse> {
     try {
       const profile = await this.profileRepository.findById(userId)
       if (!profile) {
-        return { success: false, message: '找不到 Profile', error: 'PROFILE_NOT_FOUND' }
+        return { success: false, message: 'Profile not found', error: 'PROFILE_NOT_FOUND' }
       }
-      return { success: true, message: '取得成功', data: UserProfileMapper.toDTO(profile) }
+      return { success: true, message: 'Profile retrieved', data: UserProfileMapper.toDTO(profile) }
     } catch (error: any) {
-      return { success: false, message: error.message || '取得失敗', error: error.message }
+      return { success: false, message: error.message || 'Retrieval failed', error: error.message }
     }
   }
 }
+
+

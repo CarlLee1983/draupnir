@@ -1,6 +1,6 @@
 // src/Modules/Contract/Application/Services/AssignContractService.ts
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import type { AssignContractRequest, ContractResponse } from '../DTOs/ContractDTO'
+import { ContractPresenter, type AssignContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
 
 export class AssignContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
@@ -22,7 +22,7 @@ export class AssignContractService {
       return {
         success: true,
         message: '合約已指派',
-        data: assigned.toDTO(),
+        data: ContractPresenter.fromEntity(assigned),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '指派合約失敗'

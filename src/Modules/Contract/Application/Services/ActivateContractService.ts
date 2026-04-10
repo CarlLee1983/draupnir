@@ -2,7 +2,7 @@
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractActivated } from '../../Domain/Events/ContractActivated'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import type { ContractResponse } from '../DTOs/ContractDTO'
+import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
 export class ActivateContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
@@ -28,7 +28,7 @@ export class ActivateContractService {
       return {
         success: true,
         message: '合約已啟用',
-        data: activated.toDTO(),
+        data: ContractPresenter.fromEntity(activated),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '啟用合約失敗'

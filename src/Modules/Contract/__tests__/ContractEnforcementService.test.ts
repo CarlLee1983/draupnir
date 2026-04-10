@@ -21,8 +21,10 @@ describe('ContractEnforcementService', () => {
 
   test('DRAFT 合約 → 不允許', () => {
     const contract = Contract.create({
-      targetType: 'organization', targetId: 'org-1',
-      terms: validTerms, createdBy: 'admin',
+      targetType: 'organization',
+      targetId: 'org-1',
+      terms: validTerms,
+      createdBy: 'admin',
     })
     const result = enforcementService.checkModuleAccess(contract, 'chat')
     expect(result.allowed).toBe(false)
@@ -31,8 +33,10 @@ describe('ContractEnforcementService', () => {
 
   test('ACTIVE 合約 + 模組在清單中 → 允許', () => {
     const contract = Contract.create({
-      targetType: 'organization', targetId: 'org-1',
-      terms: validTerms, createdBy: 'admin',
+      targetType: 'organization',
+      targetId: 'org-1',
+      terms: validTerms,
+      createdBy: 'admin',
     }).activate()
     const result = enforcementService.checkModuleAccess(contract, 'chat')
     expect(result.allowed).toBe(true)
@@ -40,8 +44,10 @@ describe('ContractEnforcementService', () => {
 
   test('ACTIVE 合約 + 模組不在清單中 → 不允許', () => {
     const contract = Contract.create({
-      targetType: 'organization', targetId: 'org-1',
-      terms: validTerms, createdBy: 'admin',
+      targetType: 'organization',
+      targetId: 'org-1',
+      terms: validTerms,
+      createdBy: 'admin',
     }).activate()
     const result = enforcementService.checkModuleAccess(contract, 'image-gen')
     expect(result.allowed).toBe(false)

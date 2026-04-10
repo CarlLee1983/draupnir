@@ -35,4 +35,8 @@ export class CliSessionStatus {
   getValue(): CliSessionStatusType {
     return this.value
   }
+
+  equals(other: unknown): boolean {
+    return other instanceof CliSessionStatus && other.value === this.value
+  }
 }

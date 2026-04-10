@@ -13,7 +13,7 @@ let current: IDatabaseAccess | null = null
  * 設定當前應用的 IDatabaseAccess（僅由 bootstrap 呼叫一次）
  */
 export function setCurrentDatabaseAccess(db: IDatabaseAccess): void {
-	current = db
+  current = db
 }
 
 /**
@@ -23,17 +23,17 @@ export function setCurrentDatabaseAccess(db: IDatabaseAccess): void {
  * 若尚未設定則拋錯（表示 bootstrap 未正確呼叫 setCurrentDatabaseAccess）。
  */
 export function getCurrentDatabaseAccess(): IDatabaseAccess {
-	if (current === null) {
-		throw new Error(
-			'IDatabaseAccess 尚未設定。請在 bootstrap 中於註冊 ServiceProvider 之前呼叫 setCurrentDatabaseAccess(db)。'
-		)
-	}
-	return current
+  if (current === null) {
+    throw new Error(
+      'IDatabaseAccess 尚未設定。請在 bootstrap 中於註冊 ServiceProvider 之前呼叫 setCurrentDatabaseAccess(db)。',
+    )
+  }
+  return current
 }
 
 /**
  * 是否已設定當前 IDatabaseAccess（測試或可選依賴時可用）
  */
 export function hasCurrentDatabaseAccess(): boolean {
-	return current !== null
+  return current !== null
 }

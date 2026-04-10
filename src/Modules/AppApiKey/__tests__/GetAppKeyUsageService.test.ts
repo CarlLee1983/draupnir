@@ -9,6 +9,9 @@ import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organizat
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 describe('GetAppKeyUsageService', () => {
   let service: GetAppKeyUsageService
@@ -30,13 +33,14 @@ describe('GetAppKeyUsageService', () => {
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
     await memberRepo.save(member)
 
-    const key = await AppApiKey.create({
+    const keyHash = await hashingService.hash('drp_app_usage123')
+    const key = AppApiKey.create({
       id: 'appkey-usage',
       orgId: 'org-1',
       issuedByUserId: 'user-1',
       label: 'Usage Test',
       gatewayKeyId: 'bfr-vk-usage',
-      rawKey: 'drp_app_usage123',
+      keyHash,
     })
     await appKeyRepo.save(key.activate())
   })

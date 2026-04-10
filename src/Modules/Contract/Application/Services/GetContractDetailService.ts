@@ -1,6 +1,6 @@
 // src/Modules/Contract/Application/Services/GetContractDetailService.ts
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import type { ContractResponse } from '../DTOs/ContractDTO'
+import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
 export class GetContractDetailService {
   constructor(private readonly contractRepo: IContractRepository) {}
@@ -19,7 +19,7 @@ export class GetContractDetailService {
       return {
         success: true,
         message: '查詢成功',
-        data: contract.toDTO(),
+        data: ContractPresenter.fromEntity(contract),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '查詢失敗'

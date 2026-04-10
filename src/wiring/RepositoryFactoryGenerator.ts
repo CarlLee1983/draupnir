@@ -57,10 +57,10 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
  * }
  */
 export type RepositoryFactoryMap = {
-	memory?: () => any
-	drizzle?: (db: IDatabaseAccess) => any
-	atlas?: (db: IDatabaseAccess) => any
-	prisma?: (db: IDatabaseAccess) => any
+  memory?: () => any
+  drizzle?: (db: IDatabaseAccess) => any
+  atlas?: (db: IDatabaseAccess) => any
+  prisma?: (db: IDatabaseAccess) => any
 }
 
 /**
@@ -80,30 +80,27 @@ export type RepositoryFactoryMap = {
  * registry.register('user', userFactory)
  */
 export function createRepositoryFactory(factoryMap: RepositoryFactoryMap) {
-	return (orm: string, db: IDatabaseAccess | undefined): any => {
-		// 根據 ORM 類型選擇工廠
-		const factory = factoryMap[orm as keyof RepositoryFactoryMap]
+  return (orm: string, db: IDatabaseAccess | undefined): any => {
+    // 根據 ORM 類型選擇工廠
+    const factory = factoryMap[orm as keyof RepositoryFactoryMap]
 
-		if (!factory) {
-			throw new Error(
-				`❌ Repository 不支援 ORM "${orm}"。\n` +
-					`已支援：${Object.keys(factoryMap).join(', ')}`
-			)
-		}
+    if (!factory) {
+      throw new Error(
+        `❌ Repository 不支援 ORM "${orm}"。\n` + `已支援：${Object.keys(factoryMap).join(', ')}`,
+      )
+    }
 
-		// 調用工廠函數
-		// memory 不需要 db，其他 ORM 需要 db
-		if (orm === 'memory') {
-			return (factory as () => any)()
-		} else {
-			if (!db) {
-				throw new Error(
-					`❌ ORM="${orm}" 需要 DatabaseAccess，但未提供`
-				)
-			}
-			return (factory as (db: IDatabaseAccess) => any)(db)
-		}
-	}
+    // 調用工廠函數
+    // memory 不需要 db，其他 ORM 需要 db
+    if (orm === 'memory') {
+      return (factory as () => any)()
+    } else {
+      if (!db) {
+        throw new Error(`❌ ORM="${orm}" 需要 DatabaseAccess，但未提供`)
+      }
+      return (factory as (db: IDatabaseAccess) => any)(db)
+    }
+  }
 }
 
 /**
@@ -119,16 +116,16 @@ export function createRepositoryFactory(factoryMap: RepositoryFactoryMap) {
  * })
  */
 export function registerRepositoriesInBatch(
-	repositoryMaps: Record<string, RepositoryFactoryMap>
+  repositoryMaps: Record<string, RepositoryFactoryMap>,
 ): void {
-	const { getRegistry } = require('@/wiring/RepositoryRegistry')
-	const registry = getRegistry()
+  const { getRegistry } = require('@/wiring/RepositoryRegistry')
+  const registry = getRegistry()
 
-	for (const [type, factoryMap] of Object.entries(repositoryMaps)) {
-		const factory = createRepositoryFactory(factoryMap)
-		registry.register(type, factory)
-		console.log(`✅ [${type.charAt(0).toUpperCase() + type.slice(1)}] Repository 工廠已註冊`)
-	}
+  for (const [type, factoryMap] of Object.entries(repositoryMaps)) {
+    const factory = createRepositoryFactory(factoryMap)
+    registry.register(type, factory)
+    console.log(`✅ [${type.charAt(0).toUpperCase() + type.slice(1)}] Repository 工廠已註冊`)
+  }
 }
 
 /**

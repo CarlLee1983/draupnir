@@ -33,9 +33,7 @@ export class MemoryHealthCheckRepository implements IHealthCheckRepository {
   async findAll(limit: number = 10): Promise<HealthCheck[]> {
     const checks = Array.from(this.checks.values())
     // 按時間戳降序排序，返回最新的記錄
-    return checks
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit)
+    return checks.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, limit)
   }
 
   async save(check: HealthCheck): Promise<void> {
@@ -43,8 +41,9 @@ export class MemoryHealthCheckRepository implements IHealthCheckRepository {
 
     // 清理舊記錄 (保持最多 maxRecords 條)
     if (this.checks.size > this.maxRecords) {
-      const sorted = Array.from(this.checks.values())
-        .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime())
+      const sorted = Array.from(this.checks.values()).sort(
+        (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
+      )
 
       // 刪除最舊的記錄
       const toDelete = sorted.slice(0, this.checks.size - this.maxRecords)

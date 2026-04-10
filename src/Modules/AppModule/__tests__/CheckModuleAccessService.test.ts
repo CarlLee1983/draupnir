@@ -13,36 +13,62 @@ import type { Contract as ContractType } from '@/Modules/Contract/Domain/Aggrega
 
 class MockContractRepo implements IContractRepository {
   contracts: Map<string, ContractType> = new Map()
-  async findById(id: string) { return this.contracts.get(id) ?? null }
+  async findById(id: string) {
+    return this.contracts.get(id) ?? null
+  }
   async findActiveByTargetId(targetId: string) {
     for (const c of this.contracts.values()) {
       if (c.targetId === targetId && c.status === 'active') return c
     }
     return null
   }
-  async findByTargetId() { return [] }
-  async findAllOrdered() { return [...this.contracts.values()] }
-  async findExpiring() { return [] }
-  async findExpired() { return [] }
-  async save(c: ContractType) { this.contracts.set(c.id, c) }
-  async update(c: ContractType) { this.contracts.set(c.id, c) }
+  async findByTargetId() {
+    return []
+  }
+  async findAllOrdered() {
+    return [...this.contracts.values()]
+  }
+  async findExpiring() {
+    return []
+  }
+  async findExpired() {
+    return []
+  }
+  async save(c: ContractType) {
+    this.contracts.set(c.id, c)
+  }
+  async update(c: ContractType) {
+    this.contracts.set(c.id, c)
+  }
 }
 
 class MockModuleRepo implements IAppModuleRepository {
   modules: Map<string, AppModuleType> = new Map()
-  async findById(id: string) { return this.modules.get(id) ?? null }
+  async findById(id: string) {
+    return this.modules.get(id) ?? null
+  }
   async findByName(name: string) {
-    for (const m of this.modules.values()) { if (m.name === name) return m }
+    for (const m of this.modules.values()) {
+      if (m.name === name) return m
+    }
     return null
   }
-  async findAll() { return [...this.modules.values()] }
-  async save(m: AppModuleType) { this.modules.set(m.id, m) }
-  async update(m: AppModuleType) { this.modules.set(m.id, m) }
+  async findAll() {
+    return [...this.modules.values()]
+  }
+  async save(m: AppModuleType) {
+    this.modules.set(m.id, m)
+  }
+  async update(m: AppModuleType) {
+    this.modules.set(m.id, m)
+  }
 }
 
 class MockSubscriptionRepo implements IModuleSubscriptionRepository {
   subs: Map<string, SubType> = new Map()
-  async findById(id: string) { return this.subs.get(id) ?? null }
+  async findById(id: string) {
+    return this.subs.get(id) ?? null
+  }
   async findByOrgAndModule(orgId: string, moduleId: string) {
     for (const s of this.subs.values()) {
       if (s.orgId === orgId && s.moduleId === moduleId) return s
@@ -52,8 +78,12 @@ class MockSubscriptionRepo implements IModuleSubscriptionRepository {
   async findActiveByOrgId(orgId: string) {
     return [...this.subs.values()].filter((s) => s.orgId === orgId && s.isActive())
   }
-  async save(s: SubType) { this.subs.set(s.id, s) }
-  async update(s: SubType) { this.subs.set(s.id, s) }
+  async save(s: SubType) {
+    this.subs.set(s.id, s)
+  }
+  async update(s: SubType) {
+    this.subs.set(s.id, s)
+  }
 }
 
 describe('CheckModuleAccessService', () => {
@@ -75,9 +105,11 @@ describe('CheckModuleAccessService', () => {
 
   test('合約 + 訂閱都滿足 → allowed', async () => {
     const contract = Contract.create({
-      targetType: 'organization', targetId: 'org-1',
+      targetType: 'organization',
+      targetId: 'org-1',
       terms: {
-        creditQuota: 1000, allowedModules: ['chat'],
+        creditQuota: 1000,
+        allowedModules: ['chat'],
         rateLimit: { rpm: 60, tpm: 100000 },
         validityPeriod: { startDate: '2026-01-01', endDate: '2026-12-31' },
       },
@@ -103,9 +135,11 @@ describe('CheckModuleAccessService', () => {
 
   test('合約不包含模組 → denied', async () => {
     const contract = Contract.create({
-      targetType: 'organization', targetId: 'org-1',
+      targetType: 'organization',
+      targetId: 'org-1',
       terms: {
-        creditQuota: 1000, allowedModules: ['embedding'],
+        creditQuota: 1000,
+        allowedModules: ['embedding'],
         rateLimit: { rpm: 60, tpm: 100000 },
         validityPeriod: { startDate: '2026-01-01', endDate: '2026-12-31' },
       },
@@ -120,9 +154,11 @@ describe('CheckModuleAccessService', () => {
 
   test('合約有但未訂閱 → denied', async () => {
     const contract = Contract.create({
-      targetType: 'organization', targetId: 'org-1',
+      targetType: 'organization',
+      targetId: 'org-1',
       terms: {
-        creditQuota: 1000, allowedModules: ['chat'],
+        creditQuota: 1000,
+        allowedModules: ['chat'],
         rateLimit: { rpm: 60, tpm: 100000 },
         validityPeriod: { startDate: '2026-01-01', endDate: '2026-12-31' },
       },

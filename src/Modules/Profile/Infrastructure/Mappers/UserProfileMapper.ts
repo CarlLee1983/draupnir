@@ -1,6 +1,10 @@
 import { UserProfile, type UserProfileProps } from '../../Domain/Aggregates/UserProfile'
 import type { UserProfileDTO } from '../../Application/DTOs/UserProfileDTO'
 
+/**
+ * Parses notification preferences from unknown database format.
+ * @param value - The raw value from the database.
+ */
 function parseNotificationPreferences(value: unknown): Record<string, unknown> {
   if (typeof value === 'string') {
     try {
@@ -17,15 +21,28 @@ function parseNotificationPreferences(value: unknown): Record<string, unknown> {
   return {}
 }
 
+/**
+ * Normalizes a string value with a fallback.
+ */
 function normalizeString(value: unknown, fallback = ''): string {
   return typeof value === 'string' && value.length > 0 ? value : fallback
 }
 
+/**
+ * Normalizes a string value to be nullable.
+ */
 function normalizeNullableString(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null
 }
 
+/**
+ * Mapper for converting UserProfile between different representations.
+ */
 export const UserProfileMapper = {
+  /**
+   * Maps a database row to a UserProfile aggregate.
+   * @param row - Raw data from the database.
+   */
   fromDatabase(row: Record<string, unknown>): UserProfile {
     const props: UserProfileProps = {
       id: row.id as string,
@@ -43,6 +60,10 @@ export const UserProfileMapper = {
     return UserProfile.reconstitute(props)
   },
 
+  /**
+   * Maps a UserProfile aggregate to a database-friendly object.
+   * @param profile - The aggregate instance.
+   */
   toDatabaseRow(profile: UserProfile): Record<string, unknown> {
     return {
       id: profile.id,
@@ -58,6 +79,10 @@ export const UserProfileMapper = {
     }
   },
 
+  /**
+   * Maps a UserProfile aggregate to a Data Transfer Object.
+   * @param profile - The aggregate instance.
+   */
   toDTO(profile: UserProfile): UserProfileDTO {
     return {
       id: profile.id,
@@ -73,3 +98,4 @@ export const UserProfileMapper = {
     }
   },
 }
+

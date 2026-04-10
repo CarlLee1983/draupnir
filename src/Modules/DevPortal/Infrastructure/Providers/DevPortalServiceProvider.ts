@@ -14,51 +14,51 @@ import type { ListAppKeysService } from '@/Modules/AppApiKey/Application/Service
 import type { RevokeAppKeyService } from '@/Modules/AppApiKey/Application/Services/RevokeAppKeyService'
 
 export class DevPortalServiceProvider extends ModuleServiceProvider {
-	override register(container: IContainer): void {
-		const db = getCurrentDatabaseAccess()
+  override register(container: IContainer): void {
+    const db = getCurrentDatabaseAccess()
 
-		container.singleton('devPortalApplicationRepository', () => new ApplicationRepository(db))
-		container.singleton('devPortalWebhookConfigRepository', () => new WebhookConfigRepository(db))
-		container.singleton('devPortalWebhookDispatcher', () => new WebhookDispatcher())
+    container.singleton('devPortalApplicationRepository', () => new ApplicationRepository(db))
+    container.singleton('devPortalWebhookConfigRepository', () => new WebhookConfigRepository(db))
+    container.singleton('devPortalWebhookDispatcher', () => new WebhookDispatcher())
 
-		container.bind('registerAppService', (c: IContainer) => {
-			return new RegisterAppService(
-				c.make('devPortalApplicationRepository') as ApplicationRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
+    container.bind('registerAppService', (c: IContainer) => {
+      return new RegisterAppService(
+        c.make('devPortalApplicationRepository') as ApplicationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
 
-		container.bind('listAppsService', (c: IContainer) => {
-			return new ListAppsService(
-				c.make('devPortalApplicationRepository') as ApplicationRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
+    container.bind('listAppsService', (c: IContainer) => {
+      return new ListAppsService(
+        c.make('devPortalApplicationRepository') as ApplicationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
 
-		container.bind('manageAppKeysService', (c: IContainer) => {
-			return new ManageAppKeysService(
-				c.make('devPortalApplicationRepository') as ApplicationRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-				c.make('issueAppKeyService') as IssueAppKeyService,
-				c.make('revokeAppKeyService') as RevokeAppKeyService,
-				c.make('listAppKeysService') as ListAppKeysService,
-			)
-		})
+    container.bind('manageAppKeysService', (c: IContainer) => {
+      return new ManageAppKeysService(
+        c.make('devPortalApplicationRepository') as ApplicationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+        c.make('issueAppKeyService') as IssueAppKeyService,
+        c.make('revokeAppKeyService') as RevokeAppKeyService,
+        c.make('listAppKeysService') as ListAppKeysService,
+      )
+    })
 
-		container.bind('configureWebhookService', (c: IContainer) => {
-			return new ConfigureWebhookService(
-				c.make('devPortalApplicationRepository') as ApplicationRepository,
-				c.make('devPortalWebhookConfigRepository') as WebhookConfigRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
+    container.bind('configureWebhookService', (c: IContainer) => {
+      return new ConfigureWebhookService(
+        c.make('devPortalApplicationRepository') as ApplicationRepository,
+        c.make('devPortalWebhookConfigRepository') as WebhookConfigRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
 
-		container.bind('getApiDocsService', () => {
-			return new GetApiDocsService()
-		})
-	}
+    container.bind('getApiDocsService', () => {
+      return new GetApiDocsService()
+    })
+  }
 
-	override boot(_context: unknown): void {
-		console.log('🚀 [DevPortal] Module loaded')
-	}
+  override boot(_context: unknown): void {
+    console.log('🚀 [DevPortal] Module loaded')
+  }
 }

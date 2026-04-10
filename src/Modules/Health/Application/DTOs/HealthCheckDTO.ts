@@ -3,7 +3,7 @@
  * 健康檢查數據傳輸物件
  */
 
-import { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
+import type { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
 
 export interface HealthCheckJSONData {
   id: string
@@ -18,27 +18,29 @@ export interface HealthCheckJSONData {
 }
 
 export class HealthCheckDTO {
-  id!: string
-  status!: string
-  timestamp!: Date
-  checks!: {
-    database: boolean
-    redis?: boolean
-    cache?: boolean
+  readonly id: string
+  readonly status: string
+  readonly timestamp: Date
+  readonly checks: {
+    readonly database: boolean
+    readonly redis?: boolean
+    readonly cache?: boolean
   }
-  message?: string
+  readonly message?: string
+
+  private constructor(entity: HealthCheck) {
+    this.id = entity.id
+    this.status = entity.status.toString()
+    this.timestamp = entity.timestamp
+    this.checks = entity.checks
+    this.message = entity.message
+  }
 
   /**
    * 從領域實體轉換
    */
   static fromEntity(entity: HealthCheck): HealthCheckDTO {
-    const dto = new HealthCheckDTO()
-    dto.id = entity.id
-    dto.status = entity.status.toString()
-    dto.timestamp = entity.timestamp
-    dto.checks = entity.checks
-    dto.message = entity.message
-    return dto
+    return new HealthCheckDTO(entity)
   }
 
   /**
@@ -50,7 +52,7 @@ export class HealthCheckDTO {
       status: this.status,
       timestamp: this.timestamp.toISOString(),
       checks: this.checks,
-      message: this.message
+      message: this.message,
     }
   }
 }

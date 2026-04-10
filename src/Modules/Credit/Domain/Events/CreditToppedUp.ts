@@ -6,7 +6,9 @@ export class CreditToppedUp extends DomainEvent {
     super(accountId, 'credit.topped_up', { orgId, amount })
   }
 
-  get orgId(): string { return this.data.orgId as string }
+  get orgId(): string {
+    return this.data.orgId as string
+  }
 
   toJSON(): Record<string, unknown> {
     return {

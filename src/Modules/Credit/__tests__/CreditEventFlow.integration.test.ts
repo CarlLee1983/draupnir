@@ -1,7 +1,7 @@
 // src/Modules/Credit/__tests__/CreditEventFlow.integration.test.ts
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { CreditDeductionService } from '../Domain/Services/CreditDeductionService'
+import { DeductCreditService } from '../Application/Services/DeductCreditService'
 import { TopUpCreditService } from '../Application/Services/TopUpCreditService'
 import { HandleBalanceDepletedService } from '../Application/Services/HandleBalanceDepletedService'
 import { HandleCreditToppedUpService } from '../Application/Services/HandleCreditToppedUpService'
@@ -13,6 +13,15 @@ import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
 import { KeyScope } from '@/Modules/ApiKey/Domain/ValueObjects/KeyScope'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
+const TEST_RAW_KEY = 'drp_sk_test_12345678901234567890123456789012'
+let testKeyHash: string
+
+beforeAll(async () => {
+  testKeyHash = await hashingService.hash(TEST_RAW_KEY)
+})
 
 describe('Credit Event Flow 整合測試', () => {
   let db: MemoryDatabaseAccess
@@ -20,7 +29,7 @@ describe('Credit Event Flow 整合測試', () => {
   let txRepo: CreditTransactionRepository
   let apiKeyRepo: IApiKeyRepository
   let mock: MockGatewayClient
-  let deductionService: CreditDeductionService
+  let deductionService: DeductCreditService
   let topUpService: TopUpCreditService
 
   beforeEach(async () => {
@@ -28,7 +37,7 @@ describe('Credit Event Flow 整合測試', () => {
     db = new MemoryDatabaseAccess()
     accountRepo = new CreditAccountRepository(db)
     txRepo = new CreditTransactionRepository(db)
-    deductionService = new CreditDeductionService()
+    deductionService = new DeductCreditService(accountRepo, txRepo, db)
     topUpService = new TopUpCreditService(accountRepo, txRepo, db)
 
     // Mock ApiKey repo
@@ -75,13 +84,13 @@ describe('Credit Event Flow 整合測試', () => {
 
   it('扣光餘額 → 自動封鎖 Key → 充值 → 自動恢復 Key', async () => {
     // 準備 active key (使用 mock store 中的 id)
-    const mockKey = await ApiKey.create({
+    const mockKey = ApiKey.create({
       id: 'key-1',
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Test Key',
       gatewayKeyId: 'mock_vk_000001',
-      rawKey: 'drp_sk_test_12345678901234567890123456789012',
+      keyHash: testKeyHash,
       scope: KeyScope.fromJSON({
         rate_limit_rpm: 60,
         rate_limit_tpm: 100000,
@@ -92,10 +101,7 @@ describe('Credit Event Flow 整合測試', () => {
     ;(apiKeyRepo.findActiveByOrgId as any).mockResolvedValue([activeKey])
 
     // Step 1: 扣光餘額 → 應觸發 BalanceDepleted → 自動封鎖 Key
-    const deductResult = await deductionService.deduct({
-      db,
-      accountRepo,
-      transactionRepo: txRepo,
+    const deductResult = await deductionService.execute({
       orgId: 'org-1',
       amount: '100',
     })
@@ -135,10 +141,7 @@ describe('Credit Event Flow 整合測試', () => {
   it('餘額低於閾值但未耗盡時不應封鎖 Key', async () => {
     ;(apiKeyRepo.findActiveByOrgId as any).mockResolvedValue([])
 
-    const result = await deductionService.deduct({
-      db,
-      accountRepo,
-      transactionRepo: txRepo,
+    const result = await deductionService.execute({
       orgId: 'org-1',
       amount: '80',
     })

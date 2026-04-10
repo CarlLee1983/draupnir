@@ -1,18 +1,18 @@
 /**
- * Email 值物件
+ * Email value object.
  *
- * 責任：
- * - 電子郵件格式驗證
- * - 邂逅郵件的一致性和不變性
+ * Responsibilities:
+ * - Validate email format and length.
+ * - Normalize email to lowercase.
+ * - Preserve immutability.
  */
-
 export class Email {
+  /** The normalized email string. */
   private readonly value: string
 
   /**
-   * 建立 Email 值物件
-   * @param email 電子郵件地址
-   * @throws Error 如果格式無效
+   * Creates an Email value object.
+   * @throws Error if the format is invalid or too long.
    */
   constructor(email: string) {
     if (!this.isValid(email)) {
@@ -22,7 +22,7 @@ export class Email {
   }
 
   /**
-   * 驗證電子郵件格式
+   * Validates the format and length of an email address.
    */
   private isValid(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -30,21 +30,21 @@ export class Email {
   }
 
   /**
-   * 取得電子郵件值
+   * Gets the normalized email string.
    */
   getValue(): string {
     return this.value
   }
 
   /**
-   * 比較兩個 Email 物件
+   * Checks for value equality against another Email instance.
    */
   equals(other: Email): boolean {
     return this.value === other.value
   }
 
   /**
-   * 轉換為字符串
+   * Returns the string representation of the email address.
    */
   toString(): string {
     return this.value

@@ -6,51 +6,35 @@ describe('ValidityPeriod', () => {
   const now = new Date('2026-06-15T00:00:00Z')
 
   test('建立有效期間', () => {
-    const period = ValidityPeriod.create(
-      new Date('2026-01-01'),
-      new Date('2026-12-31'),
-    )
+    const period = ValidityPeriod.create(new Date('2026-01-01'), new Date('2026-12-31'))
     expect(period.getStartDate()).toEqual(new Date('2026-01-01'))
     expect(period.getEndDate()).toEqual(new Date('2026-12-31'))
   })
 
   test('結束日期早於開始日期拋出錯誤', () => {
-    expect(() => ValidityPeriod.create(
-      new Date('2026-12-31'),
-      new Date('2026-01-01'),
-    )).toThrow('結束日期必須晚於開始日期')
+    expect(() => ValidityPeriod.create(new Date('2026-12-31'), new Date('2026-01-01'))).toThrow(
+      '結束日期必須晚於開始日期',
+    )
   })
 
   test('isActive 在期間內回傳 true', () => {
-    const period = ValidityPeriod.create(
-      new Date('2026-01-01'),
-      new Date('2026-12-31'),
-    )
+    const period = ValidityPeriod.create(new Date('2026-01-01'), new Date('2026-12-31'))
     expect(period.isActive(now)).toBe(true)
   })
 
   test('isExpired 在結束日期後回傳 true', () => {
-    const period = ValidityPeriod.create(
-      new Date('2025-01-01'),
-      new Date('2025-12-31'),
-    )
+    const period = ValidityPeriod.create(new Date('2025-01-01'), new Date('2025-12-31'))
     expect(period.isExpired(now)).toBe(true)
   })
 
   test('isExpiringSoon 在到期前 N 天回傳 true', () => {
-    const period = ValidityPeriod.create(
-      new Date('2026-01-01'),
-      new Date('2026-06-20T00:00:00Z'),
-    )
+    const period = ValidityPeriod.create(new Date('2026-01-01'), new Date('2026-06-20T00:00:00Z'))
     expect(period.isExpiringSoon(7, now)).toBe(true)
     expect(period.isExpiringSoon(3, now)).toBe(false)
   })
 
   test('getDaysRemaining 計算剩餘天數', () => {
-    const period = ValidityPeriod.create(
-      new Date('2026-01-01'),
-      new Date('2026-06-20T00:00:00Z'),
-    )
+    const period = ValidityPeriod.create(new Date('2026-01-01'), new Date('2026-06-20T00:00:00Z'))
     expect(period.getDaysRemaining(now)).toBe(5)
   })
 

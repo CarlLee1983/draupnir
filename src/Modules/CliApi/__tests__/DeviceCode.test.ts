@@ -59,7 +59,9 @@ describe('DeviceCode', () => {
       expiresAt: new Date(Date.now() + 600_000),
     })
     const authorized = dc.authorize('user-1', 'u@e.com', 'user')
-    expect(() => authorized.authorize('user-2', 'u2@e.com', 'user')).toThrow('此 device code 已被授權')
+    expect(() => authorized.authorize('user-2', 'u2@e.com', 'user')).toThrow(
+      '此 device code 已被授權',
+    )
   })
 
   it('should mark as consumed', () => {

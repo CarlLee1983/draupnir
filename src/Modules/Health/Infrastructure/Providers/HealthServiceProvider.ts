@@ -11,39 +11,45 @@
 
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHealthCheckRepository } from '../../Domain/Repositories/IHealthCheckRepository'
+import type { ISystemHealthChecker } from '../../Domain/Ports/ISystemHealthChecker'
 import { MemoryHealthCheckRepository } from '../Repositories/MemoryHealthCheckRepository'
+import { SystemHealthChecker } from '../Services/SystemHealthChecker'
 import { PerformHealthCheckService } from '../../Application/Services/PerformHealthCheckService'
 
 export class HealthServiceProvider extends ModuleServiceProvider {
-	/**
-	 * 註冊服務到容器
-	 * 在這裡定義所有的依賴注入和單例
-	 *
-	 * @param container - 框架無關的容器介面
-	 */
-	override register(container: IContainer): void {
-		// 1. 註冊 Repository (單例)
-		container.singleton('healthRepository', () => {
-			return new MemoryHealthCheckRepository()
-		})
+  /**
+   * 註冊服務到容器
+   * 在這裡定義所有的依賴注入和單例
+   *
+   * @param container - 框架無關的容器介面
+   */
+  override register(container: IContainer): void {
+    // 1. 註冊 Repository (單例)
+    container.singleton('healthRepository', () => {
+      return new MemoryHealthCheckRepository()
+    })
 
-		// 2. 註冊 Application Service（每次解析新建實例）
-		container.bind('healthCheckService', (c: IContainer) => {
-			const repository = c.make('healthRepository') as IHealthCheckRepository
-			return new PerformHealthCheckService(repository)
-		})
-	}
+    // 2. 註冊 SystemHealthChecker (db/redis/cache 由 wiring 層提供)
+    container.singleton('systemHealthChecker', () => {
+      return new SystemHealthChecker(null, null, null)
+    })
 
-	/**
-	 * 啟動時執行初始化邏輯
-	 *
-	 * 注意：如果需要訪問框架特定資源（如 Gravito 的 db、redis、cache），
-	 * 應由 Wiring 層或適配層在啟動後執行。
-	 */
-	override boot(_context: any): void {
-		console.log('💚 [Health] Module loaded')
+    // 3. 註冊 Application Service（每次解析新建實例）
+    container.bind('healthCheckService', (c: IContainer) => {
+      const repository = c.make('healthRepository') as IHealthCheckRepository
+      const healthChecker = c.make('systemHealthChecker') as ISystemHealthChecker
+      return new PerformHealthCheckService(repository, healthChecker)
+    })
+  }
 
-		// 框架特定的初始化（如執行初始健康檢查）
-		// 應由適配層或 Wiring 層處理，而不是在這裡
-	}
+  /**
+   * 啟動時執行初始化邏輯
+   *
+   * 注意：如果需要訪問框架特定資源（如 Gravito 的 db、redis、cache），
+   * 應由 Wiring 層或適配層在啟動後執行。
+   */
+  override boot(_context: unknown): void {
+    // 框架特定的初始化（如執行初始健康檢查）
+    // 應由適配層或 Wiring 層處理，而不是在這裡
+  }
 }

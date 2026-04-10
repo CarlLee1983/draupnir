@@ -1,6 +1,12 @@
 // src/Modules/Credit/Domain/Entities/CreditTransaction.ts
+/**
+ * CreditTransaction
+ * Domain Entity: represents an individual balance movement (record).
+ */
+
 import { TransactionType } from '../ValueObjects/TransactionType'
 
+/** Properties for creating a CreditTransaction. */
 interface CreditTransactionProps {
   readonly id: string
   readonly creditAccountId: string
@@ -13,6 +19,10 @@ interface CreditTransactionProps {
   readonly createdAt: Date
 }
 
+/**
+ * CreditTransaction Entity
+ * Maintains the history of all credit events for an account.
+ */
 export class CreditTransaction {
   private readonly props: CreditTransactionProps
 
@@ -20,6 +30,7 @@ export class CreditTransaction {
     this.props = props
   }
 
+  /** Creates a new transaction record. */
   static create(params: {
     id: string
     creditAccountId: string
@@ -43,6 +54,7 @@ export class CreditTransaction {
     })
   }
 
+  /** Reconstitutes a transaction from database record. */
   static fromDatabase(row: Record<string, unknown>): CreditTransaction {
     return new CreditTransaction({
       id: row.id as string,
@@ -57,41 +69,42 @@ export class CreditTransaction {
     })
   }
 
-  get id(): string { return this.props.id }
-  get creditAccountId(): string { return this.props.creditAccountId }
-  get type(): string { return this.props.type.getValue() }
-  get amount(): string { return this.props.amount }
-  get balanceAfter(): string { return this.props.balanceAfter }
-  get referenceType(): string | null { return this.props.referenceType }
-  get referenceId(): string | null { return this.props.referenceId }
-  get description(): string | null { return this.props.description }
-  get createdAt(): Date { return this.props.createdAt }
-
-  toDatabaseRow(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      credit_account_id: this.props.creditAccountId,
-      type: this.props.type.getValue(),
-      amount: this.props.amount,
-      balance_after: this.props.balanceAfter,
-      reference_type: this.props.referenceType,
-      reference_id: this.props.referenceId,
-      description: this.props.description,
-      created_at: this.props.createdAt.toISOString(),
-    }
+  /** Unique identifier. */
+  get id(): string {
+    return this.props.id
+  }
+  /** Target credit account ID. */
+  get creditAccountId(): string {
+    return this.props.creditAccountId
+  }
+  /** Transaction category (topup, deduction, etc.). */
+  get type(): string {
+    return this.props.type.getValue()
+  }
+  /** Transacted amount. */
+  get amount(): string {
+    return this.props.amount
+  }
+  /** Account balance after this transaction. */
+  get balanceAfter(): string {
+    return this.props.balanceAfter
+  }
+  /** Optional reference category (e.g., "contract"). */
+  get referenceType(): string | null {
+    return this.props.referenceType
+  }
+  /** ID of the referenced object. */
+  get referenceId(): string | null {
+    return this.props.referenceId
+  }
+  /** Human-readable description. */
+  get description(): string | null {
+    return this.props.description
+  }
+  /** Creation timestamp. */
+  get createdAt(): Date {
+    return this.props.createdAt
   }
 
-  toDTO(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      creditAccountId: this.props.creditAccountId,
-      type: this.props.type.getValue(),
-      amount: this.props.amount,
-      balanceAfter: this.props.balanceAfter,
-      referenceType: this.props.referenceType,
-      referenceId: this.props.referenceId,
-      description: this.props.description,
-      createdAt: this.props.createdAt.toISOString(),
-    }
-  }
 }
+

@@ -10,6 +10,9 @@ import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organizat
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 function createMockSync(shouldFail = false): AppKeyBifrostSync {
   const gatewayMock = new MockGatewayClient()
@@ -31,7 +34,7 @@ describe('IssueAppKeyService', () => {
     const memberRepo = new OrganizationMemberRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     const sync = createMockSync()
-    service = new IssueAppKeyService(appKeyRepo, orgAuth, sync)
+    service = new IssueAppKeyService(appKeyRepo, orgAuth, sync, hashingService)
 
     const org = Organization.create('org-1', 'Test Org', 'test')
     await orgRepo.save(org)
@@ -106,7 +109,7 @@ describe('IssueAppKeyService', () => {
     const memberRepo = new OrganizationMemberRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     const failSync = createMockSync(true)
-    const failService = new IssueAppKeyService(appKeyRepo, orgAuth, failSync)
+    const failService = new IssueAppKeyService(appKeyRepo, orgAuth, failSync, hashingService)
 
     const result = await failService.execute({
       orgId: 'org-1',

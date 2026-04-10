@@ -2,6 +2,7 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 import { ModuleSubscription } from '../../Domain/Entities/ModuleSubscription'
+import { ModuleSubscriptionMapper } from '../Mappers/ModuleSubscriptionMapper'
 
 export class ModuleSubscriptionRepository implements IModuleSubscriptionRepository {
   constructor(private readonly db: IDatabaseAccess) {}
@@ -12,7 +13,8 @@ export class ModuleSubscriptionRepository implements IModuleSubscriptionReposito
   }
 
   async findByOrgAndModule(orgId: string, moduleId: string): Promise<ModuleSubscription | null> {
-    const row = await this.db.table('module_subscriptions')
+    const row = await this.db
+      .table('module_subscriptions')
       .where('org_id', '=', orgId)
       .where('module_id', '=', moduleId)
       .first()
@@ -20,7 +22,8 @@ export class ModuleSubscriptionRepository implements IModuleSubscriptionReposito
   }
 
   async findActiveByOrgId(orgId: string): Promise<ModuleSubscription[]> {
-    const rows = await this.db.table('module_subscriptions')
+    const rows = await this.db
+      .table('module_subscriptions')
       .where('org_id', '=', orgId)
       .where('status', '=', 'active')
       .select()
@@ -28,12 +31,13 @@ export class ModuleSubscriptionRepository implements IModuleSubscriptionReposito
   }
 
   async save(subscription: ModuleSubscription): Promise<void> {
-    await this.db.table('module_subscriptions').insert(subscription.toDatabaseRow())
+    await this.db.table('module_subscriptions').insert(ModuleSubscriptionMapper.toDatabaseRow(subscription))
   }
 
   async update(subscription: ModuleSubscription): Promise<void> {
-    await this.db.table('module_subscriptions')
+    await this.db
+      .table('module_subscriptions')
       .where('id', '=', subscription.id)
-      .update(subscription.toDatabaseRow())
+      .update(ModuleSubscriptionMapper.toDatabaseRow(subscription))
   }
 }

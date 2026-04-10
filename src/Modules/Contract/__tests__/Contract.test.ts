@@ -1,6 +1,8 @@
 // src/Modules/Contract/__tests__/Contract.test.ts
 import { describe, test, expect } from 'bun:test'
 import { Contract } from '../Domain/Aggregates/Contract'
+import { ContractMapper } from '../Infrastructure/Mappers/ContractMapper'
+import { ContractPresenter } from '../Application/DTOs/ContractDTO'
 
 const validTerms = {
   creditQuota: 10000,
@@ -118,14 +120,14 @@ describe('Contract', () => {
     expect(contract.hasModule('image-gen')).toBe(false)
   })
 
-  test('fromDatabase 與 toDatabaseRow 往返', () => {
+  test('fromDatabase 與 ContractMapper 往返', () => {
     const original = Contract.create({
       targetType: 'organization',
       targetId: 'org-1',
       terms: validTerms,
       createdBy: 'admin-1',
     })
-    const row = original.toDatabaseRow()
+    const row = ContractMapper.toDatabaseRow(original)
     const restored = Contract.fromDatabase(row)
     expect(restored.id).toBe(original.id)
     expect(restored.status).toBe(original.status)
@@ -133,14 +135,14 @@ describe('Contract', () => {
     expect(restored.terms.creditQuota).toBe(original.terms.creditQuota)
   })
 
-  test('toDTO 輸出正確', () => {
+  test('ContractPresenter 輸出正確', () => {
     const contract = Contract.create({
       targetType: 'organization',
       targetId: 'org-1',
       terms: validTerms,
       createdBy: 'admin-1',
     })
-    const dto = contract.toDTO()
+    const dto = ContractPresenter.fromEntity(contract)
     expect(dto.targetType).toBe('organization')
     expect(dto.status).toBe('draft')
     expect((dto.terms as any).allowedModules).toEqual(['chat', 'embedding'])

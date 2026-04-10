@@ -1,41 +1,44 @@
 /**
  * IAuthRepository
- * 認證 Repository 介面 (倒依賴)
+ * Auth persistence port (dependency inversion).
  *
- * Domain 層定義介面，Infrastructure 層實現
+ * Defined in domain; implemented in infrastructure.
  */
 
 import type { User } from '../Aggregates/User'
 import type { Email } from '../ValueObjects/Email'
 
+/**
+ * Port for managing persistence of User aggregates.
+ */
 export interface IAuthRepository {
   /**
-   * 根據 ID 查找用戶
+   * Retrieves a User aggregate by its unique ID.
    */
   findById(id: string): Promise<User | null>
 
   /**
-   * 根據電子郵件查找用戶
+   * Retrieves a User aggregate by its registered email address.
    */
   findByEmail(email: Email): Promise<User | null>
 
   /**
-   * 檢查電子郵件是否已被註冊
+   * Checks if an account already exists with the given email address.
    */
   emailExists(email: Email): Promise<boolean>
 
   /**
-   * 保存（創建或更新）用戶
+   * Persists a User aggregate (insert or update).
    */
   save(user: User): Promise<void>
 
   /**
-   * 删除用戶
+   * Deletes a user account from the store.
    */
   delete(id: string): Promise<void>
 
   /**
-   * 取得所有用戶（分頁）
+   * Retrieves all users matching the pagination criteria.
    */
   findAll(limit?: number, offset?: number): Promise<User[]>
 }

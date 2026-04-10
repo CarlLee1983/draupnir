@@ -23,10 +23,16 @@ class InMemoryContractRepository implements IContractRepository {
     return [...this.contracts.values()].filter((c) => c.targetId === targetId)
   }
   async findAllOrdered(): Promise<Contract[]> {
-    return [...this.contracts.values()].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    return [...this.contracts.values()].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    )
   }
-  async findExpiring(): Promise<Contract[]> { return [] }
-  async findExpired(): Promise<Contract[]> { return [] }
+  async findExpiring(): Promise<Contract[]> {
+    return []
+  }
+  async findExpired(): Promise<Contract[]> {
+    return []
+  }
   async save(contract: Contract): Promise<void> {
     this.contracts.set(contract.id, contract)
   }
@@ -59,8 +65,11 @@ describe('Contract Lifecycle', () => {
 
   test('完整生命週期: DRAFT → ACTIVE → TERMINATED', async () => {
     const created = await createService.execute({
-      targetType: 'organization', targetId: 'org-1',
-      terms: validTerms, callerUserId: 'admin-1', callerSystemRole: 'admin',
+      targetType: 'organization',
+      targetId: 'org-1',
+      terms: validTerms,
+      callerUserId: 'admin-1',
+      callerSystemRole: 'admin',
     })
     const contractId = created.data!.id as string
 
@@ -75,8 +84,11 @@ describe('Contract Lifecycle', () => {
 
   test('續約: ACTIVE → EXPIRED + 新 ACTIVE', async () => {
     const created = await createService.execute({
-      targetType: 'organization', targetId: 'org-1',
-      terms: validTerms, callerUserId: 'admin-1', callerSystemRole: 'admin',
+      targetType: 'organization',
+      targetId: 'org-1',
+      terms: validTerms,
+      callerUserId: 'admin-1',
+      callerSystemRole: 'admin',
     })
     const contractId = created.data!.id as string
     await activateService.execute(contractId, 'admin')

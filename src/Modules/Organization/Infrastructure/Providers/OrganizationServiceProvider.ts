@@ -24,101 +24,110 @@ import { CancelInvitationService } from '../../Application/Services/CancelInvita
 import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 export class OrganizationServiceProvider extends ModuleServiceProvider {
-	override register(container: IContainer): void {
-		const db = getCurrentDatabaseAccess()
+  override register(container: IContainer): void {
+    const db = getCurrentDatabaseAccess()
 
-		container.singleton('organizationRepository', () => new OrganizationRepository(db))
-		container.singleton('organizationMemberRepository', () => new OrganizationMemberRepository(db))
-		container.singleton('organizationInvitationRepository', () => new OrganizationInvitationRepository(db))
+    container.singleton('organizationRepository', () => new OrganizationRepository(db))
+    container.singleton('organizationMemberRepository', () => new OrganizationMemberRepository(db))
+    container.singleton(
+      'organizationInvitationRepository',
+      () => new OrganizationInvitationRepository(db),
+    )
 
-		container.singleton('orgAuthorizationHelper', (c: IContainer) => {
-			return new OrgAuthorizationHelper(c.make('organizationMemberRepository') as IOrganizationMemberRepository)
-		})
+    container.singleton('orgAuthorizationHelper', (c: IContainer) => {
+      return new OrgAuthorizationHelper(
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+      )
+    })
 
-		container.bind('createOrganizationService', (c: IContainer) => {
-			return new CreateOrganizationService(
-				c.make('organizationRepository') as IOrganizationRepository,
-				c.make('organizationMemberRepository') as IOrganizationMemberRepository,
-				c.make('authRepository') as IAuthRepository,
-				db as IDatabaseAccess,
-				c.make('provisionOrganizationDefaultsService') as ProvisionOrganizationDefaultsService,
-			)
-		})
+    container.bind('createOrganizationService', (c: IContainer) => {
+      return new CreateOrganizationService(
+        c.make('organizationRepository') as IOrganizationRepository,
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('authRepository') as IAuthRepository,
+        db as IDatabaseAccess,
+        c.make('provisionOrganizationDefaultsService') as ProvisionOrganizationDefaultsService,
+      )
+    })
 
-		container.bind('updateOrganizationService', (c: IContainer) => {
-			return new UpdateOrganizationService(c.make('organizationRepository') as IOrganizationRepository)
-		})
+    container.bind('updateOrganizationService', (c: IContainer) => {
+      return new UpdateOrganizationService(
+        c.make('organizationRepository') as IOrganizationRepository,
+      )
+    })
 
-		container.bind('listOrganizationsService', (c: IContainer) => {
-			return new ListOrganizationsService(c.make('organizationRepository') as IOrganizationRepository)
-		})
+    container.bind('listOrganizationsService', (c: IContainer) => {
+      return new ListOrganizationsService(
+        c.make('organizationRepository') as IOrganizationRepository,
+      )
+    })
 
-		container.bind('getOrganizationService', (c: IContainer) => {
-			return new GetOrganizationService(
-				c.make('organizationRepository') as IOrganizationRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
+    container.bind('getOrganizationService', (c: IContainer) => {
+      return new GetOrganizationService(
+        c.make('organizationRepository') as IOrganizationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
 
-		container.bind('changeOrgStatusService', (c: IContainer) => {
-			return new ChangeOrgStatusService(c.make('organizationRepository') as IOrganizationRepository)
-		})
+    container.bind('changeOrgStatusService', (c: IContainer) => {
+      return new ChangeOrgStatusService(c.make('organizationRepository') as IOrganizationRepository)
+    })
 
-		container.bind('inviteMemberService', (c: IContainer) => {
-			return new InviteMemberService(
-				c.make('organizationRepository') as IOrganizationRepository,
-				c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
+    container.bind('inviteMemberService', (c: IContainer) => {
+      return new InviteMemberService(
+        c.make('organizationRepository') as IOrganizationRepository,
+        c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
 
-		container.bind('acceptInvitationService', (c: IContainer) => {
-			return new AcceptInvitationService(
-				c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
-				c.make('organizationMemberRepository') as IOrganizationMemberRepository,
-				c.make('authRepository') as IAuthRepository,
-				db as IDatabaseAccess,
-			)
-		})
+    container.bind('acceptInvitationService', (c: IContainer) => {
+      return new AcceptInvitationService(
+        c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('authRepository') as IAuthRepository,
+        db as IDatabaseAccess,
+      )
+    })
 
-		container.bind('removeMemberService', (c: IContainer) => {
-			return new RemoveMemberService(
-				c.make('organizationMemberRepository') as IOrganizationMemberRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-				db as IDatabaseAccess,
-			)
-		})
+    container.bind('removeMemberService', (c: IContainer) => {
+      return new RemoveMemberService(
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+        db as IDatabaseAccess,
+      )
+    })
 
-		container.bind('listMembersService', (c: IContainer) => {
-			return new ListMembersService(
-				c.make('organizationMemberRepository') as IOrganizationMemberRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
+    container.bind('listMembersService', (c: IContainer) => {
+      return new ListMembersService(
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
 
-		container.bind('changeOrgMemberRoleService', (c: IContainer) => {
-			return new ChangeOrgMemberRoleService(
-				c.make('organizationMemberRepository') as IOrganizationMemberRepository,
-				db as IDatabaseAccess,
-			)
-		})
+    container.bind('changeOrgMemberRoleService', (c: IContainer) => {
+      return new ChangeOrgMemberRoleService(
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        db as IDatabaseAccess,
+      )
+    })
 
-		container.bind('listInvitationsService', (c: IContainer) => {
-			return new ListInvitationsService(
-				c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
+    container.bind('listInvitationsService', (c: IContainer) => {
+      return new ListInvitationsService(
+        c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
 
-		container.bind('cancelInvitationService', (c: IContainer) => {
-			return new CancelInvitationService(
-				c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
-				c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-			)
-		})
-	}
+    container.bind('cancelInvitationService', (c: IContainer) => {
+      return new CancelInvitationService(
+        c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
+    })
+  }
 
-	override boot(_context: unknown): void {
-		console.log('🏢 [Organization] Module loaded')
-	}
+  override boot(_context: unknown): void {
+    console.log('🏢 [Organization] Module loaded')
+  }
 }

@@ -45,9 +45,15 @@ export class SubscriptionStatus extends ValueObject {
     return target
   }
 
-  isActive(): boolean { return this.value === 'active' }
-  isSuspended(): boolean { return this.value === 'suspended' }
-  isCancelled(): boolean { return this.value === 'cancelled' }
+  isActive(): boolean {
+    return this.value === 'active'
+  }
+  isSuspended(): boolean {
+    return this.value === 'suspended'
+  }
+  isCancelled(): boolean {
+    return this.value === 'cancelled'
+  }
 
   equals(other: ValueObject): boolean {
     if (!(other instanceof SubscriptionStatus)) return false

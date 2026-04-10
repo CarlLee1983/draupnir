@@ -1,23 +1,43 @@
+/**
+ * IssueAppKeyService
+ * Application service: handles system-to-system API key issuance.
+ *
+ * Responsibilities:
+ * - Validate key configuration (label, scope, rotation policy)
+ * - Verify issuer's authority and organization membership
+ * - Generate secure application-specific keys and hashes
+ * - Map to gateway (Bifrost) virtual keys
+ * - Manage persistence and activation lifecycle
+ */
+
 import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { AppKeyBifrostSync } from '../../Infrastructure/Services/AppKeyBifrostSync'
+import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
+import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
 import { AppApiKey } from '../../Domain/Aggregates/AppApiKey'
 import { AppKeyScope } from '../../Domain/ValueObjects/AppKeyScope'
 import { KeyRotationPolicy } from '../../Domain/ValueObjects/KeyRotationPolicy'
 import { BoundModules } from '../../Domain/ValueObjects/BoundModules'
-import type { IssueAppKeyRequest, AppApiKeyCreatedResponse } from '../DTOs/AppApiKeyDTO'
+import { AppApiKeyPresenter, type IssueAppKeyRequest, type AppApiKeyCreatedResponse } from '../DTOs/AppApiKeyDTO'
 
+/**
+ * Service for issuing application-specific long-lived API keys.
+ */
 export class IssueAppKeyService {
   constructor(
     private readonly appApiKeyRepository: IAppApiKeyRepository,
     private readonly orgAuth: OrgAuthorizationHelper,
-    private readonly bifrostSync: AppKeyBifrostSync,
+    private readonly bifrostSync: IAppKeyBifrostSync,
+    private readonly keyHashingService: IKeyHashingService,
   ) {}
 
+  /**
+   * Executes the application API key issuance workflow.
+   */
   async execute(request: IssueAppKeyRequest): Promise<AppApiKeyCreatedResponse> {
     try {
       if (!request.label || !request.label.trim()) {
-        return { success: false, message: 'Key 標籤不能為空', error: 'LABEL_REQUIRED' }
+        return { success: false, message: 'Key label is required', error: 'LABEL_REQUIRED' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -28,7 +48,7 @@ export class IssueAppKeyService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -48,14 +68,15 @@ export class IssueAppKeyService {
 
       const keyId = crypto.randomUUID()
       const rawKey = `drp_app_${crypto.randomUUID().replace(/-/g, '')}`
+      const hashedKey = await this.keyHashingService.hash(rawKey)
 
-      const pendingKey = await AppApiKey.create({
+      const pendingKey = AppApiKey.create({
         id: keyId,
         orgId: request.orgId,
         issuedByUserId: request.issuedByUserId,
         label: request.label,
         gatewayKeyId: '',
-        rawKey,
+        keyHash: hashedKey,
         scope,
         rotationPolicy,
         boundModules,
@@ -69,13 +90,13 @@ export class IssueAppKeyService {
           request.orgId,
         )
 
-        const activatedKey = await AppApiKey.create({
+        const activatedKey = AppApiKey.create({
           id: keyId,
           orgId: request.orgId,
           issuedByUserId: request.issuedByUserId,
           label: request.label,
           gatewayKeyId,
-          rawKey,
+          keyHash: hashedKey,
           scope,
           rotationPolicy,
           boundModules,
@@ -86,16 +107,17 @@ export class IssueAppKeyService {
 
         return {
           success: true,
-          message: 'App API Key 配發成功（請立即記錄 rawKey，此後將無法再次取得）',
-          data: { ...finalKey.toDTO(), rawKey },
+          message: 'App API Key issued successfully (Please record the rawKey now, it cannot be retrieved again)',
+          data: { ...AppApiKeyPresenter.fromEntity(finalKey), rawKey },
         }
       } catch (bifrostError: unknown) {
         await this.appApiKeyRepository.delete(keyId)
         throw bifrostError
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '配發失敗'
+      const message = error instanceof Error ? error.message : 'Issuance failed'
       return { success: false, message, error: message }
     }
   }
 }
+

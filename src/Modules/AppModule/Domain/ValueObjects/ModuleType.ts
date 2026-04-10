@@ -23,8 +23,12 @@ export class ModuleType extends ValueObject {
     return new ModuleType(value)
   }
 
-  isFree(): boolean { return this.value === 'free' }
-  isPaid(): boolean { return this.value === 'paid' }
+  isFree(): boolean {
+    return this.value === 'free'
+  }
+  isPaid(): boolean {
+    return this.value === 'paid'
+  }
 
   equals(other: ValueObject): boolean {
     if (!(other instanceof ModuleType)) return false

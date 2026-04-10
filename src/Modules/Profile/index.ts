@@ -5,10 +5,16 @@ export type { UpdateProfileFields } from './Domain/Aggregates/UserProfile'
 export { Phone } from './Domain/ValueObjects/Phone'
 export { Timezone } from './Domain/ValueObjects/Timezone'
 export { Locale } from './Domain/ValueObjects/Locale'
-export type { IUserProfileRepository, UserProfileFilters } from './Domain/Repositories/IUserProfileRepository'
+export type {
+  IUserProfileRepository,
+  UserProfileFilters,
+} from './Domain/Repositories/IUserProfileRepository'
 
 // Application
-export type { UpdateUserProfileRequest, UserProfileResponse } from './Application/DTOs/UserProfileDTO'
+export type {
+  UpdateUserProfileRequest,
+  UserProfileResponse,
+} from './Application/DTOs/UserProfileDTO'
 export { GetProfileService } from './Application/Services/GetProfileService'
 export { UpdateProfileService } from './Application/Services/UpdateProfileService'
 

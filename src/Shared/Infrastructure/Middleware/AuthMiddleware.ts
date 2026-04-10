@@ -9,7 +9,7 @@
  */
 
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { JwtTokenService } from '@/Modules/Auth/Application/Services/JwtTokenService'
+import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 
 async function sha256(str: string): Promise<string> {

@@ -8,6 +8,9 @@ import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Servi
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { ApiKey } from '../Domain/Aggregates/ApiKey'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+
+const hashingService = new KeyHashingService()
 
 describe('RevokeApiKeyService', () => {
   let service: RevokeApiKeyService
@@ -30,13 +33,14 @@ describe('RevokeApiKeyService', () => {
     // Seed gateway mock so deactivateVirtualKey can call updateKey
     const seededKey = await gatewayMock.createKey({ name: 'Active Key', isActive: true })
 
-    const key = await ApiKey.create({
+    const keyHash = await hashingService.hash('drp_sk_active')
+    const key = ApiKey.create({
       id: 'key-1',
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'Active Key',
       gatewayKeyId: seededKey.id,
-      rawKey: 'drp_sk_active',
+      keyHash,
     })
     await apiKeyRepo.save(key.activate())
   })

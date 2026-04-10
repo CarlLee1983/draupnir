@@ -12,7 +12,9 @@ import { GetModuleDetailService } from '../../Application/Services/GetModuleDeta
 import { ListOrgSubscriptionsService } from '../../Application/Services/ListOrgSubscriptionsService'
 import { EnsureCoreAppModulesService } from '../../Application/Services/EnsureCoreAppModulesService'
 import { ProvisionOrganizationDefaultsService } from '../../Application/Services/ProvisionOrganizationDefaultsService'
-import type { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
+import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
+import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
+import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 
 export class AppModuleServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
@@ -22,53 +24,53 @@ export class AppModuleServiceProvider extends ModuleServiceProvider {
     container.singleton('moduleSubscriptionRepository', () => new ModuleSubscriptionRepository(db))
 
     container.singleton('ensureCoreAppModulesService', (c: IContainer) => {
-      return new EnsureCoreAppModulesService(c.make('appModuleRepository') as AppModuleRepository)
+      return new EnsureCoreAppModulesService(c.make('appModuleRepository') as IAppModuleRepository)
     })
 
-    container.singleton('provisionOrganizationDefaultsService', () => new ProvisionOrganizationDefaultsService())
+    container.singleton('provisionOrganizationDefaultsService', (c: IContainer) => {
+      return new ProvisionOrganizationDefaultsService(
+        c.make('appModuleRepository') as IAppModuleRepository,
+        c.make('contractRepository') as IContractRepository,
+        c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
+      )
+    })
 
     container.bind('registerModuleService', (c: IContainer) => {
-      return new RegisterModuleService(
-        c.make('appModuleRepository') as AppModuleRepository,
-      )
+      return new RegisterModuleService(c.make('appModuleRepository') as IAppModuleRepository)
     })
 
     container.bind('subscribeModuleService', (c: IContainer) => {
       return new SubscribeModuleService(
-        c.make('appModuleRepository') as AppModuleRepository,
-        c.make('moduleSubscriptionRepository') as ModuleSubscriptionRepository,
+        c.make('appModuleRepository') as IAppModuleRepository,
+        c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
       )
     })
 
     container.bind('unsubscribeModuleService', () => {
       return new UnsubscribeModuleService(
-        container.make('moduleSubscriptionRepository') as ModuleSubscriptionRepository,
+        container.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
       )
     })
 
     container.bind('checkModuleAccessService', (c: IContainer) => {
       return new CheckModuleAccessService(
-        c.make('contractRepository') as ContractRepository,
-        c.make('moduleSubscriptionRepository') as ModuleSubscriptionRepository,
-        c.make('appModuleRepository') as AppModuleRepository,
+        c.make('contractRepository') as IContractRepository,
+        c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
+        c.make('appModuleRepository') as IAppModuleRepository,
       )
     })
 
     container.bind('listModulesService', (c: IContainer) => {
-      return new ListModulesService(
-        c.make('appModuleRepository') as AppModuleRepository,
-      )
+      return new ListModulesService(c.make('appModuleRepository') as IAppModuleRepository)
     })
 
     container.bind('getModuleDetailService', (c: IContainer) => {
-      return new GetModuleDetailService(
-        c.make('appModuleRepository') as AppModuleRepository,
-      )
+      return new GetModuleDetailService(c.make('appModuleRepository') as IAppModuleRepository)
     })
 
     container.bind('listOrgSubscriptionsService', (c: IContainer) => {
       return new ListOrgSubscriptionsService(
-        c.make('moduleSubscriptionRepository') as ModuleSubscriptionRepository,
+        c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
       )
     })
   }

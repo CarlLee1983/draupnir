@@ -3,6 +3,7 @@ import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositori
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
 import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
+import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
 import { AuthenticateApp } from '../../Application/UseCases/AuthenticateApp'
 import { ProxyModelCall } from '../../Application/UseCases/ProxyModelCall'
 import { QueryUsage } from '../../Application/UseCases/QueryUsage'
@@ -12,7 +13,10 @@ import { AppAuthMiddleware } from '../Middleware/AppAuthMiddleware'
 export class SdkApiServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
     container.singleton('authenticateApp', (c: IContainer) => {
-      return new AuthenticateApp(c.make('appApiKeyRepository') as IAppApiKeyRepository)
+      return new AuthenticateApp(
+        c.make('appApiKeyRepository') as IAppApiKeyRepository,
+        c.make('keyHashingService') as IKeyHashingService,
+      )
     })
 
     container.singleton('appAuthMiddleware', (c: IContainer) => {

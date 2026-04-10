@@ -2,6 +2,7 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import { AppModule } from '../../Domain/Aggregates/AppModule'
+import { AppModuleMapper } from '../Mappers/AppModuleMapper'
 
 export class AppModuleRepository implements IAppModuleRepository {
   constructor(private readonly db: IDatabaseAccess) {}
@@ -22,10 +23,10 @@ export class AppModuleRepository implements IAppModuleRepository {
   }
 
   async save(module: AppModule): Promise<void> {
-    await this.db.table('app_modules').insert(module.toDatabaseRow())
+    await this.db.table('app_modules').insert(AppModuleMapper.toDatabaseRow(module))
   }
 
   async update(module: AppModule): Promise<void> {
-    await this.db.table('app_modules').where('id', '=', module.id).update(module.toDatabaseRow())
+    await this.db.table('app_modules').where('id', '=', module.id).update(AppModuleMapper.toDatabaseRow(module))
   }
 }

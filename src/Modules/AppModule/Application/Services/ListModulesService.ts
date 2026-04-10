@@ -1,6 +1,6 @@
 // src/Modules/AppModule/Application/Services/ListModulesService.ts
 import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
-import type { ModuleListResponse } from '../DTOs/AppModuleDTO'
+import { AppModulePresenter, type ModuleListResponse } from '../DTOs/AppModuleDTO'
 
 export class ListModulesService {
   constructor(private readonly moduleRepo: IAppModuleRepository) {}
@@ -11,7 +11,7 @@ export class ListModulesService {
       return {
         success: true,
         message: '查詢成功',
-        data: modules.map((m) => m.toDTO()),
+        data: modules.map((m) => AppModulePresenter.fromEntity(m)),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '查詢失敗'

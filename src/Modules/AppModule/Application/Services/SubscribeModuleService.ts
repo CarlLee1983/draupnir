@@ -1,30 +1,50 @@
 // src/Modules/AppModule/Application/Services/SubscribeModuleService.ts
+/**
+ * SubscribeModuleService
+ * Application service: handles organization module subscription requests.
+ *
+ * Responsibilities:
+ * - Validate module existence and status
+ * - Prevent duplicate active subscriptions
+ * - Register new module-organization associations
+ * - Dispatch domain events for downstream side effects
+ */
+
 import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 import { ModuleSubscription } from '../../Domain/Entities/ModuleSubscription'
 import { ModuleSubscribed } from '../../Domain/Events/ModuleSubscribed'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import type { SubscribeModuleRequest, ModuleResponse } from '../DTOs/AppModuleDTO'
+import { ModuleSubscriptionPresenter, type SubscribeModuleRequest, type ModuleResponse } from '../DTOs/AppModuleDTO'
 
+/**
+ * Service facilitating the subscription of organizations to functional modules.
+ */
 export class SubscribeModuleService {
   constructor(
     private readonly moduleRepo: IAppModuleRepository,
     private readonly subscriptionRepo: IModuleSubscriptionRepository,
   ) {}
 
+  /**
+   * Executes the module subscription process.
+   */
   async execute(request: SubscribeModuleRequest): Promise<ModuleResponse> {
     try {
       const module = await this.moduleRepo.findById(request.moduleId)
       if (!module) {
-        return { success: false, message: '模組不存在', error: 'MODULE_NOT_FOUND' }
+        return { success: false, message: 'Module not found', error: 'MODULE_NOT_FOUND' }
       }
       if (!module.isActive()) {
-        return { success: false, message: '模組已停用', error: 'MODULE_DEPRECATED' }
+        return { success: false, message: 'Module is currently disabled', error: 'MODULE_DEPRECATED' }
       }
 
-      const existing = await this.subscriptionRepo.findByOrgAndModule(request.orgId, request.moduleId)
+      const existing = await this.subscriptionRepo.findByOrgAndModule(
+        request.orgId,
+        request.moduleId,
+      )
       if (existing && existing.isActive()) {
-        return { success: false, message: '已訂閱此模組', error: 'ALREADY_SUBSCRIBED' }
+        return { success: false, message: 'Already subscribed to this module', error: 'ALREADY_SUBSCRIBED' }
       }
 
       const subscription = ModuleSubscription.create(request.orgId, request.moduleId)
@@ -36,12 +56,13 @@ export class SubscribeModuleService {
 
       return {
         success: true,
-        message: '模組訂閱成功',
-        data: subscription.toDTO(),
+        message: 'Module subscribed successfully',
+        data: ModuleSubscriptionPresenter.fromEntity(subscription),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '訂閱失敗'
+      const message = error instanceof Error ? error.message : 'Subscription failed'
       return { success: false, message, error: message }
     }
   }
 }
+

@@ -1,6 +1,12 @@
 // src/Modules/Organization/Presentation/Requests/index.ts
-export { CreateOrganizationRequest, type CreateOrganizationParams } from './CreateOrganizationRequest'
-export { UpdateOrganizationRequest, type UpdateOrganizationParams } from './UpdateOrganizationRequest'
+export {
+  CreateOrganizationRequest,
+  type CreateOrganizationParams,
+} from './CreateOrganizationRequest'
+export {
+  UpdateOrganizationRequest,
+  type UpdateOrganizationParams,
+} from './UpdateOrganizationRequest'
 export { ChangeOrgStatusRequest, type ChangeOrgStatusParams } from './ChangeOrgStatusRequest'
 export { InviteMemberRequest, type InviteMemberParams } from './InviteMemberRequest'
 export { AcceptInvitationRequest, type AcceptInvitationParams } from './AcceptInvitationRequest'

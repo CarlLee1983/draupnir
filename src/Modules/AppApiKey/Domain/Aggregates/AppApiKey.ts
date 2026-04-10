@@ -1,10 +1,22 @@
-import { KeyHash } from '@/Modules/ApiKey/Domain/ValueObjects/KeyHash'
-import { KeyLabel } from '@/Modules/ApiKey/Domain/ValueObjects/KeyLabel'
-import { KeyStatus } from '@/Modules/ApiKey/Domain/ValueObjects/KeyStatus'
+/**
+ * AppApiKey
+ * Domain Aggregate: represents a system/application-to-application API key.
+ *
+ * Responsibilities:
+ * - Define identity and hashed credentials for applications
+ * - Manage key rotation lifecycle and grace periods
+ * - Handle module-level access and binding
+ * - Manage temporal constraints and status
+ */
+
+import { KeyHash } from '@/Shared/Domain/ValueObjects/KeyHash'
+import { KeyLabel } from '@/Shared/Domain/ValueObjects/KeyLabel'
+import { KeyStatus } from '@/Shared/Domain/ValueObjects/KeyStatus'
 import { AppKeyScope } from '../ValueObjects/AppKeyScope'
 import { KeyRotationPolicy, type KeyRotationPolicyJSON } from '../ValueObjects/KeyRotationPolicy'
 import { BoundModules } from '../ValueObjects/BoundModules'
 
+/** Properties defining an AppApiKey's state. */
 interface AppApiKeyProps {
   readonly id: string
   readonly orgId: string
@@ -25,19 +37,24 @@ interface AppApiKeyProps {
   readonly updatedAt: Date
 }
 
+/** Parameters for creating a new AppApiKey. */
 interface CreateAppApiKeyParams {
   id: string
   orgId: string
   issuedByUserId: string
   label: string
   gatewayKeyId: string
-  rawKey: string
+  keyHash: string
   scope?: AppKeyScope
   rotationPolicy?: KeyRotationPolicy
   boundModules?: BoundModules
   expiresAt?: Date | null
 }
 
+/**
+ * AppApiKey Aggregate Root
+ * Handles business logic for application-specific API keys with rotation support.
+ */
 export class AppApiKey {
   private readonly props: AppApiKeyProps
 
@@ -45,14 +62,17 @@ export class AppApiKey {
     this.props = props
   }
 
-  static async create(params: CreateAppApiKeyParams): Promise<AppApiKey> {
-    const keyHash = await KeyHash.fromRawKey(params.rawKey)
+  /**
+   * Creates a new pending application API key from a pre-computed hash.
+   * Callers must hash the raw key via IKeyHashingService before calling this.
+   */
+  static create(params: CreateAppApiKeyParams): AppApiKey {
     return new AppApiKey({
       id: params.id,
       orgId: params.orgId,
       issuedByUserId: params.issuedByUserId,
       label: new KeyLabel(params.label),
-      keyHash,
+      keyHash: KeyHash.fromExisting(params.keyHash),
       gatewayKeyId: params.gatewayKeyId,
       status: KeyStatus.pending(),
       scope: params.scope ?? AppKeyScope.read(),
@@ -68,6 +88,9 @@ export class AppApiKey {
     })
   }
 
+  /**
+   * Reconstitutes an application API key from database record.
+   */
   static fromDatabase(row: Record<string, unknown>): AppApiKey {
     const rotationPolicyJson: KeyRotationPolicyJSON =
       typeof row.rotation_policy === 'string'
@@ -102,9 +125,10 @@ export class AppApiKey {
     })
   }
 
+  /** Activates a pending key. */
   activate(): AppApiKey {
     if (!this.props.status.isPending()) {
-      throw new Error('只有 pending 狀態的 Key 可以 activate')
+      throw new Error('Only pending keys can be activated')
     }
     return new AppApiKey({
       ...this.props,
@@ -113,12 +137,13 @@ export class AppApiKey {
     })
   }
 
+  /** Revokes the key permanently. */
   revoke(): AppApiKey {
     if (this.props.status.isRevoked()) {
-      throw new Error('此 Key 已撤銷')
+      throw new Error('Key is already revoked')
     }
     if (this.props.status.isPending()) {
-      throw new Error('pending 狀態的 Key 不能撤銷，請先 activate 或直接刪除')
+      throw new Error('Pending keys cannot be revoked; activate or delete them instead')
     }
     return new AppApiKey({
       ...this.props,
@@ -128,17 +153,21 @@ export class AppApiKey {
     })
   }
 
-  async rotate(newRawKey: string, newGatewayKeyId: string): Promise<AppApiKey> {
+  /**
+   * Rotates the key material using a pre-computed hash and setting a grace period
+   * for the previous key.
+   * Callers must hash the new raw key via IKeyHashingService before calling this.
+   */
+  rotate(newKeyHash: string, newGatewayKeyId: string): AppApiKey {
     if (!this.props.status.isActive()) {
-      throw new Error('只有 active 狀態的 Key 可以輪換')
+      throw new Error('Only active keys can be rotated')
     }
-    const newKeyHash = await KeyHash.fromRawKey(newRawKey)
     const gracePeriodHours = this.props.rotationPolicy.getGracePeriodHours()
     const gracePeriodEndsAt = new Date(Date.now() + gracePeriodHours * 60 * 60 * 1000)
 
     return new AppApiKey({
       ...this.props,
-      keyHash: newKeyHash,
+      keyHash: KeyHash.fromExisting(newKeyHash),
       gatewayKeyId: newGatewayKeyId,
       previousKeyHash: this.props.keyHash.getValue(),
       previousGatewayKeyId: this.props.gatewayKeyId,
@@ -147,6 +176,7 @@ export class AppApiKey {
     })
   }
 
+  /** Finalizes rotation by clearing the previous key and grace period. */
   completeRotation(): AppApiKey {
     return new AppApiKey({
       ...this.props,
@@ -157,9 +187,10 @@ export class AppApiKey {
     })
   }
 
+  /** Updates the functional scope of the key. */
   updateScope(newScope: AppKeyScope): AppApiKey {
     if (this.props.status.isRevoked()) {
-      throw new Error('已撤銷的 Key 不能更新 scope')
+      throw new Error('Cannot update scope of a revoked key')
     }
     return new AppApiKey({
       ...this.props,
@@ -168,9 +199,10 @@ export class AppApiKey {
     })
   }
 
+  /** Updates the set of modules this key is authorized to access. */
   updateBoundModules(newModules: BoundModules): AppApiKey {
     if (this.props.status.isRevoked()) {
-      throw new Error('已撤銷的 Key 不能更新綁定模組')
+      throw new Error('Cannot update bound modules of a revoked key')
     }
     return new AppApiKey({
       ...this.props,
@@ -179,98 +211,40 @@ export class AppApiKey {
     })
   }
 
-  get id(): string {
-    return this.props.id
-  }
-  get orgId(): string {
-    return this.props.orgId
-  }
-  get issuedByUserId(): string {
-    return this.props.issuedByUserId
-  }
-  get label(): string {
-    return this.props.label.getValue()
-  }
-  get keyHashValue(): string {
-    return this.props.keyHash.getValue()
-  }
-  get gatewayKeyId(): string {
-    return this.props.gatewayKeyId
-  }
-  get status(): string {
-    return this.props.status.getValue()
-  }
-  get appKeyScope(): AppKeyScope {
-    return this.props.scope
-  }
-  get rotationPolicy(): KeyRotationPolicy {
-    return this.props.rotationPolicy
-  }
-  get boundModules(): BoundModules {
-    return this.props.boundModules
-  }
-  get previousKeyHash(): string | null {
-    return this.props.previousKeyHash
-  }
-  get previousGatewayKeyId(): string | null {
-    return this.props.previousGatewayKeyId
-  }
-  get gracePeriodEndsAt(): Date | null {
-    return this.props.gracePeriodEndsAt
-  }
-  get expiresAt(): Date | null {
-    return this.props.expiresAt
-  }
-  get revokedAt(): Date | null {
-    return this.props.revokedAt
-  }
-  get createdAt(): Date {
-    return this.props.createdAt
-  }
-  get updatedAt(): Date {
-    return this.props.updatedAt
-  }
+  /** Unique identifier. */
+  get id(): string { return this.props.id }
+  /** Associated organization. */
+  get orgId(): string { return this.props.orgId }
+  /** ID of the user who issued the key. */
+  get issuedByUserId(): string { return this.props.issuedByUserId }
+  /** Human-readable label. */
+  get label(): string { return this.props.label.getValue() }
+  /** Hashed value of the current key. */
+  get keyHashValue(): string { return this.props.keyHash.getValue() }
+  /** Gateway identifier for the current key. */
+  get gatewayKeyId(): string { return this.props.gatewayKeyId }
+  /** Current status. */
+  get status(): string { return this.props.status.getValue() }
+  /** Permission scope. */
+  get appKeyScope(): AppKeyScope { return this.props.scope }
+  /** Configuration for key rotation. */
+  get rotationPolicy(): KeyRotationPolicy { return this.props.rotationPolicy }
+  /** Modules authorized for this key. */
+  get boundModules(): BoundModules { return this.props.boundModules }
+  /** Hash of the previous key during grace period. */
+  get previousKeyHash(): string | null { return this.props.previousKeyHash }
+  /** Gateway ID of the previous key during grace period. */
+  get previousGatewayKeyId(): string | null { return this.props.previousGatewayKeyId }
+  /** Deadline for the rotation grace period. */
+  get gracePeriodEndsAt(): Date | null { return this.props.gracePeriodEndsAt }
+  /** Expiration timestamp. */
+  get expiresAt(): Date | null { return this.props.expiresAt }
+  /** Revocation timestamp. */
+  get revokedAt(): Date | null { return this.props.revokedAt }
+  /** Record creation timestamp. */
+  get createdAt(): Date { return this.props.createdAt }
+  /** Record update timestamp. */
+  get updatedAt(): Date { return this.props.updatedAt }
 
-  toDatabaseRow(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      org_id: this.props.orgId,
-      issued_by_user_id: this.props.issuedByUserId,
-      label: this.props.label.getValue(),
-      key_hash: this.props.keyHash.getValue(),
-      bifrost_virtual_key_id: this.props.gatewayKeyId,
-      status: this.props.status.getValue(),
-      scope: this.props.scope.getValue(),
-      rotation_policy: JSON.stringify(this.props.rotationPolicy.toJSON()),
-      bound_modules: JSON.stringify(this.props.boundModules.toJSON()),
-      previous_key_hash: this.props.previousKeyHash,
-      previous_bifrost_virtual_key_id: this.props.previousGatewayKeyId,
-      grace_period_ends_at: this.props.gracePeriodEndsAt?.toISOString() ?? null,
-      expires_at: this.props.expiresAt?.toISOString() ?? null,
-      revoked_at: this.props.revokedAt?.toISOString() ?? null,
-      created_at: this.props.createdAt.toISOString(),
-      updated_at: this.props.updatedAt.toISOString(),
-    }
-  }
-
-  toDTO(): Record<string, unknown> {
-    return {
-      id: this.props.id,
-      orgId: this.props.orgId,
-      issuedByUserId: this.props.issuedByUserId,
-      label: this.props.label.getValue(),
-      keyPrefix: `drp_app_...${this.props.keyHash.getValue().slice(-8)}`,
-      gatewayKeyId: this.props.gatewayKeyId,
-      status: this.props.status.getValue(),
-      scope: this.props.scope.getValue(),
-      rotationPolicy: this.props.rotationPolicy.toJSON(),
-      boundModules: this.props.boundModules.toJSON(),
-      isInGracePeriod: this.props.gracePeriodEndsAt != null,
-      gracePeriodEndsAt: this.props.gracePeriodEndsAt?.toISOString() ?? null,
-      expiresAt: this.props.expiresAt?.toISOString() ?? null,
-      revokedAt: this.props.revokedAt?.toISOString() ?? null,
-      createdAt: this.props.createdAt.toISOString(),
-      updatedAt: this.props.updatedAt.toISOString(),
-    }
-  }
 }
+

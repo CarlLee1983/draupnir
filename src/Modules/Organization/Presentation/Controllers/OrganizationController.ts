@@ -27,202 +27,204 @@ import {
 } from '../Requests'
 
 function resolveCurrentOrganizationId(ctx: IHttpContext): string | null {
-	const currentOrg = ctx.get<{ organizationId?: string }>('currentOrg')
-	if (currentOrg?.organizationId) {
-		return currentOrg.organizationId
-	}
-	return ctx.getParam('id') ?? ctx.getParam('orgId') ?? null
+  const currentOrg = ctx.get<{ organizationId?: string }>('currentOrg')
+  if (currentOrg?.organizationId) {
+    return currentOrg.organizationId
+  }
+  return ctx.getParam('id') ?? ctx.getParam('orgId') ?? null
 }
 
-function validateOrganizationId(ctx: IHttpContext): { ok: true; orgId: string } | { ok: false; response: Response } {
-	const validation = OrganizationIdSchema.safeParse({ id: resolveCurrentOrganizationId(ctx) })
-	if (!validation.success) {
-		return {
-			ok: false,
-			response: ctx.json(
-				{
-					success: false,
-					message: '驗證失敗',
-					error: validation.error.issues[0]?.message ?? '無效的組織 ID',
-				},
-				400,
-			),
-		}
-	}
-	return { ok: true, orgId: validation.data.id }
+function validateOrganizationId(
+  ctx: IHttpContext,
+): { ok: true; orgId: string } | { ok: false; response: Response } {
+  const validation = OrganizationIdSchema.safeParse({ id: resolveCurrentOrganizationId(ctx) })
+  if (!validation.success) {
+    return {
+      ok: false,
+      response: ctx.json(
+        {
+          success: false,
+          message: '驗證失敗',
+          error: validation.error.issues[0]?.message ?? '無效的組織 ID',
+        },
+        400,
+      ),
+    }
+  }
+  return { ok: true, orgId: validation.data.id }
 }
 
 function validateOrganizationMemberParams(
-	ctx: IHttpContext,
+  ctx: IHttpContext,
 ): { ok: true; orgId: string; userId: string } | { ok: false; response: Response } {
-	const validation = OrganizationMemberParamsSchema.safeParse({
-		id: resolveCurrentOrganizationId(ctx),
-		userId: ctx.getParam('userId'),
-	})
-	if (!validation.success) {
-		return {
-			ok: false,
-			response: ctx.json(
-				{
-					success: false,
-					message: '驗證失敗',
-					error: validation.error.issues[0]?.message ?? '參數無效',
-				},
-				400,
-			),
-		}
-	}
-	return { ok: true, orgId: validation.data.id, userId: validation.data.userId }
+  const validation = OrganizationMemberParamsSchema.safeParse({
+    id: resolveCurrentOrganizationId(ctx),
+    userId: ctx.getParam('userId'),
+  })
+  if (!validation.success) {
+    return {
+      ok: false,
+      response: ctx.json(
+        {
+          success: false,
+          message: '驗證失敗',
+          error: validation.error.issues[0]?.message ?? '參數無效',
+        },
+        400,
+      ),
+    }
+  }
+  return { ok: true, orgId: validation.data.id, userId: validation.data.userId }
 }
 
 function validateInvitationParams(
-	ctx: IHttpContext,
+  ctx: IHttpContext,
 ): { ok: true; orgId: string; invId: string } | { ok: false; response: Response } {
-	const validation = OrganizationInvitationParamsSchema.safeParse({
-		id: resolveCurrentOrganizationId(ctx),
-		invId: ctx.getParam('invId'),
-	})
-	if (!validation.success) {
-		return {
-			ok: false,
-			response: ctx.json(
-				{
-					success: false,
-					message: '驗證失敗',
-					error: validation.error.issues[0]?.message ?? '參數無效',
-				},
-				400,
-			),
-		}
-	}
-	return { ok: true, orgId: validation.data.id, invId: validation.data.invId }
+  const validation = OrganizationInvitationParamsSchema.safeParse({
+    id: resolveCurrentOrganizationId(ctx),
+    invId: ctx.getParam('invId'),
+  })
+  if (!validation.success) {
+    return {
+      ok: false,
+      response: ctx.json(
+        {
+          success: false,
+          message: '驗證失敗',
+          error: validation.error.issues[0]?.message ?? '參數無效',
+        },
+        400,
+      ),
+    }
+  }
+  return { ok: true, orgId: validation.data.id, invId: validation.data.invId }
 }
 
 export class OrganizationController {
-	constructor(
-		private createOrgService: CreateOrganizationService,
-		private updateOrgService: UpdateOrganizationService,
-		private listOrgsService: ListOrganizationsService,
-		private inviteMemberService: InviteMemberService,
-		private acceptInvitationService: AcceptInvitationService,
-		private removeMemberService: RemoveMemberService,
-		private listMembersService: ListMembersService,
-		private changeRoleService: ChangeOrgMemberRoleService,
-		private getOrgService: GetOrganizationService,
-		private changeOrgStatusService: ChangeOrgStatusService,
-		private listInvitationsService: ListInvitationsService,
-		private cancelInvitationService: CancelInvitationService,
-	) {}
+  constructor(
+    private createOrgService: CreateOrganizationService,
+    private updateOrgService: UpdateOrganizationService,
+    private listOrgsService: ListOrganizationsService,
+    private inviteMemberService: InviteMemberService,
+    private acceptInvitationService: AcceptInvitationService,
+    private removeMemberService: RemoveMemberService,
+    private listMembersService: ListMembersService,
+    private changeRoleService: ChangeOrgMemberRoleService,
+    private getOrgService: GetOrganizationService,
+    private changeOrgStatusService: ChangeOrgStatusService,
+    private listInvitationsService: ListInvitationsService,
+    private cancelInvitationService: CancelInvitationService,
+  ) {}
 
-	async create(ctx: IHttpContext): Promise<Response> {
-		const body = ctx.get('validated') as CreateOrganizationParams
-		const result = await this.createOrgService.execute(body)
-		return ctx.json(result, result.success ? 201 : 400)
-	}
+  async create(ctx: IHttpContext): Promise<Response> {
+    const body = ctx.get('validated') as CreateOrganizationParams
+    const result = await this.createOrgService.execute(body)
+    return ctx.json(result, result.success ? 201 : 400)
+  }
 
-	async list(ctx: IHttpContext): Promise<Response> {
-		const page = ctx.getQuery('page') ? Number(ctx.getQuery('page')) : 1
-		const limit = ctx.getQuery('limit') ? Number(ctx.getQuery('limit')) : 20
-		const result = await this.listOrgsService.execute(page, limit)
-		return ctx.json(result, 200)
-	}
+  async list(ctx: IHttpContext): Promise<Response> {
+    const page = ctx.getQuery('page') ? Number(ctx.getQuery('page')) : 1
+    const limit = ctx.getQuery('limit') ? Number(ctx.getQuery('limit')) : 20
+    const result = await this.listOrgsService.execute(page, limit)
+    return ctx.json(result, 200)
+  }
 
-	async get(ctx: IHttpContext): Promise<Response> {
-		const auth = AuthMiddleware.getAuthContext(ctx)
-		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const validated = validateOrganizationId(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const result = await this.getOrgService.execute(orgId, auth.userId, auth.role)
-		return ctx.json(result, result.success ? 200 : 404)
-	}
+  async get(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    const validated = validateOrganizationId(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const result = await this.getOrgService.execute(orgId, auth.userId, auth.role)
+    return ctx.json(result, result.success ? 200 : 404)
+  }
 
-	async update(ctx: IHttpContext): Promise<Response> {
-		const validated = validateOrganizationId(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const body = ctx.get('validated') as UpdateOrganizationParams
-		const result = await this.updateOrgService.execute(orgId, body)
-		return ctx.json(result, result.success ? 200 : 400)
-	}
+  async update(ctx: IHttpContext): Promise<Response> {
+    const validated = validateOrganizationId(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const body = ctx.get('validated') as UpdateOrganizationParams
+    const result = await this.updateOrgService.execute(orgId, body)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
 
-	async changeStatus(ctx: IHttpContext): Promise<Response> {
-		const validated = validateOrganizationId(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const body = ctx.get('validated') as ChangeOrgStatusParams
-		const result = await this.changeOrgStatusService.execute(orgId, body.status)
-		return ctx.json(result, result.success ? 200 : 400)
-	}
+  async changeStatus(ctx: IHttpContext): Promise<Response> {
+    const validated = validateOrganizationId(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const body = ctx.get('validated') as ChangeOrgStatusParams
+    const result = await this.changeOrgStatusService.execute(orgId, body.status)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
 
-	async listMembers(ctx: IHttpContext): Promise<Response> {
-		const auth = AuthMiddleware.getAuthContext(ctx)
-		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const validated = validateOrganizationId(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const result = await this.listMembersService.execute(orgId, auth.userId, auth.role)
-		return ctx.json(result, 200)
-	}
+  async listMembers(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    const validated = validateOrganizationId(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const result = await this.listMembersService.execute(orgId, auth.userId, auth.role)
+    return ctx.json(result, 200)
+  }
 
-	async invite(ctx: IHttpContext): Promise<Response> {
-		const auth = AuthMiddleware.getAuthContext(ctx)
-		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const validated = validateOrganizationId(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const body = ctx.get('validated') as InviteMemberParams
-		const result = await this.inviteMemberService.execute(orgId, auth.userId, auth.role, body)
-		return ctx.json(result, result.success ? 201 : 400)
-	}
+  async invite(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    const validated = validateOrganizationId(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const body = ctx.get('validated') as InviteMemberParams
+    const result = await this.inviteMemberService.execute(orgId, auth.userId, auth.role, body)
+    return ctx.json(result, result.success ? 201 : 400)
+  }
 
-	async acceptInvitation(ctx: IHttpContext): Promise<Response> {
-		const auth = AuthMiddleware.getAuthContext(ctx)
-		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const body = ctx.get('validated') as AcceptInvitationParams
-		const result = await this.acceptInvitationService.execute(auth.userId, body)
-		return ctx.json(result, result.success ? 200 : 400)
-	}
+  async acceptInvitation(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    const body = ctx.get('validated') as AcceptInvitationParams
+    const result = await this.acceptInvitationService.execute(auth.userId, body)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
 
-	async removeMember(ctx: IHttpContext): Promise<Response> {
-		const auth = AuthMiddleware.getAuthContext(ctx)
-		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const validated = validateOrganizationMemberParams(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const userId = validated.userId
-		const result = await this.removeMemberService.execute(orgId, userId, auth.userId, auth.role)
-		return ctx.json(result, result.success ? 200 : 400)
-	}
+  async removeMember(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    const validated = validateOrganizationMemberParams(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const userId = validated.userId
+    const result = await this.removeMemberService.execute(orgId, userId, auth.userId, auth.role)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
 
-	async changeMemberRole(ctx: IHttpContext): Promise<Response> {
-		const validated = validateOrganizationMemberParams(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const userId = validated.userId
-		const body = ctx.get('validated') as ChangeMemberRoleParams
-		const result = await this.changeRoleService.execute(orgId, userId, body.role)
-		return ctx.json(result, result.success ? 200 : 400)
-	}
+  async changeMemberRole(ctx: IHttpContext): Promise<Response> {
+    const validated = validateOrganizationMemberParams(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const userId = validated.userId
+    const body = ctx.get('validated') as ChangeMemberRoleParams
+    const result = await this.changeRoleService.execute(orgId, userId, body.role)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
 
-	async listInvitations(ctx: IHttpContext): Promise<Response> {
-		const auth = AuthMiddleware.getAuthContext(ctx)
-		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const validated = validateOrganizationId(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const result = await this.listInvitationsService.execute(orgId, auth.userId, auth.role)
-		return ctx.json(result, 200)
-	}
+  async listInvitations(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    const validated = validateOrganizationId(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const result = await this.listInvitationsService.execute(orgId, auth.userId, auth.role)
+    return ctx.json(result, 200)
+  }
 
-	async cancelInvitation(ctx: IHttpContext): Promise<Response> {
-		const auth = AuthMiddleware.getAuthContext(ctx)
-		if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
-		const validated = validateInvitationParams(ctx)
-		if (!validated.ok) return validated.response
-		const orgId = validated.orgId
-		const invId = validated.invId
-		const result = await this.cancelInvitationService.execute(orgId, invId, auth.userId, auth.role)
-		return ctx.json(result, result.success ? 200 : 400)
-	}
+  async cancelInvitation(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    const validated = validateInvitationParams(ctx)
+    if (!validated.ok) return validated.response
+    const orgId = validated.orgId
+    const invId = validated.invId
+    const result = await this.cancelInvitationService.execute(orgId, invId, auth.userId, auth.role)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
 }

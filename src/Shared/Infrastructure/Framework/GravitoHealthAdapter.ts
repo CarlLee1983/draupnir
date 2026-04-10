@@ -5,6 +5,7 @@ import { createGravitoModuleRouter } from './GravitoModuleRouter'
 import { GravitoRedisAdapter } from './GravitoRedisAdapter'
 import { GravitoCacheAdapter } from './GravitoCacheAdapter'
 import { createGravitoDatabaseConnectivityCheck } from '../Database/Adapters/Atlas'
+import { SystemHealthChecker } from '@/Modules/Health/Infrastructure/Services/SystemHealthChecker'
 import { PerformHealthCheckService } from '@/Modules/Health/Application/Services/PerformHealthCheckService'
 import { HealthController } from '@/Modules/Health/Presentation/Controllers/HealthController'
 import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Repositories/MemoryHealthCheckRepository'
@@ -15,7 +16,7 @@ import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Rep
  * Responsibilities:
  * 1. Retrieve Redis/Cache from PlanetCore (may be undefined).
  * 2. Adapt to IRedisService/ICacheService.
- * 3. Assemble PerformHealthCheckService + HealthController.
+ * 3. Assemble SystemHealthChecker + PerformHealthCheckService + HealthController.
  * 4. Register routes via IModuleRouter.
  *
  * This is the only location that knows how Gravito organizes services.
@@ -40,25 +41,20 @@ export function registerHealthWithGravito(core: PlanetCore): void {
   // Adapt to framework-agnostic interfaces (null indicates NOT set)
   const redis = rawRedis ? new GravitoRedisAdapter(rawRedis) : null
   const cache = rawCache ? new GravitoCacheAdapter(rawCache) : null
-
-  // Assemble Application layer (Injected by Gravito DB adapter, Repository decoupled from ORM)
-  const repository = new MemoryHealthCheckRepository()
   const databaseCheck = createGravitoDatabaseConnectivityCheck()
-  const performHealthCheckService = new PerformHealthCheckService(repository)
+
+  // Assemble Infrastructure health checker with port-based interfaces
+  const healthChecker = new SystemHealthChecker(databaseCheck, redis, cache)
+
+  // Assemble Application layer
+  const repository = new MemoryHealthCheckRepository()
+  const performHealthCheckService = new PerformHealthCheckService(repository, healthChecker)
   const controller = new HealthController(performHealthCheckService)
 
   // Establish framework-agnostic routing interface
   const router = createGravitoModuleRouter(core)
 
   // Register routes via IModuleRouter
-  router.get('/health', (ctx) => {
-    // For compatibility with current APIs, inject adapter services into context
-    ctx.set('__redis', redis)
-    ctx.set('__cache', cache)
-    ctx.set('__databaseCheck', databaseCheck)
-    return controller.check(ctx)
-  })
-
+  router.get('/health', (ctx) => controller.check(ctx))
   router.get('/health/history', (ctx) => controller.history(ctx))
 }
-

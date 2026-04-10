@@ -10,7 +10,10 @@ import {
   ListContractsRequest,
 } from '../Requests'
 
-export function registerContractRoutes(router: IModuleRouter, controller: ContractController): void {
+export function registerContractRoutes(
+  router: IModuleRouter,
+  controller: ContractController,
+): void {
   const adminAuth = [createRoleMiddleware('admin')]
 
   router.post('/api/contracts/handle-expiry', adminAuth, (ctx) => controller.handleExpiry(ctx))
@@ -18,9 +21,15 @@ export function registerContractRoutes(router: IModuleRouter, controller: Contra
   router.post('/api/contracts', adminAuth, CreateContractRequest, (ctx) => controller.create(ctx))
   router.get('/api/contracts', adminAuth, ListContractsRequest, (ctx) => controller.list(ctx))
   router.get('/api/contracts/:contractId', adminAuth, (ctx) => controller.getDetail(ctx))
-  router.put('/api/contracts/:contractId', adminAuth, UpdateContractRequest, (ctx) => controller.update(ctx))
+  router.put('/api/contracts/:contractId', adminAuth, UpdateContractRequest, (ctx) =>
+    controller.update(ctx),
+  )
   router.post('/api/contracts/:contractId/activate', adminAuth, (ctx) => controller.activate(ctx))
   router.post('/api/contracts/:contractId/terminate', adminAuth, (ctx) => controller.terminate(ctx))
-  router.post('/api/contracts/:contractId/renew', adminAuth, RenewContractRequest, (ctx) => controller.renew(ctx))
-  router.post('/api/contracts/:contractId/assign', adminAuth, AssignContractRequest, (ctx) => controller.assign(ctx))
+  router.post('/api/contracts/:contractId/renew', adminAuth, RenewContractRequest, (ctx) =>
+    controller.renew(ctx),
+  )
+  router.post('/api/contracts/:contractId/assign', adminAuth, AssignContractRequest, (ctx) =>
+    controller.assign(ctx),
+  )
 }

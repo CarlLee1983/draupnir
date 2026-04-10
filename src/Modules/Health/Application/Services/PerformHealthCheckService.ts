@@ -3,32 +3,30 @@
  * 應用服務：執行和記錄健康檢查
  */
 
-import { HealthCheckService } from '../../Domain/Services/HealthCheckService'
 import { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
 import { HealthCheckDTO } from '../DTOs/HealthCheckDTO'
 import type { IHealthCheckRepository } from '../../Domain/Repositories/IHealthCheckRepository'
+import type { ISystemHealthChecker } from '../../Domain/Ports/ISystemHealthChecker'
 
 export class PerformHealthCheckService {
-  private domainService: HealthCheckService
-
-  constructor(private repository: IHealthCheckRepository) {
-    this.domainService = new HealthCheckService()
-  }
+  constructor(
+    private readonly repository: IHealthCheckRepository,
+    private readonly healthChecker: ISystemHealthChecker,
+  ) {}
 
   /**
    * 執行健康檢查並保存結果
    */
-  async execute(db: any, redis?: any, cache?: any): Promise<HealthCheckDTO> {
-    // 1. 執行系統檢查 (Domain Service)
-    const checks = await this.domainService.checkSystem(db, redis, cache)
+  async execute(): Promise<HealthCheckDTO> {
+    const [database, redis, cache] = await Promise.all([
+      this.healthChecker.checkDatabase(),
+      this.healthChecker.checkRedis(),
+      this.healthChecker.checkCache(),
+    ])
 
-    // 2. 創建聚合根 (Domain Layer)
+    const checks = { database, redis, cache }
     const healthCheck = HealthCheck.create(`health-${Date.now()}`, checks)
-
-    // 3. 保存到倉庫 (Infrastructure)
     await this.repository.save(healthCheck)
-
-    // 4. 轉換為 DTO (應用層)
     return HealthCheckDTO.fromEntity(healthCheck)
   }
 

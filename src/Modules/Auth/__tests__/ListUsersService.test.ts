@@ -1,14 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { ListUsersService } from '../Application/Services/ListUsersService'
-import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
-import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { User, UserStatus } from '../Domain/Aggregates/User'
-import { Role } from '../Domain/ValueObjects/Role'
+import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import { Email } from '../Domain/ValueObjects/Email'
 import { Password } from '../Domain/ValueObjects/Password'
+import { Role } from '../Domain/ValueObjects/Role'
+import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
+import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 
 describe('ListUsersService', () => {
   let service: ListUsersService
@@ -20,7 +21,7 @@ describe('ListUsersService', () => {
     const profileRepo = new UserProfileRepository(db)
     service = new ListUsersService(authRepo, profileRepo)
 
-    const registerService = new RegisterUserService(authRepo, profileRepo)
+    const registerService = new RegisterUserService(authRepo, profileRepo, new ScryptPasswordHasher())
     await registerService.execute({ email: 'alice@example.com', password: 'StrongPass123' })
     await registerService.execute({ email: 'bob@example.com', password: 'StrongPass123' })
     await registerService.execute({ email: 'charlie@example.com', password: 'StrongPass123' })

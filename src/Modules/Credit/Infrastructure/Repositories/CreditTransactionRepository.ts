@@ -2,12 +2,13 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
 import { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
+import { CreditTransactionMapper } from '../Mappers/CreditTransactionMapper'
 
 export class CreditTransactionRepository implements ICreditTransactionRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async save(transaction: CreditTransaction): Promise<void> {
-    await this.db.table('credit_transactions').insert(transaction.toDatabaseRow())
+    await this.db.table('credit_transactions').insert(CreditTransactionMapper.toDatabaseRow(transaction))
   }
 
   async findByAccountId(
@@ -26,7 +27,10 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
   }
 
   async countByAccountId(accountId: string): Promise<number> {
-    const result = await this.db.table('credit_transactions').where('credit_account_id', '=', accountId).count()
+    const result = await this.db
+      .table('credit_transactions')
+      .where('credit_account_id', '=', accountId)
+      .count()
     return Number(result)
   }
 
@@ -36,9 +40,7 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
     startDate?: Date,
     endDate?: Date,
   ): Promise<CreditTransaction[]> {
-    let query = this.db
-      .table('credit_transactions')
-      .where('credit_account_id', '=', accountId)
+    let query = this.db.table('credit_transactions').where('credit_account_id', '=', accountId)
     if (startDate && endDate) {
       query = query.whereBetween('created_at', [startDate, endDate])
     }

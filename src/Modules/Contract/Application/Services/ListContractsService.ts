@@ -1,7 +1,7 @@
 // src/Modules/Contract/Application/Services/ListContractsService.ts
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import type { ContractListResponse } from '../DTOs/ContractDTO'
+import { ContractPresenter, type ContractListResponse } from '../DTOs/ContractDTO'
 
 export class ListContractsService {
   constructor(
@@ -9,10 +9,18 @@ export class ListContractsService {
     private readonly orgAuth: OrgAuthorizationHelper,
   ) {}
 
-  async execute(targetId: string, callerUserId: string, callerSystemRole: string): Promise<ContractListResponse> {
+  async execute(
+    targetId: string,
+    callerUserId: string,
+    callerSystemRole: string,
+  ): Promise<ContractListResponse> {
     try {
       if (callerSystemRole !== 'admin') {
-        const authResult = await this.orgAuth.requireOrgMembership(targetId, callerUserId, callerSystemRole)
+        const authResult = await this.orgAuth.requireOrgMembership(
+          targetId,
+          callerUserId,
+          callerSystemRole,
+        )
         if (!authResult.authorized) {
           return {
             success: false,
@@ -26,7 +34,7 @@ export class ListContractsService {
       return {
         success: true,
         message: '查詢成功',
-        data: contracts.map((c) => c.toDTO()),
+        data: contracts.map((c) => ContractPresenter.fromEntity(c)),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '查詢失敗'

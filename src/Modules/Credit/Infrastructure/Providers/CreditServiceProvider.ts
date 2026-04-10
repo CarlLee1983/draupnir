@@ -3,7 +3,9 @@ import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { CreditAccountRepository } from '../Repositories/CreditAccountRepository'
 import { CreditTransactionRepository } from '../Repositories/CreditTransactionRepository'
-import { CreditDeductionService } from '../../Domain/Services/CreditDeductionService'
+import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
+import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
+import { DeductCreditService } from '../../Application/Services/DeductCreditService'
 import { TopUpCreditService } from '../../Application/Services/TopUpCreditService'
 import { GetBalanceService } from '../../Application/Services/GetBalanceService'
 import { GetTransactionHistoryService } from '../../Application/Services/GetTransactionHistoryService'
@@ -21,7 +23,13 @@ export class CreditServiceProvider extends ModuleServiceProvider {
 
     container.singleton('creditAccountRepository', () => new CreditAccountRepository(db))
     container.singleton('creditTransactionRepository', () => new CreditTransactionRepository(db))
-    container.singleton('creditDeductionService', () => new CreditDeductionService())
+    container.bind('deductCreditService', (c: IContainer) => {
+      return new DeductCreditService(
+        c.make('creditAccountRepository') as ICreditAccountRepository,
+        c.make('creditTransactionRepository') as ICreditTransactionRepository,
+        db,
+      )
+    })
 
     container.bind('topUpCreditService', (c: IContainer) => {
       return new TopUpCreditService(

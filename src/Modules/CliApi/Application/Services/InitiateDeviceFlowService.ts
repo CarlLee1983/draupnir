@@ -1,4 +1,14 @@
 // src/Modules/CliApi/Application/Services/InitiateDeviceFlowService.ts
+/**
+ * InitiateDeviceFlowService
+ * Application service: starts the OAuth 2.0 Device Authorization flow for CLI clients.
+ *
+ * Responsibilities:
+ * - Generate unique device codes and human-friendly user codes
+ * - Persist request state for downstream verification and polling
+ * - Return initialization metadata (uri, codes, TTL) to the CLI
+ */
+
 import type { IDeviceCodeStore } from '../../Domain/Ports/IDeviceCodeStore'
 import { DeviceCode } from '../../Domain/ValueObjects/DeviceCode'
 import type { InitiateDeviceFlowResponse } from '../DTOs/DeviceFlowDTO'
@@ -6,12 +16,18 @@ import type { InitiateDeviceFlowResponse } from '../DTOs/DeviceFlowDTO'
 const DEVICE_CODE_TTL_SECONDS = 600 // 10 minutes
 const POLLING_INTERVAL_SECONDS = 5
 
+/**
+ * Service facilitating the start of a CLI authentication session.
+ */
 export class InitiateDeviceFlowService {
   constructor(
     private readonly store: IDeviceCodeStore,
     private readonly verificationUri: string,
   ) {}
 
+  /**
+   * Executes the device flow initiation.
+   */
   async execute(): Promise<InitiateDeviceFlowResponse> {
     try {
       const deviceCodeId = crypto.randomUUID()
@@ -29,7 +45,7 @@ export class InitiateDeviceFlowService {
 
       return {
         success: true,
-        message: 'Device code 已產生，請前往驗證頁面輸入 user code',
+        message: 'Device code generated. Please visit the verification page and enter the user code.',
         data: {
           deviceCode: deviceCodeId,
           userCode,
@@ -39,8 +55,9 @@ export class InitiateDeviceFlowService {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Device flow 初始化失敗'
+      const message = error instanceof Error ? error.message : 'Device flow initialization failed'
       return { success: false, message, error: message }
     }
   }
 }
+
