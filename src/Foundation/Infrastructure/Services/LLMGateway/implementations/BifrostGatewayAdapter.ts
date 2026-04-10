@@ -112,6 +112,9 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
         virtual_key_ids: keyIds.join(','),
         ...(query?.startTime !== undefined && { start_time: query.startTime }),
         ...(query?.endTime !== undefined && { end_time: query.endTime }),
+        ...(query?.providers !== undefined && { providers: query.providers }),
+        ...(query?.models !== undefined && { models: query.models }),
+        ...(query?.limit !== undefined && { limit: query.limit }),
       })
       return {
         totalRequests: stats.total_requests,
@@ -134,6 +137,9 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
         virtual_key_ids: keyIds.join(','),
         ...(query?.startTime !== undefined && { start_time: query.startTime }),
         ...(query?.endTime !== undefined && { end_time: query.endTime }),
+        ...(query?.providers !== undefined && { providers: query.providers }),
+        ...(query?.models !== undefined && { models: query.models }),
+        ...(query?.limit !== undefined && { limit: query.limit }),
       })
       return response.logs.map((entry) => ({
         timestamp: entry.timestamp,
