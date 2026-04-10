@@ -1,29 +1,29 @@
-import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 
 interface CreateVirtualKeyResult {
-	bifrostVirtualKeyId: string
-	bifrostKeyValue: string
+  bifrostVirtualKeyId: string
+  bifrostKeyValue: string
 }
 
 export class AppKeyBifrostSync {
-	constructor(private readonly bifrostClient: BifrostClient) {}
+  constructor(private readonly gatewayClient: ILLMGatewayClient) {}
 
-	async createVirtualKey(label: string, orgId: string): Promise<CreateVirtualKeyResult> {
-		const vk = await this.bifrostClient.createVirtualKey({
-			name: `[App] ${label}`,
-			customer_id: orgId,
-		})
-		return {
-			bifrostVirtualKeyId: vk.id,
-			bifrostKeyValue: vk.value ?? '',
-		}
-	}
+  async createVirtualKey(label: string, orgId: string): Promise<CreateVirtualKeyResult> {
+    const vk = await this.gatewayClient.createKey({
+      name: `[App] ${label}`,
+      customerId: orgId,
+    })
+    return {
+      bifrostVirtualKeyId: vk.id,
+      bifrostKeyValue: vk.value ?? '',
+    }
+  }
 
-	async deactivateVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
-		await this.bifrostClient.updateVirtualKey(bifrostVirtualKeyId, { is_active: false })
-	}
+  async deactivateVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
+    await this.gatewayClient.updateKey(bifrostVirtualKeyId, { isActive: false })
+  }
 
-	async deleteVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
-		await this.bifrostClient.deleteVirtualKey(bifrostVirtualKeyId)
-	}
+  async deleteVirtualKey(bifrostVirtualKeyId: string): Promise<void> {
+    await this.gatewayClient.deleteKey(bifrostVirtualKeyId)
+  }
 }

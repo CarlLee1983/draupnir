@@ -53,7 +53,7 @@ Plans:
 - [ ] 02-01-PLAN.md — AppApiKey module: AppKeyBifrostSync + GetAppKeyUsageService + AppApiKeyServiceProvider + tests
 - [ ] 02-02-PLAN.md — ApiKey module: ApiKeyBifrostSync (incl. syncPermissions field translation) + ApiKeyServiceProvider + tests
 - [ ] 02-03-PLAN.md — Credit module: HandleBalanceDepletedService (D-P02 retryable) + HandleCreditToppedUpService + CreditServiceProvider + tests
-- [ ] 02-04-PLAN.md — SdkApi module: QueryUsage + SdkApiServiceProvider (queryUsage only) + tests
+- [x] 02-04-PLAN.md — SdkApi module: QueryUsage + SdkApiServiceProvider (queryUsage only) + tests
 - [ ] 02-05-PLAN.md — Dashboard module: UsageAggregator + UsageQuery widening + GetUsageChartService + DashboardServiceProvider + tests
 
 ### Phase 3: Domain Rename
@@ -102,7 +102,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Gateway Foundation | 4/4 | Complete   | 2026-04-10 |
-| 2. Business-Layer Migration | 0/5 | Not started | - |
+| 2. Business-Layer Migration | 1/5 | In Progress|  |
 | 3. Domain Rename | 0/TBD | Not started | - |
 | 4. SDK Extraction | 0/TBD | Not started | - |
 | 5. Final Verification | 0/TBD | Not started | - |

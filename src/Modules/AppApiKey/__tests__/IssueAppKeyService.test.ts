@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { IssueAppKeyService } from '../Application/Services/IssueAppKeyService'
 import { AppApiKeyRepository } from '../Infrastructure/Repositories/AppApiKeyRepository'
@@ -8,122 +8,114 @@ import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Re
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
-import type { BifrostClient } from '@/Foundation/Infrastructure/Services/BifrostClient/BifrostClient'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway'
 
 function createMockSync(shouldFail = false): AppKeyBifrostSync {
-	const mockClient = {
-		createVirtualKey: shouldFail
-			? vi.fn().mockRejectedValue(new Error('Bifrost 連線失敗'))
-			: vi.fn().mockResolvedValue({
-					id: 'bfr-vk-app-new',
-					name: '[App] test',
-					value: 'vk_live_app_abc',
-					is_active: true,
-					provider_configs: [],
-				}),
-		updateVirtualKey: vi.fn().mockResolvedValue({}),
-		deleteVirtualKey: vi.fn(),
-	} as unknown as BifrostClient
-	return new AppKeyBifrostSync(mockClient)
+  const gatewayMock = new MockGatewayClient()
+  if (shouldFail) {
+    gatewayMock.failNext(new GatewayError('Bifrost 連線失敗', 'NETWORK', 503, true))
+  }
+  return new AppKeyBifrostSync(gatewayMock)
 }
 
 describe('IssueAppKeyService', () => {
-	let service: IssueAppKeyService
-	let db: MemoryDatabaseAccess
-	let appKeyRepo: AppApiKeyRepository
+  let service: IssueAppKeyService
+  let db: MemoryDatabaseAccess
+  let appKeyRepo: AppApiKeyRepository
 
-	beforeEach(async () => {
-		db = new MemoryDatabaseAccess()
-		appKeyRepo = new AppApiKeyRepository(db)
-		const orgRepo = new OrganizationRepository(db)
-		const memberRepo = new OrganizationMemberRepository(db)
-		const orgAuth = new OrgAuthorizationHelper(memberRepo)
-		const sync = createMockSync()
-		service = new IssueAppKeyService(appKeyRepo, orgAuth, sync)
+  beforeEach(async () => {
+    db = new MemoryDatabaseAccess()
+    appKeyRepo = new AppApiKeyRepository(db)
+    const orgRepo = new OrganizationRepository(db)
+    const memberRepo = new OrganizationMemberRepository(db)
+    const orgAuth = new OrgAuthorizationHelper(memberRepo)
+    const sync = createMockSync()
+    service = new IssueAppKeyService(appKeyRepo, orgAuth, sync)
 
-		const org = Organization.create('org-1', 'Test Org', 'test')
-		await orgRepo.save(org)
-		const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
-		await memberRepo.save(member)
-	})
+    const org = Organization.create('org-1', 'Test Org', 'test')
+    await orgRepo.save(org)
+    const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
+    await memberRepo.save(member)
+  })
 
-	it('應成功配發 App Key 並回傳 rawKey（drp_app_ 前綴）', async () => {
-		const result = await service.execute({
-			orgId: 'org-1',
-			issuedByUserId: 'user-1',
-			callerSystemRole: 'user',
-			label: 'My SDK App Key',
-		})
-		expect(result.success).toBe(true)
-		expect(result.data?.rawKey).toBeTruthy()
-		expect((result.data?.rawKey as string).startsWith('drp_app_')).toBe(true)
-		expect(result.data?.status).toBe('active')
-		expect(result.data?.scope).toBe('read')
-	})
+  it('應成功配發 App Key 並回傳 rawKey（drp_app_ 前綴）', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      issuedByUserId: 'user-1',
+      callerSystemRole: 'user',
+      label: 'My SDK App Key',
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.rawKey).toBeTruthy()
+    expect((result.data?.rawKey as string).startsWith('drp_app_')).toBe(true)
+    expect(result.data?.status).toBe('active')
+    expect(result.data?.scope).toBe('read')
+  })
 
-	it('應支援自訂 scope 和綁定模組', async () => {
-		const result = await service.execute({
-			orgId: 'org-1',
-			issuedByUserId: 'user-1',
-			callerSystemRole: 'user',
-			label: 'Admin Key',
-			scope: 'admin',
-			boundModuleIds: ['mod-1', 'mod-2'],
-		})
-		expect(result.success).toBe(true)
-		expect(result.data?.scope).toBe('admin')
-		expect(result.data?.boundModules).toEqual(['mod-1', 'mod-2'])
-	})
+  it('應支援自訂 scope 和綁定模組', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      issuedByUserId: 'user-1',
+      callerSystemRole: 'user',
+      label: 'Admin Key',
+      scope: 'admin',
+      boundModuleIds: ['mod-1', 'mod-2'],
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.scope).toBe('admin')
+    expect(result.data?.boundModules).toEqual(['mod-1', 'mod-2'])
+  })
 
-	it('應支援自動輪換策略', async () => {
-		const result = await service.execute({
-			orgId: 'org-1',
-			issuedByUserId: 'user-1',
-			callerSystemRole: 'user',
-			label: 'Auto Rotate Key',
-			rotationPolicy: { autoRotate: true, rotationIntervalDays: 90, gracePeriodHours: 48 },
-		})
-		expect(result.success).toBe(true)
-		const policy = result.data?.rotationPolicy as Record<string, unknown>
-		expect(policy.auto_rotate).toBe(true)
-		expect(policy.rotation_interval_days).toBe(90)
-	})
+  it('應支援自動輪換策略', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      issuedByUserId: 'user-1',
+      callerSystemRole: 'user',
+      label: 'Auto Rotate Key',
+      rotationPolicy: { autoRotate: true, rotationIntervalDays: 90, gracePeriodHours: 48 },
+    })
+    expect(result.success).toBe(true)
+    const policy = result.data?.rotationPolicy as Record<string, unknown>
+    expect(policy.auto_rotate).toBe(true)
+    expect(policy.rotation_interval_days).toBe(90)
+  })
 
-	it('非 Org 成員應回傳錯誤', async () => {
-		const result = await service.execute({
-			orgId: 'org-1',
-			issuedByUserId: 'outsider',
-			callerSystemRole: 'user',
-			label: 'Unauthorized',
-		})
-		expect(result.success).toBe(false)
-		expect(result.error).toBe('NOT_ORG_MEMBER')
-	})
+  it('非 Org 成員應回傳錯誤', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      issuedByUserId: 'outsider',
+      callerSystemRole: 'user',
+      label: 'Unauthorized',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('NOT_ORG_MEMBER')
+  })
 
-	it('空 label 應回傳錯誤', async () => {
-		const result = await service.execute({
-			orgId: 'org-1',
-			issuedByUserId: 'user-1',
-			callerSystemRole: 'user',
-			label: '',
-		})
-		expect(result.success).toBe(false)
-	})
+  it('空 label 應回傳錯誤', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      issuedByUserId: 'user-1',
+      callerSystemRole: 'user',
+      label: '',
+    })
+    expect(result.success).toBe(false)
+  })
 
-	it('Bifrost 失敗時應清理本地 pending 記錄', async () => {
-		const memberRepo = new OrganizationMemberRepository(db)
-		const orgAuth = new OrgAuthorizationHelper(memberRepo)
-		const failSync = createMockSync(true)
-		const failService = new IssueAppKeyService(appKeyRepo, orgAuth, failSync)
+  it('Bifrost 失敗時應清理本地 pending 記錄', async () => {
+    const memberRepo = new OrganizationMemberRepository(db)
+    const orgAuth = new OrgAuthorizationHelper(memberRepo)
+    const failSync = createMockSync(true)
+    const failService = new IssueAppKeyService(appKeyRepo, orgAuth, failSync)
 
-		const result = await failService.execute({
-			orgId: 'org-1',
-			issuedByUserId: 'user-1',
-			callerSystemRole: 'user',
-			label: 'Will Fail',
-		})
-		expect(result.success).toBe(false)
-		const keys = await appKeyRepo.findByOrgId('org-1')
-		expect(keys).toHaveLength(0)
-	})
+    const result = await failService.execute({
+      orgId: 'org-1',
+      issuedByUserId: 'user-1',
+      callerSystemRole: 'user',
+      label: 'Will Fail',
+    })
+    expect(result.success).toBe(false)
+    const keys = await appKeyRepo.findByOrgId('org-1')
+    expect(keys).toHaveLength(0)
+  })
 })

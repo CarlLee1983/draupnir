@@ -26,7 +26,7 @@
 - [x] **WIRE-01**: Main `ServiceProvider` (or project bootstrap) registers `llmGatewayClient` as a singleton bound to `BifrostGatewayAdapter`, which itself receives the singleton `bifrostClient`
 - [ ] **WIRE-02**: `wireAppApiKey` resolves `llmGatewayClient` from the container and passes it to services that previously received `bifrostClient`
 - [ ] **WIRE-03**: `wireApiKey` is updated the same way for the separate `ApiKey` module
-- [ ] **WIRE-04**: `wireSdkApi` is updated for the `QueryUsage` injection (but **not** `ProxyModelCall` — see SDK-05)
+- [x] **WIRE-04**: `wireSdkApi` is updated for the `QueryUsage` injection (but **not** `ProxyModelCall` — see SDK-05)
 - [ ] **WIRE-05**: `wireDashboard` is updated for `UsageAggregator`
 - [ ] **WIRE-06**: No application-layer constructor type signature references `BifrostClient` after this requirement is complete
 
@@ -35,7 +35,7 @@
 - [ ] **MIGRATE-01**: `AppKeyBifrostSync` constructor parameter type changes from `BifrostClient` to `ILLMGatewayClient`, and all method calls use the new interface vocabulary
 - [ ] **MIGRATE-02**: `ApiKeyBifrostSync.createVirtualKey` + `.deactivateVirtualKey` + `.deleteVirtualKey` migrate to `ILLMGatewayClient` (the `ApiKey` module sibling missing from the original spec)
 - [ ] **MIGRATE-03**: `GetAppKeyUsageService` migrates to `ILLMGatewayClient` and uses camelCase query types
-- [ ] **MIGRATE-04**: `QueryUsage` (SdkApi UseCase) migrates to `ILLMGatewayClient`
+- [x] **MIGRATE-04**: `QueryUsage` (SdkApi UseCase) migrates to `ILLMGatewayClient`
 - [ ] **MIGRATE-05**: `UsageAggregator.getStats` and `UsageAggregator.getLogs` (Dashboard) migrate to `ILLMGatewayClient` — uses the multi-key array form of `getUsageStats` and the new `getUsageLogs` method; stops passing snake_case query parameters
 - [ ] **MIGRATE-06**: Any remaining direct `BifrostClient` imports in application layer are removed (verified by `grep`)
 - [ ] **MIGRATE-07**: `HandleBalanceDepletedService` (Credit module) migrates from `BifrostClient.updateVirtualKey({rate_limit: {...}})` to `ILLMGatewayClient.updateKey({rateLimit: {...}})`; retry loop uses `GatewayError.retryable` flag to classify failures
@@ -60,9 +60,9 @@
 
 ### Tests (TEST)
 
-- [ ] **TEST-01**: Tests that previously mocked `BifrostClient` (e.g., `AppKeyBifrostSync.test.ts`, `GetAppKeyUsageService.test.ts`, `ApiKeyBifrostSync.test.ts`) are rewritten to mock `ILLMGatewayClient` or use `MockGatewayClient`
+- [x] **TEST-01**: Tests that previously mocked `BifrostClient` (e.g., `AppKeyBifrostSync.test.ts`, `GetAppKeyUsageService.test.ts`, `ApiKeyBifrostSync.test.ts`) are rewritten to mock `ILLMGatewayClient` or use `MockGatewayClient`
 - [ ] **TEST-02**: No test file imports the `BifrostClient` concrete class after migration (verified by `grep` excluding the sdk package itself)
-- [ ] **TEST-03**: Full Bun unit + feature test suite passes at every phase boundary
+- [x] **TEST-03**: Full Bun unit + feature test suite passes at every phase boundary
 - [ ] **TEST-04**: Playwright E2E suite passes unchanged (`bun run test:e2e`)
 
 ### Quality Gates (QUALITY)
@@ -122,13 +122,13 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | WIRE-01 | Phase 1 | Complete |
 | WIRE-02 | Phase 2 | Pending |
 | WIRE-03 | Phase 2 | Pending |
-| WIRE-04 | Phase 2 | Pending |
+| WIRE-04 | Phase 2 | Complete |
 | WIRE-05 | Phase 2 | Pending |
 | WIRE-06 | Phase 2 | Pending |
 | MIGRATE-01 | Phase 2 | Pending |
 | MIGRATE-02 | Phase 2 | Pending |
 | MIGRATE-03 | Phase 2 | Pending |
-| MIGRATE-04 | Phase 2 | Pending |
+| MIGRATE-04 | Phase 2 | Complete |
 | MIGRATE-05 | Phase 2 | Pending |
 | MIGRATE-06 | Phase 2 | Pending |
 | MIGRATE-07 | Phase 2 | Pending |
@@ -144,9 +144,9 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | SDK-04 | Phase 4 | Pending |
 | SDK-05 | Phase 4 | Pending |
 | SDK-06 | Phase 4 | Pending |
-| TEST-01 | Phase 2 | Pending |
+| TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 5 | Pending |
-| TEST-03 | Phase 2 | Pending |
+| TEST-03 | Phase 2 | Complete |
 | TEST-04 | Phase 5 | Pending |
 | QUAL-01 | Phase 5 | Pending |
 | QUAL-02 | Phase 5 | Pending |
