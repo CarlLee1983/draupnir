@@ -1,9 +1,12 @@
+import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
+import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
-import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
+/**
+ * Member dashboard summary for the selected organization (`Member/Dashboard/Index`).
+ */
 export class MemberDashboardPage {
   constructor(
     private readonly inertia: InertiaService,
@@ -11,6 +14,10 @@ export class MemberDashboardPage {
     private readonly balanceService: GetBalanceService,
   ) {}
 
+  /**
+   * @param ctx - Query `orgId` or header `X-Organization-Id` selects the active org.
+   * @returns Inertia summary, missing-org message, or login redirect.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')
@@ -42,7 +49,7 @@ export class MemberDashboardPage {
     return this.inertia.render(ctx, 'Member/Dashboard/Index', {
       orgId,
       summary,
-      balance: balanceResult.success ? balanceResult.data ?? null : null,
+      balance: balanceResult.success ? (balanceResult.data ?? null) : null,
       error: summaryResult.success ? null : summaryResult.message,
     })
   }

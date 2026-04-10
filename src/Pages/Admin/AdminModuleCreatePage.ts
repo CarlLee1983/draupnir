@@ -1,14 +1,20 @@
+import type { RegisterModuleService } from '@/Modules/AppModule/Application/Services/RegisterModuleService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { RegisterModuleService } from '@/Modules/AppModule/Application/Services/RegisterModuleService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin module registration form and submit (`Admin/Modules/Create`).
+ */
 export class AdminModuleCreatePage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly registerModuleService: RegisterModuleService,
   ) {}
 
+  /**
+   * @returns Empty create form (Inertia).
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
@@ -18,7 +24,11 @@ export class AdminModuleCreatePage {
     })
   }
 
-  /** POST /admin/modules */
+  /**
+   * POST `/admin/modules`: registers a new module from JSON body (`name`, `description`, `type`).
+   *
+   * @returns Redirect to `/admin/modules` on success or re-render with validation error.
+   */
   async store(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

@@ -1,14 +1,21 @@
+import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin user directory with filters and pagination (`Admin/Users/Index`).
+ */
 export class AdminUsersPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listService: ListUsersService,
   ) {}
 
+  /**
+   * @param ctx - Query: `page`, `limit`, `keyword`, `role`, `status`.
+   * @returns Inertia list payload or auth failure response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

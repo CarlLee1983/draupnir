@@ -1,14 +1,21 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
 
+/**
+ * Member usage chart page (`Member/Usage/Index`).
+ */
 export class MemberUsagePage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly usageChartService: GetUsageChartService,
   ) {}
 
+  /**
+   * @param ctx - Query `orgId` or org header; optional chart range query params as defined by the service.
+   * @returns Inertia chart props or login redirect.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')
@@ -33,8 +40,8 @@ export class MemberUsagePage {
 
     return this.inertia.render(ctx, 'Member/Usage/Index', {
       orgId,
-      usageLogs: result.success ? result.data?.logs ?? [] : [],
-      usageStats: result.success ? result.data?.stats ?? null : null,
+      usageLogs: result.success ? (result.data?.logs ?? []) : [],
+      usageStats: result.success ? (result.data?.stats ?? null) : null,
       error: result.success ? null : result.message,
     })
   }

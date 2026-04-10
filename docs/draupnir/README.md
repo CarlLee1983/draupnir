@@ -62,6 +62,8 @@
 | 檔案 | 主題 |
 |------|------|
 | [`README.md`](./knowledge/README.md) | 知識索引 |
+| [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md) | 原始碼 JSDoc／註解規範（normative） |
+| [`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md) | Inertia 頁面層（`src/Pages`）架構與擴充檢查清單 |
 
 ## 審查紀錄（`reviews/`）
 

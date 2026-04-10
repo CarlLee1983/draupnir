@@ -1,14 +1,21 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
 
+/**
+ * Member API key list for the selected organization (`Member/ApiKeys/Index`).
+ */
 export class MemberApiKeysPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listService: ListApiKeysService,
   ) {}
 
+  /**
+   * @param ctx - Query `page`, `limit`, `orgId` (or org header).
+   * @returns Paginated keys, error state, or login redirect.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')
@@ -46,7 +53,9 @@ export class MemberApiKeysPage {
     return this.inertia.render(ctx, 'Member/ApiKeys/Index', {
       orgId,
       keys,
-      meta: result.success ? result.data?.meta ?? { total: 0, page: 1, limit: 20, totalPages: 0 } : { total: 0, page: 1, limit: 20, totalPages: 0 },
+      meta: result.success
+        ? (result.data?.meta ?? { total: 0, page: 1, limit: 20, totalPages: 0 })
+        : { total: 0, page: 1, limit: 20, totalPages: 0 },
       error: result.success ? null : result.message,
     })
   }

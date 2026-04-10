@@ -1,10 +1,13 @@
+import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
+import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
-import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
-import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin user profile view and account status transitions (`Admin/Users/Show`).
+ */
 export class AdminUserDetailPage {
   constructor(
     private readonly inertia: InertiaService,
@@ -13,6 +16,10 @@ export class AdminUserDetailPage {
     private readonly changeUserStatusService: ChangeUserStatusService,
   ) {}
 
+  /**
+   * @param ctx - Route param `id` = user id.
+   * @returns Inertia user detail or error state.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
@@ -40,8 +47,7 @@ export class AdminUserDetailPage {
     const profile = profileResult.success ? profileResult.data : null
 
     const statusRaw = userAuth.status as unknown as string
-    const accountStatus: 'active' | 'suspended' =
-      statusRaw === 'suspended' ? 'suspended' : 'active'
+    const accountStatus: 'active' | 'suspended' = statusRaw === 'suspended' ? 'suspended' : 'active'
 
     return this.inertia.render(ctx, 'Admin/Users/Show', {
       user: {
@@ -57,7 +63,12 @@ export class AdminUserDetailPage {
     })
   }
 
-  /** POST /admin/users/:id/status — Inertia（伺服端沿用 Authorization JWT） */
+  /**
+   * POST `/admin/users/:id/status`: updates account status from JSON body (`active` | `suspended`).
+   *
+   * @param ctx - Route param `id`; body `{ status }` from `getJsonBody`.
+   * @returns Redirect back to the user detail path.
+   */
   async postStatus(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

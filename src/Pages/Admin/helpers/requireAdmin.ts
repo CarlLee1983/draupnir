@@ -1,6 +1,7 @@
+import { type AuthContext, AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { AuthMiddleware, type AuthContext } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
+/** Result of {@link requireAdmin}: either proceed with `auth` or return a ready `Response`. */
 export interface AdminAuthResult {
   ok: boolean
   auth?: AuthContext
@@ -8,10 +9,11 @@ export interface AdminAuthResult {
 }
 
 /**
- * 檢查請求是否來自已登入的 admin 使用者。
- * - 未登入：重導至 /login
- * - 非 admin：回傳 403 HTML 錯誤頁
- * - admin：回傳 { ok: true, auth }
+ * Ensures the caller is an authenticated user with role `admin`.
+ *
+ * @param ctx - Request context (JWT should already be attached by page middleware).
+ * @returns `{ ok: true, auth }` on success; otherwise `{ ok: false, response }` where `response` is
+ *   a redirect to `/login` (unauthenticated) or 403 HTML (non-admin).
  */
 export function requireAdmin(ctx: IHttpContext): AdminAuthResult {
   const auth = AuthMiddleware.getAuthContext(ctx)

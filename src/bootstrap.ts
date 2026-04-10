@@ -1,28 +1,29 @@
-import { PlanetCore, defineConfig } from '@gravito/core'
-import { OrbitPrism } from '@gravito/prism'
+import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
-import { buildConfig } from '../config/index'
+import { OrbitPrism } from '@gravito/prism'
 import { createGravitoServiceProvider } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { HealthServiceProvider } from './Modules/Health/Infrastructure/Providers/HealthServiceProvider'
+import { buildConfig } from '../config/index'
 import { FoundationServiceProvider } from './Foundation/Infrastructure/Providers/FoundationServiceProvider'
-import { AuthServiceProvider } from './Modules/Auth/Infrastructure/Providers/AuthServiceProvider'
-import { ProfileServiceProvider } from './Modules/Profile/Infrastructure/Providers/ProfileServiceProvider'
-import { OrganizationServiceProvider } from './Modules/Organization/Infrastructure/Providers/OrganizationServiceProvider'
 import { ApiKeyServiceProvider } from './Modules/ApiKey/Infrastructure/Providers/ApiKeyServiceProvider'
-import { DashboardServiceProvider } from './Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
-import { CreditServiceProvider } from './Modules/Credit/Infrastructure/Providers/CreditServiceProvider'
-import { ContractServiceProvider } from './Modules/Contract/Infrastructure/Providers/ContractServiceProvider'
-import { AppModuleServiceProvider } from './Modules/AppModule/Infrastructure/Providers/AppModuleServiceProvider'
 import { AppApiKeyServiceProvider } from './Modules/AppApiKey'
-import { DevPortalServiceProvider } from './Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
-import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
-import { CliApiServiceProvider } from './Modules/CliApi/Infrastructure/Providers/CliApiServiceProvider'
-import { registerRoutes } from './routes'
-import { initializeRegistry } from './wiring/RepositoryRegistry'
-import { getCurrentORM } from './wiring/RepositoryFactory'
-import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
-import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import type { EnsureCoreAppModulesService } from './Modules/AppModule/Application/Services/EnsureCoreAppModulesService'
+import { AppModuleServiceProvider } from './Modules/AppModule/Infrastructure/Providers/AppModuleServiceProvider'
+import { AuthServiceProvider } from './Modules/Auth/Infrastructure/Providers/AuthServiceProvider'
+import { CliApiServiceProvider } from './Modules/CliApi/Infrastructure/Providers/CliApiServiceProvider'
+import { ContractServiceProvider } from './Modules/Contract/Infrastructure/Providers/ContractServiceProvider'
+import { CreditServiceProvider } from './Modules/Credit/Infrastructure/Providers/CreditServiceProvider'
+import { DashboardServiceProvider } from './Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
+import { DevPortalServiceProvider } from './Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
+import { HealthServiceProvider } from './Modules/Health/Infrastructure/Providers/HealthServiceProvider'
+import { OrganizationServiceProvider } from './Modules/Organization/Infrastructure/Providers/OrganizationServiceProvider'
+import { ProfileServiceProvider } from './Modules/Profile/Infrastructure/Providers/ProfileServiceProvider'
+import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
+import { PagesServiceProvider } from './Pages/Infrastructure/Providers/PagesServiceProvider'
+import { registerRoutes } from './routes'
+import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
+import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
+import { getCurrentORM } from './wiring/RepositoryFactory'
+import { initializeRegistry } from './wiring/RepositoryRegistry'
 
 export async function bootstrap(port = 3000): Promise<PlanetCore> {
   // 註冊表單驗證器
@@ -50,9 +51,12 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   core.register(createGravitoServiceProvider(new DevPortalServiceProvider()))
   core.register(createGravitoServiceProvider(new SdkApiServiceProvider()))
   core.register(createGravitoServiceProvider(new CliApiServiceProvider()))
+  core.register(createGravitoServiceProvider(new PagesServiceProvider()))
 
   await core.bootstrap()
-  await (core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService).execute()
+  await (
+    core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService
+  ).execute()
   await registerRoutes(core)
   core.registerGlobalErrorHandlers()
   return core

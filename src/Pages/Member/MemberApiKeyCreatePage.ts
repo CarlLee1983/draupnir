@@ -1,14 +1,20 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
 
+/**
+ * Member flow to create an API key within an org (`Member/ApiKeys/Create`).
+ */
 export class MemberApiKeyCreatePage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly createService: CreateApiKeyService,
   ) {}
 
+  /**
+   * @returns Create form with optional `orgId` from query or header.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')
@@ -22,7 +28,11 @@ export class MemberApiKeyCreatePage {
     })
   }
 
-  /** POST /member/api-keys — Inertia 表單（伺服端帶 JWT，避免瀏覽器 fetch 無法附 Bearer） */
+  /**
+   * POST `/member/api-keys`: creates a key from JSON body (`orgId`, `label`, rate limits).
+   *
+   * @returns Re-renders create page with `createdKey` on success or `formError` on failure.
+   */
   async store(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')

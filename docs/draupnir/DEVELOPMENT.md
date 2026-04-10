@@ -31,6 +31,10 @@ Active modules: Health, Auth, User, Organization, ApiKey, Dashboard, Credit.
 
 **Key points**: Framework-agnostic contracts in `src/Shared/`; ORM switchable via `ORM` env var; Repository pattern with `IDatabaseAccess`. Details: [`architecture/`](./architecture/)
 
+### Inertia pages (`src/Pages`)
+
+Server-driven Inertia routes, DI bindings per page class, and Vite asset wiring live under `src/Pages/`. When adding or changing a page, follow the checklist and JSDoc rules in **[`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md)** and [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md).
+
 ## Testing
 
 - CI runs with `ORM=memory` — no database required

@@ -1,14 +1,21 @@
+import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin organization list with pagination (`Admin/Organizations/Index`).
+ */
 export class AdminOrganizationsPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listService: ListOrganizationsService,
   ) {}
 
+  /**
+   * @param ctx - Query: `page`, `limit`.
+   * @returns Inertia list payload or auth failure response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

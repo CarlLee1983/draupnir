@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'bun:test'
-import { InertiaService } from '../InertiaService'
+import { describe, expect, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { InertiaService } from '../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -15,8 +15,10 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     params: {},
     query: {},
     headers: {},
-    json: (data: unknown, statusCode?: number) => Response.json(data, { status: statusCode ?? 200 }),
-    text: (content: string, statusCode?: number) => new Response(content, { status: statusCode ?? 200 }),
+    json: (data: unknown, statusCode?: number) =>
+      Response.json(data, { status: statusCode ?? 200 }),
+    text: (content: string, statusCode?: number) =>
+      new Response(content, { status: statusCode ?? 200 }),
     redirect: (url: string, statusCode?: number) => Response.redirect(url, statusCode ?? 302),
     get: <T>(key: string) => store.get(key) as T | undefined,
     set: (key: string, value: unknown) => {
@@ -32,7 +34,8 @@ describe('InertiaService', () => {
     return `<html><body><script type="application/json" data-page="app">${page}</script><div id="app"></div></body></html>`
   }
 
-  const viteTags = '<script type="module" src="http://localhost:5173/resources/js/app.tsx"></script>'
+  const viteTags =
+    '<script type="module" src="http://localhost:5173/resources/js/app.tsx"></script>'
 
   test('首次訪問回傳 HTML 頁面', async () => {
     const service = new InertiaService(renderHtml, viteTags, '1.0')

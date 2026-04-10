@@ -16,3 +16,5 @@
 | [`domain-events.md`](./domain-events.md) | Domain Events 實踐與使用指南 |
 | [`ddd-testing-anti-patterns.md`](./ddd-testing-anti-patterns.md) | 測試策略與常見反模式 |
 | [`auth-ddd-refactor-lessons.md`](./auth-ddd-refactor-lessons.md) | Auth DDD 重構經驗與可重用規則 |
+| [`jsdoc-standards.md`](./jsdoc-standards.md) | 原始碼 JSDoc／註解規範（與 Biome 格式化對齊） |
+| [`pages-inertia-architecture.md`](./pages-inertia-architecture.md) | `src/Pages` Inertia 路由、DI 綁定與檔案導覽 |

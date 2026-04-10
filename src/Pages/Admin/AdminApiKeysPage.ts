@@ -1,9 +1,12 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin view of API keys scoped by organization (`Admin/ApiKeys/Index`).
+ */
 export class AdminApiKeysPage {
   constructor(
     private readonly inertia: InertiaService,
@@ -11,6 +14,10 @@ export class AdminApiKeysPage {
     private readonly listOrgsService: ListOrganizationsService,
   ) {}
 
+  /**
+   * @param ctx - Query `orgId` selects which org’s keys to list (required for listing).
+   * @returns Inertia payload with org picker and keys or auth failure response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

@@ -1,9 +1,12 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
 
+/**
+ * Member profile settings: view and update display name (`Member/Settings/Index`).
+ */
 export class MemberSettingsPage {
   constructor(
     private readonly inertia: InertiaService,
@@ -11,6 +14,9 @@ export class MemberSettingsPage {
     private readonly updateProfileService: UpdateProfileService,
   ) {}
 
+  /**
+   * @returns Current profile for the authenticated user or login redirect.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')
@@ -24,7 +30,11 @@ export class MemberSettingsPage {
     })
   }
 
-  /** PUT /member/settings — Inertia 更新顯示名稱 */
+  /**
+   * PUT `/member/settings`: updates `displayName` from JSON body.
+   *
+   * @returns Re-rendered settings page with `formError` when update fails.
+   */
   async update(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')

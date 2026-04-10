@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 
+/** Single Vite manifest record (hashed output file plus optional CSS chunks). */
 export interface ViteManifestEntry {
   file: string
   css?: string[]
@@ -8,6 +9,10 @@ export interface ViteManifestEntry {
 
 export type ViteManifest = Record<string, ViteManifestEntry>
 
+/**
+ * Builds `<script>` / `<link>` tags for Vite entrypoints in development (dev server) or production
+ * (hashed paths under `/build/` from manifest).
+ */
 export class ViteTagHelper {
   constructor(
     private readonly env: string,
@@ -15,6 +20,11 @@ export class ViteTagHelper {
     private readonly manifest?: ViteManifest,
   ) {}
 
+  /**
+   * @param entrypoints - Manifest keys such as `resources/js/app.tsx` (production) or dev paths.
+   * @returns Concatenated HTML tags for injection into `app.html`.
+   * @throws {Error} When `env` is production and manifest is missing or incomplete for an entry.
+   */
   generateTags(entrypoints: string[]): string {
     if (this.env === 'production') {
       return this.productionTags(entrypoints)
@@ -63,6 +73,10 @@ export class ViteTagHelper {
     return [...cssTags, ...jsTags].join('\n    ')
   }
 
+  /**
+   * @param manifestPath - Absolute path to `manifest.json` under `public/build`.
+   * @returns Parsed manifest, or `undefined` if the file is missing or invalid JSON.
+   */
   static loadManifest(manifestPath: string): ViteManifest | undefined {
     try {
       const raw = readFileSync(manifestPath, 'utf-8')

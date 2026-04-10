@@ -1,9 +1,12 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin organization detail with member list (`Admin/Organizations/Show`).
+ */
 export class AdminOrganizationDetailPage {
   constructor(
     private readonly inertia: InertiaService,
@@ -11,6 +14,10 @@ export class AdminOrganizationDetailPage {
     private readonly listMembersService: ListMembersService,
   ) {}
 
+  /**
+   * @param ctx - Route param `id` = organization id.
+   * @returns Inertia detail payload or auth failure response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
@@ -30,7 +37,9 @@ export class AdminOrganizationDetailPage {
       this.listMembersService.execute(orgId, auth.userId, auth.role),
     ])
 
-    const orgData = orgResult.success ? (orgResult.data as Record<string, unknown> | undefined) : undefined
+    const orgData = orgResult.success
+      ? (orgResult.data as Record<string, unknown> | undefined)
+      : undefined
     const organization = orgData
       ? {
           id: orgData.id as string,
@@ -43,7 +52,7 @@ export class AdminOrganizationDetailPage {
 
     const rawMembers =
       membersResult.success && membersResult.data && typeof membersResult.data === 'object'
-        ? (membersResult.data as { members?: Record<string, unknown>[] }).members ?? []
+        ? ((membersResult.data as { members?: Record<string, unknown>[] }).members ?? [])
         : []
 
     const members = rawMembers.map((m) => ({

@@ -1,14 +1,20 @@
+import type { ListModulesService } from '@/Modules/AppModule/Application/Services/ListModulesService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { ListModulesService } from '@/Modules/AppModule/Application/Services/ListModulesService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin catalog of app modules (`Admin/Modules/Index`).
+ */
 export class AdminModulesPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listService: ListModulesService,
   ) {}
 
+  /**
+   * @returns Inertia list of modules or auth failure response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

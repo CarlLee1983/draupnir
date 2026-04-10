@@ -1,10 +1,17 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 
+/**
+ * POST handler for revoking a member API key (`/member/api-keys/:keyId/revoke`).
+ */
 export class MemberApiKeyRevokeHandler {
   constructor(private readonly revokeService: RevokeApiKeyService) {}
 
+  /**
+   * @param ctx - Route `keyId`; optional query `orgId` preserved on redirect.
+   * @returns Redirect to `/member/api-keys` or login when unauthenticated.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')

@@ -1,14 +1,21 @@
+import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin contract directory with status filter (`Admin/Contracts/Index`).
+ */
 export class AdminContractsPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listAdminContractsService: ListAdminContractsService,
   ) {}
 
+  /**
+   * @param ctx - Query: `page`, `limit`, optional `status`.
+   * @returns Inertia list payload or auth failure response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
@@ -34,7 +41,9 @@ export class AdminContractsPage {
             }
             const tid = String(row.targetId ?? '')
             const label =
-              tid.length > 10 ? `${String(row.targetType)} · ${tid.slice(0, 8)}…` : `${String(row.targetType)} · ${tid}`
+              tid.length > 10
+                ? `${String(row.targetType)} · ${tid.slice(0, 8)}…`
+                : `${String(row.targetType)} · ${tid}`
             return {
               id: row.id as string,
               name: label,

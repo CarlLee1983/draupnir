@@ -1,8 +1,9 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../InertiaService'
 
+/** Maps a list-contract DTO row to the Inertia table shape. */
 function mapContractRow(dto: Record<string, unknown>) {
   const terms = dto.terms as {
     creditQuota: number
@@ -19,12 +20,19 @@ function mapContractRow(dto: Record<string, unknown>) {
   }
 }
 
+/**
+ * Member-facing contract list for the selected organization (`Member/Contracts/Index`).
+ */
 export class MemberContractsPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listService: ListContractsService,
   ) {}
 
+  /**
+   * @param ctx - Query `orgId` or org header required to list contracts.
+   * @returns Inertia list, missing-org error, or login redirect.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.redirect('/login')

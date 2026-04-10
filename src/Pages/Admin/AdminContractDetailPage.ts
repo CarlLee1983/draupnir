@@ -1,10 +1,13 @@
+import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
+import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
+import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
-import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
-import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin contract detail with activate/terminate actions (`Admin/Contracts/Show`).
+ */
 export class AdminContractDetailPage {
   constructor(
     private readonly inertia: InertiaService,
@@ -13,6 +16,10 @@ export class AdminContractDetailPage {
     private readonly terminateContractService: TerminateContractService,
   ) {}
 
+  /**
+   * @param ctx - Route param `id` = contract id.
+   * @returns Inertia detail payload or auth failure response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
@@ -34,7 +41,12 @@ export class AdminContractDetailPage {
     })
   }
 
-  /** POST /admin/contracts/:id/action — body: { action: 'activate' | 'terminate' } */
+  /**
+   * POST `/admin/contracts/:id/action`: body `{ action: 'activate' | 'terminate' }`.
+   *
+   * @param ctx - Route param `id`; JSON body selects lifecycle transition.
+   * @returns Redirect to the same contract detail path.
+   */
   async postAction(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

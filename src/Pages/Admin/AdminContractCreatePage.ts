@@ -1,14 +1,20 @@
+import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
-import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import { requireAdmin } from './helpers/requireAdmin'
 
+/**
+ * Admin contract creation form and submit handler (`Admin/Contracts/Create`).
+ */
 export class AdminContractCreatePage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly createContractService: CreateContractService,
   ) {}
 
+  /**
+   * @returns Empty create form (Inertia).
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
@@ -18,7 +24,12 @@ export class AdminContractCreatePage {
     })
   }
 
-  /** POST /admin/contracts — Inertia 建立合約（沿用 JWT） */
+  /**
+   * POST `/admin/contracts`: parses JSON body and calls `CreateContractService.execute`.
+   *
+   * @param ctx - JSON body with target and terms; uses admin JWT from context.
+   * @returns Redirect to contract list on success or re-render with `formError`.
+   */
   async store(ctx: IHttpContext): Promise<Response> {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!

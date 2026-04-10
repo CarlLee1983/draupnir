@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach } from 'bun:test'
+import { afterEach, describe, expect, test } from 'bun:test'
 import { ViteTagHelper } from '../ViteTagHelper'
 
 describe('ViteTagHelper', () => {
@@ -11,9 +11,15 @@ describe('ViteTagHelper', () => {
   test('development mode returns Vite dev server tags', () => {
     const helper = new ViteTagHelper('development', 'http://localhost:5173')
     const tags = helper.generateTags(['resources/js/app.tsx', 'resources/css/app.css'])
-    expect(tags).toContain('<script type="module" src="http://localhost:5173/@vite/client"></script>')
-    expect(tags).toContain('<script type="module" src="http://localhost:5173/resources/js/app.tsx"></script>')
-    expect(tags).toContain('<link rel="stylesheet" href="http://localhost:5173/resources/css/app.css">')
+    expect(tags).toContain(
+      '<script type="module" src="http://localhost:5173/@vite/client"></script>',
+    )
+    expect(tags).toContain(
+      '<script type="module" src="http://localhost:5173/resources/js/app.tsx"></script>',
+    )
+    expect(tags).toContain(
+      '<link rel="stylesheet" href="http://localhost:5173/resources/css/app.css">',
+    )
   })
 
   test('production mode reads manifest and returns hashed tags', () => {
