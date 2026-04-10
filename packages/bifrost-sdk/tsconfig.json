@@ -2,14 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "esnext",
-    "lib": ["ES2020"],
     "moduleResolution": "bundler",
-    "rootDir": ".",
-    "outDir": "dist",
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
@@ -23,13 +16,9 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@/*": ["./src/*"],
-      "@gravito/prism": ["./node_modules/@gravito/prism/dist/index.js"],
-      "@gravito/signal": ["./node_modules/@gravito/signal/dist/index.mjs"],
-      "@gravito/stasis": ["./node_modules/@gravito/stasis/dist/index.js"]
-    }
+    "rootDir": ".",
+    "outDir": "dist"
   },
-  "include": ["src", "tests", "config", "types", "database", "packages"],
+  "include": ["src", "__tests__"],
   "exclude": ["node_modules", "dist"]
 }
