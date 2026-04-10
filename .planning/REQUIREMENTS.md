@@ -104,57 +104,55 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 
 ## Traceability
 
-<!-- Populated by gsd-roadmapper in Step 8 -->
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IFACE-01 | — | Pending |
-| IFACE-02 | — | Pending |
-| IFACE-03 | — | Pending |
-| IFACE-04 | — | Pending |
-| ADAPT-01 | — | Pending |
-| ADAPT-02 | — | Pending |
-| ADAPT-03 | — | Pending |
-| ADAPT-04 | — | Pending |
-| ADAPT-05 | — | Pending |
-| ADAPT-06 | — | Pending |
-| WIRE-01 | — | Pending |
-| WIRE-02 | — | Pending |
-| WIRE-03 | — | Pending |
-| WIRE-04 | — | Pending |
-| WIRE-05 | — | Pending |
-| WIRE-06 | — | Pending |
-| MIGRATE-01 | — | Pending |
-| MIGRATE-02 | — | Pending |
-| MIGRATE-03 | — | Pending |
-| MIGRATE-04 | — | Pending |
-| MIGRATE-05 | — | Pending |
-| MIGRATE-06 | — | Pending |
-| RENAME-01 | — | Pending |
-| RENAME-02 | — | Pending |
-| RENAME-03 | — | Pending |
-| RENAME-04 | — | Pending |
-| SDK-01 | — | Pending |
-| SDK-02 | — | Pending |
-| SDK-03 | — | Pending |
-| SDK-04 | — | Pending |
-| SDK-05 | — | Pending |
-| SDK-06 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TEST-04 | — | Pending |
-| QUAL-01 | — | Pending |
-| QUAL-02 | — | Pending |
-| QUAL-03 | — | Pending |
-| QUAL-04 | — | Pending |
-| QUAL-05 | — | Pending |
+| IFACE-01 | Phase 1 | Pending |
+| IFACE-02 | Phase 1 | Pending |
+| IFACE-03 | Phase 1 | Pending |
+| IFACE-04 | Phase 1 | Pending |
+| ADAPT-01 | Phase 1 | Pending |
+| ADAPT-02 | Phase 1 | Pending |
+| ADAPT-03 | Phase 1 | Pending |
+| ADAPT-04 | Phase 1 | Pending |
+| ADAPT-05 | Phase 1 | Pending |
+| ADAPT-06 | Phase 1 | Pending |
+| WIRE-01 | Phase 1 | Pending |
+| WIRE-02 | Phase 2 | Pending |
+| WIRE-03 | Phase 2 | Pending |
+| WIRE-04 | Phase 2 | Pending |
+| WIRE-05 | Phase 2 | Pending |
+| WIRE-06 | Phase 2 | Pending |
+| MIGRATE-01 | Phase 2 | Pending |
+| MIGRATE-02 | Phase 2 | Pending |
+| MIGRATE-03 | Phase 2 | Pending |
+| MIGRATE-04 | Phase 2 | Pending |
+| MIGRATE-05 | Phase 2 | Pending |
+| MIGRATE-06 | Phase 2 | Pending |
+| RENAME-01 | Phase 3 | Pending |
+| RENAME-02 | Phase 3 | Pending |
+| RENAME-03 | Phase 3 | Pending |
+| RENAME-04 | Phase 3 | Pending |
+| SDK-01 | Phase 4 | Pending |
+| SDK-02 | Phase 4 | Pending |
+| SDK-03 | Phase 4 | Pending |
+| SDK-04 | Phase 4 | Pending |
+| SDK-05 | Phase 4 | Pending |
+| SDK-06 | Phase 4 | Pending |
+| TEST-01 | Phase 2 | Pending |
+| TEST-02 | Phase 5 | Pending |
+| TEST-03 | Phase 2 | Pending |
+| TEST-04 | Phase 5 | Pending |
+| QUAL-01 | Phase 5 | Pending |
+| QUAL-02 | Phase 5 | Pending |
+| QUAL-03 | Phase 5 | Pending |
+| QUAL-04 | Phase 5 | Pending |
+| QUAL-05 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 41 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 41 ⚠️
+- Mapped to phases: 41/41 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-10*
-*Last updated: 2026-04-10 after initial definition*
+*Last updated: 2026-04-10 — traceability populated by gsd-roadmapper*
