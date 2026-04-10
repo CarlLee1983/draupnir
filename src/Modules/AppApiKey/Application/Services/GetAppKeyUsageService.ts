@@ -34,7 +34,7 @@ export class GetAppKeyUsageService {
         request.startDate || request.endDate
           ? { startTime: request.startDate, endTime: request.endDate }
           : undefined
-      const stats = await this.gatewayClient.getUsageStats([key.bifrostVirtualKeyId], query)
+      const stats = await this.gatewayClient.getUsageStats([key.gatewayKeyId], query)
 
       return {
         success: true,

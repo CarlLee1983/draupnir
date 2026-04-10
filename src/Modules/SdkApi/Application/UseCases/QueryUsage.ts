@@ -16,7 +16,7 @@ export class QueryUsage {
           ? { startTime: options.startDate, endTime: options.endDate }
           : undefined
 
-      const stats = await this.gatewayClient.getUsageStats([auth.bifrostVirtualKeyId], query)
+      const stats = await this.gatewayClient.getUsageStats([auth.gatewayKeyId], query)
 
       return {
         success: true,
