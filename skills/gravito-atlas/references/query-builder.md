@@ -110,9 +110,23 @@ q.skip(20)                // alias for offset
 q.distinct()
 ```
 
-For stable pagination: call `.ensureDeterministicOrder()` to ensure a tie-breaker on the primary key.
+## Repository Pattern Abstraction
 
-## Joins
+In larger Gravito projects like **Draupnir**, repositories do not depend on Atlas's `DB` singleton directly. Instead, they depend on an `IDatabaseAccess` port.
+
+This abstraction allows for swapping the backend (e.g., to Drizzle, Prisma, or an in-memory test implementation) without modifying domain logic or repository code.
+
+```typescript
+// Repository constructor
+constructor(private readonly db: IDatabaseAccess) {}
+
+// Usage inside repository
+async find(id: string) {
+  return await this.db.table('users').where('id', '=', id).first()
+}
+```
+
+The `AtlasDatabaseAccess` adapter maps these calls to Atlas's `DB.table()` API. See `src/Shared/Infrastructure/IDatabaseAccess.ts` and `src/Shared/Infrastructure/Database/Adapters/Atlas/` for the implementation.
 
 ```typescript
 q.join('posts', 'users.id', '=', 'posts.user_id')

@@ -213,9 +213,11 @@ npx orbit make:migration <name> # generate a new migration file
 
 Migrations are tracked in a `migrations` table (`id`, `migration`, `batch`). Rollback runs the most recent batch in reverse.
 
-## General conventions
+## Draupnir conventions
 
-1. **Always use `Schema.dropIfExists` in `down()`**, never bare `Schema.drop()`.
-2. **One logical concern per migration file.**
-3. **Never edit an already-applied migration** on a shared environment — create a new migration to alter the schema.
-4. **`.nullable()` is opt-in** — columns are NOT NULL by default.
+1. **App-generated string IDs**: Use `table.string('id').primary()` instead of `table.id()` or `table.uuid()` to allow the application to control UUID generation (e.g., using `crypto.randomUUID()`).
+2. **Timestamps**: Always include `table.timestamps()` to track `created_at` and `updated_at`.
+3. **Soft Deletes**: Use `table.softDeletes()` for resources that should not be permanently deleted (like Organizations, Applications).
+4. **Consistency**: Use snake_case for database columns, even if the application uses camelCase (Atlas handles the mapping).
+5. **Nullability**: Use `.nullable()` explicitly for optional fields (like `webhook_url`, `description`).
+6. **Unique Constraints**: Ensure email and slugs are unique at the database level using `.unique()`.

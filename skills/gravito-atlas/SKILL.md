@@ -39,6 +39,8 @@ Running CLI tasks (migrate, seed, make:migration)?
 
 ## Setup
 
+For standalone projects:
+
 ```typescript
 import { DB } from '@gravito/atlas'
 
@@ -48,20 +50,22 @@ DB.configure({
 })
 ```
 
-For PostgreSQL / MySQL:
+### Gravito Core Integration (`OrbitAtlas`)
+
+In Gravito-based projects like Draupnir, use the `OrbitAtlas` class. This orbit automatically reads the `database` configuration and registers the `DB` singleton with the core container.
 
 ```typescript
-DB.configure({
-  client: 'pg',
-  connection: {
-    host: 'localhost',
-    port: 5432,
-    user: 'myuser',
-    password: 'mypassword',
-    database: 'mydb',
-  },
-})
+// config/orbits.ts
+import { OrbitAtlas } from '@gravito/atlas'
+
+export function getOrbits() {
+  return [
+    OrbitAtlas, // Automatically configured
+  ]
+}
 ```
+
+**MySQL Driver Tip:** When using MySQL, it is recommended to set `useNativeDriver: false` in the configuration to use the `mysql2` driver instead of the Bun-native driver, ensuring compatibility with complex `.unsafe` queries.
 
 ## Minimal examples
 

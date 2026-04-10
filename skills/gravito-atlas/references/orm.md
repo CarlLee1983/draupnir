@@ -117,30 +117,54 @@ const users = await User.with('posts').get()
 const users = await User.with({ posts: q => q.where('published', true) }).get()
 ```
 
-## Soft deletes
+## Lifecycle hooks
+
+Models support several decorators for intercepting lifecycle events. All hooks receive the model instance.
 
 ```typescript
-@SoftDeletes()
-class Post extends Model { ... }
+import { Model, column, beforeSave, afterCreate, beforeDelete } from '@gravito/atlas'
 
-await Post.find(1)            // filters deleted_at IS NULL automatically
-Post.query().withTrashed()    // include deleted
-Post.query().onlyTrashed()    // only deleted
-```
+class User extends Model {
+  @column({ isPrimary: true })
+  declare id: string
 
-## Sharding
+  @beforeSave()
+  static async hashPassword(user: User) {
+    if (user.$isDirty('password')) {
+      user.password = await hash(user.password)
+    }
+  }
 
-```typescript
-@sharded({ manager: 'default', key: 'tenantId' })
-class Document extends Model {
-  @column() declare tenantId: string
-  @column() declare content: string
+  @afterCreate()
+  static async welcomeEmail(user: User) {
+    await sendWelcome(user.email)
+  }
+
+  @beforeDelete()
+  static async cleanup(user: User) {
+    await user.posts.delete()
+  }
 }
-
-await Document.shard(tenantId).where('id', docId).first()
 ```
 
-Requires a `ShardingManager` registered via `DB.addShardingManager('default', manager)`.
+Supported hooks: `@beforeSave`, `@afterSave`, `@beforeCreate`, `@afterCreate`, `@beforeUpdate`, `@afterUpdate`, `@beforeDelete`, `@afterDelete`, `@afterFetch`, `@afterFind`.
+
+## Best practices
+
+### Repository pattern vs. Active Record
+
+While Atlas provides a powerful Active Record ORM (`extends Model`), many Draupnir projects prefer a **Repository Pattern** with a manual mapping layer (using the Query Builder).
+
+| Approach | Pattern | Pros | Cons |
+|---|---|---|---|
+| **Active Record** | `User.find(1)` | High productivity, less boilerplate. | Harder to swap ORM, logic leaks into Model. |
+| **Repository** | `authRepo.findById(1)` | Clean domain models, testable, ORM-agnostic. | More boilerplate (mapping logic). |
+
+In Draupnir, the Repository pattern is implemented using an `IDatabaseAccess` abstraction that wraps the Atlas Query Builder. This allows for in-memory implementations during unit tests.
+
+### Relationship loading
+
+Always prefer **Eager Loading** (`.with()`) over Lazy Loading to avoid N+1 query performance issues. Atlas includes a built-in detector that will warn you in development if it detects an N+1 query pattern.
 
 ## Seeders and factories
 
