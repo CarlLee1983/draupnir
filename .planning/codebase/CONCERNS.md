@@ -6,6 +6,9 @@
 
 ### 1. Tight Coupling to BifrostClient (Critical - Blocking LLM Gateway Abstraction)
 
+> **STATUS: Resolved — 2026-04-10**
+> Resolved across Phases 1-4. `ILLMGatewayClient` interface and `BifrostGatewayAdapter` introduced (Phase 1); all 7 application services migrated to the interface (Phase 2); `bifrostVirtualKeyId` renamed to `gatewayKeyId` in domain aggregates (Phase 3); `BifrostClient` extracted to `packages/bifrost-sdk/` workspace package (Phase 4). Zero files under `src/Modules/` or `src/Foundation/Application/` import `BifrostClient`.
+
 **Issue:** Business logic throughout the codebase directly depends on the `BifrostClient` concrete class. Switching to a different LLM gateway would require architectural refactoring across multiple modules.
 
 **Files:**
@@ -36,6 +39,9 @@
 
 ### 2. Leaky Snake_case Abstractions from Bifrost
 
+> **STATUS: Resolved — 2026-04-10**
+> Resolved in Phases 1 and 3. `ILLMGatewayClient` DTOs use camelCase exclusively (`keyId`, `maxLimit`, `resetDuration`, etc.); snake_case conversion is isolated to the `BifrostGatewayAdapter` boundary (Phase 1). `bifrostVirtualKeyId` field renamed to `gatewayKeyId` in `AppApiKey` and `ApiKey` domain aggregates; repositories map to the unchanged DB column `bifrost_virtual_key_id` (Phase 3).
+
 **Issue:** Bifrost API returns snake_case fields (`virtual_key_id`, `total_requests`, `token_max_limit`) that leak into domain models and service logic. Domain code uses snake_case identifiers borrowed from Bifrost.
 
 **Files:**
@@ -63,6 +69,9 @@
 ---
 
 ### 3. Missing ILLMGatewayClient Abstraction Layer
+
+> **STATUS: Resolved — 2026-04-10**
+> Resolved in Phase 1. `ILLMGatewayClient` interface created at `src/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient.ts`. `BifrostGatewayAdapter` and `MockGatewayClient` implemented. `llmGatewayClient` singleton registered in `FoundationServiceProvider` and injected throughout the application layer.
 
 **Issue:** There is no `ILLMGatewayClient` interface. The design specification exists (`docs/superpowers/specs/2026-04-10-llm-gateway-abstraction-design.md`), but implementation has not begun.
 
@@ -143,6 +152,9 @@
 ## Configuration & Environment Coupling
 
 ### 6. Bifrost-Specific Environment Variables Hardcoded Across Services
+
+> **STATUS: Partially Resolved — 2026-04-10**
+> Partially resolved in Phase 4. Hardcoded Bifrost proxy URL moved from `SdkApiServiceProvider` into `BifrostClientConfig.proxyBaseUrl` in `packages/bifrost-sdk/` (Phase 4). Remaining: `BIFROST_API_URL` / `BIFROST_MASTER_KEY` env var names, `ErrorCodes.BIFROST_ERROR` / `ErrorCodes.BIFROST_TIMEOUT` constants — renaming is a breaking API change deferred to a future milestone.
 
 **Issue:** Environment configuration is tightly coupled to Bifrost. Switching gateways would require changing env vars in multiple places.
 

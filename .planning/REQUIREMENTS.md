@@ -61,17 +61,17 @@
 ### Tests (TEST)
 
 - [x] **TEST-01**: Tests that previously mocked `BifrostClient` (e.g., `AppKeyBifrostSync.test.ts`, `GetAppKeyUsageService.test.ts`, `ApiKeyBifrostSync.test.ts`) are rewritten to mock `ILLMGatewayClient` or use `MockGatewayClient`
-- [ ] **TEST-02**: No test file imports the `BifrostClient` concrete class after migration (verified by `grep` excluding the sdk package itself)
+- [x] **TEST-02**: No test file imports the `BifrostClient` concrete class after migration (verified by `grep` excluding the sdk package itself)
 - [x] **TEST-03**: Full Bun unit + feature test suite passes at every phase boundary
-- [ ] **TEST-04**: Playwright E2E suite passes unchanged (`bun run test:e2e`)
+- [x] **TEST-04**: Playwright E2E suite passes unchanged (`bun run test:e2e`)
 
 ### Quality Gates (QUALITY)
 
-- [ ] **QUAL-01**: `bun run lint` (Biome) is clean across the workspace (root + `packages/bifrost-sdk`)
-- [ ] **QUAL-02**: `bun run typecheck` (`tsc --noEmit`) is clean across the workspace
-- [ ] **QUAL-03**: No new `any` types or `@ts-ignore` introduced by the refactor (verified by diff review)
-- [ ] **QUAL-04**: HTTP routes and request/response shapes unchanged — smoke-check via `routes-connectivity.test.ts` / `routes-existence.test.ts`
-- [ ] **QUAL-05**: `.planning/codebase/CONCERNS.md` items #1, #2, #3 (Bifrost coupling, snake_case leakage, missing abstraction) are resolved or explicitly updated to reflect new state
+- [x] **QUAL-01**: `bun run lint` (Biome) is clean across the workspace (root + `packages/bifrost-sdk`)
+- [x] **QUAL-02**: `bun run typecheck` (`tsc --noEmit`) is clean across the workspace
+- [x] **QUAL-03**: No new `any` types or `@ts-ignore` introduced by the refactor (verified by diff review)
+- [x] **QUAL-04**: HTTP routes and request/response shapes unchanged — smoke-check via `routes-connectivity.test.ts` / `routes-existence.test.ts`
+- [x] **QUAL-05**: `.planning/codebase/CONCERNS.md` items #1, #2, #3 (Bifrost coupling, snake_case leakage, missing abstraction) are resolved or explicitly updated to reflect new state
 
 ## v2 Requirements
 
@@ -145,14 +145,14 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | SDK-05 | Phase 4 | Complete |
 | SDK-06 | Phase 4 | Pending |
 | TEST-01 | Phase 2 | Complete |
-| TEST-02 | Phase 5 | Pending |
+| TEST-02 | Phase 5 | Complete |
 | TEST-03 | Phase 2 | Complete |
-| TEST-04 | Phase 5 | Pending |
-| QUAL-01 | Phase 5 | Pending |
-| QUAL-02 | Phase 5 | Pending |
-| QUAL-03 | Phase 5 | Pending |
-| QUAL-04 | Phase 5 | Pending |
-| QUAL-05 | Phase 5 | Pending |
+| TEST-04 | Phase 5 | Complete |
+| QUAL-01 | Phase 5 | Complete |
+| QUAL-02 | Phase 5 | Complete |
+| QUAL-03 | Phase 5 | Complete |
+| QUAL-04 | Phase 5 | Complete |
+| QUAL-05 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 44 total

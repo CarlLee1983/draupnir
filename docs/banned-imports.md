@@ -55,7 +55,7 @@ const fullPath = resolve(process.cwd(), 'public/build/manifest.json')
 
 ```typescript
 // ✅ 推薦
-// 位置：src/Pages/page-routes.ts
+// 位置：src/Pages/routing/pathUtils.ts
 const fullPath = joinPath(process.cwd(), 'public/build/manifest.json')
 ```
 
@@ -178,7 +178,7 @@ git commit --no-verify -m "..."
 | `docs/DEPENDENCY_OPTIMIZATION_TODO.md` | 待實施任務清單 |
 | `scripts/check-banned-imports.sh` | 檢查腳本實作 |
 | `scripts/setup-hooks.sh` | Hook 安裝腳本 |
-| `src/Pages/page-routes.ts` | `joinPath()` / `normalizePath()` 實作位置 |
+| `src/Pages/routing/pathUtils.ts` | `joinPath()` / `normalizePath()` 實作位置 |
 
 ---
 
