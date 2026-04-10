@@ -53,9 +53,9 @@
 
 - [ ] **SDK-01**: `packages/bifrost-sdk/` exists as a Bun workspace package with its own `package.json`, `tsconfig.json`, and `README.md`
 - [ ] **SDK-02**: `BifrostClient`, `BifrostClientConfig`, types, errors, and retry logic are moved from `src/Foundation/Infrastructure/Services/BifrostClient/` into `packages/bifrost-sdk/src/` and re-exported from its `index.ts`
-- [ ] **SDK-03**: Root `package.json` declares `packages/*` under `workspaces`; Draupnir imports `BifrostClient` from `@draupnir/bifrost-sdk` (or agreed scope) via `workspace:*`
-- [ ] **SDK-04**: `src/Foundation/Infrastructure/Services/BifrostClient/` directory is deleted, with no dangling imports anywhere in the repo
-- [ ] **SDK-05**: Hardcoded Bifrost proxy URL currently in `SdkApiServiceProvider` moves into `bifrost-sdk`'s config surface (e.g., `BifrostClientConfig.proxyBaseUrl`), and `ProxyModelCall` continues to work unchanged via the SDK
+- [x] **SDK-03**: Root `package.json` declares `packages/*` under `workspaces`; Draupnir imports `BifrostClient` from `@draupnir/bifrost-sdk` (or agreed scope) via `workspace:*`
+- [x] **SDK-04**: `src/Foundation/Infrastructure/Services/BifrostClient/` directory is deleted, with no dangling imports anywhere in the repo
+- [x] **SDK-05**: Hardcoded Bifrost proxy URL currently in `SdkApiServiceProvider` moves into `bifrost-sdk`'s config surface (e.g., `BifrostClientConfig.proxyBaseUrl`), and `ProxyModelCall` continues to work unchanged via the SDK
 - [ ] **SDK-06**: `packages/bifrost-sdk/` has at least one self-contained smoke test that builds and runs without importing anything from Draupnir `src/`
 
 ### Tests (TEST)
@@ -140,9 +140,9 @@ Deferred for now — acknowledged but not in this milestone's roadmap.
 | RENAME-04 | Phase 3 | Complete |
 | SDK-01 | Phase 4 | Pending |
 | SDK-02 | Phase 4 | Pending |
-| SDK-03 | Phase 4 | Pending |
-| SDK-04 | Phase 4 | Pending |
-| SDK-05 | Phase 4 | Pending |
+| SDK-03 | Phase 4 | Complete |
+| SDK-04 | Phase 4 | Complete |
+| SDK-05 | Phase 4 | Complete |
 | SDK-06 | Phase 4 | Pending |
 | TEST-01 | Phase 2 | Complete |
 | TEST-02 | Phase 5 | Pending |

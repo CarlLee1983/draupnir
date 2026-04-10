@@ -85,8 +85,8 @@ Plans:
 **UI hint**: no
 **Plans**: 2 plans
 Plans:
-- [ ] 04-01-PLAN.md — SDK package scaffold: create packages/bifrost-sdk/, copy source files, add proxyBaseUrl to config, smoke test
-- [ ] 04-02-PLAN.md — Import rewiring: update all src/ and test imports to @draupnir/bifrost-sdk, update scripts, delete old directory
+- [x] 04-01-PLAN.md — SDK package scaffold: create packages/bifrost-sdk/, copy source files, add proxyBaseUrl to config, smoke test
+- [x] 04-02-PLAN.md — Import rewiring: update all src/ and test imports to @draupnir/bifrost-sdk, update scripts, delete old directory
 
 ### Phase 5: Final Verification
 **Goal**: The milestone is provably complete — zero gateway-specific imports in business layer, all quality gates pass, and CONCERNS.md reflects the resolved state.

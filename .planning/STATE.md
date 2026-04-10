@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 02-05-PLAN.md — Dashboard module migrated to ILLMGatewayClient
-last_updated: "2026-04-10T08:51:34.552Z"
+status: Ready to execute
+stopped_at: Completed 04-02-PLAN.md — SDK import rewiring complete, old BifrostClient directory deleted
+last_updated: "2026-04-10T09:40:42.255Z"
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 4
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-10)
 
 **Core value:** No file under `src/Modules/` or `src/Foundation/Application/` may import a Bifrost-specific symbol after this milestone ships. Gateway is a compile-time wiring decision, never a domain concern.
-**Current focus:** Phase 03 — domain-rename
+**Current focus:** Phase 04 — sdk-extraction
 
 ## Current Position
 
-Phase: 4
-Plan: Not started
+Phase: 04 (sdk-extraction) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Plan: Not started
 | Phase 02-business-layer-migration P02 | 8 | 2 tasks | 6 files |
 | Phase 02 P03 | 12 | 2 tasks | 6 files |
 | Phase 02-business-layer-migration P05 | 10 | 3 tasks | 8 files |
+| Phase 04-sdk-extraction P02 | 485 | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,7 @@ Recent decisions affecting current work:
 - [Phase 02]: HandleCreditToppedUpService.retryPending 不存在，不需套用 D-P02（deferred per CONTEXT.md）
 - [Phase 02]: RevokeAppKeyService/RotateAppKeyService 測試因 AppKeyBifrostSync 建構子簽章變更同步遷移至 MockGatewayClient（Rule 1 auto-fix）
 - [Phase 02-business-layer-migration]: UsageQuery 擴充 providers/models/limit 欄位以解決 TypeScript strict mode 阻擋問題；BifrostGatewayAdapter 條件式轉發新欄位
+- [Phase 04-sdk-extraction]: bifrostConfig 作為獨立 DI singleton 讓 BifrostClient 建構與 SdkApiServiceProvider.proxyModelCall 共享同一份 config 實例，不重複呼叫 createBifrostClientConfig()
 
 ### Pending Todos
 
@@ -85,6 +87,6 @@ None yet. Note for Phase 4 planning: confirm Bun workspace `workspace:*` protoco
 
 ## Session Continuity
 
-Last session: 2026-04-10T07:40:39.657Z
-Stopped at: Completed 02-05-PLAN.md — Dashboard module migrated to ILLMGatewayClient
+Last session: 2026-04-10T09:40:42.251Z
+Stopped at: Completed 04-02-PLAN.md — SDK import rewiring complete, old BifrostClient directory deleted
 Resume file: None
