@@ -1,0 +1,160 @@
+# Requirements: Draupnir — LLM Gateway Abstraction
+
+**Defined:** 2026-04-10
+**Core Value:** No file under `src/Modules/` or `src/Foundation/Application/` may import a Bifrost-specific symbol after this milestone ships. Gateway is a compile-time wiring decision, never a domain concern.
+
+## v1 Requirements
+
+### Interface & Types (IFACE)
+
+- [ ] **IFACE-01**: `ILLMGatewayClient` interface exists at `src/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient.ts` with methods `createKey`, `updateKey`, `deleteKey`, `getUsageStats`
+- [ ] **IFACE-02**: DTO types (`CreateKeyRequest`, `UpdateKeyRequest`, `KeyResponse`, `UsageQuery`, `UsageStats`) exist at `src/Foundation/Infrastructure/Services/LLMGateway/types.ts` with `readonly` fields and camelCase naming only
+- [ ] **IFACE-03**: `GatewayError` class exists at `src/Foundation/Infrastructure/Services/LLMGateway/errors.ts` exposing `statusCode` and optional `originalError`, and is the single error type adapters re-throw
+- [ ] **IFACE-04**: A barrel export `src/Foundation/Infrastructure/Services/LLMGateway/index.ts` exposes the interface, types, and errors as the public API of the abstraction layer
+
+### Adapters (ADAPT)
+
+- [ ] **ADAPT-01**: `BifrostGatewayAdapter` exists at `src/Foundation/Infrastructure/Services/LLMGateway/implementations/BifrostGatewayAdapter.ts`, implements `ILLMGatewayClient`, and wraps an injected `BifrostClient`
+- [ ] **ADAPT-02**: `BifrostGatewayAdapter` converts snake_case ↔ camelCase at the boundary for all four methods (no snake_case leaks out through the interface)
+- [ ] **ADAPT-03**: `BifrostGatewayAdapter` catches Bifrost-specific errors and re-throws them as `GatewayError` with preserved `statusCode` and `originalError`
+- [ ] **ADAPT-04**: `MockGatewayClient` exists at `src/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient.ts`, implements `ILLMGatewayClient` with in-memory behavior (no HTTP), and is usable in tests
+- [ ] **ADAPT-05**: Unit tests cover `BifrostGatewayAdapter` request/response mapping and error translation (`tests/Unit/Foundation/LLMGateway/BifrostGatewayAdapter.test.ts`)
+- [ ] **ADAPT-06**: Unit tests cover `MockGatewayClient` behaviour so downstream tests can rely on it as a reference implementation
+
+### Wiring (WIRE)
+
+- [ ] **WIRE-01**: Main `ServiceProvider` (or project bootstrap) registers `llmGatewayClient` as a singleton bound to `BifrostGatewayAdapter`, which itself receives the singleton `bifrostClient`
+- [ ] **WIRE-02**: `wireAppApiKey` resolves `llmGatewayClient` from the container and passes it to services that previously received `bifrostClient`
+- [ ] **WIRE-03**: `wireApiKey` is updated the same way for the separate `ApiKey` module
+- [ ] **WIRE-04**: `wireSdkApi` is updated for the `QueryUsage` injection (but **not** `ProxyModelCall` — see SDK-05)
+- [ ] **WIRE-05**: `wireDashboard` is updated for `UsageAggregator`
+- [ ] **WIRE-06**: No application-layer constructor type signature references `BifrostClient` after this requirement is complete
+
+### Business-Layer Migration (MIGRATE)
+
+- [ ] **MIGRATE-01**: `AppKeyBifrostSync` constructor parameter type changes from `BifrostClient` to `ILLMGatewayClient`, and all method calls use the new interface vocabulary
+- [ ] **MIGRATE-02**: `ApiKeyBifrostSync` (the `ApiKey` module sibling missing from the original spec) migrates the same way
+- [ ] **MIGRATE-03**: `GetAppKeyUsageService` migrates to `ILLMGatewayClient` and uses camelCase query types
+- [ ] **MIGRATE-04**: `QueryUsage` (SdkApi UseCase) migrates to `ILLMGatewayClient`
+- [ ] **MIGRATE-05**: `UsageAggregator` (Dashboard) migrates to `ILLMGatewayClient` and stops passing snake_case query parameters
+- [ ] **MIGRATE-06**: Any remaining direct `BifrostClient` imports in application layer are removed (verified by `grep`)
+
+### Domain Rename (RENAME)
+
+- [ ] **RENAME-01**: TS field `bifrostVirtualKeyId` → `gatewayKeyId` in `src/Modules/AppApiKey/Domain/Aggregates/AppApiKey.ts` (and value objects, if any)
+- [ ] **RENAME-02**: TS field `bifrostVirtualKeyId` → `gatewayKeyId` in `src/Modules/ApiKey/Domain/Aggregates/ApiKey.ts`
+- [ ] **RENAME-03**: Repository layer (`AppApiKeyRepository`, `ApiKeyRepository`, multi-ORM implementations) maps `gatewayKeyId` ↔ existing DB column `bifrost_virtual_key_id` — no DB migration
+- [ ] **RENAME-04**: All call sites across modules and tests updated to `gatewayKeyId`; no references to `bifrostVirtualKeyId` remain in TS source (verified by `grep`)
+
+### SDK Extraction (SDK)
+
+- [ ] **SDK-01**: `packages/bifrost-sdk/` exists as a Bun workspace package with its own `package.json`, `tsconfig.json`, and `README.md`
+- [ ] **SDK-02**: `BifrostClient`, `BifrostClientConfig`, types, errors, and retry logic are moved from `src/Foundation/Infrastructure/Services/BifrostClient/` into `packages/bifrost-sdk/src/` and re-exported from its `index.ts`
+- [ ] **SDK-03**: Root `package.json` declares `packages/*` under `workspaces`; Draupnir imports `BifrostClient` from `@draupnir/bifrost-sdk` (or agreed scope) via `workspace:*`
+- [ ] **SDK-04**: `src/Foundation/Infrastructure/Services/BifrostClient/` directory is deleted, with no dangling imports anywhere in the repo
+- [ ] **SDK-05**: Hardcoded Bifrost proxy URL currently in `SdkApiServiceProvider` moves into `bifrost-sdk`'s config surface (e.g., `BifrostClientConfig.proxyBaseUrl`), and `ProxyModelCall` continues to work unchanged via the SDK
+- [ ] **SDK-06**: `packages/bifrost-sdk/` has at least one self-contained smoke test that builds and runs without importing anything from Draupnir `src/`
+
+### Tests (TEST)
+
+- [ ] **TEST-01**: Tests that previously mocked `BifrostClient` (e.g., `AppKeyBifrostSync.test.ts`, `GetAppKeyUsageService.test.ts`, `ApiKeyBifrostSync.test.ts`) are rewritten to mock `ILLMGatewayClient` or use `MockGatewayClient`
+- [ ] **TEST-02**: No test file imports the `BifrostClient` concrete class after migration (verified by `grep` excluding the sdk package itself)
+- [ ] **TEST-03**: Full Bun unit + feature test suite passes at every phase boundary
+- [ ] **TEST-04**: Playwright E2E suite passes unchanged (`bun run test:e2e`)
+
+### Quality Gates (QUALITY)
+
+- [ ] **QUAL-01**: `bun run lint` (Biome) is clean across the workspace (root + `packages/bifrost-sdk`)
+- [ ] **QUAL-02**: `bun run typecheck` (`tsc --noEmit`) is clean across the workspace
+- [ ] **QUAL-03**: No new `any` types or `@ts-ignore` introduced by the refactor (verified by diff review)
+- [ ] **QUAL-04**: HTTP routes and request/response shapes unchanged — smoke-check via `routes-connectivity.test.ts` / `routes-existence.test.ts`
+- [ ] **QUAL-05**: `.planning/codebase/CONCERNS.md` items #1, #2, #3 (Bifrost coupling, snake_case leakage, missing abstraction) are resolved or explicitly updated to reflect new state
+
+## v2 Requirements
+
+Deferred for now — acknowledged but not in this milestone's roadmap.
+
+### Multi-Gateway
+
+- **GATE-V2-01**: Implement an `OpenRouterGatewayAdapter` against the now-stable `ILLMGatewayClient`
+- **GATE-V2-02**: Implement a `GeminiGatewayAdapter`
+- **GATE-V2-03**: Build-time gateway selection factory (once there's more than one real adapter to pick from)
+
+### Proxy Abstraction
+
+- **PROXY-V2-01**: Extend `ILLMGatewayClient` (or create `ILLMProxyClient`) to cover raw chat-completion forwarding so `ProxyModelCall` can also go through the abstraction
+- **PROXY-V2-02**: Gateway-agnostic streaming response handling
+
+### SDK Publishing
+
+- **SDK-V2-01**: Publish `bifrost-sdk` to a private npm registry and decouple its release cadence from Draupnir
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Abstracting `ProxyModelCall` behind `ILLMGatewayClient` | Chat-completion proxying has a different shape than key management; would delay the interface landing. Deferred to v2. |
+| Implementing an `OpenRouter` or `Gemini` adapter in this milestone | Interface correctness is validated by one real adapter + the mock. Real second adapters become trivial follow-ups. |
+| Runtime gateway switching via env vars | Gateway is a compile-time ServiceProvider decision. No factory-by-env-var pattern. |
+| Renaming the DB column `bifrost_virtual_key_id` | Migration risk is not worth it for this refactor. Column stays; repository does the mapping. |
+| Publishing `bifrost-sdk` to an external registry | Workspace-only (`workspace:*`) suffices until a second project needs it. |
+| Changing any domain invariant on `AppApiKey` or `ApiKey` aggregates | Only the one field name changes; aggregate behaviour is untouched. |
+| Refactoring unrelated tech debt flagged in CONCERNS.md (Prisma adapter, etc.) | Stay scoped to the gateway abstraction; other items get their own milestones. |
+| Changes to Bifrost API Gateway itself | We only wrap the existing surface. No upstream Bifrost PRs. |
+
+## Traceability
+
+<!-- Populated by gsd-roadmapper in Step 8 -->
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| IFACE-01 | — | Pending |
+| IFACE-02 | — | Pending |
+| IFACE-03 | — | Pending |
+| IFACE-04 | — | Pending |
+| ADAPT-01 | — | Pending |
+| ADAPT-02 | — | Pending |
+| ADAPT-03 | — | Pending |
+| ADAPT-04 | — | Pending |
+| ADAPT-05 | — | Pending |
+| ADAPT-06 | — | Pending |
+| WIRE-01 | — | Pending |
+| WIRE-02 | — | Pending |
+| WIRE-03 | — | Pending |
+| WIRE-04 | — | Pending |
+| WIRE-05 | — | Pending |
+| WIRE-06 | — | Pending |
+| MIGRATE-01 | — | Pending |
+| MIGRATE-02 | — | Pending |
+| MIGRATE-03 | — | Pending |
+| MIGRATE-04 | — | Pending |
+| MIGRATE-05 | — | Pending |
+| MIGRATE-06 | — | Pending |
+| RENAME-01 | — | Pending |
+| RENAME-02 | — | Pending |
+| RENAME-03 | — | Pending |
+| RENAME-04 | — | Pending |
+| SDK-01 | — | Pending |
+| SDK-02 | — | Pending |
+| SDK-03 | — | Pending |
+| SDK-04 | — | Pending |
+| SDK-05 | — | Pending |
+| SDK-06 | — | Pending |
+| TEST-01 | — | Pending |
+| TEST-02 | — | Pending |
+| TEST-03 | — | Pending |
+| TEST-04 | — | Pending |
+| QUAL-01 | — | Pending |
+| QUAL-02 | — | Pending |
+| QUAL-03 | — | Pending |
+| QUAL-04 | — | Pending |
+| QUAL-05 | — | Pending |
+
+**Coverage:**
+- v1 requirements: 41 total
+- Mapped to phases: 0 (pending roadmap)
+- Unmapped: 41 ⚠️
+
+---
+*Requirements defined: 2026-04-10*
+*Last updated: 2026-04-10 after initial definition*
