@@ -1,7 +1,7 @@
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
+import { requireMember } from './helpers/requireMember'
 
 /** Maps a list-contract DTO row to the Inertia table shape. */
 function mapContractRow(dto: Record<string, unknown>) {
@@ -34,8 +34,9 @@ export class MemberContractsPage {
    * @returns Inertia list, missing-org error, or login redirect.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.redirect('/login')
+    const check = requireMember(ctx)
+    if (!check.ok) return check.response!
+    const auth = check.auth!
 
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {

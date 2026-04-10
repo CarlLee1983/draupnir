@@ -1,8 +1,8 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
 import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
+import { requireMember } from './helpers/requireMember'
 
 /**
  * Member dashboard summary for the selected organization (`Member/Dashboard/Index`).
@@ -19,8 +19,9 @@ export class MemberDashboardPage {
    * @returns Inertia summary, missing-org message, or login redirect.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.redirect('/login')
+    const check = requireMember(ctx)
+    if (!check.ok) return check.response!
+    const auth = check.auth!
 
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {

@@ -1,58 +1,70 @@
 /**
  * AuthServiceProvider
- * Auth 模組的服務提供者（依賴注入）
+ * Dependency injection wiring for the Auth module.
  *
- * 設計原則：
- * - 需 IDatabaseAccess 時在 register() 內透過 getCurrentDatabaseAccess() 取得，無需建構子注入
- * - 單一 AuthRepository，實作由 Shared 的 DatabaseAccessBuilder / 適配器指定
+ * Design:
+ * - Resolve `IDatabaseAccess` inside `register()` via `getCurrentDatabaseAccess()` (no ctor injection).
+ * - Single `AuthRepository` factory; concrete DB adapter is chosen by Shared wiring.
  */
 
+import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import { getCurrentORM } from '@/wiring/RepositoryFactory'
+import { getRegistry } from '@/wiring/RepositoryRegistry'
+import { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
+import { GetUserDetailService } from '../../Application/Services/GetUserDetailService'
+import { JwtTokenService } from '../../Application/Services/JwtTokenService'
+import { ListUsersService } from '../../Application/Services/ListUsersService'
+import { LoginUserService } from '../../Application/Services/LoginUserService'
+import { LogoutUserService } from '../../Application/Services/LogoutUserService'
+import { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
+import { RegisterUserService } from '../../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
-import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
-import { RegisterUserService } from '../../Application/Services/RegisterUserService'
-import { LoginUserService } from '../../Application/Services/LoginUserService'
-import { JwtTokenService } from '../../Application/Services/JwtTokenService'
-import { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
-import { LogoutUserService } from '../../Application/Services/LogoutUserService'
-import { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
-import { ListUsersService } from '../../Application/Services/ListUsersService'
+import { configureAuthMiddleware } from '../../Presentation/Middleware/RoleMiddleware'
 import { AuthRepository } from '../Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Repositories/AuthTokenRepository'
 import { ScryptPasswordHasher } from '../Services/PasswordHasher'
-import { getRegistry } from '@/wiring/RepositoryRegistry'
-import { getCurrentORM } from '@/wiring/RepositoryFactory'
-import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import { configureAuthMiddleware } from '../../Presentation/Middleware/RoleMiddleware'
 
+/**
+ * Service provider for the Auth module.
+ * Handles registration of repositories and application services into the DI container.
+ */
 export class AuthServiceProvider extends ModuleServiceProvider {
   /**
-   * 註冊本模組 Repository 工廠到 Registry，並註冊服務到容器
-   * IDatabaseAccess 透過 getCurrentDatabaseAccess() 取得，無需建構子參數
+   * Registers repository factories and Auth services on the container.
+   * Database access comes from `getCurrentDatabaseAccess()`.
+   *
+   * @param container The dependency injection container.
    */
   override register(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
     const registry = getRegistry()
+
+    // Register AuthRepository factory
     registry.register('auth', (_orm: string, _db: IDatabaseAccess | undefined) => {
       return new AuthRepository(db)
     })
 
+    // Register AuthRepository as a singleton in the container
     container.singleton('authRepository', () => {
       return getRegistry().create('auth', getCurrentORM(), undefined)
     })
 
-    // 註冊 AuthTokenRepository
+    // Register AuthTokenRepository as a singleton
     container.singleton('authTokenRepository', () => {
       return new AuthTokenRepository(db)
     })
 
+    // Register PasswordHasher as a singleton
     container.singleton('passwordHasher', () => {
       return new ScryptPasswordHasher()
     })
 
-    // 2. 註冊 Application Services
+    // 2. Register Application Services as singletons or bindings
+
     container.singleton('jwtTokenService', () => {
       return new JwtTokenService()
     })
@@ -69,7 +81,12 @@ export class AuthServiceProvider extends ModuleServiceProvider {
       const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
       const jwtTokenService = c.make('jwtTokenService')
       const passwordHasher = c.make('passwordHasher') as ScryptPasswordHasher
-      return new LoginUserService(authRepository, authTokenRepository, jwtTokenService, passwordHasher)
+      return new LoginUserService(
+        authRepository,
+        authTokenRepository,
+        jwtTokenService,
+        passwordHasher,
+      )
     })
 
     container.bind('refreshTokenService', (c: IContainer) => {
@@ -96,11 +113,18 @@ export class AuthServiceProvider extends ModuleServiceProvider {
       return new ListUsersService(authRepository, profileRepo)
     })
 
+    container.bind('getUserDetailService', (c: IContainer) => {
+      const authRepository = c.make('authRepository') as IAuthRepository
+      return new GetUserDetailService(authRepository)
+    })
+
+    // Configure middleware with the registered token repository
     configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
   }
 
   /**
-   * 啟動時執行初始化邏輯
+   * Module boot hook. Executed after all providers are registered.
+   * Useful for logging or one-time module initialization.
    */
   override boot(_context: any): void {
     console.log('🔐 [Auth] Module loaded')

@@ -1,5 +1,5 @@
 import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
-import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/GetUserDetailService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
@@ -12,7 +12,7 @@ export class AdminUserDetailPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly getProfileService: GetProfileService,
-    private readonly authRepository: IAuthRepository,
+    private readonly getUserDetailService: GetUserDetailService,
     private readonly changeUserStatusService: ChangeUserStatusService,
   ) {}
 
@@ -32,32 +32,33 @@ export class AdminUserDetailPage {
       })
     }
 
-    const [userAuth, profileResult] = await Promise.all([
-      this.authRepository.findById(userId),
+    const [userResult, profileResult] = await Promise.all([
+      this.getUserDetailService.execute(userId),
       this.getProfileService.execute(userId),
     ])
 
-    if (!userAuth) {
+    if (!userResult.success || !userResult.data) {
       return this.inertia.render(ctx, 'Admin/Users/Show', {
         user: null,
-        error: '找不到使用者',
+        error: userResult.message,
       })
     }
 
     const profile = profileResult.success ? profileResult.data : null
+    const userDetail = userResult.data
 
-    const statusRaw = userAuth.status as unknown as string
-    const accountStatus: 'active' | 'suspended' = statusRaw === 'suspended' ? 'suspended' : 'active'
+    const accountStatus: 'active' | 'suspended' =
+      userDetail.status === 'suspended' ? 'suspended' : 'active'
 
     return this.inertia.render(ctx, 'Admin/Users/Show', {
       user: {
-        id: userAuth.id,
-        email: userAuth.emailValue,
-        name: profile?.displayName ?? userAuth.emailValue,
-        role: userAuth.role.getValue(),
+        id: userDetail.id,
+        email: userDetail.email,
+        name: profile?.displayName ?? userDetail.email,
+        role: userDetail.role,
         status: accountStatus,
-        createdAt: userAuth.createdAt.toISOString(),
-        updatedAt: userAuth.updatedAt.toISOString(),
+        createdAt: userDetail.createdAt,
+        updatedAt: userDetail.updatedAt,
       },
       error: profileResult.success ? null : profileResult.message,
     })

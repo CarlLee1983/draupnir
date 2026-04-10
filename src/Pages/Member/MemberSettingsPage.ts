@@ -1,8 +1,8 @@
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
+import { requireMember } from './helpers/requireMember'
 
 /**
  * Member profile settings: view and update display name (`Member/Settings/Index`).
@@ -18,10 +18,10 @@ export class MemberSettingsPage {
    * @returns Current profile for the authenticated user or login redirect.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.redirect('/login')
+    const check = requireMember(ctx)
+    if (!check.ok) return check.response!
 
-    const result = await this.getProfileService.execute(auth.userId)
+    const result = await this.getProfileService.execute(check.auth!.userId)
 
     return this.inertia.render(ctx, 'Member/Settings/Index', {
       profile: result.success ? result.data : null,
@@ -36,8 +36,9 @@ export class MemberSettingsPage {
    * @returns Re-rendered settings page with `formError` when update fails.
    */
   async update(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.redirect('/login')
+    const check = requireMember(ctx)
+    if (!check.ok) return check.response!
+    const auth = check.auth!
 
     const body = await ctx.getJsonBody<{ displayName?: string }>()
     const displayName = typeof body.displayName === 'string' ? body.displayName : ''

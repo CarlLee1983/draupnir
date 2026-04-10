@@ -5,8 +5,8 @@ import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/L
 import type { ListModulesService } from '@/Modules/AppModule/Application/Services/ListModulesService'
 import type { RegisterModuleService } from '@/Modules/AppModule/Application/Services/RegisterModuleService'
 import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
+import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/GetUserDetailService'
 import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
-import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
@@ -69,7 +69,7 @@ export function registerAdminPageBindings(container: IContainer): void {
       new AdminUserDetailPage(
         c.make(i) as InertiaService,
         c.make('getProfileService') as GetProfileService,
-        c.make('authRepository') as IAuthRepository,
+        c.make('getUserDetailService') as GetUserDetailService,
         c.make('changeUserStatusService') as ChangeUserStatusService,
       ),
   )

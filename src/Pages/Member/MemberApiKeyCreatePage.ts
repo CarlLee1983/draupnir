@@ -1,7 +1,7 @@
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
+import { requireMember } from './helpers/requireMember'
 
 /**
  * Member flow to create an API key within an org (`Member/ApiKeys/Create`).
@@ -16,8 +16,8 @@ export class MemberApiKeyCreatePage {
    * @returns Create form with optional `orgId` from query or header.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.redirect('/login')
+    const check = requireMember(ctx)
+    if (!check.ok) return check.response!
 
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
 
@@ -34,8 +34,9 @@ export class MemberApiKeyCreatePage {
    * @returns Re-renders create page with `createdKey` on success or `formError` on failure.
    */
   async store(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.redirect('/login')
+    const check = requireMember(ctx)
+    if (!check.ok) return check.response!
+    const auth = check.auth!
 
     const body = await ctx.getJsonBody<{
       orgId?: string
