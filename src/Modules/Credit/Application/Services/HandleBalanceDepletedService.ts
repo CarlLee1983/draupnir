@@ -33,7 +33,7 @@ export class HandleBalanceDepletedService {
         await this.apiKeyRepo.update(pendingSuspend)
 
         // Step 2: 遠端 Gateway 阻擋
-        await this.gatewayClient.updateKey(key.bifrostVirtualKeyId, {
+        await this.gatewayClient.updateKey(key.gatewayKeyId, {
           rateLimit: {
             tokenMaxLimit: 0,
             tokenResetDuration: '1h',
@@ -67,7 +67,7 @@ export class HandleBalanceDepletedService {
     const suspendedKeys = await this.apiKeyRepo.findSuspendedByOrgId(orgId, 'CREDIT_DEPLETED')
     for (const key of suspendedKeys) {
       try {
-        await this.gatewayClient.updateKey(key.bifrostVirtualKeyId, {
+        await this.gatewayClient.updateKey(key.gatewayKeyId, {
           rateLimit: {
             tokenMaxLimit: 0,
             tokenResetDuration: '1h',

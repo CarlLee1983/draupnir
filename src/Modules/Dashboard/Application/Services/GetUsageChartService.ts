@@ -29,7 +29,7 @@ export class GetUsageChartService {
       const keys = await this.apiKeyRepository.findByOrgId(query.orgId)
       const virtualKeyIds = keys
         .filter((k) => k.status === 'active')
-        .map((k) => k.bifrostVirtualKeyId)
+        .map((k) => k.gatewayKeyId)
         .filter((id) => id.length > 0)
 
       if (virtualKeyIds.length === 0) {

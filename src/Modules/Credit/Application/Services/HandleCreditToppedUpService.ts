@@ -26,7 +26,7 @@ export class HandleCreditToppedUpService {
 
         // Step 1: 先恢復遠端 Gateway rate limit
         if (preFreeze && (preFreeze.rpm != null || preFreeze.tpm != null)) {
-          await this.gatewayClient.updateKey(key.bifrostVirtualKeyId, {
+          await this.gatewayClient.updateKey(key.gatewayKeyId, {
             rateLimit: {
               tokenMaxLimit: preFreeze.tpm ?? 100000,
               tokenResetDuration: '1h',
