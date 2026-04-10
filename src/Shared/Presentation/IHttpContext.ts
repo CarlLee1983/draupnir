@@ -6,7 +6,7 @@
  * migration or pure mock unit testing.
  */
 
-import type { Context as GravitoContext } from '@gravito/core'
+import type { GravitoContext } from '@gravito/core'
 
 export interface IHttpContext {
   /** Retrieves the request body as text */
