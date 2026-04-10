@@ -7,7 +7,21 @@
  */
 
 import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { and, eq, ne, gt, lt, gte, lte, like, inArray, between, asc, desc, countDistinct } from 'drizzle-orm'
+import {
+  and,
+  eq,
+  ne,
+  gt,
+  lt,
+  gte,
+  lte,
+  like,
+  inArray,
+  between,
+  asc,
+  desc,
+  countDistinct,
+} from 'drizzle-orm'
 import { getDrizzleInstance } from './config'
 
 /**
@@ -24,7 +38,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
   constructor(
     private db: ReturnType<typeof getDrizzleInstance>,
     private tableName: string,
-    private tableSchema: any
+    private tableSchema: any,
   ) {}
 
   /**
@@ -114,9 +128,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
 
       if (this.orderByConfig) {
         const col = this.tableSchema[this.orderByConfig.column]
-        query = query.orderBy(
-          this.orderByConfig.direction === 'ASC' ? asc(col) : desc(col)
-        )
+        query = query.orderBy(this.orderByConfig.direction === 'ASC' ? asc(col) : desc(col))
       }
 
       if (this.offsetValue) {
@@ -230,9 +242,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
     try {
       const col = this.tableSchema.id
 
-      let query: any = (this.db as any)
-        .select({ count: countDistinct(col) })
-        .from(this.tableSchema)
+      let query: any = (this.db as any).select({ count: countDistinct(col) }).from(this.tableSchema)
 
       if (this.whereConditions.length > 0) {
         query = query.where(and(...this.whereConditions))

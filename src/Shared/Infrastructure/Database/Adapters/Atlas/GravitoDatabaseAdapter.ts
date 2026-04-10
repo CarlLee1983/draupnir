@@ -3,78 +3,80 @@ import type { IDatabaseConnectivityCheck } from '@/Shared/Infrastructure/IDataba
 import { AtlasQueryBuilder } from './AtlasQueryBuilder'
 
 /**
- * 懶加載 Atlas DB 實例
+ * Lazy load Atlas DB instance.
  * @internal
  */
 function getDB(): any {
-	// biome-ignore lint/complexity/noCommaOperator: Required for dynamic import
-	return (require('@gravito/atlas'), require('@gravito/atlas')).DB
+  // biome-ignore lint/complexity/noCommaOperator: Required for dynamic import
+  return (require('@gravito/atlas'), require('@gravito/atlas')).DB
 }
 
 /**
- * Atlas DatabaseAccess 實現
+ * Atlas DatabaseAccess Implementation
  *
- * 實現 IDatabaseAccess 介面，將 Gravito Atlas ORM 適配為公開介面
- * 隱藏所有 Atlas 特定的 API 細節，提供統一的查詢介面。
+ * Implements the IDatabaseAccess interface, adapting the Gravito Atlas ORM to our 
+ * public interface. Hides all Atlas-specific API details and provides a unified 
+ * query interface.
  *
- * @internal 此實現是基礎設施層細節
+ * @internal This implementation is an infrastructure layer detail.
  */
 class AtlasDatabaseAccess implements IDatabaseAccess {
-	/**
-	 * 取得表的查詢建構器
-	 *
-	 * @param name 表名稱
-	 * @returns QueryBuilder 實例，用於構建查詢
-	 *
-	 * @example
-	 * const users = await db.table('users').select()
-	 * const user = await db.table('users').where('id', '=', userId).first()
-	 */
-	table(name: string): IQueryBuilder {
-		return new AtlasQueryBuilder(name)
-	}
+  /**
+   * Gets a query builder for a table.
+   *
+   * @param name - Table name.
+   * @returns QueryBuilder instance for building queries.
+   *
+   * @example
+   * const users = await db.table('users').select()
+   * const user = await db.table('users').where('id', '=', userId).first()
+   */
+  table(name: string): IQueryBuilder {
+    return new AtlasQueryBuilder(name)
+  }
 
-	async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
-		return getDB().transaction(async (connection: any) => {
-			const txAccess = new AtlasTransactionAccess(connection)
-			return fn(txAccess)
-		})
-	}
+  async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+    return getDB().transaction(async (connection: any) => {
+      const txAccess = new AtlasTransactionAccess(connection)
+      return fn(txAccess)
+    })
+  }
 }
 
 /**
  * Transaction-scoped Atlas DatabaseAccess
  *
- * 在交易中使用的 IDatabaseAccess 實現，所有查詢都透過同一 connection 執行。
+ * An IDatabaseAccess implementation for use within transactions; all queries 
+ * are executed via the same connection.
  *
  * @internal
  */
 class AtlasTransactionAccess implements IDatabaseAccess {
-	constructor(private readonly connection: any) {}
+  constructor(private readonly connection: any) {}
 
-	table(name: string): IQueryBuilder {
-		return new AtlasQueryBuilder(name, this.connection)
-	}
+  table(name: string): IQueryBuilder {
+    return new AtlasQueryBuilder(name, this.connection)
+  }
 
-	async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
-		return fn(this)
-	}
+  async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+    return fn(this)
+  }
 }
 
 /**
- * 建立 Atlas DatabaseAccess 實例
+ * Creates an Atlas DatabaseAccess instance.
  *
- * 此工廠函數是唯一建立 Atlas 適配器的方式
- * 應用層通過此函數注入 IDatabaseAccess
+ * This factory function is the preferred way to create an Atlas adapter.
+ * The application layer is injected with IDatabaseAccess through this function.
  *
- * @returns 實現 IDatabaseAccess 介面的實例
+ * @returns An instance implementing the IDatabaseAccess interface.
  *
  * @example
- * // 在 Wiring 層中使用
+ * // Usage in the Wiring layer
  * const db = createAtlasDatabaseAccess()
  * registerUserRepositories(db)
  *
- * // Repository 中使用
+ * // Usage in a Repository
  * class UserRepository {
  *   constructor(private db: IDatabaseAccess) {}
  *   async findById(id: string) {
@@ -83,23 +85,25 @@ class AtlasTransactionAccess implements IDatabaseAccess {
  * }
  */
 export function createAtlasDatabaseAccess(): IDatabaseAccess {
-	return new AtlasDatabaseAccess()
+  return new AtlasDatabaseAccess()
 }
 
 /**
- * 適配器：以 Atlas 執行資料庫連線檢查（SELECT 1），實作 IDatabaseConnectivityCheck
+ * Adapter: Performs a database connectivity check (SELECT 1) using Atlas, 
+ * implementing IDatabaseConnectivityCheck.
  *
- * 供健康檢查等 Use Case 使用，Application 層不依賴 @gravito/atlas。
+ * For use cases like health checks; the Application layer does not depend on @gravito/atlas.
  */
 export function createGravitoDatabaseConnectivityCheck(): IDatabaseConnectivityCheck {
-	return {
-		async ping(): Promise<boolean> {
-			try {
-				await getDB().raw('SELECT 1')
-				return true
-			} catch {
-				return false
-			}
-		},
-	}
+  return {
+    async ping(): Promise<boolean> {
+      try {
+        await getDB().raw('SELECT 1')
+        return true
+      } catch {
+        return false
+      }
+    },
+  }
 }
+

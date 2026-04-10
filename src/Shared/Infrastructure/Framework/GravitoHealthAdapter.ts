@@ -10,54 +10,55 @@ import { HealthController } from '@/Modules/Health/Presentation/Controllers/Heal
 import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Repositories/MemoryHealthCheckRepository'
 
 /**
- * Gravito Health 模組完整適配器
+ * Gravito Health Module Adapter
  *
- * 責任：
- * 1. 從 PlanetCore 取得 Redis/Cache（可能為 undefined）
- * 2. 適配為 IRedisService/ICacheService
- * 3. 組裝 PerformHealthCheckService + HealthController
- * 4. 透過 IModuleRouter 註冊路由
+ * Responsibilities:
+ * 1. Retrieve Redis/Cache from PlanetCore (may be undefined).
+ * 2. Adapt to IRedisService/ICacheService.
+ * 3. Assemble PerformHealthCheckService + HealthController.
+ * 4. Register routes via IModuleRouter.
  *
- * 這是唯一知道 Gravito 如何組織服務的地方。
- * 所有底層模組完全無框架耦合。
+ * This is the only location that knows how Gravito organizes services.
+ * All underlying modules are completely decoupled from the framework.
  *
  * @example
  * registerHealthWithGravito(core)
  */
 function tryMake<T>(core: PlanetCore, key: string): T | undefined {
-	try {
-		return core.container.make<T>(key as never)
-	} catch {
-		return undefined
-	}
+  try {
+    return core.container.make<T>(key as never)
+  } catch {
+    return undefined
+  }
 }
 
 export function registerHealthWithGravito(core: PlanetCore): void {
-	// 從 PlanetCore 取得原始服務（可能未註冊，例如 ORM=memory 精簡啟動）
-	const rawRedis = tryMake<RedisClientContract>(core, 'redis')
-	const rawCache = tryMake<CacheManager>(core, 'cache')
+  // Retrieve raw services from PlanetCore (might not be registered, e.g., lightweight startup with ORM=memory)
+  const rawRedis = tryMake<RedisClientContract>(core, 'redis')
+  const rawCache = tryMake<CacheManager>(core, 'cache')
 
-	// 適配為框架無關的介面（null 表示未設定）
-	const redis = rawRedis ? new GravitoRedisAdapter(rawRedis) : null
-	const cache = rawCache ? new GravitoCacheAdapter(rawCache) : null
+  // Adapt to framework-agnostic interfaces (null indicates NOT set)
+  const redis = rawRedis ? new GravitoRedisAdapter(rawRedis) : null
+  const cache = rawCache ? new GravitoCacheAdapter(rawCache) : null
 
-	// 組裝應用層（由 Gravito DB 適配器注入，Repository 與 ORM 解耦）
-	const repository = new MemoryHealthCheckRepository()
-	const databaseCheck = createGravitoDatabaseConnectivityCheck()
-	const performHealthCheckService = new PerformHealthCheckService(repository)
-	const controller = new HealthController(performHealthCheckService)
+  // Assemble Application layer (Injected by Gravito DB adapter, Repository decoupled from ORM)
+  const repository = new MemoryHealthCheckRepository()
+  const databaseCheck = createGravitoDatabaseConnectivityCheck()
+  const performHealthCheckService = new PerformHealthCheckService(repository)
+  const controller = new HealthController(performHealthCheckService)
 
-	// 建立框架無關的路由介面
-	const router = createGravitoModuleRouter(core)
+  // Establish framework-agnostic routing interface
+  const router = createGravitoModuleRouter(core)
 
-	// 透過 IModuleRouter 註冊路由
-	router.get('/health', (ctx) => {
-		// 為了相容目前的 API，將適配器服務注入到 context
-		ctx.set('__redis', redis)
-		ctx.set('__cache', cache)
-		ctx.set('__databaseCheck', databaseCheck)
-		return controller.check(ctx)
-	})
+  // Register routes via IModuleRouter
+  router.get('/health', (ctx) => {
+    // For compatibility with current APIs, inject adapter services into context
+    ctx.set('__redis', redis)
+    ctx.set('__cache', cache)
+    ctx.set('__databaseCheck', databaseCheck)
+    return controller.check(ctx)
+  })
 
-	router.get('/health/history', (ctx) => controller.history(ctx))
+  router.get('/health/history', (ctx) => controller.history(ctx))
 }
+

@@ -1,12 +1,11 @@
 /**
- * AuthMiddleware
- * Token 驗證中間件
+ * AuthMiddleware - Token Authentication Middleware
  *
- * 責任：
- * - 從 Header 提取 Token（Bearer 方案）
- * - 驗證 Token
- * - 注入用戶上下文到 HttpContext
- * - 允許未驗證的請求通過（401 響應由 Controller 決定）
+ * Responsibilities:
+ * - Extract Token from Header (Bearer scheme)
+ * - Verify Token
+ * - Inject user context into HttpContext
+ * - Allow unauthenticated requests to pass (401 response is decided by the Controller)
  */
 
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -37,26 +36,26 @@ export class AuthMiddleware {
   }
 
   /**
-   * 處理請求
+   * Handles the request verification process.
    */
   async handle(ctx: IHttpContext): Promise<void> {
     try {
-      // 1. 從 Header 提取 Token
+      // 1. Extract Token from Header
       const token = this.extractToken(ctx)
       if (!token) {
-        // 沒有 Token，繼續處理（可能是公開端點）
+        // No Token, continue processing (could be a public endpoint)
         return
       }
 
-      // 2. 驗證 Token
+      // 2. Verify Token
       const payload = this.jwtService.verify(token)
       if (!payload) {
-        // 無效的 Token，設置錯誤信息但不中斷
+        // Invalid Token, set error message but do not short-circuit
         ctx.set('authError', 'INVALID_TOKEN')
         return
       }
 
-      // 3. 檢查 Token 是否被撤銷（如果提供了 Repository）
+      // 3. Check if Token is revoked (if Repository is provided)
       if (this.authTokenRepository) {
         const tokenHash = await this.hashToken(token)
         const isRevoked = await this.authTokenRepository.isRevoked(tokenHash)
@@ -66,7 +65,7 @@ export class AuthMiddleware {
         }
       }
 
-      // 4. 注入用戶上下文到 HttpContext
+      // 4. Inject User Context into HttpContext
       const authContext: AuthContext = {
         userId: payload.userId,
         email: payload.email,
@@ -82,14 +81,14 @@ export class AuthMiddleware {
         role: payload.role,
       })
     } catch (error: any) {
-      // 中間件不應拋出異常，只設置狀態
+      // Middlewares should not throw exceptions; set status only
       ctx.set('authError', error.message)
     }
   }
 
   /**
-   * 從 Header 提取 Token
-   * 期望格式：Authorization: Bearer <token>
+   * Extracts Token from Header.
+   * Expected format: Authorization: Bearer <token>
    */
   private extractToken(ctx: IHttpContext): string | null {
     const header =
@@ -110,30 +109,31 @@ export class AuthMiddleware {
   }
 
   /**
-   * 檢查用戶是否已認證
+   * Checks if the user is authenticated.
    */
   static isAuthenticated(ctx: IHttpContext): boolean {
     return !!ctx.get<AuthContext>('auth')
   }
 
   /**
-   * 取得認證上下文
+   * Retrieves the authentication context.
    */
   static getAuthContext(ctx: IHttpContext): AuthContext | null {
     return ctx.get<AuthContext>('auth') || null
   }
 
   /**
-   * 取得認證錯誤
+   * Retrieves the authentication error.
    */
   static getAuthError(ctx: IHttpContext): string | null {
     return ctx.get<string>('authError') || null
   }
 
   /**
-   * 計算 Token Hash
+   * Calculates Token Hash.
    */
   private async hashToken(token: string): Promise<string> {
     return sha256(token)
   }
 }
+

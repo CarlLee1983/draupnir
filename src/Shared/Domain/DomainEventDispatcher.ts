@@ -4,10 +4,11 @@ import type { DomainEvent } from './DomainEvent'
 type EventHandler = (event: DomainEvent) => Promise<void>
 
 /**
- * 同步領域事件分發器（Singleton）
+ * Synchronous Domain Event Dispatcher (Singleton).
  *
- * 註冊 handler 後，呼叫 dispatch() 即依序觸發對應的 handler。
- * 設計為 fire-and-forget：handler 失敗會 log 但不中斷流程。
+ * After registering handlers, call dispatch() to trigger the corresponding 
+ * handlers in sequence. Designed as fire-and-forget: handler failures are 
+ * logged but do not interrupt the flow.
  */
 export class DomainEventDispatcher {
   private static instance: DomainEventDispatcher | null = null
@@ -22,7 +23,7 @@ export class DomainEventDispatcher {
     return DomainEventDispatcher.instance
   }
 
-  /** 僅供測試用：重置 singleton */
+  /** Only for testing: reset the singleton instance. */
   static resetForTesting(): void {
     DomainEventDispatcher.instance = null
   }
@@ -38,7 +39,7 @@ export class DomainEventDispatcher {
       try {
         await handler(event)
       } catch (error: unknown) {
-        console.error(`Event handler 執行失敗 [${event.eventType}]:`, error)
+        console.error(`Event handler failed [${event.eventType}]:`, error)
       }
     }
   }

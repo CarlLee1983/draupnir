@@ -43,9 +43,7 @@ export const authTokens = sqliteTable(
     revoked_at: text('revoked_at'),
     created_at: text('created_at').notNull(),
   },
-  (table) => [
-    index('idx_auth_tokens_user_id').on(table.user_id),
-  ]
+  (table) => [index('idx_auth_tokens_user_id').on(table.user_id)],
 )
 
 /**
@@ -116,9 +114,7 @@ export const creditTransactions = sqliteTable(
     description: text('description'),
     created_at: text('created_at').notNull(),
   },
-  (table) => [
-    index('idx_credit_transactions_account_id').on(table.credit_account_id),
-  ],
+  (table) => [index('idx_credit_transactions_account_id').on(table.credit_account_id)],
 )
 
 /**

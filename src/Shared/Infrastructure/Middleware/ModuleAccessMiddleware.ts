@@ -10,37 +10,50 @@ export function setCheckModuleAccessService(service: CheckModuleAccessService): 
   checkModuleAccessService = service
 }
 
+/**
+ * Middleware that checks if an organization has access to a specific module.
+ * 
+ * @param moduleName - The name of the module to check access for.
+ * @returns A Middleware function.
+ */
 export function createModuleAccessMiddleware(moduleName: string): Middleware {
   return async (ctx: IHttpContext, next: () => Promise<Response>): Promise<Response> => {
     if (!checkModuleAccessService) {
-      return ctx.json({ success: false, message: '模組存取檢查服務未初始化', error: 'INTERNAL_ERROR' }, 500)
+      return ctx.json(
+        { success: false, message: 'Module access check service not initialized', error: 'INTERNAL_ERROR' },
+        500,
+      )
     }
 
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) {
-      return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
 
-    // admin 跳過模組存取檢查
+    // Admins skip module access checks
     if (auth.role === 'admin') {
       return next()
     }
 
-    // 從路由參數或 auth context 取得 orgId
+    // Retrieve orgId from route params or auth context
     const orgId = ctx.getParam('orgId')
     if (!orgId) {
-      return ctx.json({ success: false, message: '缺少組織資訊', error: 'MISSING_ORG' }, 400)
+      return ctx.json({ success: false, message: 'Missing organization information', error: 'MISSING_ORG' }, 400)
     }
 
     const result = await checkModuleAccessService.execute(orgId, moduleName)
     if (!result.allowed) {
-      return ctx.json({
-        success: false,
-        message: result.reason ?? `無權存取模組 ${moduleName}`,
-        error: 'MODULE_ACCESS_DENIED',
-      }, 403)
+      return ctx.json(
+        {
+          success: false,
+          message: result.reason ?? `Access denied for module: ${moduleName}`,
+          error: 'MODULE_ACCESS_DENIED',
+        },
+        403,
+      )
     }
 
     return next()
   }
 }
+

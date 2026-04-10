@@ -1,20 +1,22 @@
 /**
- * 數據庫存取抽象（Port）
+ * Database Access Abstraction (Port)
  *
- * 定義與具體 ORM（如 Atlas）無關的查詢介面，讓各模組 Infrastructure 層
- * 可透過依賴注入替換為 mock，Domain/Application 與實際 DB 實作解耦。
+ * Defines a query interface independent of specific ORMs (e.g., Atlas), allowing
+ * the Infrastructure layer of each module to be replaced by mocks during testing.
+ * This decouples Domain/Application logic from the actual DB implementation.
  *
- * @public - 此介面是 ORM 無關的公開 API，所有層都可使用
- * @see docs/ABSTRACTION_RULES.md - 依賴抽象化規則
+ * @public - ORM-agnostic public API, usable by all layers.
+ * @see docs/ABSTRACTION_RULES.md - Abstraction rules for dependencies.
  */
 
 /**
- * 數據庫查詢建構器介面（抽象鏈式 API，支援測試替換）
+ * Query Builder Interface (Abstract Fluent API, supports test substitution)
  *
- * 提供流暢的查詢 API，隱藏具體 ORM 實現細節。
- * 所有層都可以通過此介面與數據庫交互，無需知道實際使用哪個 ORM。
+ * Provides a fluid query API, hiding specific ORM implementation details.
+ * All layers can interact with the database through this interface without 
+ * knowing which ORM is actually being used.
  *
- * @public - ORM 無關的公開 API
+ * @public - ORM-agnostic public API.
  *
  * @example
  * ```typescript
@@ -24,97 +26,97 @@
  * ```
  */
 export interface IQueryBuilder {
-	/**
-	 * WHERE 條件
-	 * @param column - 欄位名稱
-	 * @param operator - 比較運算子 ('=', '!=', '>', '<', 'LIKE' 等)
-	 * @param value - 比較值
-	 * @returns 返回自身以支援鏈式調用
-	 */
-	where(column: string, operator: string, value: unknown): IQueryBuilder
+  /**
+   * WHERE condition.
+   * @param column - Column name.
+   * @param operator - Comparison operator ('=', '!=', '>', '<', 'LIKE', etc.).
+   * @param value - Comparison value.
+   * @returns Returns self to support chaining.
+   */
+  where(column: string, operator: string, value: unknown): IQueryBuilder
 
-	/**
-	 * 取得單筆記錄
-	 * @returns 若記錄存在則返回該記錄，否則返回 null
-	 */
-	first(): Promise<Record<string, unknown> | null>
+  /**
+   * Retrieves a single record.
+   * @returns Returns the record if found, otherwise returns null.
+   */
+  first(): Promise<Record<string, unknown> | null>
 
-	/**
-	 * 取得多筆記錄
-	 * @returns 記錄陣列
-	 */
-	select(): Promise<Record<string, unknown>[]>
+  /**
+   * Retrieves multiple records.
+   * @returns Array of records.
+   */
+  select(): Promise<Record<string, unknown>[]>
 
-	/**
-	 * 新增記錄
-	 * @param data - 要新增的數據
-	 */
-	insert(data: Record<string, unknown>): Promise<void>
+  /**
+   * Inserts a record.
+   * @param data - The data to insert.
+   */
+  insert(data: Record<string, unknown>): Promise<void>
 
-	/**
-	 * 更新記錄
-	 * @param data - 要更新的數據
-	 */
-	update(data: Record<string, unknown>): Promise<void>
+  /**
+   * Updates a record.
+   * @param data - The data to update.
+   */
+  update(data: Record<string, unknown>): Promise<void>
 
-	/**
-	 * 刪除記錄
-	 */
-	delete(): Promise<void>
+  /**
+   * Deletes a record.
+   */
+  delete(): Promise<void>
 
-	/**
-	 * 限制返回記錄數
-	 * @param n - 限制數量
-	 * @returns 返回自身以支援鏈式調用
-	 */
-	limit(n: number): IQueryBuilder
+  /**
+   * Limits the number of returned records.
+   * @param n - Limit count.
+   * @returns Returns self to support chaining.
+   */
+  limit(n: number): IQueryBuilder
 
-	/**
-	 * 分頁偏移量
-	 * @param n - 偏移數量
-	 * @returns 返回自身以支援鏈式調用
-	 */
-	offset(n: number): IQueryBuilder
+  /**
+   * Pagination offset.
+   * @param n - Offset count.
+   * @returns Returns self to support chaining.
+   */
+  offset(n: number): IQueryBuilder
 
-	/**
-	 * 排序
-	 * @param column - 排序欄位
-	 * @param direction - 排序方向 ('ASC' 或 'DESC')
-	 * @returns 返回自身以支援鏈式調用
-	 */
-	orderBy(column: string, direction: 'ASC' | 'DESC'): IQueryBuilder
+  /**
+   * Ordering.
+   * @param column - Column to sort by.
+   * @param direction - Sort direction ('ASC' or 'DESC').
+   * @returns Returns self to support chaining.
+   */
+  orderBy(column: string, direction: 'ASC' | 'DESC'): IQueryBuilder
 
-	/**
-	 * 範圍查詢
-	 * @param column - 欄位名稱
-	 * @param range - 範圍 [開始, 結束]
-	 * @returns 返回自身以支援鏈式調用
-	 */
-	whereBetween(column: string, range: [Date, Date]): IQueryBuilder
+  /**
+   * Range query.
+   * @param column - Column name.
+   * @param range - Range [start, end].
+   * @returns Returns self to support chaining.
+   */
+  whereBetween(column: string, range: [Date, Date]): IQueryBuilder
 
-	/**
-	 * 計算符合條件的記錄數
-	 * @returns 記錄數量
-	 */
-	count(): Promise<number>
+  /**
+   * Counts records matching the criteria.
+   * @returns Record count.
+   */
+  count(): Promise<number>
 }
 
 /**
- * 數據庫存取介面（用於依賴注入）
+ * Database Access Interface (for Dependency Injection)
  *
- * 此介面隱藏具體 ORM 實現，提供 ORM 無關的數據庫訪問。
- * 所有層都應該通過此介面與數據庫交互。
+ * Hides specific ORM implementations and provides ORM-agnostic database access.
+ * All layers should interact with the database through this interface.
  *
- * @public - ORM 無關的公開 API，所有層都可使用
+ * @public - ORM-agnostic public API, usable by all layers.
  *
  * @design
- * - 不依賴具體 ORM 的 API
- * - 支援主流 ORM 的通用操作
- * - 當需要 ORM 特定功能時，應擴展此介面而非繞過它
+ * - Does not depend on specific ORM APIs.
+ * - Supports common operations of major ORMs.
+ * - When ORM-specific functionality is needed, extend this interface rather than bypassing it.
  *
  * @example
  * ```typescript
- * // 在 Repository 中使用
+ * // Usage in a Repository
  * export class UserRepository implements IUserRepository {
  *   constructor(private db: IDatabaseAccess) {}
  *
@@ -128,29 +130,30 @@ export interface IQueryBuilder {
  * ```
  */
 export interface IDatabaseAccess {
-	/**
-	 * 取得表的查詢建構器
-	 * @param name - 表名稱
-	 * @returns IQueryBuilder 實例，可鏈式調用
-	 */
-	table(name: string): IQueryBuilder
+  /**
+   * Gets a query builder for a table.
+   * @param name - Table name.
+   * @returns IQueryBuilder instance supporting chaining.
+   */
+  table(name: string): IQueryBuilder
 
-	/**
-	 * 在資料庫交易中執行回呼函式
-	 *
-	 * 成功時自動 commit，錯誤時自動 rollback。
-	 * 回呼接收一個 transaction-scoped 的 IDatabaseAccess 實例，
-	 * 所有在此實例上的操作都在同一交易中執行。
-	 *
-	 * @template T - 回呼回傳值型別
-	 * @param fn - 交易邏輯
-	 * @returns 回呼的回傳值
-	 */
-	transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T>
+  /**
+   * Executes a callback function within a database transaction.
+   *
+   * Automatically commits on success and rolls back on error.
+   * The callback receives a transaction-scoped IDatabaseAccess instance, 
+   * ensuring all operations on this instance are performed within the same transaction.
+   *
+   * @template T - Callback return type.
+   * @param fn - Transaction logic.
+   * @returns The return value of the callback.
+   */
+  transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T>
 }
 
 /**
- * 向後相容：沿用既有命名時可匯入此別名
- * @deprecated 使用 IDatabaseAccess 代替
+ * Backward compatibility: keep this alias when using existing naming.
+ * @deprecated Use IDatabaseAccess instead.
  */
 export type DatabaseAccess = IDatabaseAccess
+

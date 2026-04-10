@@ -1,21 +1,20 @@
 /**
- * 基礎值對象 - 不可變的領域概念
+ * Base Value Object - Immutable domain concept.
  *
- * 值對象的特性：
- * - 無 ID，由其屬性值定義
- * - 不可變 (Immutable)
- * - 相等性基於值，不是引用
+ * Characteristics of a Value Object:
+ * - No ID, defined by its attribute values.
+ * - Immutable.
+ * - Equality is based on values, not references.
  */
-
 export abstract class ValueObject {
-	/**
-	 * 比較兩個值對象是否相等
-	 * 子類應覆蓋此方法，比較其所有屬性
-	 */
-	abstract equals(other: ValueObject): boolean
+  /**
+   * Compares two value objects for equality.
+   * Subclasses should override this method to compare all their attributes.
+   */
+  abstract equals(other: ValueObject): boolean
 
-	/**
-	 * 值對象的字符串表示
-	 */
-	abstract toString(): string
+  /**
+   * String representation of the value object.
+   */
+  abstract toString(): string
 }

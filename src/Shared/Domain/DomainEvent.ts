@@ -1,65 +1,65 @@
 /**
- * 領域事件抽象基類
+ * Abstract Base Class for Domain Events
  *
- * 所有領域事件的基礎，提供：
- * - 事件識別碼 (eventId - UUID)
- * - 聚合根識別 (aggregateId)
- * - 事件類型識別 (eventType)
- * - 發生時間戳 (occurredAt)
- * - 事件結構版本 (version - 用於事件遷移)
- * - 事件負載資料 (data)
+ * Provides core properties for all domain events:
+ * - eventId: Unique identifier (UUID)
+ * - aggregateId: Identifier of the aggregate root
+ * - eventType: Categorization of the event
+ * - occurredAt: Timestamp of when the event happened
+ * - version: Schema version for event migration
+ * - data: Payload containing event details
  *
- * 子類必須實作 toJSON() 方法以支援序列化
+ * Subclasses must implement the toJSON() method to support serialization.
  *
- * 版本管理：
- * - version: 事件結構的版本號（用於向後相容性）
- * - getSchemaVersion(): 返回語意版本 (MAJOR.MINOR.PATCH)
+ * Version Management:
+ * - version: Numeric version for backward compatibility
+ * - getSchemaVersion(): Returns semantic version (MAJOR.MINOR.PATCH)
  */
 export abstract class DomainEvent {
-	readonly eventId: string = crypto.randomUUID()
-	readonly aggregateId: string
-	readonly aggregateType?: string
-	readonly eventType: string
-	readonly occurredAt: Date
-	readonly version: number
-	readonly data: Record<string, unknown>
+  readonly eventId: string = crypto.randomUUID()
+  readonly aggregateId: string
+  readonly aggregateType?: string
+  readonly eventType: string
+  readonly occurredAt: Date
+  readonly version: number
+  readonly data: Record<string, unknown>
 
-	constructor(
-		aggregateId: string,
-		eventType: string,
-		data: Record<string, unknown> = {},
-		version: number = 1,
-		occurredAt?: Date,
-	) {
-		this.aggregateId = aggregateId
-		this.eventType = eventType
-		this.occurredAt = occurredAt ?? new Date()
-		this.version = version
-		this.data = data
-	}
+  constructor(
+    aggregateId: string,
+    eventType: string,
+    data: Record<string, unknown> = {},
+    version: number = 1,
+    occurredAt?: Date,
+  ) {
+    this.aggregateId = aggregateId
+    this.eventType = eventType
+    this.occurredAt = occurredAt ?? new Date()
+    this.version = version
+    this.data = data
+  }
 
-	/**
-	 * 獲取事件結構的語意版本 (MAJOR.MINOR.PATCH)
-	 *
-	 * 用於決定遷移策略：
-	 * - 同一 MAJOR 版本：向後相容，使用遷移
-	 * - 不同 MAJOR 版本：破壞性變更，可能需要特殊處理
-	 *
-	 * 預設實作：版本號直接映射到語意版本
-	 * 子類可覆蓋此方法以提供自訂映射
-	 */
-	getSchemaVersion(): string {
-		const versions: Record<number, string> = {
-			1: '1.0.0', // 初始版本
-			2: '1.1.0', // 非破壞性新增
-			3: '1.2.0',
-			// 更多版本號映射...
-		}
-		return versions[this.version] ?? `1.${this.version - 1}.0`
-	}
+  /**
+   * Retrieves the semantic version of the event schema (MAJOR.MINOR.PATCH).
+   *
+   * Used to determine migration strategies:
+   * - Same MAJOR version: Backward compatible, migration applies
+   * - Different MAJOR versions: Breaking change, requires special handling
+   *
+   * Default implementation: Direct mapping of version number to semantic version.
+   * Subclasses can override this for custom mapping.
+   */
+  getSchemaVersion(): string {
+    const versions: Record<number, string> = {
+      1: '1.0.0', // Initial version
+      2: '1.1.0', // Non-breaking additive change
+      3: '1.2.0',
+      // Additional version mappings...
+    }
+    return versions[this.version] ?? `1.${this.version - 1}.0`
+  }
 
-	/**
-	 * 序列化事件為 JSON 物件
-	 */
-	abstract toJSON(): Record<string, unknown>
+  /**
+   * Serializes the event to a JSON object.
+   */
+  abstract toJSON(): Record<string, unknown>
 }

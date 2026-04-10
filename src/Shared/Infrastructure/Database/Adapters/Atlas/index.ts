@@ -22,5 +22,8 @@
  * 4. 完成！所有業務層代碼無需改動
  */
 
-export { createAtlasDatabaseAccess, createGravitoDatabaseConnectivityCheck } from './GravitoDatabaseAdapter'
+export {
+  createAtlasDatabaseAccess,
+  createGravitoDatabaseConnectivityCheck,
+} from './GravitoDatabaseAdapter'
 export type { AtlasQueryBuilder } from './AtlasQueryBuilder'

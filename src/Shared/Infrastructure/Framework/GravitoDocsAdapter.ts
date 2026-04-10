@@ -1,28 +1,28 @@
 /**
- * Gravito 文檔適配器 (Gravito Docs Adapter)
+ * Gravito Docs Adapter
  *
- * 負責：
- * 1. 提供 OpenAPI JSON 端點（GET /api/openapi.json）
- * 2. 提供 Swagger UI 端點（GET /api/docs）
- * 3. 從 YAML 檔案解析 OpenAPI 規範
+ * Responsibilities:
+ * 1. Provide OpenAPI JSON endpoint (GET /api/openapi.json).
+ * 2. Provide Swagger UI endpoint (GET /api/docs).
+ * 3. Parse OpenAPI specifications from YAML files.
  *
- * 架構特點：
- * - 框架無關性：只依賴 PlanetCore 和標準 Node.js API
- * - 簡化：不使用外部 Swagger UI 套件，改用 CDN
+ * Architecture Highlights:
+ * - Framework Agnostic: Depends only on PlanetCore and standard Node.js APIs.
+ * - Simplified: Doesn't use external Swagger UI packages; uses CDN instead.
  */
 
 import type { PlanetCore } from '@gravito/core'
 
 /**
- * 建構 Swagger UI HTML
- * 使用 Swagger UI CDN，無需額外套件
+ * Builds Swagger UI HTML.
+ * Uses Swagger UI CDN, no additional packages required.
  *
- * @returns HTML 字串，可直接由框架回傳
+ * @returns HTML string to be returned by the framework.
  */
 function buildSwaggerUI(): string {
-	return `
+  return `
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Gravito API - Swagger UI</title>
@@ -65,34 +65,35 @@ function buildSwaggerUI(): string {
 }
 
 /**
- * 註冊文檔路由到 Gravito
+ * Registers documentation routes with Gravito.
  *
- * 建立兩個端點：
- * 1. GET /api/docs - Swagger UI（HTML）
- * 2. GET /api/openapi.json - OpenAPI JSON 規範
+ * Establishes two endpoints:
+ * 1. GET /api/docs - Swagger UI (HTML).
+ * 2. GET /api/openapi.json - OpenAPI JSON Specification.
  *
- * @param core Gravito 核心實例
+ * @param core - Gravito core instance.
  */
 export async function registerDocsWithGravito(core: PlanetCore): Promise<void> {
-	// 快取 OpenAPI YAML 的解析結果，避免重複讀取
-	let cachedOpenAPIJSON: Record<string, unknown> | null = null
+  // Cache the parsed OpenAPI YAML result to avoid redundant reads
+  let cachedOpenAPIJSON: Record<string, unknown> | null = null
 
-	// GET /api/docs - 回傳 Swagger UI HTML
-	core.router.get('/api/docs', (ctx) => {
-		ctx.header('Content-Type', 'text/html; charset=utf-8')
-		return ctx.html(buildSwaggerUI())
-	})
+  // GET /api/docs - Return Swagger UI HTML
+  core.router.get('/api/docs', (ctx) => {
+    ctx.header('Content-Type', 'text/html; charset=utf-8')
+    return ctx.html(buildSwaggerUI())
+  })
 
-	// GET /api/openapi.json - 回傳 OpenAPI 規範（JSON）
-	core.router.get('/api/openapi.json', async (ctx) => {
-		if (cachedOpenAPIJSON === null) {
-			const yamlText = await Bun.file('docs/openapi.yaml').text()
-			const { parse } = await import('yaml')
-			cachedOpenAPIJSON = parse(yamlText)
-		}
+  // GET /api/openapi.json - Return OpenAPI specification (JSON)
+  core.router.get('/api/openapi.json', async (ctx) => {
+    if (cachedOpenAPIJSON === null) {
+      const yamlText = await Bun.file('docs/openapi.yaml').text()
+      const { parse } = await import('yaml')
+      cachedOpenAPIJSON = parse(yamlText)
+    }
 
-		return ctx.json(cachedOpenAPIJSON)
-	})
+    return ctx.json(cachedOpenAPIJSON)
+  })
 
-	console.log('✅ Docs routes registered: /api/docs, /api/openapi.json')
+  console.log('✅ Docs routes registered: /api/docs, /api/openapi.json')
 }
+

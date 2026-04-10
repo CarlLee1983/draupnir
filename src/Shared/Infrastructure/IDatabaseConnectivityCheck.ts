@@ -1,31 +1,31 @@
 /**
- * 資料庫連線檢查 Port（Port 模式）
+ * Database Connectivity Check Port (Port Pattern)
  *
- * @public - ORM 無關的公開介面
+ * @public - ORM-agnostic public interface.
  *
- * **職責**
- * - 僅負責「能否連上資料庫」的檢查
- * - 與具體 ORM/驅動完全解耦
- * - 用於健康檢查、診斷等場景
+ * **Responsibilities**
+ * - Responsible only for checking "if the database can be connected".
+ * - Completely decoupled from specific ORMs/drivers.
+ * - Used for health checks, diagnostics, etc.
  *
- * **使用位置**
- * - Application 層：Health Check Service 使用此介面檢查狀態
- * - Infrastructure 層：ORM Adapter 實現此介面（如 Atlas Adapter）
+ * **Usage Locations**
+ * - Application Layer: Health Check Service uses this interface to check status.
+ * - Infrastructure Layer: ORM Adapters implement this interface (e.g., Atlas Adapter).
  *
- * **Port 模式**
- * 這是 Hexagonal Architecture 中的「Port」概念：
- * - 定義了應用層與外部系統（資料庫）的邊界契約
- * - 應用層不知道底層如何實現
- * - 容易進行 Mock 測試
+ * **Port Pattern**
+ * This follows the "Port" concept in Hexagonal Architecture:
+ * - Defines the boundary contract between the application layer and external systems (database).
+ * - The application layer is unaware of the underlying implementation.
+ * - Faciltates easy mock testing.
  *
  * @design
- * - 簡單：只有一個方法 `ping()`
- * - 非侵入式：不改變現有資料庫連接邏輯
- * - 可測試：容易 Mock 為假實現
+ * - Simple: Only one method `ping()`.
+ * - Non-intrusive: Does not change existing database connection logic.
+ * - Testable: Easily mocked as a fake implementation.
  *
  * @example
  * ```typescript
- * // Application 層：健康檢查服務
+ * // Application Layer: Health Check Service
  * export class HealthCheckService {
  *   constructor(private dbCheck: IDatabaseConnectivityCheck) {}
  *
@@ -34,7 +34,7 @@
  *   }
  * }
  *
- * // Infrastructure 層：Atlas Adapter 實現
+ * // Infrastructure Layer: Atlas Adapter implementation
  * export class AtlasDatabaseConnectivityCheck implements IDatabaseConnectivityCheck {
  *   async ping(): Promise<boolean> {
  *     try {
@@ -46,7 +46,7 @@
  *   }
  * }
  *
- * // 測試中的 Mock 實現
+ * // Mock implementation in tests
  * class MockDatabaseConnectivityCheck implements IDatabaseConnectivityCheck {
  *   constructor(private isHealthy: boolean = true) {}
  *
@@ -56,17 +56,18 @@
  * }
  * ```
  *
- * @see docs/ABSTRACTION_RULES.md - 依賴抽象化規則
+ * @see docs/ABSTRACTION_RULES.md - Abstraction rules for dependencies.
  */
 export interface IDatabaseConnectivityCheck {
-	/**
-	 * 執行資料庫連線檢查
-	 *
-	 * 實現應該執行一個簡單的資料庫查詢（如 `SELECT 1`）來驗證連接。
-	 * 不應該進行複雜的查詢或修改操作。
-	 *
-	 * @returns `true` 表示資料庫連線正常，`false` 表示連線失敗
-	 * @throws 不應該拋出異常，應該直接返回 false
-	 */
-	ping(): Promise<boolean>
+  /**
+   * Executes a database connectivity check.
+   *
+   * The implementation should perform a simple database query (e.g., `SELECT 1`) 
+   * to verify the connection. It should not perform complex queries or modifications.
+   *
+   * @returns `true` if the database connection is normal, `false` otherwise.
+   * @throws Should not throw exceptions; should return false directly.
+   */
+  ping(): Promise<boolean>
 }
+

@@ -1,38 +1,39 @@
 /**
- * 基礎倉儲介面 - 定義所有倉儲的通用契約
+ * Base Repository Interface - Defines the common contract for all repositories.
  *
- * @public - Domain 層定義的公開介面，所有 Repository 實現都必須遵循此契約
+ * @public - Public interface defined in the Domain layer. All repository 
+ * implementations must follow this contract.
  *
- * **分層設計**
- * - 定義位置：Domain 層（`src/Shared/Domain/IRepository.ts`）
- * - 實現位置：Infrastructure 層（`src/Modules/{Module}/Infrastructure/Repositories/`）
- * - 消費者：Application 層 Service、Controller
+ * **Layered Design**
+ * - Definition Location: Domain Layer (`src/Shared/Domain/IRepository.ts`)
+ * - Implementation Location: Infrastructure Layer (`src/Modules/{Module}/Infrastructure/Repositories/`)
+ * - Consumers: Application Layer Services, Controllers
  *
- * **依賴反轉**
- * 高層（Application）依賴此抽象，不依賴具體實現。
- * 具體實現（Infrastructure Repository）依賴此抽象。
+ * **Dependency Inversion**
+ * High-level (Application) depends on this abstraction, not concrete implementations.
+ * Concrete implementation (Infrastructure Repository) depends on this abstraction.
  *
  * ```
  * Application Service
- *     ↓ (依賴)
- * IRepository<T> (公開介面)
- *     ↑ (實現)
- * InfrastructureRepository (具體實現)
+ *     ↓ (Depends)
+ * IRepository<T> (Public Interface)
+ *     ↑ (Implementation)
+ * InfrastructureRepository (Concrete Implementation)
  * ```
  *
  * @design
- * - ORM 無關：Repository 實現對外隱藏 ORM 細節
- * - 泛型：支援任何實現 BaseEntity 的 Entity 類型
- * - 異步操作：所有方法都是異步，支援各種 ORM 和存儲層
+ * - ORM Agnostic: Repository implementation hides ORM details from the outside world.
+ * - Generic: Supports any Entity type that implements BaseEntity.
+ * - Asynchronous Operations: All methods are asynchronous, supporting various ORMs and storage layers.
  *
  * @example
  * ```typescript
- * // Domain 層：定義介面
+ * // Domain Layer: Define Interface
  * export interface IUserRepository extends IRepository<User> {
  *   findByEmail(email: string): Promise<User | null>
  * }
  *
- * // Infrastructure 層：實現介面（使用任意 ORM）
+ * // Infrastructure Layer: Implement Interface (using any ORM)
  * export class UserRepository implements IUserRepository {
  *   constructor(private db: IDatabaseAccess) {}
  *
@@ -48,7 +49,7 @@
  *   }
  * }
  *
- * // Application 層：使用 Repository（不知道實現細節）
+ * // Application Layer: Use Repository (unaware of implementation details)
  * export class UserService {
  *   constructor(private repo: IUserRepository) {}
  *
@@ -58,61 +59,58 @@
  * }
  * ```
  *
- * @see docs/ABSTRACTION_RULES.md - 依賴抽象化規則
+ * @see docs/ABSTRACTION_RULES.md - Rules for dependency abstraction
  */
 
 import type { BaseEntity } from './BaseEntity'
 
 export interface IRepository<T extends BaseEntity> {
-	/**
-	 * 保存實體（新增或更新）
-	 *
-	 * 實現細節由具體 Repository 決定。根據 Entity 的狀態，
-	 * 決定是執行 INSERT 還是 UPDATE 操作。
-	 *
-	 * @param entity - 要保存的實體
-	 * @throws 若保存失敗，應拋出合適的錯誤
-	 */
-	save(entity: T): Promise<void>
+  /**
+   * Saves an entity (Create or Update).
+   *
+   * Implementation details are decided by the concrete Repository. Based on the 
+   * Entity's state, it decides whether to execute an INSERT or UPDATE operation.
+   *
+   * @param entity - The entity to save.
+   * @throws Should throw appropriate errors if saving fails.
+   */
+  save(entity: T): Promise<void>
 
-	/**
-	 * 根據 ID 查詢單個實體
-	 *
-	 * @param id - 實體 ID
-	 * @returns 若實體存在返回該實體，否則返回 null
-	 */
-	findById(id: string): Promise<T | null>
+  /**
+   * Query a single entity by ID.
+   *
+   * @param id - Entity ID.
+   * @returns Returns the entity if it exists, otherwise null.
+   */
+  findById(id: string): Promise<T | null>
 
-	/**
-	 * 刪除實體
-	 *
-	 * @param id - 要刪除的實體 ID
-	 * @throws 若刪除失敗或實體不存在，行為由實現決定
-	 */
-	delete(id: string): Promise<void>
+  /**
+   * Deletes an entity.
+   *
+   * @param id - The ID of the entity to delete.
+   * @throws Behavior on deletion failure or non-existent entity is implementation-defined.
+   */
+  delete(id: string): Promise<void>
 
-	/**
-	 * 查詢所有實體（支援分頁和過濾）
-	 *
-	 * @param params - 查詢參數
-	 * @param params.limit - 返回記錄數上限
-	 * @param params.offset - 分頁偏移量
-	 * @param params[key] - 其他過濾條件（由具體實現定義）
-	 * @returns 符合條件的實體陣列
-	 */
-	findAll(params?: {
-		limit?: number
-		offset?: number
-		[key: string]: any
-	}): Promise<T[]>
+  /**
+   * Queries all entities (Supports pagination and filtering).
+   *
+   * @param params - Query parameters.
+   * @param params.limit - Maximum number of records to return.
+   * @param params.offset - Pagination offset.
+   * @param params[key] - Other filter conditions (defined by concrete implementation).
+   * @returns An array of matching entities.
+   */
+  findAll(params?: { limit?: number; offset?: number; [key: string]: any }): Promise<T[]>
 
-	/**
-	 * 計算符合條件的實體總數
-	 *
-	 * 常用於分頁計算總頁數。
-	 *
-	 * @param params - 過濾條件（必須與 findAll 相同）
-	 * @returns 符合條件的實體總數
-	 */
-	count(params?: { [key: string]: any }): Promise<number>
+  /**
+   * Counts the total number of entities matching conditions.
+   *
+   * Commonly used for pagination to calculate total pages.
+   *
+   * @param params - Filter conditions (must match findAll).
+   * @returns Total number of matching entities.
+   */
+  count(params?: { [key: string]: any }): Promise<number>
 }
+

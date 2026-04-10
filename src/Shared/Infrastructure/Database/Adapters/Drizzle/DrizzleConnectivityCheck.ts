@@ -31,7 +31,7 @@ export function createDrizzleConnectivityCheck(): IDatabaseConnectivityCheck {
         const db = getDrizzleInstance()
 
         // 執行簡單的 SELECT 1 查詢來驗證連線
-        await (db as any).execute?.('SELECT 1') || (db as any).run?.('SELECT 1')
+        ;(await (db as any).execute?.('SELECT 1')) || (db as any).run?.('SELECT 1')
 
         return true
       } catch (error) {

@@ -1,21 +1,24 @@
 /**
- * 基礎 DTO (Data Transfer Object)
+ * Base DTO (Data Transfer Object)
  *
- * DTO 用於在層之間傳遞數據，不包含業務邏輯。
- * 作為應用層的出口 DTO，由 Presentation 層（展示層）消費並轉換為 API 響應。
+ * DTOs are used to transfer data between layers without containing business logic.
+ * As an egress DTO for the application layer, it is consumed by the Presentation layer
+ * and converted into API responses.
  *
- * 繼承此類別的 DTO 應保持唯讀（readonly）特性，確保傳遞過程中的資料一致性。
+ * DTOs inheriting from this class should maintain readonly properties to ensure
+ * data consistency during transfer.
  */
 export class BaseDTO {
-	/**
-	 * 將 DTO 轉換為純 JSON 物件（用於 API 響應序列化）
-	 *
-	 * 預設實作會淺拷貝所有實例屬性。
-	 * 子類別可覆蓋此方法以實現更複雜的轉換邏輯（例如處理嵌套對象或日期格式）。
-	 *
-	 * @returns {Record<string, any>} 包含 DTO 數據的純物件
-	 */
-	toJSON(): Record<string, any> {
-		return { ...this }
-	}
+  /**
+   * Converts the DTO to a plain JSON object for API response serialization.
+   *
+   * The default implementation performs a shallow copy of all instance properties.
+   * Subclasses can override this method for complex transformation logic (e.g.,
+   * handling nested objects or date formatting).
+   *
+   * @returns {Record<string, any>} A plain object containing the DTO data.
+   */
+  toJSON(): Record<string, any> {
+    return { ...this }
+  }
 }

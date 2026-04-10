@@ -1,35 +1,37 @@
 /**
- * 快取服務介面（Port）
+ * Cache Service Interface (Port)
  *
- * 應用層依賴此介面而非具體框架實作（如 Gravito Stasis）。
- * 支援透過測試框架或其他快取實作進行替換。
+ * The application layer depends on this interface rather than specific 
+ * framework implementations (e.g., Gravito Stasis). 
+ * Supports substitution with testing frameworks or other cache implementations.
  */
 
 export interface ICacheService {
-	/**
-	 * 從快取取得值
-	 *
-	 * @param key - 快取 key
-	 * @returns 快取值或 null（不存在或已過期）
-	 */
-	get<T = unknown>(key: string): Promise<T | null>
+  /**
+   * Retrieves a value from the cache.
+   *
+   * @param key - Cache key.
+   * @returns Cache value or null (if non-existent or expired).
+   */
+  get<T = unknown>(key: string): Promise<T | null>
 
-	/**
-	 * 設定快取值
-	 *
-	 * @param key - 快取 key
-	 * @param value - 快取值
-	 * @param ttlSeconds - 生存時間（秒），可選
-	 */
-	set<T = unknown>(key: string, value: T, ttlSeconds?: number): Promise<void>
+  /**
+   * Sets a cache value.
+   *
+   * @param key - Cache key.
+   * @param value - Cache value.
+   * @param ttlSeconds - Time-to-live in seconds (optional).
+   */
+  set<T = unknown>(key: string, value: T, ttlSeconds?: number): Promise<void>
 
-	/**
-	 * 刪除快取 key
-	 */
-	forget(key: string): Promise<void>
+  /**
+   * Deletes a cache key.
+   */
+  forget(key: string): Promise<void>
 
-	/**
-	 * 清空所有快取
-	 */
-	flush(): Promise<void>
+  /**
+   * Flushes all cache entries.
+   */
+  flush(): Promise<void>
 }
+

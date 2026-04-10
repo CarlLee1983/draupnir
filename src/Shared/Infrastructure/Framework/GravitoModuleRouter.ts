@@ -1,11 +1,7 @@
 import type { PlanetCore } from '@gravito/core'
 import type { FormRequestClass } from '@gravito/core'
 import { fromGravitoContext } from '@/Shared/Presentation/IHttpContext'
-import type {
-  IModuleRouter,
-  RouteHandler,
-  Middleware,
-} from '@/Shared/Presentation/IModuleRouter'
+import type { IModuleRouter, RouteHandler, Middleware } from '@/Shared/Presentation/IModuleRouter'
 
 const FORM_REQUEST_SYMBOL = Symbol.for('gravito.formRequest')
 
@@ -50,26 +46,27 @@ export function createGravitoModuleRouter(core: PlanetCore, prefix = ''): IModul
       if (args.length === 3 && Array.isArray(args[0]) && isFormRequestClass(args[1])) {
         const middlewares = args[0] as Middleware[]
         const formRequest = args[1] as FormRequestClass
-        const pipeline = runPipeline(middlewares, (ctx) =>
-          new Promise((resolve) => {
-            // 將已通過 middleware 的請求交給 core.router 處理 FormRequest
-            // 使用 pipeline wrapper 確保 middleware 先執行
-            resolve(handler(ctx))
-          }),
+        const pipeline = runPipeline(
+          middlewares,
+          (ctx) =>
+            new Promise((resolve) => {
+              // Pass the request that has already passed through middlewares to core.router to handle FormRequest
+              // Use pipeline wrapper to ensure middlewares execute first
+              resolve(handler(ctx))
+            }),
         )
-        // 先跑 middleware pipeline，再讓 core 處理 FormRequest
-        core.router[method](fullPath, formRequest, (ctx: any) =>
-          pipeline(fromGravitoContext(ctx)),
-        )
+        // Run the middleware pipeline first, then let the core handle FormRequest
+        core.router[method](fullPath, formRequest, (ctx: any) => pipeline(fromGravitoContext(ctx)))
         return
       }
 
-      // (path, handler) 或 (path, middlewares[], handler) — 現有邏輯
+      // (path, handler) or (path, middlewares[], handler) — Existing logic
       const middlewares = args.length > 1 ? (args[0] as Middleware[]) : []
       const pipeline = runPipeline(middlewares, handler)
       core.router[method](fullPath, (ctx: any) => pipeline(fromGravitoContext(ctx)))
     }
   }
+
 
   return {
     get: register('get') as IModuleRouter['get'],

@@ -33,7 +33,9 @@ class DrizzleDatabaseAccess implements IDatabaseAccess {
     const tableSchema = (schema as any)[name]
 
     if (!tableSchema) {
-      throw new Error(`Table "${name}" not found in schema. Available tables: ${Object.keys(schema).join(', ')}`)
+      throw new Error(
+        `Table "${name}" not found in schema. Available tables: ${Object.keys(schema).join(', ')}`,
+      )
     }
 
     return new DrizzleQueryBuilder(db, name, tableSchema)
@@ -58,7 +60,9 @@ class DrizzleTransactionAccess implements IDatabaseAccess {
   table(name: string): IQueryBuilder {
     const tableSchema = (schema as any)[name]
     if (!tableSchema) {
-      throw new Error(`Table "${name}" not found in schema. Available tables: ${Object.keys(schema).join(', ')}`)
+      throw new Error(
+        `Table "${name}" not found in schema. Available tables: ${Object.keys(schema).join(', ')}`,
+      )
     }
     return new DrizzleQueryBuilder(this.txDb, name, tableSchema)
   }

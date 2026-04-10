@@ -12,57 +12,60 @@ import type { ModuleServiceProvider, IContainer } from '@/Shared/Infrastructure/
  * 將 Gravito 的 Container 適配為框架無關的 IContainer
  */
 class GravitoContainerAdapter implements IContainer {
-	constructor(private gravitoContainer: GravitoContainer) {}
+  constructor(private gravitoContainer: GravitoContainer) {}
 
-	singleton(name: string, factory: (container: IContainer) => any): void {
-		this.gravitoContainer.singleton(name, (c: GravitoContainer) => {
-			return factory(new GravitoContainerAdapter(c))
-		})
-	}
+  singleton(name: string, factory: (container: IContainer) => any): void {
+    this.gravitoContainer.singleton(name, (c: GravitoContainer) => {
+      return factory(new GravitoContainerAdapter(c))
+    })
+  }
 
-	bind(name: string, factory: (container: IContainer) => any): void {
-		// Gravito 中的 bind 實現每次都創建新實例
-		this.gravitoContainer.bind(name, (c: GravitoContainer) => {
-			return factory(new GravitoContainerAdapter(c))
-		})
-	}
+  bind(name: string, factory: (container: IContainer) => any): void {
+    // bind implementation in Gravito creates a new instance each time
+    this.gravitoContainer.bind(name, (c: GravitoContainer) => {
+      return factory(new GravitoContainerAdapter(c))
+    })
+  }
 
-	make(name: string): any {
-		return this.gravitoContainer.make(name)
-	}
+  make(name: string): any {
+    return this.gravitoContainer.make(name)
+  }
 }
 
 /**
- * 將框架無關的 ModuleServiceProvider 適配為 Gravito 的 ServiceProvider
+ * Adapts framework-agnostic ModuleServiceProvider to Gravito's ServiceProvider.
  */
 export class GravitoServiceProviderAdapter extends ServiceProvider {
-	constructor(private moduleProvider: ModuleServiceProvider) {
-		super()
-	}
+  constructor(private moduleProvider: ModuleServiceProvider) {
+    super()
+  }
 
-	register(container: GravitoContainer): void {
-		// 將 Gravito 的 Container 適配為框架無關的 IContainer
-		const adaptedContainer = new GravitoContainerAdapter(container)
+  register(container: GravitoContainer): void {
+    // Adapt Gravito's Container to framework-agnostic IContainer
+    const adaptedContainer = new GravitoContainerAdapter(container)
 
-		// 調用模組的註冊方法
-		this.moduleProvider.register(adaptedContainer)
-	}
+    // Call module's registration method
+    this.moduleProvider.register(adaptedContainer)
+  }
 
-	boot(core: PlanetCore): void {
-		// 調用模組的啟動方法
-		this.moduleProvider.boot(core)
-	}
+  boot(core: PlanetCore): void {
+    // Call module's boot method
+    this.moduleProvider.boot(core)
+  }
 }
 
 /**
- * 工廠函式：創建適配器
+ * Factory function: creates an adapter.
  *
- * @param moduleProvider - 框架無關的模組服務提供者
- * @returns Gravito 框架的 ServiceProvider
+ * @param moduleProvider - Framework-agnostic module service provider.
+ * @returns Gravito framework ServiceProvider.
  *
  * @example
  * app.register(createGravitoServiceProvider(new UserServiceProvider()))
  */
-export function createGravitoServiceProvider(moduleProvider: ModuleServiceProvider): ServiceProvider {
-	return new GravitoServiceProviderAdapter(moduleProvider)
+export function createGravitoServiceProvider(
+  moduleProvider: ModuleServiceProvider,
+): ServiceProvider {
+  return new GravitoServiceProviderAdapter(moduleProvider)
 }
+
