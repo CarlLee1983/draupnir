@@ -23,28 +23,24 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 - ✓ Bun + Biome + TS strict + Zod validation + Bun test — existing
 - ✓ Multi-ORM repository pattern (memory, drizzle, atlas) — existing
 - ✓ Tests mock `BifrostClient` directly (brittle, coupled to concrete class) — existing
+- ✓ `ILLMGatewayClient` interface with camelCase DTOs defined — Validated in Phase 1
+- ✓ `GatewayError` class as single adapter error type — Validated in Phase 1
+- ✓ `BifrostGatewayAdapter` wrapping `BifrostClient` with snake_case ↔ camelCase conversion — Validated in Phase 1
+- ✓ `MockGatewayClient` for tests (no HTTP) — Validated in Phase 1
+- ✓ `llmGatewayClient` singleton registered in FoundationServiceProvider — Validated in Phase 1
+- ✓ All 7 application services migrated to `ILLMGatewayClient` — Validated in Phase 2
+- ✓ All wire functions pass `ILLMGatewayClient` — Validated in Phase 2
+- ✓ Tests rewritten to mock `ILLMGatewayClient` interface — Validated in Phase 2
+- ✓ `bifrostVirtualKeyId` → `gatewayKeyId` renamed in domain aggregates — Validated in Phase 3
+- ✓ `packages/bifrost-sdk/` Bun workspace package created with BifrostClient, config, types, errors, retry — Validated in Phase 4
+- ✓ Root `package.json` workspaces + imports migrated to `@draupnir/bifrost-sdk` — Validated in Phase 4
+- ✓ `src/Foundation/Infrastructure/Services/BifrostClient/` deleted — Validated in Phase 4
+- ✓ Bifrost proxy URL sourced from `bifrost-sdk` config — Validated in Phase 4
 
 ### Active
 
-<!-- The refactor scope for this milestone -->
+<!-- Remaining for Phase 5: Final Verification -->
 
-- [ ] Define `ILLMGatewayClient` interface with camelCase DTOs (`CreateKeyRequest`, `UpdateKeyRequest`, `KeyResponse`, `UsageQuery`, `UsageStats`)
-- [ ] Define `GatewayError` class as the single error type adapters throw
-- [ ] Implement `BifrostGatewayAdapter` wrapping `BifrostClient`, converting snake_case ↔ camelCase at the boundary
-- [ ] Implement `MockGatewayClient` for tests (satisfies interface, no HTTP)
-- [ ] Register `llmGatewayClient` singleton in the main ServiceProvider, bound to `BifrostGatewayAdapter`
-- [ ] Migrate `AppKeyBifrostSync` to inject `ILLMGatewayClient` instead of `BifrostClient`
-- [ ] Migrate `ApiKeyBifrostSync` to inject `ILLMGatewayClient`
-- [ ] Migrate `GetAppKeyUsageService` to inject `ILLMGatewayClient`
-- [ ] Migrate `QueryUsage` (SdkApi) to inject `ILLMGatewayClient`
-- [ ] Migrate `UsageAggregator` (Dashboard) to inject `ILLMGatewayClient`, eliminate snake_case leakage
-- [ ] Update all wire functions (`wireAppApiKey`, `wireApiKey`, `wireSdkApi`, `wireDashboard`, ...) to pass `ILLMGatewayClient`
-- [ ] Rewrite existing mock-based tests to mock `ILLMGatewayClient` interface (not `BifrostClient` concrete)
-- [ ] Create `packages/bifrost-sdk/` Bun workspace package containing `BifrostClient`, config, types, errors, retry
-- [ ] Update root `package.json` workspaces and migrate Draupnir imports to `@draupnir/bifrost-sdk` (or chosen scope)
-- [ ] Delete `src/Foundation/Infrastructure/Services/BifrostClient/` after workspace migration verified
-- [ ] Rename `bifrostVirtualKeyId` → `gatewayKeyId` in domain aggregates (`AppApiKey`, `ApiKey`), TypeScript only — repository maps to existing DB column
-- [ ] Move hardcoded Bifrost proxy URL out of `SdkApiServiceProvider` into `bifrost-sdk` config, without changing `ProxyModelCall` logic
 - [ ] All existing feature tests and E2E tests pass unchanged
 - [ ] Lint clean (Biome) + typecheck clean (`tsc --noEmit`)
 
@@ -112,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 after initialization*
+*Last updated: 2026-04-10 after Phase 4 (SDK Extraction) completion*
