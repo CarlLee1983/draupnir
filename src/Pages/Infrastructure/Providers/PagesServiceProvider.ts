@@ -1,6 +1,6 @@
 import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
 import { registerAdminPageBindings } from '@/Pages/routing/admin/registerAdminPageBindings'
-import { createInertiaService } from '@/Pages/routing/inertiaFactory'
+import { getInertiaServiceSingleton } from '@/Pages/routing/inertiaFactory'
 import { registerMemberPageBindings } from '@/Pages/routing/member/registerMemberPageBindings'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 
@@ -17,12 +17,14 @@ export { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
  *
  * Implementation note: Must run after module providers that register the services pages resolve via
  * `container.make(...)`. Route registration happens later in `registerPageRoutes`.
+ * `bootstrap` must `await warmInertiaService()` after `core.bootstrap()` so the `inertiaService`
+ * singleton can be resolved synchronously from the container.
  */
 export class PagesServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
     const { inertiaService } = PAGE_CONTAINER_KEYS
 
-    container.singleton(inertiaService, () => createInertiaService())
+    container.singleton(inertiaService, () => getInertiaServiceSingleton())
     registerAdminPageBindings(container)
     registerMemberPageBindings(container)
   }

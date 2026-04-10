@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, test } from 'bun:test'
+import { joinPath } from '../routing/pathUtils'
 import { ViteTagHelper } from '../ViteTagHelper'
 
 describe('ViteTagHelper', () => {
@@ -36,5 +37,16 @@ describe('ViteTagHelper', () => {
   test('production mode without manifest throws', () => {
     const helper = new ViteTagHelper('production', '')
     expect(() => helper.generateTags(['resources/js/app.tsx'])).toThrow()
+  })
+
+  test('loadManifest parses manifest JSON from disk', async () => {
+    const path = joinPath(import.meta.dir, 'fixtures', 'minimal-vite-manifest.json')
+    const m = await ViteTagHelper.loadManifest(path)
+    expect(m?.['resources/js/app.tsx']?.file).toBe('assets/app-abc123.js')
+  })
+
+  test('loadManifest returns undefined for missing file', async () => {
+    const m = await ViteTagHelper.loadManifest(joinPath(import.meta.dir, 'fixtures', 'nope.json'))
+    expect(m).toBeUndefined()
   })
 })

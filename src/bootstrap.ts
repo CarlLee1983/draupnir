@@ -19,6 +19,7 @@ import { OrganizationServiceProvider } from './Modules/Organization/Infrastructu
 import { ProfileServiceProvider } from './Modules/Profile/Infrastructure/Providers/ProfileServiceProvider'
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
 import { PagesServiceProvider } from './Pages/Infrastructure/Providers/PagesServiceProvider'
+import { warmInertiaService } from './Pages/routing/inertiaFactory'
 import { registerRoutes } from './routes'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
@@ -54,6 +55,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   core.register(createGravitoServiceProvider(new PagesServiceProvider()))
 
   await core.bootstrap()
+  await warmInertiaService()
   await (
     core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService
   ).execute()

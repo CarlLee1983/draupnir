@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs'
-
 /** Single Vite manifest record (hashed output file plus optional CSS chunks). */
 export interface ViteManifestEntry {
   file: string
@@ -77,10 +75,9 @@ export class ViteTagHelper {
    * @param manifestPath - Absolute path to `manifest.json` under `public/build`.
    * @returns Parsed manifest, or `undefined` if the file is missing or invalid JSON.
    */
-  static loadManifest(manifestPath: string): ViteManifest | undefined {
+  static async loadManifest(manifestPath: string): Promise<ViteManifest | undefined> {
     try {
-      const raw = readFileSync(manifestPath, 'utf-8')
-      return JSON.parse(raw) as ViteManifest
+      return (await Bun.file(manifestPath).json()) as ViteManifest
     } catch {
       return undefined
     }

@@ -2,25 +2,25 @@
  * Inertia page route registration for the HTTP server.
  *
  * Composes admin/member declarative routes (DI-resolved page handlers) and optional Vite build static
- * assets under `/build/*`. Expects `PagesServiceProvider` to have registered page bindings on `core.container`.
+ * assets under `/build/*`. Expects `PagesServiceProvider` to have registered page bindings on `container`.
  */
-import type { PlanetCore } from '@gravito/core'
-
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 
 import { registerAdminPageRoutes } from './routing/registerAdminPageRoutes'
 import { registerMemberPageRoutes } from './routing/registerMemberPageRoutes'
 import { registerPageStaticRoutes } from './routing/registerPageStaticRoutes'
 
 /**
- * Mounts all Inertia routes and static frontend assets on the Gravito router.
+ * Mounts all Inertia routes and static frontend assets on the module router.
  *
- * @param core - Bootstrapped application core (router + container).
+ * The host wires `IModuleRouter` (e.g. via `createGravitoModuleRouter`) so this module stays free of
+ * framework core types.
+ *
+ * @param router - Framework-agnostic route registrar (typically Gravito-backed).
+ * @param container - DI container holding page bindings from `PagesServiceProvider`.
  */
-export function registerPageRoutes(core: PlanetCore): void {
-  const router = createGravitoModuleRouter(core)
-  const container = core.container as IContainer
+export function registerPageRoutes(router: IModuleRouter, container: IContainer): void {
   registerAdminPageRoutes(router, container)
   registerMemberPageRoutes(router, container)
   registerPageStaticRoutes(router)
