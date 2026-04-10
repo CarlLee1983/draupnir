@@ -50,7 +50,7 @@ Plans:
 **UI hint**: no
 **Plans**: 5 plans
 Plans:
-- [ ] 02-01-PLAN.md — AppApiKey module: AppKeyBifrostSync + GetAppKeyUsageService + AppApiKeyServiceProvider + tests
+- [x] 02-01-PLAN.md — AppApiKey module: AppKeyBifrostSync + GetAppKeyUsageService + AppApiKeyServiceProvider + tests
 - [x] 02-02-PLAN.md — ApiKey module: ApiKeyBifrostSync (incl. syncPermissions field translation) + ApiKeyServiceProvider + tests
 - [x] 02-03-PLAN.md — Credit module: HandleBalanceDepletedService (D-P02 retryable) + HandleCreditToppedUpService + CreditServiceProvider + tests
 - [x] 02-04-PLAN.md — SdkApi module: QueryUsage + SdkApiServiceProvider (queryUsage only) + tests

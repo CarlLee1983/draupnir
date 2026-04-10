@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete — ready for verification
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-04-10T07:29:42.067Z"
+stopped_at: Completed 02-01-PLAN.md — AppApiKey module migrated to ILLMGatewayClient
+last_updated: "2026-04-10T07:30:16.780Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -71,6 +71,7 @@ Recent decisions affecting current work:
 - [Phase 01-gateway-foundation]: llmGatewayClient singleton resolves bifrostClient from container (c.make) to share instance — bifrostClient registration preserved until Phase 3
 - [Phase 02-business-layer-migration]: MockGatewayClient.updateKey 需要 store 內存在的 keyId，測試需在 beforeEach 呼叫 mock.createKey() 並以回傳 id 作為 bifrostVirtualKeyId
 - [Phase 02]: HandleCreditToppedUpService.retryPending 不存在，不需套用 D-P02（deferred per CONTEXT.md）
+- [Phase 02]: RevokeAppKeyService/RotateAppKeyService 測試因 AppKeyBifrostSync 建構子簽章變更同步遷移至 MockGatewayClient（Rule 1 auto-fix）
 
 ### Pending Todos
 
@@ -82,6 +83,6 @@ None yet. Note for Phase 4 planning: confirm Bun workspace `workspace:*` protoco
 
 ## Session Continuity
 
-Last session: 2026-04-10T07:29:42.065Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-04-10T07:30:12.232Z
+Stopped at: Completed 02-01-PLAN.md — AppApiKey module migrated to ILLMGatewayClient
 Resume file: None
