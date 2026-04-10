@@ -37,8 +37,14 @@ interface CallLog {
   readonly createKey: readonly CreateKeyRequest[]
   readonly updateKey: readonly { readonly keyId: string; readonly request: UpdateKeyRequest }[]
   readonly deleteKey: readonly string[]
-  readonly getUsageStats: readonly { readonly keyIds: readonly string[]; readonly query?: UsageQuery }[]
-  readonly getUsageLogs: readonly { readonly keyIds: readonly string[]; readonly query?: UsageQuery }[]
+  readonly getUsageStats: readonly {
+    readonly keyIds: readonly string[]
+    readonly query?: UsageQuery
+  }[]
+  readonly getUsageLogs: readonly {
+    readonly keyIds: readonly string[]
+    readonly query?: UsageQuery
+  }[]
 }
 
 export class MockGatewayClient implements ILLMGatewayClient {
