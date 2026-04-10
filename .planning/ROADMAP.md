@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Business-Layer Migration** - Migrate all application services and wire functions to inject `ILLMGatewayClient`; rewrite tests to mock the interface (completed 2026-04-10)
 - [x] **Phase 3: Domain Rename** - Rename `bifrostVirtualKeyId` → `gatewayKeyId` in TS domain aggregates and repositories; no DB migration (completed 2026-04-10)
 - [ ] **Phase 4: SDK Extraction** - Move `BifrostClient` into `packages/bifrost-sdk/` Bun workspace package; update all imports
-- [ ] **Phase 5: Final Verification** - Grep-verify zero business-layer Bifrost imports, run full lint/typecheck/unit/feature/E2E, update CONCERNS.md
+- [x] **Phase 5: Final Verification** - Grep-verify zero business-layer Bifrost imports, run full lint/typecheck/unit/feature/E2E, update CONCERNS.md (completed 2026-04-10)
 
 ## Phase Details
 
@@ -101,14 +101,26 @@ Plans:
 **UI hint**: no
 **Plans**: 3 plans
 Plans:
-- [ ] 05-01-PLAN.md — Fix residual violations + quality-gate diff verification (grep, lint, typecheck, any/ts-ignore, route baseline)
-- [ ] 05-02-PLAN.md — CONCERNS.md: mark items #1, #2, #3 Resolved and #6 Partially Resolved
-- [ ] 05-03-PLAN.md — Playwright E2E checkpoint: automated attempt + human verification
+- [x] 05-01-PLAN.md — Fix residual violations + quality-gate diff verification (grep, lint, typecheck, any/ts-ignore, route baseline)
+- [x] 05-02-PLAN.md — CONCERNS.md: mark items #1, #2, #3 Resolved and #6 Partially Resolved
+- [x] 05-03-PLAN.md — Playwright E2E checkpoint: automated attempt + human verification
+
+### Phase 6: 補完 Pages 頁面模組功能實作
+
+**Goal**: All 19 page handler classes have unit tests; all 25 Inertia page routes (`/admin/*`, `/member/*`) are covered in `routes-existence.test.ts`; the full test suite passes.
+**Requirements**: PAGE-01, PAGE-02, PAGE-03, PAGE-04, PAGE-05, PAGE-06
+**Depends on:** Phase 5
+**Plans:** 3 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Admin page handler unit tests: 12 test files covering auth guards, GET rendering, POST handlers (Wave 1)
+- [ ] 06-02-PLAN.md — Member page handler unit tests: 7 test files covering auth guards, GET rendering, POST handlers (Wave 1, parallel)
+- [ ] 06-03-PLAN.md — routes-existence page route coverage: 25 admin + member route assertions (Wave 2)
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
+Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -116,4 +128,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5
 | 2. Business-Layer Migration | 3/5 | Complete    | 2026-04-10 |
 | 3. Domain Rename | 3/3 | Complete | 2026-04-10 |
 | 4. SDK Extraction | 2/2 | Complete | 2026-04-10 |
-| 5. Final Verification | 0/3 | Not started | - |
+| 5. Final Verification | 3/3 | Complete | 2026-04-10 |
+| 6. Pages Test Coverage | 0/3 | In Progress | — |
