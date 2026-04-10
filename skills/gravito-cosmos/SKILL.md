@@ -27,6 +27,15 @@ Need project-specific locale patterns?
 
 Need catalog file shapes or client/server sync?
   → references/client-server.md
+
+Need locale middleware or request setup?
+  → references/middleware.md
+
+Need validation and error-message translation?
+  → references/validation.md
+
+Need utility helpers for locale resolution?
+  → references/helpers.md
 ```
 
 ## Minimal workflow
@@ -52,3 +61,6 @@ Need catalog file shapes or client/server sync?
 - `references/integration.md`
 - `references/draupnir-patterns.md`
 - `references/client-server.md`
+- `references/middleware.md`
+- `references/validation.md`
+- `references/helpers.md`

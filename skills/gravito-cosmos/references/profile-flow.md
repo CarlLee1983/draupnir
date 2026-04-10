@@ -23,6 +23,14 @@ const nextProfile = profile.updateProfile({
 })
 ```
 
+## Request flow
+
+1. user submits the locale in the profile form
+2. `UpdateProfileRequest` accepts the raw string
+3. `UpdateProfileService` validates it with `new Locale(request.locale)`
+4. the aggregate stores the normalized locale string
+5. shared data reads the updated locale on the next request
+
 ## Rules
 
 - keep locale validation in the domain layer

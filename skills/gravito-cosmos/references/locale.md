@@ -24,3 +24,27 @@ Keep locale resolution deterministic so the same request yields the same languag
 `Draupnir` already stores locale on `UserProfile` with a default of `zh-TW`. Use that as the
 long-lived preference, then expose the effective locale to the request so rendering and messages
 stay aligned.
+
+## Practical resolver
+
+```typescript
+import { Locale } from '@/Modules/Profile/Domain/ValueObjects/Locale'
+
+export function resolveLocale(input: {
+  profileLocale?: string
+  routeLocale?: string
+  cookieLocale?: string
+  headerLocale?: string
+}): string {
+  const candidate =
+    input.profileLocale ??
+    input.routeLocale ??
+    input.cookieLocale ??
+    input.headerLocale ??
+    Locale.default().toString()
+
+  return new Locale(candidate).toString()
+}
+```
+
+Keep the resolver in application or infrastructure code, not in the value object itself.
