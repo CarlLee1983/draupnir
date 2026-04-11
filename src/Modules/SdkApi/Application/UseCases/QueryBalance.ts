@@ -18,7 +18,7 @@ export class QueryBalance {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           balance: account.balance,
           lowBalanceThreshold: account.lowBalanceThreshold,
@@ -26,7 +26,7 @@ export class QueryBalance {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢餘額失敗'
+      const message = error instanceof Error ? error.message : 'Failed to query balance'
       return { success: false, message, error: 'BALANCE_QUERY_ERROR' }
     }
   }
