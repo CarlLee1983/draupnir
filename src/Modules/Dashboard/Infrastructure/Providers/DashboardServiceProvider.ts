@@ -5,6 +5,9 @@ import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLM
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
 import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorRepository'
+import { GetCostTrendsService } from '../../Application/Services/GetCostTrendsService'
+import { GetKpiSummaryService } from '../../Application/Services/GetKpiSummaryService'
+import { GetModelComparisonService } from '../../Application/Services/GetModelComparisonService'
 import { DrizzleSyncCursorRepository } from '../Repositories/DrizzleSyncCursorRepository'
 import { DrizzleUsageRepository } from '../Repositories/DrizzleUsageRepository'
 import { BifrostSyncService } from '../Services/BifrostSyncService'
@@ -49,6 +52,31 @@ export class DashboardServiceProvider extends ModuleServiceProvider {
         c.make('apiKeyRepository') as IApiKeyRepository,
         c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
         c.make('usageAggregator') as UsageAggregator,
+      )
+    })
+
+    container.bind('getKpiSummaryService', (c: IContainer) => {
+      return new GetKpiSummaryService(
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+        c.make('drizzleUsageRepository') as IUsageRepository,
+        c.make('syncCursorRepository') as ISyncCursorRepository,
+      )
+    })
+
+    container.bind('getCostTrendsService', (c: IContainer) => {
+      return new GetCostTrendsService(
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+        c.make('drizzleUsageRepository') as IUsageRepository,
+      )
+    })
+
+    container.bind('getModelComparisonService', (c: IContainer) => {
+      return new GetModelComparisonService(
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+        c.make('drizzleUsageRepository') as IUsageRepository,
       )
     })
   }
