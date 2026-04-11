@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Pages & Framework
 status: v1.1 milestone complete
-last_updated: "2026-04-11T05:48:05.577Z"
+last_updated: "2026-04-11T11:05:00.000Z"
 progress:
   total_phases: 2
   completed_phases: 2
@@ -45,6 +45,12 @@ progress:
 
 See: `.planning/PROJECT.md` (updated 2026-04-11)  
 Core value: No file under `src/Modules/` or `src/Foundation/Application/` may import a Bifrost-specific symbol.
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260411-qi1 | 修復 adversarial review 的 4 個安全問題：auth routes 缺少 FormRequest、verify-device 未授權裝置、email 寄送為 console stub、password reset 未撤銷 tokens | 2026-04-11 | eac62f1 | [260411-qi1-adversarial-review-4-auth-routes-formreq](./quick/260411-qi1-adversarial-review-4-auth-routes-formreq/) |
 
 ---
 
