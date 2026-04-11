@@ -13,10 +13,12 @@ import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingSe
 const hashingService = new KeyHashingService()
 let key1Hash: string
 let key2Hash: string
+let keyOtherHash: string
 
 beforeAll(async () => {
   key1Hash = await hashingService.hash('drp_sk_1')
   key2Hash = await hashingService.hash('drp_sk_2')
+  keyOtherHash = await hashingService.hash('drp_sk_other')
 })
 
 function createMockAggregator(): UsageAggregator {
@@ -80,5 +82,83 @@ describe('GetDashboardSummaryService', () => {
   it('admin 可存取任何 Org 的 Dashboard', async () => {
     const result = await service.execute('org-1', 'admin-user', 'admin')
     expect(result.success).toBe(true)
+  })
+
+  it('org member 僅統計自己建立的 API keys', async () => {
+    const member = OrganizationMember.create('mem-2', 'org-1', 'user-member', 'member')
+    await memberRepo.save(member)
+
+    const keyOther = ApiKey.create({
+      id: 'key-other',
+      orgId: 'org-1',
+      createdByUserId: 'user-other',
+      label: 'Other',
+      gatewayKeyId: 'bfr-vk-other',
+      keyHash: keyOtherHash,
+    })
+    await apiKeyRepo.save(keyOther.activate())
+
+    const result = await service.execute('org-1', 'user-member', 'user')
+    expect(result.success).toBe(true)
+    expect(result.data?.totalKeys).toBe(0)
+    expect(result.data?.activeKeys).toBe(0)
+    expect(result.data?.usage.totalRequests).toBe(0)
+  })
+
+  it('org manager 可統計 org 內所有成員的 keys', async () => {
+    const keyOther = ApiKey.create({
+      id: 'key-other',
+      orgId: 'org-1',
+      createdByUserId: 'user-other',
+      label: 'Other',
+      gatewayKeyId: 'bfr-vk-other',
+      keyHash: keyOtherHash,
+    })
+    await apiKeyRepo.save(keyOther.activate())
+
+    const result = await service.execute('org-1', 'user-1', 'user')
+    expect(result.success).toBe(true)
+    expect(result.data?.totalKeys).toBe(3)
+    expect(result.data?.activeKeys).toBe(3)
+  })
+
+  describe('org member role (isolated org)', () => {
+    beforeEach(async () => {
+      db = new MemoryDatabaseAccess()
+      apiKeyRepo = new ApiKeyRepository(db)
+      memberRepo = new OrganizationMemberRepository(db)
+      const orgAuth = new OrgAuthorizationHelper(memberRepo)
+      const aggregator = createMockAggregator()
+      service = new GetDashboardSummaryService(apiKeyRepo, orgAuth, aggregator)
+
+      await memberRepo.save(OrganizationMember.create('mem-a', 'org-m', 'alice', 'member'))
+
+      const aliceKey = ApiKey.create({
+        id: 'key-alice',
+        orgId: 'org-m',
+        createdByUserId: 'alice',
+        label: 'Alice',
+        gatewayKeyId: 'bfr-vk-alice',
+        keyHash: key1Hash,
+      })
+      const bobKey = ApiKey.create({
+        id: 'key-bob',
+        orgId: 'org-m',
+        createdByUserId: 'bob',
+        label: 'Bob',
+        gatewayKeyId: 'bfr-vk-bob',
+        keyHash: key2Hash,
+      })
+      await apiKeyRepo.save(aliceKey.activate())
+      await apiKeyRepo.save(bobKey.activate())
+    })
+
+    it('member 僅看到自己建立的 keys 與用量', async () => {
+      const result = await service.execute('org-m', 'alice', 'user')
+      expect(result.success).toBe(true)
+      expect(result.data?.totalKeys).toBe(1)
+      expect(result.data?.activeKeys).toBe(1)
+      expect(result.data?.usage.totalRequests).toBe(42)
+    })
   })
 })

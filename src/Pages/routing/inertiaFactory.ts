@@ -69,7 +69,8 @@ export async function createInertiaService(): Promise<InertiaService> {
   }
 
   const tagEnv = useBuild ? 'production' : nodeEnv
-  const viteHelper = new ViteTagHelper(tagEnv, devServerUrl, manifest)
+  const viteDevBase = process.env.VITE_DEV_BASE_PATH ?? ''
+  const viteHelper = new ViteTagHelper(tagEnv, devServerUrl, manifest, viteDevBase)
   const viteTags = viteHelper.generateTags(['resources/js/app.tsx', 'resources/css/app.css'])
 
   const viewDir = joinPath(process.cwd(), 'src/views')

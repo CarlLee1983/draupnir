@@ -2,6 +2,7 @@ import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IAp
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import type { DashboardSummaryResponse } from '../DTOs/DashboardDTO'
+import { DashboardKeyScopeResolver } from './DashboardKeyScopeResolver'
 
 export class GetDashboardSummaryService {
   constructor(
@@ -29,13 +30,17 @@ export class GetDashboardSummaryService {
         }
       }
 
-      const [keys, totalKeys, activeKeys] = await Promise.all([
-        this.apiKeyRepository.findByOrgId(orgId),
-        this.apiKeyRepository.countByOrgId(orgId),
-        this.apiKeyRepository.countActiveByOrgId(orgId),
-      ])
+      const keys = await this.apiKeyRepository.findByOrgId(orgId)
+      const visibleKeys = DashboardKeyScopeResolver.resolveVisibleKeys(keys, {
+        callerUserId,
+        callerSystemRole,
+        orgMembershipRole: authResult.membership?.role,
+      })
 
-      const virtualKeyIds = keys
+      const totalKeys = visibleKeys.length
+      const activeKeys = visibleKeys.filter((k) => k.status === 'active').length
+
+      const virtualKeyIds = visibleKeys
         .filter((k) => k.status === 'active')
         .map((k) => k.gatewayKeyId)
         .filter((id) => id.length > 0)

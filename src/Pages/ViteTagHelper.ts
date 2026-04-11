@@ -16,6 +16,11 @@ export class ViteTagHelper {
     private readonly env: string,
     private readonly devServerUrl: string,
     private readonly manifest?: ViteManifest,
+    /**
+     * Must match Vite **dev** `base` (repo default: `''` when `vite serve` uses `base: '/'`).
+     * Override with `VITE_DEV_BASE_PATH` if your dev server uses another prefix (e.g. `/build/`).
+     */
+    private readonly viteDevBasePath: string = '',
   ) {}
 
   /**
@@ -30,15 +35,24 @@ export class ViteTagHelper {
     return this.developmentTags(entrypoints)
   }
 
+  /** Full URL for a path under the Vite dev server, respecting dev `base` prefix. */
+  private devServerModuleUrl(path: string): string {
+    const origin = this.devServerUrl.replace(/\/$/, '')
+    const base = this.viteDevBasePath.replace(/^\/+|\/+$/g, '')
+    const rel = path.startsWith('/') ? path : `/${path}`
+    const prefix = base ? `/${base}` : ''
+    return `${origin}${prefix}${rel}`
+  }
+
   private developmentTags(entrypoints: string[]): string {
     const tags: string[] = [
-      `<script type="module" src="${this.devServerUrl}/@vite/client"></script>`,
+      `<script type="module" src="${this.devServerModuleUrl('/@vite/client')}"></script>`,
     ]
     for (const entry of entrypoints) {
       if (entry.endsWith('.css')) {
-        tags.push(`<link rel="stylesheet" href="${this.devServerUrl}/${entry}">`)
+        tags.push(`<link rel="stylesheet" href="${this.devServerModuleUrl(entry)}">`)
       } else {
-        tags.push(`<script type="module" src="${this.devServerUrl}/${entry}"></script>`)
+        tags.push(`<script type="module" src="${this.devServerModuleUrl(entry)}"></script>`)
       }
     }
     return tags.join('\n    ')

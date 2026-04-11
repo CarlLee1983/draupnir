@@ -5,10 +5,17 @@ import { fileURLToPath } from 'node:url'
 
 const rootDir = dirname(fileURLToPath(import.meta.url))
 
-export default defineConfig({
+const vitePort = Number(process.env.VITE_PORT ?? 5173)
+const viteDevOrigin = process.env.VITE_ORIGIN ?? `http://localhost:${vitePort}`
+
+/**
+ * Dev uses `base: '/'` so `/@react-refresh` matches @vitejs/plugin-react preamble imports.
+ * Build keeps `base: '/build/'` so hashed assets align with Bun/Inertia production tags.
+ */
+export default defineConfig(({ command }) => ({
   plugins: [react()],
   root: '.',
-  base: '/build/',
+  base: command === 'build' ? '/build/' : '/',
   resolve: {
     alias: {
       '@': resolve(rootDir, 'resources/js'),
@@ -26,8 +33,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: vitePort,
     strictPort: true,
-    origin: 'http://localhost:5173',
+    origin: viteDevOrigin,
   },
-})
+}))

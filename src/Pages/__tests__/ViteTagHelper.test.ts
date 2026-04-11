@@ -23,6 +23,14 @@ describe('ViteTagHelper', () => {
     )
   })
 
+  test('development mode respects custom dev base prefix', () => {
+    const helper = new ViteTagHelper('development', 'http://localhost:5173', undefined, 'build')
+    const tags = helper.generateTags(['resources/js/app.tsx'])
+    expect(tags).toContain(
+      '<script type="module" src="http://localhost:5173/build/@vite/client"></script>',
+    )
+  })
+
   test('production mode reads manifest and returns hashed tags', () => {
     const manifest = {
       'resources/js/app.tsx': { file: 'assets/app-abc123.js', css: ['assets/app-def456.css'] },

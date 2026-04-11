@@ -26,9 +26,13 @@ const sampleLog: LogEntry = {
 
 const hashingService = new KeyHashingService()
 let key1Hash: string
+let key2Hash: string
+let keyOtherHash: string
 
 beforeAll(async () => {
   key1Hash = await hashingService.hash('drp_sk_1')
+  key2Hash = await hashingService.hash('drp_sk_2')
+  keyOtherHash = await hashingService.hash('drp_sk_other')
 })
 
 function createMockAggregator(): UsageAggregator {
@@ -74,6 +78,10 @@ describe('GetUsageChartService', () => {
     expect(result.success).toBe(true)
     expect(result.data?.logs).toHaveLength(1)
     expect(result.data?.stats.totalRequests).toBe(1)
+    expect(result.data?.stats.totalTokens).toBe(150)
+    const log0 = result.data?.logs[0] as { inputTokens?: number; outputTokens?: number }
+    expect(log0?.inputTokens).toBe(100)
+    expect(log0?.outputTokens).toBe(50)
   })
 
   it('非 Org 成員不能存取用量資料', async () => {
@@ -94,5 +102,86 @@ describe('GetUsageChartService', () => {
     })
     expect(result.success).toBe(true)
     expect(result.data?.logs).toHaveLength(0)
+  })
+
+  it('org manager 可查詢 org 內所有 keys 的用量 log', async () => {
+    const key2 = ApiKey.create({
+      id: 'key-2',
+      orgId: 'org-1',
+      createdByUserId: 'user-other',
+      label: 'Key 2',
+      gatewayKeyId: 'bfr-vk-2',
+      keyHash: keyOtherHash,
+    })
+    await apiKeyRepo.save(key2.activate())
+
+    const gatewayMock = new MockGatewayClient()
+    gatewayMock.seedUsageLogs([sampleLog, { ...sampleLog, keyId: 'bfr-vk-2' }])
+    gatewayMock.seedUsageStats({ totalRequests: 2, totalCost: 0.06, totalTokens: 300, avgLatency: 200 })
+    const memberRepo = new OrganizationMemberRepository(db)
+    const orgAuth = new OrgAuthorizationHelper(memberRepo)
+    const aggregator = new UsageAggregator(gatewayMock)
+    const multiKeyService = new GetUsageChartService(apiKeyRepo, orgAuth, aggregator)
+
+    const result = await multiKeyService.execute({
+      orgId: 'org-1',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.logs).toHaveLength(2)
+  })
+
+  describe('org member role (isolated org)', () => {
+    beforeEach(async () => {
+      db = new MemoryDatabaseAccess()
+      apiKeyRepo = new ApiKeyRepository(db)
+      const memberRepo = new OrganizationMemberRepository(db)
+      const orgAuth = new OrgAuthorizationHelper(memberRepo)
+      const aggregator = createMockAggregator()
+      service = new GetUsageChartService(apiKeyRepo, orgAuth, aggregator)
+
+      await memberRepo.save(OrganizationMember.create('mem-a', 'org-m', 'alice', 'member'))
+
+      const aliceKey = ApiKey.create({
+        id: 'key-alice',
+        orgId: 'org-m',
+        createdByUserId: 'alice',
+        label: 'Alice',
+        gatewayKeyId: 'bfr-vk-alice',
+        keyHash: key1Hash,
+      })
+      const bobKey = ApiKey.create({
+        id: 'key-bob',
+        orgId: 'org-m',
+        createdByUserId: 'bob',
+        label: 'Bob',
+        gatewayKeyId: 'bfr-vk-bob',
+        keyHash: key2Hash,
+      })
+      await apiKeyRepo.save(aliceKey.activate())
+      await apiKeyRepo.save(bobKey.activate())
+    })
+
+    it('member 僅將自己的 gateway key ids 傳入用量查詢', async () => {
+      const gatewayMock = new MockGatewayClient()
+      const aliceLog: LogEntry = { ...sampleLog, keyId: 'bfr-vk-alice' }
+      gatewayMock.seedUsageLogs([aliceLog])
+      gatewayMock.seedUsageStats({ totalRequests: 1, totalCost: 0.03, totalTokens: 150, avgLatency: 200 })
+      const memberRepo = new OrganizationMemberRepository(db)
+      const orgAuth = new OrgAuthorizationHelper(memberRepo)
+      const aggregator = new UsageAggregator(gatewayMock)
+      const scoped = new GetUsageChartService(apiKeyRepo, orgAuth, aggregator)
+
+      const result = await scoped.execute({
+        orgId: 'org-m',
+        callerUserId: 'alice',
+        callerSystemRole: 'user',
+      })
+      expect(result.success).toBe(true)
+      expect(gatewayMock.calls.getUsageLogs[0]?.keyIds).toEqual(['bfr-vk-alice'])
+      expect(result.data?.logs).toHaveLength(1)
+      expect((result.data?.logs[0] as LogEntry).keyId).toBe('bfr-vk-alice')
+    })
   })
 })

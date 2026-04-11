@@ -2,6 +2,7 @@ import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IAp
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import type { UsageChartQuery, UsageChartResponse } from '../DTOs/DashboardDTO'
+import { DashboardKeyScopeResolver } from './DashboardKeyScopeResolver'
 
 export class GetUsageChartService {
   constructor(
@@ -26,7 +27,13 @@ export class GetUsageChartService {
       }
 
       const keys = await this.apiKeyRepository.findByOrgId(query.orgId)
-      const virtualKeyIds = keys
+      const visibleKeys = DashboardKeyScopeResolver.resolveVisibleKeys(keys, {
+        callerUserId: query.callerUserId,
+        callerSystemRole: query.callerSystemRole,
+        orgMembershipRole: authResult.membership?.role,
+      })
+
+      const virtualKeyIds = visibleKeys
         .filter((k) => k.status === 'active')
         .map((k) => k.gatewayKeyId)
         .filter((id) => id.length > 0)

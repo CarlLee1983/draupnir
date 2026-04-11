@@ -141,5 +141,8 @@ describe('AdminDashboardPage', () => {
     expect(totals?.users).toBe(10)
     expect(totals?.organizations).toBe(5)
     expect(totals?.contracts).toBe(3)
+    expect(mockListUsersService.execute).toHaveBeenCalled()
+    expect(mockListOrgsService.execute).toHaveBeenCalled()
+    expect(mockListAdminContractsService.execute).toHaveBeenCalled()
   })
 })
