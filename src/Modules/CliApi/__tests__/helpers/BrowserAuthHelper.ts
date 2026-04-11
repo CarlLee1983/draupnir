@@ -18,28 +18,39 @@ export class BrowserAuthHelper {
   }
 
   /**
+   * Ensure the browser has a live, open page (recreates if closed by a prior test failure)
+   */
+  private async ensurePage(): Promise<Page> {
+    if (!this.browser) {
+      throw new Error('Browser not launched — call launch() first')
+    }
+    if (!this.page || this.page.isClosed()) {
+      this.page = await this.browser.newPage()
+    }
+    return this.page
+  }
+
+  /**
    * Navigate to verification URI and authorize device with user code
    */
   async authorizeDevice(verificationUri: string, userCode: string): Promise<void> {
-    if (!this.page) {
-      throw new Error('Browser not launched — call launch() first')
-    }
+    const page = await this.ensurePage()
 
-    await this.page.goto(verificationUri, { waitUntil: 'networkidle' })
+    await page.goto(verificationUri, { waitUntil: 'networkidle' })
 
-    const userCodeInput = this.page.locator(
+    const userCodeInput = page.locator(
       'input[name="userCode"], input[placeholder*="code"], input[placeholder*="Code"]',
     )
 
     await userCodeInput.fill(userCode)
 
-    const submitButton = this.page.locator(
+    const submitButton = page.locator(
       'button[type="submit"], button:has-text("Authorize"), button:has-text("authorize")',
     )
 
     await submitButton.click()
 
-    await this.page.waitForLoadState('networkidle')
+    await page.waitForLoadState('networkidle')
   }
 
   /**
@@ -53,10 +64,8 @@ export class BrowserAuthHelper {
    * Get page content (for assertions)
    */
   async getPageContent(): Promise<string> {
-    if (!this.page) {
-      throw new Error('Browser not launched')
-    }
-    return this.page.content()
+    const page = await this.ensurePage()
+    return page.content()
   }
 
   /**
