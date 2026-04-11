@@ -22,7 +22,7 @@ export class CheckModuleAccessService {
     // 1. 查詢模組是否存在
     const module = await this.moduleRepo.findByName(moduleName)
     if (!module || !module.isActive()) {
-      return { allowed: false, reason: `模組 ${moduleName} 不存在或已停用` }
+      return { allowed: false, reason: `Module ${moduleName} does not exist or is disabled` }
     }
 
     // 2. 檢查合約白名單
@@ -35,7 +35,7 @@ export class CheckModuleAccessService {
     // 3. 檢查訂閱狀態
     const subscription = await this.subscriptionRepo.findByOrgAndModule(orgId, module.id)
     if (!subscription || !subscription.isActive()) {
-      return { allowed: false, reason: `組織未訂閱模組 ${moduleName}` }
+      return { allowed: false, reason: `Organization has not subscribed to module ${moduleName}` }
     }
 
     return { allowed: true }

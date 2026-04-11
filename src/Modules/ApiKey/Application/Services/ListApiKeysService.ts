@@ -24,7 +24,7 @@ export class ListApiKeysService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '無權存取此組織的 Keys',
+          message: 'No permission to access keys for this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -37,7 +37,7 @@ export class ListApiKeysService {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           keys: keys.map((k) => ApiKeyPresenter.fromEntity(k)),
           meta: {

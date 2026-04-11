@@ -26,10 +26,10 @@ export class KeyScope {
       props.allowedModels && props.allowedModels.length > 0 ? props.allowedModels : null
 
     if (props.rateLimitRpm != null && props.rateLimitRpm < 0) {
-      throw new Error('RPM 限制不能為負數')
+      throw new Error('RPM limit cannot be negative')
     }
     if (props.rateLimitTpm != null && props.rateLimitTpm < 0) {
-      throw new Error('TPM 限制不能為負數')
+      throw new Error('TPM limit cannot be negative')
     }
 
     return new KeyScope(models, props.rateLimitRpm ?? null, props.rateLimitTpm ?? null)

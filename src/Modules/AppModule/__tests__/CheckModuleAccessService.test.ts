@@ -130,7 +130,7 @@ describe('CheckModuleAccessService', () => {
 
     const result = await service.execute('org-1', 'chat')
     expect(result.allowed).toBe(false)
-    expect(result.reason).toContain('無有效合約')
+    expect(result.reason).toContain('No valid contract')
   })
 
   test('合約不包含模組 → denied', async () => {
@@ -149,7 +149,7 @@ describe('CheckModuleAccessService', () => {
 
     const result = await service.execute('org-1', 'chat')
     expect(result.allowed).toBe(false)
-    expect(result.reason).toContain('不在合約允許清單中')
+    expect(result.reason).toContain('is not in the contract allowed list')
   })
 
   test('合約有但未訂閱 → denied', async () => {
@@ -168,12 +168,12 @@ describe('CheckModuleAccessService', () => {
 
     const result = await service.execute('org-1', 'chat')
     expect(result.allowed).toBe(false)
-    expect(result.reason).toContain('未訂閱')
+    expect(result.reason).toContain('has not subscribed to module')
   })
 
   test('模組不存在 → denied', async () => {
     const result = await service.execute('org-1', 'nonexistent')
     expect(result.allowed).toBe(false)
-    expect(result.reason).toContain('不存在或已停用')
+    expect(result.reason).toContain('does not exist or is disabled')
   })
 })
