@@ -29,6 +29,7 @@ export interface KpiSummaryResponse {
   message: string
   data?: {
     usage: UsageStats
+    previousPeriod: UsageStats
     lastSyncedAt: string | null
   }
   error?: string

@@ -112,6 +112,12 @@ describe('GetKpiSummaryService', () => {
         totalTokens: 100,
         avgLatency: 300,
       })
+      .mockResolvedValue({
+        totalRequests: 0,
+        totalCost: 0,
+        totalTokens: 0,
+        avgLatency: 0,
+      })
 
     const result = await service.execute({
       orgId: 'org-1',
@@ -123,7 +129,7 @@ describe('GetKpiSummaryService', () => {
 
     expect(result.success).toBe(true)
     expect(usageRepository.queryStatsByOrg).not.toHaveBeenCalled()
-    expect(usageRepository.queryStatsByKey).toHaveBeenCalledTimes(2)
+    expect(usageRepository.queryStatsByKey).toHaveBeenCalledTimes(4)
     expect(result.data?.usage).toEqual({
       totalRequests: 5,
       totalCost: 2,

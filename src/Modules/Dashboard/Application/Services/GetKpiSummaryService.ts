@@ -40,45 +40,70 @@ export class GetKpiSummaryService {
       const cursor = await this.cursorRepo.get('bifrost_logs')
       const lastSyncedAt = cursor?.lastSyncedAt ?? null
 
-      if (query.callerSystemRole === 'admin' || membershipRole === 'manager') {
-        const usage = await this.usageRepository.queryStatsByOrg(query.orgId, range)
-        return { success: true, message: 'Query successful', data: { usage, lastSyncedAt } }
+      // Resolve visible keys once — admin/manager callers will not use this list
+      // (queryUsageForCaller takes the queryStatsByOrg branch for them)
+      let visibleKeys: readonly { id: string }[] = []
+      if (query.callerSystemRole !== 'admin' && membershipRole !== 'manager') {
+        const keys = await this.apiKeyRepository.findByOrgId(query.orgId)
+        visibleKeys = DashboardKeyScopeResolver.resolveVisibleKeys(keys, {
+          callerUserId: query.callerUserId,
+          callerSystemRole: query.callerSystemRole,
+          orgMembershipRole: membershipRole,
+        })
       }
 
-      const keys = await this.apiKeyRepository.findByOrgId(query.orgId)
-      const visibleKeys = DashboardKeyScopeResolver.resolveVisibleKeys(keys, {
-        callerUserId: query.callerUserId,
-        callerSystemRole: query.callerSystemRole,
-        orgMembershipRole: membershipRole,
-      })
+      const usage = await this.queryUsageForCaller(
+        query.orgId,
+        range,
+        query.callerSystemRole,
+        membershipRole,
+        visibleKeys,
+      )
 
-      if (visibleKeys.length === 0) {
-        return {
-          success: true,
-          message: 'Query successful',
-          data: {
-            usage: zeroUsage(),
-            lastSyncedAt,
-          },
-        }
+      const windowMs =
+        new Date(range.endDate).getTime() - new Date(range.startDate).getTime()
+      const priorRange = {
+        startDate: new Date(new Date(range.startDate).getTime() - windowMs).toISOString(),
+        endDate: range.startDate,
       }
 
-      const perKeyStats = await Promise.all(
-        visibleKeys.map((key) => this.usageRepository.queryStatsByKey(key.id, range)),
+      const previousPeriod = await this.queryUsageForCaller(
+        query.orgId,
+        priorRange,
+        query.callerSystemRole,
+        membershipRole,
+        visibleKeys,
       )
 
       return {
         success: true,
         message: 'Query successful',
-        data: {
-          usage: combineStats(perKeyStats),
-          lastSyncedAt,
-        },
+        data: { usage, previousPeriod, lastSyncedAt },
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
+  }
+
+  private async queryUsageForCaller(
+    orgId: string,
+    range: { startDate: string; endDate: string },
+    callerSystemRole: string,
+    membershipRole: string | undefined,
+    visibleKeys: readonly { id: string }[],
+  ): Promise<UsageStats> {
+    if (callerSystemRole === 'admin' || membershipRole === 'manager') {
+      return this.usageRepository.queryStatsByOrg(orgId, range)
+    }
+
+    if (visibleKeys.length === 0) return zeroUsage()
+
+    const perKeyStats = await Promise.all(
+      visibleKeys.map((key) => this.usageRepository.queryStatsByKey(key.id, range)),
+    )
+
+    return combineStats(perKeyStats)
   }
 }
 
