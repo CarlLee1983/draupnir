@@ -37,7 +37,9 @@ export interface IApiKeyRepository {
   /** Returns the count of active keys for an organization. */
   countActiveByOrgId(orgId: string): Promise<number>
 
+  /** Finds a key by its Bifrost virtual key ID. Returns null if not found. */
+  findByBifrostVirtualKeyId(bifrostVirtualKeyId: string): Promise<ApiKey | null>
+
   /** Returns a repository instance scoped to a transaction. */
   withTransaction(tx: IDatabaseAccess): IApiKeyRepository
 }
-

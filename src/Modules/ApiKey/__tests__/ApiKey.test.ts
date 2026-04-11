@@ -3,6 +3,8 @@ import { ApiKey } from '../Domain/Aggregates/ApiKey'
 import { KeyScope } from '../Domain/ValueObjects/KeyScope'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { ApiKeyMapper } from '../Infrastructure/Mappers/ApiKeyMapper'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
+import { ApiKeyRepository } from '../Infrastructure/Repositories/ApiKeyRepository'
 
 const hashingService = new KeyHashingService()
 
@@ -203,5 +205,34 @@ describe('ApiKey', () => {
     expect(rebuilt.id).toBe('key-9')
     expect(rebuilt.label).toBe('Rebuild')
     expect(rebuilt.status).toBe('pending')
+  })
+})
+
+describe('ApiKeyRepository.findByBifrostVirtualKeyId', () => {
+  it('應根據 Bifrost virtual key ID 找到 ApiKey', async () => {
+    const db = new MemoryDatabaseAccess()
+    const repo = new ApiKeyRepository(db)
+    const key = ApiKey.create({
+      id: 'key-vk-1',
+      orgId: 'org-1',
+      createdByUserId: 'user-1',
+      label: 'Lookup Key',
+      gatewayKeyId: 'bfr-vk-test-1',
+      keyHash: hashes['drp_sk_db'],
+    })
+    await repo.save(key)
+
+    const found = await repo.findByBifrostVirtualKeyId('bfr-vk-test-1')
+    expect(found).not.toBeNull()
+    expect(found?.id).toBe('key-vk-1')
+    expect(found?.gatewayKeyId).toBe('bfr-vk-test-1')
+  })
+
+  it('找不到對應的 Bifrost virtual key 時回傳 null', async () => {
+    const db = new MemoryDatabaseAccess()
+    const repo = new ApiKeyRepository(db)
+
+    const found = await repo.findByBifrostVirtualKeyId('missing-vk')
+    expect(found).toBeNull()
   })
 })

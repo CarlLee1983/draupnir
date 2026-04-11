@@ -55,6 +55,7 @@ export interface UsageStats {
 export interface LogEntry {
   readonly timestamp: string
   readonly keyId: string
+  readonly logId?: string
   readonly model: string
   readonly provider: string
   readonly inputTokens: number

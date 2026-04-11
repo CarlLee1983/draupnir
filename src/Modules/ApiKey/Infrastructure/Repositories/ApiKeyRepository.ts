@@ -71,6 +71,11 @@ export class ApiKeyRepository implements IApiKeyRepository {
       .count()
   }
 
+  async findByBifrostVirtualKeyId(bifrostVirtualKeyId: string): Promise<ApiKey | null> {
+    const row = await this.db.table('api_keys').where('bifrost_virtual_key_id', '=', bifrostVirtualKeyId).first()
+    return row ? ApiKey.fromDatabase(row) : null
+  }
+
   withTransaction(tx: IDatabaseAccess): ApiKeyRepository {
     return new ApiKeyRepository(tx)
   }
