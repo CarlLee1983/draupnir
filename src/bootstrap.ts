@@ -13,6 +13,7 @@ import { CliApiServiceProvider } from './Modules/CliApi/Infrastructure/Providers
 import { ContractServiceProvider } from './Modules/Contract/Infrastructure/Providers/ContractServiceProvider'
 import { CreditServiceProvider } from './Modules/Credit/Infrastructure/Providers/CreditServiceProvider'
 import { DashboardServiceProvider } from './Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
+import { BifrostSyncService } from './Modules/Dashboard/Infrastructure/Services/BifrostSyncService'
 import { DevPortalServiceProvider } from './Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
 import { HealthServiceProvider } from './Modules/Health/Infrastructure/Providers/HealthServiceProvider'
 import { OrganizationServiceProvider } from './Modules/Organization/Infrastructure/Providers/OrganizationServiceProvider'
@@ -60,6 +61,28 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
     core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService
   ).execute()
   await registerRoutes(core)
+  // --- BifrostSyncService scheduler ---
+  // Must be after core.bootstrap() so DI container is fully initialized.
+  // Per RESEARCH.md anti-pattern warning: never register timer in ServiceProvider.boot().
+  const syncService = core.container.make('bifrostSyncService') as BifrostSyncService
+  const SYNC_INTERVAL_MS = Number(process.env.BIFROST_SYNC_INTERVAL_MS ?? 5 * 60 * 1000)
+
+  // Run once at startup to populate initial data
+  syncService.sync().catch((err) => {
+    console.error('[BifrostSync] Initial sync failed (non-fatal):', err)
+  })
+
+  // Then on interval
+  setInterval(() => {
+    syncService.sync().then((result) => {
+      console.error(`[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`)
+    }).catch((err) => {
+      console.error('[BifrostSync] Sync error (dashboard serves stale data):', err)
+      // DO NOT rethrow — server must not crash on sync failure
+    })
+  }, SYNC_INTERVAL_MS)
+  // --- End BifrostSyncService scheduler ---
+
   core.registerGlobalErrorHandlers()
   return core
 }

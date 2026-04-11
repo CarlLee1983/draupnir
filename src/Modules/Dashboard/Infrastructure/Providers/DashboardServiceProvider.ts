@@ -1,7 +1,13 @@
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
+import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorRepository'
+import { DrizzleSyncCursorRepository } from '../Repositories/DrizzleSyncCursorRepository'
+import { DrizzleUsageRepository } from '../Repositories/DrizzleUsageRepository'
+import { BifrostSyncService } from '../Services/BifrostSyncService'
 import { UsageAggregator } from '../Services/UsageAggregator'
 import { GetDashboardSummaryService } from '../../Application/Services/GetDashboardSummaryService'
 import { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
@@ -10,6 +16,24 @@ export class DashboardServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
     container.singleton('usageAggregator', (c: IContainer) => {
       return new UsageAggregator(c.make('llmGatewayClient') as ILLMGatewayClient)
+    })
+
+    container.singleton('syncCursorRepository', (c: IContainer) => {
+      return new DrizzleSyncCursorRepository(c.make('database') as IDatabaseAccess)
+    })
+
+    container.singleton('drizzleUsageRepository', (c: IContainer) => {
+      return new DrizzleUsageRepository(c.make('database') as IDatabaseAccess)
+    })
+
+    container.singleton('bifrostSyncService', (c: IContainer) => {
+      return new BifrostSyncService(
+        c.make('llmGatewayClient') as ILLMGatewayClient,
+        c.make('drizzleUsageRepository') as IUsageRepository,
+        c.make('syncCursorRepository') as ISyncCursorRepository,
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('database') as IDatabaseAccess,
+      )
     })
 
     container.bind('getDashboardSummaryService', (c: IContainer) => {
