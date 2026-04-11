@@ -18,11 +18,6 @@ export class MemoryDeviceCodeStore implements IDeviceCodeStore {
   async findByDeviceCode(code: string): Promise<DeviceCode | null> {
     const entry = this.store.get(code)
     if (!entry) return null
-    if (entry.deviceCode.isExpired()) {
-      this.store.delete(code)
-      this.userCodeIndex.delete(entry.deviceCode.userCode)
-      return null
-    }
     return entry.deviceCode
   }
 

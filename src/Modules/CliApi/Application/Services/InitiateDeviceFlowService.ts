@@ -13,9 +13,6 @@ import type { IDeviceCodeStore } from '../../Domain/Ports/IDeviceCodeStore'
 import { DeviceCode } from '../../Domain/ValueObjects/DeviceCode'
 import type { InitiateDeviceFlowResponse } from '../DTOs/DeviceFlowDTO'
 
-const DEVICE_CODE_TTL_SECONDS = 600 // 10 minutes
-const POLLING_INTERVAL_SECONDS = 5
-
 /**
  * Service facilitating the start of a CLI authentication session.
  */
@@ -23,6 +20,8 @@ export class InitiateDeviceFlowService {
   constructor(
     private readonly store: IDeviceCodeStore,
     private readonly verificationUri: string,
+    private readonly ttlSeconds: number = 600,
+    private readonly pollingIntervalSeconds: number = 5,
   ) {}
 
   /**
@@ -32,7 +31,7 @@ export class InitiateDeviceFlowService {
     try {
       const deviceCodeId = crypto.randomUUID()
       const userCode = DeviceCode.generateUserCode()
-      const expiresAt = new Date(Date.now() + DEVICE_CODE_TTL_SECONDS * 1000)
+      const expiresAt = new Date(Date.now() + this.ttlSeconds * 1000)
 
       const deviceCode = DeviceCode.create({
         deviceCode: deviceCodeId,
@@ -50,8 +49,8 @@ export class InitiateDeviceFlowService {
           deviceCode: deviceCodeId,
           userCode,
           verificationUri: this.verificationUri,
-          expiresIn: DEVICE_CODE_TTL_SECONDS,
-          interval: POLLING_INTERVAL_SECONDS,
+          expiresIn: this.ttlSeconds,
+          interval: this.pollingIntervalSeconds,
         },
       }
     } catch (error: unknown) {

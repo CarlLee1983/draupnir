@@ -47,7 +47,13 @@ export class CliApiController {
       email: auth.email,
       role: auth.role,
     })
-    const status = result.success ? 200 : result.error === 'INVALID_USER_CODE' ? 404 : 400
+    const status = result.success
+      ? 200
+      : result.error === 'INVALID_USER_CODE'
+        ? 404
+        : result.error === 'EXPIRED'
+          ? 410
+          : 400
     return ctx.json(result, status)
   }
 

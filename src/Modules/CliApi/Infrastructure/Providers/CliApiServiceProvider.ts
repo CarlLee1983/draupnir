@@ -1,5 +1,6 @@
 // src/Modules/CliApi/Infrastructure/Providers/CliApiServiceProvider.ts
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import { loadCliApiConfig } from '../Config/CliApiConfig'
 import { MemoryDeviceCodeStore } from '../Services/MemoryDeviceCodeStore'
 import { InitiateDeviceFlowService } from '../../Application/Services/InitiateDeviceFlowService'
 import { AuthorizeDeviceService } from '../../Application/Services/AuthorizeDeviceService'
@@ -10,16 +11,19 @@ import type { ICliProxyClient } from '../../Application/Services/ProxyCliRequest
 import type { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 
-const CLI_VERIFICATION_URI = process.env.CLI_VERIFICATION_URI || 'http://localhost:3000/cli/verify'
-
 export class CliApiServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
+    const cliApiConfig = loadCliApiConfig()
+    container.singleton('cliApiConfig', () => cliApiConfig)
+
     container.singleton('deviceCodeStore', () => new MemoryDeviceCodeStore())
 
     container.bind('initiateDeviceFlowService', (c: IContainer) => {
       return new InitiateDeviceFlowService(
         c.make('deviceCodeStore') as MemoryDeviceCodeStore,
-        CLI_VERIFICATION_URI,
+        cliApiConfig.verificationUri,
+        cliApiConfig.deviceCodeTtlSeconds,
+        cliApiConfig.pollingIntervalSeconds,
       )
     })
 

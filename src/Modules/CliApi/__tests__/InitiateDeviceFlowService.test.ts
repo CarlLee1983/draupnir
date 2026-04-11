@@ -1,7 +1,8 @@
 // src/Modules/CliApi/__tests__/InitiateDeviceFlowService.test.ts
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
 import { InitiateDeviceFlowService } from '../Application/Services/InitiateDeviceFlowService'
+import type { IDeviceCodeStore } from '../Domain/Ports/IDeviceCodeStore'
 
 describe('InitiateDeviceFlowService', () => {
   let store: MemoryDeviceCodeStore
@@ -35,5 +36,20 @@ describe('InitiateDeviceFlowService', () => {
     const result2 = await service.execute()
     expect(result1.data!.deviceCode).not.toBe(result2.data!.deviceCode)
     expect(result1.data!.userCode).not.toBe(result2.data!.userCode)
+  })
+
+  it('should surface store errors', async () => {
+    const failingStore: IDeviceCodeStore = {
+      save: vi.fn().mockRejectedValue(new Error('Store failed')),
+      findByDeviceCode: vi.fn(),
+      findByUserCode: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      cleanup: vi.fn(),
+    }
+    const svc = new InitiateDeviceFlowService(failingStore, 'https://app.draupnir.dev/cli/verify')
+    const result = await svc.execute()
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('Store failed')
   })
 })

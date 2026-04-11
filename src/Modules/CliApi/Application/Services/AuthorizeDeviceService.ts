@@ -23,6 +23,10 @@ export class AuthorizeDeviceService {
         return { success: false, message: 'Invalid user code', error: 'INVALID_USER_CODE' }
       }
 
+      if (deviceCode.isExpired()) {
+        return { success: false, message: 'Device code has expired', error: 'EXPIRED' }
+      }
+
       const authorized = deviceCode.authorize(request.userId, request.email, request.role)
       await this.store.update(authorized)
 

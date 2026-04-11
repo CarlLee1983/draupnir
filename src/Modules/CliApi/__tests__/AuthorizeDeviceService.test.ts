@@ -64,6 +64,7 @@ describe('AuthorizeDeviceService', () => {
       role: 'user',
     })
     expect(result.success).toBe(false)
+    expect(result.error).toBe('EXPIRED')
   })
 
   it('should reject empty user code', async () => {

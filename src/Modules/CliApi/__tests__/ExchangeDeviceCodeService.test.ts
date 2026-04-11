@@ -99,7 +99,7 @@ describe('ExchangeDeviceCodeService', () => {
 
     const result = await service.execute({ deviceCode: 'dc-exp' })
     expect(result.success).toBe(false)
-    expect(result.error).toBe('invalid_device_code')
+    expect(result.error).toBe('expired')
   })
 
   it('should save auth tokens to repository', async () => {

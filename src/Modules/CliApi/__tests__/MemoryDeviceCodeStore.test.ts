@@ -71,7 +71,7 @@ describe('MemoryDeviceCodeStore', () => {
     expect(found).toBeNull()
   })
 
-  it('should not return expired entries', async () => {
+  it('should return expired entries until cleanup()', async () => {
     const dc = DeviceCode.create({
       deviceCode: 'dc-5',
       userCode: 'EXP55555',
@@ -80,7 +80,8 @@ describe('MemoryDeviceCodeStore', () => {
     })
     await store.save(dc)
     const found = await store.findByDeviceCode('dc-5')
-    expect(found).toBeNull()
+    expect(found).not.toBeNull()
+    expect(found!.isExpired()).toBe(true)
   })
 
   it('should clean up expired entries on cleanup()', async () => {
