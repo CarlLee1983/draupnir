@@ -24,7 +24,7 @@ export class ListAppKeysService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -37,7 +37,7 @@ export class ListAppKeysService {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           keys: keys.map((k) => AppApiKeyPresenter.fromEntity(k)),
           meta: { total, page, limit, totalPages: Math.ceil(total / limit) },

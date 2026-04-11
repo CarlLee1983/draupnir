@@ -10,7 +10,7 @@ export class ListOrgSubscriptionsService {
       const subscriptions = await this.subscriptionRepo.findActiveByOrgId(orgId)
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: subscriptions.map((s) => ModuleSubscriptionPresenter.fromEntity(s)),
       }
     } catch (error: unknown) {

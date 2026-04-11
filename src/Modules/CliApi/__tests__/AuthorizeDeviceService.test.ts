@@ -30,7 +30,7 @@ describe('AuthorizeDeviceService', () => {
     })
 
     expect(result.success).toBe(true)
-    expect(result.message).toContain('授權成功')
+    expect(result.message).toContain('authorized successfully')
 
     const updated = await store.findByDeviceCode('dc-1')
     expect(updated!.status).toBe('authorized')

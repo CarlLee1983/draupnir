@@ -48,7 +48,7 @@ describe('DeviceCode', () => {
       verificationUri: 'https://app.draupnir.dev/cli/verify',
       expiresAt: new Date(Date.now() - 1000),
     })
-    expect(() => dc.authorize('user-1', 'u@e.com', 'user')).toThrow('Device code 已過期')
+    expect(() => dc.authorize('user-1', 'u@e.com', 'user')).toThrow('Device code has expired')
   })
 
   it('should not authorize twice', () => {
@@ -60,7 +60,7 @@ describe('DeviceCode', () => {
     })
     const authorized = dc.authorize('user-1', 'u@e.com', 'user')
     expect(() => authorized.authorize('user-2', 'u2@e.com', 'user')).toThrow(
-      '此 device code 已被授權',
+      'This device code has already been authorized or consumed',
     )
   })
 

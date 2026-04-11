@@ -14,7 +14,7 @@ export class SetAppKeyScopeService {
     try {
       const key = await this.appApiKeyRepository.findById(request.keyId)
       if (!key) {
-        return { success: false, message: 'App Key 不存在', error: 'KEY_NOT_FOUND' }
+        return { success: false, message: 'App Key not found', error: 'KEY_NOT_FOUND' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -25,7 +25,7 @@ export class SetAppKeyScopeService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -40,7 +40,7 @@ export class SetAppKeyScopeService {
 
       await this.appApiKeyRepository.update(updated)
 
-      return { success: true, message: 'Scope 更新成功', data: AppApiKeyPresenter.fromEntity(updated) }
+      return { success: true, message: 'Scope updated successfully', data: AppApiKeyPresenter.fromEntity(updated) }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '更新失敗'
       return { success: false, message, error: message }

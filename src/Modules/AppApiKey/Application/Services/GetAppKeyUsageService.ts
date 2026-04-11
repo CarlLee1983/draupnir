@@ -14,7 +14,7 @@ export class GetAppKeyUsageService {
     try {
       const key = await this.appApiKeyRepository.findById(request.keyId)
       if (!key) {
-        return { success: false, message: 'App Key 不存在', error: 'KEY_NOT_FOUND' }
+        return { success: false, message: 'App Key not found', error: 'KEY_NOT_FOUND' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -25,7 +25,7 @@ export class GetAppKeyUsageService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -38,7 +38,7 @@ export class GetAppKeyUsageService {
 
       return {
         success: true,
-        message: '用量查詢成功',
+        message: 'Usage retrieved successfully',
         data: {
           keyId: key.id,
           label: key.label,

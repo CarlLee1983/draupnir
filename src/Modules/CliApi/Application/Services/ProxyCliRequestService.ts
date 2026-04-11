@@ -23,18 +23,18 @@ export class ProxyCliRequestService {
   async execute(request: ProxyRequest): Promise<ProxyResponse> {
     try {
       if (!request.body.model || !request.body.model.trim()) {
-        return { success: false, message: '模型名稱不能為空', error: 'MODEL_REQUIRED' }
+        return { success: false, message: 'Model name is required', error: 'MODEL_REQUIRED' }
       }
 
       if (!request.body.messages || request.body.messages.length === 0) {
-        return { success: false, message: '訊息列表不能為空', error: 'MESSAGES_REQUIRED' }
+        return { success: false, message: 'Messages list cannot be empty', error: 'MESSAGES_REQUIRED' }
       }
 
       const result = await this.client.proxyRequest(request.body)
 
       return {
         success: true,
-        message: 'AI 請求完成',
+        message: 'AI request completed',
         data: result,
       }
     } catch (error: unknown) {

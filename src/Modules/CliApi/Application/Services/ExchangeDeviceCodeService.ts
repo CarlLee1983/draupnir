@@ -28,7 +28,7 @@ export class ExchangeDeviceCodeService {
       if (!deviceCode) {
         return {
           success: false,
-          message: '無效或已過期的 device code',
+          message: 'Invalid or expired device code',
           error: 'invalid_device_code',
         }
       }
@@ -36,7 +36,7 @@ export class ExchangeDeviceCodeService {
       if (deviceCode.isExpired()) {
         return {
           success: false,
-          message: 'Device code 已過期，請重新申請',
+          message: 'Device code has expired, please request a new one',
           error: 'expired',
         }
       }
@@ -44,7 +44,7 @@ export class ExchangeDeviceCodeService {
       if (deviceCode.status === DeviceCodeStatus.CONSUMED) {
         return {
           success: false,
-          message: '此 device code 已被使用',
+          message: 'This device code has already been used',
           error: 'invalid_device_code',
         }
       }
@@ -52,7 +52,7 @@ export class ExchangeDeviceCodeService {
       if (deviceCode.status === DeviceCodeStatus.PENDING) {
         return {
           success: false,
-          message: '等待使用者授權中',
+          message: 'Waiting for user authorization',
           error: 'authorization_pending',
         }
       }
@@ -105,7 +105,7 @@ export class ExchangeDeviceCodeService {
 
       return {
         success: true,
-        message: 'CLI 登入成功',
+        message: 'CLI login successful',
         data: {
           accessToken: accessTokenStr,
           refreshToken: refreshTokenStr,

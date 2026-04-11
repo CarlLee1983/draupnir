@@ -9,11 +9,11 @@ export class GetModuleDetailService {
     try {
       const module = await this.moduleRepo.findById(moduleId)
       if (!module) {
-        return { success: false, message: '模組不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Module not found', error: 'NOT_FOUND' }
       }
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: AppModulePresenter.fromEntity(module),
       }
     } catch (error: unknown) {

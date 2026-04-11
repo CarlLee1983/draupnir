@@ -11,10 +11,10 @@ export class UnsubscribeModuleService {
     try {
       const subscription = await this.subscriptionRepo.findByOrgAndModule(orgId, moduleId)
       if (!subscription) {
-        return { success: false, message: '訂閱不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Subscription not found', error: 'NOT_FOUND' }
       }
       if (!subscription.isActive()) {
-        return { success: false, message: '訂閱已非啟用狀態', error: 'NOT_ACTIVE' }
+        return { success: false, message: 'Subscription is not active', error: 'NOT_ACTIVE' }
       }
 
       const cancelled = subscription.cancel()
@@ -26,7 +26,7 @@ export class UnsubscribeModuleService {
 
       return {
         success: true,
-        message: '已取消訂閱',
+        message: 'Unsubscribed successfully',
         data: ModuleSubscriptionPresenter.fromEntity(cancelled),
       }
     } catch (error: unknown) {

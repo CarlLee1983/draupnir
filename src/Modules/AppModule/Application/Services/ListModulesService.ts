@@ -10,7 +10,7 @@ export class ListModulesService {
       const modules = await this.moduleRepo.findAll()
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: modules.map((m) => AppModulePresenter.fromEntity(m)),
       }
     } catch (error: unknown) {

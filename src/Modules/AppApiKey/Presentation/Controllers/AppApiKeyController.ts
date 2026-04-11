@@ -19,7 +19,7 @@ export class AppApiKeyController {
 
   async issue(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = await ctx.getJsonBody<{
       label?: string
       scope?: string
@@ -32,7 +32,7 @@ export class AppApiKeyController {
       expiresAt?: string
     }>()
     const orgId = ctx.getParam('orgId')
-    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
+    if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.issueService.execute({
       orgId,
       issuedByUserId: auth.userId,
@@ -48,9 +48,9 @@ export class AppApiKeyController {
 
   async list(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
-    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
+    if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const page = ctx.getQuery('page') ? parseInt(ctx.getQuery('page')!, 10) : 1
     const limit = ctx.getQuery('limit') ? parseInt(ctx.getQuery('limit')!, 10) : 20
     const result = await this.listService.execute(orgId, auth.userId, auth.role, page, limit)
@@ -59,9 +59,9 @@ export class AppApiKeyController {
 
   async rotate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
-    if (!keyId) return ctx.json({ success: false, message: '缺少 keyId' }, 400)
+    if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.rotateService.execute({
       keyId,
       callerUserId: auth.userId,
@@ -73,9 +73,9 @@ export class AppApiKeyController {
 
   async revoke(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
-    if (!keyId) return ctx.json({ success: false, message: '缺少 keyId' }, 400)
+    if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.revokeService.execute({
       keyId,
       callerUserId: auth.userId,
@@ -87,9 +87,9 @@ export class AppApiKeyController {
 
   async setScope(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
-    if (!keyId) return ctx.json({ success: false, message: '缺少 keyId' }, 400)
+    if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const body = await ctx.getJsonBody<{ scope?: string; boundModuleIds?: string[] }>()
     const result = await this.setScopeService.execute({
       keyId,
@@ -104,9 +104,9 @@ export class AppApiKeyController {
 
   async getUsage(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
-    if (!keyId) return ctx.json({ success: false, message: '缺少 keyId' }, 400)
+    if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.getUsageService.execute({
       keyId,
       callerUserId: auth.userId,

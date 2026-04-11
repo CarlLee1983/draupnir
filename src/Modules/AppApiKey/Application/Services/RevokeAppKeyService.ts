@@ -14,7 +14,7 @@ export class RevokeAppKeyService {
     try {
       const key = await this.appApiKeyRepository.findById(request.keyId)
       if (!key) {
-        return { success: false, message: 'App Key 不存在', error: 'KEY_NOT_FOUND' }
+        return { success: false, message: 'App Key not found', error: 'KEY_NOT_FOUND' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -25,7 +25,7 @@ export class RevokeAppKeyService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -38,7 +38,7 @@ export class RevokeAppKeyService {
       const revoked = key.revoke()
       await this.appApiKeyRepository.update(revoked)
 
-      return { success: true, message: 'App Key 已撤銷', data: AppApiKeyPresenter.fromEntity(revoked) }
+      return { success: true, message: 'App Key revoked successfully', data: AppApiKeyPresenter.fromEntity(revoked) }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : '撤銷失敗'
       return { success: false, message, error: message }

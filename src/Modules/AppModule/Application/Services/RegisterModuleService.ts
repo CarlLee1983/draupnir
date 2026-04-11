@@ -9,12 +9,12 @@ export class RegisterModuleService {
   async execute(request: RegisterModuleRequest): Promise<ModuleResponse> {
     try {
       if (request.callerRole !== 'admin') {
-        return { success: false, message: '僅管理者可註冊模組', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can register modules', error: 'FORBIDDEN' }
       }
 
       const existing = await this.moduleRepo.findByName(request.name.trim().toLowerCase())
       if (existing) {
-        return { success: false, message: '模組名稱已存在', error: 'DUPLICATE_NAME' }
+        return { success: false, message: 'Module name already exists', error: 'DUPLICATE_NAME' }
       }
 
       const module = AppModule.create({
@@ -27,7 +27,7 @@ export class RegisterModuleService {
 
       return {
         success: true,
-        message: '模組註冊成功',
+        message: 'Module registered successfully',
         data: AppModulePresenter.fromEntity(module),
       }
     } catch (error: unknown) {

@@ -21,7 +21,7 @@ export class AppModuleController {
 
   async register(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = ctx.get('validated') as RegisterModuleParams
     const result = await this.registerService.execute({
       name: body.name,
@@ -39,7 +39,7 @@ export class AppModuleController {
 
   async getDetail(ctx: IHttpContext): Promise<Response> {
     const moduleId = ctx.getParam('moduleId')
-    if (!moduleId) return ctx.json({ success: false, message: '缺少 moduleId' }, 400)
+    if (!moduleId) return ctx.json({ success: false, message: 'Missing moduleId' }, 400)
     const result = await this.getDetailService.execute(moduleId)
     const status = result.success ? 200 : result.error === 'NOT_FOUND' ? 404 : 400
     return ctx.json(result, status)
@@ -47,9 +47,9 @@ export class AppModuleController {
 
   async subscribe(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
-    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
+    if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const body = ctx.get('validated') as SubscribeModuleParams
     const result = await this.subscribeService.execute({
       orgId,
@@ -62,19 +62,19 @@ export class AppModuleController {
 
   async unsubscribe(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     const moduleId = ctx.getParam('moduleId')
-    if (!orgId || !moduleId) return ctx.json({ success: false, message: '缺少參數' }, 400)
+    if (!orgId || !moduleId) return ctx.json({ success: false, message: 'Missing parameters' }, 400)
     const result = await this.unsubscribeService.execute(orgId, moduleId)
     return ctx.json(result, result.success ? 200 : 400)
   }
 
   async listOrgSubscriptions(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
-    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
+    if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.listOrgSubscriptionsService.execute(orgId)
     return ctx.json(result)
   }

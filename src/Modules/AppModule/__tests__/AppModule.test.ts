@@ -23,7 +23,7 @@ describe('AppModule', () => {
   })
 
   test('空名稱拋出錯誤', () => {
-    expect(() => AppModule.create({ name: '', type: 'free' })).toThrow('模組名稱不可為空')
+    expect(() => AppModule.create({ name: '', type: 'free' })).toThrow('Module name cannot be empty')
   })
 
   test('deprecate 回傳新實例', () => {

@@ -16,7 +16,7 @@ export class RotateAppKeyService {
     try {
       const key = await this.appApiKeyRepository.findById(request.keyId)
       if (!key) {
-        return { success: false, message: 'App Key 不存在', error: 'KEY_NOT_FOUND' }
+        return { success: false, message: 'App Key not found', error: 'KEY_NOT_FOUND' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -27,7 +27,7 @@ export class RotateAppKeyService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -45,7 +45,7 @@ export class RotateAppKeyService {
 
       return {
         success: true,
-        message: 'Key 輪換成功，舊 Key 在寬限期內仍可使用',
+        message: 'Key rotated successfully, old key remains valid during grace period',
         data: { ...AppApiKeyPresenter.fromEntity(rotated), rawKey: newRawKey },
       }
     } catch (error: unknown) {
