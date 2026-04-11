@@ -21,6 +21,7 @@ key_files:
     - src/Pages/__tests__/Admin/AdminModulesPage.test.ts
     - src/Pages/__tests__/Admin/AdminApiKeysPage.test.ts
     - src/Pages/__tests__/Admin/AdminUsageSyncPage.test.ts
+    - src/Pages/__tests__/Admin/AdminContractsPage.test.ts
     - src/Pages/__tests__/Admin/AdminUserDetailPage.test.ts
     - src/Pages/__tests__/Admin/AdminOrganizationDetailPage.test.ts
     - src/Pages/__tests__/Admin/AdminContractCreatePage.test.ts
@@ -28,11 +29,11 @@ key_files:
     - src/Pages/__tests__/Admin/AdminModuleCreatePage.test.ts
 decisions: []
 metrics:
-  duration: "00:10:15"
-  completed_at: "2026-04-11T01:45:34Z"
+  duration: "00:11:30"
+  completed_at: "2026-04-11T01:46:45Z"
   tasks_completed: 2
   test_files_created: 12
-  test_count: 47
+  test_count: 50
 ---
 
 # Phase 06 Plan 01: Admin Page Handler Unit Tests Summary
@@ -43,9 +44,9 @@ metrics:
 
 ## Execution Summary
 
-### Task 1: Simple GET-only Admin Pages (6 test files)
+### Task 1: Simple GET-only Admin Pages (7 test files)
 **Status:** ✅ Complete  
-**Tests:** 19 passing
+**Tests:** 22 passing
 
 Implemented unit tests for the following pages:
 - **AdminDashboardPage**: Aggregates user, organization, and contract totals for the admin home dashboard
@@ -54,6 +55,7 @@ Implemented unit tests for the following pages:
 - **AdminModulesPage**: App module catalog
 - **AdminApiKeysPage**: API keys scoped by organization, with orgId query parameter branch testing
 - **AdminUsageSyncPage**: Static placeholder sync status
+- **AdminContractsPage**: Contract directory with status filter and pagination
 
 All 6 files follow the same test pattern:
 1. **Unauthenticated request** → 302 redirect to /login (PAGE-03)
@@ -98,7 +100,7 @@ All POST handler tests use inline helper factory `createAdminContextWithBody()` 
 ## Test Coverage
 
 - **Total test files created:** 12
-- **Total tests:** 47 passing (Task 1: 19, Task 2: 28)
+- **Total tests:** 50 passing (Task 1: 22, Task 2: 28)
 - **Auth gate coverage:** All 12 files test unauthenticated→302, non-admin→403, admin→component rendering
 - **GET handler coverage:** All 12 files test successful handle() method execution
 - **POST handler coverage:** 5 files with comprehensive success/failure paths
@@ -120,10 +122,10 @@ All test suites pass:
 
 ```bash
 $ bun test src/Pages/__tests__/Admin
-✅ 47 pass, 0 fail across 11 files
+✅ 50 pass, 0 fail across 12 files
 
 $ bun test src/Pages
-✅ 91 pass, 0 fail across 23 files (including pre-existing InertiaService + ViteTagHelper tests)
+✅ 94 pass, 0 fail across 24 files (including pre-existing InertiaService + ViteTagHelper tests)
 ```
 
 No regressions in existing test suite.
@@ -156,6 +158,7 @@ All created files verified to exist and contain expected content:
 - AdminModulesPage.test.ts: contains 'Admin/Modules/Index'
 - AdminApiKeysPage.test.ts: contains 'Admin/ApiKeys/Index'
 - AdminUsageSyncPage.test.ts: contains 'enabled' and 'false'
+- AdminContractsPage.test.ts: contains 'Admin/Contracts/Index'
 - AdminUserDetailPage.test.ts: contains 'postStatus' and auth tests
 - AdminOrganizationDetailPage.test.ts: contains detail view tests
 - AdminContractCreatePage.test.ts: contains '請填寫完整欄位（含目標與條款）'
