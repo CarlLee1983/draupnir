@@ -1,0 +1,129 @@
+import { describe, expect, test, mock } from 'bun:test'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { InertiaService } from '../../InertiaService'
+import { MemberDashboardPage } from '../../Member/MemberDashboardPage'
+
+function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  return {
+    getBodyText: async () => '',
+    getJsonBody: async <T>() => ({}) as T,
+    getBody: async <T>() => ({}) as T,
+    getHeader: () => undefined,
+    getParam: () => undefined,
+    getPathname: () => '/member/dashboard',
+    getQuery: () => undefined,
+    params: {},
+    query: {},
+    headers: {},
+    json: (data: unknown, statusCode?: number) =>
+      Response.json(data, { status: statusCode ?? 200 }),
+    text: (content: string, statusCode?: number) =>
+      new Response(content, { status: statusCode ?? 200 }),
+    redirect: (url: string, statusCode?: number) => Response.redirect(url, statusCode ?? 302),
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
+    },
+    ...overrides,
+  }
+}
+
+function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  return createMockContext({
+    get: <T>(key: string) => {
+      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
+      return undefined
+    },
+    ...overrides,
+  })
+}
+
+type InertiaCapture = { component: string; props: Record<string, unknown> } | null
+
+function createMockInertia(): { inertia: InertiaService; captured: { lastCall: InertiaCapture } } {
+  const captured = { lastCall: null as InertiaCapture }
+  const inertia = {
+    render: (_ctx: IHttpContext, component: string, props: Record<string, unknown>) => {
+      captured.lastCall = { component, props }
+      return new Response(JSON.stringify({ component, props }), {
+        headers: { 'Content-Type': 'application/json' },
+      })
+    },
+  } as unknown as InertiaService
+  return { inertia, captured }
+}
+
+describe('MemberDashboardPage', () => {
+  test('unauthenticated request returns 302 redirect to /login', async () => {
+    const ctx = createMockContext()
+    const { inertia } = createMockInertia()
+    const page = new MemberDashboardPage(inertia, {} as any, {} as any)
+
+    const response = await page.handle(ctx)
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('Location')).toBe('/login')
+  })
+
+  test('authenticated member request renders correct Inertia component', async () => {
+    const ctx = createMemberContext({
+      getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),
+    })
+    const { inertia, captured } = createMockInertia()
+
+    const mockSummaryService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { totalKeys: 5, activeKeys: 3, usage: { totalRequests: 100 } },
+        })
+      ),
+    }
+    const mockBalanceService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { balance: 50 } })),
+    }
+
+    const page = new MemberDashboardPage(inertia, mockSummaryService as any, mockBalanceService as any)
+    await page.handle(ctx)
+
+    expect(captured.lastCall).not.toBe(null)
+    expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
+    expect(captured.lastCall?.props.orgId).toBe('org-123')
+    expect(captured.lastCall?.props.summary).not.toBe(null)
+    expect(captured.lastCall?.props.balance).not.toBe(null)
+  })
+
+  test('without orgId renders with null summary and balance', async () => {
+    const ctx = createMemberContext()
+    const { inertia, captured } = createMockInertia()
+
+    const mockSummaryService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
+    const mockBalanceService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
+
+    const page = new MemberDashboardPage(inertia, mockSummaryService as any, mockBalanceService as any)
+    await page.handle(ctx)
+
+    expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
+    expect(captured.lastCall?.props.orgId).toBe(null)
+    expect(captured.lastCall?.props.summary).toBe(null)
+    expect(captured.lastCall?.props.balance).toBe(null)
+  })
+
+  test('service failure passes error message to Inertia', async () => {
+    const ctx = createMemberContext({
+      getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),
+    })
+    const { inertia, captured } = createMockInertia()
+
+    const mockSummaryService = {
+      execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })),
+    }
+    const mockBalanceService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
+
+    const page = new MemberDashboardPage(inertia, mockSummaryService as any, mockBalanceService as any)
+    await page.handle(ctx)
+
+    expect(captured.lastCall?.props.error).toBe('組織不存在')
+  })
+})
