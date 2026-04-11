@@ -12,6 +12,9 @@ export class VerifyDevicePage {
 
   /**
    * GET /verify-device: Display the device authorization form.
+   *
+   * @param ctx - HTTP context
+   * @returns Inertia response rendering Auth/VerifyDevice component
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const sharedData = ctx.get('inertia:shared') || {}
@@ -25,7 +28,14 @@ export class VerifyDevicePage {
   }
 
   /**
-   * POST /verify-device: Re-render with success copy after form handling (client calls /cli/authorize).
+   * POST /verify-device: Authorize the device with the provided user code.
+   *
+   * This method is called by the form submission and should call the authenticated
+   * /cli/authorize endpoint via JavaScript fetch (not server-side forwarding).
+   * The response handling happens on the client side.
+   *
+   * @param ctx - HTTP context
+   * @returns Inertia response with success/error message
    */
   async authorize(ctx: IHttpContext): Promise<Response> {
     const sharedData = ctx.get('inertia:shared') || {}
