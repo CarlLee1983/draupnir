@@ -54,7 +54,7 @@ must_haves:
       contains: "inputTokens"
   key_links:
     - from: "GetDashboardSummaryService / GetUsageChartService"
-      to: "shared visibility resolver"
+      to: "DashboardKeyScopeResolver"
       via: "single role-aware key-selection path"
       pattern: "createdByUserId === callerUserId"
     - from: "BifrostGatewayAdapter"
@@ -134,24 +134,34 @@ Output: the dashboard services and tests prove that member, manager, and admin s
     Use the existing `OrgAuthorizationHelper.requireOrgMembership(...)` result as the auth gate, then branch on the caller role for visibility.
   </behavior>
   <action>
+    Create `DashboardKeyScopeResolver.ts` as a REQUIRED separate file at
+    `src/Modules/Dashboard/Application/Services/DashboardKeyScopeResolver.ts`.
+    It MUST be imported by both `GetDashboardSummaryService.ts` and `GetUsageChartService.ts`.
+    Do NOT inline the branching logic into either service — the resolver file must exist as a
+    standalone export so both services share one source of truth.
+
+    The resolver receives the full org key list and the caller's role + userId, and returns the
+    filtered key subset. Both services then pass their org keys through this resolver before
+    aggregation.
+
     Update `GetDashboardSummaryService.execute(...)` and `GetUsageChartService.execute(...)` to:
     - load org membership as they do today,
-    - resolve the allowed key set through the shared helper,
+    - call `DashboardKeyScopeResolver` to obtain the allowed key set,
     - use only the allowed keys for totals and usage aggregation.
-
-    If the planner/executor chooses to keep the helper private to Dashboard, it must still be shared by both services via one local source of truth.
   </action>
   <verify>
     <automated>bun test src/Modules/Dashboard/__tests__/GetDashboardSummaryService.test.ts src/Modules/Dashboard/__tests__/GetUsageChartService.test.ts</automated>
   </verify>
   <acceptance_criteria>
-    - `GetDashboardSummaryService` and `GetUsageChartService` both use the same role-aware visible-key logic.
+    - `DashboardKeyScopeResolver.ts` exists as a separate file and is imported by both services (not inlined).
+    - `GetDashboardSummaryService` and `GetUsageChartService` both delegate to `DashboardKeyScopeResolver` for visible-key filtering.
     - MEMBER requests only aggregate `ApiKey.createdByUserId === callerUserId`.
     - MANAGER and ADMIN requests continue to aggregate all active keys in the selected org.
+    - `GetUsageChartService.test.ts` includes an assertion that when mocked log data contains non-zero `inputTokens` and `outputTokens`, the `GetUsageChartService` output chart values reflect those non-zero token counts (proving P2: real token values flow through to chart output).
     - No route files change.
     - No schema migration files change.
   </acceptance_criteria>
-  <done>Summary and usage chart are role-aware and share the same visibility rule.</done>
+  <done>Summary and usage chart are role-aware, share the same visibility rule via DashboardKeyScopeResolver, and chart output is proven to carry non-zero token values.</done>
 </task>
 
 <task type="auto" tdd="true">
@@ -168,7 +178,6 @@ Output: the dashboard services and tests prove that member, manager, and admin s
     src/Pages/__tests__/Admin/AdminDashboardPage.test.ts,
     src/Pages/__tests__/Member/MemberDashboardPage.test.ts,
     tests/Unit/Foundation/LLMGateway/BifrostGatewayAdapter.test.ts,
-    src/Modules/Dashboard/__tests__/UsageAggregator.test.ts,
     src/Modules/Dashboard/__tests__/GetDashboardSummaryService.test.ts,
     src/Modules/Dashboard/__tests__/GetUsageChartService.test.ts
   </files>
@@ -177,7 +186,7 @@ Output: the dashboard services and tests prove that member, manager, and admin s
     - No sample-data fallback should be added or reintroduced.
     - Member dashboard tests must keep the current inline error-state behavior for org-level failures.
     - Gateway adapter tests must continue proving camelCase `LogEntry` output from Bifrost snake_case fields.
-    - UsageAggregator tests must continue proving empty-key short-circuit behavior and camelCase log consumption.
+    - `UsageAggregator.test.ts` already has empty-key short-circuit coverage and camelCase log consumption assertions — read it to confirm existing coverage, but do NOT modify it.
   </behavior>
   <action>
     Update or add assertions so the phase is locked by tests:
@@ -185,6 +194,9 @@ Output: the dashboard services and tests prove that member, manager, and admin s
     - member denial remains inline,
     - log mapping stays camelCase,
     - no hidden `sampleUsageData` or snake_case dashboard consumption remains.
+
+    Note: `UsageAggregator.test.ts` already covers empty-key short-circuit behavior and camelCase
+    LogEntry consumption. Verify it passes but make no changes to it.
   </action>
   <verify>
     <automated>bun test src/Pages/__tests__/Admin/AdminDashboardPage.test.ts src/Pages/__tests__/Member/MemberDashboardPage.test.ts tests/Unit/Foundation/LLMGateway/BifrostGatewayAdapter.test.ts src/Modules/Dashboard/__tests__/UsageAggregator.test.ts src/Modules/Dashboard/__tests__/GetDashboardSummaryService.test.ts src/Modules/Dashboard/__tests__/GetUsageChartService.test.ts</automated>
@@ -193,10 +205,34 @@ Output: the dashboard services and tests prove that member, manager, and admin s
     - `AdminDashboardPage.test.ts` still asserts component `Admin/Dashboard/Index` and live totals from services.
     - `MemberDashboardPage.test.ts` still asserts inline `props.error` rendering on failure.
     - `BifrostGatewayAdapter.test.ts` still asserts camelCase `inputTokens`/`outputTokens`.
-    - `UsageAggregator.test.ts` still asserts empty-key short-circuit behavior.
+    - `UsageAggregator.test.ts` passes green (existing empty-key short-circuit assertions remain intact; no new changes needed).
     - No test introduces a 403 expectation for member dashboard org failures.
   </acceptance_criteria>
   <done>Phase 8 regression tests lock the final behavior and normalization boundary.</done>
 </task>
 
 </tasks>
+
+<verification>
+Run the full phase suite to confirm all tasks are green:
+
+```
+bun test src/Modules/Dashboard src/Pages/__tests__/Admin src/Pages/__tests__/Member tests/Unit/Foundation/LLMGateway
+```
+
+All tests must pass with no watch-mode flags.
+</verification>
+
+<success_criteria>
+- `DashboardKeyScopeResolver.ts` exists and is imported by both dashboard services.
+- MEMBER sees only self-owned keys; MANAGER/ADMIN see all org keys.
+- Member dashboard denial remains inline (no 403 / redirect).
+- BifrostGatewayAdapter normalizes to camelCase; no snake_case fields reach the dashboard layer.
+- AdminDashboardPage renders live service totals (no sample data).
+- Non-zero token values flow through to GetUsageChartService chart output (proven by test assertion).
+- All automated tests pass green.
+</success_criteria>
+
+<output>
+After completion, create `.planning/phases/08-data-correctness-permission-foundation/08-01-SUMMARY.md`
+</output>
