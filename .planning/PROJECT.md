@@ -98,4 +98,10 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 after v1.0 (LLM Gateway Abstraction) completion*
+*Last updated: 2026-04-11*
+
+## Current Status
+
+**Milestone:** v1.1 Pages & Framework (Phase 6/7 complete)
+- **Phase 6** (Pages): All 19 page handler classes unit-tested (83 tests); all 25 Inertia page routes covered in integration tests. ✓ Complete
+- **Phase 7** (Framework Capability Docs & Improvement): Planned next
