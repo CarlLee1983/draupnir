@@ -70,7 +70,6 @@ export class RefreshTokenService {
    */
   async execute(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
     try {
-      // 1. 驗證 Refresh Token
       const payload = this.jwtService.verify(request.refreshToken)
       if (!payload || payload.type !== 'refresh') {
         return {
@@ -80,7 +79,6 @@ export class RefreshTokenService {
         }
       }
 
-      // 2. 檢查 Token 是否被撤銷
       const tokenHash = await this.hashToken(request.refreshToken)
       const isRevoked = await this.authTokenRepository.isRevoked(tokenHash)
       if (isRevoked) {
@@ -91,7 +89,6 @@ export class RefreshTokenService {
         }
       }
 
-      // 3. 查詢用戶
       const email = new Email(payload.email)
       const user = await this.authRepository.findByEmail(email)
       if (!user) {
@@ -102,7 +99,6 @@ export class RefreshTokenService {
         }
       }
 
-      // 4. 簽發新 Access Token
       const tokenPayload: TokenSignPayload = {
         userId: user.id,
         email: user.emailValue,
@@ -113,7 +109,6 @@ export class RefreshTokenService {
       const newAccessToken = this.jwtService.signAccessToken(tokenPayload)
       const timeToExpire = newAccessToken.getExpiresAt().getTime() - Date.now()
 
-      // 保存新的 Access Token 到倉庫
       const newAccessTokenStr = newAccessToken.getValue()
       const newAccessTokenHash = await this.hashToken(newAccessTokenStr)
       await this.authTokenRepository.save({
@@ -136,7 +131,7 @@ export class RefreshTokenService {
     } catch (error: any) {
       return {
         success: false,
-        message: error.message || 'Token 刷新失敗',
+        message: error.message || 'Refresh token failed',
         error: error.message,
       }
     }

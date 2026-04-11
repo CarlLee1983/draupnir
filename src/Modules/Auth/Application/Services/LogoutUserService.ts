@@ -51,7 +51,6 @@ export class LogoutUserService {
    */
   async execute(request: LogoutRequest): Promise<LogoutResponse> {
     try {
-      // 1. 驗證 Token 不為空
       if (!request.token || request.token.trim() === '') {
         return {
           success: false,
@@ -60,20 +59,16 @@ export class LogoutUserService {
         }
       }
 
-      // 2. 計算 Token Hash
       const tokenHash = await this.hashToken(request.token)
 
-      // 3. 檢查 Token 是否存在
       const tokenRecord = await this.authTokenRepository.findByHash(tokenHash)
       if (!tokenRecord) {
-        // 即使 Token 不存在也返回成功（冪等性）
         return {
           success: true,
           message: 'Logged out successfully',
         }
       }
 
-      // 4. 撤銷 Token
       await this.authTokenRepository.revoke(tokenHash)
 
       return {
@@ -83,7 +78,7 @@ export class LogoutUserService {
     } catch (error: any) {
       return {
         success: false,
-        message: error.message || '登出失敗',
+        message: error.message || 'Logout failed',
         error: error.message,
       }
     }
@@ -103,7 +98,7 @@ export class LogoutUserService {
     } catch (error: any) {
       return {
         success: false,
-        message: error.message || '登出失敗',
+        message: error.message || 'Logout failed',
         error: error.message,
       }
     }

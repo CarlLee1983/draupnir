@@ -2,21 +2,21 @@
 import { z } from '@gravito/impulse'
 
 export const OrganizationIdSchema = z.object({
-  id: z.string().uuid('無效的組織 ID'),
+  id: z.string().uuid('Invalid organization ID'),
 })
 
 export const OrganizationMemberParamsSchema = z.object({
-  id: z.string().uuid('無效的組織 ID'),
-  userId: z.string().uuid('無效的使用者 ID'),
+  id: z.string().uuid('Invalid organization ID'),
+  userId: z.string().uuid('Invalid user ID'),
 })
 
 export const OrganizationInvitationParamsSchema = z.object({
-  id: z.string().uuid('無效的組織 ID'),
-  invId: z.string().min(1, '邀請 ID 不能為空'),
+  id: z.string().uuid('Invalid organization ID'),
+  invId: z.string().min(1, 'Invitation ID is required'),
 })
 
 export const OrganizationAuthHeaderSchema = z.object({
-  organizationId: z.string().uuid('無效的組織 ID'),
+  organizationId: z.string().uuid('Invalid organization ID'),
 })
 
 export type OrganizationIdParams = z.infer<typeof OrganizationIdSchema>

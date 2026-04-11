@@ -1,8 +1,3 @@
-/**
- * HealthCheckMapper
- * 將領域聚合根轉換為持久化格式
- */
-
 import { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
 
 export class HealthCheckMapper {

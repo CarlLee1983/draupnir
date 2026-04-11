@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { MemberApiKeyCreatePage } from '../../Member/MemberApiKeyCreatePage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     ...overrides,
   })
@@ -41,12 +53,23 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
 
 function createMemberContextWithBody(
   body: unknown,
-  overrides: Partial<IHttpContext> = {}
+  overrides: Partial<IHttpContext> = {},
 ): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     getJsonBody: async <T>() => body as T,
     ...overrides,
@@ -126,24 +149,14 @@ describe('MemberApiKeyCreatePage', () => {
         rateLimitRpm: 60,
         rateLimitTpm: 10000,
       }
-      const ctx = createMemberContextWithBody(body, {
-        get: <T>(key: string) => {
-          if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-          if (key === 'inertia:shared')
-            return {
-              locale: 'zh-TW',
-              messages: { 'member.apiKeys.missingOrgId': '缺少 orgId' },
-            } as T
-          return undefined
-        },
-      })
+      const ctx = createMemberContextWithBody(body)
       const { inertia, captured } = createMockInertia()
 
       const page = new MemberApiKeyCreatePage(inertia, {} as any)
       await page.store(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/ApiKeys/Create')
-      expect(captured.lastCall?.props.formError).toBe('缺少 orgId')
+      expect(captured.lastCall?.props.formError).toBe('Missing orgId')
     })
 
     test('valid body with service success renders with createdKey', async () => {
@@ -161,7 +174,7 @@ describe('MemberApiKeyCreatePage', () => {
           Promise.resolve({
             success: true,
             data: { rawKey: 'raw-key-value-12345' },
-          })
+          }),
         ),
       }
 
@@ -187,8 +200,8 @@ describe('MemberApiKeyCreatePage', () => {
         execute: mock(() =>
           Promise.resolve({
             success: false,
-            message: '建立失敗，請稍後再試',
-          })
+            message: 'Create failed',
+          }),
         ),
       }
 
@@ -196,7 +209,7 @@ describe('MemberApiKeyCreatePage', () => {
       await page.store(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/ApiKeys/Create')
-      expect(captured.lastCall?.props.formError).toBe('建立失敗，請稍後再試')
+      expect(captured.lastCall?.props.formError).toBe('Create failed')
       expect(captured.lastCall?.props.createdKey).toBe(null)
     })
   })

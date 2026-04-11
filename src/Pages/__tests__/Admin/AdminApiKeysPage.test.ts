@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminApiKeysPage } from '../../Admin/AdminApiKeysPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -65,10 +77,18 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 describe('AdminApiKeysPage', () => {
   test('unauthenticated request returns 302 redirect to /login (PAGE-03)', async () => {
     const { inertia } = createMockInertia()
-    const mockListKeysService = { execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })) }
+    const mockListKeysService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })),
+    }
+    const mockListOrgsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })),
+    }
 
-    const page = new AdminApiKeysPage(inertia, mockListKeysService as any, mockListOrgsService as any)
+    const page = new AdminApiKeysPage(
+      inertia,
+      mockListKeysService as any,
+      mockListOrgsService as any,
+    )
     const ctx = createMockContext()
     const response = await page.handle(ctx)
 
@@ -78,10 +98,18 @@ describe('AdminApiKeysPage', () => {
 
   test('authenticated non-admin request returns 403 (PAGE-04)', async () => {
     const { inertia } = createMockInertia()
-    const mockListKeysService = { execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })) }
+    const mockListKeysService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })),
+    }
+    const mockListOrgsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })),
+    }
 
-    const page = new AdminApiKeysPage(inertia, mockListKeysService as any, mockListOrgsService as any)
+    const page = new AdminApiKeysPage(
+      inertia,
+      mockListKeysService as any,
+      mockListOrgsService as any,
+    )
     const ctx = createMemberContext()
     const response = await page.handle(ctx)
 
@@ -90,10 +118,18 @@ describe('AdminApiKeysPage', () => {
 
   test('authenticated admin request without orgId renders with correct component (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockListKeysService = { execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })) }
+    const mockListKeysService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })),
+    }
+    const mockListOrgsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })),
+    }
 
-    const page = new AdminApiKeysPage(inertia, mockListKeysService as any, mockListOrgsService as any)
+    const page = new AdminApiKeysPage(
+      inertia,
+      mockListKeysService as any,
+      mockListOrgsService as any,
+    )
     const ctx = createAdminContext()
     await page.handle(ctx)
 
@@ -104,14 +140,22 @@ describe('AdminApiKeysPage', () => {
 
   test('authenticated admin request with orgId calls listKeysService', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockListKeysService = { execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })) }
+    const mockListKeysService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { keys: [] } })),
+    }
+    const mockListOrgsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { organizations: [] } })),
+    }
 
-    const page = new AdminApiKeysPage(inertia, mockListKeysService as any, mockListOrgsService as any)
+    const page = new AdminApiKeysPage(
+      inertia,
+      mockListKeysService as any,
+      mockListOrgsService as any,
+    )
     const ctx = createAdminContext()
     const ctxWithQuery = {
       ...ctx,
-      getQuery: (key: string) => key === 'orgId' ? 'org-123' : undefined,
+      getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),
     }
     await page.handle(ctxWithQuery as IHttpContext)
 

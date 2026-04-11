@@ -43,7 +43,7 @@ export class SetKeyPermissionsService {
 
       return { success: true, message: 'Permissions updated successfully', data: ApiKeyPresenter.fromEntity(updated) }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '更新失敗'
+      const message = error instanceof Error ? error.message : 'Update failed'
       return { success: false, message, error: message }
     }
   }

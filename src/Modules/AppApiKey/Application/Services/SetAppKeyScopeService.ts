@@ -2,7 +2,11 @@ import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyR
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { AppKeyScope } from '../../Domain/ValueObjects/AppKeyScope'
 import { BoundModules } from '../../Domain/ValueObjects/BoundModules'
-import { AppApiKeyPresenter, type SetAppKeyScopeRequest, type AppApiKeyResponse } from '../DTOs/AppApiKeyDTO'
+import {
+  AppApiKeyPresenter,
+  type SetAppKeyScopeRequest,
+  type AppApiKeyResponse,
+} from '../DTOs/AppApiKeyDTO'
 
 export class SetAppKeyScopeService {
   constructor(
@@ -40,9 +44,13 @@ export class SetAppKeyScopeService {
 
       await this.appApiKeyRepository.update(updated)
 
-      return { success: true, message: 'Scope updated successfully', data: AppApiKeyPresenter.fromEntity(updated) }
+      return {
+        success: true,
+        message: 'Scope updated successfully',
+        data: AppApiKeyPresenter.fromEntity(updated),
+      }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '更新失敗'
+      const message = error instanceof Error ? error.message : 'Update failed'
       return { success: false, message, error: message }
     }
   }

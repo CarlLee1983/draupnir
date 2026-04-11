@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { MemberDashboardPage } from '../../Member/MemberDashboardPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     ...overrides,
   })
@@ -108,6 +120,7 @@ describe('MemberDashboardPage', () => {
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.summary).toBe(null)
     expect(captured.lastCall?.props.balance).toBe(null)
+    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
   })
 
   test('service failure passes error message to Inertia', async () => {

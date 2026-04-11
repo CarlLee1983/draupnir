@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll } from 'bun:test'
 import { TestClient } from './lib/test-client'
-import { setupTestServer, getBaseURL } from './lib/test-server'
+import { setupTestServerFor, getBaseURL } from './lib/test-server'
 
-setupTestServer()
+setupTestServerFor('routes-connectivity')
 
 let client: TestClient
 

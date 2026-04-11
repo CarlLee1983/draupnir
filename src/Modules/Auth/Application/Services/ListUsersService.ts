@@ -88,7 +88,11 @@ export class ListUsersService {
         },
       }
     } catch (error: any) {
-      return { success: false, message: error.message || '取得失敗', error: error.message }
+      return {
+        success: false,
+        message: error.message || 'Failed to load users',
+        error: error.message,
+      }
     }
   }
 }

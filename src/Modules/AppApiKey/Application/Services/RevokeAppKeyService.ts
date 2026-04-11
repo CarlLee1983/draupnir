@@ -1,7 +1,11 @@
 import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
-import { AppApiKeyPresenter, type RevokeAppKeyRequest, type AppApiKeyResponse } from '../DTOs/AppApiKeyDTO'
+import {
+  AppApiKeyPresenter,
+  type RevokeAppKeyRequest,
+  type AppApiKeyResponse,
+} from '../DTOs/AppApiKeyDTO'
 
 export class RevokeAppKeyService {
   constructor(
@@ -38,9 +42,13 @@ export class RevokeAppKeyService {
       const revoked = key.revoke()
       await this.appApiKeyRepository.update(revoked)
 
-      return { success: true, message: 'App Key revoked successfully', data: AppApiKeyPresenter.fromEntity(revoked) }
+      return {
+        success: true,
+        message: 'App Key revoked successfully',
+        data: AppApiKeyPresenter.fromEntity(revoked),
+      }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '撤銷失敗'
+      const message = error instanceof Error ? error.message : 'Revoke failed'
       return { success: false, message, error: message }
     }
   }

@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminOrganizationDetailPage } from '../../Admin/AdminOrganizationDetailPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -68,7 +80,11 @@ describe('AdminOrganizationDetailPage', () => {
     const mockGetOrgService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockListMembersService = { execute: mock(() => Promise.resolve({ success: true })) }
 
-    const page = new AdminOrganizationDetailPage(inertia, mockGetOrgService as any, mockListMembersService as any)
+    const page = new AdminOrganizationDetailPage(
+      inertia,
+      mockGetOrgService as any,
+      mockListMembersService as any,
+    )
     const ctx = createMockContext()
     const response = await page.handle(ctx)
 
@@ -81,7 +97,11 @@ describe('AdminOrganizationDetailPage', () => {
     const mockGetOrgService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockListMembersService = { execute: mock(() => Promise.resolve({ success: true })) }
 
-    const page = new AdminOrganizationDetailPage(inertia, mockGetOrgService as any, mockListMembersService as any)
+    const page = new AdminOrganizationDetailPage(
+      inertia,
+      mockGetOrgService as any,
+      mockListMembersService as any,
+    )
     const ctx = createMemberContext()
     const response = await page.handle(ctx)
 
@@ -90,14 +110,33 @@ describe('AdminOrganizationDetailPage', () => {
 
   test('authenticated admin request renders with correct component (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockGetOrgService = { execute: mock(() => Promise.resolve({ success: true, data: { id: 'org-1', name: 'Test Org', slug: 'test-org', status: 'active', createdAt: '2026-01-01' } })) }
-    const mockListMembersService = { execute: mock(() => Promise.resolve({ success: true, data: { members: [] } })) }
+    const mockGetOrgService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: {
+            id: 'org-1',
+            name: 'Test Org',
+            slug: 'test-org',
+            status: 'active',
+            createdAt: '2026-01-01',
+          },
+        }),
+      ),
+    }
+    const mockListMembersService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { members: [] } })),
+    }
 
-    const page = new AdminOrganizationDetailPage(inertia, mockGetOrgService as any, mockListMembersService as any)
+    const page = new AdminOrganizationDetailPage(
+      inertia,
+      mockGetOrgService as any,
+      mockListMembersService as any,
+    )
     const ctx = createAdminContext()
     const ctxWithId = {
       ...ctx,
-      getParam: (name: string) => name === 'id' ? 'org-1' : undefined,
+      getParam: (name: string) => (name === 'id' ? 'org-1' : undefined),
     }
     await page.handle(ctxWithId as IHttpContext)
 
@@ -111,7 +150,11 @@ describe('AdminOrganizationDetailPage', () => {
     const mockGetOrgService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockListMembersService = { execute: mock(() => Promise.resolve({ success: true })) }
 
-    const page = new AdminOrganizationDetailPage(inertia, mockGetOrgService as any, mockListMembersService as any)
+    const page = new AdminOrganizationDetailPage(
+      inertia,
+      mockGetOrgService as any,
+      mockListMembersService as any,
+    )
     const ctx = createAdminContext()
     await page.handle(ctx)
 

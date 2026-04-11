@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminContractsPage } from '../../Admin/AdminContractsPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -65,7 +77,14 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 describe('AdminContractsPage', () => {
   test('unauthenticated request returns 302 redirect to /login (PAGE-03)', async () => {
     const { inertia } = createMockInertia()
-    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { contracts: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } } })) }
+    const mockListAdminContractsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { contracts: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
+        }),
+      ),
+    }
 
     const page = new AdminContractsPage(inertia, mockListAdminContractsService as any)
     const ctx = createMockContext()
@@ -77,7 +96,14 @@ describe('AdminContractsPage', () => {
 
   test('authenticated non-admin request returns 403 (PAGE-04)', async () => {
     const { inertia } = createMockInertia()
-    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { contracts: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } } })) }
+    const mockListAdminContractsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { contracts: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
+        }),
+      ),
+    }
 
     const page = new AdminContractsPage(inertia, mockListAdminContractsService as any)
     const ctx = createMemberContext()
@@ -88,7 +114,14 @@ describe('AdminContractsPage', () => {
 
   test('authenticated admin request renders with correct component (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { contracts: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } } })) }
+    const mockListAdminContractsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { contracts: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
+        }),
+      ),
+    }
 
     const page = new AdminContractsPage(inertia, mockListAdminContractsService as any)
     const ctx = createAdminContext()

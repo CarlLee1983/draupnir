@@ -18,7 +18,7 @@ async function start() {
   const core = await createApp()
 
   // 產生 Bun.serve 設定並手動啟動 HTTP 伺服器
-  const port = (core.config.get<number>('PORT') ?? 3000) as number
+  const port = Number(core.config.get('PORT') ?? 3000)
   const baseUrl = `http://localhost:${port}`
   const { core: _liftoffCore, ...serveConfig } = core.liftoff(port)
   const server = Bun.serve(serveConfig as any)

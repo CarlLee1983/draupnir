@@ -16,7 +16,7 @@ export class Email {
    */
   constructor(email: string) {
     if (!this.isValid(email)) {
-      throw new Error(`無效的電子郵件格式: ${email}`)
+      throw new Error(`Invalid email format: ${email}`)
     }
     this.value = email.toLowerCase()
   }

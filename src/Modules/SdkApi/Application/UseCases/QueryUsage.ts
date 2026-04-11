@@ -29,7 +29,7 @@ export class QueryUsage {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢用量失敗'
+      const message = error instanceof Error ? error.message : 'Failed to query usage'
       return { success: false, message, error: 'USAGE_QUERY_ERROR' }
     }
   }

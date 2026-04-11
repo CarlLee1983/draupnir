@@ -12,7 +12,7 @@ function mapContractRow(dto: Record<string, unknown>) {
   const id = dto.id as string
   return {
     id,
-    name: `合約 ${id.slice(0, 8)}`,
+    name: `Contract ${id.slice(0, 8)}`,
     status: dto.status as 'draft' | 'active' | 'expired' | 'terminated',
     startDate: terms.validityPeriod.startDate,
     endDate: terms.validityPeriod.endDate,

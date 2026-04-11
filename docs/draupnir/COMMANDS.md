@@ -12,9 +12,11 @@ bun run build                  # Build to dist/
 ## Testing
 
 ```bash
-bun test                       # Run all tests
+bun test                       # Run source/unit/package tests (excludes tests/Feature)
 bun test tests/Unit/           # Unit tests only
-bun test tests/Feature/        # Feature (API) tests only
+bun run test:feature           # Auto mode: reuse API_BASE_URL if set, otherwise start a server
+bun run test:feature:server    # Feature tests with a dedicated app server
+bun run test:feature:existing  # Feature tests against an existing API_BASE_URL
 bun test --filter User         # Filter by name
 bun test --watch               # Watch mode
 bun test --coverage            # With coverage

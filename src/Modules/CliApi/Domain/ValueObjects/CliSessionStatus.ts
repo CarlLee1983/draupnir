@@ -19,7 +19,7 @@ export class CliSessionStatus {
 
   static from(value: string): CliSessionStatus {
     if (!CliSessionStatusValues.includes(value as CliSessionStatusType)) {
-      throw new Error(`無效的 CLI Session 狀態: ${value}`)
+      throw new Error(`Invalid CLI session status: ${value}`)
     }
     return new CliSessionStatus(value as CliSessionStatusType)
   }

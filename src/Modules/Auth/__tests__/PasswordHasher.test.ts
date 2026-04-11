@@ -17,6 +17,8 @@ describe('ScryptPasswordHasher', () => {
 
   it('應該拒絕弱密碼', async () => {
     const hasher = new ScryptPasswordHasher()
-    await expect(hasher.hash('weak')).rejects.toThrow('密碼不符合強度要求')
+    await expect(hasher.hash('weak')).rejects.toThrow(
+      'Password does not meet strength requirements',
+    )
   })
 })

@@ -45,7 +45,7 @@ function validateOrganizationId(
         {
           success: false,
           message: 'Validation failed',
-          error: validation.error.issues[0]?.message ?? '無效的組織 ID',
+          error: validation.error.issues[0]?.message ?? 'Invalid organization ID',
         },
         400,
       ),
@@ -68,7 +68,7 @@ function validateOrganizationMemberParams(
         {
           success: false,
           message: 'Validation failed',
-          error: validation.error.issues[0]?.message ?? '參數無效',
+          error: validation.error.issues[0]?.message ?? 'Invalid parameter',
         },
         400,
       ),
@@ -91,7 +91,7 @@ function validateInvitationParams(
         {
           success: false,
           message: 'Validation failed',
-          error: validation.error.issues[0]?.message ?? '參數無效',
+          error: validation.error.issues[0]?.message ?? 'Invalid parameter',
         },
         400,
       ),

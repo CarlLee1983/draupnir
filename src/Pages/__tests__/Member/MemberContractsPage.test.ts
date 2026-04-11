@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { MemberContractsPage } from '../../Member/MemberContractsPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     ...overrides,
   })
@@ -86,7 +98,7 @@ describe('MemberContractsPage', () => {
               },
             },
           ],
-        })
+        }),
       ),
     }
 
@@ -101,15 +113,7 @@ describe('MemberContractsPage', () => {
 
   test('without orgId renders with empty contracts and error message', async () => {
     const ctx = createMemberContext({
-      get: <T>(key: string) => {
-        if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-        if (key === 'inertia:shared')
-          return {
-            locale: 'zh-TW',
-            messages: { 'member.contracts.selectOrg': '請先選擇組織' },
-          } as T
-        return undefined
-      },
+      getQuery: () => undefined,
     })
     const { inertia, captured } = createMockInertia()
 
@@ -121,7 +125,7 @@ describe('MemberContractsPage', () => {
     expect(captured.lastCall?.component).toBe('Member/Contracts/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.contracts).toEqual([])
-    expect(captured.lastCall?.props.error).toContain('請先選擇組織')
+    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
   })
 
   test('service failure passes error message to Inertia', async () => {
@@ -134,14 +138,14 @@ describe('MemberContractsPage', () => {
       execute: mock(() =>
         Promise.resolve({
           success: false,
-          message: '合約列表查詢失敗',
-        })
+          message: 'Failed to load contracts',
+        }),
       ),
     }
 
     const page = new MemberContractsPage(inertia, mockListService as any)
     await page.handle(ctx)
 
-    expect(captured.lastCall?.props.error).toBe('合約列表查詢失敗')
+    expect(captured.lastCall?.props.error).toBe('Failed to load contracts')
   })
 })

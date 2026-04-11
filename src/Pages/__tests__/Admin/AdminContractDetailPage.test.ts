@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminContractDetailPage } from '../../Admin/AdminContractDetailPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -48,13 +60,24 @@ function createMemberContext(): IHttpContext {
 }
 
 function createAdminContextWithBody(body: unknown, overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     getJsonBody: async <T>() => body as T,
-    getParam: (name: string) => {
+    getParam: (_name: string) => {
       return undefined
     },
     ...overrides,

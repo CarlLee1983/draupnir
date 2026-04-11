@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { MemberUsagePage } from '../../Member/MemberUsagePage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     ...overrides,
   })
@@ -80,7 +92,7 @@ describe('MemberUsagePage', () => {
             logs: [{ timestamp: '2026-01-01', requests: 100 }],
             stats: { totalRequests: 100 },
           },
-        })
+        }),
       ),
     }
 
@@ -95,19 +107,13 @@ describe('MemberUsagePage', () => {
 
   test('without orgId renders with empty logs and error message', async () => {
     const ctx = createMemberContext({
-      get: <T>(key: string) => {
-        if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-        if (key === 'inertia:shared')
-          return {
-            locale: 'zh-TW',
-            messages: { 'member.usage.selectOrg': '請先選擇組織' },
-          } as T
-        return undefined
-      },
+      getQuery: () => undefined,
     })
     const { inertia, captured } = createMockInertia()
 
-    const mockUsageChartService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
+    const mockUsageChartService = {
+      execute: mock(() => Promise.resolve({ success: true, data: null })),
+    }
 
     const page = new MemberUsagePage(inertia, mockUsageChartService as any)
     await page.handle(ctx)
@@ -116,7 +122,7 @@ describe('MemberUsagePage', () => {
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.usageLogs).toEqual([])
     expect(captured.lastCall?.props.usageStats).toBe(null)
-    expect(captured.lastCall?.props.error).toContain('請先選擇組織')
+    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
   })
 
   test('service failure passes error message to Inertia', async () => {
@@ -129,14 +135,14 @@ describe('MemberUsagePage', () => {
       execute: mock(() =>
         Promise.resolve({
           success: false,
-          message: '使用量查詢失敗',
-        })
+          message: 'Failed to load usage',
+        }),
       ),
     }
 
     const page = new MemberUsagePage(inertia, mockUsageChartService as any)
     await page.handle(ctx)
 
-    expect(captured.lastCall?.props.error).toBe('使用量查詢失敗')
+    expect(captured.lastCall?.props.error).toBe('Failed to load usage')
   })
 })

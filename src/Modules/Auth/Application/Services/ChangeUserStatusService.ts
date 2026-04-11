@@ -49,7 +49,7 @@ export class ChangeUserStatusService {
         },
       }
     } catch (error: any) {
-      return { success: false, message: error.message || '操作失敗', error: error.message }
+      return { success: false, message: error.message || 'Operation failed', error: error.message }
     }
   }
 }

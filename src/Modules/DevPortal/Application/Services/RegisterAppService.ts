@@ -1,7 +1,11 @@
 import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { Application } from '../../Domain/Aggregates/Application'
-import { ApplicationPresenter, type RegisterAppRequest, type RegisterAppResponse } from '../DTOs/RegisterAppDTO'
+import {
+  ApplicationPresenter,
+  type RegisterAppRequest,
+  type RegisterAppResponse,
+} from '../DTOs/RegisterAppDTO'
 
 export class RegisterAppService {
   constructor(

@@ -3,7 +3,7 @@ import { FormRequest, z } from '@gravito/impulse'
 
 export class ChangeMemberRoleRequest extends FormRequest {
   schema = z.object({
-    role: z.string().min(1, '角色不能為空'),
+    role: z.string().min(1, 'Role is required'),
   })
 }
 

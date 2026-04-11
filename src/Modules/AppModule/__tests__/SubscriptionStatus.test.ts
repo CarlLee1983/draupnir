@@ -15,7 +15,7 @@ describe('SubscriptionStatus', () => {
   })
 
   test('無效字串拋出錯誤', () => {
-    expect(() => SubscriptionStatus.fromString('invalid')).toThrow('無效的訂閱狀態')
+    expect(() => SubscriptionStatus.fromString('invalid')).toThrow('Invalid subscription status')
   })
 
   test('active → suspended 合法', () => {

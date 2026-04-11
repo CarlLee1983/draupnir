@@ -16,12 +16,12 @@ describe('KeyRotationPolicy', () => {
   })
 
   it('輪換天數不能為零或負數', () => {
-    expect(() => KeyRotationPolicy.auto(0, 24)).toThrow('輪換間隔天數必須大於 0')
-    expect(() => KeyRotationPolicy.auto(-1, 24)).toThrow('輪換間隔天數必須大於 0')
+    expect(() => KeyRotationPolicy.auto(0, 24)).toThrow('Rotation interval days must be greater than 0')
+    expect(() => KeyRotationPolicy.auto(-1, 24)).toThrow('Rotation interval days must be greater than 0')
   })
 
   it('寬限期不能為負數', () => {
-    expect(() => KeyRotationPolicy.auto(90, -1)).toThrow('寬限期時數不能為負數')
+    expect(() => KeyRotationPolicy.auto(90, -1)).toThrow('Grace period hours cannot be negative')
   })
 
   it('應正確序列化/反序列化 JSON', () => {

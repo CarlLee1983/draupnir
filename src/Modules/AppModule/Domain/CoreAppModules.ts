@@ -4,22 +4,22 @@ export const CORE_APP_MODULE_SPECS = [
   {
     id: '00000000-0000-4000-8000-000000000001',
     name: 'dashboard',
-    description: '組織儀表板與用量摘要',
+    description: 'Organization dashboard and usage summary',
   },
   {
     id: '00000000-0000-4000-8000-000000000002',
     name: 'credit',
-    description: '點數餘額與交易紀錄',
+    description: 'Credit balance and transaction history',
   },
   {
     id: '00000000-0000-4000-8000-000000000003',
     name: 'api_keys',
-    description: '組織 API 金鑰管理',
+    description: 'Organization API key management',
   },
   {
     id: '00000000-0000-4000-8000-000000000004',
     name: 'app_api_keys',
-    description: '應用層級 API 金鑰（SDK/CLI）',
+    description: 'Application-level API keys (SDK/CLI)',
   },
 ] as const
 

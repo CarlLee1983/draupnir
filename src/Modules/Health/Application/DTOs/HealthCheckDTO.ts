@@ -1,8 +1,3 @@
-/**
- * HealthCheckDTO
- * 健康檢查數據傳輸物件
- */
-
 import type { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
 
 export interface HealthCheckJSONData {
@@ -36,16 +31,10 @@ export class HealthCheckDTO {
     this.message = entity.message
   }
 
-  /**
-   * 從領域實體轉換
-   */
   static fromEntity(entity: HealthCheck): HealthCheckDTO {
     return new HealthCheckDTO(entity)
   }
 
-  /**
-   * 轉換為 JSON (用於 HTTP 響應)
-   */
   toJSON(): HealthCheckJSONData {
     return {
       id: this.id,

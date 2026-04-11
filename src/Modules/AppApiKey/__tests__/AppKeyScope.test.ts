@@ -32,6 +32,6 @@ describe('AppKeyScope', () => {
   })
 
   it('無效值應拋出錯誤', () => {
-    expect(() => AppKeyScope.from('invalid')).toThrow('無效的 App Key Scope')
+    expect(() => AppKeyScope.from('invalid')).toThrow('Invalid App Key Scope')
   })
 })

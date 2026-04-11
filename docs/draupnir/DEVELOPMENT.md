@@ -38,7 +38,11 @@ Server-driven Inertia routes, DI bindings per page class, and Vite asset wiring 
 ## Testing
 
 - CI runs with `ORM=memory` — no database required
-- Feature tests (`tests/Feature/`) include OpenAPI spec validation
+- `bun test` excludes `tests/Feature/` and covers source, unit, and package tests
+- Feature tests (`tests/Feature/`) run through `bun run test:feature`, which auto-reuses `API_BASE_URL` when present
+- Use `bun run test:feature:server` to start one dedicated app server and set `API_BASE_URL`
+- Use `bun run test:feature:existing` to run against an already running server
+- Feature tests include OpenAPI spec validation
 - E2E tests (Playwright) auto-start the app with `ORM=memory` on port 3001
 - Test strategy: [`knowledge/`](./knowledge/)
 

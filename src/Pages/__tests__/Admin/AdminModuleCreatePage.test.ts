@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminModuleCreatePage } from '../../Admin/AdminModuleCreatePage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -47,11 +59,25 @@ function createMemberContext(): IHttpContext {
   })
 }
 
-function createAdminContextWithBody(body: unknown, overrides: Partial<IHttpContext> = {}): IHttpContext {
+function createAdminContextWithBody(
+  body: unknown,
+  overrides: Partial<IHttpContext> = {},
+): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     getJsonBody: async <T>() => body as T,
     ...overrides,
@@ -119,23 +145,18 @@ describe('AdminModuleCreatePage', () => {
         name: '',
         description: 'Test module',
       },
-      {
-        get: <T>(key: string) => {
-          if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-          if (key === 'inertia:shared') return { messages: { 'admin.modules.nameRequired': '模組識別名稱為必填' } } as T
-          return undefined
-        },
-      }
     )
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Modules/Create')
-    expect(captured.lastCall?.props.formError).toBe('模組識別名稱為必填')
+    expect(captured.lastCall?.props.formError).toBe('Module identifier is required')
   })
 
   test('store with valid name and successful service call redirects', async () => {
     const { inertia } = createMockInertia()
-    const mockRegisterModuleService = { execute: mock(() => Promise.resolve({ success: true, data: { id: 'module-1' } })) }
+    const mockRegisterModuleService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { id: 'module-1' } })),
+    }
 
     const page = new AdminModuleCreatePage(inertia, mockRegisterModuleService as any)
     const ctx = createAdminContextWithBody({
@@ -151,7 +172,9 @@ describe('AdminModuleCreatePage', () => {
 
   test('store with service failure re-renders with error message', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockRegisterModuleService = { execute: mock(() => Promise.resolve({ success: false, message: 'Module already exists' })) }
+    const mockRegisterModuleService = {
+      execute: mock(() => Promise.resolve({ success: false, message: 'Module already exists' })),
+    }
 
     const page = new AdminModuleCreatePage(inertia, mockRegisterModuleService as any)
     const ctx = createAdminContextWithBody({

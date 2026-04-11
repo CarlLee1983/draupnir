@@ -3,7 +3,7 @@ import { FormRequest, z } from '@gravito/impulse'
 
 export class CreateOrganizationRequest extends FormRequest {
   schema = z.object({
-    name: z.string().min(1, '名稱不能為空').max(100),
+    name: z.string().min(1, 'Name is required').max(100),
     description: z.string().max(255).optional(),
     slug: z
       .string()
@@ -11,7 +11,7 @@ export class CreateOrganizationRequest extends FormRequest {
       .max(50)
       .regex(/^[a-z0-9-]+$/)
       .optional(),
-    managerUserId: z.string().uuid('無效的用戶 ID'),
+    managerUserId: z.string().uuid('Invalid user ID'),
   })
 }
 

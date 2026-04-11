@@ -1,6 +1,3 @@
-// src/Modules/CliApi/Application/DTOs/DeviceFlowDTO.ts
-
-/** POST /cli/device-code -- 初始化 device flow */
 export interface InitiateDeviceFlowResponse {
   success: boolean
   message: string
@@ -14,7 +11,6 @@ export interface InitiateDeviceFlowResponse {
   error?: string
 }
 
-/** POST /cli/authorize -- 使用者在瀏覽器授權 */
 export interface AuthorizeDeviceRequest {
   userCode: string
 }
@@ -25,7 +21,6 @@ export interface AuthorizeDeviceResponse {
   error?: string
 }
 
-/** POST /cli/token -- CLI 輪詢換取 token */
 export interface ExchangeDeviceCodeRequest {
   deviceCode: string
 }
@@ -45,7 +40,6 @@ export interface ExchangeDeviceCodeResponse {
   error?: 'authorization_pending' | 'expired' | 'invalid_device_code' | string
 }
 
-/** POST /cli/proxy -- 轉發 AI 請求 */
 export interface ProxyCliRequestBody {
   model: string
   messages: Array<{ role: string; content: string }>
@@ -53,7 +47,6 @@ export interface ProxyCliRequestBody {
   [key: string]: unknown
 }
 
-/** POST /cli/logout -- 撤銷 CLI session */
 export interface RevokeCliSessionResponse {
   success: boolean
   message: string

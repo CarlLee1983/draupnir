@@ -1,7 +1,11 @@
 // src/Modules/AppModule/Application/Services/RegisterModuleService.ts
 import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import { AppModule } from '../../Domain/Aggregates/AppModule'
-import { AppModulePresenter, type RegisterModuleRequest, type ModuleResponse } from '../DTOs/AppModuleDTO'
+import {
+  AppModulePresenter,
+  type RegisterModuleRequest,
+  type ModuleResponse,
+} from '../DTOs/AppModuleDTO'
 
 export class RegisterModuleService {
   constructor(private readonly moduleRepo: IAppModuleRepository) {}
@@ -31,7 +35,7 @@ export class RegisterModuleService {
         data: AppModulePresenter.fromEntity(module),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '註冊模組失敗'
+      const message = error instanceof Error ? error.message : 'Failed to register module'
       return { success: false, message, error: message }
     }
   }

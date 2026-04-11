@@ -43,7 +43,7 @@ export class RevokeApiKeyService {
 
       return { success: true, message: 'Key revoked successfully', data: ApiKeyPresenter.fromEntity(revoked) }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '撤銷失敗'
+      const message = error instanceof Error ? error.message : 'Revoke failed'
       return { success: false, message, error: message }
     }
   }

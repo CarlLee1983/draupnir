@@ -2,13 +2,6 @@
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 
-/**
- * 充值恢復服務 — 補償式狀態轉換
- *
- * 策略：先操作遠端恢復（Gateway），成功後再清除本地凍結狀態。
- * 若遠端失敗，本地保持 SUSPENDED_NO_CREDIT 不變，由重試修復。
- * 若本地清除失敗，遠端已恢復但本地可由重試修復。
- */
 export class HandleCreditToppedUpService {
   constructor(
     private readonly apiKeyRepo: IApiKeyRepository,
@@ -24,25 +17,24 @@ export class HandleCreditToppedUpService {
       try {
         const preFreeze = key.preFreezeRateLimit
 
-        // Step 1: 先恢復遠端 Gateway rate limit
         if (preFreeze && (preFreeze.rpm != null || preFreeze.tpm != null)) {
           await this.gatewayClient.updateKey(key.gatewayKeyId, {
             rateLimit: {
               tokenMaxLimit: preFreeze.tpm ?? 100000,
               tokenResetDuration: '1h',
-              ...(preFreeze.rpm != null && { requestMaxLimit: preFreeze.rpm, requestResetDuration: '1m' }),
+              ...(preFreeze.rpm != null && {
+                requestMaxLimit: preFreeze.rpm,
+                requestResetDuration: '1m',
+              }),
             },
           })
         }
 
-        // Step 2: 遠端成功後，清除本地凍結狀態
         const restored = key.unsuspend()
         await this.apiKeyRepo.update(restored)
         processed++
       } catch (error: unknown) {
-        // 遠端失敗：本地保持 SUSPENDED_NO_CREDIT，不恢復
-        // 排程重試會再次嘗試
-        console.error(`Key ${key.id} 恢復失敗，將由排程重試:`, error)
+        console.error(`Key ${key.id} restore failed, will be retried by the scheduler:`, error)
         failed++
       }
     }

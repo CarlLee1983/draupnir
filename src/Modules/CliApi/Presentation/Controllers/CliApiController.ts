@@ -1,4 +1,3 @@
-// src/Modules/CliApi/Presentation/Controllers/CliApiController.ts
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { InitiateDeviceFlowService } from '../../Application/Services/InitiateDeviceFlowService'
@@ -24,14 +23,12 @@ export class CliApiController {
     private readonly revokeService: RevokeCliSessionService,
   ) {}
 
-  /** POST /cli/device-code -- CLI 請求裝置碼（公開端點） */
   async initiateDeviceFlow(ctx: IHttpContext): Promise<Response> {
     const result = await this.initiateService.execute()
     const status = result.success ? 200 : 500
     return ctx.json(result, status)
   }
 
-  /** POST /cli/authorize -- 使用者在瀏覽器端授權（需要登入） */
   async authorizeDevice(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -54,7 +51,6 @@ export class CliApiController {
     return ctx.json(result, status)
   }
 
-  /** POST /cli/token -- CLI 輪詢換取 token（公開端點） */
   async exchangeToken(ctx: IHttpContext): Promise<Response> {
     const body = await ctx.getJsonBody<{ deviceCode?: string }>()
     if (!body.deviceCode) {
@@ -71,7 +67,6 @@ export class CliApiController {
     return ctx.json(result, 400)
   }
 
-  /** POST /cli/proxy -- 轉發 AI 請求（需要 token） */
   async proxyRequest(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -92,7 +87,6 @@ export class CliApiController {
     return ctx.json(result, status)
   }
 
-  /** POST /cli/logout -- 撤銷目前的 CLI session（需要 token） */
   async logout(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -110,7 +104,6 @@ export class CliApiController {
     return ctx.json(result, result.success ? 200 : 500)
   }
 
-  /** POST /cli/logout-all -- 撤銷所有 CLI session（需要 token） */
   async logoutAll(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)

@@ -47,7 +47,7 @@ export class GetUserDetailService {
         },
       }
     } catch (error: any) {
-      return { success: false, message: error.message || '取得失敗' }
+      return { success: false, message: error.message || 'Failed to load user' }
     }
   }
 }

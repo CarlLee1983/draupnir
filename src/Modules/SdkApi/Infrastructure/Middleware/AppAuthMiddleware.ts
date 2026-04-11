@@ -14,7 +14,7 @@ export class AppAuthMiddleware {
 
     if (!header) {
       return ctx.json(
-        { success: false, message: 'Missing Authorization header', error: 'MISSING_AUTH' },
+        { success: false, message: 'Missing authorization header', error: 'MISSING_AUTH' },
         401,
       )
     }
@@ -38,7 +38,7 @@ export class AppAuthMiddleware {
       return ctx.json(
         {
           success: false,
-          message: result.message ?? '認證失敗',
+          message: result.message ?? 'Authentication failed',
           error: result.error ?? 'AUTH_FAILED',
         },
         401,

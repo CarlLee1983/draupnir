@@ -46,9 +46,6 @@ export class ContractRepository implements IContractRepository {
     const threshold = new Date()
     threshold.setDate(threshold.getDate() + days)
 
-    // 查詢 ACTIVE 且即將到期的合約
-    // terms 欄位為 JSON，包含 validityPeriod.endDate
-    // 在 memory ORM 中需特殊處理
     const rows = await this.db.table('contracts').where('status', '=', 'active').select()
 
     return rows

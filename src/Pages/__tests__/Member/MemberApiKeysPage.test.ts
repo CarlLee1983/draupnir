@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { MemberApiKeysPage } from '../../Member/MemberApiKeysPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     ...overrides,
   })
@@ -89,7 +101,7 @@ describe('MemberApiKeysPage', () => {
             ],
             meta: { total: 1, page: 1, limit: 20, totalPages: 1 },
           },
-        })
+        }),
       ),
     }
 
@@ -104,15 +116,7 @@ describe('MemberApiKeysPage', () => {
 
   test('without orgId renders with empty keys and error message', async () => {
     const ctx = createMemberContext({
-      get: <T>(key: string) => {
-        if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-        if (key === 'inertia:shared')
-          return {
-            locale: 'zh-TW',
-            messages: { 'member.apiKeys.selectOrg': '請先選擇組織' },
-          } as T
-        return undefined
-      },
+      getQuery: () => undefined,
     })
     const { inertia, captured } = createMockInertia()
 
@@ -124,7 +128,7 @@ describe('MemberApiKeysPage', () => {
     expect(captured.lastCall?.component).toBe('Member/ApiKeys/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.keys).toEqual([])
-    expect(captured.lastCall?.props.error).toContain('請先選擇組織')
+    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
   })
 
   test('service failure passes error message to Inertia', async () => {
@@ -137,14 +141,14 @@ describe('MemberApiKeysPage', () => {
       execute: mock(() =>
         Promise.resolve({
           success: false,
-          message: '列表查詢失敗',
-        })
+          message: 'Failed to load API keys',
+        }),
       ),
     }
 
     const page = new MemberApiKeysPage(inertia, mockListService as any)
     await page.handle(ctx)
 
-    expect(captured.lastCall?.props.error).toBe('列表查詢失敗')
+    expect(captured.lastCall?.props.error).toBe('Failed to load API keys')
   })
 })

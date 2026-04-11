@@ -10,9 +10,9 @@ export class LoginRequest extends FormRequest {
    */
   schema = z.object({
     /** User's registered email address. */
-    email: z.string().email('電子郵件格式無效'),
+    email: z.string().email('Invalid email address'),
     /** User's plain-text password. */
-    password: z.string().min(1, '密碼不能為空'),
+    password: z.string().min(1, 'Password is required'),
   })
 }
 

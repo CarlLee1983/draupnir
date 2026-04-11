@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminContractCreatePage } from '../../Admin/AdminContractCreatePage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -48,10 +60,21 @@ function createMemberContext(): IHttpContext {
 }
 
 function createAdminContextWithBody(body: unknown, overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     getJsonBody: async <T>() => body as T,
     ...overrides,
@@ -118,19 +141,12 @@ describe('AdminContractCreatePage', () => {
       {
         targetType: 'organization',
         // missing targetId
-      },
-      {
-        get: <T>(key: string) => {
-          if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-          if (key === 'inertia:shared') return { messages: { 'admin.contracts.validationFailed': '請填寫完整欄位（含目標與條款）' } } as T
-          return undefined
-        },
       }
     )
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Contracts/Create')
-    expect(captured.lastCall?.props.formError).toBe('請填寫完整欄位（含目標與條款）')
+    expect(captured.lastCall?.props.formError).toBe('Please fill in all required fields, including target and terms')
   })
 
   test('store with valid body and successful service call redirects', async () => {

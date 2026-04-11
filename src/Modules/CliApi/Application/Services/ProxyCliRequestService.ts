@@ -27,7 +27,11 @@ export class ProxyCliRequestService {
       }
 
       if (!request.body.messages || request.body.messages.length === 0) {
-        return { success: false, message: 'Messages list cannot be empty', error: 'MESSAGES_REQUIRED' }
+        return {
+          success: false,
+          message: 'Messages list cannot be empty',
+          error: 'MESSAGES_REQUIRED',
+        }
       }
 
       const result = await this.client.proxyRequest(request.body)
@@ -38,7 +42,7 @@ export class ProxyCliRequestService {
         data: result,
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'AI 請求代理失敗'
+      const message = error instanceof Error ? error.message : 'AI request proxy failed'
       return { success: false, message, error: message }
     }
   }

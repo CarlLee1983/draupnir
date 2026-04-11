@@ -10,7 +10,7 @@ export class RefreshTokenRequest extends FormRequest {
    */
   schema = z.object({
     /** The current refresh token (required). */
-    refreshToken: z.string().min(1, 'Refresh Token 不能為空'),
+    refreshToken: z.string().min(1, 'Refresh token is required'),
   })
 }
 

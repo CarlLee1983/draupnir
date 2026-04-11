@@ -18,7 +18,7 @@ export class ModuleType extends ValueObject {
 
   static fromString(value: string): ModuleType {
     if (value !== 'free' && value !== 'paid') {
-      throw new Error(`無效的模組類型: ${value}`)
+      throw new Error(`Invalid module type: ${value}`)
     }
     return new ModuleType(value)
   }

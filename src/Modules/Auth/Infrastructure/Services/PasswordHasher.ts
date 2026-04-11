@@ -39,7 +39,9 @@ export class ScryptPasswordHasher implements IPasswordHasher {
    */
   private assertStrongPassword(password: string): void {
     if (!this.isStrong(password)) {
-      throw new Error('密碼不符合強度要求，至少需要 8 個字符，包含大寫、小寫、數字')
+      throw new Error(
+        'Password does not meet strength requirements: at least 8 characters with uppercase, lowercase, and numbers',
+      )
     }
   }
 

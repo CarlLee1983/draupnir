@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { MemberSettingsPage } from '../../Member/MemberSettingsPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     ...overrides,
   })
@@ -41,12 +53,23 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
 
 function createMemberContextWithBody(
   body: unknown,
-  overrides: Partial<IHttpContext> = {}
+  overrides: Partial<IHttpContext> = {},
 ): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     getJsonBody: async <T>() => body as T,
     ...overrides,
@@ -90,7 +113,7 @@ describe('MemberSettingsPage', () => {
           Promise.resolve({
             success: true,
             data: { displayName: 'Test User', email: 'member@test.com' },
-          })
+          }),
         ),
       }
 
@@ -111,8 +134,8 @@ describe('MemberSettingsPage', () => {
         execute: mock(() =>
           Promise.resolve({
             success: false,
-            message: '載入個人檔案失敗',
-          })
+            message: 'Failed to load profile',
+          }),
         ),
       }
 
@@ -121,7 +144,7 @@ describe('MemberSettingsPage', () => {
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
       expect(captured.lastCall?.props.profile).toBe(null)
-      expect(captured.lastCall?.props.error).toBe('載入個人檔案失敗')
+      expect(captured.lastCall?.props.error).toBe('Failed to load profile')
     })
   })
 
@@ -147,14 +170,18 @@ describe('MemberSettingsPage', () => {
           Promise.resolve({
             success: true,
             data: { displayName: 'New Name', email: 'member@test.com' },
-          })
+          }),
         ),
       }
       const mockUpdateProfileService = {
         execute: mock(() => Promise.resolve({ success: true })),
       }
 
-      const page = new MemberSettingsPage(inertia, mockGetProfileService as any, mockUpdateProfileService as any)
+      const page = new MemberSettingsPage(
+        inertia,
+        mockGetProfileService as any,
+        mockUpdateProfileService as any,
+      )
       await page.update(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
@@ -172,23 +199,27 @@ describe('MemberSettingsPage', () => {
           Promise.resolve({
             success: true,
             data: { displayName: 'Old Name', email: 'member@test.com' },
-          })
+          }),
         ),
       }
       const mockUpdateProfileService = {
         execute: mock(() =>
           Promise.resolve({
             success: false,
-            message: '名稱過短',
-          })
+            message: 'Name is too short',
+          }),
         ),
       }
 
-      const page = new MemberSettingsPage(inertia, mockGetProfileService as any, mockUpdateProfileService as any)
+      const page = new MemberSettingsPage(
+        inertia,
+        mockGetProfileService as any,
+        mockUpdateProfileService as any,
+      )
       await page.update(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
-      expect(captured.lastCall?.props.formError).toBe('名稱過短')
+      expect(captured.lastCall?.props.formError).toBe('Name is too short')
     })
   })
 })

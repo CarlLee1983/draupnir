@@ -91,12 +91,10 @@ describe('HandleCreditToppedUpService', () => {
     const suspended = mockKey.activate().suspend('CREDIT_DEPLETED', { rpm: 60, tpm: 100000 })
 
     ;(apiKeyRepo.findSuspendedByOrgId as any).mockResolvedValue([suspended])
-    mock.failNext(new (await import('@/Foundation/Infrastructure/Services/LLMGateway')).GatewayError(
-      'Gateway error',
-      'NETWORK',
-      503,
-      true,
-    ))
+    const GatewayErrorClass = (await import('@/Foundation/Infrastructure/Services/LLMGateway'))
+      .GatewayError
+    const error = new GatewayErrorClass('Gateway error', 'NETWORK', 503, true)
+    mock.failNext(error)
 
     const result = await service.execute('org-1')
 

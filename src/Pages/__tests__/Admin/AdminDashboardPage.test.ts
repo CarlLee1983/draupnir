@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminDashboardPage } from '../../Admin/AdminDashboardPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -118,10 +130,14 @@ describe('AdminDashboardPage', () => {
     const ctx = createAdminContext()
     await page.handle(ctx)
 
+    const totals = captured.lastCall?.props.totals as
+      | { users: number; organizations: number; contracts: number }
+      | undefined
+
     expect(captured.lastCall?.component).toBe('Admin/Dashboard/Index')
-    expect(captured.lastCall?.props.totals).toBeDefined()
-    expect(captured.lastCall?.props.totals.users).toBe(10)
-    expect(captured.lastCall?.props.totals.organizations).toBe(5)
-    expect(captured.lastCall?.props.totals.contracts).toBe(3)
+    expect(totals).toBeDefined()
+    expect(totals?.users).toBe(10)
+    expect(totals?.organizations).toBe(5)
+    expect(totals?.contracts).toBe(3)
   })
 })

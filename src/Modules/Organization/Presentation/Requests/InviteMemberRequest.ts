@@ -3,7 +3,7 @@ import { FormRequest, z } from '@gravito/impulse'
 
 export class InviteMemberRequest extends FormRequest {
   schema = z.object({
-    email: z.string().email('電子郵件格式無效'),
+    email: z.string().email('Invalid email address'),
     role: z.string().optional(),
   })
 }

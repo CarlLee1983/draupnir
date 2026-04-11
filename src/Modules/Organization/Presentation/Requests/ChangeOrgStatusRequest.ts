@@ -3,7 +3,9 @@ import { FormRequest, z } from '@gravito/impulse'
 
 export class ChangeOrgStatusRequest extends FormRequest {
   schema = z.object({
-    status: z.enum(['active', 'suspended'], { errorMap: () => ({ message: 'Invalid status value' }) }),
+    status: z.enum(['active', 'suspended'], {
+      errorMap: () => ({ message: 'Invalid status value' }),
+    }),
   })
 }
 

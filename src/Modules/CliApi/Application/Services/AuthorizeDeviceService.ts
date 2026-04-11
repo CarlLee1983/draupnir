@@ -26,9 +26,12 @@ export class AuthorizeDeviceService {
       const authorized = deviceCode.authorize(request.userId, request.email, request.role)
       await this.store.update(authorized)
 
-      return { success: true, message: 'CLI device authorized successfully, return to CLI to complete login' }
+      return {
+        success: true,
+        message: 'CLI device authorized successfully, return to CLI to complete login',
+      }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '授權失敗'
+      const message = error instanceof Error ? error.message : 'Authorization failed'
       return { success: false, message, error: message }
     }
   }

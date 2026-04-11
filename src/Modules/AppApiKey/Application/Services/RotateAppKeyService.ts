@@ -2,7 +2,11 @@ import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyR
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
 import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
-import { AppApiKeyPresenter, type RotateAppKeyRequest, type AppApiKeyCreatedResponse } from '../DTOs/AppApiKeyDTO'
+import {
+  AppApiKeyPresenter,
+  type RotateAppKeyRequest,
+  type AppApiKeyCreatedResponse,
+} from '../DTOs/AppApiKeyDTO'
 
 export class RotateAppKeyService {
   constructor(
@@ -49,7 +53,7 @@ export class RotateAppKeyService {
         data: { ...AppApiKeyPresenter.fromEntity(rotated), rawKey: newRawKey },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '輪換失敗'
+      const message = error instanceof Error ? error.message : 'Rotation failed'
       return { success: false, message, error: message }
     }
   }

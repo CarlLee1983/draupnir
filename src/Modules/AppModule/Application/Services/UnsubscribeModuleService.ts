@@ -21,7 +21,7 @@ export class UnsubscribeModuleService {
       await this.subscriptionRepo.update(cancelled)
 
       await DomainEventDispatcher.getInstance().dispatch(
-        new ModuleAccessRevoked(subscription.id, orgId, moduleId, '使用者取消訂閱'),
+        new ModuleAccessRevoked(subscription.id, orgId, moduleId, 'User unsubscribed'),
       )
 
       return {
@@ -30,7 +30,7 @@ export class UnsubscribeModuleService {
         data: ModuleSubscriptionPresenter.fromEntity(cancelled),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '取消訂閱失敗'
+      const message = error instanceof Error ? error.message : 'Failed to unsubscribe module'
       return { success: false, message, error: message }
     }
   }

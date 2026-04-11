@@ -1,5 +1,6 @@
 import { describe, expect, test, mock } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { InertiaService } from '../../InertiaService'
 import { AdminUserDetailPage } from '../../Admin/AdminUserDetailPage'
 
@@ -30,10 +31,21 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 }
 
 function createAdminContext(): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
   })
 }
@@ -47,14 +59,28 @@ function createMemberContext(): IHttpContext {
   })
 }
 
-function createAdminContextWithBody(body: unknown, overrides: Partial<IHttpContext> = {}): IHttpContext {
+function createAdminContextWithBody(
+  body: unknown,
+  overrides: Partial<IHttpContext> = {},
+): IHttpContext {
+  const store = new Map<string, unknown>()
+  const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
+  store.set('auth', auth)
+  store.set('inertia:shared', {
+    locale: 'en',
+    messages: loadMessages('en'),
+    auth: { user: { id: auth.userId, email: auth.email, role: auth.role } },
+    currentOrgId: null,
+    flash: {},
+  })
+
   return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'admin-1', email: 'admin@test.com', role: 'admin' } as T
-      return undefined
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
     },
     getJsonBody: async <T>() => body as T,
-    getParam: (name: string) => {
+    getParam: (_name: string) => {
       return undefined
     },
     ...overrides,
@@ -116,8 +142,24 @@ describe('AdminUserDetailPage', () => {
 
   test('authenticated admin request renders with correct component (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockGetProfileService = { execute: mock(() => Promise.resolve({ success: true, data: { displayName: 'Test User' } })) }
-    const mockGetUserDetailService = { execute: mock(() => Promise.resolve({ success: true, data: { id: 'user-1', email: 'user@test.com', status: 'active', role: 'member', createdAt: '2026-01-01', updatedAt: '2026-01-01' } })) }
+    const mockGetProfileService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { displayName: 'Test User' } })),
+    }
+    const mockGetUserDetailService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: {
+            id: 'user-1',
+            email: 'user@test.com',
+            status: 'active',
+            role: 'member',
+            createdAt: '2026-01-01',
+            updatedAt: '2026-01-01',
+          },
+        }),
+      ),
+    }
     const mockChangeUserStatusService = { execute: mock(() => Promise.resolve({ success: true })) }
 
     const page = new AdminUserDetailPage(
@@ -129,7 +171,7 @@ describe('AdminUserDetailPage', () => {
     const ctx = createAdminContext()
     const ctxWithId = {
       ...ctx,
-      getParam: (name: string) => name === 'id' ? 'user-1' : undefined,
+      getParam: (name: string) => (name === 'id' ? 'user-1' : undefined),
     }
     await page.handle(ctxWithId as IHttpContext)
 
@@ -149,9 +191,12 @@ describe('AdminUserDetailPage', () => {
       mockGetUserDetailService as any,
       mockChangeUserStatusService as any,
     )
-    const ctx = createAdminContextWithBody({ status: 'suspended' }, {
-      getParam: (name: string) => name === 'id' ? 'user-1' : undefined,
-    })
+    const ctx = createAdminContextWithBody(
+      { status: 'suspended' },
+      {
+        getParam: (name: string) => (name === 'id' ? 'user-1' : undefined),
+      },
+    )
     const response = await page.postStatus(ctx as IHttpContext)
 
     expect(response.status).toBe(302)
@@ -170,9 +215,12 @@ describe('AdminUserDetailPage', () => {
       mockGetUserDetailService as any,
       mockChangeUserStatusService as any,
     )
-    const ctx = createAdminContextWithBody({ status: 'invalid' }, {
-      getParam: (name: string) => name === 'id' ? 'user-1' : undefined,
-    })
+    const ctx = createAdminContextWithBody(
+      { status: 'invalid' },
+      {
+        getParam: (name: string) => (name === 'id' ? 'user-1' : undefined),
+      },
+    )
     const response = await page.postStatus(ctx as IHttpContext)
 
     expect(response.status).toBe(302)

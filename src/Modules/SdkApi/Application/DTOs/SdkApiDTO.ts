@@ -1,4 +1,3 @@
-/** AppAuthMiddleware 認證後注入到 ctx 的上下文 */
 export interface AppAuthContext {
   readonly appKeyId: string
   readonly orgId: string
@@ -7,7 +6,6 @@ export interface AppAuthContext {
   readonly boundModuleIds: readonly string[]
 }
 
-/** ProxyModelCall 請求 */
 export interface ProxyCallRequest {
   readonly model: string
   readonly messages: readonly { role: string; content: string }[]
@@ -17,7 +15,6 @@ export interface ProxyCallRequest {
   readonly [key: string]: unknown
 }
 
-/** ProxyModelCall 回應（透傳 Bifrost 回應） */
 export interface ProxyCallResponse {
   success: boolean
   message?: string
@@ -25,7 +22,6 @@ export interface ProxyCallResponse {
   error?: string
 }
 
-/** QueryUsage 回應 */
 export interface UsageResponse {
   success: boolean
   message: string
@@ -38,7 +34,6 @@ export interface UsageResponse {
   error?: string
 }
 
-/** QueryBalance 回應 */
 export interface BalanceQueryResponse {
   success: boolean
   message: string

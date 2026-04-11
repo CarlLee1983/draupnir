@@ -18,7 +18,7 @@ export class AppKeyScope {
 
   static from(value: string): AppKeyScope {
     if (!AppKeyScopeValues.includes(value as AppKeyScopeType)) {
-      throw new Error('無效的 App Key Scope')
+      throw new Error('Invalid App Key Scope')
     }
     return new AppKeyScope(value as AppKeyScopeType)
   }

@@ -1,23 +1,9 @@
-/**
- * HealthController
- * 健康檢查控制器 (HTTP 處理)
- *
- * 設計原則：
- * - 依賴通過構造函數注入（不訪問容器）
- * - 使用 IHttpContext 而不是 GravitoContext（框架無關）
- * - 純淨的業務邏輯實現
- */
-
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { PerformHealthCheckService } from '../../Application/Services/PerformHealthCheckService'
 
 export class HealthController {
   constructor(private readonly service: PerformHealthCheckService) {}
 
-  /**
-   * GET /health
-   * 執行健康檢查並返回結果
-   */
   async check(ctx: IHttpContext): Promise<Response> {
     try {
       const result = await this.service.execute()
@@ -46,10 +32,6 @@ export class HealthController {
     }
   }
 
-  /**
-   * GET /health/history?limit=10
-   * 獲取健康檢查歷史
-   */
   async history(ctx: IHttpContext): Promise<Response> {
     try {
       const limit = parseInt(ctx.query.limit || '10')

@@ -4,13 +4,13 @@ import { parseOpenAPI, type Operation } from './lib/spec-parser'
 import { buildValidRequest } from './lib/request-builder'
 import { validateSchema } from './lib/schema-validator'
 import { TestClient } from './lib/test-client'
-import { setupTestServer, getBaseURL } from './lib/test-server'
+import { setupTestServerFor, getBaseURL } from './lib/test-server'
 import { ensureAuth, resetAuth } from './lib/auth-helper'
 import { resolveRefs, extractValue } from './lib/jsonpath'
 
 const SPEC_PATH = resolve(import.meta.dir, '../../docs/openapi.yaml')
 
-setupTestServer()
+setupTestServerFor('api-spec')
 
 const spec = parseOpenAPI(SPEC_PATH)
 let client: TestClient

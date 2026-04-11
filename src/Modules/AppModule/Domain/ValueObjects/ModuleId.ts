@@ -12,7 +12,7 @@ export class ModuleId extends ValueObject {
 
   static fromString(id: string): ModuleId {
     if (!id || id.trim().length === 0) {
-      throw new Error('ModuleId 不可為空')
+      throw new Error('ModuleId cannot be empty')
     }
     return new ModuleId(id)
   }

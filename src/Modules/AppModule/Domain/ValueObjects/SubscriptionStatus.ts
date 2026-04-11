@@ -29,7 +29,7 @@ export class SubscriptionStatus extends ValueObject {
   static fromString(value: string): SubscriptionStatus {
     const valid: SubscriptionStatusValue[] = ['active', 'suspended', 'cancelled']
     if (!valid.includes(value as SubscriptionStatusValue)) {
-      throw new Error(`無效的訂閱狀態: ${value}`)
+      throw new Error(`Invalid subscription status: ${value}`)
     }
     return new SubscriptionStatus(value as SubscriptionStatusValue)
   }
@@ -40,7 +40,7 @@ export class SubscriptionStatus extends ValueObject {
 
   transitionTo(target: SubscriptionStatus): SubscriptionStatus {
     if (!this.canTransitionTo(target)) {
-      throw new Error(`無法從 ${this.value} 轉換至 ${target.value}`)
+      throw new Error(`Cannot transition from ${this.value} to ${target.value}`)
     }
     return target
   }

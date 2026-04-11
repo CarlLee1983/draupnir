@@ -27,7 +27,7 @@ export class ProxyModelCall {
         return {
           success: false,
           error: 'MODULE_NOT_ALLOWED',
-          message: 'This App Key is not bound to the ai_chat module',
+          message: 'This app key is not bound to the ai_chat module',
         }
       }
 
@@ -69,7 +69,7 @@ export class ProxyModelCall {
         return {
           success: false,
           error: 'BIFROST_ERROR',
-          message: `Bifrost 回傳 ${response.status}`,
+          message: `Bifrost returned ${response.status}`,
           data: errorBody,
         }
       }
@@ -77,7 +77,7 @@ export class ProxyModelCall {
       const data = await response.json()
       return { success: true, data }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '代理呼叫失敗'
+      const message = error instanceof Error ? error.message : 'Proxy call failed'
       return { success: false, error: 'PROXY_ERROR', message }
     }
   }

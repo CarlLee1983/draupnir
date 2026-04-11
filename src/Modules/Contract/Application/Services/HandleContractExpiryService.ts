@@ -18,7 +18,6 @@ export class HandleContractExpiryService {
     let expiringCount = 0
     let expiredCount = 0
 
-    // 處理即將到期（7天內）的合約
     const expiringContracts = await this.contractRepo.findExpiring(7)
     for (const contract of expiringContracts) {
       await dispatcher.dispatch(
@@ -27,7 +26,6 @@ export class HandleContractExpiryService {
       expiringCount++
     }
 
-    // 處理已到期的合約
     const expiredContracts = await this.contractRepo.findExpired()
     for (const contract of expiredContracts) {
       const expired = contract.expire()

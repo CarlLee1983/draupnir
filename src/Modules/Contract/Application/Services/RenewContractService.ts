@@ -33,11 +33,9 @@ export class RenewContractService {
         return { success: false, message: 'Only ACTIVE contracts can be renewed', error: 'INVALID_STATUS' }
       }
 
-      // 舊合約標記為 EXPIRED
       const expired = oldContract.expire()
       await this.contractRepo.update(expired)
 
-      // 建立新合約並直接啟用
       const newContract = Contract.create({
         targetType: oldContract.targetType,
         targetId: oldContract.targetId,

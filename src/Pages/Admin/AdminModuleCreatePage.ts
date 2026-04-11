@@ -68,7 +68,7 @@ export class AdminModuleCreatePage {
     }
 
     return this.inertia.render(ctx, 'Admin/Modules/Create', {
-      formError: result.message ?? '註冊失敗',
+      formError: result.message ?? 'Registration failed',
     })
   }
 }

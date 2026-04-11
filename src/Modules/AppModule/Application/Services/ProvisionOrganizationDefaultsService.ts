@@ -13,9 +13,6 @@ const DEFAULT_CONTRACT_TERMS = {
   validityPeriod: { startDate: '2020-01-01', endDate: '2099-12-31' },
 }
 
-/**
- * 新組織建立後：確保內建模組存在、建立預設啟用合約、為內建模組建立訂閱。
- */
 export class ProvisionOrganizationDefaultsService {
   constructor(
     private readonly moduleRepo: IAppModuleRepository,

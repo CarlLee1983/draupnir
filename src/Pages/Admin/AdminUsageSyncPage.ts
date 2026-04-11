@@ -36,7 +36,7 @@ export class AdminUsageSyncPage {
 
     return this.inertia.render(ctx, 'Admin/UsageSync/Index', {
       status,
-      message: 'UsageSync 模組尚未啟用（Phase 4 待完成）',
+      message: 'UsageSync module is not enabled yet (Phase 4 pending completion)',
     })
   }
 }

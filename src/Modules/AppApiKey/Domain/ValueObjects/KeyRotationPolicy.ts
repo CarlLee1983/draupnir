@@ -13,17 +13,17 @@ export class KeyRotationPolicy {
 
   static manual(gracePeriodHours = 24): KeyRotationPolicy {
     if (gracePeriodHours < 0) {
-      throw new Error('寬限期時數不能為負數')
+      throw new Error('Grace period hours cannot be negative')
     }
     return new KeyRotationPolicy(false, null, gracePeriodHours)
   }
 
   static auto(rotationIntervalDays: number, gracePeriodHours = 24): KeyRotationPolicy {
     if (rotationIntervalDays <= 0) {
-      throw new Error('輪換間隔天數必須大於 0')
+      throw new Error('Rotation interval days must be greater than 0')
     }
     if (gracePeriodHours < 0) {
-      throw new Error('寬限期時數不能為負數')
+      throw new Error('Grace period hours cannot be negative')
     }
     return new KeyRotationPolicy(true, rotationIntervalDays, gracePeriodHours)
   }

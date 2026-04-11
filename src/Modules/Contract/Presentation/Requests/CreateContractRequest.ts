@@ -5,7 +5,7 @@ import { FormRequest, z } from '@gravito/impulse'
 export class CreateContractRequest extends FormRequest {
   schema = z.object({
     targetType: z.enum(['organization', 'user']),
-    targetId: z.string().min(1, '目標 ID 為必填'),
+    targetId: z.string().min(1, 'Target ID is required'),
     terms: z.object({
       creditQuota: z.number().min(0),
       allowedModules: z.array(z.string()),

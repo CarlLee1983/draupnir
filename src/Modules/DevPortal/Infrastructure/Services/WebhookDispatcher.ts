@@ -56,7 +56,7 @@ export class WebhookDispatcher {
           return {
             success: false,
             statusCode: response.status,
-            error: `Webhook 發送失敗，HTTP ${response.status}，已重試 ${this.maxRetries} 次`,
+            error: `Webhook dispatch failed, HTTP ${response.status}, retried ${this.maxRetries} times`,
             attempts: attempt,
           }
         }
@@ -64,10 +64,10 @@ export class WebhookDispatcher {
         if (attempt < this.maxRetries) {
           await this.delay(attempt)
         } else {
-          const message = error instanceof Error ? error.message : '未知錯誤'
+          const message = error instanceof Error ? error.message : 'Unknown error'
           return {
             success: false,
-            error: `Webhook 發送失敗: ${message}，已重試 ${this.maxRetries} 次`,
+            error: `Webhook dispatch failed: ${message}, retried ${this.maxRetries} times`,
             attempts: attempt,
           }
         }
@@ -76,7 +76,7 @@ export class WebhookDispatcher {
 
     return {
       success: false,
-      error: '超過最大重試次數',
+      error: 'Exceeded maximum retry attempts',
       attempts: this.maxRetries,
     }
   }

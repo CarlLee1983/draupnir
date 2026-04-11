@@ -113,7 +113,7 @@ export class ExchangeDeviceCodeService {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Token 交換失敗'
+      const message = error instanceof Error ? error.message : 'Token exchange failed'
       return { success: false, message, error: message }
     }
   }
