@@ -123,7 +123,7 @@
   3. The PDF output contains the correct cost total and at least one trend chart
 **Plans**: 2 plans
 Plans:
-- [ ] 12-01-PLAN.md — GetKpiSummaryService prior-period extension + DTO update (TDD)
+- [x] 12-01-PLAN.md — GetKpiSummaryService prior-period extension + DTO update (TDD)
 - [ ] 12-02-PLAN.md — Frontend KPI badges, Download Report button, print:hidden layout
 **UI hint**: yes
 
@@ -144,4 +144,4 @@ Plans:
 | 9. Cached Sync Infrastructure | v1.2 | 5/5 | Complete | 2026-04-11 |
 | 10. P1 Chart UI | v1.2 | 1/1 | Complete    | 2026-04-11 |
 | 11. Resilience & UX Polish | v1.2 | 0/3 | Complete    | 2026-04-11 |
-| 12. Differentiators | v1.2 | 0/? | Not started | - |
+| 12. Differentiators | v1.2 | 1/2 | In Progress|  |
