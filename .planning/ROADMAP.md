@@ -77,11 +77,11 @@
   3. A chart service query against `usage_records` returns in under 100ms
   4. Sync failures are logged and surfaced; the dashboard continues to serve stale data without crashing
 **Plans**: 5 plans
-- [ ] 09-01-PLAN.md — Schema migration + LogEntry.logId + ApiKeyRepository.findByBifrostVirtualKeyId (Wave 1)
-- [ ] 09-02-PLAN.md — Application ports: IUsageRepository, ISyncCursorRepository, UsageLogDTO (Wave 1)
-- [ ] 09-03-PLAN.md — Infrastructure repositories: DrizzleUsageRepository + DrizzleSyncCursorRepository (Wave 2)
-- [ ] 09-04-PLAN.md — BifrostSyncService implementation + unit tests (Wave 2)
-- [ ] 09-05-PLAN.md — DI wiring (DashboardServiceProvider) + bootstrap scheduler (Wave 3)
+- [x] 09-01-PLAN.md — Schema migration + LogEntry.logId + ApiKeyRepository.findByBifrostVirtualKeyId (Wave 1)
+- [x] 09-02-PLAN.md — Application ports: IUsageRepository, ISyncCursorRepository, UsageLogDTO (Wave 1)
+- [x] 09-03-PLAN.md — Infrastructure repositories: DrizzleUsageRepository + DrizzleSyncCursorRepository (Wave 2)
+- [x] 09-04-PLAN.md — BifrostSyncService implementation + unit tests (Wave 2)
+- [x] 09-05-PLAN.md — DI wiring (DashboardServiceProvider) + bootstrap scheduler (Wave 3)
 
 ### Phase 10: P1 Chart UI
 **Goal**: Users can view the full dashboard — KPI summary cards, cost trend, model comparison bar chart, token usage stacked chart, and model comparison table — all wired to live local data
