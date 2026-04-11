@@ -12,6 +12,7 @@ import { GoogleOAuthCallbackPage } from '../../Auth/GoogleOAuthCallbackPage'
 import { LoginPage } from '../../Auth/LoginPage'
 import { RegisterPage } from '../../Auth/RegisterPage'
 import { ResetPasswordPage } from '../../Auth/ResetPasswordPage'
+import { VerifyDevicePage } from '../../Auth/VerifyDevicePage'
 
 import { AUTH_PAGE_KEYS } from './authPageKeys'
 
@@ -41,5 +42,10 @@ export function registerAuthPageBindings(container: IContainer): void {
   container.singleton(
     k.googleOAuthCallback,
     (c) => new GoogleOAuthCallbackPage(c.make('googleOAuthService') as GoogleOAuthService),
+  )
+
+  container.singleton(
+    k.verifyDevice,
+    (c) => new VerifyDevicePage(c.make(i) as InertiaService),
   )
 }

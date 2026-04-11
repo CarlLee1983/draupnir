@@ -14,6 +14,7 @@ type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 type AuthPageInstance = {
   handle(ctx: IHttpContext): Promise<Response>
   store?(ctx: IHttpContext): Promise<Response>
+  authorize?(ctx: IHttpContext): Promise<Response>
 }
 
 type AuthRouteDef = {
@@ -63,6 +64,18 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     path: '/oauth/google/callback',
     page: AUTH_PAGE_KEYS.googleOAuthCallback,
     action: 'handle',
+  },
+  {
+    method: 'get',
+    path: '/verify-device',
+    page: AUTH_PAGE_KEYS.verifyDevice,
+    action: 'handle',
+  },
+  {
+    method: 'post',
+    path: '/verify-device',
+    page: AUTH_PAGE_KEYS.verifyDevice,
+    action: 'authorize',
   },
 ]
 
