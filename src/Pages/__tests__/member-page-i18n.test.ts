@@ -3,40 +3,6 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { MemberDashboardPage } from '../Member/MemberDashboardPage'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
 
-function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
-  const store = new Map<string, unknown>()
-  // 預先注入 inertia:shared（模擬 SharedDataMiddleware 已執行）
-  store.set('inertia:shared', {
-    locale: 'en',
-    messages: loadMessages('en'),
-    auth: { user: null },
-    currentOrgId: null,
-    flash: {},
-  })
-  return {
-    getBodyText: async () => '',
-    getJsonBody: async <T>() => ({}) as T,
-    getBody: async <T>() => ({}) as T,
-    getHeader: () => undefined,
-    getParam: () => undefined,
-    getPathname: () => '/member/dashboard',
-    getQuery: () => undefined,
-    params: {},
-    query: {},
-    headers: {},
-    json: (data: unknown, statusCode?: number) =>
-      Response.json(data, { status: statusCode ?? 200 }),
-    text: (content: string, statusCode?: number) =>
-      new Response(content, { status: statusCode ?? 200 }),
-    redirect: (url: string, statusCode?: number) => Response.redirect(url, statusCode ?? 302),
-    get: <T>(key: string) => store.get(key) as T | undefined,
-    set: (key: string, value: unknown) => {
-      store.set(key, value)
-    },
-    ...overrides,
-  }
-}
-
 describe('MemberDashboardPage i18n', () => {
   test('returns localized message when orgId is missing', async () => {
     // 建立一個帶有 auth 的 mock context（模擬已登入的 member）

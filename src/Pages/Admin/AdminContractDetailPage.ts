@@ -25,11 +25,18 @@ export class AdminContractDetailPage {
     if (!check.ok) return check.response!
 
     const auth = check.auth!
+
+    const shared = ctx.get('inertia:shared') as {
+      locale: 'zh-TW' | 'en'
+      messages: Record<string, string>
+    } | undefined
+    const messages = shared?.messages ?? {}
+
     const contractId = ctx.getParam('id')
     if (!contractId) {
       return this.inertia.render(ctx, 'Admin/Contracts/Show', {
         contract: null,
-        error: '缺少 contract id',
+        error: messages['admin.contracts.missingId'],
       })
     }
 

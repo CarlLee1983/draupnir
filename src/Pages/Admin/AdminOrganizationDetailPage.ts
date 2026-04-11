@@ -23,12 +23,18 @@ export class AdminOrganizationDetailPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
+    const shared = ctx.get('inertia:shared') as {
+      locale: 'zh-TW' | 'en'
+      messages: Record<string, string>
+    } | undefined
+    const messages = shared?.messages ?? {}
+
     const orgId = ctx.getParam('id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Admin/Organizations/Show', {
         organization: null,
         members: [],
-        error: '缺少 org id',
+        error: messages['admin.organizations.missingId'],
       })
     }
 

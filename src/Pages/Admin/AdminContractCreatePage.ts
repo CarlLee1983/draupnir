@@ -35,6 +35,12 @@ export class AdminContractCreatePage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
+    const shared = ctx.get('inertia:shared') as {
+      locale: 'zh-TW' | 'en'
+      messages: Record<string, string>
+    } | undefined
+    const messages = shared?.messages ?? {}
+
     const body = await ctx.getJsonBody<{
       targetType?: string
       targetId?: string
@@ -58,7 +64,7 @@ export class AdminContractCreatePage {
       !terms.allowedModules?.length
     ) {
       return this.inertia.render(ctx, 'Admin/Contracts/Create', {
-        formError: '請填寫完整欄位（含目標與條款）',
+        formError: messages['admin.contracts.validationFailed'],
       })
     }
 
@@ -87,7 +93,7 @@ export class AdminContractCreatePage {
     }
 
     return this.inertia.render(ctx, 'Admin/Contracts/Create', {
-      formError: result.message ?? '建立失敗',
+      formError: result.message ?? messages['admin.contracts.createFailed'],
     })
   }
 }

@@ -23,10 +23,12 @@ export function requireAdmin(ctx: IHttpContext): AdminAuthResult {
   }
 
   if (auth.role !== 'admin') {
+    const shared = ctx.get('inertia:shared') as { messages?: Record<string, string> } | undefined
+    const t = (key: string) => shared?.messages?.[key] ?? key
     return {
       ok: false,
       response: new Response(
-        '<html><body><h1>403 Forbidden</h1><p>需要管理員權限</p></body></html>',
+        '<html><body><h1>403 Forbidden</h1><p>' + t('auth.forbidden.adminOnly') + '</p></body></html>',
         { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
       ),
     }

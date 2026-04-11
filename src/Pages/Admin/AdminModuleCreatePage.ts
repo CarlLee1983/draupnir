@@ -40,13 +40,19 @@ export class AdminModuleCreatePage {
       type?: string
     }>()
 
+    const shared = ctx.get('inertia:shared') as {
+      locale: 'zh-TW' | 'en'
+      messages: Record<string, string>
+    } | undefined
+    const messages = shared?.messages ?? {}
+
     const name = typeof body.name === 'string' ? body.name.trim() : ''
     const description = typeof body.description === 'string' ? body.description.trim() : ''
     const typeRaw = body.type === 'paid' ? 'paid' : 'free'
 
     if (!name) {
       return this.inertia.render(ctx, 'Admin/Modules/Create', {
-        formError: '模組識別名稱為必填',
+        formError: messages['admin.modules.nameRequired'],
       })
     }
 
