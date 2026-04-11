@@ -46,7 +46,7 @@
     "make:controller": "bun gravito make:controller",
     "make:middleware": "bun gravito make:middleware",
     "make:command": "bun gravito make:command",
-    "route:list": "bun gravito route:list",
+    "route:list": "bun gravito route:list --entry src/gravito-cli-entry.ts",
     "tinker": "bun gravito tinker",
     "generate:types": "bun orbit generate:types",
     "dev:frontend": "vite",

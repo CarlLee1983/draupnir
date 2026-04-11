@@ -55,6 +55,6 @@ export function registerHealthWithGravito(core: PlanetCore): void {
   const router = createGravitoModuleRouter(core)
 
   // Register routes via IModuleRouter
-  router.get('/health', (ctx) => controller.check(ctx))
-  router.get('/health/history', (ctx) => controller.history(ctx))
+  router.get('/health', (ctx) => controller.check(ctx), { name: 'health.check' })
+  router.get('/health/history', (ctx) => controller.history(ctx), { name: 'health.history' })
 }

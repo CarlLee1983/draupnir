@@ -1,7 +1,11 @@
-import type { PlanetCore } from '@gravito/core'
-import type { FormRequestClass } from '@gravito/core'
+import type { FormRequestClass, PlanetCore } from '@gravito/core'
 import { fromGravitoContext } from '@/Shared/Presentation/IHttpContext'
-import type { IModuleRouter, RouteHandler, Middleware } from '@/Shared/Presentation/IModuleRouter'
+import type {
+  IModuleRouter,
+  Middleware,
+  ModuleRouteOptions,
+  RouteHandler,
+} from '@/Shared/Presentation/IModuleRouter'
 
 const FORM_REQUEST_SYMBOL = Symbol.for('gravito.formRequest')
 
@@ -10,6 +14,31 @@ function isFormRequestClass(value: unknown): value is FormRequestClass {
   if ((value as any)[FORM_REQUEST_SYMBOL] === true) return true
   if (value.prototype && typeof value.prototype.validate === 'function') return true
   return false
+}
+
+function isModuleRouteOptions(value: unknown): value is ModuleRouteOptions {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+  if (isFormRequestClass(value)) {
+    return false
+  }
+  const o = value as Record<string, unknown>
+  const keys = Object.keys(o)
+  if (keys.length === 0) {
+    return true
+  }
+  return keys.every((k) => k === 'name') && (o.name === undefined || typeof o.name === 'string')
+}
+
+function applyRouteName(route: unknown, options?: ModuleRouteOptions): void {
+  if (!options?.name || route === null || route === undefined) {
+    return
+  }
+  const r = route as { name?: (n: string) => unknown }
+  if (typeof r.name === 'function') {
+    r.name(options.name)
+  }
 }
 
 function runPipeline(middlewares: Middleware[], handler: RouteHandler): RouteHandler {
@@ -33,40 +62,44 @@ export function createGravitoModuleRouter(core: PlanetCore, prefix = ''): IModul
   function register(method: 'get' | 'post' | 'put' | 'patch' | 'delete') {
     return (path: string, ...args: unknown[]) => {
       const fullPath = prefix + path
-      const handler = args[args.length - 1] as RouteHandler
+      const raw = [...args]
+      let options: ModuleRouteOptions | undefined
+      if (raw.length > 0 && isModuleRouteOptions(raw[raw.length - 1])) {
+        options = raw.pop() as ModuleRouteOptions
+      }
+
+      const handler = raw[raw.length - 1] as RouteHandler
       const wrapped = wrapHandler(handler)
 
-      // (path, FormRequest, handler)
-      if (args.length === 2 && isFormRequestClass(args[0])) {
-        core.router[method](fullPath, args[0] as FormRequestClass, wrapped)
+      if (raw.length === 2 && isFormRequestClass(raw[0])) {
+        const route = core.router[method](fullPath, raw[0] as FormRequestClass, wrapped)
+        applyRouteName(route, options)
         return
       }
 
-      // (path, middlewares[], FormRequest, handler)
-      if (args.length === 3 && Array.isArray(args[0]) && isFormRequestClass(args[1])) {
-        const middlewares = args[0] as Middleware[]
-        const formRequest = args[1] as FormRequestClass
+      if (raw.length === 3 && Array.isArray(raw[0]) && isFormRequestClass(raw[1])) {
+        const middlewares = raw[0] as Middleware[]
+        const formRequest = raw[1] as FormRequestClass
         const pipeline = runPipeline(
           middlewares,
           (ctx) =>
             new Promise((resolve) => {
-              // Pass the request that has already passed through middlewares to core.router to handle FormRequest
-              // Use pipeline wrapper to ensure middlewares execute first
               resolve(handler(ctx))
             }),
         )
-        // Run the middleware pipeline first, then let the core handle FormRequest
-        core.router[method](fullPath, formRequest, (ctx: any) => pipeline(fromGravitoContext(ctx)))
+        const route = core.router[method](fullPath, formRequest, (ctx: any) =>
+          pipeline(fromGravitoContext(ctx)),
+        )
+        applyRouteName(route, options)
         return
       }
 
-      // (path, handler) or (path, middlewares[], handler) — Existing logic
-      const middlewares = args.length > 1 ? (args[0] as Middleware[]) : []
+      const middlewares = raw.length > 1 ? (raw[0] as Middleware[]) : []
       const pipeline = runPipeline(middlewares, handler)
-      core.router[method](fullPath, (ctx: any) => pipeline(fromGravitoContext(ctx)))
+      const route = core.router[method](fullPath, (ctx: any) => pipeline(fromGravitoContext(ctx)))
+      applyRouteName(route, options)
     }
   }
-
 
   return {
     get: register('get') as IModuleRouter['get'],
@@ -74,17 +107,21 @@ export function createGravitoModuleRouter(core: PlanetCore, prefix = ''): IModul
     put: register('put') as IModuleRouter['put'],
     patch: register('patch') as IModuleRouter['patch'],
     delete: register('delete') as IModuleRouter['delete'],
-    head: (path, handler) => {
-      core.router.get(prefix + path, (ctx: any) => handler(fromGravitoContext(ctx)))
+    head: (path, handler, options) => {
+      const fullPath = prefix + path
+      const route = core.router.get(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
+      applyRouteName(route, options)
     },
-    options: (path, handler) => {
+    options: (path, handler, options) => {
       const fullPath = prefix + path
       const r = core.router as any
+      let route: unknown
       if (r.options && typeof r.options === 'function') {
-        r.options(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
+        route = r.options(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
       } else {
-        r.get(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
+        route = r.get(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
       }
+      applyRouteName(route, options)
     },
     group(groupPrefix, fn) {
       fn(createGravitoModuleRouter(core, prefix + groupPrefix))

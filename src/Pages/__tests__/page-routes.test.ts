@@ -92,10 +92,10 @@ describe('registerPageRoutes consolidation', () => {
     // 3. Error includes which registration failed
 
     const registrations = [
-      { label: 'Auth Inertia page', register: () => {} },
-      { label: 'Admin Inertia page', register: () => {} },
-      { label: 'Member Inertia page', register: () => {} },
-      { label: 'Static page assets', register: () => {} },
+      { label: 'Auth Inertia page', register: (_r: IModuleRouter, _c: IContainer) => {} },
+      { label: 'Admin Inertia page', register: (_r: IModuleRouter, _c: IContainer) => {} },
+      { label: 'Member Inertia page', register: (_r: IModuleRouter, _c: IContainer) => {} },
+      { label: 'Static page assets', register: (_r: IModuleRouter, _c: IContainer) => {} },
     ]
 
     let executionCount = 0
@@ -116,10 +116,15 @@ describe('registerPageRoutes consolidation', () => {
     // This is critical for debugging (e.g., "Admin Inertia page routes" failed, not "auth")
 
     const registrations = [
-      { label: 'Auth Inertia page', register: () => {} },
-      { label: 'Admin Inertia page', register: () => { throw new Error('Simulated failure') } },
-      { label: 'Member Inertia page', register: () => {} },
-      { label: 'Static page assets', register: () => {} },
+      { label: 'Auth Inertia page', register: (_r: IModuleRouter, _c: IContainer) => {} },
+      {
+        label: 'Admin Inertia page',
+        register: (_r: IModuleRouter, _c: IContainer) => {
+          throw new Error('Simulated failure')
+        },
+      },
+      { label: 'Member Inertia page', register: (_r: IModuleRouter, _c: IContainer) => {} },
+      { label: 'Static page assets', register: (_r: IModuleRouter, _c: IContainer) => {} },
     ]
 
     let failedLabel = ''

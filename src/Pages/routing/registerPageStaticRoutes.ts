@@ -28,26 +28,30 @@ export function registerPageStaticRoutes(router: Pick<IModuleRouter, 'get'>): vo
 
   const staticDir = joinPath(process.cwd(), 'public')
 
-  router.get('/build/*', async (ctx: IHttpContext) => {
-    const pathname = safeDecodePathname(ctx.getPathname())
-    if (!pathname.startsWith('/build/')) {
-      return new Response('Not Found', { status: 404 })
-    }
-    const relative = pathname.replace(/^\/+/, '')
-    const filePath = joinPath(staticDir, relative)
-    const normalizedStatic = normalizePath(staticDir)
-    const normalizedFilePath = normalizePath(filePath)
-    if (!normalizedFilePath.startsWith(normalizedStatic)) {
-      return new Response('Forbidden', { status: 403 })
-    }
-    try {
-      const file = Bun.file(filePath)
-      if (await file.exists()) {
-        return new Response(file)
+  router.get(
+    '/build/*',
+    async (ctx: IHttpContext) => {
+      const pathname = safeDecodePathname(ctx.getPathname())
+      if (!pathname.startsWith('/build/')) {
+        return new Response('Not Found', { status: 404 })
       }
-    } catch {
-      /* ignore */
-    }
-    return new Response('Not Found', { status: 404 })
-  })
+      const relative = pathname.replace(/^\/+/, '')
+      const filePath = joinPath(staticDir, relative)
+      const normalizedStatic = normalizePath(staticDir)
+      const normalizedFilePath = normalizePath(filePath)
+      if (!normalizedFilePath.startsWith(normalizedStatic)) {
+        return new Response('Forbidden', { status: 403 })
+      }
+      try {
+        const file = Bun.file(filePath)
+        if (await file.exists()) {
+          return new Response(file)
+        }
+      } catch {
+        /* ignore */
+      }
+      return new Response('Not Found', { status: 404 })
+    },
+    { name: 'assets.vite.build' },
+  )
 }

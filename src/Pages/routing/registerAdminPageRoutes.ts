@@ -6,7 +6,11 @@
  */
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { IModuleRouter, RouteHandler } from '@/Shared/Presentation/IModuleRouter'
+import type {
+  IModuleRouter,
+  ModuleRouteOptions,
+  RouteHandler,
+} from '@/Shared/Presentation/IModuleRouter'
 
 import type { AdminPageBindingKey } from './admin/adminPageKeys'
 import { ADMIN_PAGE_KEYS } from './admin/adminPageKeys'
@@ -22,6 +26,8 @@ type AdminRouteDef = {
   readonly page: AdminPageBindingKey
   /** Instance method name on the page class. */
   readonly action: keyof AdminPageInstance & string
+  /** Optional named route for URL generation / `route:list` (framework-agnostic). */
+  readonly name?: string
 }
 
 /** Minimal shape for `bindPageAction` typing; each admin page exposes these method names. */
@@ -37,71 +43,117 @@ type AdminPageInstance = {
  * Order matters: static paths before `/:id` segments.
  */
 const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
-  { method: 'get', path: '/admin/dashboard', page: ADMIN_PAGE_KEYS.dashboard, action: 'handle' },
-  { method: 'get', path: '/admin/users', page: ADMIN_PAGE_KEYS.users, action: 'handle' },
-  { method: 'get', path: '/admin/users/:id', page: ADMIN_PAGE_KEYS.userDetail, action: 'handle' },
+  {
+    method: 'get',
+    path: '/admin/dashboard',
+    page: ADMIN_PAGE_KEYS.dashboard,
+    action: 'handle',
+    name: 'pages.admin.dashboard',
+  },
+  {
+    method: 'get',
+    path: '/admin/users',
+    page: ADMIN_PAGE_KEYS.users,
+    action: 'handle',
+    name: 'pages.admin.users.index',
+  },
+  {
+    method: 'get',
+    path: '/admin/users/:id',
+    page: ADMIN_PAGE_KEYS.userDetail,
+    action: 'handle',
+    name: 'pages.admin.users.show',
+  },
   {
     method: 'post',
     path: '/admin/users/:id/status',
     page: ADMIN_PAGE_KEYS.userDetail,
     action: 'postStatus',
+    name: 'pages.admin.users.status',
   },
   {
     method: 'get',
     path: '/admin/organizations',
     page: ADMIN_PAGE_KEYS.organizations,
     action: 'handle',
+    name: 'pages.admin.organizations.index',
   },
   {
     method: 'get',
     path: '/admin/organizations/:id',
     page: ADMIN_PAGE_KEYS.organizationDetail,
     action: 'handle',
+    name: 'pages.admin.organizations.show',
   },
-  { method: 'get', path: '/admin/contracts', page: ADMIN_PAGE_KEYS.contracts, action: 'handle' },
+  {
+    method: 'get',
+    path: '/admin/contracts',
+    page: ADMIN_PAGE_KEYS.contracts,
+    action: 'handle',
+    name: 'pages.admin.contracts.index',
+  },
   {
     method: 'get',
     path: '/admin/contracts/create',
     page: ADMIN_PAGE_KEYS.contractCreate,
     action: 'handle',
+    name: 'pages.admin.contracts.create',
   },
   {
     method: 'post',
     path: '/admin/contracts',
     page: ADMIN_PAGE_KEYS.contractCreate,
     action: 'store',
+    name: 'pages.admin.contracts.store',
   },
   {
     method: 'get',
     path: '/admin/contracts/:id',
     page: ADMIN_PAGE_KEYS.contractDetail,
     action: 'handle',
+    name: 'pages.admin.contracts.show',
   },
   {
     method: 'post',
     path: '/admin/contracts/:id/action',
     page: ADMIN_PAGE_KEYS.contractDetail,
     action: 'postAction',
+    name: 'pages.admin.contracts.action',
   },
-  { method: 'get', path: '/admin/modules', page: ADMIN_PAGE_KEYS.modules, action: 'handle' },
+  {
+    method: 'get',
+    path: '/admin/modules',
+    page: ADMIN_PAGE_KEYS.modules,
+    action: 'handle',
+    name: 'pages.admin.modules.index',
+  },
   {
     method: 'get',
     path: '/admin/modules/create',
     page: ADMIN_PAGE_KEYS.moduleCreate,
     action: 'handle',
+    name: 'pages.admin.modules.create',
   },
   {
     method: 'post',
     path: '/admin/modules',
     page: ADMIN_PAGE_KEYS.moduleCreate,
     action: 'store',
+    name: 'pages.admin.modules.store',
   },
-  { method: 'get', path: '/admin/api-keys', page: ADMIN_PAGE_KEYS.apiKeys, action: 'handle' },
+  {
+    method: 'get',
+    path: '/admin/api-keys',
+    page: ADMIN_PAGE_KEYS.apiKeys,
+    action: 'handle',
+    name: 'pages.admin.apiKeys',
+  },
   {
     method: 'get',
     path: '/admin/usage-sync',
     page: ADMIN_PAGE_KEYS.usageSync,
     action: 'handle',
+    name: 'pages.admin.usageSync',
   },
 ]
 
@@ -110,11 +162,12 @@ function registerAdminHttpRoute(
   method: 'get' | 'post',
   path: string,
   handler: RouteHandler,
+  routeOptions?: ModuleRouteOptions,
 ): void {
   if (method === 'get') {
-    router.get(path, handler)
+    router.get(path, handler, routeOptions)
   } else {
-    router.post(path, handler)
+    router.post(path, handler, routeOptions)
   }
 }
 
@@ -128,8 +181,9 @@ export function registerAdminPageRoutes(
   router: Pick<IModuleRouter, 'get' | 'post'>,
   container: IContainer,
 ): void {
-  for (const { method, path, page, action } of ADMIN_PAGE_ROUTES) {
+  for (const { method, path, page, action, name } of ADMIN_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
-    registerAdminHttpRoute(router, method, path, withInertiaPageHandler(inner))
+    const opts = name !== undefined ? { name } : undefined
+    registerAdminHttpRoute(router, method, path, withInertiaPageHandler(inner), opts)
   }
 }

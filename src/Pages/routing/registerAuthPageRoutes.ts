@@ -1,16 +1,20 @@
 /**
  * Declarative auth Inertia routes.
  */
-import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { IModuleRouter, RouteHandler } from '@/Shared/Presentation/IModuleRouter'
-import type { FormRequestClass } from '@gravito/core'
 
+import type { FormRequestClass } from '@gravito/core'
 import { ForgotPasswordRequest } from '@/Modules/Auth/Presentation/Requests/ForgotPasswordRequest'
 import { LoginRequest } from '@/Modules/Auth/Presentation/Requests/LoginRequest'
 import { RegisterRequest } from '@/Modules/Auth/Presentation/Requests/RegisterRequest'
 import { ResetPasswordRequest } from '@/Modules/Auth/Presentation/Requests/ResetPasswordRequest'
 import { VerifyDeviceRequest } from '@/Modules/Auth/Presentation/Requests/VerifyDeviceRequest'
+import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type {
+  IModuleRouter,
+  ModuleRouteOptions,
+  RouteHandler,
+} from '@/Shared/Presentation/IModuleRouter'
 
 import { AUTH_PAGE_KEYS } from './auth/authPageKeys'
 import { bindPageAction } from './bindPageAction'
@@ -30,30 +34,46 @@ type AuthRouteDef = {
   readonly page: (typeof AUTH_PAGE_KEYS)[keyof typeof AUTH_PAGE_KEYS]
   readonly action: keyof AuthPageInstance & string
   readonly formRequest?: FormRequestClass
+  readonly name?: string
 }
 
 const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
-  { method: 'get', path: '/login', page: AUTH_PAGE_KEYS.login, action: 'handle' },
+  {
+    method: 'get',
+    path: '/login',
+    page: AUTH_PAGE_KEYS.login,
+    action: 'handle',
+    name: 'pages.auth.login',
+  },
   {
     method: 'post',
     path: '/login',
     page: AUTH_PAGE_KEYS.login,
     action: 'store',
     formRequest: LoginRequest,
+    name: 'pages.auth.login.submit',
   },
-  { method: 'get', path: '/register', page: AUTH_PAGE_KEYS.register, action: 'handle' },
+  {
+    method: 'get',
+    path: '/register',
+    page: AUTH_PAGE_KEYS.register,
+    action: 'handle',
+    name: 'pages.auth.register',
+  },
   {
     method: 'post',
     path: '/register',
     page: AUTH_PAGE_KEYS.register,
     action: 'store',
     formRequest: RegisterRequest,
+    name: 'pages.auth.register.submit',
   },
   {
     method: 'get',
     path: '/forgot-password',
     page: AUTH_PAGE_KEYS.forgotPassword,
     action: 'handle',
+    name: 'pages.auth.password.request',
   },
   {
     method: 'post',
@@ -61,12 +81,14 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     page: AUTH_PAGE_KEYS.forgotPassword,
     action: 'store',
     formRequest: ForgotPasswordRequest,
+    name: 'pages.auth.password.email',
   },
   {
     method: 'get',
     path: '/reset-password/:token',
     page: AUTH_PAGE_KEYS.resetPassword,
     action: 'handle',
+    name: 'pages.auth.password.reset',
   },
   {
     method: 'post',
@@ -74,24 +96,28 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     page: AUTH_PAGE_KEYS.resetPassword,
     action: 'store',
     formRequest: ResetPasswordRequest,
+    name: 'pages.auth.password.update',
   },
   {
     method: 'get',
     path: '/verify-email/:token',
     page: AUTH_PAGE_KEYS.emailVerification,
     action: 'handle',
+    name: 'pages.auth.verifyEmail',
   },
   {
     method: 'get',
     path: '/oauth/google/callback',
     page: AUTH_PAGE_KEYS.googleOAuthCallback,
     action: 'handle',
+    name: 'pages.auth.oauth.google.callback',
   },
   {
     method: 'get',
     path: '/verify-device',
     page: AUTH_PAGE_KEYS.verifyDevice,
     action: 'handle',
+    name: 'pages.auth.device.verify',
   },
   {
     method: 'post',
@@ -99,6 +125,7 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     page: AUTH_PAGE_KEYS.verifyDevice,
     action: 'authorize',
     formRequest: VerifyDeviceRequest,
+    name: 'pages.auth.device.authorize',
   },
 ]
 
@@ -108,13 +135,14 @@ function registerAuthHttpRoute(
   path: string,
   handler: RouteHandler,
   formRequest?: FormRequestClass,
+  routeOptions?: ModuleRouteOptions,
 ): void {
   if (method === 'get') {
-    router.get(path, handler)
+    router.get(path, handler, routeOptions)
   } else if (formRequest) {
-    router.post(path, formRequest, handler)
+    router.post(path, formRequest, handler, routeOptions)
   } else {
-    router.post(path, handler)
+    router.post(path, handler, routeOptions)
   }
 }
 
@@ -125,8 +153,9 @@ export function registerAuthPageRoutes(
   router: Pick<IModuleRouter, 'get' | 'post'>,
   container: IContainer,
 ): void {
-  for (const { method, path, page, action, formRequest } of AUTH_PAGE_ROUTES) {
+  for (const { method, path, page, action, formRequest, name } of AUTH_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
-    registerAuthHttpRoute(router, method, path, withInertiaPageHandler(inner), formRequest)
+    const opts = name !== undefined ? { name } : undefined
+    registerAuthHttpRoute(router, method, path, withInertiaPageHandler(inner), formRequest, opts)
   }
 }

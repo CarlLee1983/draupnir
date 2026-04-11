@@ -20,13 +20,18 @@ import {
 } from './wiring'
 
 export async function registerRoutes(core: PlanetCore) {
-  core.router.get('/api', async (ctx) => {
-    return ctx.json({
-      success: true,
-      message: 'Draupnir API',
-      version: '0.1.0',
-    })
-  })
+  const web = createGravitoModuleRouter(core)
+  web.get(
+    '/api',
+    async (ctx) => {
+      return ctx.json({
+        success: true,
+        message: 'Draupnir API',
+        version: '0.1.0',
+      })
+    },
+    { name: 'api.root' },
+  )
 
   registerHealth(core)
   registerAuth(core)
@@ -42,6 +47,6 @@ export async function registerRoutes(core: PlanetCore) {
   registerSdkApi(core)
   registerCliApi(core)
   await registerDocs(core)
-  registerPageRoutes(createGravitoModuleRouter(core), core.container as IContainer)
+  registerPageRoutes(web, core.container as IContainer)
   console.log('✅ Routes registered')
 }
