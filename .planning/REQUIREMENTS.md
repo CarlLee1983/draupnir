@@ -65,28 +65,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ALRT-01 | — | Pending |
-| ALRT-02 | — | Pending |
-| ALRT-03 | — | Pending |
-| ALRT-04 | — | Pending |
-| ALRT-05 | — | Pending |
-| ALRT-06 | — | Pending |
-| ALRT-07 | — | Pending |
-| ALRT-08 | — | Pending |
-| COST-01 | — | Pending |
-| COST-02 | — | Pending |
-| COST-03 | — | Pending |
-| COST-04 | — | Pending |
-| REPT-01 | — | Pending |
-| REPT-02 | — | Pending |
-| REPT-03 | — | Pending |
-| REPT-04 | — | Pending |
+| ALRT-01 | Phase 13 | Pending |
+| ALRT-02 | Phase 13 | Pending |
+| ALRT-03 | Phase 13 | Pending |
+| ALRT-04 | Phase 13 | Pending |
+| ALRT-05 | Phase 13 | Pending |
+| ALRT-06 | Phase 15 | Pending |
+| ALRT-07 | Phase 15 | Pending |
+| ALRT-08 | Phase 15 | Pending |
+| COST-01 | Phase 14 | Pending |
+| COST-02 | Phase 14 | Pending |
+| COST-03 | Phase 14 | Pending |
+| COST-04 | Phase 14 | Pending |
+| REPT-01 | Phase 16 | Pending |
+| REPT-02 | Phase 16 | Pending |
+| REPT-03 | Phase 16 | Pending |
+| REPT-04 | Phase 16 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-12*
-*Last updated: 2026-04-12 after initial definition*
+*Last updated: 2026-04-12 after roadmap creation*
