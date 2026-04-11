@@ -46,7 +46,7 @@
 ### Phases
 
 - [x] **Phase 8: Data Correctness & Permission Foundation** ✅ - Fix 3 prerequisite bugs: hardcoded data, field mismatch, role-scoped permissions (completed 2026-04-11)
-- [ ] **Phase 9: Cached Sync Infrastructure** - BifrostSyncService + usage_records SQLite schema enabling local 5-50ms reads
+- [x] **Phase 9: Cached Sync Infrastructure** ✅ - BifrostSyncService + usage_records SQLite schema enabling local 5-50ms reads
 - [ ] **Phase 10: P1 Chart UI** - Six table-stakes dashboard features wired end-to-end with real data
 - [ ] **Phase 11: Resilience & UX Polish** - Gateway timeout handling, performance safeguards, staleness UX
 - [ ] **Phase 12: Differentiators** - Period-over-period comparison, per-key breakdown, PDF export
@@ -71,6 +71,7 @@
 **Goal**: A local `usage_records` SQLite table is populated by `BifrostSyncService` on a 5-minute schedule, enabling all chart services to query sub-100ms local data instead of hitting Bifrost directly
 **Depends on**: Phase 8
 **Requirements**: (infrastructure phase — enables DASHBOARD-01 through DASHBOARD-05)
+**Status**: ✅ COMPLETED 2026-04-11
 **Success Criteria** (what must be TRUE):
   1. `usage_records` table exists in the local SQLite database with correct schema
   2. `BifrostSyncService` fetches incremental Bifrost logs and upserts rows on schedule
@@ -133,7 +134,7 @@
 | 6. Pages Test Coverage | v1.1 | 2/3 | Complete | 2026-04-11 |
 | 7. Framework & i18n | v1.1 | 5/5 | Complete | 2026-04-11 |
 | 8. Data Correctness & Permission Foundation | v1.2 | 1/1 | Complete | 2026-04-11 |
-| 9. Cached Sync Infrastructure | v1.2 | 0/5 | Not started | - |
+| 9. Cached Sync Infrastructure | v1.2 | 5/5 | Complete | 2026-04-11 |
 | 10. P1 Chart UI | v1.2 | 0/? | Not started | - |
 | 11. Resilience & UX Polish | v1.2 | 0/? | Not started | - |
 | 12. Differentiators | v1.2 | 0/? | Not started | - |

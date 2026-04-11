@@ -19,6 +19,7 @@ Executed:
 
 ```bash
 bun test
+bunx tsc --noEmit
 ```
 
 Result:
@@ -26,3 +27,4 @@ Result:
 - 755 pass
 - 1 skip
 - 0 fail
+- Repo-wide typecheck still reports unrelated `src/Modules/CliApi/__tests__/helpers/CliTestClient.ts` errors
