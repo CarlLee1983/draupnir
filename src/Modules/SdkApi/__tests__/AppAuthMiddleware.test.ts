@@ -29,6 +29,8 @@ function createMockCtx(authHeader?: string): IHttpContext {
     query: {},
     text: vi.fn(),
     redirect: vi.fn(),
+    getCookie: vi.fn(),
+    setCookie: vi.fn(),
   } as unknown as IHttpContext
 }
 

@@ -33,7 +33,11 @@ function createMockProxyClient(): ICliProxyClient {
 }
 
 function minimalCtx(partial: Partial<IHttpContext> & Record<string, unknown>): IHttpContext {
-  return partial as IHttpContext
+  return {
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
+    ...partial,
+  } as IHttpContext
 }
 
 describe('CliApiController', () => {

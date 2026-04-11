@@ -1,5 +1,6 @@
 import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { IHttpContext, PendingCookie } from '@/Shared/Presentation/IHttpContext'
+import { applyPendingCookies } from '@/Shared/Presentation/cookieUtils'
 import type { RouteHandler } from '@/Shared/Presentation/IModuleRouter'
 
 import { injectSharedData } from '../SharedDataMiddleware'
@@ -19,6 +20,8 @@ export function withInertiaPageHandler(
   return (ctx) =>
     jwtMw(ctx, async () => {
       injectSharedData(ctx)
-      return handler(ctx)
+      const response = await handler(ctx)
+      const pending = ctx.get<PendingCookie[]>('__pending_cookies__') ?? []
+      return applyPendingCookies(response, pending)
     })
 }

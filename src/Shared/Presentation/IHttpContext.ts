@@ -8,6 +8,22 @@
 
 import type { GravitoContext } from '@gravito/core'
 
+/** Cookie 設定選項 */
+export interface CookieOptions {
+  httpOnly?: boolean
+  secure?: boolean
+  sameSite?: 'Strict' | 'Lax' | 'None'
+  path?: string
+  maxAge?: number
+}
+
+/** Pending cookie，用於 setCookie queue */
+export interface PendingCookie {
+  name: string
+  value: string
+  options: CookieOptions
+}
+
 export interface IHttpContext {
   /** Retrieves the request body as text */
   getBodyText(): Promise<string>
@@ -56,6 +72,12 @@ export interface IHttpContext {
 
   /** Sets a value in the context */
   set(key: string, value: unknown): void
+
+  /** 從請求 Cookie header 讀取指定 cookie 值 */
+  getCookie(name: string): string | undefined
+
+  /** 將 cookie 加入 pending queue（由 withInertiaPageHandler 套用至回應） */
+  setCookie(name: string, value: string, options?: CookieOptions): void
 }
 
 /**
@@ -96,7 +118,11 @@ function fallbackPathParam(pathname: string, name: string): string | undefined {
     if (m?.[1]) return decodeURIComponent(m[1])
   }
   if (name === 'token') {
-    const m = /^\/api\/invitations\/([^/]+)(?:\/|$)/.exec(pathname)
+    let m = /^\/reset-password\/([^/]+)/.exec(pathname)
+    if (m?.[1]) return decodeURIComponent(m[1])
+    m = /^\/verify-email\/([^/]+)/.exec(pathname)
+    if (m?.[1]) return decodeURIComponent(m[1])
+    m = /^\/api\/invitations\/([^/]+)(?:\/|$)/.exec(pathname)
     if (m?.[1]) return decodeURIComponent(m[1])
   }
   if (name === 'invId') {
@@ -188,5 +214,21 @@ export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
     redirect: (url, statusCode = 302) => ctx.redirect(url, statusCode as any),
     get: <T>(key: string) => ctx.get(key as any) as T | undefined,
     set: (key, value) => ctx.set(key as any, value),
+    getCookie: (name: string) => {
+      const cookieHeader =
+        (ctx.req.header('Cookie') ?? ctx.req.header('cookie')) as string | undefined
+      if (!cookieHeader) return undefined
+      for (const pair of cookieHeader.split(';')) {
+        const [rawKey, ...rest] = pair.split('=')
+        if (rawKey?.trim() === name) return rest.join('=').trim() || undefined
+      }
+      return undefined
+    },
+    setCookie: (name: string, value: string, options: CookieOptions = {}) => {
+      const pending: PendingCookie[] =
+        (ctx.get('__pending_cookies__') as PendingCookie[]) ?? []
+      pending.push({ name, value, options })
+      ctx.set('__pending_cookies__', pending)
+    },
   }
 }

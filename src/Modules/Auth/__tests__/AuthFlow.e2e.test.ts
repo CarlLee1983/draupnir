@@ -58,6 +58,8 @@ describe('認證流程 E2E 測試', () => {
       set: (key: string, value: unknown) => {
         state[key] = value
       },
+      getCookie: (_name: string) => undefined,
+      setCookie: (_name: string, _value: string, _options?: unknown) => {},
     } as IHttpContext
   }
 

@@ -26,6 +26,8 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     set: (key: string, value: unknown) => {
       store.set(key, value)
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   }
 }
@@ -47,6 +49,8 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
     set: (key: string, value: unknown) => {
       store.set(key, value)
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   })
 }
@@ -72,6 +76,8 @@ function createMemberContextWithBody(
       store.set(key, value)
     },
     getJsonBody: async <T>() => body as T,
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   })
 }

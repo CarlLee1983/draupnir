@@ -37,6 +37,8 @@ describe('MemberDashboardPage i18n', () => {
       set: (key: string, value: unknown) => {
         store.set(key, value)
       },
+      getCookie: (_name: string) => undefined,
+      setCookie: (_name: string, _value: string, _options?: unknown) => {},
     }
 
     // Mock inertia render 來擷取 props

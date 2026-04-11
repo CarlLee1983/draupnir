@@ -26,6 +26,8 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     set: (key: string, value: unknown) => {
       store.set(key, value)
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   }
 }
@@ -80,6 +82,8 @@ function createAdminContextWithBody(body: unknown, overrides: Partial<IHttpConte
     getParam: (_name: string) => {
       return undefined
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   })
 }

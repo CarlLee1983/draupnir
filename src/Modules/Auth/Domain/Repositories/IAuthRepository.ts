@@ -38,6 +38,11 @@ export interface IAuthRepository {
   save(user: User): Promise<void>
 
   /**
+   * Updates the hashed password for a user by ID.
+   */
+  updatePassword(id: string, hashedPassword: string): Promise<void>
+
+  /**
    * Deletes a user account from the store.
    */
   delete(id: string): Promise<void>

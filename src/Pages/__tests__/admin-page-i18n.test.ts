@@ -31,7 +31,9 @@ describe('requireAdmin', () => {
       set: (key: string, value: unknown) => {
         store.set(key, value)
       },
-    } as any
+      getCookie: (_name: string) => undefined,
+      setCookie: (_name: string, _value: string, _options?: unknown) => {},
+    } as IHttpContext
 
     const result = requireAdmin(ctx)
 

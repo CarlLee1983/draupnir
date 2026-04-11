@@ -25,16 +25,23 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     set: (key: string, value: unknown) => {
       store.set(key, value)
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   }
+}
+
+const mockRegisterService = {
+  execute: mock(async () => ({ success: true, message: '帳號建立成功' })),
 }
 
 describe('RegisterPage', () => {
   test('should render registration form on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new RegisterPage(inertia)
+    const page = new RegisterPage(inertia, mockRegisterService as any)
     const ctx = createMockContext()
+    ctx.set('inertia:shared', { csrfToken: 'csrf' })
 
     await page.handle(ctx)
 
@@ -43,7 +50,7 @@ describe('RegisterPage', () => {
       | [unknown, string, Record<string, unknown>]
       | undefined
     expect(call?.[1]).toBe('Auth/Register')
-    expect(typeof call?.[2]?.csrfToken).toBe('string')
+    expect(call?.[2]?.csrfToken).toBe('csrf')
     expect(call?.[2]?.passwordRequirements).toBeDefined()
     expect(typeof call?.[2]?.passwordRequirements).toBe('object')
   })
@@ -51,20 +58,17 @@ describe('RegisterPage', () => {
   test('should process registration on POST', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new RegisterPage(inertia)
-    const ctx = createMockContext({
-      get: <T>(key: string) =>
-        (key === 'validated'
-          ? ({
-              email: 'newuser@example.com',
-              password: 'SecurePass123!',
-              passwordConfirmation: 'SecurePass123!',
-              agreedToTerms: true,
-            } as T)
-          : undefined),
+    const page = new RegisterPage(inertia, mockRegisterService as any)
+    const ctx = createMockContext()
+    ctx.set('validated', {
+      email: 'newuser@example.com',
+      password: 'SecurePass123!',
+      passwordConfirmation: 'SecurePass123!',
+      agreedToTerms: true,
     })
 
     const response = await page.store(ctx)
     expect(response).toBeInstanceOf(Response)
+    expect(response.status).toBe(302)
   })
 })

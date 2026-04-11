@@ -1,19 +1,30 @@
+import type { ForgotPasswordService } from '@/Modules/Auth/Application/Services/ForgotPasswordService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
 
 export class ForgotPasswordPage {
-  constructor(private readonly inertia: InertiaService) {}
+  constructor(
+    private readonly inertia: InertiaService,
+    private readonly forgotPasswordService: ForgotPasswordService,
+  ) {}
 
   async handle(ctx: IHttpContext): Promise<Response> {
-    return this.inertia.render(ctx, 'Auth/ForgotPassword', {
-      csrfToken: 'TODO',
-    })
+    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
+    const csrfToken = (shared?.csrfToken as string) ?? ''
+    return this.inertia.render(ctx, 'Auth/ForgotPassword', { csrfToken })
   }
 
   async store(ctx: IHttpContext): Promise<Response> {
-    ctx.get('validated') as { email?: string } | undefined
+    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
+    const csrfToken = (shared?.csrfToken as string) ?? ''
+    const validated = ctx.get('validated') as { email?: string } | undefined
+    const email = validated?.email ?? ''
+
+    await this.forgotPasswordService.execute(email)
+
     return this.inertia.render(ctx, 'Auth/ForgotPassword', {
-      message: 'Reset link sent',
+      csrfToken,
+      message: '若此 email 存在，重設連結已寄出',
     })
   }
 }

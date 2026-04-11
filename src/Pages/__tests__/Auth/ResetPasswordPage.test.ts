@@ -4,6 +4,7 @@ import type { InertiaService } from '../../InertiaService'
 import { ResetPasswordPage } from '../../Auth/ResetPasswordPage'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
+  const store = new Map<string, unknown>()
   return {
     getBodyText: async () => '',
     getJsonBody: async <T>() => ({}) as T,
@@ -20,18 +21,28 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     text: (content: string, statusCode?: number) =>
       new Response(content, { status: statusCode ?? 200 }),
     redirect: (url: string, statusCode?: number) => Response.redirect(url, statusCode ?? 302),
-    get: () => undefined,
-    set: () => {},
+    get: <T>(key: string) => store.get(key) as T | undefined,
+    set: (key: string, value: unknown) => {
+      store.set(key, value)
+    },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   }
+}
+
+const mockResetPasswordService = {
+  validateToken: mock(async () => ({ valid: true })),
+  execute: mock(async () => ({ success: true, message: 'ok' })),
 }
 
 describe('ResetPasswordPage', () => {
   test('should render reset password form with token on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new ResetPasswordPage(inertia)
+    const page = new ResetPasswordPage(inertia, mockResetPasswordService as any)
     const ctx = createMockContext()
+    ctx.set('inertia:shared', { csrfToken: 'c' })
 
     await page.handle(ctx)
 

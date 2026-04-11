@@ -8,7 +8,7 @@
  */
 
 import type { Email } from '../ValueObjects/Email'
-import type { Password } from '../ValueObjects/Password'
+import { Password } from '../ValueObjects/Password'
 import { Role, type RoleType } from '../ValueObjects/Role'
 
 /**
@@ -184,5 +184,16 @@ export class User {
   /** Gets the timestamp when the user account was last updated. */
   get updatedAt(): Date {
     return this.props.updatedAt
+  }
+
+  /**
+   * Returns a new User with an updated hashed password (immutable pattern).
+   */
+  withPassword(hashedPassword: string): User {
+    return new User({
+      ...this.props,
+      password: Password.fromHashed(hashedPassword),
+      updatedAt: new Date(),
+    })
   }
 }

@@ -25,16 +25,31 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     set: (key: string, value: unknown) => {
       store.set(key, value)
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: mock((_name: string, _value: string, _opts?: unknown) => {}),
     ...overrides,
   }
+}
+
+const mockLoginService = {
+  execute: mock(async () => ({
+    success: true,
+    message: 'OK',
+    data: {
+      accessToken: 'tok',
+      refreshToken: 'ref',
+      user: { id: '1', email: 'a@b.com', role: 'member' },
+    },
+  })),
 }
 
 describe('LoginPage', () => {
   test('should render login form on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new LoginPage(inertia)
+    const page = new LoginPage(inertia, mockLoginService as any)
     const ctx = createMockContext()
+    ctx.set('inertia:shared', { csrfToken: 'csrf-test' })
 
     await page.handle(ctx)
 
@@ -43,22 +58,19 @@ describe('LoginPage', () => {
       | [unknown, string, Record<string, unknown>]
       | undefined
     expect(call?.[1]).toBe('Auth/Login')
-    expect(typeof call?.[2]?.csrfToken).toBe('string')
+    expect(call?.[2]?.csrfToken).toBe('csrf-test')
   })
 
   test('should process login form on POST', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new LoginPage(inertia)
-    const ctx = createMockContext({
-      get: <T>(key: string) =>
-        (key === 'validated'
-          ? ({ email: 'user@example.com', password: 'password123' } as T)
-          : undefined),
-    })
+    const page = new LoginPage(inertia, mockLoginService as any)
+    const ctx = createMockContext()
+    ctx.set('validated', { email: 'user@example.com', password: 'password123' })
 
     const response = await page.store(ctx)
 
     expect(response).toBeInstanceOf(Response)
+    expect(response.status).toBe(302)
   })
 })

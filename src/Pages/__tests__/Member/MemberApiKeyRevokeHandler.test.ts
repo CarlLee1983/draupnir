@@ -24,6 +24,8 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     set: (key: string, value: unknown) => {
       store.set(key, value)
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   }
 }
@@ -34,6 +36,8 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
       if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
       return undefined
     },
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   })
 }

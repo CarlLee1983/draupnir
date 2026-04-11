@@ -32,6 +32,8 @@ function createOAuthContext(options: {
     redirect: mock((url: string, statusCode?: number) => Response.redirect(url, statusCode ?? 302)),
     get: <T>(key: string) => (key === 'oauthExpectedState' ? (expectedState as T) : undefined),
     set: () => {},
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
   }
 }
 

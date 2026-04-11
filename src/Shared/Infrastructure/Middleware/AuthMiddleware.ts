@@ -94,18 +94,16 @@ export class AuthMiddleware {
     const header =
       ctx.getHeader('authorization') ??
       ctx.getHeader('Authorization') ??
-      ctx.headers?.authorization ??
-      ctx.headers?.Authorization
-    if (!header) {
-      return null
+      (ctx.headers as Record<string, string | undefined>)?.authorization ??
+      (ctx.headers as Record<string, string | undefined>)?.Authorization
+    if (header) {
+      const parts = header.split(' ')
+      if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+        return parts[1]
+      }
     }
 
-    const parts = header.split(' ')
-    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
-      return null
-    }
-
-    return parts[1]
+    return ctx.getCookie('auth_token') ?? null
   }
 
   /**

@@ -22,15 +22,25 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     redirect: (url: string, statusCode?: number) => Response.redirect(url, statusCode ?? 302),
     get: () => undefined,
     set: () => {},
+    getCookie: (_name: string) => undefined,
+    setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   }
+}
+
+const mockEmailVerificationService = {
+  execute: mock(async () => ({
+    success: true,
+    message: '電子郵件驗證成功',
+    redirectUrl: '/member/dashboard',
+  })),
 }
 
 describe('EmailVerificationPage', () => {
   test('should render email verification result on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new EmailVerificationPage(inertia)
+    const page = new EmailVerificationPage(inertia, mockEmailVerificationService as any)
     const ctx = createMockContext()
 
     await page.handle(ctx)
