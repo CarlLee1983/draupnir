@@ -45,7 +45,7 @@ completed: 2026-04-11T16:44:56Z
 
 ## Task Commits
 
-1. **Task 1: Add composite index migration** - `37c473f` (feat)
+1. **Task 1: Add composite index migration** - `81a3e37` (feat)
 
 ## Files Created/Modified
 - `database/migrations/2026_04_12_000001_add_composite_index_to_usage_records.ts` - Adds the composite usage_records index.
