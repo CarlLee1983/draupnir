@@ -1,6 +1,7 @@
 // src/Modules/Contract/Domain/Events/ContractExpired.ts
 import { DomainEvent } from '@/Shared/Domain/DomainEvent'
 
+/** Emitted after a contract is persisted as EXPIRED. */
 export class ContractExpired extends DomainEvent {
   constructor(contractId: string, targetType: string, targetId: string) {
     super(contractId, 'contract.expired', { contractId, targetType, targetId })

@@ -4,9 +4,15 @@ import { ContractActivated } from '../../Domain/Events/ContractActivated'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
+/**
+ * Activates an existing contract when the caller is an admin, persists it, and dispatches domain events.
+ */
 export class ActivateContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Activates the contract identified by `contractId` when the caller is an admin.
+   */
   async execute(contractId: string, callerRole: string): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {

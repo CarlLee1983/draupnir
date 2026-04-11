@@ -1,6 +1,7 @@
 // src/Modules/Contract/Presentation/Requests/ListContractsRequest.ts
 import { FormRequest, z } from '@gravito/impulse'
 
+/** Validates query string for listing contracts by organization/target id. */
 export class ListContractsRequest extends FormRequest {
   source = 'query' as const
   schema = z.object({
@@ -8,4 +9,5 @@ export class ListContractsRequest extends FormRequest {
   })
 }
 
+/** Inferred validated query for {@link ListContractsRequest}. */
 export type ListContractsQueryParams = z.infer<ListContractsRequest['schema']>

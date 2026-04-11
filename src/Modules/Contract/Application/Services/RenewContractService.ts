@@ -4,9 +4,15 @@ import { Contract } from '../../Domain/Aggregates/Contract'
 import type { ContractTermProps } from '../../Domain/Entities/ContractTerm'
 import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
+/**
+ * Renews an active contract for admin callers by expiring the old aggregate and saving a new activated one.
+ */
 export class RenewContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Renews the contract identified by `contractId` with `newTerms` when the caller is an admin.
+   */
   async execute(
     contractId: string,
     newTerms: ContractTermProps,

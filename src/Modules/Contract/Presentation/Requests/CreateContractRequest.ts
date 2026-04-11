@@ -1,6 +1,7 @@
 // src/Modules/Contract/Presentation/Requests/CreateContractRequest.ts
 import { FormRequest, z } from '@gravito/impulse'
 
+/** Validates JSON body for creating a contract (target + full terms). */
 export class CreateContractRequest extends FormRequest {
   schema = z.object({
     targetType: z.enum(['organization', 'user']),
@@ -20,4 +21,5 @@ export class CreateContractRequest extends FormRequest {
   })
 }
 
+/** Inferred validated payload for {@link CreateContractRequest}. */
 export type CreateContractParams = z.infer<CreateContractRequest['schema']>

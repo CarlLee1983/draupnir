@@ -2,6 +2,7 @@
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractPresenter } from '../DTOs/ContractDTO'
 
+/** Admin contract list query with optional status filter and pagination. */
 export interface ListAdminContractsQuery {
   callerRole: string
   page?: number
@@ -9,6 +10,7 @@ export interface ListAdminContractsQuery {
   status?: string
 }
 
+/** Admin contract list response with contracts and pagination meta. */
 export interface ListAdminContractsResponse {
   success: boolean
   message: string
@@ -19,9 +21,15 @@ export interface ListAdminContractsResponse {
   error?: string
 }
 
+/**
+ * Lists all contracts for admin callers with optional status filter and in-memory pagination.
+ */
 export class ListAdminContractsService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Returns a paginated contract list for `query` when the caller is an admin.
+   */
   async execute(query: ListAdminContractsQuery): Promise<ListAdminContractsResponse> {
     try {
       if (query.callerRole !== 'admin') {

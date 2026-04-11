@@ -3,9 +3,15 @@ import type { IContractRepository } from '../../Domain/Repositories/IContractRep
 import { Contract } from '../../Domain/Aggregates/Contract'
 import { ContractPresenter, type CreateContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
 
+/**
+ * Creates and persists a new contract when the caller is an admin.
+ */
 export class CreateContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Creates a contract from `request` when the caller is an admin.
+   */
   async execute(request: CreateContractRequest): Promise<ContractResponse> {
     try {
       if (request.callerSystemRole !== 'admin') {

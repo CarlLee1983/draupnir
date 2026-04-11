@@ -15,7 +15,9 @@ import { ListContractsService } from '../../Application/Services/ListContractsSe
 import { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
 import { ListAdminContractsService } from '../../Application/Services/ListAdminContractsService'
 
+/** Registers contract repositories, domain helpers, and application services in the DI container. */
 export class ContractServiceProvider extends ModuleServiceProvider {
+  /** Wires contract module singletons and scoped services. */
   override register(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
 
@@ -66,6 +68,7 @@ export class ContractServiceProvider extends ModuleServiceProvider {
     })
   }
 
+  /** Logs module load during application bootstrap. */
   override boot(): void {
     console.log('📋 [Contract] Module loaded')
   }

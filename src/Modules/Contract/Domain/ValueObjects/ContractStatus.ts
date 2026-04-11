@@ -1,6 +1,7 @@
 // src/Modules/Contract/Domain/ValueObjects/ContractStatus.ts
 import { ValueObject } from '@/Shared/Domain/ValueObject'
 
+/** Lifecycle states for a contract aggregate. */
 export type ContractStatusValue = 'draft' | 'active' | 'expired' | 'terminated'
 
 const VALID_TRANSITIONS: Record<ContractStatusValue, ContractStatusValue[]> = {
@@ -10,6 +11,7 @@ const VALID_TRANSITIONS: Record<ContractStatusValue, ContractStatusValue[]> = {
   terminated: [],
 }
 
+/** Value object enforcing allowed transitions between contract lifecycle states. */
 export class ContractStatus extends ValueObject {
   private constructor(private readonly value: ContractStatusValue) {
     super()
@@ -31,6 +33,7 @@ export class ContractStatus extends ValueObject {
     return new ContractStatus('terminated')
   }
 
+  /** Parses a known status string or throws when invalid. */
   static fromString(value: string): ContractStatus {
     const valid: ContractStatusValue[] = ['draft', 'active', 'expired', 'terminated']
     if (!valid.includes(value as ContractStatusValue)) {
@@ -39,10 +42,12 @@ export class ContractStatus extends ValueObject {
     return new ContractStatus(value as ContractStatusValue)
   }
 
+  /** True when moving from this status to `target` is allowed by the transition table. */
   canTransitionTo(target: ContractStatus): boolean {
     return VALID_TRANSITIONS[this.value].includes(target.value)
   }
 
+  /** Returns `target` when the transition is valid; otherwise throws. */
   transitionTo(target: ContractStatus): ContractStatus {
     if (!this.canTransitionTo(target)) {
       throw new Error(`Cannot transition from ${this.value} to ${target.value}`)

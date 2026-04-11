@@ -1,6 +1,7 @@
 // src/Modules/Contract/Presentation/Requests/RenewContractRequest.ts
 import { FormRequest, z } from '@gravito/impulse'
 
+/** Validates JSON body for renewal (new terms for the replacement contract). */
 export class RenewContractRequest extends FormRequest {
   schema = z.object({
     terms: z.object({
@@ -18,4 +19,5 @@ export class RenewContractRequest extends FormRequest {
   })
 }
 
+/** Inferred validated payload for {@link RenewContractRequest}. */
 export type RenewContractParams = z.infer<RenewContractRequest['schema']>

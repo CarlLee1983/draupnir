@@ -2,9 +2,15 @@
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractPresenter, type AssignContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
 
+/**
+ * Reassigns a contract to another target when the caller is an admin, then persists it.
+ */
 export class AssignContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Assigns the contract in `request` to a new target when the caller is an admin.
+   */
   async execute(request: AssignContractRequest): Promise<ContractResponse> {
     try {
       if (request.callerSystemRole !== 'admin') {

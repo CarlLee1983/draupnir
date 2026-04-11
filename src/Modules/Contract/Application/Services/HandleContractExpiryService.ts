@@ -4,9 +4,15 @@ import { ContractExpiring } from '../../Domain/Events/ContractExpiring'
 import { ContractExpired } from '../../Domain/Events/ContractExpired'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 
+/**
+ * Runs expiry workflows for scheduled jobs: notifies expiring contracts and persists expired ones.
+ */
 export class HandleContractExpiryService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Dispatches expiring and expired contract handling, returning how many of each were processed.
+   */
   async execute(): Promise<{ expiring: number; expired: number }> {
     const dispatcher = DomainEventDispatcher.getInstance()
     let expiringCount = 0

@@ -10,6 +10,7 @@ import {
   ListContractsRequest,
 } from '../Requests'
 
+/** Registers contract REST endpoints and wires them to {@link ContractController} handlers. */
 export function registerContractRoutes(
   router: IModuleRouter,
   controller: ContractController,

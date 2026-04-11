@@ -2,9 +2,15 @@
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractPresenter, type UpdateContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
 
+/**
+ * Updates contract terms when the caller is an admin, then persists the aggregate.
+ */
 export class UpdateContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Updates terms on the contract in `request` when the caller is an admin.
+   */
   async execute(request: UpdateContractRequest): Promise<ContractResponse> {
     try {
       if (request.callerSystemRole !== 'admin') {

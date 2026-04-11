@@ -4,14 +4,17 @@ import type { IContractRepository } from '../../Domain/Repositories/IContractRep
 import { Contract } from '../../Domain/Aggregates/Contract'
 import { ContractMapper } from '../Mappers/ContractMapper'
 
+/** SQL-backed implementation of {@link IContractRepository} using the shared DB access layer. */
 export class ContractRepository implements IContractRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
+  /** @inheritdoc */
   async findById(id: string): Promise<Contract | null> {
     const row = await this.db.table('contracts').where('id', '=', id).first()
     return row ? Contract.fromDatabase(row) : null
   }
 
+  /** @inheritdoc */
   async findActiveByTargetId(targetId: string): Promise<Contract | null> {
     const row = await this.db
       .table('contracts')
@@ -21,6 +24,7 @@ export class ContractRepository implements IContractRepository {
     return row ? Contract.fromDatabase(row) : null
   }
 
+  /** @inheritdoc */
   async findByTargetId(targetId: string): Promise<Contract[]> {
     const rows = await this.db
       .table('contracts')
@@ -30,11 +34,13 @@ export class ContractRepository implements IContractRepository {
     return rows.map((row) => Contract.fromDatabase(row))
   }
 
+  /** @inheritdoc */
   async findAllOrdered(): Promise<Contract[]> {
     const rows = await this.db.table('contracts').orderBy('created_at', 'DESC').select()
     return rows.map((row) => Contract.fromDatabase(row))
   }
 
+  /** @inheritdoc */
   async findExpiring(days: number): Promise<Contract[]> {
     const now = new Date()
     const threshold = new Date()
@@ -53,6 +59,7 @@ export class ContractRepository implements IContractRepository {
       })
   }
 
+  /** @inheritdoc */
   async findExpired(): Promise<Contract[]> {
     const now = new Date()
     const rows = await this.db.table('contracts').where('status', '=', 'active').select()
@@ -65,10 +72,12 @@ export class ContractRepository implements IContractRepository {
       })
   }
 
+  /** @inheritdoc */
   async save(contract: Contract): Promise<void> {
     await this.db.table('contracts').insert(ContractMapper.toDatabaseRow(contract))
   }
 
+  /** @inheritdoc */
   async update(contract: Contract): Promise<void> {
     await this.db.table('contracts').where('id', '=', contract.id).update(ContractMapper.toDatabaseRow(contract))
   }

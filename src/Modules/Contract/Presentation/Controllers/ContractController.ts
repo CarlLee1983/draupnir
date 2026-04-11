@@ -18,6 +18,7 @@ import type {
   ListContractsQueryParams,
 } from '../Requests'
 
+/** HTTP adapter for contract commands and queries; delegates to application services. */
 export class ContractController {
   constructor(
     private readonly createService: CreateContractService,
@@ -31,6 +32,7 @@ export class ContractController {
     private readonly handleContractExpiryService: HandleContractExpiryService,
   ) {}
 
+  /** POST /api/contracts — creates a contract for an admin-authenticated caller. */
   async create(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -45,6 +47,7 @@ export class ContractController {
     return ctx.json(result, result.success ? 201 : 400)
   }
 
+  /** POST /api/contracts/:contractId/activate — activates a contract when allowed. */
   async activate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -54,6 +57,7 @@ export class ContractController {
     return ctx.json(result, result.success ? 200 : 400)
   }
 
+  /** PUT /api/contracts/:contractId — updates DRAFT terms. */
   async update(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -69,6 +73,7 @@ export class ContractController {
     return ctx.json(result, result.success ? 200 : 400)
   }
 
+  /** POST /api/contracts/:contractId/assign — reassigns a DRAFT contract target. */
   async assign(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -85,6 +90,7 @@ export class ContractController {
     return ctx.json(result, result.success ? 200 : 400)
   }
 
+  /** POST /api/contracts/:contractId/terminate — terminates a contract. */
   async terminate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -94,6 +100,7 @@ export class ContractController {
     return ctx.json(result, result.success ? 200 : 400)
   }
 
+  /** POST /api/contracts/:contractId/renew — renews an ACTIVE contract with new terms. */
   async renew(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -104,7 +111,7 @@ export class ContractController {
     return ctx.json(result, result.success ? 200 : 400)
   }
 
-  /** 管理員觸發：處理即將到期事件與已過期合約（供 Cron 或手動呼叫） */
+  /** POST /api/contracts/handle-expiry — admin-only job hook for expiring/expired processing. */
   async handleExpiry(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -115,6 +122,7 @@ export class ContractController {
     return ctx.json({ success: true, message: 'Contract expiry check processed', data: counts })
   }
 
+  /** GET /api/contracts — lists contracts for `targetId` with org membership checks for non-admins. */
   async list(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
@@ -123,6 +131,7 @@ export class ContractController {
     return ctx.json(result)
   }
 
+  /** GET /api/contracts/:contractId — returns one contract for admins. */
   async getDetail(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)

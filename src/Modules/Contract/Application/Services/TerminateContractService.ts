@@ -2,9 +2,15 @@
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
+/**
+ * Terminates an existing contract when the caller is an admin, then persists it.
+ */
 export class TerminateContractService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Terminates the contract identified by `contractId` when the caller is an admin.
+   */
   async execute(contractId: string, callerRole: string): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {

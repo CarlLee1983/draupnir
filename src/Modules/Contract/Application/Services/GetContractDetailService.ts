@@ -2,9 +2,15 @@
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
+/**
+ * Loads a single contract by id for admin callers.
+ */
 export class GetContractDetailService {
   constructor(private readonly contractRepo: IContractRepository) {}
 
+  /**
+   * Returns the contract identified by `contractId` when the caller is an admin.
+   */
   async execute(contractId: string, callerRole: string): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {

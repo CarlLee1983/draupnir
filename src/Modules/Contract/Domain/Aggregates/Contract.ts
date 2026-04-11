@@ -3,6 +3,7 @@ import { ContractStatus } from '../ValueObjects/ContractStatus'
 import { ContractTarget, type ContractTargetType } from '../ValueObjects/ContractTarget'
 import { ContractTerm, type ContractTermProps } from '../Entities/ContractTerm'
 
+/** Immutable snapshot backing the contract aggregate. */
 interface ContractProps {
   readonly id: string
   readonly target: ContractTarget
@@ -13,6 +14,9 @@ interface ContractProps {
   readonly updatedAt: Date
 }
 
+/**
+ * Contract aggregate root: target, terms, and status change only through methods that return new instances.
+ */
 export class Contract {
   private readonly props: ContractProps
 
@@ -20,6 +24,7 @@ export class Contract {
     this.props = props
   }
 
+  /** Creates a new DRAFT contract; assigns a random id when `id` is omitted. */
   static create(params: {
     id?: string
     targetType: ContractTargetType
@@ -38,6 +43,7 @@ export class Contract {
     })
   }
 
+  /** Rehydrates an aggregate from a persistence row (parses JSON `terms` when string). */
   static fromDatabase(row: Record<string, unknown>): Contract {
     const termsData = typeof row.terms === 'string' ? JSON.parse(row.terms) : row.terms
     return new Contract({
@@ -51,6 +57,7 @@ export class Contract {
     })
   }
 
+  /** Returns a copy transitioned to ACTIVE when the current status allows it. */
   activate(): Contract {
     const newStatus = this.props.status.transitionTo(ContractStatus.active())
     return new Contract({
@@ -60,6 +67,7 @@ export class Contract {
     })
   }
 
+  /** Returns a copy transitioned to EXPIRED when the current status allows it. */
   expire(): Contract {
     const newStatus = this.props.status.transitionTo(ContractStatus.expired())
     return new Contract({
@@ -69,6 +77,7 @@ export class Contract {
     })
   }
 
+  /** Returns a copy transitioned to TERMINATED when the current status allows it. */
   terminate(): Contract {
     const newStatus = this.props.status.transitionTo(ContractStatus.terminated())
     return new Contract({
@@ -78,6 +87,7 @@ export class Contract {
     })
   }
 
+  /** Returns a copy with replaced terms; only allowed while the contract is DRAFT. */
   updateTerms(terms: ContractTermProps): Contract {
     if (!this.props.status.isDraft()) {
       throw new Error('Only DRAFT contracts can have their terms modified')
@@ -89,6 +99,7 @@ export class Contract {
     })
   }
 
+  /** Returns a copy bound to a new target; only allowed while the contract is DRAFT. */
   assignTo(targetType: ContractTargetType, targetId: string): Contract {
     if (!this.props.status.isDraft()) {
       throw new Error('Only DRAFT contracts can be reassigned')
@@ -100,6 +111,7 @@ export class Contract {
     })
   }
 
+  /** True when the terms allow the given module name. */
   hasModule(moduleName: string): boolean {
     return this.props.terms.hasModule(moduleName)
   }
@@ -129,9 +141,12 @@ export class Contract {
     return this.props.updatedAt
   }
 
+  /** True when lifecycle status is ACTIVE. */
   isActive(): boolean {
     return this.props.status.isActive()
   }
+
+  /** True when lifecycle status is DRAFT. */
   isDraft(): boolean {
     return this.props.status.isDraft()
   }

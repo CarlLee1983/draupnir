@@ -1,6 +1,7 @@
 // src/Modules/Contract/Presentation/Requests/UpdateContractRequest.ts
 import { FormRequest, z } from '@gravito/impulse'
 
+/** Validates JSON body for replacing contract terms on update. */
 export class UpdateContractRequest extends FormRequest {
   schema = z.object({
     terms: z.object({
@@ -18,4 +19,5 @@ export class UpdateContractRequest extends FormRequest {
   })
 }
 
+/** Inferred validated payload for {@link UpdateContractRequest}. */
 export type UpdateContractParams = z.infer<UpdateContractRequest['schema']>

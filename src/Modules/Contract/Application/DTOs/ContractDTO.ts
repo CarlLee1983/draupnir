@@ -3,7 +3,9 @@ import type { ContractTargetType } from '../../Domain/ValueObjects/ContractTarge
 import type { ContractTermProps } from '../../Domain/Entities/ContractTerm'
 import type { Contract } from '../../Domain/Aggregates/Contract'
 
+/** Maps domain contracts into JSON-friendly records for HTTP responses. */
 export class ContractPresenter {
+  /** Serializes aggregate fields and ISO timestamps for APIs. */
   static fromEntity(entity: Contract): Record<string, unknown> {
     return {
       id: entity.id,
@@ -18,6 +20,7 @@ export class ContractPresenter {
   }
 }
 
+/** Application-layer input for creating a contract (includes caller context). */
 export interface CreateContractRequest {
   targetType: ContractTargetType
   targetId: string
@@ -26,6 +29,7 @@ export interface CreateContractRequest {
   callerSystemRole: string
 }
 
+/** Application-layer input for updating DRAFT contract terms. */
 export interface UpdateContractRequest {
   contractId: string
   terms: ContractTermProps
@@ -33,6 +37,7 @@ export interface UpdateContractRequest {
   callerSystemRole: string
 }
 
+/** Application-layer input for reassigning a DRAFT contract target. */
 export interface AssignContractRequest {
   contractId: string
   targetType: ContractTargetType
@@ -41,6 +46,7 @@ export interface AssignContractRequest {
   callerSystemRole: string
 }
 
+/** Standard command/query envelope returned by contract application services. */
 export interface ContractResponse {
   success: boolean
   message: string
@@ -48,6 +54,7 @@ export interface ContractResponse {
   error?: string
 }
 
+/** List-shaped variant of {@link ContractResponse}. */
 export interface ContractListResponse {
   success: boolean
   message: string

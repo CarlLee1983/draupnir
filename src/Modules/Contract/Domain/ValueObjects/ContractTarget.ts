@@ -1,8 +1,10 @@
 // src/Modules/Contract/Domain/ValueObjects/ContractTarget.ts
 import { ValueObject } from '@/Shared/Domain/ValueObject'
 
+/** Who a contract applies to: an organization or a single user. */
 export type ContractTargetType = 'organization' | 'user'
 
+/** Value object pairing a target kind with its id. */
 export class ContractTarget extends ValueObject {
   private constructor(
     private readonly type: ContractTargetType,
@@ -25,6 +27,7 @@ export class ContractTarget extends ValueObject {
     return new ContractTarget('user', userId)
   }
 
+  /** Factory that dispatches to organization or user constructors based on `type`. */
   static create(type: string, id: string): ContractTarget {
     if (type === 'organization') return ContractTarget.forOrganization(id)
     if (type === 'user') return ContractTarget.forUser(id)

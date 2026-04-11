@@ -1,7 +1,9 @@
 // src/Modules/Contract/Domain/Services/ContractEnforcementService.ts
 import type { Contract } from '../Aggregates/Contract'
 
+/** Pure domain helper that decides whether a module is allowed for a contract snapshot. */
 export class ContractEnforcementService {
+  /** Returns whether `moduleName` may be used given contract presence, ACTIVE status, and terms. */
   checkModuleAccess(
     contract: Contract | null,
     moduleName: string,
