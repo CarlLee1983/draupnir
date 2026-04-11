@@ -37,6 +37,8 @@ export interface UserProps {
   role: Role
   /** Current account status. */
   status: UserStatus
+  /** Google account subject (`sub`) when linked via OAuth; otherwise null. */
+  googleId: string | null
   /** When the user account was first created. */
   createdAt: Date
   /** When the user account was last updated. */
@@ -69,6 +71,7 @@ export class User {
     status: UserStatus = UserStatus.ACTIVE,
     createdAt: Date = new Date(),
     updatedAt: Date = new Date(),
+    googleId: string | null = null,
   ): User {
     return new User({
       id,
@@ -76,6 +79,7 @@ export class User {
       password,
       role,
       status,
+      googleId,
       createdAt,
       updatedAt,
     })
@@ -108,6 +112,14 @@ export class User {
    */
   activate(): void {
     this.setStatus(UserStatus.ACTIVE)
+  }
+
+  /**
+   * Associates a Google account with this user (e.g. first OAuth login for an email-only account).
+   */
+  linkGoogleAccount(googleId: string): void {
+    this.props.googleId = googleId
+    this.props.updatedAt = new Date()
   }
 
   /**
@@ -157,6 +169,11 @@ export class User {
   /** Gets the user's current account status. */
   get status(): UserStatus {
     return this.props.status
+  }
+
+  /** Google OAuth subject id when linked; otherwise null. */
+  get googleId(): string | null {
+    return this.props.googleId
   }
 
   /** Gets the timestamp when the user account was created. */

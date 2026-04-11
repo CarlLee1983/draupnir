@@ -23,6 +23,11 @@ export interface IAuthRepository {
   findByEmail(email: Email): Promise<User | null>
 
   /**
+   * Retrieves a User aggregate linked to the given Google OAuth subject id.
+   */
+  findByGoogleId(googleId: string): Promise<User | null>
+
+  /**
    * Checks if an account already exists with the given email address.
    */
   emailExists(email: Email): Promise<boolean>

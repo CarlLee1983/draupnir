@@ -2,6 +2,7 @@ import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { AuthController } from '../Controllers/AuthController'
 import { attachJwt } from '../Middleware/RoleMiddleware'
 import { LoginRequest, RefreshTokenRequest, RegisterRequest } from '../Requests'
+import { registerOAuthRoutes } from './oauth.routes'
 
 /**
  * Registers authentication-related routes with the module router.
@@ -10,6 +11,8 @@ export async function registerAuthRoutes(
   router: IModuleRouter,
   controller: AuthController,
 ): Promise<void> {
+  registerOAuthRoutes(router)
+
   /** POST /api/auth/register - Register a new user */
   router.post('/api/auth/register', RegisterRequest, (ctx) => controller.register(ctx))
 

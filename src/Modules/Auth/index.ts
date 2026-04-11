@@ -22,6 +22,7 @@ export type {
 export { ChangeUserStatusService } from './Application/Services/ChangeUserStatusService'
 export { ListUsersService } from './Application/Services/ListUsersService'
 export { LoginUserService } from './Application/Services/LoginUserService'
+export { GoogleOAuthService } from './Application/Services/GoogleOAuthService'
 export { RegisterUserService } from './Application/Services/RegisterUserService'
 
 // Domain

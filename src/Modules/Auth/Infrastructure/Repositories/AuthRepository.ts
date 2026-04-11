@@ -39,6 +39,14 @@ export class AuthRepository implements IAuthRepository {
   }
 
   /**
+   * Finds a user by linked Google OAuth subject id.
+   */
+  async findByGoogleId(googleId: string): Promise<User | null> {
+    const row = await this.db.table('users').where('google_id', '=', googleId).first()
+    return row ? this.mapRowToUser(row) : null
+  }
+
+  /**
    * Checks if a user with the given email already exists in the system.
    */
   async emailExists(email: Email): Promise<boolean> {
@@ -81,12 +89,14 @@ export class AuthRepository implements IAuthRepository {
    * Maps a raw database row to a User aggregate.
    */
   private mapRowToUser(row: Record<string, unknown>): User {
+    const googleRaw = row.google_id
     return User.reconstitute({
       id: String(row.id),
       email: new Email(String(row.email)),
       password: Password.fromHashed(String(row.password)),
       role: this.mapRole(row.role),
       status: this.mapStatus(row.status),
+      googleId: googleRaw != null && String(googleRaw).length > 0 ? String(googleRaw) : null,
       createdAt: this.toDate(row.created_at),
       updatedAt: this.toDate(row.updated_at),
     })
@@ -102,6 +112,7 @@ export class AuthRepository implements IAuthRepository {
       password: user.password.getHashed(),
       role: user.role.getValue(),
       status: user.status,
+      google_id: user.googleId,
       created_at: user.createdAt.toISOString(),
       updated_at: user.updatedAt.toISOString(),
     }

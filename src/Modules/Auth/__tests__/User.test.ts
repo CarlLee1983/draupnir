@@ -18,6 +18,7 @@ describe('User Aggregate Root', () => {
     expect(user.role.getValue()).toBe(RoleType.MEMBER)
     expect(user.role.isMember()).toBe(true)
     expect(user.status).toBe(UserStatus.ACTIVE)
+    expect(user.googleId).toBeNull()
   })
 
   it('應該識別管理員', () => {
@@ -48,6 +49,7 @@ describe('User Aggregate Root', () => {
       password: Password.fromHashed('salt:hash'),
       role: Role.member(),
       status: UserStatus.INACTIVE,
+      googleId: null,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-02T00:00:00.000Z'),
     })

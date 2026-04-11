@@ -33,6 +33,7 @@ describe('ListUsersService', () => {
       password: Password.fromHashed(users[0].password.getHashed()),
       role: Role.admin(),
       status: UserStatus.ACTIVE,
+      googleId: users[0].googleId,
       createdAt: users[0].createdAt,
       updatedAt: users[0].updatedAt,
     })

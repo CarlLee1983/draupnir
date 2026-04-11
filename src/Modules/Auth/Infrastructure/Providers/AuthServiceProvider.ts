@@ -13,9 +13,11 @@ import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { getCurrentORM } from '@/wiring/RepositoryFactory'
 import { getRegistry } from '@/wiring/RepositoryRegistry'
+import { GoogleOAuthService } from '../../Application/Services/GoogleOAuthService'
 import { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
 import { GetUserDetailService } from '../../Application/Services/GetUserDetailService'
 import { JwtTokenService } from '../Services/JwtTokenService'
+import { GoogleOAuthAdapter } from '../Services/GoogleOAuthAdapter'
 import { ListUsersService } from '../../Application/Services/ListUsersService'
 import { LoginUserService } from '../../Application/Services/LoginUserService'
 import { LogoutUserService } from '../../Application/Services/LogoutUserService'
@@ -116,6 +118,24 @@ export class AuthServiceProvider extends ModuleServiceProvider {
     container.bind('getUserDetailService', (c: IContainer) => {
       const authRepository = c.make('authRepository') as IAuthRepository
       return new GetUserDetailService(authRepository)
+    })
+
+    container.singleton('googleOAuthAdapter', () => {
+      const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID ?? ''
+      const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? ''
+      const redirectUri =
+        process.env.GOOGLE_OAUTH_REDIRECT_URI ?? 'http://localhost:3000/oauth/google/callback'
+      return new GoogleOAuthAdapter(clientId, clientSecret, redirectUri)
+    })
+
+    container.bind('googleOAuthService', (c: IContainer) => {
+      return new GoogleOAuthService(
+        c.make('authRepository') as IAuthRepository,
+        c.make('jwtTokenService') as JwtTokenService,
+        c.make('googleOAuthAdapter') as GoogleOAuthAdapter,
+        c.make('profileRepository') as IUserProfileRepository,
+        c.make('passwordHasher') as ScryptPasswordHasher,
+      )
     })
 
     // Configure middleware with the registered token repository

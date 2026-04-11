@@ -1,5 +1,6 @@
 import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
 import { registerAdminPageBindings } from '@/Pages/routing/admin/registerAdminPageBindings'
+import { registerAuthPageBindings } from '@/Pages/routing/auth/registerAuthPageBindings'
 import { getInertiaServiceSingleton } from '@/Pages/routing/inertiaFactory'
 import { registerMemberPageBindings } from '@/Pages/routing/member/registerMemberPageBindings'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
@@ -25,6 +26,7 @@ export class PagesServiceProvider extends ModuleServiceProvider {
     const { inertiaService } = PAGE_CONTAINER_KEYS
 
     container.singleton(inertiaService, () => getInertiaServiceSingleton())
+    registerAuthPageBindings(container)
     registerAdminPageBindings(container)
     registerMemberPageBindings(container)
   }
