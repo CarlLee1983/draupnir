@@ -187,4 +187,106 @@ describe('GetKpiSummaryService', () => {
 
     expect(result.data?.lastSyncedAt).toBeNull()
   })
+
+  it('returns previousPeriod scoped to member visible keys', async () => {
+    const { service, usageRepository, orgAuth, apiKeyRepository } = createService()
+
+    ;(orgAuth.requireOrgMembership as ReturnType<typeof vi.fn>).mockResolvedValue({
+      authorized: true,
+      membership: { role: 'member', userId: 'user-1' },
+    })
+    ;(apiKeyRepository.findByOrgId as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { id: 'key-1', createdByUserId: 'user-1', status: 'active' },
+      { id: 'key-2', createdByUserId: 'other', status: 'active' }, // not visible
+    ])
+
+    // current period calls (1x for key-1)
+    // prior period calls (1x for key-1)
+    ;(usageRepository.queryStatsByKey as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ totalRequests: 10, totalCost: 2.0, totalTokens: 400, avgLatency: 100 }) // current key-1
+      .mockResolvedValueOnce({ totalRequests: 5, totalCost: 1.0, totalTokens: 200, avgLatency: 80 })  // prior key-1
+
+    const result = await service.execute({
+      orgId: 'org-1',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+      startTime: '2026-03-13T00:00:00Z',
+      endTime: '2026-04-12T00:00:00Z',
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.data?.previousPeriod).toEqual({
+      totalRequests: 5,
+      totalCost: 1.0,
+      totalTokens: 200,
+      avgLatency: 80,
+    })
+    // queryStatsByOrg must NOT be called at all
+    expect(usageRepository.queryStatsByOrg).not.toHaveBeenCalled()
+    // queryStatsByKey called twice: once for current, once for prior
+    expect(usageRepository.queryStatsByKey).toHaveBeenCalledTimes(2)
+  })
+
+  it('returns previousPeriod as zeroUsage when prior period has no records', async () => {
+    const { service, usageRepository, orgAuth } = createService()
+
+    ;(orgAuth.requireOrgMembership as ReturnType<typeof vi.fn>).mockResolvedValue({
+      authorized: true,
+      membership: { role: 'manager', userId: 'user-1' },
+    })
+    ;(usageRepository.queryStatsByOrg as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ totalRequests: 8, totalCost: 1.5, totalTokens: 300, avgLatency: 120 }) // current
+      .mockResolvedValueOnce({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 })       // prior
+
+    const result = await service.execute({
+      orgId: 'org-1',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+      startTime: '2026-03-13T00:00:00Z',
+      endTime: '2026-04-12T00:00:00Z',
+    })
+
+    expect(result.success).toBe(true)
+    expect(result.data?.previousPeriod).toEqual({
+      totalRequests: 0,
+      totalCost: 0,
+      totalTokens: 0,
+      avgLatency: 0,
+    })
+  })
+
+  it('prior window duration mirrors the selected window exactly', async () => {
+    const { service, usageRepository, orgAuth } = createService()
+
+    ;(orgAuth.requireOrgMembership as ReturnType<typeof vi.fn>).mockResolvedValue({
+      authorized: true,
+      membership: null,
+    })
+    ;(usageRepository.queryStatsByOrg as ReturnType<typeof vi.fn>).mockResolvedValue({
+      totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0,
+    })
+
+    const startTime = '2026-03-13T00:00:00.000Z'
+    const endTime = '2026-04-12T00:00:00.000Z'
+
+    await service.execute({
+      orgId: 'org-1',
+      callerUserId: 'user-1',
+      callerSystemRole: 'admin',
+      startTime,
+      endTime,
+    })
+
+    // queryStatsByOrg called twice: current range, then prior range
+    expect(usageRepository.queryStatsByOrg).toHaveBeenCalledTimes(2)
+
+    const windowMs = new Date(endTime).getTime() - new Date(startTime).getTime()
+    const expectedPriorStart = new Date(new Date(startTime).getTime() - windowMs).toISOString()
+    const expectedPriorEnd = startTime
+
+    expect(usageRepository.queryStatsByOrg).toHaveBeenNthCalledWith(2, 'org-1', {
+      startDate: expectedPriorStart,
+      endDate: expectedPriorEnd,
+    })
+  })
 })
