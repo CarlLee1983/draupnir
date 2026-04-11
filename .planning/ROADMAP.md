@@ -45,7 +45,7 @@
 
 ### Phases
 
-- [ ] **Phase 8: Data Correctness & Permission Foundation** - Fix 3 prerequisite bugs: hardcoded data, field mismatch, role-scoped permissions
+- [x] **Phase 8: Data Correctness & Permission Foundation** ✅ - Fix 3 prerequisite bugs: hardcoded data, field mismatch, role-scoped permissions (completed 2026-04-11)
 - [ ] **Phase 9: Cached Sync Infrastructure** - BifrostSyncService + usage_records SQLite schema enabling local 5-50ms reads
 - [ ] **Phase 10: P1 Chart UI** - Six table-stakes dashboard features wired end-to-end with real data
 - [ ] **Phase 11: Resilience & UX Polish** - Gateway timeout handling, performance safeguards, staleness UX
@@ -58,13 +58,14 @@
 **Depends on**: Phase 7 (v1.1 complete)
 **Requirements**: DASHBOARD-P1, DASHBOARD-P2, DASHBOARD-P3
 **Success Criteria** (what must be TRUE):
-  1. Admin dashboard displays real organisation cost figures, not the static `sampleUsageData` literal
-  2. Token charts show non-zero input and output token counts matching Bifrost log values
-  3. A MEMBER user cannot see another member's API key costs or usage data
-  4. A MANAGER or ADMIN user sees the full organisation-level usage summary
-  5. All existing tests continue to pass with zero regressions
-**Plans**: TBD
-**UI hint**: yes
+  1. ✅ Admin dashboard displays real organisation cost figures, not the static `sampleUsageData` literal
+  2. ✅ Token charts show non-zero input and output token counts matching Bifrost log values
+  3. ✅ A MEMBER user cannot see another member's API key costs or usage data
+  4. ✅ A MANAGER or ADMIN user sees the full organisation-level usage summary
+  5. ✅ All existing tests continue to pass with zero regressions
+**Plans**: 
+- [x] 08-01-PLAN.md — DashboardKeyScopeResolver + role-aware summary/usage (completed 2026-04-11)
+**Status**: ✅ COMPLETED 2026-04-11
 
 ### Phase 9: Cached Sync Infrastructure
 **Goal**: A local `usage_records` SQLite table is populated by `BifrostSyncService` on a 5-minute schedule, enabling all chart services to query sub-100ms local data instead of hitting Bifrost directly
