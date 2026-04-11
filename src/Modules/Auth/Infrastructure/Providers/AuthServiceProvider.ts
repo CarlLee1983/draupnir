@@ -25,9 +25,18 @@ import { RefreshTokenService } from '../../Application/Services/RefreshTokenServ
 import { RegisterUserService } from '../../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
+import type { IEmailVerificationRepository } from '../../Domain/Repositories/IEmailVerificationRepository'
+import type { IPasswordResetRepository } from '../../Domain/Repositories/IPasswordResetRepository'
+import { EmailVerificationService } from '../../Application/Services/EmailVerificationService'
+import { ForgotPasswordService } from '../../Application/Services/ForgotPasswordService'
+import { ResetPasswordService } from '../../Application/Services/ResetPasswordService'
+import type { IEmailService } from '../../Application/Ports/IEmailService'
 import { configureAuthMiddleware } from '../../Presentation/Middleware/RoleMiddleware'
 import { AuthRepository } from '../Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Repositories/AuthTokenRepository'
+import { InMemoryEmailVerificationRepository } from '../Repositories/InMemoryEmailVerificationRepository'
+import { InMemoryPasswordResetRepository } from '../Repositories/InMemoryPasswordResetRepository'
+import { ConsoleEmailService } from '../Services/ConsoleEmailService'
 import { ScryptPasswordHasher } from '../Services/PasswordHasher'
 
 /**
@@ -135,6 +144,49 @@ export class AuthServiceProvider extends ModuleServiceProvider {
         c.make('googleOAuthAdapter') as GoogleOAuthAdapter,
         c.make('profileRepository') as IUserProfileRepository,
         c.make('passwordHasher') as ScryptPasswordHasher,
+      )
+    })
+
+    container.singleton('emailService', (): IEmailService => {
+      if (process.env.NODE_ENV === 'production' && process.env.EMAIL_TRANSPORT_CONFIGURED !== 'true') {
+        throw new Error(
+          '[Auth] Production email transport not configured. ' +
+          'Set EMAIL_TRANSPORT_CONFIGURED=true and wire a real IEmailService binding, ' +
+          'or replace ConsoleEmailService in AuthServiceProvider.',
+        )
+      }
+      return new ConsoleEmailService()
+    })
+
+    container.singleton('passwordResetRepository', () => new InMemoryPasswordResetRepository())
+
+    container.singleton(
+      'emailVerificationRepository',
+      () => new InMemoryEmailVerificationRepository(),
+    )
+
+    container.bind('forgotPasswordService', (c: IContainer) => {
+      const baseUrl = process.env.APP_URL?.trim() || 'http://localhost:3000'
+      return new ForgotPasswordService(
+        c.make('authRepository') as IAuthRepository,
+        c.make('passwordResetRepository') as IPasswordResetRepository,
+        c.make('emailService') as IEmailService,
+        baseUrl,
+      )
+    })
+
+    container.bind('resetPasswordService', (c: IContainer) => {
+      return new ResetPasswordService(
+        c.make('passwordResetRepository') as IPasswordResetRepository,
+        c.make('authRepository') as IAuthRepository,
+        c.make('passwordHasher') as ScryptPasswordHasher,
+        c.make('authTokenRepository') as IAuthTokenRepository,
+      )
+    })
+
+    container.bind('emailVerificationService', (c: IContainer) => {
+      return new EmailVerificationService(
+        c.make('emailVerificationRepository') as IEmailVerificationRepository,
       )
     })
 
