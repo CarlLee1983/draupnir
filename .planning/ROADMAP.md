@@ -121,7 +121,10 @@
   1. User can click "Download Report" to trigger a `window.print()` PDF of the dashboard with all KPI data included
   2. KPI cards show a percentage-change badge comparing the current period to the prior equivalent period (e.g., +5% / -3%)
   3. The PDF output contains the correct cost total and at least one trend chart
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 12-01-PLAN.md — GetKpiSummaryService prior-period extension + DTO update (TDD)
+- [ ] 12-02-PLAN.md — Frontend KPI badges, Download Report button, print:hidden layout
 **UI hint**: yes
 
 ---
