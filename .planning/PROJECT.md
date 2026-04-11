@@ -98,7 +98,7 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11 after v1.1 milestone completion*
+*Last updated: 2026-04-12 after Phase 11 completion*
 
 ## Shipped Milestones
 
@@ -137,12 +137,12 @@ This document evolves at phase transitions and milestone boundaries.
 - English-only API responses standardized across all modules (v1.1)
 - Test infrastructure ready for further development (912+ tests, 0 failures)
 - Lint and type checking clean
-- Dashboard 基礎架構已建立（表格賭注 chart 已識別，無技術債務）
+- Dashboard 基礎架構已建立，Phase 11 已完成 resilience/UX hardening，並提供 staleness freshness metadata
 
 **What's Ready for Next Milestone (v1.2):**
 - Research complete: chart 庫、feature 層級、架構決策、pitfalls 識別
 - 5 個 requirements categories 定義完畢
-- 路線圖準備生成（~5-7 phases）
+- 路線圖已完成；Phase 12 differentiators 可直接在既有 dashboard 基礎上延伸
 
 ## Previous Milestone: v1.1 Pages & Framework ✓
 
