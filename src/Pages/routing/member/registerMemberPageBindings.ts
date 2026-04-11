@@ -6,7 +6,6 @@ import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/L
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
-import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
@@ -33,10 +32,8 @@ export function registerMemberPageBindings(container: IContainer): void {
   const k = MEMBER_PAGE_KEYS
 
   container.singleton(k.dashboard, (c) => {
-    const summaryService = c.make('getDashboardSummaryService') as GetDashboardSummaryService
     return new MemberDashboardPage(
       c.make(i) as InertiaService,
-      summaryService,
       c.make('getBalanceService') as GetBalanceService,
     )
   })

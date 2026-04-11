@@ -52,7 +52,7 @@ describe('MemberDashboardPage i18n', () => {
       },
     } as any
 
-    const page = new MemberDashboardPage(mockInertia, {} as any, {} as any)
+    const page = new MemberDashboardPage(mockInertia, {} as any)
     await page.handle(ctx)
 
     expect(capturedProps.error).toBe('Please select an organization first')

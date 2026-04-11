@@ -60,7 +60,15 @@ export interface UsageRecordInsert {
 export interface IUsageRepository {
   upsert(record: UsageRecordInsert): Promise<void>
   queryDailyCostByOrg(orgId: string, range: DateRange): Promise<readonly DailyCostBucket[]>
+  queryDailyCostByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly DailyCostBucket[]>
   queryModelBreakdown(orgId: string, range: DateRange): Promise<readonly ModelUsageBucket[]>
+  queryModelBreakdownByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly ModelUsageBucket[]>
   queryStatsByOrg(orgId: string, range: DateRange): Promise<UsageStats>
   queryStatsByKey(apiKeyId: string, range: DateRange): Promise<UsageStats>
 }

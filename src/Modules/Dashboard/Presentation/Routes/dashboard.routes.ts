@@ -12,4 +12,13 @@ export function registerDashboardRoutes(
   router.get('/api/organizations/:orgId/dashboard/usage', moduleAuth, (ctx) =>
     controller.usage(ctx),
   )
+  router.get('/api/organizations/:orgId/dashboard/kpi-summary', moduleAuth, (ctx) =>
+    controller.kpiSummary(ctx),
+  )
+  router.get('/api/organizations/:orgId/dashboard/cost-trends', moduleAuth, (ctx) =>
+    controller.costTrends(ctx),
+  )
+  router.get('/api/organizations/:orgId/dashboard/model-comparison', moduleAuth, (ctx) =>
+    controller.modelComparison(ctx),
+  )
 }

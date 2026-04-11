@@ -155,6 +155,45 @@ describe('DrizzleUsageRepository', () => {
     ])
   })
 
+  it('aggregates daily cost only for the selected API keys', async () => {
+    await seedRecord({
+      apiKeyId: 'key-1',
+      creditCost: '1.50',
+      inputTokens: 10,
+      outputTokens: 20,
+    })
+    await repository.upsert({
+      id: 'row-2',
+      bifrostLogId: 'log-2',
+      apiKeyId: 'key-2',
+      orgId: 'org-1',
+      model: 'claude-sonnet',
+      provider: 'anthropic',
+      inputTokens: 50,
+      outputTokens: 10,
+      creditCost: '2.75',
+      latencyMs: 200,
+      status: 'success',
+      occurredAt: '2026-04-11T12:30:00Z',
+      createdAt: '2026-04-11T12:30:01Z',
+    })
+
+    const result = await repository.queryDailyCostByKeys(['key-1'], {
+      startDate: '2026-04-11T00:00:00Z',
+      endDate: '2026-04-12T00:00:00Z',
+    })
+
+    expect(result).toEqual([
+      {
+        date: '2026-04-11',
+        totalCost: 1.5,
+        totalRequests: 1,
+        totalInputTokens: 10,
+        totalOutputTokens: 20,
+      },
+    ])
+  })
+
   it('excludes rows outside the requested date range', async () => {
     await seedRecord({ occurredAt: '2026-04-10T23:59:59Z' })
     await repository.upsert({
@@ -234,6 +273,38 @@ describe('DrizzleUsageRepository', () => {
         avgLatencyMs: 100,
       },
     ])
+  })
+
+  it('limits model breakdown to the top 10 rows by cost', async () => {
+    for (let index = 1; index <= 11; index += 1) {
+      await repository.upsert({
+        id: `row-${index}`,
+        bifrostLogId: `log-${index}`,
+        apiKeyId: `key-${index}`,
+        orgId: 'org-1',
+        model: `model-${index}`,
+        provider: index % 2 === 0 ? 'openai' : 'anthropic',
+        inputTokens: index * 10,
+        outputTokens: index * 5,
+        creditCost: String(index),
+        latencyMs: 100 + index,
+        status: 'success',
+        occurredAt: '2026-04-11T10:00:00Z',
+        createdAt: '2026-04-11T10:00:01Z',
+      })
+    }
+
+    const result = await repository.queryModelBreakdownByKeys(
+      Array.from({ length: 11 }, (_, index) => `key-${index + 1}`),
+      {
+        startDate: '2026-04-11T00:00:00Z',
+        endDate: '2026-04-12T00:00:00Z',
+      },
+    )
+
+    expect(result).toHaveLength(10)
+    expect(result[0]).toMatchObject({ model: 'model-11', totalCost: 11 })
+    expect(result[9]).toMatchObject({ model: 'model-2', totalCost: 2 })
   })
 
   it('returns aggregate stats for the org', async () => {

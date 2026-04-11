@@ -142,6 +142,9 @@ export const registerDashboard = (core: PlanetCore): void => {
   const controller = new DashboardController(
     core.container.make('getDashboardSummaryService') as any,
     core.container.make('getUsageChartService') as any,
+    core.container.make('getKpiSummaryService') as any,
+    core.container.make('getCostTrendsService') as any,
+    core.container.make('getModelComparisonService') as any,
   )
   registerDashboardRoutes(router, controller)
 }

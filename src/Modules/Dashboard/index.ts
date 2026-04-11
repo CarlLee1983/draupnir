@@ -1,5 +1,8 @@
 export { GetDashboardSummaryService } from './Application/Services/GetDashboardSummaryService'
 export { GetUsageChartService } from './Application/Services/GetUsageChartService'
+export { GetKpiSummaryService } from './Application/Services/GetKpiSummaryService'
+export { GetCostTrendsService } from './Application/Services/GetCostTrendsService'
+export { GetModelComparisonService } from './Application/Services/GetModelComparisonService'
 export { UsageAggregator } from './Infrastructure/Services/UsageAggregator'
 export { DashboardServiceProvider } from './Infrastructure/Providers/DashboardServiceProvider'
 export { DashboardController } from './Presentation/Controllers/DashboardController'

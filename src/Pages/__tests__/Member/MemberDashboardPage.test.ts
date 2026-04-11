@@ -74,7 +74,7 @@ describe('MemberDashboardPage', () => {
   test('unauthenticated request returns 302 redirect to /login', async () => {
     const ctx = createMockContext()
     const { inertia } = createMockInertia()
-    const page = new MemberDashboardPage(inertia, {} as any, {} as any)
+    const page = new MemberDashboardPage(inertia, {} as any)
 
     const response = await page.handle(ctx)
 
@@ -88,41 +88,30 @@ describe('MemberDashboardPage', () => {
     })
     const { inertia, captured } = createMockInertia()
 
-    const mockSummaryService = {
-      execute: mock(() =>
-        Promise.resolve({
-          success: true,
-          data: { totalKeys: 5, activeKeys: 3, usage: { totalRequests: 100 } },
-        })
-      ),
-    }
     const mockBalanceService = {
       execute: mock(() => Promise.resolve({ success: true, data: { balance: 50 } })),
     }
 
-    const page = new MemberDashboardPage(inertia, mockSummaryService as any, mockBalanceService as any)
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall).not.toBe(null)
     expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
     expect(captured.lastCall?.props.orgId).toBe('org-123')
-    expect(captured.lastCall?.props.summary).not.toBe(null)
     expect(captured.lastCall?.props.balance).not.toBe(null)
   })
 
-  test('without orgId renders with null summary and balance', async () => {
+  test('without orgId renders with null balance', async () => {
     const ctx = createMemberContext()
     const { inertia, captured } = createMockInertia()
 
-    const mockSummaryService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
     const mockBalanceService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
 
-    const page = new MemberDashboardPage(inertia, mockSummaryService as any, mockBalanceService as any)
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
-    expect(captured.lastCall?.props.summary).toBe(null)
     expect(captured.lastCall?.props.balance).toBe(null)
     expect(captured.lastCall?.props.error).toBe('Please select an organization first')
   })
@@ -133,12 +122,9 @@ describe('MemberDashboardPage', () => {
     })
     const { inertia, captured } = createMockInertia()
 
-    const mockSummaryService = {
-      execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })),
-    }
-    const mockBalanceService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
+    const mockBalanceService = { execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })) }
 
-    const page = new MemberDashboardPage(inertia, mockSummaryService as any, mockBalanceService as any)
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.error).toBe('組織不存在')

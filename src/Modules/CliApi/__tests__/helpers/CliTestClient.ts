@@ -37,7 +37,11 @@ export class CliTestClient {
       throw new Error(`Device code request failed: ${response.status}`)
     }
 
-    const body = await response.json()
+    const body = (await response.json()) as {
+      success?: boolean
+      data?: { deviceCode: string; userCode: string; verificationUri: string; expiresIn: number; interval: number }
+      message?: string
+    }
     if (!body.success || !body.data) {
       throw new Error(`Device code generation failed: ${body.message}`)
     }
@@ -61,7 +65,7 @@ export class CliTestClient {
     })
 
     if (!response.ok) {
-      const body = await response.json()
+      const body = (await response.json()) as { message?: string }
       if (response.status === 428) {
         throw new Error('AUTHORIZATION_PENDING')
       }
@@ -71,7 +75,11 @@ export class CliTestClient {
       throw new Error(`Token exchange failed: ${body.message}`)
     }
 
-    const body = await response.json()
+    const body = (await response.json()) as {
+      success?: boolean
+      data?: { accessToken: string; refreshToken: string; user: { id: string; email: string; role: string } }
+      message?: string
+    }
     if (!body.success || !body.data) {
       throw new Error(`Token exchange failed: ${body.message}`)
     }
@@ -107,9 +115,13 @@ export class CliTestClient {
       throw new Error(`LLM proxy failed: ${response.status}`)
     }
 
-    const body = await response.json()
+    const body = (await response.json()) as { success?: boolean; message?: string; data?: { choices: Array<{ role: string; content: string }> } }
     if (!body.success) {
       throw new Error(`LLM request failed: ${body.message}`)
+    }
+
+    if (!body.data) {
+      throw new Error('LLM request failed: missing response data')
     }
 
     return body.data

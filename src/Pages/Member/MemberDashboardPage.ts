@@ -1,22 +1,20 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
-import type { GetDashboardSummaryService } from '@/Modules/Dashboard/Application/Services/GetDashboardSummaryService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
 import { requireMember } from './helpers/requireMember'
 
 /**
- * Member dashboard summary for the selected organization (`Member/Dashboard/Index`).
+ * Member dashboard shell for the selected organization (`Member/Dashboard/Index`).
  */
 export class MemberDashboardPage {
   constructor(
     private readonly inertia: InertiaService,
-    private readonly summaryService: GetDashboardSummaryService,
     private readonly balanceService: GetBalanceService,
   ) {}
 
   /**
    * @param ctx - Query `orgId` or header `X-Organization-Id` selects the active org.
-   * @returns Inertia summary, missing-org message, or login redirect.
+   * @returns Inertia shell, missing-org message, or login redirect.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)
@@ -33,31 +31,17 @@ export class MemberDashboardPage {
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Dashboard/Index', {
         orgId: null,
-        summary: null,
         balance: null,
         error: messages['member.dashboard.selectOrg'],
       })
     }
 
-    const [summaryResult, balanceResult] = await Promise.all([
-      this.summaryService.execute(orgId, auth.userId, auth.role),
-      this.balanceService.execute(orgId, auth.userId, auth.role),
-    ])
-
-    const summary =
-      summaryResult.success && summaryResult.data
-        ? {
-            totalKeys: summaryResult.data.totalKeys,
-            activeKeys: summaryResult.data.activeKeys,
-            totalUsage: summaryResult.data.usage.totalRequests,
-          }
-        : null
+    const balanceResult = await this.balanceService.execute(orgId, auth.userId, auth.role)
 
     return this.inertia.render(ctx, 'Member/Dashboard/Index', {
       orgId,
-      summary,
       balance: balanceResult.success ? (balanceResult.data ?? null) : null,
-      error: summaryResult.success ? null : summaryResult.message,
+      error: balanceResult.success ? null : balanceResult.message,
     })
   }
 }

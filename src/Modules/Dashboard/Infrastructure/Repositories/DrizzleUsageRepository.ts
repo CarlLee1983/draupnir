@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, lte, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, lte, sql } from 'drizzle-orm'
 import { getDrizzleInstance } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
 import { usageRecords } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
 import type {
@@ -36,6 +36,68 @@ export class DrizzleUsageRepository implements IUsageRepository {
   }
 
   async queryDailyCostByOrg(orgId: string, range: DateRange): Promise<readonly DailyCostBucket[]> {
+    return this.queryDailyCost(
+      and(
+        eq(usageRecords.org_id, orgId),
+        gte(usageRecords.occurred_at, range.startDate),
+        lte(usageRecords.occurred_at, range.endDate),
+      ),
+    )
+  }
+
+  async queryDailyCostByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly DailyCostBucket[]> {
+    if (apiKeyIds.length === 0) {
+      return []
+    }
+
+    return this.queryDailyCost(
+      and(
+        inArray(usageRecords.api_key_id, [...apiKeyIds]),
+        gte(usageRecords.occurred_at, range.startDate),
+        lte(usageRecords.occurred_at, range.endDate),
+      ),
+    )
+  }
+
+  async queryModelBreakdown(orgId: string, range: DateRange): Promise<readonly ModelUsageBucket[]> {
+    return this.queryModelBreakdownInternal(
+      and(
+        eq(usageRecords.org_id, orgId),
+        gte(usageRecords.occurred_at, range.startDate),
+        lte(usageRecords.occurred_at, range.endDate),
+      ),
+    )
+  }
+
+  async queryModelBreakdownByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly ModelUsageBucket[]> {
+    if (apiKeyIds.length === 0) {
+      return []
+    }
+
+    return this.queryModelBreakdownInternal(
+      and(
+        inArray(usageRecords.api_key_id, [...apiKeyIds]),
+        gte(usageRecords.occurred_at, range.startDate),
+        lte(usageRecords.occurred_at, range.endDate),
+      ),
+    )
+  }
+
+  async queryStatsByOrg(orgId: string, range: DateRange): Promise<UsageStats> {
+    return this.queryStats(eq(usageRecords.org_id, orgId), range)
+  }
+
+  async queryStatsByKey(apiKeyId: string, range: DateRange): Promise<UsageStats> {
+    return this.queryStats(eq(usageRecords.api_key_id, apiKeyId), range)
+  }
+
+  private async queryDailyCost(condition: any): Promise<readonly DailyCostBucket[]> {
     const db = getDrizzleInstance()
     const rows = await db
       .select({
@@ -46,13 +108,7 @@ export class DrizzleUsageRepository implements IUsageRepository {
         totalOutputTokens: sql<number>`SUM(${usageRecords.output_tokens})`,
       })
       .from(usageRecords)
-      .where(
-        and(
-          eq(usageRecords.org_id, orgId),
-          gte(usageRecords.occurred_at, range.startDate),
-          lte(usageRecords.occurred_at, range.endDate),
-        ),
-      )
+      .where(condition)
       .groupBy(sql`DATE(${usageRecords.occurred_at})`)
       .orderBy(sql`DATE(${usageRecords.occurred_at})`)
 
@@ -65,7 +121,7 @@ export class DrizzleUsageRepository implements IUsageRepository {
     }))
   }
 
-  async queryModelBreakdown(orgId: string, range: DateRange): Promise<readonly ModelUsageBucket[]> {
+  private async queryModelBreakdownInternal(condition: any): Promise<readonly ModelUsageBucket[]> {
     const db = getDrizzleInstance()
     const rows = await db
       .select({
@@ -76,15 +132,10 @@ export class DrizzleUsageRepository implements IUsageRepository {
         avgLatencyMs: sql<number>`AVG(COALESCE(${usageRecords.latency_ms}, 0))`,
       })
       .from(usageRecords)
-      .where(
-        and(
-          eq(usageRecords.org_id, orgId),
-          gte(usageRecords.occurred_at, range.startDate),
-          lte(usageRecords.occurred_at, range.endDate),
-        ),
-      )
+      .where(condition)
       .groupBy(usageRecords.model, usageRecords.provider)
       .orderBy(desc(sql`SUM(CAST(${usageRecords.credit_cost} AS REAL))`))
+      .limit(10)
 
     return rows.map((row) => ({
       model: String(row.model),
@@ -93,14 +144,6 @@ export class DrizzleUsageRepository implements IUsageRepository {
       totalRequests: Number(row.totalRequests ?? 0),
       avgLatencyMs: Number(row.avgLatencyMs ?? 0),
     }))
-  }
-
-  async queryStatsByOrg(orgId: string, range: DateRange): Promise<UsageStats> {
-    return this.queryStats(eq(usageRecords.org_id, orgId), range)
-  }
-
-  async queryStatsByKey(apiKeyId: string, range: DateRange): Promise<UsageStats> {
-    return this.queryStats(eq(usageRecords.api_key_id, apiKeyId), range)
   }
 
   private async queryStats(condition: any, range: DateRange): Promise<UsageStats> {
