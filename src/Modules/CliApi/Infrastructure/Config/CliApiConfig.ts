@@ -21,7 +21,7 @@ export function loadCliApiConfig(): CliApiConfig {
   const verificationUri =
     process.env.CLI_VERIFICATION_URI?.trim() ||
     process.env.VERIFICATION_URI?.trim() ||
-    'http://localhost:3000/cli/verify'
+    'http://localhost:3000/verify-device'
 
   const storeRaw = (process.env.DEVICE_CODE_STORE_TYPE ?? 'memory').toLowerCase()
   if (storeRaw !== 'memory') {

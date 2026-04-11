@@ -27,7 +27,7 @@ describe('loadCliApiConfig', () => {
     const c = loadCliApiConfig()
     expect(c.deviceCodeTtlSeconds).toBe(600)
     expect(c.pollingIntervalSeconds).toBe(5)
-    expect(c.verificationUri).toBe('http://localhost:3000/cli/verify')
+    expect(c.verificationUri).toBe('http://localhost:3000/verify-device')
   })
 
   it('reads overrides from env', () => {
