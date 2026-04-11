@@ -43,6 +43,7 @@ export class TestClient {
       method: operation.method.toUpperCase(),
       headers,
       body: hasBody ? JSON.stringify(options.body) : undefined,
+      redirect: 'manual',
     })
 
     const contentType = res.headers.get('content-type') ?? ''

@@ -21,7 +21,27 @@ import { registerPageStaticRoutes } from './routing/registerPageStaticRoutes'
  * @param container - DI container holding page bindings from `PagesServiceProvider`.
  */
 export function registerPageRoutes(router: IModuleRouter, container: IContainer): void {
-  registerAdminPageRoutes(router, container)
-  registerMemberPageRoutes(router, container)
-  registerPageStaticRoutes(router)
+  try {
+    registerAdminPageRoutes(router, container)
+    console.log('✅ Admin Inertia page routes registered')
+  } catch (error) {
+    console.error('❌ Failed to register admin page routes:', error)
+    throw error
+  }
+
+  try {
+    registerMemberPageRoutes(router, container)
+    console.log('✅ Member Inertia page routes registered')
+  } catch (error) {
+    console.error('❌ Failed to register member page routes:', error)
+    throw error
+  }
+
+  try {
+    registerPageStaticRoutes(router)
+    console.log('✅ Static page assets routes registered')
+  } catch (error) {
+    console.error('❌ Failed to register static page routes:', error)
+    throw error
+  }
 }
