@@ -9,6 +9,6 @@ export default class AddCompositeIndexToUsageRecords implements Migration {
 
   async down(): Promise<void> {
     // SQLite does not support DROP INDEX via Schema helper without full table recreation.
-    // This migration is intentionally irreversible — the index is additive and harmless if left.
+    // This migration is intentionally irreversible - the index is additive and harmless if left.
   }
 }
