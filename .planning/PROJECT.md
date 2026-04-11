@@ -47,7 +47,7 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 | PDF export via `window.print()` | Simplest implementation with high visual fidelity; no new deps | ✅ Completed |
 
 ---
-*Last updated: 2026-04-12 after v1.2 completion*
+*Last updated: 2026-04-12 after v1.3 milestone start*
 
 ## Shipped Milestones
 
@@ -70,11 +70,28 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 - **Role Isolation:** Multi-member security logic ensures users only see authorized usage.
 - **Differentiators:** Period-over-period % change badges and nav-hidden PDF export.
 
-## Next Milestone: v1.3 Advanced Analytics & Alerts
+## Current Milestone: v1.3 Advanced Analytics & Alerts
 
-**目標：** 增強分析深度並引入主動通知機制。
+**Goal:** 增強分析深度並引入主動通知機制 — 使用警報、金鑰成本細分、自動化報表。
 
-**核心交付物：**
-1. **使用警報** — 當組織或特定金鑰成本超過預算時發送 Webhook/Email。
-2. **按金鑰成本細分** — 詳細顯示每個 API Key 的具體花費和 Token 效率。
-3. **自動化報表** — 定期（每週/每月）自動發送決算 PDF 至管理員郵箱。
+**Target features:**
+- 使用警報 — 當組織或特定金鑰成本超過預算時發送 Webhook/Email
+- 按金鑰成本細分 — 詳細顯示每個 API Key 的具體花費和 Token 效率
+- 自動化報表 — 定期（每週/每月）自動發送決算 PDF 至管理員郵箱
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
