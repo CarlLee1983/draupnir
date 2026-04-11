@@ -59,7 +59,10 @@
   3. System sends an email when a threshold is breached, with correct severity level indicated
   4. System does not send duplicate alerts for the same threshold breach within the deduplication window
   5. Alert emails distinguish between warning (soft limit) and critical (hard limit) severity
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 13-01-PLAN.md — Domain layer, IMailer port, DB schema, value objects, repositories
+- [ ] 13-02-PLAN.md — Evaluation pipeline, email sending, controller, ServiceProvider wiring
 **UI hint**: yes
 
 ### Phase 14: Per-Key Cost Breakdown
@@ -71,7 +74,7 @@
   2. User can see token usage efficiency metrics (cost per token, tokens per request) for each key
   3. User can view cost distribution across models with percentage breakdowns
   4. User can view per-model aggregation showing each model's share of total organization usage
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
 
 ### Phase 15: Webhook Alerts
@@ -82,7 +85,7 @@
   1. User can register a webhook URL to receive alert notifications when thresholds are breached
   2. All webhook payloads include an HMAC-SHA256 signature that receivers can verify
   3. User can view a history of all alerts with delivery status (sent, failed) per channel
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
 
 ### Phase 16: Automated Reports
@@ -94,7 +97,7 @@
   2. System generates a server-side PDF containing dashboard charts and cost summary data
   3. System emails the generated PDF to configured recipients on the scheduled cadence
   4. Report scheduling respects the admin's selected timezone, including DST transitions
-**Plans**: TBD
+**Plans**: 2 plans
 
 ## Progress
 
@@ -103,7 +106,7 @@
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Alert Foundation & Email Infrastructure | v1.3 | 0/? | Not started | - |
+| 13. Alert Foundation & Email Infrastructure | v1.3 | 0/2 | Planning complete | - |
 | 14. Per-Key Cost Breakdown | v1.3 | 0/? | Not started | - |
 | 15. Webhook Alerts | v1.3 | 0/? | Not started | - |
 | 16. Automated Reports | v1.3 | 0/? | Not started | - |
