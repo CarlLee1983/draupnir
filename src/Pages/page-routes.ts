@@ -12,6 +12,24 @@ import { registerAuthPageRoutes } from './routing/registerAuthPageRoutes'
 import { registerMemberPageRoutes } from './routing/registerMemberPageRoutes'
 import { registerPageStaticRoutes } from './routing/registerPageStaticRoutes'
 
+type PageRouteRegistration = {
+  label: string
+  register: (router: IModuleRouter, container: IContainer) => void
+}
+
+/** Order matters: auth → admin → member → static assets. */
+const PAGE_ROUTE_REGISTRATIONS: readonly PageRouteRegistration[] = [
+  { label: 'Auth Inertia page', register: registerAuthPageRoutes },
+  { label: 'Admin Inertia page', register: registerAdminPageRoutes },
+  { label: 'Member Inertia page', register: registerMemberPageRoutes },
+  {
+    label: 'Static page assets',
+    register: (r) => {
+      registerPageStaticRoutes(r)
+    },
+  },
+]
+
 /**
  * Mounts all Inertia routes and static frontend assets on the module router.
  *
@@ -22,35 +40,15 @@ import { registerPageStaticRoutes } from './routing/registerPageStaticRoutes'
  * @param container - DI container holding page bindings from `PagesServiceProvider`.
  */
 export function registerPageRoutes(router: IModuleRouter, container: IContainer): void {
+  let currentLabel = ''
   try {
-    registerAuthPageRoutes(router, container)
-    console.log('✅ Auth Inertia page routes registered')
+    for (const { label, register } of PAGE_ROUTE_REGISTRATIONS) {
+      currentLabel = label
+      register(router, container)
+      console.log(`✅ ${label} routes registered`)
+    }
   } catch (error) {
-    console.error('❌ Failed to register auth page routes:', error)
-    throw error
-  }
-
-  try {
-    registerAdminPageRoutes(router, container)
-    console.log('✅ Admin Inertia page routes registered')
-  } catch (error) {
-    console.error('❌ Failed to register admin page routes:', error)
-    throw error
-  }
-
-  try {
-    registerMemberPageRoutes(router, container)
-    console.log('✅ Member Inertia page routes registered')
-  } catch (error) {
-    console.error('❌ Failed to register member page routes:', error)
-    throw error
-  }
-
-  try {
-    registerPageStaticRoutes(router)
-    console.log('✅ Static page assets routes registered')
-  } catch (error) {
-    console.error('❌ Failed to register static page routes:', error)
+    console.error(`❌ Failed to register ${currentLabel} routes:`, error)
     throw error
   }
 }
