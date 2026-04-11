@@ -110,11 +110,11 @@ Plans:
 **Goal**: All 19 page handler classes have unit tests; all 25 Inertia page routes (`/admin/*`, `/member/*`) are covered in `routes-existence.test.ts`; the full test suite passes.
 **Requirements**: PAGE-01, PAGE-02, PAGE-03, PAGE-04, PAGE-05, PAGE-06
 **Depends on:** Phase 5
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 06-01-PLAN.md — Admin page handler unit tests: 12 test files covering auth guards, GET rendering, POST handlers (Wave 1)
-- [ ] 06-02-PLAN.md — Member page handler unit tests: 7 test files covering auth guards, GET rendering, POST handlers (Wave 1, parallel)
+- [x] 06-01-PLAN.md — Admin page handler unit tests: 12 test files covering auth guards, GET rendering, POST handlers (Wave 1)
+- [x] 06-02-PLAN.md — Member page handler unit tests: 7 test files covering auth guards, GET rendering, POST handlers (Wave 1, parallel)
 - [ ] 06-03-PLAN.md — routes-existence page route coverage: 25 admin + member route assertions (Wave 2)
 
 ## Progress
@@ -129,4 +129,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | 3. Domain Rename | 3/3 | Complete | 2026-04-10 |
 | 4. SDK Extraction | 2/2 | Complete | 2026-04-10 |
 | 5. Final Verification | 3/3 | Complete | 2026-04-10 |
-| 6. Pages Test Coverage | 0/3 | In Progress | — |
+| 6. Pages Test Coverage | 2/3 | In Progress|  |
