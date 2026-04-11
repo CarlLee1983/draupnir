@@ -19,54 +19,70 @@ export class BifrostSyncService {
   ) {}
 
   async sync(): Promise<SyncResult> {
+    const TIMEOUT_MS = 30_000
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      timeoutId = setTimeout(() => {
+        reject(new Error('[BifrostSyncService] sync timed out after 30s'))
+      }, TIMEOUT_MS)
+    })
+
     try {
-      const cursor = await this.cursorRepo.get('bifrost_logs')
-      const since = cursor?.lastSyncedAt ?? new Date(0).toISOString()
-      const logs = await this.gatewayClient.getUsageLogs([], { startTime: since, limit: 500 })
-
-      let synced = 0
-      let quarantined = 0
-      let lastProcessedLogId: string | undefined
-
-      for (const log of logs) {
-        const bifrostLogId = log.logId ?? `${log.timestamp}:${log.keyId}`
-        lastProcessedLogId = bifrostLogId
-
-        const apiKey = await this.apiKeyRepo.findByBifrostVirtualKeyId(log.keyId)
-        if (!apiKey) {
-          await this.quarantineLog(log, 'virtual_key_not_found')
-          quarantined++
-          continue
-        }
-
-        await this.usageRepo.upsert({
-          id: crypto.randomUUID(),
-          bifrostLogId,
-          apiKeyId: apiKey.id,
-          orgId: apiKey.orgId,
-          model: log.model,
-          provider: log.provider,
-          inputTokens: log.inputTokens,
-          outputTokens: log.outputTokens,
-          creditCost: String(log.cost),
-          latencyMs: log.latencyMs,
-          status: log.status,
-          occurredAt: log.timestamp,
-          createdAt: new Date().toISOString(),
-        })
-        synced++
-      }
-
-      await this.cursorRepo.advance('bifrost_logs', {
-        lastSyncedAt: new Date().toISOString(),
-        lastBifrostLogId: lastProcessedLogId ?? cursor?.lastBifrostLogId ?? undefined,
-      })
-
-      return { synced, quarantined }
+      return await Promise.race([this.syncInternal(), timeoutPromise])
     } catch (error: unknown) {
       console.error('[BifrostSyncService] Sync failed:', error)
       return { synced: 0, quarantined: 0 }
+    } finally {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
     }
+  }
+
+  private async syncInternal(): Promise<SyncResult> {
+    const cursor = await this.cursorRepo.get('bifrost_logs')
+    const since = cursor?.lastSyncedAt ?? new Date(0).toISOString()
+    const logs = await this.gatewayClient.getUsageLogs([], { startTime: since, limit: 500 })
+
+    let synced = 0
+    let quarantined = 0
+    let lastProcessedLogId: string | undefined
+
+    for (const log of logs) {
+      const bifrostLogId = log.logId ?? `${log.timestamp}:${log.keyId}`
+      lastProcessedLogId = bifrostLogId
+
+      const apiKey = await this.apiKeyRepo.findByBifrostVirtualKeyId(log.keyId)
+      if (!apiKey) {
+        await this.quarantineLog(log, 'virtual_key_not_found')
+        quarantined++
+        continue
+      }
+
+      await this.usageRepo.upsert({
+        id: crypto.randomUUID(),
+        bifrostLogId,
+        apiKeyId: apiKey.id,
+        orgId: apiKey.orgId,
+        model: log.model,
+        provider: log.provider,
+        inputTokens: log.inputTokens,
+        outputTokens: log.outputTokens,
+        creditCost: String(log.cost),
+        latencyMs: log.latencyMs,
+        status: log.status,
+        occurredAt: log.timestamp,
+        createdAt: new Date().toISOString(),
+      })
+      synced++
+    }
+
+    await this.cursorRepo.advance('bifrost_logs', {
+      lastSyncedAt: new Date().toISOString(),
+      lastBifrostLogId: lastProcessedLogId ?? cursor?.lastBifrostLogId ?? undefined,
+    })
+
+    return { synced, quarantined }
   }
 
   private async quarantineLog(

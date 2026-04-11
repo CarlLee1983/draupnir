@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
@@ -31,7 +31,9 @@ function makeUsageRepo(db: MemoryDatabaseAccess): IUsageRepository {
       })
     },
     queryDailyCostByOrg: async () => [],
+    queryDailyCostByKeys: async () => [],
     queryModelBreakdown: async () => [],
+    queryModelBreakdownByKeys: async () => [],
     queryStatsByOrg: async () => ({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }),
     queryStatsByKey: async () => ({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }),
   }
@@ -265,5 +267,48 @@ describe('BifrostSyncService', () => {
     gateway.seedUsageLogs([])
     await service.sync()
     expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(getCursorState()?.lastSyncedAt)
+  })
+
+  it('returns { synced: 0, quarantined: 0 } when sync body exceeds 30 seconds', async () => {
+    vi.useFakeTimers()
+
+    try {
+      class SlowGateway extends MockGatewayClient {
+        override async getUsageLogs(): Promise<readonly LogEntry[]> {
+          await new Promise<void>((resolve) => setTimeout(resolve, 60_000))
+          return []
+        }
+      }
+
+      service = new BifrostSyncService(new SlowGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
+      const syncPromise = service.sync()
+      vi.advanceTimersByTime(30_001)
+
+      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0 })
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('does not advance cursor when sync times out', async () => {
+    vi.useFakeTimers()
+
+    try {
+      class SlowGateway extends MockGatewayClient {
+        override async getUsageLogs(): Promise<readonly LogEntry[]> {
+          await new Promise<void>((resolve) => setTimeout(resolve, 60_000))
+          return []
+        }
+      }
+
+      service = new BifrostSyncService(new SlowGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
+      const syncPromise = service.sync()
+      vi.advanceTimersByTime(30_001)
+
+      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0 })
+      expect(getCursorState()).toBeNull()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
