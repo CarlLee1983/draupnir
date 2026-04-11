@@ -13,8 +13,13 @@ export class BrowserAuthHelper {
    * Launch browser instance
    */
   async launch(headless: boolean = true): Promise<void> {
-    this.browser = await chromium.launch({ headless })
-    this.page = await this.browser.newPage()
+    try {
+      this.browser = await chromium.launch({ headless })
+      this.page = await this.browser.newPage()
+    } catch (error) {
+      // 在沒有 X11 或其他顯示伺服器的環境（如 CI/CD）中，瀏覽器啟動會失敗
+      console.warn('Failed to launch browser, skipping browser-based tests:', error instanceof Error ? error.message : String(error))
+    }
   }
 
   /**
@@ -34,6 +39,10 @@ export class BrowserAuthHelper {
    * Navigate to verification URI and authorize device with user code
    */
   async authorizeDevice(verificationUri: string, userCode: string): Promise<void> {
+    if (!this.browser || !this.page) {
+      throw new Error('Browser not available - ensure launch() was called successfully')
+    }
+
     const page = await this.ensurePage()
 
     await page.goto(verificationUri, { waitUntil: 'networkidle' })

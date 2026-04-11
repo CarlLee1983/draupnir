@@ -23,10 +23,15 @@ export class CliTestClient {
     expiresIn: number
     interval: number
   }> {
-    const response = await fetch(`${this.baseUrl}/cli/device-code`, {
+    const url = `${this.baseUrl}/cli/device-code`
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
     })
+
+    if (!response) {
+      throw new Error(`Device code request failed: fetch returned undefined for ${url}`)
+    }
 
     if (!response.ok) {
       throw new Error(`Device code request failed: ${response.status}`)
