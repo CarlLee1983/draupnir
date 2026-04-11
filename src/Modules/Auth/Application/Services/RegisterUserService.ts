@@ -37,51 +37,51 @@ export class RegisterUserService {
    */
   async execute(request: RegisterUserRequest): Promise<RegisterUserResponse> {
     try {
-      // 1. 驗證輸入
+      // 1. Validate input
       const validation = this.validateInput(request)
       if (!validation.isValid) {
         return {
           success: false,
-          message: validation.error || '驗證失敗',
+          message: validation.error || 'Validation failed',
           error: validation.error,
         }
       }
 
-      // 2. 建立 Email 值物件（如果格式無效會拋出例外）
+      // 2. Create Email value object
       const email = new Email(request.email)
 
-      // 3. 檢查電子郵件是否已存在
+      // 3. Check if email already exists
       const emailExists = await this.authRepository.emailExists(email)
       if (emailExists) {
         return {
           success: false,
-          message: '此電子郵件已被註冊',
+          message: 'Email already exists',
           error: 'EMAIL_ALREADY_EXISTS',
         }
       }
 
-      // 4. 創建新用戶（密碼由應用層加密）
+      // 4. Create new user
       const userId = crypto.randomUUID()
       const hashedPassword = await this.passwordHasher.hash(request.password)
       const user = User.create(userId, email, Password.fromHashed(hashedPassword), Role.member())
 
-      // 5. 保存到資料庫
+      // 5. Save to database
       await this.authRepository.save(user)
 
-      // 6. 建立 User Profile（原子性保證）
+      // 6. Create User Profile
       try {
         const profile = UserProfile.createDefault(user.id, request.email)
         await this.userProfileRepository.save(profile)
       } catch (profileError) {
-        // Profile 建立失敗 → 回滾 auth user
+        // Rollback auth user if profile creation fails
         await this.authRepository.delete(user.id)
         throw profileError
       }
 
-      // 7. 返回成功回應（不包含密碼）
+      // 7. Return successful response
       return {
         success: true,
-        message: '用戶註冊成功',
+        message: 'User registered successfully',
         data: {
           id: user.id,
           email: user.emailValue,
@@ -89,10 +89,9 @@ export class RegisterUserService {
         },
       }
     } catch (error: any) {
-      // 捕捉密碼強度驗證或其他錯誤
       return {
         success: false,
-        message: error.message || '註冊失敗',
+        message: error.message || 'Registration failed',
         error: error.message,
       }
     }
@@ -106,19 +105,19 @@ export class RegisterUserService {
     error?: string
   } {
     if (!request.email || !request.email.trim()) {
-      return { isValid: false, error: '電子郵件不能為空' }
+      return { isValid: false, error: 'Email is required' }
     }
 
     if (!request.password || !request.password.trim()) {
-      return { isValid: false, error: '密碼不能為空' }
+      return { isValid: false, error: 'Password is required' }
     }
 
     if (request.password.length < 8) {
-      return { isValid: false, error: '密碼至少需要 8 個字符' }
+      return { isValid: false, error: 'Password must be at least 8 characters long' }
     }
 
     if (request.confirmPassword && request.password !== request.confirmPassword) {
-      return { isValid: false, error: '密碼不匹配' }
+      return { isValid: false, error: 'Passwords do not match' }
     }
 
     return { isValid: true }

@@ -47,7 +47,7 @@ describe('LoginUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(true)
-    expect(result.message).toBe('登入成功')
+    expect(result.message).toBe('Login successful')
     expect(result.data?.accessToken).toBeTruthy()
     expect(result.data?.refreshToken).toBeTruthy()
     expect(result.data?.user.email).toBe('user@example.com')
@@ -64,7 +64,7 @@ describe('LoginUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.message).toBe('電子郵件或密碼錯誤')
+    expect(result.message).toBe('Invalid email or password')
   })
 
   it('應該拒絕錯誤的密碼', async () => {
@@ -74,7 +74,7 @@ describe('LoginUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.message).toBe('電子郵件或密碼錯誤')
+    expect(result.message).toBe('Invalid email or password')
   })
 
   it('應該拒絕空的電子郵件', async () => {
@@ -84,7 +84,7 @@ describe('LoginUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error).toBe('電子郵件不能為空')
+    expect(result.error).toBe('Email is required')
   })
 
   it('應該拒絕空的密碼', async () => {
@@ -94,7 +94,7 @@ describe('LoginUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error).toBe('密碼不能為空')
+    expect(result.error).toBe('Password is required')
   })
 
   it('應該拒絕被暫停的用戶登入', async () => {
@@ -111,6 +111,6 @@ describe('LoginUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.message).toBe('此帳戶已被暫停')
+    expect(result.message).toBe('This account has been suspended')
   })
 })
