@@ -14,7 +14,7 @@ describe('WebhookSecret', () => {
   })
 
   it('空值應拋出錯誤', () => {
-    expect(() => WebhookSecret.fromExisting('')).toThrow('Webhook Secret 不能為空')
+    expect(() => WebhookSecret.fromExisting('')).toThrow('Webhook Secret cannot be empty')
   })
 
   it('應正確計算 HMAC-SHA256 簽名', () => {

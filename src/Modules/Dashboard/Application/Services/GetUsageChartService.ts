@@ -20,7 +20,7 @@ export class GetUsageChartService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '無權存取此組織的用量資料',
+          message: 'Unauthorized to access this organization\'s usage data',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -34,7 +34,7 @@ export class GetUsageChartService {
       if (virtualKeyIds.length === 0) {
         return {
           success: true,
-          message: '查詢成功',
+          message: 'Query successful',
           data: {
             logs: [],
             stats: { totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 },
@@ -57,14 +57,14 @@ export class GetUsageChartService {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           logs: logs.map((l) => ({ ...l }) as Record<string, unknown>),
           stats,
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢失敗'
+      const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
   }

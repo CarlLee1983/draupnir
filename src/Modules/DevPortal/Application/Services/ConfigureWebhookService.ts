@@ -17,7 +17,7 @@ export class ConfigureWebhookService {
     try {
       const application = await this.applicationRepository.findById(request.applicationId)
       if (!application) {
-        return { success: false, message: 'Application 不存在', error: 'APP_NOT_FOUND' }
+        return { success: false, message: 'Application not found', error: 'APP_NOT_FOUND' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -28,7 +28,7 @@ export class ConfigureWebhookService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -54,7 +54,7 @@ export class ConfigureWebhookService {
 
       return {
         success: true,
-        message: 'Webhook 設定成功',
+        message: 'Webhook configured successfully',
         data: {
           webhookUrl: request.webhookUrl,
           webhookSecret: secret.getValue(),
@@ -62,7 +62,7 @@ export class ConfigureWebhookService {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '設定失敗'
+      const message = error instanceof Error ? error.message : 'Configuration failed'
       return { success: false, message, error: message }
     }
   }

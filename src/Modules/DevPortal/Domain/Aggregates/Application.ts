@@ -37,10 +37,10 @@ export class Application {
 
   static create(params: CreateApplicationParams): Application {
     if (!params.name || params.name.trim().length === 0) {
-      throw new Error('Application 名稱不能為空')
+      throw new Error('Application name cannot be empty')
     }
     if (params.name.length > 255) {
-      throw new Error('Application 名稱不能超過 255 字')
+      throw new Error('Application name cannot exceed 255 characters')
     }
     return new Application({
       id: params.id,
@@ -80,13 +80,13 @@ export class Application {
 
   updateInfo(name: string, description: string): Application {
     if (this.props.status.isArchived()) {
-      throw new Error('已封存的應用不能修改')
+      throw new Error('Archived applications cannot be modified')
     }
     if (!name || name.trim().length === 0) {
-      throw new Error('Application 名稱不能為空')
+      throw new Error('Application name cannot be empty')
     }
     if (name.length > 255) {
-      throw new Error('Application 名稱不能超過 255 字')
+      throw new Error('Application name cannot exceed 255 characters')
     }
     return new Application({
       ...this.props,
@@ -98,7 +98,7 @@ export class Application {
 
   setWebhook(url: string, secret: string): Application {
     if (!url.startsWith('https://')) {
-      throw new Error('Webhook URL 必須使用 HTTPS')
+      throw new Error('Webhook URL must use HTTPS')
     }
     return new Application({
       ...this.props,
@@ -119,7 +119,7 @@ export class Application {
 
   updateRedirectUris(uris: string[]): Application {
     if (this.props.status.isArchived()) {
-      throw new Error('已封存的應用不能修改')
+      throw new Error('Archived applications cannot be modified')
     }
     return new Application({
       ...this.props,
@@ -138,7 +138,7 @@ export class Application {
 
   reactivate(): Application {
     if (this.props.status.isArchived()) {
-      throw new Error('已封存的應用不能重新啟用')
+      throw new Error('Archived applications cannot be reactivated')
     }
     return new Application({
       ...this.props,

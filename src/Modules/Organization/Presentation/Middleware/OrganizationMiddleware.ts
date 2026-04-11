@@ -47,13 +47,13 @@ export function requireOrganizationContext(): Middleware {
     await getJwtParser().handle(ctx)
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) {
-      return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
 
     const organizationId = extractOrganizationId(ctx)
     if (!organizationId) {
       return ctx.json(
-        { success: false, message: '缺少組織 ID', error: 'MISSING_ORGANIZATION_ID' },
+        { success: false, message: 'Missing organization ID', error: 'MISSING_ORGANIZATION_ID' },
         400,
       )
     }
@@ -67,7 +67,7 @@ export function requireOrganizationContext(): Middleware {
       return ctx.json(
         {
           success: false,
-          message: '組織權限不足',
+          message: 'Insufficient organization permissions',
           error: orgAuth.error ?? 'FORBIDDEN',
         },
         403,

@@ -22,7 +22,7 @@ describe('WebhookConfig', () => {
         applicationId: 'app-1',
         eventType: 'invalid.event',
       }),
-    ).toThrow('無效的 Webhook 事件類型')
+    ).toThrow('Invalid Webhook event type')
   })
 
   it('應啟用/停用 webhook', () => {

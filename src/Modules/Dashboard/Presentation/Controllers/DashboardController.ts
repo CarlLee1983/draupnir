@@ -11,18 +11,18 @@ export class DashboardController {
 
   async summary(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
-    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
+    if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.summaryService.execute(orgId, auth.userId, auth.role)
     return ctx.json(result)
   }
 
   async usage(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
-    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 400)
+    if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.usageChartService.execute({
       orgId,
       callerUserId: auth.userId,

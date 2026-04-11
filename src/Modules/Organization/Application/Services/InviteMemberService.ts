@@ -24,20 +24,20 @@ export class InviteMemberService {
         callerSystemRole,
       )
       if (!authResult.authorized) {
-        return { success: false, message: '權限不足', error: authResult.error }
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
       if (!request.email || !request.email.trim()) {
-        return { success: false, message: '電子郵件不能為空', error: 'EMAIL_REQUIRED' }
+        return { success: false, message: 'Missing email', error: 'EMAIL_REQUIRED' }
       }
 
       const org = await this.orgRepository.findById(orgId)
       if (!org) {
-        return { success: false, message: '找不到組織', error: 'ORG_NOT_FOUND' }
+        return { success: false, message: 'Organization not found', error: 'ORG_NOT_FOUND' }
       }
 
       if (org.status === 'suspended') {
-        return { success: false, message: '組織已停用', error: 'ORG_SUSPENDED' }
+        return { success: false, message: 'Organization is suspended', error: 'ORG_SUSPENDED' }
       }
 
       const role = request.role || 'member'
@@ -51,7 +51,7 @@ export class InviteMemberService {
 
       return {
         success: true,
-        message: '邀請已發送',
+        message: 'Invitation sent',
         data: {
           ...OrganizationInvitationPresenter.fromEntity(invitation),
           token: invitation.token,
@@ -59,7 +59,7 @@ export class InviteMemberService {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '邀請失敗'
+      const message = error instanceof Error ? error.message : 'Invitation failed'
       return { success: false, message, error: message }
     }
   }

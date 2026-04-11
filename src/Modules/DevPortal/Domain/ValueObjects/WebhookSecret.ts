@@ -10,7 +10,7 @@ export class WebhookSecret {
 
   static fromExisting(value: string): WebhookSecret {
     if (!value || value.trim().length === 0) {
-      throw new Error('Webhook Secret 不能為空')
+      throw new Error('Webhook Secret cannot be empty')
     }
     return new WebhookSecret(value)
   }

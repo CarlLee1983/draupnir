@@ -44,7 +44,7 @@ function validateOrganizationId(
       response: ctx.json(
         {
           success: false,
-          message: '驗證失敗',
+          message: 'Validation failed',
           error: validation.error.issues[0]?.message ?? '無效的組織 ID',
         },
         400,
@@ -67,7 +67,7 @@ function validateOrganizationMemberParams(
       response: ctx.json(
         {
           success: false,
-          message: '驗證失敗',
+          message: 'Validation failed',
           error: validation.error.issues[0]?.message ?? '參數無效',
         },
         400,
@@ -90,7 +90,7 @@ function validateInvitationParams(
       response: ctx.json(
         {
           success: false,
-          message: '驗證失敗',
+          message: 'Validation failed',
           error: validation.error.issues[0]?.message ?? '參數無效',
         },
         400,
@@ -131,7 +131,7 @@ export class OrganizationController {
 
   async get(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationId(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
@@ -159,7 +159,7 @@ export class OrganizationController {
 
   async listMembers(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationId(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
@@ -169,7 +169,7 @@ export class OrganizationController {
 
   async invite(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationId(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
@@ -180,7 +180,7 @@ export class OrganizationController {
 
   async acceptInvitation(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const body = ctx.get('validated') as AcceptInvitationParams
     const result = await this.acceptInvitationService.execute(auth.userId, body)
     return ctx.json(result, result.success ? 200 : 400)
@@ -188,7 +188,7 @@ export class OrganizationController {
 
   async removeMember(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationMemberParams(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
@@ -209,7 +209,7 @@ export class OrganizationController {
 
   async listInvitations(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationId(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
@@ -219,7 +219,7 @@ export class OrganizationController {
 
   async cancelInvitation(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateInvitationParams(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId

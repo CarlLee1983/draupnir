@@ -12,7 +12,7 @@ export class RegisterAppService {
   async execute(request: RegisterAppRequest): Promise<RegisterAppResponse> {
     try {
       if (!request.name || !request.name.trim()) {
-        return { success: false, message: 'Application 名稱不能為空', error: 'NAME_REQUIRED' }
+        return { success: false, message: 'Application name is required', error: 'NAME_REQUIRED' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -23,7 +23,7 @@ export class RegisterAppService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -42,11 +42,11 @@ export class RegisterAppService {
 
       return {
         success: true,
-        message: 'Application 註冊成功',
+        message: 'Application registered successfully',
         data: ApplicationPresenter.fromEntity(application),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '註冊失敗'
+      const message = error instanceof Error ? error.message : 'Registration failed'
       return { success: false, message, error: message }
     }
   }

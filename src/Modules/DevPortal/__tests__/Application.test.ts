@@ -30,13 +30,13 @@ describe('Application', () => {
 
   it('名稱為空應拋出錯誤', () => {
     expect(() => Application.create({ ...defaultParams, name: '' })).toThrow(
-      'Application 名稱不能為空',
+      'Application name cannot be empty',
     )
   })
 
   it('名稱過長應拋出錯誤', () => {
     expect(() => Application.create({ ...defaultParams, name: 'x'.repeat(256) })).toThrow(
-      'Application 名稱不能超過 255 字',
+      'Application name cannot exceed 255 characters',
     )
   })
 
@@ -51,7 +51,7 @@ describe('Application', () => {
   it('已封存的應用不能更新資訊', () => {
     const app = Application.create(defaultParams)
     const archived = app.archive()
-    expect(() => archived.updateInfo('New', 'Desc')).toThrow('已封存的應用不能修改')
+    expect(() => archived.updateInfo('New', 'Desc')).toThrow('Archived applications cannot be modified')
   })
 
   it('應設定 webhook URL 與 secret', () => {
@@ -64,7 +64,7 @@ describe('Application', () => {
   it('webhook URL 必須是 HTTPS', () => {
     const app = Application.create(defaultParams)
     expect(() => app.setWebhook('http://example.com/webhook', 'whsec_test')).toThrow(
-      'Webhook URL 必須使用 HTTPS',
+      'Webhook URL must use HTTPS',
     )
   })
 
@@ -97,7 +97,7 @@ describe('Application', () => {
   it('已封存的應用不能 reactivate', () => {
     const app = Application.create(defaultParams)
     const archived = app.archive()
-    expect(() => archived.reactivate()).toThrow('已封存的應用不能重新啟用')
+    expect(() => archived.reactivate()).toThrow('Archived applications cannot be reactivated')
   })
 
   it('應更新 redirect URIs', () => {

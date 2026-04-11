@@ -15,16 +15,16 @@ export class RenewContractService {
   ): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {
-        return { success: false, message: '僅管理者可續約', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can renew contracts', error: 'FORBIDDEN' }
       }
 
       const oldContract = await this.contractRepo.findById(contractId)
       if (!oldContract) {
-        return { success: false, message: '合約不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Contract not found', error: 'NOT_FOUND' }
       }
 
       if (!oldContract.isActive()) {
-        return { success: false, message: '僅 ACTIVE 合約可續約', error: 'INVALID_STATUS' }
+        return { success: false, message: 'Only ACTIVE contracts can be renewed', error: 'INVALID_STATUS' }
       }
 
       // 舊合約標記為 EXPIRED
@@ -43,11 +43,11 @@ export class RenewContractService {
 
       return {
         success: true,
-        message: '合約已續約',
+        message: 'Contract renewed successfully',
         data: ContractPresenter.fromEntity(newContract),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '續約失敗'
+      const message = error instanceof Error ? error.message : 'Contract renewal failed'
       return { success: false, message, error: message }
     }
   }

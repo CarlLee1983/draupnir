@@ -16,7 +16,7 @@ describe('ContractEnforcementService', () => {
   test('null 合約 → 不允許', () => {
     const result = enforcementService.checkModuleAccess(null, 'chat')
     expect(result.allowed).toBe(false)
-    expect(result.reason).toContain('無有效合約')
+    expect(result.reason).toContain('No valid contract')
   })
 
   test('DRAFT 合約 → 不允許', () => {
@@ -28,7 +28,7 @@ describe('ContractEnforcementService', () => {
     })
     const result = enforcementService.checkModuleAccess(contract, 'chat')
     expect(result.allowed).toBe(false)
-    expect(result.reason).toContain('非 ACTIVE')
+    expect(result.reason).toContain('not ACTIVE')
   })
 
   test('ACTIVE 合約 + 模組在清單中 → 允許', () => {
@@ -51,6 +51,6 @@ describe('ContractEnforcementService', () => {
     }).activate()
     const result = enforcementService.checkModuleAccess(contract, 'image-gen')
     expect(result.allowed).toBe(false)
-    expect(result.reason).toContain('不在合約允許清單中')
+    expect(result.reason).toContain('not in the contract allowed list')
   })
 })

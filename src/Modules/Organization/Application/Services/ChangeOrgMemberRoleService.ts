@@ -20,7 +20,7 @@ export class ChangeOrgMemberRoleService {
 
       const member = await this.memberRepository.findByUserAndOrgId(targetUserId, orgId)
       if (!member) {
-        return { success: false, message: '找不到成員', error: 'MEMBER_NOT_FOUND' }
+        return { success: false, message: 'Member not found', error: 'MEMBER_NOT_FOUND' }
       }
 
       const updated = member.changeRole(newRole)
@@ -34,16 +34,16 @@ export class ChangeOrgMemberRoleService {
         await txMemberRepo.update(updated)
       })
 
-      return { success: true, message: '成員角色已變更', data: OrganizationMemberPresenter.fromEntity(updated) }
+      return { success: true, message: 'Member role updated successfully', data: OrganizationMemberPresenter.fromEntity(updated) }
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('last manager')) {
         return {
           success: false,
-          message: '不能降級最後一個 Manager',
+          message: 'Cannot demote the last manager',
           error: 'CANNOT_DEMOTE_LAST_MANAGER',
         }
       }
-      const message = error instanceof Error ? error.message : '變更失敗'
+      const message = error instanceof Error ? error.message : 'Role change failed'
       return { success: false, message, error: message }
     }
   }

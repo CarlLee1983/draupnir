@@ -7,13 +7,13 @@ export class ContractEnforcementService {
     moduleName: string,
   ): { allowed: boolean; reason?: string } {
     if (!contract) {
-      return { allowed: false, reason: '無有效合約' }
+      return { allowed: false, reason: 'No valid contract' }
     }
     if (!contract.isActive()) {
-      return { allowed: false, reason: `合約狀態為 ${contract.status}，非 ACTIVE` }
+      return { allowed: false, reason: `Contract status is ${contract.status}, not ACTIVE` }
     }
     if (!contract.hasModule(moduleName)) {
-      return { allowed: false, reason: `模組 ${moduleName} 不在合約允許清單中` }
+      return { allowed: false, reason: `Module ${moduleName} is not in the contract allowed list` }
     }
     return { allowed: true }
   }

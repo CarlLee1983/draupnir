@@ -10,7 +10,7 @@ export class InvitationStatus {
 
   constructor(status: string) {
     if (!Object.values(InvitationStatusType).includes(status as InvitationStatusType)) {
-      throw new Error(`無效的邀請狀態: ${status}`)
+      throw new Error(`Invalid invitation status: ${status}`)
     }
     this.value = status as InvitationStatusType
   }

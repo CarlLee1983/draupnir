@@ -24,7 +24,7 @@ export class ListContractsService {
         if (!authResult.authorized) {
           return {
             success: false,
-            message: '無權檢視此組織的合約',
+            message: 'Unauthorized to view contracts for this organization',
             error: authResult.error ?? 'NOT_ORG_MEMBER',
           }
         }
@@ -33,11 +33,11 @@ export class ListContractsService {
       const contracts = await this.contractRepo.findByTargetId(targetId)
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: contracts.map((c) => ContractPresenter.fromEntity(c)),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢失敗'
+      const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
   }

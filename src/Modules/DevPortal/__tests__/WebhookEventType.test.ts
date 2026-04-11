@@ -28,7 +28,7 @@ describe('WebhookEventType', () => {
   })
 
   it('無效值應拋出錯誤', () => {
-    expect(() => WebhookEventType.from('invalid.event')).toThrow('無效的 Webhook 事件類型')
+    expect(() => WebhookEventType.from('invalid.event')).toThrow('Invalid Webhook event type')
   })
 
   it('應匯出所有有效事件類型清單', () => {

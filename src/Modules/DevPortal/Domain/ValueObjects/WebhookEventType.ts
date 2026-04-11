@@ -28,7 +28,7 @@ export class WebhookEventType {
 
   static from(value: string): WebhookEventType {
     if (!WEBHOOK_EVENT_TYPES.includes(value as WebhookEventTypeValue)) {
-      throw new Error(`無效的 Webhook 事件類型: ${value}`)
+      throw new Error(`Invalid Webhook event type: ${value}`)
     }
     return new WebhookEventType(value as WebhookEventTypeValue)
   }

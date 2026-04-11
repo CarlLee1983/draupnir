@@ -9,7 +9,7 @@ export class CreateContractService {
   async execute(request: CreateContractRequest): Promise<ContractResponse> {
     try {
       if (request.callerSystemRole !== 'admin') {
-        return { success: false, message: '僅管理者可建立合約', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can create contracts', error: 'FORBIDDEN' }
       }
 
       const contract = Contract.create({
@@ -23,11 +23,11 @@ export class CreateContractService {
 
       return {
         success: true,
-        message: '合約建立成功',
+        message: 'Contract created successfully',
         data: ContractPresenter.fromEntity(contract),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '建立合約失敗'
+      const message = error instanceof Error ? error.message : 'Contract creation failed'
       return { success: false, message, error: message }
     }
   }

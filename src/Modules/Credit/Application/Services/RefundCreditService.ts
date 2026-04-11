@@ -29,12 +29,12 @@ export class RefundCreditService {
       try {
         Balance.fromPositiveAmount(request.amount)
       } catch {
-        return { success: false, message: '退款金額必須為正數', error: 'INVALID_AMOUNT' }
+        return { success: false, message: 'Refund amount must be a positive number', error: 'INVALID_AMOUNT' }
       }
 
       const account = await this.accountRepo.findByOrgId(request.orgId)
       if (!account) {
-        return { success: false, message: '帳戶不存在', error: 'ACCOUNT_NOT_FOUND' }
+        return { success: false, message: 'Account not found', error: 'ACCOUNT_NOT_FOUND' }
       }
 
       const updated = account.applyTopUp(request.amount)
@@ -46,7 +46,7 @@ export class RefundCreditService {
         balanceAfter: updated.balance,
         referenceType: request.referenceType,
         referenceId: request.referenceId,
-        description: request.description ?? `管理者 ${request.callerUserId} 退款`,
+        description: request.description ?? `Admin ${request.callerUserId} refund`,
       })
 
       await this.db.transaction(async (tx) => {
@@ -58,14 +58,14 @@ export class RefundCreditService {
 
       return {
         success: true,
-        message: '退款成功',
+        message: 'Refund processed successfully',
         data: {
           balance: updated.balance,
           transactionId: transaction.id,
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '退款失敗'
+      const message = error instanceof Error ? error.message : 'Refund failed'
       return { success: false, message, error: message }
     }
   }

@@ -14,14 +14,14 @@ export class ListOrganizationsService {
 
       return {
         success: true,
-        message: '取得組織列表成功',
+        message: 'Organizations retrieved successfully',
         data: {
           organizations: orgs.map((o) => OrganizationPresenter.fromEntity(o)),
           meta: { total, page, limit, totalPages: Math.ceil(total / limit) || 0 },
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '取得失敗'
+      const message = error instanceof Error ? error.message : 'Fetch failed'
       return { success: false, message, error: message }
     }
   }

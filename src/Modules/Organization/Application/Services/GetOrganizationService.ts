@@ -20,16 +20,16 @@ export class GetOrganizationService {
         callerSystemRole,
       )
       if (!authResult.authorized) {
-        return { success: false, message: '權限不足', error: authResult.error }
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
       const org = await this.orgRepository.findById(orgId)
       if (!org) {
-        return { success: false, message: '找不到組織', error: 'ORG_NOT_FOUND' }
+        return { success: false, message: 'Organization not found', error: 'ORG_NOT_FOUND' }
       }
-      return { success: true, message: '取得成功', data: OrganizationPresenter.fromEntity(org) }
+      return { success: true, message: 'Query successful', data: OrganizationPresenter.fromEntity(org) }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '取得失敗'
+      const message = error instanceof Error ? error.message : 'Fetch failed'
       return { success: false, message, error: message }
     }
   }

@@ -33,7 +33,7 @@ export class ContractController {
 
   async create(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = ctx.get('validated') as CreateContractParams
     const result = await this.createService.execute({
       targetType: body.targetType,
@@ -47,18 +47,18 @@ export class ContractController {
 
   async activate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
-    if (!contractId) return ctx.json({ success: false, message: '缺少 contractId' }, 400)
+    if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const result = await this.activateService.execute(contractId, auth.role)
     return ctx.json(result, result.success ? 200 : 400)
   }
 
   async update(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
-    if (!contractId) return ctx.json({ success: false, message: '缺少 contractId' }, 400)
+    if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const body = ctx.get('validated') as UpdateContractParams
     const result = await this.updateService.execute({
       contractId,
@@ -71,9 +71,9 @@ export class ContractController {
 
   async assign(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
-    if (!contractId) return ctx.json({ success: false, message: '缺少 contractId' }, 400)
+    if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const body = ctx.get('validated') as AssignContractParams
     const result = await this.assignService.execute({
       contractId,
@@ -87,18 +87,18 @@ export class ContractController {
 
   async terminate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
-    if (!contractId) return ctx.json({ success: false, message: '缺少 contractId' }, 400)
+    if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const result = await this.terminateService.execute(contractId, auth.role)
     return ctx.json(result, result.success ? 200 : 400)
   }
 
   async renew(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
-    if (!contractId) return ctx.json({ success: false, message: '缺少 contractId' }, 400)
+    if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const body = ctx.get('validated') as RenewContractParams
     const result = await this.renewService.execute(contractId, body.terms, auth.userId, auth.role)
     return ctx.json(result, result.success ? 200 : 400)
@@ -107,17 +107,17 @@ export class ContractController {
   /** 管理員觸發：處理即將到期事件與已過期合約（供 Cron 或手動呼叫） */
   async handleExpiry(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     if (auth.role !== 'admin') {
-      return ctx.json({ success: false, message: '僅管理者可執行', error: 'FORBIDDEN' }, 403)
+      return ctx.json({ success: false, message: 'Only admins can perform this action', error: 'FORBIDDEN' }, 403)
     }
     const counts = await this.handleContractExpiryService.execute()
-    return ctx.json({ success: true, message: '已處理合約到期檢查', data: counts })
+    return ctx.json({ success: true, message: 'Contract expiry check processed', data: counts })
   }
 
   async list(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const query = ctx.get('validated') as ListContractsQueryParams
     const result = await this.listService.execute(query.targetId, auth.userId, auth.role)
     return ctx.json(result)
@@ -125,9 +125,9 @@ export class ContractController {
 
   async getDetail(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
-    if (!contractId) return ctx.json({ success: false, message: '缺少 contractId' }, 400)
+    if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const result = await this.getDetailService.execute(contractId, auth.role)
     const status = result.success ? 200 : result.error === 'NOT_FOUND' ? 404 : 400
     return ctx.json(result, status)

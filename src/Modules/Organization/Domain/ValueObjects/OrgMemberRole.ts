@@ -8,7 +8,7 @@ export class OrgMemberRole {
 
   constructor(role: string) {
     if (!Object.values(OrgMemberRoleType).includes(role as OrgMemberRoleType)) {
-      throw new Error(`無效的組織成員角色: ${role}`)
+      throw new Error(`Invalid organization member role: ${role}`)
     }
     this.value = role as OrgMemberRoleType
   }

@@ -54,7 +54,7 @@ export class ManageAppKeysService {
     try {
       const application = await this.applicationRepository.findById(request.applicationId)
       if (!application) {
-        return { success: false, message: 'Application 不存在', error: 'APP_NOT_FOUND' }
+        return { success: false, message: 'Application not found', error: 'APP_NOT_FOUND' }
       }
 
       const authResult = await this.orgAuth.requireOrgMembership(
@@ -65,7 +65,7 @@ export class ManageAppKeysService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -89,7 +89,7 @@ export class ManageAppKeysService {
         }
         case 'revoke': {
           if (!request.keyId) {
-            return { success: false, message: '缺少 keyId', error: 'KEY_ID_REQUIRED' }
+            return { success: false, message: 'Missing keyId', error: 'KEY_ID_REQUIRED' }
           }
           const revokeResult = await this.revokeAppKeyService.execute({
             keyId: request.keyId,
@@ -110,16 +110,16 @@ export class ManageAppKeysService {
           )
           return {
             success: listResult.success,
-            message: listResult.message ?? 'App Keys 查詢成功',
+            message: listResult.message ?? 'App keys retrieved successfully',
             data: listResult.data,
             error: listResult.error,
           }
         }
         default:
-          return { success: false, message: '無效的操作', error: 'INVALID_ACTION' }
+          return { success: false, message: 'Invalid action', error: 'INVALID_ACTION' }
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '操作失敗'
+      const message = error instanceof Error ? error.message : 'Operation failed'
       return { success: false, message, error: message }
     }
   }

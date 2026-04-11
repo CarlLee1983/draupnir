@@ -28,7 +28,7 @@ export class ListAppsService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '你不是此組織的成員',
+          message: 'You are not a member of this organization',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -44,7 +44,7 @@ export class ListAppsService {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           apps: apps.map((a) => ApplicationPresenter.fromEntity(a)),
           meta: {
@@ -56,7 +56,7 @@ export class ListAppsService {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢失敗'
+      const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
   }

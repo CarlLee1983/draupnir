@@ -8,7 +8,7 @@ export class TopUpRequest extends FormRequest {
         const n = parseFloat(val)
         return !isNaN(n) && n > 0
       },
-      { message: '金額必須為正數' },
+      { message: 'Amount must be a positive number' },
     ),
     description: z.string().optional(),
   })

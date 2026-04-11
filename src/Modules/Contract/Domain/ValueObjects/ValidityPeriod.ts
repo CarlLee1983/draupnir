@@ -11,7 +11,7 @@ export class ValidityPeriod extends ValueObject {
 
   static create(startDate: Date, endDate: Date): ValidityPeriod {
     if (endDate <= startDate) {
-      throw new Error('結束日期必須晚於開始日期')
+      throw new Error('End date must be after start date')
     }
     return new ValidityPeriod(startDate, endDate)
   }

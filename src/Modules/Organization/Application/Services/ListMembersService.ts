@@ -20,17 +20,17 @@ export class ListMembersService {
         callerSystemRole,
       )
       if (!authResult.authorized) {
-        return { success: false, message: '權限不足', error: authResult.error }
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
       const members = await this.memberRepository.findByOrgId(orgId)
       return {
         success: true,
-        message: '取得成員列表成功',
+        message: 'Members retrieved successfully',
         data: { members: members.map((m) => OrganizationMemberPresenter.fromEntity(m)) },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '取得失敗'
+      const message = error instanceof Error ? error.message : 'Fetch failed'
       return { success: false, message, error: message }
     }
   }

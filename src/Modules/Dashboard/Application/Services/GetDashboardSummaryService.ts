@@ -24,7 +24,7 @@ export class GetDashboardSummaryService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: '無權存取此組織的 Dashboard',
+          message: 'Unauthorized to access this organization\'s dashboard',
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -44,11 +44,11 @@ export class GetDashboardSummaryService {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: { totalKeys, activeKeys, usage },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢失敗'
+      const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
   }

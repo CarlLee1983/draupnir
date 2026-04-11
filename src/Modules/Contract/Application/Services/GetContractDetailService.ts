@@ -8,21 +8,21 @@ export class GetContractDetailService {
   async execute(contractId: string, callerRole: string): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {
-        return { success: false, message: '僅管理者可檢視合約', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can view contracts', error: 'FORBIDDEN' }
       }
 
       const contract = await this.contractRepo.findById(contractId)
       if (!contract) {
-        return { success: false, message: '合約不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Contract not found', error: 'NOT_FOUND' }
       }
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: ContractPresenter.fromEntity(contract),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢失敗'
+      const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
   }

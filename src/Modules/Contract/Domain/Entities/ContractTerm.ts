@@ -24,13 +24,13 @@ export class ContractTerm {
 
   static create(props: ContractTermProps): ContractTerm {
     if (props.creditQuota < 0) {
-      throw new Error('信用額度不可為負數')
+      throw new Error('Credit quota cannot be negative')
     }
     if (props.rateLimit.rpm < 0 || props.rateLimit.tpm < 0) {
-      throw new Error('速率限制不可為負數')
+      throw new Error('Rate limits cannot be negative')
     }
     if (!props.allowedModules || props.allowedModules.length === 0) {
-      throw new Error('允許模組清單不可為空')
+      throw new Error('Allowed modules list cannot be empty')
     }
     return new ContractTerm(props)
   }

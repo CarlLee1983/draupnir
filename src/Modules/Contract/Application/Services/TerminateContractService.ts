@@ -8,12 +8,12 @@ export class TerminateContractService {
   async execute(contractId: string, callerRole: string): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {
-        return { success: false, message: '僅管理者可終止合約', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can terminate contracts', error: 'FORBIDDEN' }
       }
 
       const contract = await this.contractRepo.findById(contractId)
       if (!contract) {
-        return { success: false, message: '合約不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Contract not found', error: 'NOT_FOUND' }
       }
 
       const terminated = contract.terminate()
@@ -21,11 +21,11 @@ export class TerminateContractService {
 
       return {
         success: true,
-        message: '合約已終止',
+        message: 'Contract terminated successfully',
         data: ContractPresenter.fromEntity(terminated),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '終止合約失敗'
+      const message = error instanceof Error ? error.message : 'Contract termination failed'
       return { success: false, message, error: message }
     }
   }

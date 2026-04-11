@@ -8,12 +8,12 @@ export class AssignContractService {
   async execute(request: AssignContractRequest): Promise<ContractResponse> {
     try {
       if (request.callerSystemRole !== 'admin') {
-        return { success: false, message: '僅管理者可指派合約', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can assign contracts', error: 'FORBIDDEN' }
       }
 
       const contract = await this.contractRepo.findById(request.contractId)
       if (!contract) {
-        return { success: false, message: '合約不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Contract not found', error: 'NOT_FOUND' }
       }
 
       const assigned = contract.assignTo(request.targetType, request.targetId)
@@ -21,11 +21,11 @@ export class AssignContractService {
 
       return {
         success: true,
-        message: '合約已指派',
+        message: 'Contract assigned successfully',
         data: ContractPresenter.fromEntity(assigned),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '指派合約失敗'
+      const message = error instanceof Error ? error.message : 'Contract assignment failed'
       return { success: false, message, error: message }
     }
   }

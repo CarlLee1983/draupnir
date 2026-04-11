@@ -13,14 +13,14 @@ export class ContractTarget extends ValueObject {
 
   static forOrganization(orgId: string): ContractTarget {
     if (!orgId || orgId.trim().length === 0) {
-      throw new Error('Organization ID 不可為空')
+      throw new Error('Organization ID cannot be empty')
     }
     return new ContractTarget('organization', orgId)
   }
 
   static forUser(userId: string): ContractTarget {
     if (!userId || userId.trim().length === 0) {
-      throw new Error('User ID 不可為空')
+      throw new Error('User ID cannot be empty')
     }
     return new ContractTarget('user', userId)
   }
@@ -28,7 +28,7 @@ export class ContractTarget extends ValueObject {
   static create(type: string, id: string): ContractTarget {
     if (type === 'organization') return ContractTarget.forOrganization(id)
     if (type === 'user') return ContractTarget.forUser(id)
-    throw new Error(`無效的合約對象類型: ${type}`)
+    throw new Error(`Invalid contract target type: ${type}`)
   }
 
   getType(): ContractTargetType {

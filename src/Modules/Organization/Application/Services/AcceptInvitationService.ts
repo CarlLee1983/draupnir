@@ -24,23 +24,23 @@ export class AcceptInvitationService {
   async execute(userId: string, request: AcceptInvitationRequest): Promise<OrganizationResponse> {
     try {
       if (!request.token || !request.token.trim()) {
-        return { success: false, message: 'Token 不能為空', error: 'TOKEN_REQUIRED' }
+        return { success: false, message: 'Missing token', error: 'TOKEN_REQUIRED' }
       }
 
       const tokenHash = await sha256(request.token)
       const invitation = await this.invitationRepository.findByTokenHash(tokenHash)
 
       if (!invitation || !invitation.isPending()) {
-        return { success: false, message: '無效或已過期的邀請', error: 'INVALID_INVITATION' }
+        return { success: false, message: 'Invalid or expired invitation', error: 'INVALID_INVITATION' }
       }
 
       const user = await this.authRepository.findById(userId)
       if (!user) {
-        return { success: false, message: '找不到使用者', error: 'USER_NOT_FOUND' }
+        return { success: false, message: 'User not found', error: 'USER_NOT_FOUND' }
       }
 
       if (user.emailValue.toLowerCase() !== invitation.email.toLowerCase()) {
-        return { success: false, message: '此邀請不是發給您的', error: 'EMAIL_MISMATCH' }
+        return { success: false, message: 'This invitation was not sent to you', error: 'EMAIL_MISMATCH' }
       }
 
       const existingMembership = await this.memberRepository.findByUserAndOrgId(
@@ -48,7 +48,7 @@ export class AcceptInvitationService {
         invitation.organizationId,
       )
       if (existingMembership) {
-        return { success: false, message: '您已屬於此組織', error: 'USER_ALREADY_IN_ORG' }
+        return { success: false, message: 'Already a member of this organization', error: 'USER_ALREADY_IN_ORG' }
       }
 
       const member = OrganizationMember.create(
@@ -67,11 +67,11 @@ export class AcceptInvitationService {
 
       return {
         success: true,
-        message: '已成功加入組織',
+        message: 'Successfully joined organization',
         data: OrganizationMemberPresenter.fromEntity(member),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '加入失敗'
+      const message = error instanceof Error ? error.message : 'Join failed'
       return { success: false, message, error: message }
     }
   }

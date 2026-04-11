@@ -34,7 +34,7 @@ export class ContractStatus extends ValueObject {
   static fromString(value: string): ContractStatus {
     const valid: ContractStatusValue[] = ['draft', 'active', 'expired', 'terminated']
     if (!valid.includes(value as ContractStatusValue)) {
-      throw new Error(`無效的合約狀態: ${value}`)
+      throw new Error(`Invalid contract status: ${value}`)
     }
     return new ContractStatus(value as ContractStatusValue)
   }
@@ -45,7 +45,7 @@ export class ContractStatus extends ValueObject {
 
   transitionTo(target: ContractStatus): ContractStatus {
     if (!this.canTransitionTo(target)) {
-      throw new Error(`無法從 ${this.value} 轉換至 ${target.value}`)
+      throw new Error(`Cannot transition from ${this.value} to ${target.value}`)
     }
     return target
   }

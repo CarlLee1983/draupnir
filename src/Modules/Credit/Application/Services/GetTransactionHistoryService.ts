@@ -25,14 +25,14 @@ export class GetTransactionHistoryService {
         callerSystemRole,
       )
       if (!authResult.authorized) {
-        return { success: false, message: '無權存取', error: 'NOT_ORG_MEMBER' }
+        return { success: false, message: 'Unauthorized access', error: 'NOT_ORG_MEMBER' }
       }
 
       const account = await this.accountRepo.findByOrgId(orgId)
       if (!account) {
         return {
           success: true,
-          message: '查詢成功',
+          message: 'Query successful',
           data: { transactions: [], total: 0, page, limit },
         }
       }
@@ -45,7 +45,7 @@ export class GetTransactionHistoryService {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           transactions: transactions.map((t) => CreditTransactionPresenter.fromEntity(t)),
           total,
@@ -54,7 +54,7 @@ export class GetTransactionHistoryService {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢失敗'
+      const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
   }

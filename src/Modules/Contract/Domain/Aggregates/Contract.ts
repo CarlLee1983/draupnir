@@ -80,7 +80,7 @@ export class Contract {
 
   updateTerms(terms: ContractTermProps): Contract {
     if (!this.props.status.isDraft()) {
-      throw new Error('僅 DRAFT 狀態的合約可修改條款')
+      throw new Error('Only DRAFT contracts can have their terms modified')
     }
     return new Contract({
       ...this.props,
@@ -91,7 +91,7 @@ export class Contract {
 
   assignTo(targetType: ContractTargetType, targetId: string): Contract {
     if (!this.props.status.isDraft()) {
-      throw new Error('僅 DRAFT 狀態的合約可重新指派')
+      throw new Error('Only DRAFT contracts can be reassigned')
     }
     return new Contract({
       ...this.props,

@@ -16,7 +16,7 @@ describe('ContractStatus', () => {
   })
 
   test('無效字串拋出錯誤', () => {
-    expect(() => ContractStatus.fromString('invalid')).toThrow('無效的合約狀態')
+    expect(() => ContractStatus.fromString('invalid')).toThrow('Invalid contract status')
   })
 
   test('DRAFT → ACTIVE 合法', () => {
@@ -40,7 +40,7 @@ describe('ContractStatus', () => {
   test('DRAFT → EXPIRED 非法', () => {
     const draft = ContractStatus.draft()
     expect(() => draft.transitionTo(ContractStatus.expired())).toThrow(
-      '無法從 draft 轉換至 expired',
+      'Cannot transition from draft to expired',
     )
   })
 

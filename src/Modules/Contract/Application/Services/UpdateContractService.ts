@@ -8,12 +8,12 @@ export class UpdateContractService {
   async execute(request: UpdateContractRequest): Promise<ContractResponse> {
     try {
       if (request.callerSystemRole !== 'admin') {
-        return { success: false, message: '僅管理者可修改合約', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can update contracts', error: 'FORBIDDEN' }
       }
 
       const contract = await this.contractRepo.findById(request.contractId)
       if (!contract) {
-        return { success: false, message: '合約不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Contract not found', error: 'NOT_FOUND' }
       }
 
       const updated = contract.updateTerms(request.terms)
@@ -21,11 +21,11 @@ export class UpdateContractService {
 
       return {
         success: true,
-        message: '合約已更新',
+        message: 'Contract updated successfully',
         data: ContractPresenter.fromEntity(updated),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '更新合約失敗'
+      const message = error instanceof Error ? error.message : 'Contract update failed'
       return { success: false, message, error: message }
     }
   }

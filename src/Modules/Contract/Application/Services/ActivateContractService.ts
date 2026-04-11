@@ -10,12 +10,12 @@ export class ActivateContractService {
   async execute(contractId: string, callerRole: string): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {
-        return { success: false, message: '僅管理者可啟用合約', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can activate contracts', error: 'FORBIDDEN' }
       }
 
       const contract = await this.contractRepo.findById(contractId)
       if (!contract) {
-        return { success: false, message: '合約不存在', error: 'NOT_FOUND' }
+        return { success: false, message: 'Contract not found', error: 'NOT_FOUND' }
       }
 
       const activated = contract.activate()
@@ -27,11 +27,11 @@ export class ActivateContractService {
 
       return {
         success: true,
-        message: '合約已啟用',
+        message: 'Contract activated successfully',
         data: ContractPresenter.fromEntity(activated),
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '啟用合約失敗'
+      const message = error instanceof Error ? error.message : 'Contract activation failed'
       return { success: false, message, error: message }
     }
   }

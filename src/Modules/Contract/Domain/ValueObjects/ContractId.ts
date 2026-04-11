@@ -12,7 +12,7 @@ export class ContractId extends ValueObject {
 
   static fromString(id: string): ContractId {
     if (!id || id.trim().length === 0) {
-      throw new Error('ContractId 不可為空')
+      throw new Error('ContractId cannot be empty')
     }
     return new ContractId(id)
   }

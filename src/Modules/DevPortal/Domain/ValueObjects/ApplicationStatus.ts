@@ -18,7 +18,7 @@ export class ApplicationStatus {
 
   static from(value: string): ApplicationStatus {
     if (!ApplicationStatusValues.includes(value as ApplicationStatusType)) {
-      throw new Error(`無效的 Application 狀態: ${value}`)
+      throw new Error(`Invalid Application status: ${value}`)
     }
     return new ApplicationStatus(value as ApplicationStatusType)
   }

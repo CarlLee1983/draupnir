@@ -25,7 +25,7 @@ export class ListAdminContractsService {
   async execute(query: ListAdminContractsQuery): Promise<ListAdminContractsResponse> {
     try {
       if (query.callerRole !== 'admin') {
-        return { success: false, message: '僅管理者可檢視合約列表', error: 'FORBIDDEN' }
+        return { success: false, message: 'Only admins can view the contract list', error: 'FORBIDDEN' }
       }
 
       const page = query.page ?? 1
@@ -42,7 +42,7 @@ export class ListAdminContractsService {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           contracts,
           meta: {
@@ -54,7 +54,7 @@ export class ListAdminContractsService {
         },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '查詢失敗'
+      const message = error instanceof Error ? error.message : 'Query failed'
       return { success: false, message, error: message }
     }
   }

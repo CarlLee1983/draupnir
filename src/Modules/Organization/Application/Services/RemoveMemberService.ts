@@ -24,16 +24,16 @@ export class RemoveMemberService {
         requesterSystemRole,
       )
       if (!authResult.authorized) {
-        return { success: false, message: '權限不足', error: authResult.error }
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
       if (targetUserId === requesterId) {
-        return { success: false, message: '不能移除自己', error: 'CANNOT_REMOVE_SELF' }
+        return { success: false, message: 'Cannot remove yourself', error: 'CANNOT_REMOVE_SELF' }
       }
 
       const member = await this.memberRepository.findByUserAndOrgId(targetUserId, orgId)
       if (!member) {
-        return { success: false, message: '找不到成員', error: 'MEMBER_NOT_FOUND' }
+        return { success: false, message: 'Member not found', error: 'MEMBER_NOT_FOUND' }
       }
 
       await this.db.transaction(async (tx) => {
@@ -45,16 +45,16 @@ export class RemoveMemberService {
         await txMemberRepo.remove(member.id)
       })
 
-      return { success: true, message: '成員已移除' }
+      return { success: true, message: 'Member removed successfully' }
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('last manager')) {
         return {
           success: false,
-          message: '不能移除最後一個 Manager',
+          message: 'Cannot remove the last manager',
           error: 'CANNOT_REMOVE_LAST_MANAGER',
         }
       }
-      const message = error instanceof Error ? error.message : '移除失敗'
+      const message = error instanceof Error ? error.message : 'Remove failed'
       return { success: false, message, error: message }
     }
   }

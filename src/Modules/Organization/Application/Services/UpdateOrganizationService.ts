@@ -8,15 +8,15 @@ export class UpdateOrganizationService {
     try {
       const org = await this.orgRepository.findById(orgId)
       if (!org) {
-        return { success: false, message: '找不到組織', error: 'ORG_NOT_FOUND' }
+        return { success: false, message: 'Organization not found', error: 'ORG_NOT_FOUND' }
       }
 
       const updated = org.update(request)
       await this.orgRepository.update(updated)
 
-      return { success: true, message: '組織已更新', data: OrganizationPresenter.fromEntity(updated) }
+      return { success: true, message: 'Organization updated successfully', data: OrganizationPresenter.fromEntity(updated) }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '更新失敗'
+      const message = error instanceof Error ? error.message : 'Update failed'
       return { success: false, message, error: message }
     }
   }

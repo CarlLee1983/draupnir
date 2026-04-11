@@ -17,18 +17,18 @@ export class CancelInvitationService {
     try {
       const authResult = await this.orgAuth.requireOrgManager(orgId, callerUserId, callerSystemRole)
       if (!authResult.authorized) {
-        return { success: false, message: '權限不足', error: authResult.error }
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
       const invitation = await this.invitationRepository.findById(invitationId)
       if (!invitation || invitation.organizationId !== orgId) {
-        return { success: false, message: '找不到邀請', error: 'INVITATION_NOT_FOUND' }
+        return { success: false, message: 'Invitation not found', error: 'INVITATION_NOT_FOUND' }
       }
 
       await this.invitationRepository.cancel(invitationId)
-      return { success: true, message: '邀請已取消' }
+      return { success: true, message: 'Invitation cancelled' }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '取消失敗'
+      const message = error instanceof Error ? error.message : 'Cancellation failed'
       return { success: false, message, error: message }
     }
   }

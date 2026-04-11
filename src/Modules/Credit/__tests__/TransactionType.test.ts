@@ -17,7 +17,7 @@ describe('TransactionType', () => {
   })
 
   it('無效類型應拋出錯誤', () => {
-    expect(() => TransactionType.from('invalid')).toThrow('無效的交易類型')
+    expect(() => TransactionType.from('invalid')).toThrow('Invalid transaction type')
   })
 
   it('isCredit 應正確判斷入帳類型', () => {

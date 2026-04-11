@@ -16,17 +16,17 @@ export class ListInvitationsService {
     try {
       const authResult = await this.orgAuth.requireOrgManager(orgId, callerUserId, callerSystemRole)
       if (!authResult.authorized) {
-        return { success: false, message: '權限不足', error: authResult.error }
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
       const invitations = await this.invitationRepository.findByOrgId(orgId)
       return {
         success: true,
-        message: '取得邀請列表成功',
+        message: 'Invitations retrieved successfully',
         data: { invitations: invitations.map((i) => OrganizationInvitationPresenter.fromEntity(i)) },
       }
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : '取得失敗'
+      const message = error instanceof Error ? error.message : 'Fetch failed'
       return { success: false, message, error: message }
     }
   }

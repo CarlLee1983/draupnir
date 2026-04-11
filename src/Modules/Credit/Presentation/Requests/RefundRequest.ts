@@ -8,10 +8,10 @@ export class RefundRequest extends FormRequest {
         const n = parseFloat(val)
         return !isNaN(n) && n > 0
       },
-      { message: '退款金額必須為正數' },
+      { message: 'Refund amount must be a positive number' },
     ),
-    referenceType: z.string().min(1, '參考類型為必填'),
-    referenceId: z.string().min(1, '參考 ID 為必填'),
+    referenceType: z.string().min(1, 'Reference type is required'),
+    referenceId: z.string().min(1, 'Reference ID is required'),
     description: z.string().optional(),
   })
 }

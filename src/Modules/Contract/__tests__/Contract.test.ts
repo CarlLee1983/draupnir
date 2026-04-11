@@ -94,7 +94,7 @@ describe('Contract', () => {
       terms: validTerms,
       createdBy: 'admin-1',
     }).activate()
-    expect(() => active.updateTerms(validTerms)).toThrow('僅 DRAFT 狀態的合約可修改條款')
+    expect(() => active.updateTerms(validTerms)).toThrow('Only DRAFT contracts can have their terms modified')
   })
 
   test('assignTo 僅 DRAFT 可重新指派', () => {

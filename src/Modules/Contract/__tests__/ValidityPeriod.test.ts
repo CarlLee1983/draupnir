@@ -13,7 +13,7 @@ describe('ValidityPeriod', () => {
 
   test('結束日期早於開始日期拋出錯誤', () => {
     expect(() => ValidityPeriod.create(new Date('2026-12-31'), new Date('2026-01-01'))).toThrow(
-      '結束日期必須晚於開始日期',
+      'End date must be after start date',
     )
   })
 

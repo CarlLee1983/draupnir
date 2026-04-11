@@ -32,6 +32,6 @@ describe('ApplicationStatus', () => {
   })
 
   it('無效值應拋出錯誤', () => {
-    expect(() => ApplicationStatus.from('invalid')).toThrow('無效的 Application 狀態')
+    expect(() => ApplicationStatus.from('invalid')).toThrow('Invalid Application status')
   })
 })

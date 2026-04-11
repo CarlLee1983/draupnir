@@ -17,15 +17,15 @@ export class DevPortalController {
 
   async registerApp(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = await ctx.getJsonBody<{
       orgId?: string
       name?: string
       description?: string
       redirectUris?: string[]
     }>()
-    if (!body.orgId) return ctx.json({ success: false, message: '缺少 orgId' }, 422)
-    if (!body.name) return ctx.json({ success: false, message: '缺少 name' }, 422)
+    if (!body.orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 422)
+    if (!body.name) return ctx.json({ success: false, message: 'Missing name' }, 422)
     const result = await this.registerAppService.execute({
       orgId: body.orgId,
       createdByUserId: auth.userId,
@@ -40,9 +40,9 @@ export class DevPortalController {
 
   async listApps(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getQuery('orgId')
-    if (!orgId) return ctx.json({ success: false, message: '缺少 orgId 查詢參數' }, 422)
+    if (!orgId) return ctx.json({ success: false, message: 'Missing orgId query parameter' }, 422)
     const pageRaw = ctx.getQuery('page')
     const limitRaw = ctx.getQuery('limit')
     const result = await this.listAppsService.execute({
@@ -57,9 +57,9 @@ export class DevPortalController {
 
   async issueKey(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const appId = ctx.getParam('appId')
-    if (!appId) return ctx.json({ success: false, message: '缺少 appId' }, 400)
+    if (!appId) return ctx.json({ success: false, message: 'Missing appId' }, 400)
     const body = await ctx.getJsonBody<{
       label?: string
       scope?: string
@@ -80,9 +80,9 @@ export class DevPortalController {
 
   async listKeys(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const appId = ctx.getParam('appId')
-    if (!appId) return ctx.json({ success: false, message: '缺少 appId' }, 400)
+    if (!appId) return ctx.json({ success: false, message: 'Missing appId' }, 400)
     const result = await this.manageAppKeysService.execute({
       applicationId: appId,
       callerUserId: auth.userId,
@@ -94,11 +94,11 @@ export class DevPortalController {
 
   async revokeKey(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const appId = ctx.getParam('appId')
     const keyId = ctx.getParam('keyId')
-    if (!appId) return ctx.json({ success: false, message: '缺少 appId' }, 400)
-    if (!keyId) return ctx.json({ success: false, message: '缺少 keyId' }, 400)
+    if (!appId) return ctx.json({ success: false, message: 'Missing appId' }, 400)
+    if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.manageAppKeysService.execute({
       applicationId: appId,
       callerUserId: auth.userId,
@@ -112,16 +112,16 @@ export class DevPortalController {
 
   async configureWebhook(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const appId = ctx.getParam('appId')
-    if (!appId) return ctx.json({ success: false, message: '缺少 appId' }, 400)
+    if (!appId) return ctx.json({ success: false, message: 'Missing appId' }, 400)
     const body = await ctx.getJsonBody<{
       webhookUrl?: string
       eventTypes?: string[]
     }>()
-    if (!body.webhookUrl) return ctx.json({ success: false, message: '缺少 webhookUrl' }, 400)
+    if (!body.webhookUrl) return ctx.json({ success: false, message: 'Missing webhookUrl' }, 400)
     if (!body.eventTypes || body.eventTypes.length === 0) {
-      return ctx.json({ success: false, message: '至少需要訂閱一個事件類型' }, 400)
+      return ctx.json({ success: false, message: 'At least one event type must be subscribed' }, 400)
     }
     const result = await this.configureWebhookService.execute({
       applicationId: appId,
