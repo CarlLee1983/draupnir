@@ -38,6 +38,12 @@ export class MemberApiKeyCreatePage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
+    const shared = ctx.get('inertia:shared') as {
+      locale: 'zh-TW' | 'en'
+      messages: Record<string, string>
+    } | undefined
+    const messages = shared?.messages ?? {}
+
     const body = await ctx.getJsonBody<{
       orgId?: string
       label?: string
@@ -54,7 +60,7 @@ export class MemberApiKeyCreatePage {
       return this.inertia.render(ctx, 'Member/ApiKeys/Create', {
         orgId: null,
         createdKey: null,
-        formError: '缺少 orgId',
+        formError: messages['member.apiKeys.missingOrgId'],
       })
     }
 
@@ -78,7 +84,7 @@ export class MemberApiKeyCreatePage {
     return this.inertia.render(ctx, 'Member/ApiKeys/Create', {
       orgId,
       createdKey: null,
-      formError: result.message ?? '建立失敗',
+      formError: result.message ?? messages['member.apiKeys.createFailed'],
     })
   }
 }

@@ -38,12 +38,18 @@ export class MemberContractsPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
+    const shared = ctx.get('inertia:shared') as {
+      locale: 'zh-TW' | 'en'
+      messages: Record<string, string>
+    } | undefined
+    const messages = shared?.messages ?? {}
+
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Contracts/Index', {
         orgId: null,
         contracts: [],
-        error: '請先選擇組織',
+        error: messages['member.contracts.selectOrg'],
       })
     }
 

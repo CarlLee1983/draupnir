@@ -21,13 +21,19 @@ export class MemberApiKeysPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
+    const shared = ctx.get('inertia:shared') as {
+      locale: 'zh-TW' | 'en'
+      messages: Record<string, string>
+    } | undefined
+    const messages = shared?.messages ?? {}
+
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/ApiKeys/Index', {
         orgId: null,
         keys: [],
         meta: { total: 0, page: 1, limit: 20, totalPages: 0 },
-        error: '請先選擇組織',
+        error: messages['member.apiKeys.selectOrg'],
       })
     }
 
