@@ -11,4 +11,9 @@ describe('loadMessages', () => {
     const messages = loadMessages('en', { 'admin.users.loadFailed': undefined })
     expect(messages['admin.users.loadFailed']).toBe('admin.users.loadFailed')
   })
+
+  test('exposes the same flat keys in both locales', () => {
+    expect(loadMessages('zh-TW')['member.dashboard.selectOrg']).toBeDefined()
+    expect(loadMessages('en')['member.dashboard.selectOrg']).toBeDefined()
+  })
 })
