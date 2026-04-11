@@ -76,7 +76,12 @@
   2. `BifrostSyncService` fetches incremental Bifrost logs and upserts rows on schedule
   3. A chart service query against `usage_records` returns in under 100ms
   4. Sync failures are logged and surfaced; the dashboard continues to serve stale data without crashing
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 09-01-PLAN.md — Schema migration + LogEntry.logId + ApiKeyRepository.findByBifrostVirtualKeyId (Wave 1)
+- [ ] 09-02-PLAN.md — Application ports: IUsageRepository, ISyncCursorRepository, UsageLogDTO (Wave 1)
+- [ ] 09-03-PLAN.md — Infrastructure repositories: DrizzleUsageRepository + DrizzleSyncCursorRepository (Wave 2)
+- [ ] 09-04-PLAN.md — BifrostSyncService implementation + unit tests (Wave 2)
+- [ ] 09-05-PLAN.md — DI wiring (DashboardServiceProvider) + bootstrap scheduler (Wave 3)
 
 ### Phase 10: P1 Chart UI
 **Goal**: Users can view the full dashboard — KPI summary cards, cost trend, model comparison bar chart, token usage stacked chart, and model comparison table — all wired to live local data
@@ -127,8 +132,8 @@
 | 5. Final Verification | v1.0 | 3/3 | Complete | 2026-04-10 |
 | 6. Pages Test Coverage | v1.1 | 2/3 | Complete | 2026-04-11 |
 | 7. Framework & i18n | v1.1 | 5/5 | Complete | 2026-04-11 |
-| 8. Data Correctness & Permission Foundation | v1.2 | 0/? | Not started | - |
-| 9. Cached Sync Infrastructure | v1.2 | 0/? | Not started | - |
+| 8. Data Correctness & Permission Foundation | v1.2 | 1/1 | Complete | 2026-04-11 |
+| 9. Cached Sync Infrastructure | v1.2 | 0/5 | Not started | - |
 | 10. P1 Chart UI | v1.2 | 0/? | Not started | - |
 | 11. Resilience & UX Polish | v1.2 | 0/? | Not started | - |
 | 12. Differentiators | v1.2 | 0/? | Not started | - |
