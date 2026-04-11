@@ -1,57 +1,60 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Pages & Framework
-status: v1.1 milestone complete
-last_updated: "2026-04-11T11:05:00.000Z"
+milestone: v1.2
+milestone_name: Dashboard 分析和報告
+status: Defining requirements
+last_updated: "2026-04-11T12:30:00.000Z"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 8
-  completed_plans: 9
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
 
 ## Current Milestone Status
 
-**v1.0: LLM Gateway Abstraction** — ✅ SHIPPED
+**v1.2: Dashboard 分析和報告** — 📋 規劃中
 
-### Completion Summary
+### Status
 
-- **Phases**: 1-5 (5 phases, 17 plans)
-- **Requirements**: 44/44 (100%)
-- **Shipped**: 2026-04-11
+- Phase: Not started (defining requirements)
+- Plan: —
+- Status: Defining requirements
+- Last activity: 2026-04-11 — Milestone v1.2 研究完成，準備路線圖
 
-### Key Deliverables
+### Research Complete ✓
 
-1. `ILLMGatewayClient` abstraction with adapter pattern
-2. All 7 application services refactored
-3. `bifrostVirtualKeyId` → `gatewayKeyId` rename
-4. `packages/bifrost-sdk/` workspace extraction
-5. Full test suite passing (unit, feature, E2E)
+- ✅ Stack research: Recharts 3.8.1 已安裝，零新依賴
+- ✅ Features research: P1/P2/deferred 層級已識別
+- ✅ Architecture research: 快取聚合決策已驗證（vs 實時 Bifrost）
+- ✅ Pitfalls research: 3 個先決條件 bugs 識別（permission、field mismatch、hardcoded data）
 
-## Next Milestone
+### Key Findings
 
-**v1.1: Pages & Framework Capability**
+1. **No library blocker** — Recharts 3.8.1 already installed, React 19 compatible, Bun ESM-native
+2. **Architecture decided: Cached aggregation** — SQLite local reads (5-50ms) vs Bifrost queries (500ms-5s)
+3. **Critical prerequisites before dev** — Remove hardcoded dashboard data, fix camelCase fields, implement per-role permission scoping
+4. **5-phase roadmap recommended** — P1 data correctness, P2 sync infra, P3 chart UI, P4 resilience, P5 differentiators
 
-### Current Context
+## Previous Milestone: v1.1 Pages & Framework ✓
 
-- Phase 6 partially started (2/3 plans)
-- Phase 7 complete
-- `/gsd:new-milestone` needed to finalize v1.1 requirements
+**Completed 2026-04-11**
+- All 19 page handler classes unit-tested (3 plans, 83 tests)
+- All 25 Inertia page routes covered in integration tests
+- Complete i18n migration for page handlers and API responses
+- Full test suite passing (912+ tests, 0 failures)
 
-### Project Reference
+## Previous Milestone: v1.0 LLM Gateway Abstraction ✓
 
-See: `.planning/PROJECT.md` (updated 2026-04-11)  
-Core value: No file under `src/Modules/` or `src/Foundation/Application/` may import a Bifrost-specific symbol.
-
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260411-qi1 | 修復 adversarial review 的 4 個安全問題：auth routes 缺少 FormRequest、verify-device 未授權裝置、email 寄送為 console stub、password reset 未撤銷 tokens | 2026-04-11 | eac62f1 | [260411-qi1-adversarial-review-4-auth-routes-formreq](./quick/260411-qi1-adversarial-review-4-auth-routes-formreq/) |
+**Completed 2026-04-10**
+- `ILLMGatewayClient` abstraction with adapter pattern
+- All 7 application services refactored
+- `bifrostVirtualKeyId` → `gatewayKeyId` rename
+- `packages/bifrost-sdk/` workspace extraction
+- Full test suite passing
 
 ---
 
-*v1.0 milestone archived 2026-04-11*
+*Last updated: 2026-04-11*

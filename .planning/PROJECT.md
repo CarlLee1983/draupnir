@@ -115,6 +115,20 @@ This document evolves at phase transitions and milestone boundaries.
 - **Phase 6 (Pages):** All 19 page handler classes unit-tested (3 plans, 83 tests); all 25 Inertia page routes covered in integration tests
 - **Phase 7 (Framework Capability & i18n):** Complete i18n migration for page handlers and API responses; all API modules return English-only messages; SharedDataMiddleware wired across all page tests; full test suite passing (912+ tests, 0 failures)
 
+## Current Milestone: v1.2 Dashboard 分析和報告
+
+**目標：** 為多角色使用者（工程師、產品經理、財務）提供完整的 API 使用分析和每月決算報告。
+
+**核心交付物：**
+1. **使用概覽** — 多 API Key 並列比較（成本、請求數、代幣數）
+2. **成本分析** — 模型對比 + 成本趨勢圖 + 時間窗口成本追蹤（7/30/90 天）
+3. **每月 PDF 報告** — 自動生成高層決算報告
+
+**技術亮點：**
+- 零新依賴（Recharts 3.8.1 已安裝）
+- 快取聚合架構（SQLite 本地讀取，Bifrost 異步同步）
+- 修復 3 個現有 data/permission bugs 作為先決條件
+
 ## Current State
 
 **Codebase:** Draupnir is now a mature Bun + TypeScript + DDD service with:
@@ -123,17 +137,17 @@ This document evolves at phase transitions and milestone boundaries.
 - English-only API responses standardized across all modules (v1.1)
 - Test infrastructure ready for further development (912+ tests, 0 failures)
 - Lint and type checking clean
+- Dashboard 基礎架構已建立（表格賭注 chart 已識別，無技術債務）
 
-**What's Ready for Next Milestone:**
-- Pages and page tests are fully covered and i18n-enabled
-- All API modules speak English only
-- Framework capabilities documented and standardized
-- Foundation ready for new feature development
+**What's Ready for Next Milestone (v1.2):**
+- Research complete: chart 庫、feature 層級、架構決策、pitfalls 識別
+- 5 個 requirements categories 定義完畢
+- 路線圖準備生成（~5-7 phases）
 
-## Next Milestone Focus
+## Previous Milestone: v1.1 Pages & Framework ✓
 
-Will be defined during `/gsd:new-milestone` process. Consider areas:
-- OAuth/OIDC authentication system
-- Dashboard analytics and reporting
-- SDK public publishing
-- Additional gateway adapters (v2 from Out of Scope)
+**Completed 2026-04-11**
+- All 19 page handler classes unit-tested (3 plans, 83 tests)
+- All 25 Inertia page routes covered in integration tests
+- Complete i18n migration for page handlers and API responses
+- Full test suite passing (912+ tests, 0 failures)
