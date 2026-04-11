@@ -13,15 +13,19 @@ export function AppShell({ sidebarTitle, navItems, children }: AppShellProps) {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar
-        title={sidebarTitle}
-        items={navItems}
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <div className="print:hidden">
+        <Sidebar
+          title={sidebarTitle}
+          items={navItems}
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+      </div>
 
       <div className="flex flex-1 flex-col">
-        <TopBar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        <div className="print:hidden">
+          <TopBar onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        </div>
 
         <main className="flex-1 p-4 sm:p-6">{children}</main>
       </div>
