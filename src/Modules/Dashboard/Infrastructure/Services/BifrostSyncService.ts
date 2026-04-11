@@ -20,14 +20,7 @@ export class BifrostSyncService {
 
   async sync(): Promise<SyncResult> {
     try {
-      const cursorRepo =
-        this.cursorRepo && typeof this.cursorRepo.get === 'function'
-          ? this.cursorRepo
-          : {
-              get: async () => null,
-              advance: async () => {},
-            }
-      const cursor = await cursorRepo.get('bifrost_logs')
+      const cursor = await this.cursorRepo.get('bifrost_logs')
       const since = cursor?.lastSyncedAt ?? new Date(0).toISOString()
       const logs = await this.gatewayClient.getUsageLogs([], { startTime: since, limit: 500 })
 
@@ -64,7 +57,7 @@ export class BifrostSyncService {
         synced++
       }
 
-      await cursorRepo.advance('bifrost_logs', {
+      await this.cursorRepo.advance('bifrost_logs', {
         lastSyncedAt: new Date().toISOString(),
         lastBifrostLogId: lastProcessedLogId ?? cursor?.lastBifrostLogId ?? undefined,
       })
