@@ -12,8 +12,6 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 
 ### Validated
 
-<!-- Existing capabilities proven in production, inferred from codebase map -->
-
 - ✓ Draupnir uses `BifrostClient` to create/update/delete virtual keys for app API keys — existing
 - ✓ `GetAppKeyUsageService` queries Bifrost logs stats for per-key usage metrics — existing
 - ✓ `QueryUsage` (SdkApi) returns aggregated token/cost data from Bifrost — existing
@@ -22,27 +20,19 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 - ✓ DI via `IContainer` with per-module `ServiceProvider`s and `wireXxxRoutes` wiring — existing
 - ✓ Bun + Biome + TS strict + Zod validation + Bun test — existing
 - ✓ Multi-ORM repository pattern (memory, drizzle, atlas) — existing
-- ✓ Tests mock `BifrostClient` directly (brittle, coupled to concrete class) — existing
-- ✓ `ILLMGatewayClient` interface with camelCase DTOs defined — Validated in Phase 1
-- ✓ `GatewayError` class as single adapter error type — Validated in Phase 1
-- ✓ `BifrostGatewayAdapter` wrapping `BifrostClient` with snake_case ↔ camelCase conversion — Validated in Phase 1
-- ✓ `MockGatewayClient` for tests (no HTTP) — Validated in Phase 1
-- ✓ `llmGatewayClient` singleton registered in FoundationServiceProvider — Validated in Phase 1
-- ✓ All 7 application services migrated to `ILLMGatewayClient` — Validated in Phase 2
-- ✓ All wire functions pass `ILLMGatewayClient` — Validated in Phase 2
-- ✓ Tests rewritten to mock `ILLMGatewayClient` interface — Validated in Phase 2
-- ✓ `bifrostVirtualKeyId` → `gatewayKeyId` renamed in domain aggregates — Validated in Phase 3
-- ✓ `packages/bifrost-sdk/` Bun workspace package created with BifrostClient, config, types, errors, retry — Validated in Phase 4
-- ✓ Root `package.json` workspaces + imports migrated to `@draupnir/bifrost-sdk` — Validated in Phase 4
-- ✓ `src/Foundation/Infrastructure/Services/BifrostClient/` deleted — Validated in Phase 4
-- ✓ Bifrost proxy URL sourced from `bifrost-sdk` config — Validated in Phase 4
+- ✓ `ILLMGatewayClient` interface with camelCase DTOs, adapter, mock, barrel export — v1.0
+- ✓ All 7 application services migrated to `ILLMGatewayClient` with tests — v1.0
+- ✓ `bifrostVirtualKeyId` → `gatewayKeyId` renamed across domain and repos — v1.0
+- ✓ `packages/bifrost-sdk/` workspace package with BifrostClient, config, types, errors — v1.0
+- ✓ Bifrost proxy URL sourced from `bifrost-sdk` config via DI — v1.0
+- ✓ All feature, unit, and E2E tests pass — v1.0
+- ✓ Lint (Biome) + typecheck (`tsc --noEmit`) clean across workspace — v1.0
 
 ### Active
 
-<!-- Remaining for Phase 5: Final Verification -->
-
-- [ ] All existing feature tests and E2E tests pass unchanged
-- [ ] Lint clean (Biome) + typecheck clean (`tsc --noEmit`)
+- [ ] Implement `OpenRouterGatewayAdapter` (v2)
+- [ ] Extend `ILLMGatewayClient` to cover raw chat-completion proxying (v2)
+- [ ] Publish `bifrost-sdk` to private npm registry (v2)
 
 ### Out of Scope
 
@@ -82,13 +72,13 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| `ProxyModelCall` stays on Bifrost, out of `ILLMGatewayClient` | Chat-completion proxying has a different shape than key management; scoping creep would delay the interface landing | — Pending |
-| Move hardcoded Bifrost URL into `bifrost-sdk` package config | Even though `ProxyModelCall` stays coupled, the URL shouldn't live in an application-module ServiceProvider | — Pending |
-| Rename `bifrostVirtualKeyId` → `gatewayKeyId` in TS only | Gateway-neutral domain vocabulary without the blast radius of a DB migration | — Pending |
-| `bifrost-sdk` lives at `packages/bifrost-sdk/` as a Bun workspace | Versioned together with Draupnir, no publishing overhead, keeps one-repo development loop | — Pending |
-| Ship only `BifrostGatewayAdapter` + `MockGatewayClient` — no OpenRouter this milestone | Prove interface correctness cheaply; OpenRouter becomes a trivial follow-up phase once the interface is stable | — Pending |
-| Gateway binding is compile-time in ServiceProvider, not env-driven | Avoids a factory layer; matches project's DI-first architecture | — Pending |
-| Tests migrate to mock `ILLMGatewayClient` interface, not concrete adapter | Mocking the interface is the whole point of the refactor — it eliminates the test-coupling debt called out in CONCERNS.md | — Pending |
+| `ProxyModelCall` stays on Bifrost, out of `ILLMGatewayClient` | Chat-completion proxying has a different shape than key management; scoping creep would delay the interface landing | ✅ Completed — boundaries respected, clean separation |
+| Move hardcoded Bifrost URL into `bifrost-sdk` package config | Even though `ProxyModelCall` stays coupled, the URL shouldn't live in an application-module ServiceProvider | ✅ Completed — URL sourced via DI singleton bifrostConfig |
+| Rename `bifrostVirtualKeyId` → `gatewayKeyId` in TS only | Gateway-neutral domain vocabulary without the blast radius of a DB migration | ✅ Completed — TS-only rename with zero-risk repo mapping |
+| `bifrost-sdk` lives at `packages/bifrost-sdk/` as a Bun workspace | Versioned together with Draupnir, no publishing overhead, keeps one-repo development loop | ✅ Completed — independent package with smoke tests |
+| Ship only `BifrostGatewayAdapter` + `MockGatewayClient` — no OpenRouter this milestone | Prove interface correctness cheaply; OpenRouter becomes a trivial follow-up phase once the interface is stable | ✅ Completed — proved interface correctness with real + mock |
+| Gateway binding is compile-time in ServiceProvider, not env-driven | Avoids a factory layer; matches project's DI-first architecture | ✅ Completed — DI-first binding in FoundationServiceProvider |
+| Tests migrate to mock `ILLMGatewayClient` interface, not concrete adapter | Mocking the interface is the whole point of the refactor — it eliminates the test-coupling debt called out in CONCERNS.md | ✅ Completed — all tests now mock interface, not concrete class |
 
 ## Evolution
 
@@ -108,4 +98,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 after Phase 4 (SDK Extraction) completion*
+*Last updated: 2026-04-11 after v1.0 (LLM Gateway Abstraction) completion*
