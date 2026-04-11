@@ -1,219 +1,388 @@
-# Stack Research
+# Technology Stack — v1.3 Alerts & Automated Reports
 
-**Domain:** Dashboard Analytics Visualization — Bun + TypeScript + Inertia.js + React 19
-**Researched:** 2026-04-11
+**Project:** Draupnir LLM Gateway
+**Milestone:** v1.3 — Usage Alerts, Per-Key Cost Breakdown, Automated PDF Reports
+**Researched:** 2026-04-12
 **Confidence:** HIGH
 
-## Critical Pre-Finding
+## Executive Summary
 
-**Recharts 3.8.1 is already installed** (`package.json` line 88: `"recharts": "^3.8.1"`).
-The project already has two chart components in production use:
-- `resources/js/components/charts/UsageLineChart.tsx` — LineChart with ResponsiveContainer
-- `resources/js/components/charts/CreditBarChart.tsx` — BarChart with ResponsiveContainer
+v1.3 introduces three new capabilities requiring four stack additions:
 
-The dashboard visualization milestone does NOT need to add a chart library. It needs to extend what is already there.
+1. **Email/Webhook notifications** — Send alerts when usage thresholds exceeded
+2. **Server-side PDF generation** — Render dashboards as PDFs for email attachment
+3. **Job scheduling** — Automate recurring report generation and dispatch
+4. **Webhook persistence** — Track webhook delivery status and retry logic
 
----
-
-## Recommended Stack
-
-### Core Technologies
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| recharts | ^3.8.1 (installed) | All chart rendering | Already installed, React 19 compatible, ESM-native, zero new dep overhead, TypeScript-first in v3, used by shadcn/ui |
-| react | ^19.2.5 (installed) | Component runtime | Already installed; recharts 3.x targets React 18+ with React 19 working without overrides |
-| tailwindcss | 3 (installed) | Chart container styling | Utility classes on wrappers; recharts SVG is self-styled but containers/cards use Tailwind |
-
-### Supporting Libraries (all already installed — zero new deps)
-
-| Library | Version | Purpose | When to Use |
-|---------|---------|---------|-------------|
-| recharts `ResponsiveContainer` | bundled with recharts | Makes charts fluid-width | Use on every chart; wrap all chart roots |
-| recharts `ComposedChart` | bundled | Overlay line + bar on same axes | Cost vs. request volume dual-axis charts |
-| recharts `AreaChart` | bundled | Time-series cost/usage trends | Continuous-data trend visualization |
-| recharts `PieChart` | bundled | Model share breakdown | Proportional comparisons (model cost %) |
-| recharts `RadarChart` | bundled | Multi-model comparison | Latency/cost/quality radar view |
-| `@radix-ui/react-*` | installed | Tooltip, dialog, dropdown wrappers | Chart filter controls, date-range pickers |
-| `lucide-react` | ^1.8.0 (installed) | Icon set for stat cards | Trending arrows, cost indicators |
-| `zod` | ^4.3.6 (installed) | Validate chart data payloads from API | Type-safe chart prop construction from Inertia page props |
-
-### Development Tools
-
-| Tool | Purpose | Notes |
-|------|---------|-------|
-| Biome | Lint/format chart component files | Already configured; no extra setup |
-| `tsc --noEmit` | Type-check recharts prop usage | Recharts 3 exports typed `dataKey` helpers; use `ChartHelper` generic for strict dataKey inference |
-| Vite + `@vitejs/plugin-react` | Bundle chart components for browser | Already configured in `vite.config.*`; recharts is ESM so tree-shaking works |
+All recommendations prioritize **Bun compatibility**, **TypeScript strictness**, and **integration with existing Drizzle ORM** infrastructure. No breaking changes to v1.0 and v1.2.
 
 ---
 
-## Installation
+## Recommended Stack Additions
 
-Nothing to install. All required libraries are already present:
+### Core Additions
 
-```bash
-# Verify recharts is present (should show 3.8.x)
-bun pm ls | grep recharts
+#### 1. Email Sending — **Upyo v0.4.0** (Primary)
+
+| Component | Selection | Version | Why |
+|-----------|-----------|---------|-----|
+| Email Framework | Upyo | 0.4.0 | Cross-runtime (Bun/Node/Deno/edge), zero deps, pluggable transports |
+| SMTP Transport | Upyo SMTP | 0.4.0 | Local SMTP for dev, production SMTP server support |
+| Service Provider | Resend | 6.10.0 | Modern cloud email, React Email components, 40MB attachments |
+
+**Why Upyo over Nodemailer?**
+- Nodemailer explicitly doesn't work on Bun/Deno (Node.js only)
+- Upyo provides unified API across transports: SMTP, Resend, SendGrid, Mailgun
+- Zero dependencies keeps bundle lean (critical for Bun startup time)
+- Identical TypeScript API across all providers (swap at runtime via env var)
+
+**Integration Pattern:**
+```typescript
+// Factory pattern: swap transport at startup via ServiceProvider
+type EmailTransport = 'smtp' | 'resend'
+const transport = process.env.EMAIL_TRANSPORT === 'resend'
+  ? new ResendTransport({ apiKey: process.env.RESEND_API_KEY })
+  : new SmtpTransport({ host, port, auth })
+
+const result = await transport.send({ to, from, subject, html })
 ```
 
-If a shadcn-style `ChartContainer` wrapper component is desired (optional, copy-paste only):
+**High confidence:** Verified with official Bun email guide (2026), Upyo GitHub, and npm registry.
+
+---
+
+#### 2. Server-Side PDF Generation — **Playwright v1.59.1**
+
+| Component | Selection | Version | Why |
+|-----------|-----------|---------|-----|
+| PDF Renderer | Playwright | 1.59.1 | Fastest (3ms warm), smallest files (59–125KB), multi-browser |
+| Browser Engine | Chromium | Built-in | Pre-bundled, native CSS Grid/Flexbox support |
+| Headless Mode | Chromium Headless | Native | No X11 dependency, light resource footprint |
+
+**Why Playwright over Puppeteer/PDFKit?**
+- **Performance:** 3ms warm start vs Puppeteer's 48ms (16x faster)
+- **File size:** 59–125KB PDF vs Puppeteer's 197KB (40% smaller)
+- **Compatibility:** Works seamlessly with Bun runtime (proven in production)
+- **CSS support:** Full Flexbox/Grid rendering (needed for Recharts dashboard from v1.2)
+
+**Benchmark Results (2026-04-02, macOS arm64):**
+```
+Cold start:  Playwright 42ms  vs  Puppeteer 147ms
+Warm mode:   Playwright 3ms   vs  Puppeteer 48ms
+File size:   Playwright 59KB  vs  Puppeteer 197KB
+```
+
+**Critical Bun Integration Note:**
+Playwright's bundled Chromium may fail in Docker with Bun. Recommended workaround:
+```bash
+# Install system Chrome, point Playwright to it
+export PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+```
+
+**Memory & Resource Requirements:**
+- Single render: ~200–500MB (depends on HTML complexity)
+- Concurrent renders: Implement semaphore (queue up to 2–3 concurrent)
+- Docker minimum: 2GB RAM allocated; shm size ≥ 1GB
+- Disk: Ensure /tmp has free space ≥ RAM allocation
+
+**High confidence:** PDF4.dev 2026 benchmark, Playwright docs, verified examples with Bun (Hono + Bun).
+
+---
+
+#### 3. Job Scheduling — **Bun.cron() Native API**
+
+| Component | Selection | Version | Why |
+|-----------|-----------|---------|-----|
+| Scheduler | Bun.cron | Built-in | Native to Bun runtime, zero external deps |
+| Cron Parser | Bun.cron | Built-in | Supports standard 5-field expressions + shortcuts |
+| Fallback Queue | BullMQ | 5.73.4 | If Redis persistence needed in Phase 2 |
+
+**Why Bun.cron over external schedulers (node-cron, Agenda)?**
+- **Zero dependencies:** No external job queue infrastructure required
+- **In-process execution:** Runs callbacks directly in Bun process
+- **Cross-platform:** Works on macOS, Linux, Windows (with caveats)
+- **Cron expressions:** Full support for `*/5 * * * *`, `@daily`, `@weekly`, ranges, lists
+
+**Supported Cron Expressions:**
+```
+* * * * *        → Every minute
+@hourly          → Every hour
+@daily           → Every day at midnight (UTC)
+@weekly          → Every Monday at midnight (UTC)
+@monthly         → 1st of each month
+30 2 * * MON     → 2:30 AM Mondays
+0 0 1 * *        → 1st of each month at midnight
+*/5 9-17 * * MON-FRI  → Every 5 min, 9 AM–5 PM weekdays
+```
+
+**Limitations & Workarounds:**
+```
+Windows Task Scheduler: Max 48 triggers per task
+❌ Invalid: */7 * * * * (216 triggers)
+✅ Valid:  */5 * * * * (288 triggers within Windows limits)
+
+UTC-only: In-process cron always runs on UTC
+Workaround: Calculate local time in handler, or use BullMQ for TZ-aware scheduling
+```
+
+**When to upgrade to BullMQ:**
+- Need Redis persistence (cron survives restarts)
+- Running load-balanced instances (multiple servers coordinate)
+- Require retry logic with exponential backoff for failed jobs
+
+**High confidence:** Bun.cron documented at bun.com/docs/runtime/cron, v1.3.12 release notes (March 2026).
+
+---
+
+#### 4. Job Queue & Scheduled Reports (Optional) — **BullMQ v5.73.4**
+
+| Component | Selection | Version | Why |
+|-----------|-----------|---------|-----|
+| Job Queue | BullMQ | 5.73.4 | Redis-backed, full Bun support, rate limiting |
+| Redis Client | ioredis | (via BullMQ) | Bun-compatible, handles connection pooling |
+| Scheduler | BullMQ Job Factories | 5.73.4 | Cron-scheduled jobs with retry & rate limiting |
+
+**When to use BullMQ:**
+- Email delivery fails → auto-retry with exponential backoff
+- High concurrent PDF renders → queue and rate-limit by tier
+- Multi-instance deployment → Redis coordinates job locking
+
+**Bun Setup Requirement:**
+```typescript
+const connection = {
+  host: 'localhost',
+  port: 6379,
+  maxRetriesPerRequest: null,  // Critical for Bun compatibility
+}
+
+const emailQueue = new Queue('send-email', { connection })
+const emailWorker = new Worker('send-email', async (job) => {
+  await sendEmail(job.data)
+}, { connection })
+```
+
+**Defer to Phase 2 if:** Single-instance deployment, acceptable email failures, no retry budget.
+
+**High confidence:** BullMQ explicitly supports Bun in CI, ElysiaJS + BullMQ + Bun examples from Feb 2026.
+
+---
+
+### Supporting Additions
+
+#### Drizzle ORM Extensions (No New Dependency)
+
+Use existing **Drizzle v0.45.1** (already in package.json) for webhook event storage:
+
+```typescript
+// src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts
+
+export const webhookEvents = sqliteTable(
+  'webhook_events',
+  {
+    id: text('id').primaryKey(),
+    type: text('type').notNull(),  // 'alert.threshold', 'report.generated'
+    org_id: text('org_id').notNull(),
+    payload: text('payload').notNull(),  // JSON stringified
+    status: text('status').notNull().default('pending'),  // pending → sent → failed
+    attempt_count: integer('attempt_count').default(0),
+    last_error: text('last_error'),
+    scheduled_at: text('scheduled_at'),
+    created_at: text('created_at').notNull(),
+    updated_at: text('updated_at').notNull(),
+  },
+  (table) => [
+    index('idx_webhook_events_org_id').on(table.org_id),
+    index('idx_webhook_events_status').on(table.status),
+    index('idx_webhook_events_scheduled_at').on(table.scheduled_at),
+  ],
+)
+```
+
+No ORM API changes needed; use existing Drizzle query builder from `src/Shared/Infrastructure/Database/Adapters/Drizzle`.
+
+---
+
+## Installation Instructions
 
 ```bash
-# Copy from shadcn/ui — no package install needed
-# https://ui.shadcn.com/docs/components/radix/chart
-# The chart.tsx wrapper is ~200 lines of plain React + recharts, pasted into:
-# resources/js/components/ui/chart.tsx
+# Core additions
+bun add @upyo/core @upyo/resend
+bun add -d playwright
+
+# Optional: Distributed job queue (Phase 2)
+# bun add bullmq ioredis
+
+# Create schema migration for webhook_events
+bun run make:migration add_webhook_events_table
+```
+
+### Environment Variables
+
+```env
+# Email transport (dev uses SMTP, prod uses Resend)
+EMAIL_TRANSPORT=smtp
+SMTP_HOST=localhost
+SMTP_PORT=1025
+SMTP_USER=test
+SMTP_PASS=test
+
+# Production: Resend API (when EMAIL_TRANSPORT=resend)
+RESEND_API_KEY=re_xxxxx
+
+# Webhook scheduling
+ALERT_CHECK_SCHEDULE=*/5 * * * *     # Every 5 minutes
+REPORT_GENERATION_SCHEDULE=0 2 * * MON  # Mondays 2 AM UTC
+
+# PDF rendering (Docker only)
+PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
 ```
 
 ---
 
-## Alternatives Considered
+## Alternatives Considered & Rejected
 
-| Recommended | Alternative | When to Use Alternative |
-|-------------|-------------|-------------------------|
-| recharts (already installed) | Chart.js / react-chartjs-2 | Never here — Canvas-based, heavier, adds a new dep, no benefit over SVG recharts for this data type |
-| recharts (already installed) | Tremor | Tremor is built ON recharts; adds abstraction overhead without adding capability; contradicts "no new framework deps" constraint |
-| recharts (already installed) | Victory (FormidableHQ) | Only if React Native mobile target required — not applicable here |
-| recharts (already installed) | Visx (Airbnb) | If very custom/bespoke layouts are needed; 15KB but much lower-level and requires more boilerplate; not worth switching |
-| recharts (already installed) | D3 directly | If recharts becomes a bottleneck on highly custom layouts; overkill for standard analytics dashboards |
-| shadcn `chart.tsx` wrapper (optional) | Raw recharts only | Current chart components use raw recharts. shadcn wrapper adds consistent theming via CSS vars; adopt only if visual consistency with the rest of the shadcn/Radix component system is a priority |
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Email | Upyo | Nodemailer | Doesn't work on Bun; Node.js-only |
+| Email | Upyo | Postal/Brevo | Higher complexity, no native Bun support, HTTP-only |
+| PDF | Playwright | Puppeteer | 16x slower warm start (48ms vs 3ms), 40% larger files |
+| PDF | Playwright | html2pdf/WeasyPrint | Python-based, incompatible with Bun runtime |
+| PDF | Playwright | PDFKit | Programmatic PDF only, can't render complex CSS/charts |
+| Scheduler | Bun.cron | Node-cron | External dep, less performant on Bun, no native support |
+| Scheduler | Bun.cron | Agenda | MongoDB dependency overkill for v1.3 |
+| Queue | BullMQ | Bull (legacy) | Deprecation risk; BullMQ is maintained successor |
+| Queue | BullMQ | Bee-queue | Lighter but no scheduled job factories for Bun |
+| Notifications | Native Bun.cron | Svix | Overkill for Phase 1; consider for Phase 3 if 3rd-party webhooks critical |
 
 ---
 
-## What NOT to Use
+## What NOT to Add
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| Tremor | Built on recharts but adds a 50KB wrapper layer; "no new framework dependencies" constraint violated | recharts directly (already installed) |
-| nivo | Peer depends on specific React versions; D3-heavy; much larger bundle; adds dep; same output as recharts | recharts |
-| Ant Design Charts (AntV G2) | Pulls in the entire AntD ecosystem; massive bundle; no Tailwind alignment | recharts |
-| Plotly.js / react-plotly.js | 3MB+ bundle; designed for scientific/statistical charts not SaaS dashboards | recharts |
-| ECharts / echarts-for-react | Apache project, heavy, poor ESM tree-shaking, adds a dep | recharts |
+| SendGrid directly | Resend/Upyo abstraction already handles it; adds direct SDK overhead | Upyo + RESEND_API_KEY config |
+| Mailgun directly | Same as SendGrid | Upyo + mailgun transport in Phase 2 |
+| Apache Kafka / RabbitMQ | Overkill for single-instance; Redis via BullMQ is sufficient | BullMQ (Phase 2) if scaling required |
+| Scheduled.io / Temporal | Heavy orchestration for simple cron jobs | Bun.cron (v1.3) or BullMQ (v1.3.1) |
 
 ---
 
-## Stack Patterns by Variant
+## Integration Checklist
 
-**For time-series cost/usage trends (primary use case):**
-- Use `AreaChart` or `LineChart` with `ResponsiveContainer`
-- `XAxis` with time-bucketed labels (daily, weekly)
-- Two `Line` / `Area` dataSeries: `totalCost` + `totalRequests`
-- Because AreaChart conveys magnitude at a glance, better than bare LineChart for cost
+### Phase 1: Core Features (v1.3)
+- [ ] Create `AlertService` using Upyo for SMTP/Resend
+- [ ] Implement `PdfReportService` using Playwright
+- [ ] Add Drizzle migration for `webhook_events` table
+- [ ] Create `AlertScheduler` using Bun.cron
+- [ ] Add environment variable validation (zod schemas)
+- [ ] Unit test email sending with Upyo mocks
+- [ ] Integration test PDF rendering with sample HTML from Recharts
+- [ ] E2E test: Verify alert fires when threshold exceeded
+- [ ] E2E test: Verify PDF email generated and sent
 
-**For model comparison (cost per model, request share):**
-- Use `BarChart` (grouped) for side-by-side model comparison
-- Use `PieChart` / `RadialBarChart` for percentage breakdown
-- Because bar is better for absolute comparisons; pie for proportional "what fraction"
+### Phase 2: Reliability (v1.3.1)
+- [ ] Set up Redis locally + BullMQ queue
+- [ ] Implement retry logic with exponential backoff
+- [ ] Add webhook delivery tracking to `webhook_events`
+- [ ] Create webhook status dashboard
+- [ ] Load test Playwright with concurrent renders (5+ concurrent)
+- [ ] Set up monitoring for email delivery success rate
 
-**For dual-metric overlays (requests + cost on same time axis):**
-- Use `ComposedChart` with `Bar` (requests) + `Line` (cost)
-- Add dual `YAxis` (left = requests, right = cost $)
-- Because requests and cost have different units; dual axis prevents misleading scale
-
-**For chart data from Inertia page props:**
-- Define Zod schema matching Inertia prop shape
-- Use `z.infer<typeof schema>[]` as the chart `data` prop type
-- Prevents runtime shape mismatches between server DTO and chart component
-
----
-
-## Version Compatibility
-
-| Package | Compatible With | Notes |
-|---------|-----------------|-------|
-| recharts@3.8.1 | react@19.2.5 | CONFIRMED: recharts 3.x removed react-is dependency; React 19 works without overrides. The `overrides.react-is` workaround only applied to recharts 2.x. |
-| recharts@3.8.1 | TypeScript@5.3 | CONFIRMED: recharts 3.0 rewrote state management with full TS types; `ChartHelper<T>` generic available for strict dataKey inference |
-| recharts@3.8.1 | Bun runtime | CONFIRMED: recharts ships ESM-first; Bun handles ESM natively. No CJS-only modules in the dependency tree. Vite bundles for browser, Bun never executes recharts server-side. |
-| recharts@3.8.1 | Vite@8 | CONFIRMED: recharts is tree-shakeable ESM; Vite's rollup bundler will dead-code-eliminate unused chart types |
-| recharts@3.8.1 | @inertiajs/react@3.0.3 | COMPATIBLE: Inertia page components are standard React components; recharts components render inside them without any adapter needed |
+### Deployment Checklist
+- [ ] Docker: Install `chromium-browser` or use `microsoft/playwright-for-docker` base image
+- [ ] Docker: Allocate ≥2GB RAM, set `--ipc=host` for Chromium shared memory
+- [ ] Production: Set `EMAIL_TRANSPORT=resend` + valid RESEND_API_KEY
+- [ ] Production: Configure `ALERT_CHECK_SCHEDULE` per SLA requirements (recommend `*/5 * * * *`)
+- [ ] Production: Configure `REPORT_GENERATION_SCHEDULE` per business requirements (recommend `0 2 * * MON`)
+- [ ] Monitor: Track email delivery success rate (target ≥99%)
+- [ ] Monitor: Track PDF generation latency (target <5s per report)
+- [ ] Alerting: Meta-alert if alerts fail to send (alert on alert delivery)
 
 ---
 
-## Bundle Size
+## Versions Verified
 
-| Library | Minified | Gzipped | Notes |
-|---------|----------|---------|-------|
-| recharts@3.8.1 | ~445KB | ~130KB | Full install; tree-shaking reduces this to only imported chart types |
-| recharts (tree-shaken, 3 chart types) | ~120KB | ~38KB | Estimated for AreaChart + BarChart + PieChart import set |
-| Vite production build | applies dead-code elimination | — | Only imported recharts components are bundled |
-
-The project already pays this bundle cost (recharts is installed and imported). No new bundle cost for the dashboard analytics milestone.
+| Library | Version | Last Updated | Bun Compatible | Verified By |
+|---------|---------|--------------|----------------|------------|
+| @upyo/core | 0.4.0 | 2026-04-09 | ✅ YES | GitHub + npm registry |
+| @upyo/resend | 0.4.0 | 2026-04-09 | ✅ YES | Built on Upyo core |
+| Playwright | 1.59.1 | 2026-04-02 | ✅ YES | PDF4.dev benchmark, examples |
+| BullMQ | 5.73.4 | 2026-04-11 | ✅ YES | TestSuite runs on BunJS in CI |
+| Bun.cron | Built-in | v1.3.12+ | ✅ YES | bun.com/docs/runtime/cron |
+| Drizzle ORM | 0.45.1 (existing) | 2026-03-15 | ✅ YES | Already in project |
 
 ---
 
-## Integration Pattern with Inertia Page Components
+## Risk Mitigation
 
-Recharts components integrate directly as React components inside Inertia page files. The existing pattern in `UsageLineChart.tsx` and `CreditBarChart.tsx` is already correct. For the new dashboard analytics work, extend this pattern:
+### Email Delivery Failures
+**Risk:** SMTP outages or misconfiguration prevent alerts  
+**Mitigation:**
+- Use Resend (managed service) in production, not self-hosted SMTP
+- Implement retry with exponential backoff (via BullMQ in Phase 2)
+- Alert on alert delivery failures (meta-monitoring)
 
-```typescript
-// resources/js/components/charts/CostTrendChart.tsx
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+### PDF Memory Exhaustion
+**Risk:** Concurrent PDF renders OOM the process  
+**Mitigation:**
+- Implement semaphore: max 2–3 concurrent Playwright instances
+- Kill hung renders after 30s timeout
+- Monitor heap usage; alert if >1.5GB
 
-export interface CostTrendPoint {
-  readonly date: string
-  readonly cost: number
-  readonly requests: number
-}
+### Cron Timezone Issues
+**Risk:** Bun.cron runs UTC; users expect local time  
+**Mitigation:**
+- Document all schedules as UTC in UI
+- Calculate user timezone offset in AlertService handler
+- Use BullMQ in Phase 2 if TZ-aware scheduling becomes critical
 
-interface Props {
-  readonly data: CostTrendPoint[]
-  readonly title?: string
-}
-
-export function CostTrendChart({ data, title = 'Cost Trend' }: Props) {
-  return (
-    <Card>
-      <CardHeader><CardTitle>{title}</CardTitle></CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-            <XAxis dataKey="date" className="text-xs" />
-            <YAxis className="text-xs" />
-            <Tooltip />
-            <Area type="monotone" dataKey="cost" stroke="hsl(222.2 47.4% 11.2%)" fill="hsl(222.2 47.4% 11.2% / 0.1)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  )
-}
-```
-
-Inertia page passes typed props directly:
-
-```typescript
-// resources/js/Pages/Admin/Dashboard/Index.tsx
-// Props come from the server-side DashboardController via Inertia::render()
-interface Props {
-  readonly costTrend: CostTrendPoint[]
-  readonly modelBreakdown: ModelShare[]
-}
-
-export default function AdminDashboard({ costTrend, modelBreakdown }: Props) {
-  return (
-    <AdminLayout>
-      <CostTrendChart data={costTrend} title="Cost Analysis" />
-      <ModelBreakdownChart data={modelBreakdown} />
-    </AdminLayout>
-  )
-}
-```
+### Webhook Signature Verification (Future)
+**Risk:** Third-party webhook receivers don't validate origin  
+**Consideration:**
+- Add HMAC-SHA256 signature to webhook payload (Phase 2)
+- Document verification in webhook receiver guide
+- Consider Svix-like pattern if webhook delivery becomes critical (Phase 3)
 
 ---
 
 ## Sources
 
-- GitHub recharts/recharts issues/4558 — React 19 support status; confirmed resolved in 3.x (HIGH confidence)
-- GitHub recharts/recharts releases — confirmed latest version is 3.8.1 as of March 2025 (HIGH confidence)
-- shadcn/ui chart docs (ui.shadcn.com/docs/components/radix/chart) — recharts 3.x usage patterns, ChartContainer pattern (HIGH confidence)
-- package.json project file — direct inspection confirming recharts@^3.8.1 already installed (HIGH confidence)
-- resources/js/components/charts/*.tsx — direct code inspection confirming recharts already in use (HIGH confidence)
-- WebSearch: LogRocket "Best React chart libraries 2025" — bundle size comparisons, Tremor-on-recharts relationship (MEDIUM confidence)
-- Bundlephobia recharts@3.8.1 listing — bundle size reference (MEDIUM confidence, page content not fully extractable)
+### Email Libraries
+- [Upyo GitHub](https://github.com/dahlia/upyo)
+- [Upyo npm @upyo/core](https://www.npmjs.com/package/@upyo/core)
+- [Bun Email Sending Guide (2026)](https://dev.to/hongminhee/sending-emails-in-nodejs-deno-and-bun-in-2026-a-practical-guide-og9)
+- [Resend Bun Documentation](https://resend.com/docs/send-with-bun)
+- [Resend npm](https://www.npmjs.com/package/resend)
+
+### PDF Generation
+- [Playwright HTML to PDF Benchmark 2026](https://pdf4.dev/blog/html-to-pdf-benchmark-2026)
+- [Playwright Official Docs](https://playwright.dev/docs/intro)
+- [Playwright npm](https://www.npmjs.com/package/playwright)
+- [Bun + Hono + Playwright Document Generation API](https://dev.to/zerolooplabs/how-i-built-a-document-generation-api-with-bun-hono-playwright-do0)
+- [Playwright Docker Production Guide](https://thomasbourimech.com/blog/en/playwright-chromium-docker-production/)
+
+### Job Scheduling
+- [Bun.cron Official Documentation](https://bun.com/docs/runtime/cron)
+- [Bun v1.3.12 Release Notes](https://bun.com/blog/bun-v1.3.12)
+- [BullMQ Official Docs](https://docs.bullmq.io/)
+- [BullMQ GitHub](https://github.com/taskforcesh/bullmq)
+- [BullMQ npm](https://www.npmjs.com/package/bullmq)
+- [BullMQ + Bun Examples](https://dev.to/anupom69/scheduling-whatsapp-messages-with-bun-bullmq-3il2)
+
+### Drizzle ORM
+- [Drizzle ORM Official](https://orm.drizzle.team/)
+- [Drizzle Bun SQLite Integration](https://orm.drizzle.team/docs/connect-bun-sqlite)
+- [Drizzle npm](https://www.npmjs.com/package/drizzle-orm)
 
 ---
-*Stack research for: Dashboard Analytics Visualization (v1.2)*
-*Researched: 2026-04-11*
+
+**Status:** Ready for roadmap implementation. All versions verified current (2026-04-12), Bun compatibility confirmed, integration points mapped to existing DDD architecture (Foundation/Modules pattern).
+
+**Confidence Assessment:**
+| Area | Confidence | Notes |
+|------|------------|-------|
+| Email stack (Upyo) | HIGH | Official docs, cross-runtime verified |
+| PDF generation (Playwright) | HIGH | Benchmark verified, examples in production |
+| Job scheduling (Bun.cron) | HIGH | Built-in, documented, v1.3.12+ |
+| Queue fallback (BullMQ) | HIGH | Explicit Bun support in CI |
+| Database (Drizzle) | HIGH | Already in project, no changes needed |
