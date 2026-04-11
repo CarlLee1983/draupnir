@@ -1,6 +1,6 @@
 # Roadmap: Draupnir
 
-**Last Updated**: 2026-04-11
+**Last Updated**: 2026-04-12
 
 ## Milestones
 
@@ -47,7 +47,7 @@
 
 - [x] **Phase 8: Data Correctness & Permission Foundation** ✅ - Fix 3 prerequisite bugs: hardcoded data, field mismatch, role-scoped permissions (completed 2026-04-11)
 - [x] **Phase 9: Cached Sync Infrastructure** ✅ - BifrostSyncService + usage_records SQLite schema enabling local 5-50ms reads
-- [ ] **Phase 10: P1 Chart UI** - Six table-stakes dashboard features wired end-to-end with real data
+- [x] **Phase 10: P1 Chart UI** - Six table-stakes dashboard features wired end-to-end with real data (completed 2026-04-11)
 - [ ] **Phase 11: Resilience & UX Polish** - Gateway timeout handling, performance safeguards, staleness UX
 - [ ] **Phase 12: Differentiators** - Period-over-period comparison, per-key breakdown, PDF export
 
@@ -94,7 +94,8 @@
   3. User sees a bar chart of cost by model, sorted descending, showing the top 10 models
   4. User sees a stacked area chart of input vs output tokens over time (blue/orange, non-zero values)
   5. User can click a column header on the model comparison table to sort rows by that metric
-**Plans**: TBD
+**Plans**: 1 plan
+- [x] 10-01-PLAN.md — Full chart UI implementation (completed 2026-04-11)
 **UI hint**: yes
 
 ### Phase 11: Resilience & UX Polish
@@ -106,7 +107,10 @@
   2. Chart queries with large date ranges complete in under 500ms (indexed queries, no full-table scans)
   3. A "Last updated N minutes ago" label is visible on the dashboard and reflects actual sync time
   4. The page handles an empty `usage_records` table without blank charts or JS errors
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 11-01-PLAN.md — BifrostSyncService timeout + KPI lastSyncedAt + DI wiring (Wave 1, TDD)
+- [ ] 11-02-PLAN.md — Composite index migration on usage_records(org_id, occurred_at) (Wave 1)
+- [ ] 11-03-PLAN.md — StalenessLabel frontend component + KpiPayload extension (Wave 2)
 **UI hint**: yes
 
 ### Phase 12: Differentiators
@@ -135,6 +139,6 @@
 | 7. Framework & i18n | v1.1 | 5/5 | Complete | 2026-04-11 |
 | 8. Data Correctness & Permission Foundation | v1.2 | 1/1 | Complete | 2026-04-11 |
 | 9. Cached Sync Infrastructure | v1.2 | 5/5 | Complete | 2026-04-11 |
-| 10. P1 Chart UI | v1.2 | 0/? | Not started | - |
-| 11. Resilience & UX Polish | v1.2 | 0/? | Not started | - |
+| 10. P1 Chart UI | v1.2 | 1/1 | Complete    | 2026-04-11 |
+| 11. Resilience & UX Polish | v1.2 | 0/3 | Not started | - |
 | 12. Differentiators | v1.2 | 0/? | Not started | - |
