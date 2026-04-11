@@ -1,5 +1,23 @@
 # Shipped Milestones
 
+## v1.1 Pages & Framework (Shipped: 2026-04-11)
+
+**Phases completed:** 2 phases, 8 plans, 5 tasks
+
+**Key accomplishments:**
+
+- Objective:
+- One-liner:
+- One-liner:
+- Objective:
+- Objective:
+- Objective:
+- Objective:
+- Objective:
+- Phase:
+
+---
+
 ## v1.0: LLM Gateway Abstraction
 
 **Shipped**: 2026-04-11  
@@ -44,11 +62,13 @@ See `.planning/milestones/v1.0-MILESTONE-AUDIT.md` for full audit details.
 ### Next Milestone
 
 **v1.1: Pages & Framework Capability** (in planning)
+
 - Phase 6: Complete pages test coverage
 - Phase 7: Framework capability review and i18n improvements
 
 ---
 
 For archived roadmap and requirements, see:
+
 - `.planning/milestones/v1.0-ROADMAP.md`
 - `.planning/milestones/v1.0-REQUIREMENTS.md`

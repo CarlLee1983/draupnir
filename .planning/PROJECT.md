@@ -98,10 +98,42 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-11*
+*Last updated: 2026-04-11 after v1.1 milestone completion*
 
-## Current Status
+## Shipped Milestones
 
-**Milestone:** v1.1 Pages & Framework (Phase 6/7 complete)
-- **Phase 6** (Pages): All 19 page handler classes unit-tested (83 tests); all 25 Inertia page routes covered in integration tests. ✓ Complete
-- **Phase 7** (Framework Capability Docs & Improvement): Planned next
+### v1.0: LLM Gateway Abstraction ✓
+**Completed 2026-04-10**
+- Introduced `ILLMGatewayClient` abstraction layer
+- Decoupled application logic from Bifrost-specific types
+- Extracted `bifrost-sdk` into workspace package
+- All services migrated to interface-based gateway access
+- All tests passing; lint and type checking clean
+
+### v1.1: Pages & Framework ✓
+**Completed 2026-04-11**
+- **Phase 6 (Pages):** All 19 page handler classes unit-tested (3 plans, 83 tests); all 25 Inertia page routes covered in integration tests
+- **Phase 7 (Framework Capability & i18n):** Complete i18n migration for page handlers and API responses; all API modules return English-only messages; SharedDataMiddleware wired across all page tests; full test suite passing (912+ tests, 0 failures)
+
+## Current State
+
+**Codebase:** Draupnir is now a mature Bun + TypeScript + DDD service with:
+- Gateway abstraction complete and proven (v1.0)
+- Full page handler test coverage with i18n fixtures (v1.1)
+- English-only API responses standardized across all modules (v1.1)
+- Test infrastructure ready for further development (912+ tests, 0 failures)
+- Lint and type checking clean
+
+**What's Ready for Next Milestone:**
+- Pages and page tests are fully covered and i18n-enabled
+- All API modules speak English only
+- Framework capabilities documented and standardized
+- Foundation ready for new feature development
+
+## Next Milestone Focus
+
+Will be defined during `/gsd:new-milestone` process. Consider areas:
+- OAuth/OIDC authentication system
+- Dashboard analytics and reporting
+- SDK public publishing
+- Additional gateway adapters (v2 from Out of Scope)
