@@ -6,7 +6,7 @@ Following the successful completion of v1.0 (LLM Gateway Abstraction), this mile
 1. **Phase 6**: Complete page handler unit test coverage (Pages module)
 2. **Phase 7**: Framework capability review and i18n system improvement
 
-**Current Status**: Planning next milestone
+**Current Status**: Phase 7 planning complete
 **Last Updated**: 2026-04-11
 
 ## Milestones
@@ -25,11 +25,20 @@ Following the successful completion of v1.0 (LLM Gateway Abstraction), this mile
 - [x] 06-02-PLAN.md — Member page handler unit tests (completed 2026-04-11)
 - [ ] 06-03-PLAN.md — routes-existence page route coverage
 
+**Requirements**: [PAGES-01, PAGES-02, PAGES-03]
+
 ### Phase 7: Framework Capability & i18n
 
-**Goal**: Document framework capabilities, identify i18n system gaps, propose improvements.
+**Goal**: Complete i18n migration (wire SharedDataMiddleware, replace page hardcoded strings), standardize all API responses to English, fix failing tests (39 fail, 3 errors → 0).
 
-**Plans**: TBD
+**Plans**: 5 plans
+- [ ] 07-01-PLAN.md — Member page test fixtures with i18n (Wave 1)
+- [ ] 07-02-PLAN.md — Admin page tests + Credit service fixes (Wave 1)
+- [ ] 07-03-PLAN.md — API English-only: Auth, Organization, Contract, AppModule, Credit (Wave 2)
+- [ ] 07-04-PLAN.md — API English-only: SdkApi, Health, Dashboard, DevPortal, AppApiKey, CliApi (Wave 2)
+- [ ] 07-05-PLAN.md — Final verification and phase completion (Wave 3)
+
+**Requirements**: [I18N-01, I18N-02, API-01, TEST-01, QUAL-01, QUAL-02]
 
 ## Progress
 
@@ -40,5 +49,79 @@ Following the successful completion of v1.0 (LLM Gateway Abstraction), this mile
 | 3. Domain Rename | v1.0 | 3/3 | Complete | 2026-04-10 |
 | 4. SDK Extraction | v1.0 | 2/2 | Complete | 2026-04-10 |
 | 5. Final Verification | v1.0 | 3/3 | Complete | 2026-04-10 |
-| 6. Pages Test Coverage | v1.1 | 2/3 | Complete    | 2026-04-11 |
-| 7. Framework & i18n | v1.1 | 0/? | Planning | — |
+| 6. Pages Test Coverage | v1.1 | 2/3 | In Progress | — |
+| 7. Framework & i18n | v1.1 | 0/5 | Planning Complete | — |
+
+## Phase 7 Detailed Plan
+
+### 07-01: Member Page Test Fixtures (Wave 1)
+- 6 member page test files
+- Add i18n fixtures to mock context
+- Update assertions to English catalog messages
+- Deliverable: `src/Pages/__tests__/Member/*.test.ts` pass with i18n
+
+### 07-02: Admin Pages + Credit Module (Wave 1)
+- 11 admin page test files + Credit service fixes
+- Add i18n fixtures to mock context
+- Fix HandleCreditToppedUpService async mock error (3 errors)
+- Fix HandleBalanceDepletedService console.log to English
+- Deliverable: All page tests + Credit tests pass
+
+### 07-03: Auth, Org, Contract, AppModule, Credit APIs (Wave 2)
+- Standardize request validation messages to English
+- Standardize service error fallbacks to English
+- 5 modules, ~50+ message updates
+- Deliverable: API modules return English-only
+
+### 07-04: SdkApi, Health, Dashboard, DevPortal, AppApiKey, CliApi (Wave 2)
+- Standardize remaining module APIs to English
+- 6 modules, ~40+ message updates
+- Global verification: 0 Chinese in API code
+- Deliverable: All APIs English-only
+
+### 07-05: Final Verification (Wave 3)
+- Run full test suite (expect 912+ tests, 0 fail)
+- Verify linting and type checking clean
+- Verify i18n implementation complete
+- Verify API English-only enforcement
+- Create phase completion summary
+- Deliverable: Phase complete, ready for v1.1 closure
+
+## Phase 7 Requirements Map
+
+| Req ID | Title | Status | Plan |
+|--------|-------|--------|------|
+| I18N-01 | SharedDataMiddleware injects locale and messages | 📋 | 07-01 |
+| I18N-02 | Page handlers use catalog keys, tests inject fixtures | 📋 | 07-01, 07-02 |
+| API-01 | API controllers return English messages only | 📋 | 07-03, 07-04 |
+| TEST-01 | HandleCreditToppedUpService GatewayError test passes | 📋 | 07-02 |
+| QUAL-01 | Biome lint clean | 📋 | 07-05 |
+| QUAL-02 | TypeScript strict clean | 📋 | 07-05 |
+
+## Key Decisions
+
+1. **i18n Split Strategy**: Page layer uses catalogs (`loadMessages`). API layer uses English constants only. No locale-dependent API responses.
+
+2. **Wave Structure**: 
+   - Wave 1: Page handler tests (17 files) + Credit module fixes
+   - Wave 2: API standardization (11 modules in parallel)
+   - Wave 3: Verification
+
+3. **Test Fixtures**: All page tests inject `inertia:shared` with `{ locale: 'en', messages: loadMessages('en'), auth, ... }` for consistency.
+
+4. **Error Codes**: Machine-readable codes (UNAUTHORIZED, NOT_FOUND, etc.) remain unchanged. Only user-visible messages standardized.
+
+## Dependencies
+
+- Phase 07 depends on Phase 06 test infrastructure (createMockContext, test patterns)
+- No external dependency additions
+- All i18n infrastructure already implemented (loaded from Phase 6)
+
+## Success Criteria
+
+- ✅ All page tests inject i18n fixtures
+- ✅ All page handlers use catalog-driven strings
+- ✅ All API modules return English messages
+- ✅ Full test suite passes (0 fail, 0 errors)
+- ✅ Linting and type checking clean
+- ✅ 0 Chinese in user-facing API code
