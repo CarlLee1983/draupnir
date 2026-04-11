@@ -33,6 +33,7 @@ interface KpiUsage {
 
 interface KpiPayload {
   usage: KpiUsage
+  previousPeriod: KpiUsage
   lastSyncedAt: string | null
 }
 
@@ -139,10 +140,12 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
             </div>
             <div className="flex flex-col items-end gap-1">
               <WindowSelector value={selectedWindow} onChange={setSelectedWindow} />
-              <StalenessLabel
-                lastSyncedAt={bundle?.kpi.lastSyncedAt ?? null}
-                isLoading={loading}
-              />
+              <div className="flex items-center gap-2">
+                <StalenessLabel lastSyncedAt={bundle?.kpi.lastSyncedAt ?? null} isLoading={loading} />
+                <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}>
+                  Download Report
+                </Button>
+              </div>
             </div>
           </div>
         </header>
@@ -150,7 +153,7 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
         {error && <InfoCard tone="destructive" title="Organization" message={error} />}
         {fetchError && <InfoCard tone="destructive" title="Analytics" message={fetchError} />}
 
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+        <div className="grid gap-4 lg:grid-cols-[1fr_auto] print:hidden">
           <BalanceCard balance={balance} />
           <QuickActionsCard orgId={orgId} />
         </div>
@@ -166,24 +169,44 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
                 suffix="USD"
                 icon={<CreditCard className="h-4 w-4" />}
                 accentClassName="from-emerald-400 to-teal-500"
+                changePercent={
+                  bundle
+                    ? computeChange(bundle.kpi.usage.totalCost, bundle.kpi.previousPeriod.totalCost)
+                    : undefined
+                }
               />
               <MetricCard
                 title="請求數"
                 value={bundle ? formatNumber(bundle.kpi.usage.totalRequests) : '—'}
                 icon={<Sparkles className="h-4 w-4" />}
                 accentClassName="from-sky-400 to-cyan-500"
+                changePercent={
+                  bundle
+                    ? computeChange(bundle.kpi.usage.totalRequests, bundle.kpi.previousPeriod.totalRequests)
+                    : undefined
+                }
               />
               <MetricCard
                 title="總 Tokens"
                 value={bundle ? formatNumber(bundle.kpi.usage.totalTokens) : '—'}
                 icon={<BarChart3 className="h-4 w-4" />}
                 accentClassName="from-orange-400 to-amber-500"
+                changePercent={
+                  bundle
+                    ? computeChange(bundle.kpi.usage.totalTokens, bundle.kpi.previousPeriod.totalTokens)
+                    : undefined
+                }
               />
               <MetricCard
                 title="平均延遲"
                 value={bundle ? `${formatNumber(bundle.kpi.usage.avgLatency)} ms` : '—'}
                 icon={<Clock3 className="h-4 w-4" />}
                 accentClassName="from-violet-400 to-fuchsia-500"
+                changePercent={
+                  bundle
+                    ? computeChange(bundle.kpi.usage.avgLatency, bundle.kpi.previousPeriod.avgLatency)
+                    : undefined
+                }
               />
             </section>
 
@@ -243,12 +266,14 @@ function MetricCard({
   suffix,
   icon,
   accentClassName,
+  changePercent,
 }: {
   title: string
   value: string
   suffix?: string
   icon: ReactNode
   accentClassName: string
+  changePercent?: number
 }) {
   return (
     <Card className="relative overflow-hidden">
@@ -262,6 +287,7 @@ function MetricCard({
           <span className="text-3xl font-semibold tracking-tight">{value}</span>
           {suffix ? <span className="text-sm text-muted-foreground">{suffix}</span> : null}
         </div>
+        {changePercent !== undefined ? renderChangeBadge(changePercent) : null}
       </CardContent>
     </Card>
   )
@@ -472,4 +498,30 @@ function StalenessLabel({
   }
 
   return <span className="text-xs text-muted-foreground">{label}</span>
+}
+
+function computeChange(current: number, previous: number): number | undefined {
+  if (previous === 0) return undefined
+  return ((current - previous) / previous) * 100
+}
+
+function renderChangeBadge(changePercent: number): ReactNode {
+  if (changePercent === 0) {
+    return (
+      <Badge variant="secondary" className="mt-1 text-xs">
+        0%
+      </Badge>
+    )
+  }
+  const formatted = changePercent > 0 ? `+${changePercent.toFixed(1)}%` : `${changePercent.toFixed(1)}%`
+  return (
+    <Badge
+      variant={changePercent > 0 ? 'outline' : 'destructive'}
+      className={
+        changePercent > 0 ? 'mt-1 text-xs bg-emerald-100 text-emerald-800 border-emerald-200' : 'mt-1 text-xs'
+      }
+    >
+      {formatted}
+    </Badge>
+  )
 }
