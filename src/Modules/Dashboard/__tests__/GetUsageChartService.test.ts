@@ -181,7 +181,8 @@ describe('GetUsageChartService', () => {
       expect(result.success).toBe(true)
       expect(gatewayMock.calls.getUsageLogs[0]?.keyIds).toEqual(['bfr-vk-alice'])
       expect(result.data?.logs).toHaveLength(1)
-      expect((result.data?.logs[0] as LogEntry).keyId).toBe('bfr-vk-alice')
+      const firstLog = result.data?.logs[0] as unknown as LogEntry
+      expect(firstLog.keyId).toBe('bfr-vk-alice')
     })
   })
 })
