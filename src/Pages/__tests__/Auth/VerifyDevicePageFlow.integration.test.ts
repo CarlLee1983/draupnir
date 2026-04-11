@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
 import { VerifyDevicePage } from '../../Auth/VerifyDevicePage'
 import type { InertiaService } from '../../InertiaService'
 import { AUTH_PAGE_KEYS } from '../../routing/auth/authPageKeys'
@@ -9,12 +10,20 @@ import { registerAuthPageBindings } from '../../routing/auth/registerAuthPageBin
 
 describe('VerifyDevicePage integration', () => {
   let mockInertia: InertiaService
+  let mockAuthorizeDeviceService: AuthorizeDeviceService
   let mockContext: IHttpContext
 
   beforeEach(() => {
     mockInertia = {
       render: mock(() => Promise.resolve(new Response('OK'))),
     } as unknown as InertiaService
+
+    mockAuthorizeDeviceService = {
+      execute: mock(async () => ({
+        success: true,
+        message: 'CLI device authorized successfully, return to CLI to complete login',
+      })),
+    } as unknown as AuthorizeDeviceService
 
     const store = new Map<string, unknown>()
     store.set('inertia:shared', { csrfToken: 'test-csrf-token' })
@@ -49,6 +58,9 @@ describe('VerifyDevicePage integration', () => {
         if (key === PAGE_CONTAINER_KEYS.inertiaService) {
           return mockInertia
         }
+        if (key === 'authorizeDeviceService') {
+          return mockAuthorizeDeviceService
+        }
         return undefined
       }),
     } as unknown as IContainer
@@ -60,7 +72,7 @@ describe('VerifyDevicePage integration', () => {
   })
 
   test('handle matches GET /verify-device behavior', async () => {
-    const page = new VerifyDevicePage(mockInertia)
+    const page = new VerifyDevicePage(mockInertia, mockAuthorizeDeviceService)
     await page.handle(mockContext)
     const render = mockInertia.render as ReturnType<typeof mock>
     expect(render).toHaveBeenCalledWith(
@@ -72,15 +84,16 @@ describe('VerifyDevicePage integration', () => {
     )
   })
 
-  test('authorize matches POST /verify-device behavior', async () => {
-    const page = new VerifyDevicePage(mockInertia)
+  test('authorize without auth returns Authentication required error', async () => {
+    const page = new VerifyDevicePage(mockInertia, mockAuthorizeDeviceService)
     await page.authorize(mockContext)
     const render = mockInertia.render as ReturnType<typeof mock>
     expect(render).toHaveBeenCalledWith(
       mockContext,
       'Auth/VerifyDevice',
       expect.objectContaining({
-        message: expect.stringContaining('Device authorization completed'),
+        error: 'Authentication required',
+        message: undefined,
       }),
     )
   })
