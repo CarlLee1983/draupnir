@@ -11,7 +11,7 @@ export class QueryBalance {
       if (!account) {
         return {
           success: true,
-          message: '查詢成功',
+          message: 'Query successful',
           data: { balance: '0', lowBalanceThreshold: '100', status: 'active' },
         }
       }

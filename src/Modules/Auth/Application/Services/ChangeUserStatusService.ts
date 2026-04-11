@@ -24,7 +24,7 @@ export class ChangeUserStatusService {
     try {
       const user = await this.authRepository.findById(userId)
       if (!user) {
-        return { success: false, message: '找不到使用者', error: 'USER_NOT_FOUND' }
+        return { success: false, message: 'User not found', error: 'USER_NOT_FOUND' }
       }
 
       if (request.status === 'suspended') {
@@ -38,7 +38,7 @@ export class ChangeUserStatusService {
 
       return {
         success: true,
-        message: `帳戶已${request.status === 'suspended' ? '停用' : '啟用'}`,
+        message: `Account ${request.status === 'suspended' ? 'suspended' : 'activated'} successfully`,
         data: {
           id: user.id,
           email: user.emailValue,

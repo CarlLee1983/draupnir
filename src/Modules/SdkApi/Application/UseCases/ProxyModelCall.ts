@@ -19,7 +19,7 @@ export class ProxyModelCall {
         return {
           success: false,
           error: 'INSUFFICIENT_SCOPE',
-          message: 'read scope 不允許呼叫模型',
+          message: 'Read scope cannot invoke model',
         }
       }
 
@@ -27,16 +27,16 @@ export class ProxyModelCall {
         return {
           success: false,
           error: 'MODULE_NOT_ALLOWED',
-          message: '此 App Key 未綁定 ai_chat 模組',
+          message: 'This App Key is not bound to the ai_chat module',
         }
       }
 
       if (!request.model) {
-        return { success: false, error: 'MISSING_MODEL', message: '缺少 model 參數' }
+        return { success: false, error: 'MISSING_MODEL', message: 'Missing model parameter' }
       }
 
       if (!request.messages || request.messages.length === 0) {
-        return { success: false, error: 'MISSING_MESSAGES', message: '缺少 messages 參數' }
+        return { success: false, error: 'MISSING_MESSAGES', message: 'Missing messages parameter' }
       }
 
       const { model, messages, temperature, max_tokens, stream, ...rest } = request

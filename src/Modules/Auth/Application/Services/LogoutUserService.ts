@@ -55,7 +55,7 @@ export class LogoutUserService {
       if (!request.token || request.token.trim() === '') {
         return {
           success: false,
-          message: 'Token 不能為空',
+          message: 'Token is required',
           error: 'INVALID_TOKEN',
         }
       }
@@ -69,7 +69,7 @@ export class LogoutUserService {
         // 即使 Token 不存在也返回成功（冪等性）
         return {
           success: true,
-          message: '登出成功',
+          message: 'Logged out successfully',
         }
       }
 
@@ -78,7 +78,7 @@ export class LogoutUserService {
 
       return {
         success: true,
-        message: '登出成功',
+        message: 'Logged out successfully',
       }
     } catch (error: any) {
       return {
@@ -98,7 +98,7 @@ export class LogoutUserService {
 
       return {
         success: true,
-        message: '已登出所有設備',
+        message: 'Logged out from all devices',
       }
     } catch (error: any) {
       return {

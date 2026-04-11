@@ -20,7 +20,7 @@ export class QueryUsage {
 
       return {
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: {
           totalRequests: stats.totalRequests,
           totalCost: stats.totalCost,

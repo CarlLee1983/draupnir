@@ -4,8 +4,8 @@ import { Role, RoleType } from '../Domain/ValueObjects/Role'
 describe('Role', () => {
   it('只允許 ADMIN / MANAGER / MEMBER', () => {
     expect(Object.values(RoleType)).toEqual(['admin', 'manager', 'member'])
-    expect(() => new Role('user')).toThrow('無效的角色')
-    expect(() => new Role('guest')).toThrow('無效的角色')
+    expect(() => new Role('user')).toThrow('Invalid role: user')
+    expect(() => new Role('guest')).toThrow('Invalid role: guest')
   })
 
   it('提供系統角色判斷', () => {

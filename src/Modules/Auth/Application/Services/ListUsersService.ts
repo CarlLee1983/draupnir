@@ -76,7 +76,7 @@ export class ListUsersService {
 
       return {
         success: true,
-        message: '取得使用者列表成功',
+        message: 'Users retrieved successfully',
         data: {
           users: pageItems,
           meta: {

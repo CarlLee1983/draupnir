@@ -15,7 +15,7 @@ export class SdkApiController {
   async chatCompletions(ctx: IHttpContext): Promise<Response> {
     const auth = AppAuthMiddleware.getAppAuthContext(ctx)
     if (!auth) {
-      return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
 
     const body = await ctx.getJsonBody<ProxyCallRequest>()
@@ -41,7 +41,7 @@ export class SdkApiController {
   async getUsage(ctx: IHttpContext): Promise<Response> {
     const auth = AppAuthMiddleware.getAppAuthContext(ctx)
     if (!auth) {
-      return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
 
     const options = {
@@ -57,7 +57,7 @@ export class SdkApiController {
   async getBalance(ctx: IHttpContext): Promise<Response> {
     const auth = AppAuthMiddleware.getAppAuthContext(ctx)
     if (!auth) {
-      return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
 
     const result = await this.queryBalance.execute(auth)

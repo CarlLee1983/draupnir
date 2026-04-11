@@ -31,12 +31,12 @@ export class GetUserDetailService {
       const user = await this.authRepository.findById(userId)
 
       if (!user) {
-        return { success: false, message: '找不到使用者' }
+        return { success: false, message: 'User not found' }
       }
 
       return {
         success: true,
-        message: '取得使用者詳細資料成功',
+        message: 'User retrieved successfully',
         data: {
           id: user.id,
           email: user.emailValue,

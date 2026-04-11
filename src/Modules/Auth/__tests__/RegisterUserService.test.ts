@@ -29,7 +29,7 @@ describe('RegisterUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(true)
-    expect(result.message).toBe('用戶註冊成功')
+    expect(result.message).toBe('User registered successfully')
     expect(result.data?.id).toBeTruthy()
     expect(result.data?.email).toBe('newuser@example.com')
     expect(result.data?.role).toBe(RoleType.MEMBER)
@@ -49,7 +49,7 @@ describe('RegisterUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.message).toBe('此電子郵件已被註冊')
+    expect(result.message).toBe('Email already exists')
   })
 
   it('應該驗證密碼強度', async () => {
@@ -70,7 +70,7 @@ describe('RegisterUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error).toBe('密碼不匹配')
+    expect(result.error).toBe('Passwords do not match')
   })
 
   it('應該拒絕空的電子郵件', async () => {
@@ -80,7 +80,7 @@ describe('RegisterUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error).toBe('電子郵件不能為空')
+    expect(result.error).toBe('Email is required')
   })
 
   it('應該拒絕空的密碼', async () => {
@@ -90,6 +90,6 @@ describe('RegisterUserService Integration Test', () => {
     })
 
     expect(result.success).toBe(false)
-    expect(result.error).toBe('密碼不能為空')
+    expect(result.error).toBe('Password is required')
   })
 })

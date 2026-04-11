@@ -14,6 +14,6 @@ describe('Password Value Object', () => {
   })
 
   it('應該拒絕空的雜湊值', () => {
-    expect(() => Password.fromHashed('')).toThrow('無效的密碼雜湊')
+    expect(() => Password.fromHashed('')).toThrow('Invalid password hash')
   })
 })

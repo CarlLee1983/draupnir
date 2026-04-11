@@ -70,18 +70,18 @@ export class AuthController {
   async logout(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.isAuthenticated(ctx)
     if (!auth) {
-      return ctx.json({ success: false, message: '未經授權', error: 'UNAUTHORIZED' }, 401)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
 
     const authHeader = ctx.getHeader('authorization') ?? ctx.getHeader('Authorization')
     if (!authHeader) {
-      return ctx.json({ success: false, message: '缺少 Token', error: 'MISSING_TOKEN' }, 400)
+      return ctx.json({ success: false, message: 'Missing token', error: 'MISSING_TOKEN' }, 400)
     }
 
     const parts = authHeader.split(' ')
     if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
       return ctx.json(
-        { success: false, message: '無效的 Authorization 格式', error: 'INVALID_AUTH_HEADER' },
+        { success: false, message: 'Invalid Authorization header', error: 'INVALID_AUTH_HEADER' },
         400,
       )
     }

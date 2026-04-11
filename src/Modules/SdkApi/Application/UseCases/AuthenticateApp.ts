@@ -18,7 +18,7 @@ export class AuthenticateApp {
   async execute(rawKey: string): Promise<AuthenticateResult> {
     try {
       if (!rawKey.startsWith('drp_app_')) {
-        return { success: false, error: 'INVALID_KEY_FORMAT', message: '無效的 App Key 格式' }
+        return { success: false, error: 'INVALID_KEY_FORMAT', message: 'Invalid App Key format' }
       }
 
       const keyHash = await this.keyHashingService.hash(rawKey)
@@ -30,25 +30,25 @@ export class AuthenticateApp {
         if (appKey) {
           const gracePeriodEndsAt = appKey.gracePeriodEndsAt
           if (!gracePeriodEndsAt || gracePeriodEndsAt < new Date()) {
-            return { success: false, error: 'INVALID_APP_KEY', message: 'App Key 無效或已過期' }
+            return { success: false, error: 'INVALID_APP_KEY', message: 'App Key is invalid or expired' }
           }
         }
       }
 
       if (!appKey) {
-        return { success: false, error: 'INVALID_APP_KEY', message: 'App Key 無效' }
+        return { success: false, error: 'INVALID_APP_KEY', message: 'App Key is invalid' }
       }
 
       if (appKey.status === 'revoked') {
-        return { success: false, error: 'KEY_REVOKED', message: '此 App Key 已撤銷' }
+        return { success: false, error: 'KEY_REVOKED', message: 'This App Key has been revoked' }
       }
 
       if (appKey.status !== 'active') {
-        return { success: false, error: 'KEY_INACTIVE', message: '此 App Key 未啟用' }
+        return { success: false, error: 'KEY_INACTIVE', message: 'This App Key is not active' }
       }
 
       if (appKey.expiresAt && appKey.expiresAt < new Date()) {
-        return { success: false, error: 'KEY_EXPIRED', message: '此 App Key 已過期' }
+        return { success: false, error: 'KEY_EXPIRED', message: 'This App Key has expired' }
       }
 
       const context: AppAuthContext = {

@@ -85,7 +85,7 @@ describe('AppAuthMiddleware', () => {
     ;(mockAuthenticateApp.execute as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: false,
       error: 'INVALID_APP_KEY',
-      message: 'App Key 無效',
+      message: 'App Key is invalid',
     })
     const ctx = createMockCtx('Bearer drp_app_invalidkey')
     const next = vi.fn()

@@ -75,7 +75,7 @@ export class RefreshTokenService {
       if (!payload || payload.type !== 'refresh') {
         return {
           success: false,
-          message: '無效的 Refresh Token',
+          message: 'Invalid refresh token',
           error: 'INVALID_REFRESH_TOKEN',
         }
       }
@@ -86,7 +86,7 @@ export class RefreshTokenService {
       if (isRevoked) {
         return {
           success: false,
-          message: 'Refresh Token 已被撤銷',
+          message: 'Refresh token has been revoked',
           error: 'TOKEN_REVOKED',
         }
       }
@@ -97,7 +97,7 @@ export class RefreshTokenService {
       if (!user) {
         return {
           success: false,
-          message: '找不到用戶',
+          message: 'User not found',
           error: 'USER_NOT_FOUND',
         }
       }
@@ -127,7 +127,7 @@ export class RefreshTokenService {
 
       return {
         success: true,
-        message: 'Token 已刷新',
+        message: 'Token refreshed successfully',
         data: {
           accessToken: newAccessTokenStr,
           expiresIn: Math.floor(timeToExpire / 1000),

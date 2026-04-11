@@ -14,7 +14,7 @@ export class AppAuthMiddleware {
 
     if (!header) {
       return ctx.json(
-        { success: false, message: '缺少 Authorization header', error: 'MISSING_AUTH' },
+        { success: false, message: 'Missing Authorization header', error: 'MISSING_AUTH' },
         401,
       )
     }
@@ -24,7 +24,7 @@ export class AppAuthMiddleware {
       return ctx.json(
         {
           success: false,
-          message: '無效的 Authorization 格式，需要 Bearer token',
+          message: 'Invalid Authorization format, Bearer token required',
           error: 'INVALID_AUTH_FORMAT',
         },
         401,

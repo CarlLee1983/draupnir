@@ -28,7 +28,7 @@ export class RegisterRequest extends FormRequest {
         if (data.confirmPassword && data.password !== data.confirmPassword) return false
         return true
       },
-      { message: '密碼不匹配', path: ['confirmPassword'] },
+      { message: 'Passwords do not match', path: ['confirmPassword'] },
     )
 }
 

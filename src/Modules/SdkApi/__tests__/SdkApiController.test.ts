@@ -57,7 +57,7 @@ describe('SdkApiController', () => {
     mockUsage = {
       execute: vi.fn().mockResolvedValue({
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: { totalRequests: 100, totalCost: 5, totalTokens: 50000, avgLatency: 300 },
       }),
     } as unknown as QueryUsage
@@ -65,7 +65,7 @@ describe('SdkApiController', () => {
     mockBalance = {
       execute: vi.fn().mockResolvedValue({
         success: true,
-        message: '查詢成功',
+        message: 'Query successful',
         data: { balance: '5000', lowBalanceThreshold: '100', status: 'active' },
       }),
     } as unknown as QueryBalance
