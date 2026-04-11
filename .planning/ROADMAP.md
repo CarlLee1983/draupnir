@@ -40,5 +40,5 @@ Following the successful completion of v1.0 (LLM Gateway Abstraction), this mile
 | 3. Domain Rename | v1.0 | 3/3 | Complete | 2026-04-10 |
 | 4. SDK Extraction | v1.0 | 2/2 | Complete | 2026-04-10 |
 | 5. Final Verification | v1.0 | 3/3 | Complete | 2026-04-10 |
-| 6. Pages Test Coverage | v1.1 | 2/3 | In Progress | — |
+| 6. Pages Test Coverage | v1.1 | 2/3 | Complete    | 2026-04-11 |
 | 7. Framework & i18n | v1.1 | 0/? | Planning | — |

@@ -1,9 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-status: Milestone Shipped
-completed_at: "2026-04-11T10:31:27+0800"
-last_updated: "2026-04-11T10:31:27+0800"
+milestone: v1.1
+milestone_name: Pages & Framework
+status: Ready to plan
+last_updated: "2026-04-11T02:46:07.606Z"
+progress:
+  total_phases: 2
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 3
 ---
 
 # Project State
