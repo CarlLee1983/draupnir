@@ -2,15 +2,14 @@
 
 **Last Updated**: 2026-04-11
 
-## Milestones Shipped
+## Milestones
 
 - ✅ **v1.0 LLM Gateway Abstraction** — Phases 1-5 (shipped 2026-04-10)
 - ✅ **v1.1 Pages & Framework** — Phases 6-7 (shipped 2026-04-11)
+- 🚧 **v1.2 Dashboard 分析和報告** — Phases 8-12 (in progress)
 
 <details>
 <summary><strong>v1.1 Pages & Framework</strong> (Phases 6-7) — SHIPPED 2026-04-11</summary>
-
-## Phases (v1.1) — ARCHIVED
 
 ### Phase 6: Pages Test Coverage
 
@@ -36,98 +35,99 @@
 
 **Requirements**: [I18N-01, I18N-02, API-01, TEST-01, QUAL-01, QUAL-02]
 
+</details>
+
+---
+
+## 🚧 v1.2 Dashboard 分析和報告 (In Progress)
+
+**Milestone Goal:** 為多角色使用者（工程師、產品經理、財務）提供完整的 API 使用分析和每月決算報告。零新依賴，快取聚合架構，修復三個先決條件 bug 後再開發圖表功能。
+
+### Phases
+
+- [ ] **Phase 8: Data Correctness & Permission Foundation** - Fix 3 prerequisite bugs: hardcoded data, field mismatch, role-scoped permissions
+- [ ] **Phase 9: Cached Sync Infrastructure** - BifrostSyncService + usage_records SQLite schema enabling local 5-50ms reads
+- [ ] **Phase 10: P1 Chart UI** - Six table-stakes dashboard features wired end-to-end with real data
+- [ ] **Phase 11: Resilience & UX Polish** - Gateway timeout handling, performance safeguards, staleness UX
+- [ ] **Phase 12: Differentiators** - Period-over-period comparison, per-key breakdown, PDF export
+
+## Phase Details
+
+### Phase 8: Data Correctness & Permission Foundation
+**Goal**: The dashboard reads real data and respects role boundaries — no hardcoded samples, no field mismatches, no cross-member data leakage
+**Depends on**: Phase 7 (v1.1 complete)
+**Requirements**: DASHBOARD-P1, DASHBOARD-P2, DASHBOARD-P3
+**Success Criteria** (what must be TRUE):
+  1. Admin dashboard displays real organisation cost figures, not the static `sampleUsageData` literal
+  2. Token charts show non-zero input and output token counts matching Bifrost log values
+  3. A MEMBER user cannot see another member's API key costs or usage data
+  4. A MANAGER or ADMIN user sees the full organisation-level usage summary
+  5. All existing tests continue to pass with zero regressions
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 9: Cached Sync Infrastructure
+**Goal**: A local `usage_records` SQLite table is populated by `BifrostSyncService` on a 5-minute schedule, enabling all chart services to query sub-100ms local data instead of hitting Bifrost directly
+**Depends on**: Phase 8
+**Requirements**: (infrastructure phase — enables DASHBOARD-01 through DASHBOARD-05)
+**Success Criteria** (what must be TRUE):
+  1. `usage_records` table exists in the local SQLite database with correct schema
+  2. `BifrostSyncService` fetches incremental Bifrost logs and upserts rows on schedule
+  3. A chart service query against `usage_records` returns in under 100ms
+  4. Sync failures are logged and surfaced; the dashboard continues to serve stale data without crashing
+**Plans**: TBD
+
+### Phase 10: P1 Chart UI
+**Goal**: Users can view the full dashboard — KPI summary cards, cost trend, model comparison bar chart, token usage stacked chart, and model comparison table — all wired to live local data
+**Depends on**: Phase 9
+**Requirements**: DASHBOARD-01, DASHBOARD-02, DASHBOARD-03, DASHBOARD-04, DASHBOARD-05
+**Success Criteria** (what must be TRUE):
+  1. User can select 7, 30, or 90-day windows and four KPI cards update (cost, requests, tokens, avg latency)
+  2. User sees an area chart of daily cost over the selected time window with correct per-day aggregation
+  3. User sees a bar chart of cost by model, sorted descending, showing the top 10 models
+  4. User sees a stacked area chart of input vs output tokens over time (blue/orange, non-zero values)
+  5. User can click a column header on the model comparison table to sort rows by that metric
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 11: Resilience & UX Polish
+**Goal**: The dashboard degrades gracefully under Bifrost timeouts, never blocks on slow sync, and shows users when data was last refreshed
+**Depends on**: Phase 10
+**Requirements**: (quality phase — hardens DASHBOARD-01 through DASHBOARD-05 in production conditions)
+**Success Criteria** (what must be TRUE):
+  1. When Bifrost sync takes longer than the configured timeout, the dashboard renders stale data with a visible staleness indicator rather than failing
+  2. Chart queries with large date ranges complete in under 500ms (indexed queries, no full-table scans)
+  3. A "Last updated N minutes ago" label is visible on the dashboard and reflects actual sync time
+  4. The page handles an empty `usage_records` table without blank charts or JS errors
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 12: Differentiators
+**Goal**: Users can generate and download a monthly PDF report and see period-over-period cost change badges on KPI cards
+**Depends on**: Phase 11
+**Requirements**: DASHBOARD-06
+**Success Criteria** (what must be TRUE):
+  1. User can click "Download Report" to trigger a `window.print()` PDF of the dashboard with all KPI data included
+  2. KPI cards show a percentage-change badge comparing the current period to the prior equivalent period (e.g., +5% / -3%)
+  3. The PDF output contains the correct cost total and at least one trend chart
+**Plans**: TBD
+**UI hint**: yes
+
+---
+
 ## Progress
 
-| Phase | Milestone | Plans | Status | Completed |
-|-------|-----------|-------|--------|-----------|
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
 | 1. Gateway Foundation | v1.0 | 4/4 | Complete | 2026-04-10 |
 | 2. Business-Layer Migration | v1.0 | 5/5 | Complete | 2026-04-10 |
 | 3. Domain Rename | v1.0 | 3/3 | Complete | 2026-04-10 |
 | 4. SDK Extraction | v1.0 | 2/2 | Complete | 2026-04-10 |
 | 5. Final Verification | v1.0 | 3/3 | Complete | 2026-04-10 |
-| 6. Pages Test Coverage | v1.1 | 2/3 | In Progress | — |
+| 6. Pages Test Coverage | v1.1 | 2/3 | Complete | 2026-04-11 |
 | 7. Framework & i18n | v1.1 | 5/5 | Complete | 2026-04-11 |
-
-## Phase 7 Detailed Plan
-
-### 07-01: Member Page Test Fixtures (Wave 1)
-- 6 member page test files
-- Add i18n fixtures to mock context
-- Update assertions to English catalog messages
-- Deliverable: `src/Pages/__tests__/Member/*.test.ts` pass with i18n
-
-### 07-02: Admin Pages + Credit Module (Wave 1)
-- 11 admin page test files + Credit service fixes
-- Add i18n fixtures to mock context
-- Fix HandleCreditToppedUpService async mock error (3 errors)
-- Fix HandleBalanceDepletedService console.log to English
-- Deliverable: All page tests + Credit tests pass
-
-### 07-03: Auth, Org, Contract, AppModule, Credit APIs (Wave 2)
-- Standardize request validation messages to English
-- Standardize service error fallbacks to English
-- 5 modules, ~50+ message updates
-- Deliverable: API modules return English-only
-
-### 07-04: SdkApi, Health, Dashboard, DevPortal, AppApiKey, CliApi (Wave 2)
-- Standardize remaining module APIs to English
-- 6 modules, ~40+ message updates
-- Global verification: 0 Chinese in API code
-- Deliverable: All APIs English-only
-
-### 07-05: Final Verification (Wave 3)
-- Run full test suite (expect 912+ tests, 0 fail)
-- Verify linting and type checking clean
-- Verify i18n implementation complete
-- Verify API English-only enforcement
-- Create phase completion summary
-- Deliverable: Phase complete, ready for v1.1 closure
-
-## Phase 7 Requirements Map
-
-| Req ID | Title | Status | Plan |
-|--------|-------|--------|------|
-| I18N-01 | SharedDataMiddleware injects locale and messages | ✅ | 07-01 |
-| I18N-02 | Page handlers use catalog keys, tests inject fixtures | ✅ | 07-01, 07-02 |
-| API-01 | API controllers return English messages only | ✅ | 07-03, 07-04 |
-| TEST-01 | HandleCreditToppedUpService GatewayError test passes | ✅ | 07-02 |
-| QUAL-01 | Biome lint clean | ⚠️ | 07-05 |
-| QUAL-02 | TypeScript strict clean | ✅ | 07-05 |
-
-## Key Decisions
-
-1. **i18n Split Strategy**: Page layer uses catalogs (`loadMessages`). API layer uses English constants only. No locale-dependent API responses.
-
-2. **Wave Structure**: 
-   - Wave 1: Page handler tests (17 files) + Credit module fixes
-   - Wave 2: API standardization (11 modules in parallel)
-   - Wave 3: Verification
-
-3. **Test Fixtures**: All page tests inject `inertia:shared` with `{ locale: 'en', messages: loadMessages('en'), auth, ... }` for consistency.
-
-4. **Error Codes**: Machine-readable codes (UNAUTHORIZED, NOT_FOUND, etc.) remain unchanged. Only user-visible messages standardized.
-
-## Dependencies
-
-- Phase 07 depends on Phase 06 test infrastructure (createMockContext, test patterns)
-- No external dependency additions
-- All i18n infrastructure already implemented (loaded from Phase 6)
-
-## Success Criteria
-
-- ✅ All page tests inject i18n fixtures
-- ✅ All page handlers use catalog-driven strings
-- ✅ All API modules return English messages
-- ✅ Full test suite passes (0 fail, 0 errors)
-- ✅ Linting and type checking clean
-- ✅ 0 Chinese in user-facing API code
-
-</details>
-
----
-
-## Next Milestone
-
-Planned phases will be defined during `/gsd:new-milestone`.
-
-For archived milestone details, see `.planning/milestones/v1.1-ROADMAP.md`.
+| 8. Data Correctness & Permission Foundation | v1.2 | 0/? | Not started | - |
+| 9. Cached Sync Infrastructure | v1.2 | 0/? | Not started | - |
+| 10. P1 Chart UI | v1.2 | 0/? | Not started | - |
+| 11. Resilience & UX Polish | v1.2 | 0/? | Not started | - |
+| 12. Differentiators | v1.2 | 0/? | Not started | - |

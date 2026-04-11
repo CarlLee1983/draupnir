@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Dashboard 分析和報告
-status: Defining requirements
-last_updated: "2026-04-11T12:30:00.000Z"
+status: Not started (defining phases)
+last_updated: "2026-04-11T13:00:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -13,48 +13,61 @@ progress:
 
 # Project State
 
-## Current Milestone Status
+## Project Reference
 
-**v1.2: Dashboard 分析和報告** — 📋 規劃中
+See: .planning/PROJECT.md (updated 2026-04-11)
 
-### Status
+**Core value:** No file under `src/Modules/` or `src/Foundation/Application/` may import a Bifrost-specific symbol after this milestone ships (v1.0 achieved); v1.2 delivers dashboard analytics for multi-role users
+**Current focus:** Phase 8 — Data Correctness & Permission Foundation (not yet started)
 
-- Phase: Not started (defining requirements)
-- Plan: —
-- Status: Defining requirements
-- Last activity: 2026-04-11 — Milestone v1.2 研究完成，準備路線圖
+## Current Position
 
-### Research Complete ✓
+Phase: 8 of 12 (Data Correctness & Permission Foundation)
+Plan: — of — in current phase
+Status: Ready to plan
+Last activity: 2026-04-11 — Roadmap created for v1.2 (5 phases: 8-12)
 
-- ✅ Stack research: Recharts 3.8.1 已安裝，零新依賴
-- ✅ Features research: P1/P2/deferred 層級已識別
-- ✅ Architecture research: 快取聚合決策已驗證（vs 實時 Bifrost）
-- ✅ Pitfalls research: 3 個先決條件 bugs 識別（permission、field mismatch、hardcoded data）
+Progress: [░░░░░░░░░░] 0% (v1.2)
 
-### Key Findings
+## Performance Metrics
 
-1. **No library blocker** — Recharts 3.8.1 already installed, React 19 compatible, Bun ESM-native
-2. **Architecture decided: Cached aggregation** — SQLite local reads (5-50ms) vs Bifrost queries (500ms-5s)
-3. **Critical prerequisites before dev** — Remove hardcoded dashboard data, fix camelCase fields, implement per-role permission scoping
-4. **5-phase roadmap recommended** — P1 data correctness, P2 sync infra, P3 chart UI, P4 resilience, P5 differentiators
+**Velocity:**
+- Total plans completed: 0 (this milestone)
+- Average duration: —
+- Total execution time: —
 
-## Previous Milestone: v1.1 Pages & Framework ✓
+**By Phase:**
 
-**Completed 2026-04-11**
-- All 19 page handler classes unit-tested (3 plans, 83 tests)
-- All 25 Inertia page routes covered in integration tests
-- Complete i18n migration for page handlers and API responses
-- Full test suite passing (912+ tests, 0 failures)
+| Phase | Plans | Total | Avg/Plan |
+|-------|-------|-------|----------|
+| - | - | - | - |
 
-## Previous Milestone: v1.0 LLM Gateway Abstraction ✓
+**Recent Trend:** — (no data yet)
 
-**Completed 2026-04-10**
-- `ILLMGatewayClient` abstraction with adapter pattern
-- All 7 application services refactored
-- `bifrostVirtualKeyId` → `gatewayKeyId` rename
-- `packages/bifrost-sdk/` workspace extraction
-- Full test suite passing
+*Updated after each plan completion*
 
----
+## Accumulated Context
 
-*Last updated: 2026-04-11*
+### Decisions
+
+Decisions are logged in PROJECT.md Key Decisions table.
+Recent decisions affecting v1.2:
+
+- Architecture: Cached aggregation (SQLite local reads 5-50ms) chosen over live Bifrost queries (500ms-5s)
+- Zero new dependencies: Recharts 3.8.1 already installed
+- PDF export via `window.print()` for v1.2; Puppeteer deferred to v1.3
+
+### Pending Todos
+
+None yet.
+
+### Blockers/Concerns
+
+- Phase 8 prerequisite bugs must all be resolved before Phase 9 can start
+- DASHBOARD-P3 permission fix requires careful multi-member isolation testing
+
+## Session Continuity
+
+Last session: 2026-04-11
+Stopped at: Roadmap written — 5 phases defined (8-12), requirement coverage 100%
+Resume file: None

@@ -106,15 +106,15 @@ These are validated features, deferred by priority or complexity:
 
 | REQ-ID | Feature | Phase | Status |
 |--------|---------|-------|--------|
-| DASHBOARD-P1 | Remove hardcoded sample data | 1 | Pending |
-| DASHBOARD-P2 | Fix field name mismatch | 1 | Pending |
-| DASHBOARD-P3 | Implement per-role permission scoping | 1 | Pending |
-| DASHBOARD-01 | Usage overview cards + time window | 3 | Pending |
-| DASHBOARD-02 | Cost over time trend chart | 3 | Pending |
-| DASHBOARD-03 | Cost by model bar chart | 3 | Pending |
-| DASHBOARD-04 | Token usage stacked area chart | 3 | Pending |
-| DASHBOARD-05 | Model comparison table | 3 | Pending |
-| DASHBOARD-06 | Monthly PDF report | 5 | Pending |
+| DASHBOARD-P1 | Remove hardcoded sample data | Phase 8 | Pending |
+| DASHBOARD-P2 | Fix field name mismatch | Phase 8 | Pending |
+| DASHBOARD-P3 | Implement per-role permission scoping | Phase 8 | Pending |
+| DASHBOARD-01 | Usage overview cards + time window | Phase 10 | Pending |
+| DASHBOARD-02 | Cost over time trend chart | Phase 10 | Pending |
+| DASHBOARD-03 | Cost by model bar chart | Phase 10 | Pending |
+| DASHBOARD-04 | Token usage stacked area chart | Phase 10 | Pending |
+| DASHBOARD-05 | Model comparison table | Phase 10 | Pending |
+| DASHBOARD-06 | Monthly PDF report | Phase 12 | Pending |
 
 ---
 
@@ -129,4 +129,4 @@ See `.planning/research/` for detailed findings:
 
 ---
 
-**Last updated: 2026-04-11** — Research complete, requirements drafted
+**Last updated: 2026-04-11** — Roadmap created, traceability matrix updated with phase assignments
