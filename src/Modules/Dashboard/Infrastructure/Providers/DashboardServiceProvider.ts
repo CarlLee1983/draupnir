@@ -8,6 +8,7 @@ import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorR
 import { GetCostTrendsService } from '../../Application/Services/GetCostTrendsService'
 import { GetKpiSummaryService } from '../../Application/Services/GetKpiSummaryService'
 import { GetModelComparisonService } from '../../Application/Services/GetModelComparisonService'
+import { GetPerKeyCostService } from '../../Application/Services/GetPerKeyCostService'
 import { DrizzleSyncCursorRepository } from '../Repositories/DrizzleSyncCursorRepository'
 import { DrizzleUsageRepository } from '../Repositories/DrizzleUsageRepository'
 import { BifrostSyncService } from '../Services/BifrostSyncService'
@@ -74,6 +75,14 @@ export class DashboardServiceProvider extends ModuleServiceProvider {
 
     container.bind('getModelComparisonService', (c: IContainer) => {
       return new GetModelComparisonService(
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+        c.make('drizzleUsageRepository') as IUsageRepository,
+      )
+    })
+
+    container.bind('getPerKeyCostService', (c: IContainer) => {
+      return new GetPerKeyCostService(
         c.make('apiKeyRepository') as IApiKeyRepository,
         c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
         c.make('drizzleUsageRepository') as IUsageRepository,

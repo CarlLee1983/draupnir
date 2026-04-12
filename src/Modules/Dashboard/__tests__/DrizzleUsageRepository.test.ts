@@ -307,6 +307,106 @@ describe('DrizzleUsageRepository', () => {
     expect(result[9]).toMatchObject({ model: 'model-2', totalCost: 2 })
   })
 
+  it('aggregates per-key cost grouped by api_key_id', async () => {
+    await repository.upsert({
+      id: 'row-1',
+      bifrostLogId: 'log-1',
+      apiKeyId: 'key-1',
+      orgId: 'org-1',
+      model: 'gpt-4o',
+      provider: 'openai',
+      inputTokens: 10,
+      outputTokens: 20,
+      creditCost: '1.00',
+      latencyMs: 100,
+      status: 'success',
+      occurredAt: '2026-04-11T10:00:00Z',
+      createdAt: '2026-04-11T10:00:01Z',
+    })
+    await repository.upsert({
+      id: 'row-2',
+      bifrostLogId: 'log-2',
+      apiKeyId: 'key-2',
+      orgId: 'org-1',
+      model: 'claude-sonnet',
+      provider: 'anthropic',
+      inputTokens: 50,
+      outputTokens: 25,
+      creditCost: '3.25',
+      latencyMs: 250,
+      status: 'success',
+      occurredAt: '2026-04-11T12:00:00Z',
+      createdAt: '2026-04-11T12:00:01Z',
+    })
+
+    const result = await repository.queryPerKeyCost('org-1', {
+      startDate: '2026-04-11T00:00:00Z',
+      endDate: '2026-04-12T00:00:00Z',
+    })
+
+    expect(result).toEqual([
+      {
+        apiKeyId: 'key-2',
+        totalCost: 3.25,
+        totalRequests: 1,
+        totalTokens: 75,
+      },
+      {
+        apiKeyId: 'key-1',
+        totalCost: 1,
+        totalRequests: 1,
+        totalTokens: 30,
+      },
+    ])
+  })
+
+  it('returns only selected keys for per-key cost queries', async () => {
+    await repository.upsert({
+      id: 'row-1',
+      bifrostLogId: 'log-1',
+      apiKeyId: 'key-1',
+      orgId: 'org-1',
+      model: 'gpt-4o',
+      provider: 'openai',
+      inputTokens: 10,
+      outputTokens: 20,
+      creditCost: '1.00',
+      latencyMs: 100,
+      status: 'success',
+      occurredAt: '2026-04-11T10:00:00Z',
+      createdAt: '2026-04-11T10:00:01Z',
+    })
+    await repository.upsert({
+      id: 'row-2',
+      bifrostLogId: 'log-2',
+      apiKeyId: 'key-2',
+      orgId: 'org-1',
+      model: 'claude-sonnet',
+      provider: 'anthropic',
+      inputTokens: 50,
+      outputTokens: 25,
+      creditCost: '3.25',
+      latencyMs: 250,
+      status: 'success',
+      occurredAt: '2026-04-11T12:00:00Z',
+      createdAt: '2026-04-11T12:00:01Z',
+    })
+
+    const result = await repository.queryPerKeyCostByKeys(['key-1'], {
+      startDate: '2026-04-11T00:00:00Z',
+      endDate: '2026-04-12T00:00:00Z',
+    })
+
+    expect(result).toEqual([
+      {
+        apiKeyId: 'key-1',
+        totalCost: 1,
+        totalRequests: 1,
+        totalTokens: 30,
+      },
+    ])
+  })
+
   it('returns aggregate stats for the org', async () => {
     await seedRecord()
     await repository.upsert({

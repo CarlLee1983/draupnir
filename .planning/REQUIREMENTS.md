@@ -20,10 +20,10 @@ Requirements for v1.3 milestone. Each maps to roadmap phases.
 
 ### Cost Breakdown
 
-- [ ] **COST-01**: User can view per-key cost breakdown for a given time period
-- [ ] **COST-02**: User can view per-key token usage efficiency metrics
-- [ ] **COST-03**: User can view per-model cost distribution across the organization
-- [ ] **COST-04**: User can view per-model aggregation with usage percentage
+- [x] **COST-01**: User can view per-key cost breakdown for a given time period
+- [x] **COST-02**: User can view per-key token usage efficiency metrics
+- [x] **COST-03**: User can view per-model cost distribution across the organization
+- [x] **COST-04**: User can view per-model aggregation with usage percentage
 
 ### Reports
 
@@ -73,10 +73,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ALRT-06 | Phase 15 | Pending |
 | ALRT-07 | Phase 15 | Pending |
 | ALRT-08 | Phase 15 | Pending |
-| COST-01 | Phase 14 | Pending |
-| COST-02 | Phase 14 | Pending |
-| COST-03 | Phase 14 | Pending |
-| COST-04 | Phase 14 | Pending |
+| COST-01 | Phase 14 | Complete |
+| COST-02 | Phase 14 | Complete |
+| COST-03 | Phase 14 | Complete |
+| COST-04 | Phase 14 | Complete |
 | REPT-01 | Phase 16 | Pending |
 | REPT-02 | Phase 16 | Pending |
 | REPT-03 | Phase 16 | Pending |

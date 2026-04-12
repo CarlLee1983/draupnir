@@ -28,12 +28,6 @@ export class GetModelComparisonService {
 
       const range = resolveDateRange(query.startTime, query.endTime)
       const membershipRole = authResult.membership?.role
-
-      if (query.callerSystemRole === 'admin' || membershipRole === 'manager') {
-        const rows = await this.usageRepository.queryModelBreakdown(query.orgId, range)
-        return { success: true, message: 'Query successful', data: { rows } }
-      }
-
       const keys = await this.apiKeyRepository.findByOrgId(query.orgId)
       const visibleKeys = DashboardKeyScopeResolver.resolveVisibleKeys(keys, {
         callerUserId: query.callerUserId,
@@ -41,7 +35,22 @@ export class GetModelComparisonService {
         orgMembershipRole: membershipRole,
       })
 
-      const keyIds = visibleKeys.map((key) => key.id)
+      const keyIds =
+        query.apiKeyIds && query.apiKeyIds.length > 0
+          ? visibleKeys.filter((key) => query.apiKeyIds?.includes(key.id)).map((key) => key.id)
+          : visibleKeys.map((key) => key.id)
+
+      if (query.apiKeyIds && query.apiKeyIds.length > 0) {
+        const rows =
+          keyIds.length > 0 ? await this.usageRepository.queryModelBreakdownByKeys(keyIds, range) : []
+        return { success: true, message: 'Query successful', data: { rows } }
+      }
+
+      if (query.callerSystemRole === 'admin' || membershipRole === 'manager') {
+        const rows = await this.usageRepository.queryModelBreakdown(query.orgId, range)
+        return { success: true, message: 'Query successful', data: { rows } }
+      }
+
       const rows =
         keyIds.length > 0 ? await this.usageRepository.queryModelBreakdownByKeys(keyIds, range) : []
 

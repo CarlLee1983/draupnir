@@ -1,5 +1,6 @@
 import type { PlanetCore } from '@gravito/core'
 import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
+import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { IUsageRepository } from '@/Modules/Dashboard/Application/Ports/IUsageRepository'
@@ -8,14 +9,30 @@ import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repo
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { AlertController } from '../../Presentation/Controllers/AlertController'
+import { AlertHistoryController } from '../../Presentation/Controllers/AlertHistoryController'
+import { WebhookEndpointController } from '../../Presentation/Controllers/WebhookEndpointController'
+import { DeleteWebhookEndpointService } from '../../Application/Services/DeleteWebhookEndpointService'
+import { DispatchAlertWebhooksService } from '../../Application/Services/DispatchAlertWebhooksService'
 import { GetBudgetService } from '../../Application/Services/GetBudgetService'
+import { GetAlertHistoryService } from '../../Application/Services/GetAlertHistoryService'
 import { EvaluateThresholdsService } from '../../Application/Services/EvaluateThresholdsService'
+import { ListWebhookEndpointsService } from '../../Application/Services/ListWebhookEndpointsService'
+import { RegisterWebhookEndpointService } from '../../Application/Services/RegisterWebhookEndpointService'
+import { ResendDeliveryService } from '../../Application/Services/ResendDeliveryService'
+import { RotateWebhookSecretService } from '../../Application/Services/RotateWebhookSecretService'
 import { SendAlertService } from '../../Application/Services/SendAlertService'
+import { TestWebhookEndpointService } from '../../Application/Services/TestWebhookEndpointService'
 import { SetBudgetService } from '../../Application/Services/SetBudgetService'
+import { UpdateWebhookEndpointService } from '../../Application/Services/UpdateWebhookEndpointService'
 import type { IAlertConfigRepository } from '../../Domain/Repositories/IAlertConfigRepository'
+import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
+import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
 import { DrizzleAlertConfigRepository } from '../Repositories/DrizzleAlertConfigRepository'
+import { DrizzleAlertDeliveryRepository } from '../Repositories/DrizzleAlertDeliveryRepository'
 import { DrizzleAlertEventRepository } from '../Repositories/DrizzleAlertEventRepository'
+import { DrizzleWebhookEndpointRepository } from '../Repositories/DrizzleWebhookEndpointRepository'
 
 export class AlertsServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
@@ -29,12 +46,101 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
       return new DrizzleAlertEventRepository(db)
     })
 
+    container.singleton('webhookEndpointRepository', () => {
+      return new DrizzleWebhookEndpointRepository(db)
+    })
+
+    container.singleton('alertDeliveryRepository', () => {
+      return new DrizzleAlertDeliveryRepository(db)
+    })
+
     container.bind('setBudgetService', (c: IContainer) => {
       return new SetBudgetService(c.make('drizzleAlertConfigRepository') as IAlertConfigRepository)
     })
 
     container.bind('getBudgetService', (c: IContainer) => {
       return new GetBudgetService(c.make('drizzleAlertConfigRepository') as IAlertConfigRepository)
+    })
+
+    container.bind('alertController', (c: IContainer) => {
+      return new AlertController(
+        c.make('setBudgetService') as SetBudgetService,
+        c.make('getBudgetService') as GetBudgetService,
+      )
+    })
+
+    container.bind('registerWebhookEndpointService', (c: IContainer) => {
+      return new RegisterWebhookEndpointService({
+        repo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+        allowHttp: process.env.WEBHOOK_ALLOW_HTTP === '1',
+      })
+    })
+
+    container.bind('listWebhookEndpointsService', (c: IContainer) => {
+      return new ListWebhookEndpointsService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+    })
+
+    container.bind('updateWebhookEndpointService', (c: IContainer) => {
+      return new UpdateWebhookEndpointService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+    })
+
+    container.bind('rotateWebhookSecretService', (c: IContainer) => {
+      return new RotateWebhookSecretService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+    })
+
+    container.bind('deleteWebhookEndpointService', (c: IContainer) => {
+      return new DeleteWebhookEndpointService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+    })
+
+    container.bind('testWebhookEndpointService', (c: IContainer) => {
+      return new TestWebhookEndpointService({
+        repo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+        dispatcher: c.make('webhookDispatcher') as IWebhookDispatcher,
+      })
+    })
+
+    container.bind('dispatchAlertWebhooksService', (c: IContainer) => {
+      return new DispatchAlertWebhooksService({
+        endpointRepo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+        dispatcher: c.make('webhookDispatcher') as IWebhookDispatcher,
+      })
+    })
+
+    container.bind('webhookEndpointController', (c: IContainer) => {
+      return new WebhookEndpointController({
+        listWebhookEndpointsService: c.make('listWebhookEndpointsService') as ListWebhookEndpointsService,
+        registerWebhookEndpointService: c.make('registerWebhookEndpointService') as RegisterWebhookEndpointService,
+        updateWebhookEndpointService: c.make('updateWebhookEndpointService') as UpdateWebhookEndpointService,
+        rotateWebhookSecretService: c.make('rotateWebhookSecretService') as RotateWebhookSecretService,
+        deleteWebhookEndpointService: c.make('deleteWebhookEndpointService') as DeleteWebhookEndpointService,
+        testWebhookEndpointService: c.make('testWebhookEndpointService') as TestWebhookEndpointService,
+      })
+    })
+
+    container.bind('getAlertHistoryService', (c: IContainer) => {
+      return new GetAlertHistoryService({
+        eventRepo: c.make('drizzleAlertEventRepository') as IAlertEventRepository,
+        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+      })
+    })
+
+    container.bind('alertHistoryController', (c: IContainer) => {
+      return new AlertHistoryController({
+        getAlertHistoryService: c.make('getAlertHistoryService') as GetAlertHistoryService,
+        resendDeliveryService: c.make('resendDeliveryService') as ResendDeliveryService,
+      })
+    })
+
+    container.bind('resendDeliveryService', (c: IContainer) => {
+      return new ResendDeliveryService({
+        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+        eventRepo: c.make('drizzleAlertEventRepository') as IAlertEventRepository,
+        endpointRepo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+        dispatcher: c.make('webhookDispatcher') as IWebhookDispatcher,
+        mailer: c.make('mailer') as IMailer,
+        orgRepo: c.make('organizationRepository') as IOrganizationRepository,
+      })
     })
 
     container.bind('sendAlertService', (c: IContainer) => {
@@ -44,6 +150,8 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
         c.make('organizationRepository') as IOrganizationRepository,
         c.make('authRepository') as IAuthRepository,
         c.make('drizzleAlertEventRepository') as IAlertEventRepository,
+        c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+        c.make('dispatchAlertWebhooksService') as DispatchAlertWebhooksService,
       )
     })
 

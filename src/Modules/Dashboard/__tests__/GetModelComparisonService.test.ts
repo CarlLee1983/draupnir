@@ -108,4 +108,42 @@ describe('GetModelComparisonService', () => {
       endDate: '2026-04-30T23:59:59Z',
     })
   })
+
+  it('filters model rows to a specific key when apiKeyIds are supplied', async () => {
+    const { service, usageRepository, orgAuth, apiKeyRepository } = createService()
+
+    ;(orgAuth.requireOrgMembership as ReturnType<typeof vi.fn>).mockResolvedValue({
+      authorized: true,
+      membership: { role: 'member', userId: 'user-1' },
+    })
+    ;(apiKeyRepository.findByOrgId as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { id: 'key-1', createdByUserId: 'user-1', status: 'active' },
+      { id: 'key-2', createdByUserId: 'user-1', status: 'active' },
+    ])
+    ;(usageRepository.queryModelBreakdownByKeys as ReturnType<typeof vi.fn>).mockResolvedValue([
+      {
+        model: 'gpt-4o',
+        provider: 'openai',
+        totalCost: 2.25,
+        totalRequests: 3,
+        avgLatencyMs: 110,
+      },
+    ])
+
+    const result = await service.execute({
+      orgId: 'org-1',
+      callerUserId: 'user-1',
+      callerSystemRole: 'user',
+      startTime: '2026-04-01T00:00:00Z',
+      endTime: '2026-04-30T23:59:59Z',
+      apiKeyIds: ['key-1'],
+    })
+
+    expect(result.success).toBe(true)
+    expect(usageRepository.queryModelBreakdownByKeys).toHaveBeenCalledWith(['key-1'], {
+      startDate: '2026-04-01T00:00:00Z',
+      endDate: '2026-04-30T23:59:59Z',
+    })
+    expect(usageRepository.queryModelBreakdown).not.toHaveBeenCalled()
+  })
 })

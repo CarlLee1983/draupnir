@@ -11,6 +11,7 @@ import type {
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
+import { requireOrganizationManager } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 
 import { bindPageAction } from './bindPageAction'
 import type { MemberPageBindingKey } from './member/memberPageKeys'
@@ -78,6 +79,13 @@ const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
   },
   {
     method: 'get',
+    path: '/member/cost-breakdown',
+    page: MEMBER_PAGE_KEYS.costBreakdown,
+    action: 'handle',
+    name: 'pages.member.costBreakdown',
+  },
+  {
+    method: 'get',
     path: '/member/contracts',
     page: MEMBER_PAGE_KEYS.contracts,
     action: 'handle',
@@ -130,4 +138,12 @@ export function registerMemberPageRoutes(
     const opts = name !== undefined ? { name } : undefined
     registerMemberHttpRoute(router, method, path, withInertiaPageHandler(inner), opts)
   }
+
+  const alertsHandler = bindPageAction(container, MEMBER_PAGE_KEYS.ALERTS, 'handle') as InertiaHandler
+  router.get(
+    '/member/alerts',
+    [requireOrganizationManager()],
+    withInertiaPageHandler(alertsHandler),
+    { name: 'pages.member.alerts' },
+  )
 }

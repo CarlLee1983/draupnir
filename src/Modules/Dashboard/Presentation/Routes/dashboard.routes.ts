@@ -21,4 +21,7 @@ export function registerDashboardRoutes(
   router.get('/api/organizations/:orgId/dashboard/model-comparison', moduleAuth, (ctx) =>
     controller.modelComparison(ctx),
   )
+  router.get('/api/organizations/:orgId/dashboard/per-key-cost', moduleAuth, (ctx) =>
+    controller.perKeyCost(ctx),
+  )
 }

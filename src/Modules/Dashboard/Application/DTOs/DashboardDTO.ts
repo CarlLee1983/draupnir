@@ -22,6 +22,7 @@ export interface DashboardAnalyticsQuery {
   callerSystemRole: string
   startTime?: string
   endTime?: string
+  apiKeyIds?: readonly string[]
 }
 
 export interface KpiSummaryResponse {
@@ -49,6 +50,31 @@ export interface ModelComparisonResponse {
   message: string
   data?: {
     rows: readonly ModelUsageBucket[]
+  }
+  error?: string
+}
+
+export interface PerKeyCostRow {
+  readonly apiKeyId: string
+  readonly keyName: string
+  readonly totalCost: number
+  readonly totalRequests: number
+  readonly totalTokens: number
+  readonly costPerRequest: number
+  readonly tokensPerRequest: number
+  readonly percentOfTotal: number
+}
+
+export interface PerKeyCostResponse {
+  success: boolean
+  message: string
+  data?: {
+    rows: readonly PerKeyCostRow[]
+    grandTotal: {
+      readonly totalCost: number
+      readonly totalRequests: number
+      readonly totalTokens: number
+    }
   }
   error?: string
 }

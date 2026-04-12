@@ -6,6 +6,7 @@ import type {
   DateRange,
   IUsageRepository,
   ModelUsageBucket,
+  PerKeyCostBucket,
   UsageRecordInsert,
   UsageStats,
 } from '../../Application/Ports/IUsageRepository'
@@ -97,6 +98,33 @@ export class DrizzleUsageRepository implements IUsageRepository {
     return this.queryStats(eq(usageRecords.api_key_id, apiKeyId), range)
   }
 
+  async queryPerKeyCost(orgId: string, range: DateRange): Promise<readonly PerKeyCostBucket[]> {
+    return this.queryPerKeyCostInternal(
+      and(
+        eq(usageRecords.org_id, orgId),
+        gte(usageRecords.occurred_at, range.startDate),
+        lte(usageRecords.occurred_at, range.endDate),
+      ),
+    )
+  }
+
+  async queryPerKeyCostByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly PerKeyCostBucket[]> {
+    if (apiKeyIds.length === 0) {
+      return []
+    }
+
+    return this.queryPerKeyCostInternal(
+      and(
+        inArray(usageRecords.api_key_id, [...apiKeyIds]),
+        gte(usageRecords.occurred_at, range.startDate),
+        lte(usageRecords.occurred_at, range.endDate),
+      ),
+    )
+  }
+
   private async queryDailyCost(condition: any): Promise<readonly DailyCostBucket[]> {
     const db = getDrizzleInstance()
     const rows = await db
@@ -143,6 +171,28 @@ export class DrizzleUsageRepository implements IUsageRepository {
       totalCost: Number(row.totalCost ?? 0),
       totalRequests: Number(row.totalRequests ?? 0),
       avgLatencyMs: Number(row.avgLatencyMs ?? 0),
+    }))
+  }
+
+  private async queryPerKeyCostInternal(condition: any): Promise<readonly PerKeyCostBucket[]> {
+    const db = getDrizzleInstance()
+    const rows = await db
+      .select({
+        apiKeyId: usageRecords.api_key_id,
+        totalCost: sql<number>`SUM(CAST(${usageRecords.credit_cost} AS REAL))`,
+        totalRequests: sql<number>`COUNT(*)`,
+        totalTokens: sql<number>`SUM(${usageRecords.input_tokens} + ${usageRecords.output_tokens})`,
+      })
+      .from(usageRecords)
+      .where(condition)
+      .groupBy(usageRecords.api_key_id)
+      .orderBy(desc(sql`SUM(CAST(${usageRecords.credit_cost} AS REAL))`))
+
+    return rows.map((row) => ({
+      apiKeyId: String(row.apiKeyId),
+      totalCost: Number(row.totalCost ?? 0),
+      totalRequests: Number(row.totalRequests ?? 0),
+      totalTokens: Number(row.totalTokens ?? 0),
     }))
   }
 

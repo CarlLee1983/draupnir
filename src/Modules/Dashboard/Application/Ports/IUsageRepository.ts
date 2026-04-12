@@ -40,6 +40,14 @@ export interface UsageStats {
   readonly avgLatency: number
 }
 
+/** Per-API-key aggregation — used by the per-key cost breakdown table. */
+export interface PerKeyCostBucket {
+  readonly apiKeyId: string
+  readonly totalCost: number
+  readonly totalRequests: number
+  readonly totalTokens: number
+}
+
 /** Insert shape for the usage_records table. */
 export interface UsageRecordInsert {
   readonly id: string
@@ -71,4 +79,9 @@ export interface IUsageRepository {
   ): Promise<readonly ModelUsageBucket[]>
   queryStatsByOrg(orgId: string, range: DateRange): Promise<UsageStats>
   queryStatsByKey(apiKeyId: string, range: DateRange): Promise<UsageStats>
+  queryPerKeyCost(orgId: string, range: DateRange): Promise<readonly PerKeyCostBucket[]>
+  queryPerKeyCostByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly PerKeyCostBucket[]>
 }

@@ -3,15 +3,18 @@ import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domai
 import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
+import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import { AlertEvent } from '../../Domain/Entities/AlertEvent'
+import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import {
   criticalAlertTemplate,
   warningAlertTemplate,
   type AlertEmailTemplateParams,
   type AlertKeyBreakdownItem,
 } from '../../Infrastructure/Services/AlertEmailTemplates'
+import { DispatchAlertWebhooksService } from './DispatchAlertWebhooksService'
 
-export interface SendAlertParams extends AlertEmailTemplateParams {
+export interface SendAlertParams extends Omit<AlertEmailTemplateParams, 'orgName'> {
   readonly orgId: string
   readonly tier: 'warning' | 'critical'
 }
@@ -26,6 +29,8 @@ export class SendAlertService {
     private readonly orgRepo: IOrganizationRepository,
     private readonly authRepo: IAuthRepository,
     private readonly alertEventRepo: IAlertEventRepository,
+    private readonly deliveryRepo: IAlertDeliveryRepository,
+    private readonly webhookDispatch: DispatchAlertWebhooksService,
   ) {}
 
   async send(params: SendAlertParams): Promise<void> {
@@ -44,32 +49,69 @@ export class SendAlertService {
     }
 
     const recipients = [...emailSet]
-    if (recipients.length === 0) {
-      return
-    }
+
+    const alertEvent = AlertEvent.create({
+      orgId: params.orgId,
+      tier: params.tier,
+      budgetUsd: params.budgetUsd,
+      actualCostUsd: params.actualCostUsd,
+      percentage: params.percentage,
+      month: params.month,
+      recipients: [],
+    })
+
+    await this.alertEventRepo.save(alertEvent)
 
     const html =
       params.tier === 'critical'
         ? criticalAlertTemplate({ ...params, orgName })
         : warningAlertTemplate({ ...params, orgName })
 
-    await this.mailer.send({
-      to: recipients,
-      subject: `[Draupnir] ${params.tier === 'critical' ? 'CRITICAL' : 'Warning'}: Budget alert for ${orgName}`,
-      html,
-    })
-
-    await this.alertEventRepo.save(
-      AlertEvent.create({
+    for (const recipient of recipients) {
+      const skipped = await this.deliveryRepo.existsSent({
         orgId: params.orgId,
-        tier: params.tier,
-        budgetUsd: params.budgetUsd,
-        actualCostUsd: params.actualCostUsd,
-        percentage: params.percentage,
         month: params.month,
-        recipients,
-      }),
-    )
+        tier: params.tier,
+        channel: 'email',
+        target: recipient,
+      })
+      if (skipped) {
+        continue
+      }
+
+      const dispatchedAt = new Date().toISOString()
+      const base = AlertDelivery.create({
+        alertEventId: alertEvent.id,
+        channel: 'email',
+        target: recipient,
+        targetUrl: null,
+        dispatchedAt,
+      })
+
+      try {
+        await this.mailer.send({
+          to: recipient,
+          subject: `[Draupnir] ${params.tier === 'critical' ? 'CRITICAL' : 'Warning'}: Budget alert for ${orgName}`,
+          html,
+        })
+
+        await this.deliveryRepo.save(base.markSent(null, new Date().toISOString(), 1))
+      } catch (error) {
+        await this.deliveryRepo.save(
+          base.markFailed(
+            null,
+            error instanceof Error ? error.message : 'Unknown email error',
+            1,
+          ),
+        )
+      }
+    }
+
+    queueMicrotask(() => {
+      void Promise.resolve(this.webhookDispatch.dispatchAll(alertEvent, orgName)).catch((error) =>
+        console.error('[SendAlertService] webhook dispatch unexpectedly threw', error),
+      )
+    })
   }
 }
 

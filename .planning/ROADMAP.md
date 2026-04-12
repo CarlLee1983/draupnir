@@ -90,10 +90,10 @@ Plans:
   3. User can view a history of all alerts with delivery status (sent, failed) per channel
 **Plans**: 4 plans
 Plans:
-- [ ] 15-01-PLAN.md — Foundation + Domain: promote WebhookDispatcher/WebhookSecret to Foundation; WebhookEndpoint aggregate (immutable + withDescription) + WebhookUrl VO (SSRF/HTTPS); alert_deliveries + webhook_endpoints schema + migration + backfill script
-- [ ] 15-02-PLAN.md — Application Services: webhook CRUD/test services, DispatchAlertWebhooksService (Promise.allSettled fan-out), GetAlertHistoryService, ResendDeliveryService, DTO mappers, SendAlertService D-17 fire-and-forget integration
-- [ ] 15-03-PLAN.md — Presentation + Wiring: controllers, FormRequests, manager-gated routes, AlertsServiceProvider DI bindings, MemberAlertsPage Inertia handler with DTO-mapped props
-- [ ] 15-04-PLAN.md — Frontend: unified /alerts page (Budgets | Webhooks | History tabs); webhook CRUD UI with one-time secret reveal; history timeline with per-channel delivery status + resend
+- [x] 15-01-PLAN.md — Foundation + Domain: promote WebhookDispatcher/WebhookSecret to Foundation; WebhookEndpoint aggregate (immutable + withDescription) + WebhookUrl VO (SSRF/HTTPS); alert_deliveries + webhook_endpoints schema + migration + backfill script
+- [x] 15-02-PLAN.md — Application Services: webhook CRUD/test services, DispatchAlertWebhooksService (Promise.allSettled fan-out), GetAlertHistoryService, ResendDeliveryService, DTO mappers, SendAlertService D-17 fire-and-forget integration
+- [x] 15-03-PLAN.md — Presentation + Wiring: controllers, FormRequests, manager-gated routes, AlertsServiceProvider DI bindings, MemberAlertsPage Inertia handler with DTO-mapped props
+- [x] 15-04-PLAN.md — Frontend: unified /alerts page (Budgets | Webhooks | History tabs); webhook CRUD UI with one-time secret reveal; history timeline with per-channel delivery status + resend
 **UI hint**: yes
 
 ### Phase 16: Automated Reports
@@ -116,5 +116,5 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 13. Alert Foundation & Email Infrastructure | v1.3 | 2/2 | Complete | 2026-04-12 |
 | 14. Per-Key Cost Breakdown | v1.3 | 2/2 | Complete   | 2026-04-12 |
-| 15. Webhook Alerts | v1.3 | 0/? | Not started | - |
+| 15. Webhook Alerts | v1.3 | 4/4 | Complete | 2026-04-12 |
 | 16. Automated Reports | v1.3 | 0/? | Not started | - |

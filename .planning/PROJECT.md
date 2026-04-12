@@ -22,13 +22,13 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 - ✓ Six production dashboard charts (Cost, Tokens, Models) using Recharts — v1.2
 - ✓ Role-scoped analytics (ADMIN/MANAGER/MEMBER) with key-level isolation — v1.2
 - ✓ Period-over-period comparison badges and PDF export via browser print — v1.2
+- ✓ Usage alerts foundation, webhook alerts CRUD/history/resend, and signed delivery persistence — v1.3
 
 ### Active
 
 - [ ] Implement `OpenRouterGatewayAdapter` (v2)
 - [ ] Extend `ILLMGatewayClient` to cover raw chat-completion proxying (v2)
 - [ ] Implement automated email reports for monthly usage (v1.3)
-- [ ] Usage alerts and threshold notifications (v1.3)
 
 ### Out of Scope
 

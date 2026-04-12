@@ -42,3 +42,4 @@ dist/
 .eslintcache
 *.sqlite*
 .claude/worktrees/
+.omx/

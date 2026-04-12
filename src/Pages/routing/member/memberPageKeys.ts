@@ -10,8 +10,11 @@ export const MEMBER_PAGE_KEYS = {
   apiKeyCreate: 'page.member.apiKeyCreate',
   apiKeyRevoke: 'page.member.apiKeyRevoke',
   usage: 'page.member.usage',
+  costBreakdown: 'page.member.costBreakdown',
   contracts: 'page.member.contracts',
   settings: 'page.member.settings',
+  ALERTS: 'member/alerts',
+  alerts: 'member/alerts',
 } as const
 
 export type MemberPageBindingKey = (typeof MEMBER_PAGE_KEYS)[keyof typeof MEMBER_PAGE_KEYS]

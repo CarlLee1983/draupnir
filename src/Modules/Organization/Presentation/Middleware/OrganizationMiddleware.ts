@@ -84,3 +84,29 @@ export function requireOrganizationContext(): Middleware {
     return next()
   }
 }
+
+const MANAGER_SENTINEL = new Response(null, { status: 204 })
+
+export function requireOrganizationManager(): Middleware {
+  const orgContext = requireOrganizationContext()
+  return async (ctx, next) => {
+    const result = await orgContext(ctx, async () => MANAGER_SENTINEL)
+    if (result !== MANAGER_SENTINEL) {
+      return result
+    }
+
+    const current = ctx.get<CurrentOrganizationContext>('currentOrg')
+    if (!current || (!current.isAdmin && current.role !== 'manager')) {
+      return ctx.json(
+        {
+          success: false,
+          message: 'Insufficient organization permissions',
+          error: 'NOT_ORG_MANAGER',
+        },
+        403,
+      )
+    }
+
+    return next()
+  }
+}

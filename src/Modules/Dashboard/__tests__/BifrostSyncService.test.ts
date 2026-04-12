@@ -129,7 +129,7 @@ describe('BifrostSyncService', () => {
     gateway.seedUsageLogs(logs)
 
     const result = await service.sync()
-    expect(result).toEqual({ synced: 2, quarantined: 0 })
+    expect(result).toEqual({ synced: 2, quarantined: 0, affectedOrgIds: ['org-1'] })
     expect(await db.table('usage_records').count()).toBe(2)
     expect(gateway.calls.getUsageLogs[0]?.keyIds).toEqual([])
   })
@@ -152,7 +152,7 @@ describe('BifrostSyncService', () => {
     ])
 
     const result = await service.sync()
-    expect(result).toEqual({ synced: 0, quarantined: 1 })
+    expect(result).toEqual({ synced: 0, quarantined: 1, affectedOrgIds: [] })
     expect(await db.table('usage_records').count()).toBe(0)
     expect(await db.table('quarantined_logs').count()).toBe(1)
   })
@@ -242,7 +242,7 @@ describe('BifrostSyncService', () => {
     }
 
     service = new BifrostSyncService(new ThrowingGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
-    await expect(service.sync()).resolves.toEqual({ synced: 0, quarantined: 0 })
+    await expect(service.sync()).resolves.toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
   })
 
   it('advances cursor after successful sync batch', async () => {
@@ -284,7 +284,7 @@ describe('BifrostSyncService', () => {
       const syncPromise = service.sync()
       vi.advanceTimersByTime(30_001)
 
-      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0 })
+      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
     } finally {
       vi.useRealTimers()
     }
@@ -305,7 +305,7 @@ describe('BifrostSyncService', () => {
       const syncPromise = service.sync()
       vi.advanceTimersByTime(30_001)
 
-      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0 })
+      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
       expect(getCursorState()).toBeNull()
     } finally {
       vi.useRealTimers()
