@@ -2,24 +2,33 @@
 phase: 13-alert-foundation-email-infrastructure
 plan: 01
 subsystem: infra
-tags: [alerts, email, sqlite, drizzle, decimal, upyo]
-
+tags:
+  - alerts
+  - email
+  - drizzle
+  - decimal.js
+  - upyo
+  - domain-events
 requires:
-  - phase: 12
-    provides: cached usage aggregation and local read models for alert evaluation
+  - phase: 12-differentiators
+    provides: usage_records table and sync baseline for downstream cost evaluation
 provides:
-  - shared IMailer port for foundation email delivery
-  - Upyo-backed and console-backed mailer implementations
-  - immutable alert budget value objects
-  - alert configuration aggregate and alert event entity
-  - Drizzle schema and repositories for alert persistence
-  - Bifrost sync completion domain event for downstream evaluation
-affects: [phase-13, phase-14, phase-15, phase-16]
-
+  - shared IMailer port for Foundation services
+  - alert threshold value objects and immutable budget configuration
+  - alert audit persistence tables and repositories
+  - BifrostSyncCompletedEvent for wave 2 evaluation wiring
+affects:
+  - phase 13 wave 2 pipeline wiring
+  - alert evaluation and email delivery services
 tech-stack:
-  added: [@upyo/core, @upyo/smtp, decimal.js]
-  patterns: [immutable value objects, immutable aggregate roots, ORM-backed repositories, domain event hook]
-
+  added:
+    - @upyo/core
+    - @upyo/smtp
+    - decimal.js
+  patterns:
+    - immutable aggregates and value objects
+    - shared mailer port in Foundation
+    - JSON-backed alert audit entities
 key-files:
   created:
     - src/Foundation/Infrastructure/Ports/IMailer.ts
@@ -42,72 +51,80 @@ key-files:
     - package.json
     - bun.lock
     - src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts
-    - .planning/STATE.md
-
-key-decisions:
-  - "Used a shared Foundation IMailer port so Auth and Alerts can share the same email abstraction."
-  - "Modeled alert budgets as immutable aggregates and value objects backed by Decimal.js."
-  - "Stored alert configs and alert events in new Drizzle tables for persistence and auditability."
-  - "Introduced BifrostSyncCompletedEvent as the post-sync hook for downstream threshold evaluation."
-
-patterns-established:
-  - "Pattern 1: generic mail transport interface in Foundation with console and SMTP implementations"
-  - "Pattern 2: fixed-tier alert thresholds represented as immutable value objects"
-  - "Pattern 3: alert dedup state stored on the aggregate with monthly reset semantics"
-  - "Pattern 4: alert audit events persisted separately from the config aggregate"
-
 requirements-completed: [ALRT-01, ALRT-05]
-
-duration: 1h 15m
+duration: 4m
 completed: 2026-04-12
 ---
 
-# Phase 13: Alert Foundation & Email Infrastructure Summary
+# Phase 13 Plan 01: Alert Foundation Summary
 
-**Alerts foundation layer with shared email abstraction, fixed threshold value objects, and persistence contracts for org-level budget alerts**
+**Shared mailer port, immutable alert budget/value objects, alert persistence, and the sync-completion event that Wave 2 consumes**
 
 ## Performance
 
-- **Duration:** 1h 15m
-- **Started:** 2026-04-12T00:00:00Z
-- **Completed:** 2026-04-12T00:00:00Z
+- **Duration:** 4m
+- **Started:** 2026-04-12T08:40:19+08:00
+- **Completed:** 2026-04-12T08:43:38+08:00
 - **Tasks:** 2
-- **Files modified:** 18
+- **Files modified:** 19
 
 ## Accomplishments
-- Added a shared `IMailer` port plus console and Upyo SMTP mailer implementations in Foundation.
-- Implemented immutable alert budget value objects for threshold tier, budget amount, and monthly period logic.
-- Added `AlertConfig` and `AlertEvent` domain types, repository ports, Drizzle persistence, and the sync-completion event used by Wave 2.
+- Added a shared `IMailer` port in Foundation plus console and Upyo-backed implementations.
+- Introduced alert threshold value objects, immutable budget configuration, and alert audit entities.
+- Added `alert_configs` and `alert_events` tables plus repositories for Alert persistence.
+- Wired `BifrostSyncCompletedEvent` so the alert pipeline can subscribe in Wave 2.
 
 ## Task Commits
 
-1. **Task 1: Install dependencies, create IMailer port, and domain value objects with tests** - `bf2d1f0` (`feat`)
-2. **Task 2: Create AlertConfig aggregate, AlertEvent entity, DB schema, repositories, and BifrostSyncCompletedEvent** - `8c49089` (`feat`)
+1. **Task 1: add alerts mailer and value objects** - `bf2d1f0` (feat)
+2. **Task 2: add alert persistence and sync event** - `8c49089` (feat)
 
 ## Files Created/Modified
-- `src/Foundation/Infrastructure/Ports/IMailer.ts` - shared email contract for Foundation consumers.
-- `src/Foundation/Infrastructure/Services/Mail/ConsoleMailer.ts` - development mail stub.
-- `src/Foundation/Infrastructure/Services/Mail/UpyoMailer.ts` - SMTP-backed production mailer.
-- `src/Modules/Alerts/Domain/ValueObjects/*.ts` - threshold, amount, and month value objects.
-- `src/Modules/Alerts/Domain/Aggregates/AlertConfig.ts` - immutable org budget configuration aggregate.
-- `src/Modules/Alerts/Domain/Entities/AlertEvent.ts` - persisted alert audit event.
-- `src/Modules/Alerts/Infrastructure/Repositories/*.ts` - Drizzle repositories for alert config/event persistence.
-- `src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts` - new `alert_configs` and `alert_events` tables.
-- `src/Modules/Dashboard/Domain/Events/BifrostSyncCompletedEvent.ts` - post-sync domain event for threshold evaluation.
+- `package.json` - Added `@upyo/core`, `@upyo/smtp`, and `decimal.js`.
+- `bun.lock` - Locked the new mailer and decimal dependencies.
+- `src/Foundation/Infrastructure/Ports/IMailer.ts` - Shared mail contract.
+- `src/Foundation/Infrastructure/Services/Mail/ConsoleMailer.ts` - Console fallback implementation.
+- `src/Foundation/Infrastructure/Services/Mail/UpyoMailer.ts` - SMTP-backed mail implementation.
+- `src/Modules/Alerts/Domain/ValueObjects/ThresholdTier.ts` - Fixed warning/critical tier model.
+- `src/Modules/Alerts/Domain/ValueObjects/BudgetAmount.ts` - Decimal-backed budget validation.
+- `src/Modules/Alerts/Domain/ValueObjects/MonthlyPeriod.ts` - UTC month period helper.
+- `src/Modules/Alerts/Domain/Aggregates/AlertConfig.ts` - Immutable org budget aggregate.
+- `src/Modules/Alerts/Domain/Entities/AlertEvent.ts` - Alert audit entity with serialized recipients.
+- `src/Modules/Alerts/Domain/Repositories/IAlertConfigRepository.ts` - Alert config persistence port.
+- `src/Modules/Alerts/Domain/Repositories/IAlertEventRepository.ts` - Alert event persistence port.
+- `src/Modules/Alerts/Infrastructure/Repositories/DrizzleAlertConfigRepository.ts` - Drizzle adapter for alert configs.
+- `src/Modules/Alerts/Infrastructure/Repositories/DrizzleAlertEventRepository.ts` - Drizzle adapter for alert events.
+- `src/Modules/Dashboard/Domain/Events/BifrostSyncCompletedEvent.ts` - Post-sync domain event for alert evaluation.
+- `src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts` - Added `alert_configs` and `alert_events`.
+- `src/Modules/Alerts/__tests__/ThresholdTier.test.ts` - Tier behavior coverage.
+- `src/Modules/Alerts/__tests__/BudgetAmount.test.ts` - Budget amount and monthly period coverage.
+- `src/Modules/Alerts/__tests__/AlertConfig.test.ts` - Dedup and immutability coverage.
 
 ## Decisions Made
-- Kept alert thresholds fixed at 80% warning and 100% critical for v1.3.
-- Used Decimal.js for budget math to avoid floating-point drift.
-- Stored dedup metadata on the alert config aggregate so monthly alert resets remain deterministic.
+- Kept the mail contract generic in Foundation so Auth and Alerts can share the same transport abstraction.
+- Used Decimal.js for all budget validation and percentage math to avoid floating-point drift.
+- Modeled alert deduplication as immutable month-scoped state on `AlertConfig`.
 
 ## Deviations from Plan
-None.
+
+None - plan executed as written.
 
 ## Issues Encountered
-- Bun test timer helpers were not available in this environment, so the `MonthlyPeriod.current()` test used a lightweight `Date` shim instead.
+
+None.
+
+## Self-Check
+
+- [x] `bun test src/Modules/Alerts/__tests__/ThresholdTier.test.ts src/Modules/Alerts/__tests__/BudgetAmount.test.ts`
+- [x] `bun test src/Modules/Alerts/__tests__/AlertConfig.test.ts`
+- [x] `bun run build`
+- [x] `IMailer` exists in Foundation
+- [x] `alertConfigs` and `alertEvents` schema entries exist
+- [x] `BifrostSyncCompletedEvent` is available for Wave 2
 
 ## Next Phase Readiness
-Foundation contracts are in place. Wave 2 can now build the evaluation pipeline, alert delivery, and route wiring on top of these types.
+
+Wave 1 is complete and Wave 2 can now wire the alert evaluation pipeline, email templates, controller, and service provider registration on top of the shared contracts and persistence layer.
 
 ---
 *Phase: 13-alert-foundation-email-infrastructure*
