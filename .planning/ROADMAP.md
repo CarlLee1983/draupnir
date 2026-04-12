@@ -34,6 +34,16 @@
 
 </details>
 
+### Phase 17: 擴充 IQueryBuilder 聚合原語並重構 UsageRepository 去除 Drizzle 直接依賴
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 16
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 17 to break down)
+
 ---
 
 ## 🚧 v1.3 Advanced Analytics & Alerts (In Progress)
@@ -106,6 +116,9 @@ Plans:
   3. System emails the generated PDF to configured recipients on the scheduled cadence
   4. Report scheduling respects the admin's selected timezone, including DST transitions
 **Plans**: 2 plans
+Plans:
+- [ ] 16-01-PLAN.md — Backend foundation: ReportJob, PDF gen (Playwright), scheduling (croner), email integration, API
+- [ ] 16-02-PLAN.md — Frontend management: ReportsPage CRUD, timezone picker, and report preview template
 
 ## Progress
 
@@ -117,4 +130,4 @@ Plans:
 | 13. Alert Foundation & Email Infrastructure | v1.3 | 2/2 | Complete | 2026-04-12 |
 | 14. Per-Key Cost Breakdown | v1.3 | 2/2 | Complete   | 2026-04-12 |
 | 15. Webhook Alerts | v1.3 | 4/4 | Complete | 2026-04-12 |
-| 16. Automated Reports | v1.3 | 0/? | Not started | - |
+| 16. Automated Reports | v1.3 | 0/2 | Not started | - |
