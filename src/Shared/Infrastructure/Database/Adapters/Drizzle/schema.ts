@@ -180,3 +180,40 @@ export const quarantinedLogs = sqliteTable('quarantined_logs', {
   raw_data: text('raw_data').notNull(),
   created_at: text('created_at').notNull(),
 })
+
+/**
+ * Alert Configs 表 — 每個組織一筆預算設定
+ */
+export const alertConfigs = sqliteTable(
+  'alert_configs',
+  {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull().unique(),
+    budget_usd: text('budget_usd').notNull(),
+    last_alerted_tier: text('last_alerted_tier'),
+    last_alerted_at: text('last_alerted_at'),
+    last_alerted_month: text('last_alerted_month'),
+    created_at: text('created_at').notNull(),
+    updated_at: text('updated_at').notNull(),
+  },
+  (table) => [index('idx_alert_configs_org_id').on(table.org_id)],
+)
+
+/**
+ * Alert Events 表 — 已觸發的告警審計記錄
+ */
+export const alertEvents = sqliteTable(
+  'alert_events',
+  {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull(),
+    tier: text('tier').notNull(),
+    budget_usd: text('budget_usd').notNull(),
+    actual_cost_usd: text('actual_cost_usd').notNull(),
+    percentage: text('percentage').notNull(),
+    month: text('month').notNull(),
+    recipients: text('recipients').notNull(),
+    created_at: text('created_at').notNull(),
+  },
+  (table) => [index('idx_alert_events_org_id').on(table.org_id), index('idx_alert_events_month').on(table.month)],
+)
