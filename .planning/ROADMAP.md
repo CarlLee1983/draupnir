@@ -75,6 +75,9 @@ Plans:
   3. User can view cost distribution across models with percentage breakdowns
   4. User can view per-model aggregation showing each model's share of total organization usage
 **Plans**: 2 plans
+Plans:
+- [ ] 14-01-PLAN.md — Backend: IUsageRepository extension, DrizzleUsageRepository, GetPerKeyCostService, controller methods, routes, DI wiring, TDD tests
+- [ ] 14-02-PLAN.md — Frontend: PerKeyCostTable, ModelDistributionDonut, CostBreakdown page, Inertia handler, four-file nav wiring
 **UI hint**: yes
 
 ### Phase 15: Webhook Alerts
@@ -107,6 +110,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 13. Alert Foundation & Email Infrastructure | v1.3 | 2/2 | Complete | 2026-04-12 |
-| 14. Per-Key Cost Breakdown | v1.3 | 0/? | Not started | - |
+| 14. Per-Key Cost Breakdown | v1.3 | 0/2 | Not started | - |
 | 15. Webhook Alerts | v1.3 | 0/? | Not started | - |
 | 16. Automated Reports | v1.3 | 0/? | Not started | - |
