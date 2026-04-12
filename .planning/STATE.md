@@ -1,12 +1,12 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: v1.3 milestone complete
-stopped_at: Completed Phase 17 Plan 01 execution
-last_updated: "2026-04-12T15:43:35.673Z"
+milestone: v1.4
+milestone_name: Hardening & Refinement
+status: v1.4 milestone planning complete
+stopped_at: Phase 18 context gathered
+last_updated: "2026-04-12T16:04:07.261Z"
 progress:
-  total_phases: 17
+  total_phases: 18
   completed_phases: 17
   total_plans: 52
   completed_plans: 53
@@ -18,13 +18,13 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-12)
 
-**Core value:** Proactive cost control — alerts, per-key attribution, and automated reports transform Draupnir from reactive observation to proactive cost management.
-**Current focus:** Completed Milestone v1.3
+**Core value:** Proactive cost control with enterprise-grade stability — v1.3 delivered alerts and analytics; v1.4 hardens architecture for long-term maintainability.
+**Current focus:** Started Milestone v1.4 (Hardening & Refinement)
 
 ## Current Position
 
-Phase: 17 (iquerybuilder-usagerepository-drizzle)
-Plan: 5 of 5 (Phase 17 COMPLETED)
+Phase: 18 (uniform-background-jobs) — PLANNING
+Plan: Ready to begin Phase 18 execution
 
 ## Performance Metrics
 
@@ -59,6 +59,8 @@ Recent decisions affecting current work:
 - [v1.3 Roadmap]: Playwright for server-side PDF (16x faster than Puppeteer)
 - [v1.3 Roadmap]: Bun.cron for scheduling; BullMQ deferred unless Redis persistence needed
 - [Phase 17]: usage_records.credit_cost text-to-real migration to simplify repository logic.
+- [v1.4 Roadmap]: Uniform background jobs using Bun.cron; Redis persistence (BullMQ) deferred to v2
+- [v1.4 Roadmap]: ORM-agnostic pattern (from Phase 17) extended to Alerts module for full decoupling
 
 ### Roadmap Evolution
 
@@ -74,6 +76,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T12:30:00Z
-Stopped at: Completed Phase 17 Plan 01 execution
-Resume file: .planning/phases/17-iquerybuilder-usagerepository-drizzle/17-01-SUMMARY.md
+Last session: 2026-04-12T16:04:07.258Z
+Stopped at: Phase 18 context gathered
+Next step: `/gsd:plan-phase 18` to begin Phase 18 planning
