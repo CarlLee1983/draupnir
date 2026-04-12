@@ -43,7 +43,7 @@
 ## Phases
 
 - [ ] **Phase 13: Alert Foundation & Email Infrastructure** - Cost threshold alerts with email notifications and deduplication
-- [ ] **Phase 14: Per-Key Cost Breakdown** - Granular per-key and per-model cost attribution dashboard
+- [x] **Phase 14: Per-Key Cost Breakdown** - Granular per-key and per-model cost attribution dashboard (completed 2026-04-12)
 - [ ] **Phase 15: Webhook Alerts** - Webhook endpoint registration with HMAC signing and alert history
 - [ ] **Phase 16: Automated Reports** - Scheduled PDF report generation and email delivery
 
@@ -76,8 +76,8 @@ Plans:
   4. User can view per-model aggregation showing each model's share of total organization usage
 **Plans**: 2 plans
 Plans:
-- [ ] 14-01-PLAN.md — Backend: IUsageRepository extension, DrizzleUsageRepository, GetPerKeyCostService, controller methods, routes, DI wiring, TDD tests
-- [ ] 14-02-PLAN.md — Frontend: PerKeyCostTable, ModelDistributionDonut, CostBreakdown page, Inertia handler, four-file nav wiring
+- [x] 14-01-PLAN.md — Backend: IUsageRepository extension, DrizzleUsageRepository, GetPerKeyCostService, controller methods, routes, DI wiring, TDD tests
+- [x] 14-02-PLAN.md — Frontend: PerKeyCostTable, ModelDistributionDonut, CostBreakdown page, Inertia handler, four-file nav wiring
 **UI hint**: yes
 
 ### Phase 15: Webhook Alerts
@@ -89,6 +89,9 @@ Plans:
   2. All webhook payloads include an HMAC-SHA256 signature that receivers can verify
   3. User can view a history of all alerts with delivery status (sent, failed) per channel
 **Plans**: 2 plans
+Plans:
+- [ ] 15-01-PLAN.md — Backend: promote WebhookDispatcher/WebhookSecret to Foundation; WebhookEndpoint aggregate + WebhookUrl VO (SSRF/HTTPS); alert_deliveries schema + backfill; SendAlertService multi-channel fan-out; CRUD/test/history/resend routes + DI wiring
+- [ ] 15-02-PLAN.md — Frontend: unified /alerts page (Budgets | Webhooks | History tabs); webhook CRUD UI with one-time secret reveal; history timeline with per-channel delivery status + resend
 **UI hint**: yes
 
 ### Phase 16: Automated Reports
@@ -110,6 +113,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 13. Alert Foundation & Email Infrastructure | v1.3 | 2/2 | Complete | 2026-04-12 |
-| 14. Per-Key Cost Breakdown | v1.3 | 0/2 | Not started | - |
+| 14. Per-Key Cost Breakdown | v1.3 | 2/2 | Complete   | 2026-04-12 |
 | 15. Webhook Alerts | v1.3 | 0/? | Not started | - |
 | 16. Automated Reports | v1.3 | 0/? | Not started | - |
