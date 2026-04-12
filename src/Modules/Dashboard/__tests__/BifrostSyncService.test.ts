@@ -36,6 +36,8 @@ function makeUsageRepo(db: MemoryDatabaseAccess): IUsageRepository {
     queryModelBreakdownByKeys: async () => [],
     queryStatsByOrg: async () => ({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }),
     queryStatsByKey: async () => ({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }),
+    queryPerKeyCost: async () => [],
+    queryPerKeyCostByKeys: async () => [],
   }
 }
 

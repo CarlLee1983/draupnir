@@ -28,9 +28,12 @@ export class UpyoMailer implements IMailer {
     await this.transport.send(
       createMessage({
         from: message.from ?? this.defaultFrom,
-        to: message.to,
+        to: message.to as string | string[],
         subject: message.subject,
         content: { html: message.html },
+        attachments: message.attachments?.map(
+          (a) => new File([a.content], a.filename, { type: 'application/pdf' }),
+        ),
       }),
     )
   }

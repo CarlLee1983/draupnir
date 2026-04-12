@@ -3,6 +3,7 @@ export interface MailMessage {
   readonly subject: string
   readonly html: string
   readonly from?: string
+  readonly attachments?: Array<{ filename: string; content: Buffer }>
 }
 
 export interface IMailer {
