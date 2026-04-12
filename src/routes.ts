@@ -4,6 +4,7 @@ import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { registerPageRoutes } from './Pages/page-routes'
 import {
   registerApiKey,
+  registerAlerts,
   registerAppApiKey,
   registerAppModule,
   registerAuth,
@@ -43,6 +44,7 @@ export async function registerRoutes(core: PlanetCore) {
   registerDevPortal(core)
   registerApiKey(core)
   registerDashboard(core)
+  registerAlerts(core)
   registerCredit(core)
   registerSdkApi(core)
   registerCliApi(core)

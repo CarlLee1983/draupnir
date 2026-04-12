@@ -1,5 +1,7 @@
 import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/BifrostGatewayAdapter'
+import { ConsoleMailer } from '../Services/Mail/ConsoleMailer'
+import { UpyoMailer } from '../Services/Mail/UpyoMailer'
 import {
   BifrostClient,
   createBifrostClientConfig,
@@ -18,6 +20,16 @@ export class FoundationServiceProvider extends ModuleServiceProvider {
     container.singleton('llmGatewayClient', (c: IContainer) => {
       const bifrost = c.make('bifrostClient') as BifrostClient
       return new BifrostGatewayAdapter(bifrost)
+    })
+
+    container.singleton('mailer', () => {
+      const transport = process.env.EMAIL_TRANSPORT ?? 'console'
+      if (transport === 'smtp') {
+        const smtpUrl = process.env.SMTP_URL ?? 'smtp://localhost:1025'
+        return new UpyoMailer(smtpUrl)
+      }
+
+      return new ConsoleMailer()
     })
   }
 

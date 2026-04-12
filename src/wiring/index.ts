@@ -133,6 +133,7 @@ export const registerApiKey = (core: PlanetCore): void => {
 }
 
 import { DashboardController, registerDashboardRoutes } from '@/Modules/Dashboard'
+import { AlertController, registerAlertRoutes } from '@/Modules/Alerts'
 
 /**
  * 註冊 Dashboard 模組
@@ -147,6 +148,18 @@ export const registerDashboard = (core: PlanetCore): void => {
     core.container.make('getModelComparisonService') as any,
   )
   registerDashboardRoutes(router, controller)
+}
+
+/**
+ * 註冊 Alerts 模組
+ */
+export const registerAlerts = (core: PlanetCore): void => {
+  const router = createGravitoModuleRouter(core)
+  const controller = new AlertController(
+    core.container.make('setBudgetService') as any,
+    core.container.make('getBudgetService') as any,
+  )
+  registerAlertRoutes(router, controller)
 }
 
 import { CreditController, registerCreditRoutes } from '@/Modules/Credit'
