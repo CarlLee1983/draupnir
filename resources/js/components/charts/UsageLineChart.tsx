@@ -8,7 +8,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 
 export interface UsageDataPoint {
   date: string
@@ -19,9 +19,10 @@ export interface UsageDataPoint {
 interface UsageLineChartProps {
   data: UsageDataPoint[]
   title?: string
+  isAnimationActive?: boolean
 }
 
-export function UsageLineChart({ data, title = '用量趨勢' }: UsageLineChartProps) {
+export function UsageLineChart({ data, title = '用量趨勢', isAnimationActive = true }: UsageLineChartProps) {
   return (
     <Card>
       <CardHeader>
@@ -42,6 +43,7 @@ export function UsageLineChart({ data, title = '用量趨勢' }: UsageLineChartP
               stroke="hsl(222.2 47.4% 11.2%)"
               strokeWidth={2}
               dot={false}
+              isAnimationActive={isAnimationActive}
             />
             <Line
               type="monotone"
@@ -50,6 +52,7 @@ export function UsageLineChart({ data, title = '用量趨勢' }: UsageLineChartP
               stroke="hsl(210 40% 60%)"
               strokeWidth={2}
               dot={false}
+              isAnimationActive={isAnimationActive}
             />
           </LineChart>
         </ResponsiveContainer>
