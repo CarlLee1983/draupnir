@@ -1,12 +1,15 @@
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
 import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorRepository'
+import { BifrostSyncCompletedEvent } from '../../Domain/Events/BifrostSyncCompletedEvent'
 
 export interface SyncResult {
   readonly synced: number
   readonly quarantined: number
+  readonly affectedOrgIds: readonly string[]
 }
 
 export class BifrostSyncService {
@@ -31,7 +34,7 @@ export class BifrostSyncService {
       return await Promise.race([this.syncInternal(), timeoutPromise])
     } catch (error: unknown) {
       console.error('[BifrostSyncService] Sync failed:', error)
-      return { synced: 0, quarantined: 0 }
+      return { synced: 0, quarantined: 0, affectedOrgIds: [] }
     } finally {
       if (timeoutId) {
         clearTimeout(timeoutId)
@@ -47,6 +50,7 @@ export class BifrostSyncService {
     let synced = 0
     let quarantined = 0
     let lastProcessedLogId: string | undefined
+    const affectedOrgIds = new Set<string>()
 
     for (const log of logs) {
       const bifrostLogId = log.logId ?? `${log.timestamp}:${log.keyId}`
@@ -74,6 +78,7 @@ export class BifrostSyncService {
         occurredAt: log.timestamp,
         createdAt: new Date().toISOString(),
       })
+      affectedOrgIds.add(apiKey.orgId)
       synced++
     }
 
@@ -82,7 +87,13 @@ export class BifrostSyncService {
       lastBifrostLogId: lastProcessedLogId ?? cursor?.lastBifrostLogId ?? undefined,
     })
 
-    return { synced, quarantined }
+    if (synced > 0) {
+      await DomainEventDispatcher.getInstance().dispatch(
+        new BifrostSyncCompletedEvent([...affectedOrgIds]),
+      )
+    }
+
+    return { synced, quarantined, affectedOrgIds: [...affectedOrgIds] }
   }
 
   private async quarantineLog(
