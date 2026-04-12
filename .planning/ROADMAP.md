@@ -88,10 +88,12 @@ Plans:
   1. User can register a webhook URL to receive alert notifications when thresholds are breached
   2. All webhook payloads include an HMAC-SHA256 signature that receivers can verify
   3. User can view a history of all alerts with delivery status (sent, failed) per channel
-**Plans**: 2 plans
+**Plans**: 4 plans
 Plans:
-- [ ] 15-01-PLAN.md — Backend: promote WebhookDispatcher/WebhookSecret to Foundation; WebhookEndpoint aggregate + WebhookUrl VO (SSRF/HTTPS); alert_deliveries schema + backfill; SendAlertService multi-channel fan-out; CRUD/test/history/resend routes + DI wiring
-- [ ] 15-02-PLAN.md — Frontend: unified /alerts page (Budgets | Webhooks | History tabs); webhook CRUD UI with one-time secret reveal; history timeline with per-channel delivery status + resend
+- [ ] 15-01-PLAN.md — Foundation + Domain: promote WebhookDispatcher/WebhookSecret to Foundation; WebhookEndpoint aggregate (immutable + withDescription) + WebhookUrl VO (SSRF/HTTPS); alert_deliveries + webhook_endpoints schema + migration + backfill script
+- [ ] 15-02-PLAN.md — Application Services: webhook CRUD/test services, DispatchAlertWebhooksService (Promise.allSettled fan-out), GetAlertHistoryService, ResendDeliveryService, DTO mappers, SendAlertService D-17 fire-and-forget integration
+- [ ] 15-03-PLAN.md — Presentation + Wiring: controllers, FormRequests, manager-gated routes, AlertsServiceProvider DI bindings, MemberAlertsPage Inertia handler with DTO-mapped props
+- [ ] 15-04-PLAN.md — Frontend: unified /alerts page (Budgets | Webhooks | History tabs); webhook CRUD UI with one-time secret reveal; history timeline with per-channel delivery status + resend
 **UI hint**: yes
 
 ### Phase 16: Automated Reports
