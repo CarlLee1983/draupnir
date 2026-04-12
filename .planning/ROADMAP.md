@@ -36,13 +36,17 @@
 
 ### Phase 17: 擴充 IQueryBuilder 聚合原語並重構 UsageRepository 去除 Drizzle 直接依賴
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** 擴充 IQueryBuilder 加入 aggregate() 聚合原語（sum/count/avg/min/max/dateTrunc/coalesce/add）並重構 DrizzleUsageRepository 去除直接 drizzle-orm 依賴；同步將 usage_records.credit_cost 從 TEXT 遷移為 REAL，讓服務層測試可用 MemoryDatabaseAccess 取代 SQLite。
+**Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07 (from 17-CONTEXT.md locked decisions — no v1.3 REQ-IDs map to this internal-architecture phase)
 **Depends on:** Phase 16
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 17 to break down)
+- [ ] 17-01-PLAN.md — Migrate usage_records.credit_cost TEXT→REAL; update schema.ts, IUsageRepository DTO, DrizzleUsageRepository CAST removal, BifrostSyncService producer
+- [ ] 17-02-PLAN.md — Define AggregateSpec<T> + 9 builder functions; extend IQueryBuilder with aggregate<T>(spec) signature (interface-first)
+- [ ] 17-03-PLAN.md — Implement DrizzleQueryBuilder.aggregate() — all 8 expression kinds translated to drizzle SQL AST; primitive tests against :memory: libsql
+- [ ] 17-04-PLAN.md — Implement MemoryQueryBuilder.aggregate() parity + fix Pitfall 5 (lowercase operators); cross-adapter AggregateParity suite
+- [ ] 17-05-PLAN.md — Refactor DrizzleUsageRepository to IDatabaseAccess-only; add insertOrIgnore primitive; fix Pitfall 1 test seam; add UsageRepository.memory.test.ts for D-07
 
 ---
 
@@ -115,10 +119,12 @@ Plans:
   2. System generates a server-side PDF containing dashboard charts and cost summary data
   3. System emails the generated PDF to configured recipients on the scheduled cadence
   4. Report scheduling respects the admin's selected timezone, including DST transitions
+**Status**: 🚧 IN PROGRESS
 **Plans**: 2 plans
 Plans:
 - [ ] 16-01-PLAN.md — Backend foundation: ReportJob, PDF gen (Playwright), scheduling (croner), email integration, API
 - [ ] 16-02-PLAN.md — Frontend management: ReportsPage CRUD, timezone picker, and report preview template
+**UI hint**: yes
 
 ## Progress
 
@@ -130,4 +136,4 @@ Plans:
 | 13. Alert Foundation & Email Infrastructure | v1.3 | 2/2 | Complete | 2026-04-12 |
 | 14. Per-Key Cost Breakdown | v1.3 | 2/2 | Complete   | 2026-04-12 |
 | 15. Webhook Alerts | v1.3 | 4/4 | Complete | 2026-04-12 |
-| 16. Automated Reports | v1.3 | 0/2 | Not started | - |
+| 16. Automated Reports | v1.3 | 0/2 | In Progress | - |
