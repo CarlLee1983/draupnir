@@ -1,5 +1,5 @@
 import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,7 +27,7 @@ export default function Register({ passwordRequirements, error }: Props) {
   const [agreedToTerms, setAgreedToTerms] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     router.post('/register', { email, password, passwordConfirmation, agreedToTerms }, {

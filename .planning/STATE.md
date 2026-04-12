@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Advanced Analytics & Alerts
-status: Completed Phase 15 execution
-stopped_at: Completed Phase 15 execution
-last_updated: "2026-04-12T11:10:45Z"
+status: Completed Phase 17 execution
+stopped_at: Completed Phase 17 execution
+last_updated: "2026-04-12T15:00:00Z"
 progress:
-  total_phases: 4
-  completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 15
+  completed_plans: 15
 ---
 
 # Project State
@@ -19,18 +19,18 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** Proactive cost control — alerts, per-key attribution, and automated reports transform Draupnir from reactive observation to proactive cost management.
-**Current focus:** Phase 16 — automated-reports
+**Current focus:** Completed Milestone v1.3
 
 ## Current Position
 
-Phase: 15 (webhook-alerts) — COMPLETED
-Plan: 4 of 4
+Phase: 17 (iquerybuilder-usagerepository-drizzle)
+Plan: 5 of 5 (Phase 17 COMPLETED)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4 (v1.3)
+- Total plans completed: 9 (v1.3)
 - Average duration: -
 - Total execution time: -
 
@@ -38,7 +38,10 @@ Plan: 4 of 4
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 14 | 2 | - | - |
+| 14 | 2 | 2 | - |
+| 15 | 4 | 4 | - |
+| 16 | 2 | 2 | - |
+| 17 | 5 | 5 | - |
 
 *Updated after each plan completion*
 
@@ -55,6 +58,11 @@ Recent decisions affecting current work:
 - [v1.3 Roadmap]: Webhook MVP separate from alert foundation; advanced retry deferred to v2
 - [v1.3 Roadmap]: Playwright for server-side PDF (16x faster than Puppeteer)
 - [v1.3 Roadmap]: Bun.cron for scheduling; BullMQ deferred unless Redis persistence needed
+- [Phase 17]: usage_records.credit_cost text-to-real migration to simplify repository logic.
+
+### Roadmap Evolution
+
+- Phase 17 added: 擴充 IQueryBuilder 聚合原語並重構 UsageRepository 去除 Drizzle 直接依賴
 
 ### Pending Todos
 
@@ -62,11 +70,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- Bun.cron is UTC-only; Phase 16 needs timezone-aware scheduling — may need workaround
-- Playwright Chromium may need special Docker config for production deployment
+- `bun orbit` CLI has configuration auto-discovery issues in some environments; manual script required for migration execution.
 
 ## Session Continuity
 
-Last session: 2026-04-12T05:22:45.481Z
-Stopped at: Completed Phase 15 execution
-Resume file: None
+Last session: 2026-04-12T12:30:00Z
+Stopped at: Completed Phase 17 Plan 01 execution
+Resume file: .planning/phases/17-iquerybuilder-usagerepository-drizzle/17-01-SUMMARY.md

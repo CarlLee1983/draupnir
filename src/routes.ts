@@ -17,6 +17,7 @@ import {
   registerHealth,
   registerOrganization,
   registerProfile,
+  registerReports,
   registerSdkApi,
 } from './wiring'
 
@@ -45,6 +46,7 @@ export async function registerRoutes(core: PlanetCore) {
   registerApiKey(core)
   registerDashboard(core)
   registerAlerts(core)
+  registerReports(core)
   registerCredit(core)
   registerSdkApi(core)
   registerCliApi(core)

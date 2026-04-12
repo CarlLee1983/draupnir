@@ -282,6 +282,16 @@ export const registerSdkApi = (core: PlanetCore): void => {
 }
 
 import { CliApiController, registerCliApiRoutes } from '@/Modules/CliApi'
+import { ReportController, registerReportRoutes } from '@/Modules/Reports'
+
+/**
+ * 註冊 Reports 模組
+ */
+export const registerReports = (core: PlanetCore): void => {
+  const router = createGravitoModuleRouter(core)
+  const controller = core.container.make('reportController') as ReportController
+  registerReportRoutes(router, controller)
+}
 
 /**
  * 註冊 CliApi 模組

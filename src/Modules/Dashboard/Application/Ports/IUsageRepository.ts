@@ -6,7 +6,7 @@
  * Used by Phase 10 chart services instead of live Bifrost API calls.
  *
  * Constraint: All fields readonly (immutability rule).
- * Constraint: credit_cost stored as TEXT in DB - callers receive number (repository converts).
+ * Constraint: credit_cost stored as REAL in DB; callers pass and receive number.
  */
 
 export interface DateRange {
@@ -58,7 +58,7 @@ export interface UsageRecordInsert {
   readonly provider: string | null
   readonly inputTokens: number
   readonly outputTokens: number
-  readonly creditCost: string
+  readonly creditCost: number
   readonly latencyMs: number | null
   readonly status: 'success' | 'error' | null
   readonly occurredAt: string

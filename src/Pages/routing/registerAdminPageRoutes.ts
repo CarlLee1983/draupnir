@@ -155,6 +155,20 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
     action: 'handle',
     name: 'pages.admin.usageSync',
   },
+  {
+    method: 'get',
+    path: '/admin/org/:orgId/reports',
+    page: ADMIN_PAGE_KEYS.reports,
+    action: 'handle',
+    name: 'pages.admin.reports',
+  },
+  {
+    method: 'get',
+    path: '/admin/reports/template',
+    page: ADMIN_PAGE_KEYS.reportTemplate,
+    action: 'handle',
+    name: 'pages.admin.reports.template',
+  },
 ]
 
 function registerAdminHttpRoute(

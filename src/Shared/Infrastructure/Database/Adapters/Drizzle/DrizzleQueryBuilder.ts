@@ -21,7 +21,19 @@ import {
   asc,
   desc,
   countDistinct,
+  sql,
+  sum as drizzleSum,
+  count as drizzleCount,
+  avg as drizzleAvg,
+  min as drizzleMin,
+  max as drizzleMax,
+  type SQL,
 } from 'drizzle-orm'
+import type {
+  AggregateSpec,
+  AggregateExpression,
+  AggregateOrderBy,
+} from '../../AggregateSpec'
 import { getDrizzleInstance } from './config'
 
 /**
@@ -153,12 +165,32 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
    */
   async insert(data: Record<string, unknown>): Promise<void> {
     try {
-      await this.db.insert(this.tableSchema).values(data)
+      await (this.db as any).insert(this.tableSchema).values(data)
     } catch (error) {
       console.error(`Error in insert(): ${error}`)
       throw error
     }
   }
+
+  async insertOrIgnore(
+    data: Record<string, unknown>,
+    { conflictTarget }: { readonly conflictTarget: string | readonly string[] },
+  ): Promise<void> {
+    try {
+      const targets = Array.isArray(conflictTarget)
+        ? conflictTarget.map((c) => this.resolveColumn(c))
+        : [this.resolveColumn(conflictTarget as string)]
+
+      await (this.db as any)
+        .insert(this.tableSchema)
+        .values(data)
+        .onConflictDoNothing({ target: targets as any })
+    } catch (error) {
+      console.error(`Error in insertOrIgnore(): ${error}`)
+      throw error
+    }
+  }
+
 
   /**
    * 更新記錄
@@ -271,7 +303,119 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
       throw new Error(`Column "${column}" not found in table "${this.tableName}"`)
     }
 
-    this.whereConditions.push(between(col, range[0], range[1]))
+    const start = range[0] instanceof Date ? range[0].toISOString() : range[0]
+    const end = range[1] instanceof Date ? range[1].toISOString() : range[1]
+
+    this.whereConditions.push(between(col, start, end))
     return this
+  }
+
+  /**
+   * 宣告式聚合查詢
+   *
+   * @param spec 聚合規格
+   * @returns 聚合結果陣列
+   */
+  async aggregate<T>(spec: AggregateSpec): Promise<readonly T[]> {
+    try {
+      // 1. 建立 select 物件：別名 -> SQL 表達式
+      const selectShape: Record<string, SQL> = {}
+      for (const [alias, expr] of Object.entries(spec.select)) {
+        selectShape[alias] = this.translateExpression(expr)
+      }
+
+      // 2. 建立查詢並加入累積的 where 條件
+      let query: any = (this.db as any).select(selectShape).from(this.tableSchema)
+
+      if (this.whereConditions.length > 0) {
+        query = query.where(and(...this.whereConditions))
+      }
+
+      // 3. groupBy — 將每個項目解析為 select 別名或原始欄位
+      if (spec.groupBy && spec.groupBy.length > 0) {
+        const groupCols = spec.groupBy.map((name) =>
+          selectShape[name] !== undefined ? selectShape[name] : this.resolveColumn(name),
+        )
+        query = query.groupBy(...groupCols)
+      }
+
+      // 4. orderBy — 同樣支援別名或原始欄位
+      if (spec.orderBy && spec.orderBy.length > 0) {
+        const orderExprs = spec.orderBy.map((o: AggregateOrderBy) => {
+          const base =
+            selectShape[o.column] !== undefined
+              ? selectShape[o.column]
+              : this.resolveColumn(o.column)
+          return o.direction === 'DESC' ? desc(base as any) : asc(base as any)
+        })
+        query = query.orderBy(...orderExprs)
+      }
+
+      // 5. limit
+      if (spec.limit !== undefined) {
+        query = query.limit(spec.limit)
+      }
+
+      const rows = await query
+      return rows as readonly T[]
+    } catch (error) {
+      console.error(`Error in aggregate(): ${error}`)
+      throw error
+    }
+  }
+
+  private resolveColumn(name: string): SQL | unknown {
+    const col = this.tableSchema[name]
+    if (col === undefined) {
+      throw new Error(`Column "${name}" not found on table "${this.tableName}"`)
+    }
+    return col
+  }
+
+  private translateExpression(expr: AggregateExpression): SQL {
+    switch (expr.kind) {
+      case 'sum':
+        return (typeof expr.column === 'string'
+          ? drizzleSum(this.resolveColumn(expr.column) as any)
+          : drizzleSum(this.translateExpression(expr.column))
+        ).mapWith(Number)
+      case 'count':
+        return (expr.column === '*'
+          ? drizzleCount()
+          : drizzleCount(this.resolveColumn(expr.column) as any)
+        ).mapWith(Number)
+      case 'avg':
+        return (typeof expr.column === 'string'
+          ? drizzleAvg(this.resolveColumn(expr.column) as any)
+          : drizzleAvg(this.translateExpression(expr.column))
+        ).mapWith(Number)
+      case 'min':
+        return (typeof expr.column === 'string'
+          ? drizzleMin(this.resolveColumn(expr.column) as any)
+          : drizzleMin(this.translateExpression(expr.column))
+        ).mapWith(Number)
+      case 'max':
+        return (typeof expr.column === 'string'
+          ? drizzleMax(this.resolveColumn(expr.column) as any)
+          : drizzleMax(this.translateExpression(expr.column))
+        ).mapWith(Number)
+      case 'dateTrunc':
+        if (expr.unit !== 'day') throw new Error(`Unsupported dateTrunc unit: ${expr.unit}`)
+        return sql<string>`strftime('%Y-%m-%d', ${this.resolveColumn(expr.column)})`
+      case 'coalesce': {
+        const [first, fallback] = expr.operands
+        const firstSql =
+          typeof first === 'string' ? this.resolveColumn(first) : this.translateExpression(first)
+        return sql`COALESCE(${firstSql}, ${fallback})`
+      }
+      case 'add':
+        return sql<number>`(${this.resolveColumn(expr.left)} + ${this.resolveColumn(expr.right)})`
+      case 'column':
+        return sql`${this.resolveColumn(expr.column)}`
+      default: {
+        const _exhaustive: never = expr
+        throw new Error(`Unhandled expression kind: ${(_exhaustive as { kind: string }).kind}`)
+      }
+    }
   }
 }

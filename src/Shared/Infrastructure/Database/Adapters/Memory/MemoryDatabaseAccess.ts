@@ -8,6 +8,10 @@
  */
 
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type {
+  AggregateSpec,
+  AggregateExpression,
+} from '../../AggregateSpec'
 
 type WhereCondition = { column: string; operator: string; value: unknown }
 
@@ -44,7 +48,7 @@ class MemoryQueryBuilder implements IQueryBuilder {
     return this
   }
 
-  whereBetween(column: string, range: [Date, Date]): IQueryBuilder {
+  whereBetween(column: string, range: readonly [Date | string, Date | string]): IQueryBuilder {
     this.whereConditions.push({ column, operator: '>=', value: range[0] })
     this.whereConditions.push({ column, operator: '<=', value: range[1] })
     return this
@@ -60,21 +64,26 @@ class MemoryQueryBuilder implements IQueryBuilder {
   private matchRow(row: Record<string, unknown>, cond: WhereCondition): boolean {
     const val = row[cond.column]
     if (val === undefined && !(cond.column in row)) return false
-    switch (cond.operator) {
+
+    const op = cond.operator.toLowerCase()
+    const targetValue = cond.value instanceof Date ? cond.value.toISOString() : cond.value
+
+    switch (op) {
       case '=':
-        return val === cond.value
+        return val === targetValue
       case '!=':
-        return val !== cond.value
+      case '<>':
+        return val !== targetValue
       case '>':
-        return Number(val) > Number(cond.value) || (val as string) > (cond.value as string)
+        return Number(val) > Number(targetValue) || (val as string) > (targetValue as string)
       case '>=':
-        return Number(val) >= Number(cond.value) || (val as string) >= (cond.value as string)
+        return Number(val) >= Number(targetValue) || (val as string) >= (targetValue as string)
       case '<':
-        return Number(val) < Number(cond.value) || (val as string) < (cond.value as string)
+        return Number(val) < Number(targetValue) || (val as string) < (targetValue as string)
       case '<=':
-        return Number(val) <= Number(cond.value) || (val as string) <= (cond.value as string)
-      case 'LIKE':
-        return String(val).includes(String(cond.value).replace(/%/g, ''))
+        return Number(val) <= Number(targetValue) || (val as string) <= (targetValue as string)
+      case 'like':
+        return String(val).includes(String(targetValue).replace(/%/g, ''))
       default:
         return false
     }
@@ -123,6 +132,20 @@ class MemoryQueryBuilder implements IQueryBuilder {
     rows.push({ ...data })
   }
 
+  async insertOrIgnore(
+    data: Record<string, unknown>,
+    { conflictTarget }: { readonly conflictTarget: string | readonly string[] },
+  ): Promise<void> {
+    const rows = this.getTableRows()
+    const targets = Array.isArray(conflictTarget) ? [...conflictTarget] : [conflictTarget]
+
+    const hasConflict = rows.some((row) => targets.every((t) => row[t] === data[t]))
+
+    if (!hasConflict) {
+      rows.push({ ...data })
+    }
+  }
+
   async update(data: Record<string, unknown>): Promise<void> {
     const rows = this.getTableRows()
     const filtered = this.filterRows(rows)
@@ -151,6 +174,177 @@ class MemoryQueryBuilder implements IQueryBuilder {
     const rows = this.getTableRows()
     const filtered = this.filterRows(rows, { skipLimitOffset: true })
     return filtered.length
+  }
+
+  async aggregate<T>(spec: AggregateSpec): Promise<readonly T[]> {
+    const filtered = this.filterRows(this.getTableRows(), { skipLimitOffset: true })
+
+    // 1. Group
+    const groups = new Map<string, Record<string, unknown>[]>()
+    const groupCols = spec.groupBy ?? []
+    
+    if (filtered.length === 0 && groupCols.length === 0) {
+      // SQL behavior: without GROUP BY, always returns 1 row even for empty table
+      groups.set('_all', [])
+    } else {
+      for (const row of filtered) {
+        const key =
+          groupCols.length === 0
+            ? '_all'
+            : groupCols
+                .map((g) => {
+                  const selectExpr = spec.select[g]
+                  const val = selectExpr !== undefined ? evalExpression(row, selectExpr) : row[g]
+                  return String(val)
+                })
+                .join('\x1f')
+        if (!groups.has(key)) groups.set(key, [])
+        groups.get(key)!.push(row)
+      }
+    }
+
+    // 2. Evaluate select expressions per group
+    let result: Record<string, unknown>[] = []
+    for (const groupRows of groups.values()) {
+      const out: Record<string, unknown> = {}
+      for (const [alias, expr] of Object.entries(spec.select)) {
+        out[alias] = reduceAggregate(groupRows, expr)
+      }
+      result.push(out)
+    }
+
+    // 3. orderBy
+    if (spec.orderBy && spec.orderBy.length > 0) {
+      result.sort((a, b) => {
+        for (const o of spec.orderBy!) {
+          const av = a[o.column]
+          const bv = b[o.column]
+          if (av == null && bv == null) continue
+          if (av == null) return o.direction === 'ASC' ? -1 : 1
+          if (bv == null) return o.direction === 'ASC' ? 1 : -1
+
+          const na = typeof av === 'number' ? av : Number(av)
+          const nb = typeof bv === 'number' ? bv : Number(bv)
+
+          if (!Number.isNaN(na) && !Number.isNaN(nb)) {
+            if (na !== nb) return o.direction === 'ASC' ? na - nb : nb - na
+          } else {
+            const sa = String(av)
+            const sb = String(bv)
+            if (sa !== sb) return o.direction === 'ASC' ? (sa < sb ? -1 : 1) : sa < sb ? 1 : -1
+          }
+        }
+        return 0
+      })
+    }
+
+    // 4. limit
+    if (spec.limit !== undefined) {
+      result = result.slice(0, spec.limit)
+    }
+
+    return result as readonly T[]
+  }
+}
+
+/**
+ * evalExpression: 針對單一行評估運算式（非聚合）
+ */
+function evalExpression(row: Record<string, unknown>, expr: AggregateExpression): unknown {
+  switch (expr.kind) {
+    case 'column':
+      return row[expr.column]
+    case 'dateTrunc': {
+      if (expr.unit !== 'day') throw new Error(`Unsupported unit: ${expr.unit}`)
+      const v = row[expr.column]
+      return v == null ? null : String(v).slice(0, 10)
+    }
+    case 'coalesce': {
+      const [first, fallback] = expr.operands
+      const val = typeof first === 'string' ? row[first] : evalExpression(row, first)
+      return val ?? fallback
+    }
+    case 'add': {
+      const a = row[expr.left]
+      const b = row[expr.right]
+      return a == null || b == null ? null : Number(a) + Number(b)
+    }
+    default:
+      throw new Error(
+        `evalExpression: unsupported kind '${expr.kind}' — aggregators belong in reduceAggregate`,
+      )
+  }
+}
+
+/**
+ * valueFor: 取得欄位值或評估運算式值
+ */
+function valueFor(row: Record<string, unknown>, col: string | AggregateExpression): unknown {
+  return typeof col === 'string' ? row[col] : evalExpression(row, col)
+}
+
+/**
+ * reduceAggregate: 針對整組行計算聚合值
+ */
+function reduceAggregate(
+  rows: readonly Record<string, unknown>[],
+  expr: AggregateExpression,
+): unknown {
+  switch (expr.kind) {
+    case 'sum': {
+      if (rows.length === 0) return null
+      let total = 0
+      let hasValue = false
+      for (const r of rows) {
+        const v = valueFor(r, expr.column)
+        if (v != null) {
+          total += Number(v)
+          hasValue = true
+        }
+      }
+      return hasValue ? total : null
+    }
+    case 'count':
+      if (expr.column === '*') return rows.length
+      return rows.filter((r) => r[expr.column as string] != null).length
+    case 'avg': {
+      const values: number[] = []
+      for (const r of rows) {
+        const val = valueFor(r, expr.column)
+        if (val != null) values.push(Number(val))
+      }
+      return values.length === 0 ? null : values.reduce((s, x) => s + x, 0) / values.length
+    }
+    case 'min': {
+      let m: number | null = null
+      for (const r of rows) {
+        const v = valueFor(r, expr.column)
+        if (v == null) continue
+        const n = Number(v)
+        if (m === null || n < m) m = n
+      }
+      return m
+    }
+    case 'max': {
+      let m: number | null = null
+      for (const r of rows) {
+        const v = valueFor(r, expr.column)
+        if (v == null) continue
+        const n = Number(v)
+        if (m === null || n > m) m = n
+      }
+      return m
+    }
+    case 'dateTrunc':
+    case 'coalesce':
+    case 'add':
+    case 'column':
+      if (rows.length === 0) return null
+      return evalExpression(rows[0], expr)
+    default: {
+      const _exhaustive: never = expr
+      throw new Error(`Unhandled expression kind: ${(_exhaustive as any).kind}`)
+    }
   }
 }
 

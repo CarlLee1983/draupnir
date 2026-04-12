@@ -72,7 +72,7 @@ export class BifrostSyncService {
         provider: log.provider,
         inputTokens: log.inputTokens,
         outputTokens: log.outputTokens,
-        creditCost: String(log.cost),
+        creditCost: log.cost,
         latencyMs: log.latencyMs,
         status: log.status,
         occurredAt: log.timestamp,

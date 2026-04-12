@@ -7,7 +7,7 @@
  * @see https://orm.drizzle.team/docs/sql-schema-declaration
  */
 
-import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, integer, index, real } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 
 /**
@@ -130,7 +130,7 @@ export const usageRecords = sqliteTable(
     model: text('model').notNull(),
     input_tokens: integer('input_tokens').notNull().default(0),
     output_tokens: integer('output_tokens').notNull().default(0),
-    credit_cost: text('credit_cost').notNull().default('0'),
+    credit_cost: real('credit_cost').notNull().default(0),
     provider: text('provider'),
     latency_ms: integer('latency_ms'),
     status: text('status'),
@@ -264,4 +264,24 @@ export const alertDeliveries = sqliteTable(
     index('idx_alert_deliveries_channel_target').on(table.channel, table.target),
     index('idx_alert_deliveries_dedup').on(table.alert_event_id, table.channel, table.target, table.status),
   ],
+)
+
+/**
+ * Report Schedules 表 — 定期自動發送報告設定
+ */
+export const reportSchedules = sqliteTable(
+  'report_schedules',
+  {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull(),
+    type: text('type').notNull(), // weekly, monthly
+    day: integer('day').notNull(), // 0-6 for weekly, 1-31 for monthly
+    time: text('time').notNull(), // HH:mm
+    timezone: text('timezone').notNull(), // IANA timezone
+    recipients: text('recipients').notNull(), // JSON array of emails
+    enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
+    created_at: text('created_at').notNull(),
+    updated_at: text('updated_at').notNull(),
+  },
+  (table) => [index('idx_report_schedules_org_id').on(table.org_id)],
 )

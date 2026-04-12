@@ -15,6 +15,7 @@ import { CreditServiceProvider } from './Modules/Credit/Infrastructure/Providers
 import { DashboardServiceProvider } from './Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
 import { BifrostSyncService } from './Modules/Dashboard/Infrastructure/Services/BifrostSyncService'
 import { AlertsServiceProvider } from './Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
+import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { DevPortalServiceProvider } from './Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
 import { HealthServiceProvider } from './Modules/Health/Infrastructure/Providers/HealthServiceProvider'
 import { OrganizationServiceProvider } from './Modules/Organization/Infrastructure/Providers/OrganizationServiceProvider'
@@ -48,6 +49,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   core.register(createGravitoServiceProvider(new ApiKeyServiceProvider()))
   core.register(createGravitoServiceProvider(new DashboardServiceProvider()))
   core.register(createGravitoServiceProvider(new AlertsServiceProvider()))
+  core.register(createGravitoServiceProvider(new ReportsServiceProvider()))
   core.register(createGravitoServiceProvider(new CreditServiceProvider()))
   core.register(createGravitoServiceProvider(new ContractServiceProvider()))
   core.register(createGravitoServiceProvider(new AppModuleServiceProvider()))

@@ -63,24 +63,30 @@ describe('DispatchAlertWebhooksService', () => {
     })
     const first = WebhookEndpoint.create('org-1', 'https://example.com/one')
     const second = WebhookEndpoint.create('org-1', 'https://example.com/two')
+    const third = WebhookEndpoint.create('org-1', 'https://example.com/three')
 
-    endpointRepo.findActiveByOrg.mockResolvedValue([first, second])
+    endpointRepo.findActiveByOrg.mockResolvedValue([first, second, third])
+    // first is already sent
     deliveryRepo.existsSent.mockImplementation(async ({ target }) => target === first.id)
+
     dispatcher.dispatch
-      .mockRejectedValueOnce(new Error('boom'))
-      .mockResolvedValueOnce({
+      .mockRejectedValueOnce(new Error('boom')) // second fails
+      .mockResolvedValueOnce({ // third succeeds
         success: true,
         statusCode: 200,
-        attempts: 2,
-        webhookId: 'wh_1',
+        attempts: 1,
+        webhookId: 'wh_3',
       })
 
     await expect(service.dispatchAll(event, 'Org Name')).resolves.toBeUndefined()
 
-    expect(dispatcher.dispatch).toHaveBeenCalledTimes(1)
-    expect(deliveryRepo.save).toHaveBeenCalledTimes(1)
-    expect(endpointRepo.save).toHaveBeenCalledTimes(1)
+    expect(dispatcher.dispatch).toHaveBeenCalledTimes(2) // second and third
+    expect(deliveryRepo.save).toHaveBeenCalledTimes(2)
+    expect(endpointRepo.save).toHaveBeenCalledTimes(2)
     expect(logger.error).not.toHaveBeenCalled()
+
+    // Verify first was skipped
+    expect(dispatcher.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ url: first.url }))
   })
 
   it('never throws when endpoint lookup fails', async () => {

@@ -17,6 +17,8 @@ export const ADMIN_PAGE_KEYS = {
   moduleCreate: 'page.admin.moduleCreate',
   apiKeys: 'page.admin.apiKeys',
   usageSync: 'page.admin.usageSync',
+  reports: 'page.admin.reports',
+  reportTemplate: 'page.admin.reportTemplate',
 } as const
 
 export type AdminPageBindingKey = (typeof ADMIN_PAGE_KEYS)[keyof typeof ADMIN_PAGE_KEYS]

@@ -28,10 +28,13 @@
         "@upyo/smtp": "^0.4.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "croner": "^10.0.1",
         "decimal.js": "^10.6.0",
         "drizzle-orm": "^0.45.1",
         "jsonwebtoken": "^9.0.0",
         "lucide-react": "^1.8.0",
+        "luxon": "^3.7.2",
+        "playwright": "^1.59.1",
         "react": "^19.2.5",
         "react-dom": "^19.2.5",
         "react-hook-form": "^7.72.1",
@@ -686,6 +689,8 @@
     "convert-source-map": ["convert-source-map@2.0.0", "", {}, "sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg=="],
 
     "cron-parser": ["cron-parser@5.5.0", "", { "dependencies": { "luxon": "^3.7.1" } }, "sha512-oML4lKUXxizYswqmxuOCpgFS8BNUJpIu6k/2HVHyaL8Ynnf3wdf9tkns0yRdJLSIjkJ+b0DXHMZEHGpMwjnPww=="],
+
+    "croner": ["croner@10.0.1", "", {}, "sha512-ixNtAJndqh173VQ4KodSdJEI6nuioBWI0V1ITNKhZZsO0pEMoDxz539T4FTTbSZ/xIOSuDnzxLVRqBVSvPNE2g=="],
 
     "cross-fetch": ["cross-fetch@4.1.0", "", { "dependencies": { "node-fetch": "^2.7.0" } }, "sha512-uKm5PU+MHTootlWEY+mZ4vvXoCn4fLQxT9dSc1sXVMSFkINTJVN8cAQROpwcKm8bJ/c7rgZVIBWzH5T78sNZZw=="],
 

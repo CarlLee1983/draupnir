@@ -9,6 +9,8 @@
  * @see docs/ABSTRACTION_RULES.md - Abstraction rules for dependencies.
  */
 
+import type { AggregateSpec } from './Database/AggregateSpec'
+
 /**
  * Query Builder Interface (Abstract Fluent API, supports test substitution)
  *
@@ -54,6 +56,18 @@ export interface IQueryBuilder {
   insert(data: Record<string, unknown>): Promise<void>
 
   /**
+   * Inserts a record; silently ignores if a unique constraint on the specified target column(s) already exists.
+   * Maps to SQLite `INSERT ... ON CONFLICT(target) DO NOTHING`.
+   *
+   * @param data - The data to insert.
+   * @param options.conflictTarget - Column name (or list) that triggers the conflict-do-nothing.
+   */
+  insertOrIgnore(
+    data: Record<string, unknown>,
+    options: { readonly conflictTarget: string | readonly string[] },
+  ): Promise<void>
+
+  /**
    * Updates a record.
    * @param data - The data to update.
    */
@@ -92,13 +106,29 @@ export interface IQueryBuilder {
    * @param range - Range [start, end].
    * @returns Returns self to support chaining.
    */
-  whereBetween(column: string, range: [Date, Date]): IQueryBuilder
+  whereBetween(column: string, range: readonly [Date | string, Date | string]): IQueryBuilder
 
   /**
    * Counts records matching the criteria.
    * @returns Record count.
    */
   count(): Promise<number>
+
+  /**
+   * Declarative aggregation query.
+   *
+   * Runs GROUP BY / SUM / COUNT / AVG / MIN / MAX / dateTrunc / coalesce / add
+   * against the current table and any previously-chained where/whereBetween
+   * filters. Caller supplies the row DTO as `T`; adapter returns rows matching
+   * the shape of `spec.select` keys.
+   *
+   * See AggregateSpec for the closed set of supported expressions.
+   *
+   * @typeParam T - Caller-supplied DTO shape, one field per spec.select alias.
+   * @param spec - Declarative aggregate specification (select / groupBy / orderBy / limit).
+   * @returns Array of T rows, one per group (or one row total if no groupBy).
+   */
+  aggregate<T>(spec: AggregateSpec): Promise<readonly T[]>
 }
 
 /**

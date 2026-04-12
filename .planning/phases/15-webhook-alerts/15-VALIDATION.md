@@ -1,7 +1,7 @@
 ---
 phase: 15
 slug: webhook-alerts
-status: approved
+status: complete
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-04-12
@@ -38,17 +38,17 @@ created: 2026-04-12
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 15-01-01 | 01 | 1 | ALRT-07 | unit (foundation) | `bun test src/Foundation/__tests__/WebhookDispatcher.test.ts src/Foundation/__tests__/WebhookSecret.test.ts && bun run typecheck` | W0 (moved from DevPortal) | ⬜ pending |
-| 15-01-02 | 01 | 1 | ALRT-06 | unit (domain) | `bun test src/Modules/Alerts/__tests__/WebhookUrl.test.ts src/Modules/Alerts/__tests__/WebhookEndpoint.test.ts && bun run typecheck` | W0 (to create) | ⬜ pending |
-| 15-02-01 | 02 | 2 | ALRT-06 | unit (services + DTO) | `bun test src/Modules/Alerts/__tests__/RegisterWebhookEndpointService.test.ts src/Modules/Alerts/__tests__/WebhookEndpointDTO.test.ts && bun run typecheck` | W0 (to create) | ⬜ pending |
-| 15-02-02 | 02 | 2 | ALRT-07, ALRT-08 | unit (services) | `bun test src/Modules/Alerts/__tests__/DispatchAlertWebhooksService.test.ts src/Modules/Alerts/__tests__/GetAlertHistoryService.test.ts src/Modules/Alerts/__tests__/ResendDeliveryService.test.ts && bun run typecheck` | W0 (to create) | ⬜ pending |
-| 15-02-03 | 02 | 2 | ALRT-07 (D-17) | unit (integration) | `bun test src/Modules/Alerts/__tests__/SendAlertService.test.ts && bun run typecheck` | ✅ (existing, extend) | ⬜ pending |
-| 15-03-01 | 03 | 3 | ALRT-06, ALRT-07, ALRT-08 | static + module suite | `bun run typecheck && bun test src/Modules/Alerts/__tests__/` | ✅ | ⬜ pending |
-| 15-03-02 | 03 | 3 | ALRT-06, ALRT-07, ALRT-08 | full backend | `bun test src/Modules/Alerts/__tests__/ && bun run typecheck && bun run build` | ✅ | ⬜ pending |
-| 15-04-01 | 04 | 4 | ALRT-06, ALRT-08 | frontend static | `bun run typecheck && bun run build` | N/A (Vite bundles) | ⬜ pending |
-| 15-04-02 | 04 | 4 | ALRT-06, ALRT-07 | frontend static | `bun run typecheck && bun run build` | N/A | ⬜ pending |
-| 15-04-03 | 04 | 4 | ALRT-08 | frontend static | `bun run typecheck && bun run build` | N/A | ⬜ pending |
-| 15-04-04 | 04 | 4 | ALRT-06, ALRT-07, ALRT-08 | human (E2E) | manual checklist (14 items) | N/A | ⬜ pending |
+| 15-01-01 | 01 | 1 | ALRT-07 | unit (foundation) | `bun test src/Foundation/__tests__/WebhookDispatcher.test.ts src/Foundation/__tests__/WebhookSecret.test.ts && bun run typecheck` | ✅ (moved from DevPortal) | ✅ green |
+| 15-01-02 | 01 | 1 | ALRT-06 | unit (domain) | `bun test src/Modules/Alerts/__tests__/WebhookUrl.test.ts src/Modules/Alerts/__tests__/WebhookEndpoint.test.ts && bun run typecheck` | ✅ (created) | ✅ green |
+| 15-02-01 | 02 | 2 | ALRT-06 | unit (services + DTO) | `bun test src/Modules/Alerts/__tests__/RegisterWebhookEndpointService.test.ts src/Modules/Alerts/__tests__/WebhookEndpointDTO.test.ts && bun run typecheck` | ✅ (created) | ✅ green |
+| 15-02-02 | 02 | 2 | ALRT-07, ALRT-08 | unit (services) | `bun test src/Modules/Alerts/__tests__/DispatchAlertWebhooksService.test.ts src/Modules/Alerts/__tests__/GetAlertHistoryService.test.ts src/Modules/Alerts/__tests__/ResendDeliveryService.test.ts && bun run typecheck` | ✅ (created) | ✅ green |
+| 15-02-03 | 02 | 2 | ALRT-07 (D-17) | unit (integration) | `bun test src/Modules/Alerts/__tests__/SendAlertService.test.ts && bun run typecheck` | ✅ (existing, extended) | ✅ green |
+| 15-03-01 | 03 | 3 | ALRT-06, ALRT-07, ALRT-08 | static + module suite | `bun run typecheck && bun test src/Modules/Alerts/__tests__/` | ✅ | ✅ green |
+| 15-03-02 | 03 | 3 | ALRT-06, ALRT-07, ALRT-08 | full backend | `bun test src/Modules/Alerts/__tests__/ && bun run typecheck && bun run build` | ✅ | ✅ green |
+| 15-04-01 | 04 | 4 | ALRT-06, ALRT-08 | frontend static | `bun run typecheck && bun run build` | N/A (Vite bundles) | ✅ green |
+| 15-04-02 | 04 | 4 | ALRT-06, ALRT-07 | frontend static | `bun run typecheck && bun run build` | N/A | ✅ green |
+| 15-04-03 | 04 | 4 | ALRT-08 | frontend static | `bun run typecheck && bun run build` | N/A | ✅ green |
+| 15-04-04 | 04 | 4 | ALRT-06, ALRT-07, ALRT-08 | human (E2E) | manual checklist (14 items) | N/A | ✅ human |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

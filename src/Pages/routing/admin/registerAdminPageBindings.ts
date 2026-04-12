@@ -21,6 +21,8 @@ import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 
 import { AdminApiKeysPage } from '../../Admin/AdminApiKeysPage'
+import { AdminReportsPage } from '../../Admin/AdminReportsPage'
+import { AdminReportTemplatePage } from '../../Admin/AdminReportTemplatePage'
 import { AdminContractCreatePage } from '../../Admin/AdminContractCreatePage'
 import { AdminContractDetailPage } from '../../Admin/AdminContractDetailPage'
 import { AdminContractsPage } from '../../Admin/AdminContractsPage'
@@ -151,4 +153,18 @@ export function registerAdminPageBindings(container: IContainer): void {
   )
 
   container.singleton(k.usageSync, (c) => new AdminUsageSyncPage(c.make(i) as InertiaService))
+
+  container.singleton(
+    k.reports,
+    (c) =>
+      new AdminReportsPage(
+        c.make(i) as InertiaService,
+        c.make('reportRepository') as any,
+      ),
+  )
+
+  container.singleton(
+    k.reportTemplate,
+    (c) => new AdminReportTemplatePage(c.make(i) as InertiaService),
+  )
 }
