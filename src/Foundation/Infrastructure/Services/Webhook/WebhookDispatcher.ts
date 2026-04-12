@@ -1,26 +1,17 @@
-import type { WebhookSecret } from '../../Domain/ValueObjects/WebhookSecret'
-
-interface DispatchRequest {
-  url: string
-  secret: WebhookSecret
-  eventType: string
-  payload: Record<string, unknown>
-}
-
-interface DispatchResult {
-  success: boolean
-  statusCode?: number
-  error?: string
-  attempts: number
-}
-
-export class WebhookDispatcher {
-  private readonly maxRetries = 3
+import type {
+  IWebhookDispatcher,
+  WebhookDispatchRequest,
+  WebhookDispatchResult,
+} from '../../Ports/IWebhookDispatcher'
+export class WebhookDispatcher implements IWebhookDispatcher {
   private readonly baseDelayMs = 100
 
-  async dispatch(request: DispatchRequest): Promise<DispatchResult> {
+  constructor(private readonly maxRetries = 3) {}
+
+  async dispatch(request: WebhookDispatchRequest): Promise<WebhookDispatchResult> {
+    const webhookId = crypto.randomUUID()
     const webhookPayload = {
-      id: crypto.randomUUID(),
+      id: webhookId,
       event: request.eventType,
       data: request.payload,
       timestamp: new Date().toISOString(),
@@ -37,7 +28,7 @@ export class WebhookDispatcher {
             'Content-Type': 'application/json',
             'X-Webhook-Signature': signature,
             'X-Webhook-Event': request.eventType,
-            'X-Webhook-Id': webhookPayload.id,
+            'X-Webhook-Id': webhookId,
           },
           body,
         })
@@ -47,6 +38,7 @@ export class WebhookDispatcher {
             success: true,
             statusCode: response.status,
             attempts: attempt,
+            webhookId,
           }
         }
 
@@ -58,6 +50,7 @@ export class WebhookDispatcher {
             statusCode: response.status,
             error: `Webhook dispatch failed, HTTP ${response.status}, retried ${this.maxRetries} times`,
             attempts: attempt,
+            webhookId,
           }
         }
       } catch (error: unknown) {
@@ -69,6 +62,7 @@ export class WebhookDispatcher {
             success: false,
             error: `Webhook dispatch failed: ${message}, retried ${this.maxRetries} times`,
             attempts: attempt,
+            webhookId,
           }
         }
       }
@@ -78,6 +72,7 @@ export class WebhookDispatcher {
       success: false,
       error: 'Exceeded maximum retry attempts',
       attempts: this.maxRetries,
+      webhookId,
     }
   }
 

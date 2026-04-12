@@ -2,6 +2,7 @@ import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/
 import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/BifrostGatewayAdapter'
 import { ConsoleMailer } from '../Services/Mail/ConsoleMailer'
 import { UpyoMailer } from '../Services/Mail/UpyoMailer'
+import { WebhookDispatcher } from '../Services/Webhook/WebhookDispatcher'
 import {
   BifrostClient,
   createBifrostClientConfig,
@@ -30,6 +31,10 @@ export class FoundationServiceProvider extends ModuleServiceProvider {
       }
 
       return new ConsoleMailer()
+    })
+
+    container.singleton('webhookDispatcher', () => {
+      return new WebhookDispatcher(3)
     })
   }
 

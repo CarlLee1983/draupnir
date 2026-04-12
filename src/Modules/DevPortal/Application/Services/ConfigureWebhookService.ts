@@ -2,7 +2,7 @@ import type { IApplicationRepository } from '../../Domain/Repositories/IApplicat
 import type { IWebhookConfigRepository } from '../../Domain/Repositories/IWebhookConfigRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { WebhookConfig } from '../../Domain/Entities/WebhookConfig'
-import { WebhookSecret } from '../../Domain/ValueObjects/WebhookSecret'
+import { WebhookSecret } from '@/Foundation/Infrastructure/Services/Webhook/WebhookSecret'
 import { WebhookEventType } from '../../Domain/ValueObjects/WebhookEventType'
 import type { ConfigureWebhookRequest, ConfigureWebhookResponse } from '../DTOs/WebhookConfigDTO'
 

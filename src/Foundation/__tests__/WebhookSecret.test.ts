@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { WebhookSecret } from '../Domain/ValueObjects/WebhookSecret'
+import { WebhookSecret } from '../Infrastructure/Services/Webhook/WebhookSecret'
 
 describe('WebhookSecret', () => {
   it('應生成新的 webhook secret', () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { WebhookDispatcher } from '../Infrastructure/Services/WebhookDispatcher'
-import { WebhookSecret } from '../Domain/ValueObjects/WebhookSecret'
+import { WebhookDispatcher } from '../Infrastructure/Services/Webhook/WebhookDispatcher'
+import { WebhookSecret } from '../Infrastructure/Services/Webhook/WebhookSecret'
 
 describe('WebhookDispatcher', () => {
   let dispatcher: WebhookDispatcher
@@ -32,6 +32,8 @@ describe('WebhookDispatcher', () => {
     })
 
     expect(result.success).toBe(true)
+    expect(result.webhookId).toBeTruthy()
+    expect(result.attempts).toBe(1)
     expect(mockFetch).toHaveBeenCalledOnce()
 
     const [callUrl, callOptions] = mockFetch.mock.calls[0] as [string, RequestInit]
@@ -40,6 +42,7 @@ describe('WebhookDispatcher', () => {
     expect((callOptions.headers as Record<string, string>)['Content-Type']).toBe('application/json')
     expect((callOptions.headers as Record<string, string>)['X-Webhook-Signature']).toBeTruthy()
     expect((callOptions.headers as Record<string, string>)['X-Webhook-Event']).toBe('key.revoked')
+    expect((callOptions.headers as Record<string, string>)['X-Webhook-Id']).toBe(result.webhookId)
 
     const body = callOptions.body as string
     const signature = (callOptions.headers as Record<string, string>)['X-Webhook-Signature']
@@ -64,6 +67,7 @@ describe('WebhookDispatcher', () => {
 
     expect(result.success).toBe(true)
     expect(mockFetch).toHaveBeenCalledTimes(3)
+    expect(result.webhookId).toBeTruthy()
   })
 
   it('3 次都失敗應回傳失敗', async () => {
@@ -81,6 +85,7 @@ describe('WebhookDispatcher', () => {
     expect(result.success).toBe(false)
     expect(result.error).toBeTruthy()
     expect(mockFetch).toHaveBeenCalledTimes(3)
+    expect(result.webhookId).toBeTruthy()
   })
 
   it('fetch 拋出異常時應重試', async () => {
@@ -100,6 +105,7 @@ describe('WebhookDispatcher', () => {
 
     expect(result.success).toBe(true)
     expect(mockFetch).toHaveBeenCalledTimes(2)
+    expect(result.webhookId).toBeTruthy()
   })
 
   it('payload 應包含 event 和 data 欄位', async () => {

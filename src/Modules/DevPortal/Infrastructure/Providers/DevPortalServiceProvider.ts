@@ -3,7 +3,6 @@ import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { ApplicationRepository } from '../Repositories/ApplicationRepository'
 import { WebhookConfigRepository } from '../Repositories/WebhookConfigRepository'
-import { WebhookDispatcher } from '../Services/WebhookDispatcher'
 import { RegisterAppService } from '../../Application/Services/RegisterAppService'
 import { ListAppsService } from '../../Application/Services/ListAppsService'
 import { ManageAppKeysService } from '../../Application/Services/ManageAppKeysService'
@@ -12,6 +11,7 @@ import { GetApiDocsService } from '../../Application/Services/GetApiDocsService'
 import type { IssueAppKeyService } from '@/Modules/AppApiKey/Application/Services/IssueAppKeyService'
 import type { ListAppKeysService } from '@/Modules/AppApiKey/Application/Services/ListAppKeysService'
 import type { RevokeAppKeyService } from '@/Modules/AppApiKey/Application/Services/RevokeAppKeyService'
+import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
 
 export class DevPortalServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
@@ -19,7 +19,9 @@ export class DevPortalServiceProvider extends ModuleServiceProvider {
 
     container.singleton('devPortalApplicationRepository', () => new ApplicationRepository(db))
     container.singleton('devPortalWebhookConfigRepository', () => new WebhookConfigRepository(db))
-    container.singleton('devPortalWebhookDispatcher', () => new WebhookDispatcher())
+    container.singleton('devPortalWebhookDispatcher', (c: IContainer) => {
+      return c.make('webhookDispatcher') as IWebhookDispatcher
+    })
 
     container.bind('registerAppService', (c: IContainer) => {
       return new RegisterAppService(
