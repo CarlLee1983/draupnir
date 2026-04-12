@@ -49,6 +49,7 @@
     "route:list": "bun gravito route:list --entry src/gravito-cli-entry.ts",
     "tinker": "bun gravito tinker",
     "generate:types": "bun orbit generate:types",
+    "backfill:alert-deliveries": "bun src/Modules/Alerts/Infrastructure/Scripts/backfillAlertDeliveries.ts",
     "dev:frontend": "vite",
     "build:frontend": "vite build",
     "preview:frontend": "vite preview",

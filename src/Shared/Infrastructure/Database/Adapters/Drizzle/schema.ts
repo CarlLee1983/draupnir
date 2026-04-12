@@ -217,3 +217,51 @@ export const alertEvents = sqliteTable(
   },
   (table) => [index('idx_alert_events_org_id').on(table.org_id), index('idx_alert_events_month').on(table.month)],
 )
+
+/**
+ * Webhook Endpoints 表 — 每個組織可註冊多個 webhook URL
+ */
+export const webhookEndpoints = sqliteTable(
+  'webhook_endpoints',
+  {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull(),
+    url: text('url').notNull(),
+    secret: text('secret').notNull(),
+    active: integer('active', { mode: 'boolean' }).notNull().default(true),
+    description: text('description'),
+    created_at: text('created_at').notNull(),
+    last_success_at: text('last_success_at'),
+    last_failure_at: text('last_failure_at'),
+  },
+  (table) => [
+    index('idx_webhook_endpoints_org_id').on(table.org_id),
+    index('idx_webhook_endpoints_org_active').on(table.org_id, table.active),
+  ],
+)
+
+/**
+ * Alert Deliveries 表 — 記錄 email / webhook 每次遞送結果
+ */
+export const alertDeliveries = sqliteTable(
+  'alert_deliveries',
+  {
+    id: text('id').primaryKey(),
+    alert_event_id: text('alert_event_id').notNull(),
+    channel: text('channel').notNull(),
+    target: text('target').notNull(),
+    target_url: text('target_url'),
+    status: text('status').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    status_code: integer('status_code'),
+    error_message: text('error_message'),
+    dispatched_at: text('dispatched_at').notNull(),
+    delivered_at: text('delivered_at'),
+    created_at: text('created_at').notNull(),
+  },
+  (table) => [
+    index('idx_alert_deliveries_event_id').on(table.alert_event_id),
+    index('idx_alert_deliveries_channel_target').on(table.channel, table.target),
+    index('idx_alert_deliveries_dedup').on(table.alert_event_id, table.channel, table.target, table.status),
+  ],
+)
