@@ -7,133 +7,61 @@
 - ✅ **v1.0 LLM Gateway Abstraction** — Phases 1-5 (shipped 2026-04-10)
 - ✅ **v1.1 Pages & Framework** — Phases 6-7 (shipped 2026-04-11)
 - ✅ **v1.2 Dashboard 分析和報告** — Phases 8-12 (shipped 2026-04-12)
-- 🚧 **v1.3 Advanced Analytics & Alerts** — Phases 13-16 (in progress)
-
-<details>
-<summary><strong>v1.2 Dashboard 分析和報告</strong> (Phases 8-12) — SHIPPED 2026-04-12</summary>
-
-### Phase 8: Data Correctness & Permission Foundation
-**Goal**: The dashboard reads real data and respects role boundaries.
-**Status**: ✅ COMPLETED 2026-04-11
-
-### Phase 9: Cached Sync Infrastructure
-**Goal**: SQLite local reads populate dashboard metrics.
-**Status**: ✅ COMPLETED 2026-04-11
-
-### Phase 10: P1 Chart UI
-**Goal**: KPI cards, trend area charts, model comparison charts/tables.
-**Status**: ✅ COMPLETED 2026-04-11
-
-### Phase 11: Resilience & UX Polish
-**Goal**: Timeout handling, staleness UX, indexed query performance.
-**Status**: ✅ COMPLETED 2026-04-11
-
-### Phase 12: Differentiators
-**Goal**: Period-over-period change badges, PDF export via `window.print()`.
-**Status**: ✅ COMPLETED 2026-04-12
-
-</details>
-
-### Phase 17: 擴充 IQueryBuilder 聚合原語並重構 UsageRepository 去除 Drizzle 直接依賴
-
-**Goal:** 擴充 IQueryBuilder 加入 aggregate() 聚合原語（sum/count/avg/min/max/dateTrunc/coalesce/add）並重構 DrizzleUsageRepository 去除直接 drizzle-orm 依賴；同步將 usage_records.credit_cost 從 TEXT 遷移為 REAL，讓服務層測試可用 MemoryDatabaseAccess 取代 SQLite。
-**Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07 (from 17-CONTEXT.md locked decisions — no v1.3 REQ-IDs map to this internal-architecture phase)
-**Depends on:** Phase 16
-**Plans:** 5 plans
-
-Plans:
-- [ ] 17-01-PLAN.md — Migrate usage_records.credit_cost TEXT→REAL; update schema.ts, IUsageRepository DTO, DrizzleUsageRepository CAST removal, BifrostSyncService producer
-- [ ] 17-02-PLAN.md — Define AggregateSpec<T> + 9 builder functions; extend IQueryBuilder with aggregate<T>(spec) signature (interface-first)
-- [ ] 17-03-PLAN.md — Implement DrizzleQueryBuilder.aggregate() — all 8 expression kinds translated to drizzle SQL AST; primitive tests against :memory: libsql
-- [ ] 17-04-PLAN.md — Implement MemoryQueryBuilder.aggregate() parity + fix Pitfall 5 (lowercase operators); cross-adapter AggregateParity suite
-- [ ] 17-05-PLAN.md — Refactor DrizzleUsageRepository to IDatabaseAccess-only; add insertOrIgnore primitive; fix Pitfall 1 test seam; add UsageRepository.memory.test.ts for D-07
-
----
-
-## 🚧 v1.3 Advanced Analytics & Alerts (In Progress)
-
-**Milestone Goal:** Proactive cost control — alerts, per-key attribution, and automated reports transform Draupnir from reactive observation to proactive cost management.
+- ✅ **v1.3 Advanced Analytics & Alerts** — Phases 13-17 (shipped 2026-04-12)
+- 🚧 **v1.4 Hardening & Refinement** — Phases 18-20 (planned)
 
 ## Phases
 
-- [ ] **Phase 13: Alert Foundation & Email Infrastructure** - Cost threshold alerts with email notifications and deduplication
-- [x] **Phase 14: Per-Key Cost Breakdown** - Granular per-key and per-model cost attribution dashboard (completed 2026-04-12)
-- [ ] **Phase 15: Webhook Alerts** - Webhook endpoint registration with HMAC signing and alert history
-- [ ] **Phase 16: Automated Reports** - Scheduled PDF report generation and email delivery
+<details>
+<summary>✅ v1.3 Advanced Analytics & Alerts (Phases 13-17) — SHIPPED 2026-04-12</summary>
 
-## Phase Details
+- [x] Phase 13: Alert Foundation & Email Infrastructure
+- [x] Phase 14: Per-Key Cost Breakdown
+- [x] Phase 15: Webhook Alerts
+- [x] Phase 16: Automated Reports
+- [x] Phase 17: IQueryBuilder & UsageRepository Refactor
 
-### Phase 13: Alert Foundation & Email Infrastructure
-**Goal**: Users receive proactive email notifications when API key or organization costs exceed configured thresholds
-**Depends on**: Phase 12 (v1.2 usage_records + analytics infrastructure)
-**Requirements**: ALRT-01, ALRT-02, ALRT-03, ALRT-04, ALRT-05
-**Success Criteria** (what must be TRUE):
-  1. User can set soft (warning) and hard (critical) cost thresholds for an organization
-  2. User can set soft and hard cost thresholds for individual API keys
-  3. System sends an email when a threshold is breached, with correct severity level indicated
-  4. System does not send duplicate alerts for the same threshold breach within the deduplication window
-  5. Alert emails distinguish between warning (soft limit) and critical (hard limit) severity
-**Plans**: 2 plans
-Plans:
-- [x] 13-01-PLAN.md — Domain layer, IMailer port, DB schema, value objects, repositories (completed 2026-04-12)
-- [x] 13-02-PLAN.md — Evaluation pipeline, email sending, controller, ServiceProvider wiring (completed 2026-04-12)
-**UI hint**: yes
+</details>
 
-### Phase 14: Per-Key Cost Breakdown
-**Goal**: Users can analyze cost attribution per API key and per model to identify spending patterns
-**Depends on**: Phase 12 (v1.2 usage_records + chart infrastructure)
-**Requirements**: COST-01, COST-02, COST-03, COST-04
-**Success Criteria** (what must be TRUE):
-  1. User can view a table showing each API key's cost for a selected time period (7/30/90 days)
-  2. User can see token usage efficiency metrics (cost per token, tokens per request) for each key
-  3. User can view cost distribution across models with percentage breakdowns
-  4. User can view per-model aggregation showing each model's share of total organization usage
-**Plans**: 2 plans
-Plans:
-- [x] 14-01-PLAN.md — Backend: IUsageRepository extension, DrizzleUsageRepository, GetPerKeyCostService, controller methods, routes, DI wiring, TDD tests
-- [x] 14-02-PLAN.md — Frontend: PerKeyCostTable, ModelDistributionDonut, CostBreakdown page, Inertia handler, four-file nav wiring
-**UI hint**: yes
+<details>
+<summary>✅ v1.2 Dashboard 分析和報告 (Phases 8-12) — SHIPPED 2026-04-12</summary>
 
-### Phase 15: Webhook Alerts
-**Goal**: Users can receive alert notifications via webhook endpoints with cryptographic verification
-**Depends on**: Phase 13 (alert infrastructure and threshold logic)
-**Requirements**: ALRT-06, ALRT-07, ALRT-08
-**Success Criteria** (what must be TRUE):
-  1. User can register a webhook URL to receive alert notifications when thresholds are breached
-  2. All webhook payloads include an HMAC-SHA256 signature that receivers can verify
-  3. User can view a history of all alerts with delivery status (sent, failed) per channel
-**Plans**: 4 plans
-Plans:
-- [x] 15-01-PLAN.md — Foundation + Domain: promote WebhookDispatcher/WebhookSecret to Foundation; WebhookEndpoint aggregate (immutable + withDescription) + WebhookUrl VO (SSRF/HTTPS); alert_deliveries + webhook_endpoints schema + migration + backfill script
-- [x] 15-02-PLAN.md — Application Services: webhook CRUD/test services, DispatchAlertWebhooksService (Promise.allSettled fan-out), GetAlertHistoryService, ResendDeliveryService, DTO mappers, SendAlertService D-17 fire-and-forget integration
-- [x] 15-03-PLAN.md — Presentation + Wiring: controllers, FormRequests, manager-gated routes, AlertsServiceProvider DI bindings, MemberAlertsPage Inertia handler with DTO-mapped props
-- [x] 15-04-PLAN.md — Frontend: unified /alerts page (Budgets | Webhooks | History tabs); webhook CRUD UI with one-time secret reveal; history timeline with per-channel delivery status + resend
-**UI hint**: yes
+- [x] Phase 8: Data Correctness & Permission Foundation
+- [x] Phase 9: Cached Sync Infrastructure
+- [x] Phase 10: P1 Chart UI
+- [x] Phase 11: Resilience & UX Polish
+- [x] Phase 12: Differentiators
 
-### Phase 16: Automated Reports
-**Goal**: Admins receive scheduled PDF usage reports via email without manual intervention
-**Depends on**: Phase 13 (email infrastructure), Phase 14 (cost breakdown data)
-**Requirements**: REPT-01, REPT-02, REPT-03, REPT-04
-**Success Criteria** (what must be TRUE):
-  1. Admin can configure weekly or monthly PDF report delivery for their organization
-  2. System generates a server-side PDF containing dashboard charts and cost summary data
-  3. System emails the generated PDF to configured recipients on the scheduled cadence
-  4. Report scheduling respects the admin's selected timezone, including DST transitions
-**Status**: 🚧 IN PROGRESS
-**Plans**: 2 plans
-Plans:
-- [ ] 16-01-PLAN.md — Backend foundation: ReportJob, PDF gen (Playwright), scheduling (croner), email integration, API
-- [ ] 16-02-PLAN.md — Frontend management: ReportsPage CRUD, timezone picker, and report preview template
-**UI hint**: yes
+</details>
+
+<details>
+<summary>✅ v1.0 & v1.1 Foundation (Phases 1-7) — SHIPPED 2026-04-11</summary>
+
+- [x] Phase 1: LLM Gateway Abstraction
+- [x] Phase 2: Business Layer Migration
+- [x] Phase 3: Domain Rename
+- [x] Phase 4: SDK Extraction
+- [x] Phase 5: Final Verification
+- [x] Phase 6: Pages
+- [x] Phase 7: Framework Capability Docs
+
+</details>
+
+### 🚧 v1.4 Hardening & Refinement (Planned)
+
+- [ ] Phase 18: Uniform Background Jobs ([N] plans)
+- [ ] Phase 19: Alerts Module Decoupling ([N] plans)
+- [ ] Phase 20: CI Verification Guardrails ([N] plans)
 
 ## Progress
 
-**Execution Order:** Phases 13 → 14 → 15 → 16
-(Phase 14 can begin in parallel with Phase 13 if needed — no hard dependency)
-
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Alert Foundation & Email Infrastructure | v1.3 | 2/2 | Complete | 2026-04-12 |
-| 14. Per-Key Cost Breakdown | v1.3 | 2/2 | Complete   | 2026-04-12 |
+| 13. Alert Foundation | v1.3 | 2/2 | Complete | 2026-04-12 |
+| 14. Cost Breakdown | v1.3 | 2/2 | Complete | 2026-04-12 |
 | 15. Webhook Alerts | v1.3 | 4/4 | Complete | 2026-04-12 |
-| 16. Automated Reports | v1.3 | 0/2 | In Progress | - |
+| 16. Automated Reports | v1.3 | 2/2 | Complete | 2026-04-12 |
+| 17. Repository Refactor | v1.3 | 5/5 | Complete | 2026-04-12 |
+| 18. Uniform Background Jobs | v1.4 | 0/2 | Not started | - |
+| 19. Alerts Decoupling | v1.4 | 0/3 | Not started | - |
+| 20. CI Guardrails | v1.4 | 0/2 | Not started | - |

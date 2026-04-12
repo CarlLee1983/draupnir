@@ -6,7 +6,7 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 
 ## Core Value
 
-**No file under `src/Modules/` or `src/Foundation/Application/` may import a Bifrost-specific symbol after this milestone ships (v1.0 achieved); v1.2 delivers high-performance dashboard analytics with period-over-period comparisons.**
+**No file under `src/Modules/` or `src/Foundation/Application/` may import a Bifrost-specific symbol after this milestone ships (v1.0 achieved); v1.3 delivers proactive cost control via alerts, per-key attribution, and automated reports.**
 
 ## Requirements
 
@@ -23,12 +23,16 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 - ✓ Role-scoped analytics (ADMIN/MANAGER/MEMBER) with key-level isolation — v1.2
 - ✓ Period-over-period comparison badges and PDF export via browser print — v1.2
 - ✓ Usage alerts foundation, webhook alerts CRUD/history/resend, and signed delivery persistence — v1.3
+- ✓ Per-key/per-model cost breakdown with token efficiency metrics — v1.3
+- ✓ Scheduled server-side PDF usage reports via Croner + Playwright — v1.3
+- ✓ ORM-agnostic `UsageRepository` with declarative `AggregateSpec` and `IQueryBuilder.aggregate` — v1.3
 
 ### Active
 
 - [ ] Implement `OpenRouterGatewayAdapter` (v2)
 - [ ] Extend `ILLMGatewayClient` to cover raw chat-completion proxying (v2)
-- [ ] Implement automated email reports for monthly usage (v1.3)
+- [ ] Standardize background job runners (move scheduled reports to sync-style interval) (v1.4)
+- [ ] Refactor Alerts repositories to ORM-agnostic pattern (v1.4)
 
 ### Out of Scope
 
@@ -45,39 +49,39 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 | i18n migration for all page handlers | Ensures consistent English-only API and localized UI | ✅ Completed |
 | Cached aggregation (SQLite local reads) | Avoids 500ms-5s Bifrost API latency; enables sub-100ms UI | ✅ Completed |
 | PDF export via `window.print()` | Simplest implementation with high visual fidelity; no new deps | ✅ Completed |
+| HMAC-SHA256 Webhook Signing | Standard industry pattern for message integrity and authenticity | ✅ Completed |
+| Declarative `AggregateSpec` | Decouples repository logic from ORM-specific syntax (Drizzle/Atlas) | ✅ Completed |
+| Playwright for Server-side PDF | Native headless browser support; consistent layout with dashboard | ✅ Completed |
 
 ---
-*Last updated: 2026-04-12 after v1.3 milestone start*
+*Last updated: 2026-04-12 after v1.3 milestone completion*
 
 ## Shipped Milestones
 
 ### v1.0: LLM Gateway Abstraction ✓
 **Completed 2026-04-10**
-- Introduced `ILLMGatewayClient` abstraction layer
-- Decoupled application logic from Bifrost-specific types
-- Extracted `bifrost-sdk` into workspace package
 
 ### v1.1: Pages & Framework ✓
 **Completed 2026-04-11**
-- 100% unit test coverage for page handlers
-- Standardized i18n and English API responses
-- 912+ tests passing, 0 failures
 
 ### v1.2: Dashboard 分析和報告 ✓
 **Completed 2026-04-12**
-- **Cached Sync:** `BifrostSyncService` populates local SQLite table for high-performance reads.
-- **Analytics UI:** Six production charts (Cost, Tokens, Models) with 7/30/90 day windows.
-- **Role Isolation:** Multi-member security logic ensures users only see authorized usage.
-- **Differentiators:** Period-over-period % change badges and nav-hidden PDF export.
 
-## Current Milestone: v1.3 Advanced Analytics & Alerts
+### v1.3: Advanced Analytics & Alerts ✓
+**Completed 2026-04-12**
+- **Alerting System:** Multi-tier thresholds (80%/100%) with deduplicated email and signed webhook notifications.
+- **Analytics Depth:** Per-key cost attribution, token efficiency tracking, and model-level distribution charts.
+- **Automated Reports:** Server-side PDF generation and scheduled delivery via internal mailer.
+- **Storage Evolution:** ORM-agnostic aggregation engine allows testing without SQLite dependencies.
 
-**Goal:** 增強分析深度並引入主動通知機制 — 使用警報、金鑰成本細分、自動化報表。
+## Current Milestone: v1.4 Hardening & Refinement
+
+**Goal:** 核心架構加固與技術債清償 — 統一背景任務機制、Alerts 模組去耦合、提升 CI 驗證強度。
 
 **Target features:**
-- 使用警報 — 當組織或特定金鑰成本超過預算時發送 Webhook/Email
-- 按金鑰成本細分 — 詳細顯示每個 API Key 的具體花費和 Token 效率
-- 自動化報表 — 定期（每週/每月）自動發送決算 PDF 至管理員郵箱
+- **一致性定時器:** 將 `ScheduleReportService` 從 `boot()` 遷出，統一行政背景任務啟動邏輯。
+- **Alerts 倉庫重構:** 應用 Phase 17 建立的 ORM-agnostic 模式重構剩餘的警告配置倉庫。
+- **CI 加固:** 將 Playwright PDF 生成整合進 CI pipeline 流動驗證。
 
 ## Evolution
 
