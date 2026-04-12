@@ -61,8 +61,8 @@
   5. Alert emails distinguish between warning (soft limit) and critical (hard limit) severity
 **Plans**: 2 plans
 Plans:
-- [x] 13-01-PLAN.md — Domain layer, IMailer port, DB schema, value objects, repositories
-- [ ] 13-02-PLAN.md — Evaluation pipeline, email sending, controller, ServiceProvider wiring
+- [x] 13-01-PLAN.md — Domain layer, IMailer port, DB schema, value objects, repositories (completed 2026-04-12)
+- [x] 13-02-PLAN.md — Evaluation pipeline, email sending, controller, ServiceProvider wiring (completed 2026-04-12)
 **UI hint**: yes
 
 ### Phase 14: Per-Key Cost Breakdown
@@ -106,7 +106,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Alert Foundation & Email Infrastructure | v1.3 | 1/2 | In Progress|  |
+| 13. Alert Foundation & Email Infrastructure | v1.3 | 2/2 | Complete | 2026-04-12 |
 | 14. Per-Key Cost Breakdown | v1.3 | 0/? | Not started | - |
 | 15. Webhook Alerts | v1.3 | 0/? | Not started | - |
 | 16. Automated Reports | v1.3 | 0/? | Not started | - |
