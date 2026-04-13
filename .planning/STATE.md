@@ -49,8 +49,9 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260413-uzv | 修復 Auth 模組 DDD 戰術設計問題 | 2026-04-13 | 2a0ce69 | [260413-uzv-auth-ddd](.planning/quick/260413-uzv-auth-ddd/) |
+| 260413-vdk | 解耦 Auth ↔ Profile：引入 UserRegistered domain event | 2026-04-13 | 157ee29 | [260413-vdk-domain-event-userregistered-auth-profile](.planning/quick/260413-vdk-domain-event-userregistered-auth-profile/) |
 
 ## Session continuity
 
-Last activity: 2026-04-13 - Completed quick task 260413-uzv: 修復 Auth 模組 DDD 戰術設計問題
+Last activity: 2026-04-13 - Completed quick task 260413-vdk: 解耦 Auth ↔ Profile：引入 UserRegistered domain event
 Next step: `/gsd-new-milestone` when ready to plan v1.5+.
