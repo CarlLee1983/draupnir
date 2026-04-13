@@ -72,6 +72,17 @@
   - [ ] 20-01-PLAN.md — Guardrail 工具建置：coverage threshold config、migration schema drift 檢查腳本、DI binding 完整性稽核腳本、routes-existence 測試補強、E2E smoke journey 挑選與 fixture 準備
   - [ ] 20-02-PLAN.md — CI workflow 串接：擴充 `.github/workflows/ci.yml`，將所有守門點分 job 並行（typecheck / lint+format / unit+coverage / migration-drift / routes-check / di-audit / e2e-smoke），設為 main/develop 的 required checks
 
+### Phase 20: CI Verification Guardrails
+
+**Requirements:** CI-01, CI-02, CI-03, CI-04, CI-05, CI-06, CI-07, CI-08
+
+**Goal:** 把所有驗證守門點（typecheck、lint/format、unit test + coverage threshold、DB migration schema drift、routes invariance、DI binding 完整性、E2E smoke tests）串入 GitHub Actions CI pipeline，讓每個 PR 都必須通過全部檢查才能合併至 main/develop，建立防回歸護欄。
+
+**Plans:** 2 plans
+
+- 20-01-PLAN.md — Guardrail 工具建置：coverage threshold config、migration schema drift 檢查腳本、DI binding 完整性稽核腳本、routes-existence 測試補強、E2E smoke journey 挑選與 fixture 準備
+- 20-02-PLAN.md — CI workflow 串接：擴充 `.github/workflows/ci.yml`，將所有守門點分 job 並行（typecheck / lint+format / unit+coverage / migration-drift / routes-check / di-audit / e2e-smoke），設為 main/develop 的 required checks
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
