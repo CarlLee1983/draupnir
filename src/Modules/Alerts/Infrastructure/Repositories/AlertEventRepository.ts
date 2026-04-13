@@ -7,7 +7,7 @@ import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEven
  *
  * Replaces the Drizzle-coupled version using the ORM-agnostic IDatabaseAccess port.
  */
-export class DrizzleAlertEventRepository implements IAlertEventRepository {
+export class AlertEventRepository implements IAlertEventRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async save(event: AlertEvent): Promise<void> {

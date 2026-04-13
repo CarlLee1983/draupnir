@@ -2,7 +2,7 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { AlertConfig } from '../../Domain/Aggregates/AlertConfig'
 import type { IAlertConfigRepository } from '../../Domain/Repositories/IAlertConfigRepository'
 
-export class DrizzleAlertConfigRepository implements IAlertConfigRepository {
+export class AlertConfigRepository implements IAlertConfigRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async findByOrgId(orgId: string): Promise<AlertConfig | null> {

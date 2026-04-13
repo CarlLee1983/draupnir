@@ -66,15 +66,21 @@ export class AlertDelivery {
   }
 
   static rehydrate(props: AlertDeliveryProps): AlertDelivery {
+    if (!props.orgId) {
+      throw new Error(`AlertDelivery.rehydrate: missing orgId (id=${props.id})`)
+    }
+    if (!props.month) {
+      throw new Error(`AlertDelivery.rehydrate: missing month (id=${props.id})`)
+    }
+    if (!props.tier) {
+      throw new Error(`AlertDelivery.rehydrate: missing tier (id=${props.id})`)
+    }
     return new AlertDelivery({
       ...props,
       targetUrl: props.targetUrl ?? null,
       statusCode: props.statusCode ?? null,
       errorMessage: props.errorMessage ?? null,
       deliveredAt: props.deliveredAt ?? null,
-      orgId: props.orgId ?? '',
-      month: props.month ?? '',
-      tier: props.tier ?? '',
     })
   }
 

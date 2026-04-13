@@ -10,7 +10,7 @@ import { WebhookEndpointMapper } from '../Mappers/WebhookEndpointMapper'
  * The `save` operation performs an upsert via delete-then-insert semantics since
  * IDatabaseAccess does not expose an `onConflictDoUpdate` API.
  */
-export class DrizzleWebhookEndpointRepository implements IWebhookEndpointRepository {
+export class WebhookEndpointRepository implements IWebhookEndpointRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async findById(id: string): Promise<WebhookEndpoint | null> {

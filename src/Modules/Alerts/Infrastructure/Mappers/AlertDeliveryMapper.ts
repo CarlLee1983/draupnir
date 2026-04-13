@@ -20,6 +20,19 @@ export interface AlertDeliveriesInsert {
 
 export class AlertDeliveryMapper {
   static toDomain(row: Record<string, unknown>): AlertDelivery {
+    const orgId = row.org_id
+    const month = row.month
+    const tier = row.tier
+    if (orgId === null || orgId === undefined || orgId === '') {
+      throw new Error(`AlertDeliveryMapper: row ${String(row.id)} missing denormalized org_id`)
+    }
+    if (month === null || month === undefined || month === '') {
+      throw new Error(`AlertDeliveryMapper: row ${String(row.id)} missing denormalized month`)
+    }
+    if (tier === null || tier === undefined || tier === '') {
+      throw new Error(`AlertDeliveryMapper: row ${String(row.id)} missing denormalized tier`)
+    }
+
     return AlertDelivery.rehydrate({
       id: String(row.id),
       alertEventId: String(row.alert_event_id),
@@ -33,9 +46,9 @@ export class AlertDeliveryMapper {
       dispatchedAt: String(row.dispatched_at),
       deliveredAt: row.delivered_at === null || row.delivered_at === undefined ? null : String(row.delivered_at),
       createdAt: String(row.created_at),
-      orgId: String(row.org_id ?? ''),
-      month: String(row.month ?? ''),
-      tier: String(row.tier ?? ''),
+      orgId: String(orgId),
+      month: String(month),
+      tier: String(tier),
     } satisfies AlertDeliveryProps)
   }
 

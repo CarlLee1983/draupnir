@@ -15,9 +15,7 @@ function createDeferred<T = void>() {
 
 describe('SendAlertService', () => {
   let mailer: { send: ReturnType<typeof vi.fn> }
-  let orgMemberRepo: { findByOrgId: ReturnType<typeof vi.fn> }
-  let orgRepo: { findById: ReturnType<typeof vi.fn> }
-  let authRepo: { findById: ReturnType<typeof vi.fn> }
+
   let alertEventRepo: IAlertEventRepository & {
     save: ReturnType<typeof vi.fn>
   }
@@ -29,9 +27,6 @@ describe('SendAlertService', () => {
 
   beforeEach(() => {
     mailer = { send: vi.fn() }
-    orgMemberRepo = { findByOrgId: vi.fn() }
-    orgRepo = { findById: vi.fn() }
-    authRepo = { findById: vi.fn() }
     alertEventRepo = {
       save: vi.fn(),
       findByOrgAndMonth: vi.fn(),
@@ -53,28 +48,23 @@ describe('SendAlertService', () => {
   })
 
   it('writes per-recipient email deliveries and skips deduped recipients', async () => {
-    orgRepo.findById.mockResolvedValue({ id: 'org-1', name: 'Org Name' })
-    orgMemberRepo.findByOrgId.mockResolvedValue([
-      { userId: 'user-1', isManager: () => true },
-      { userId: 'user-2', isManager: () => true },
-    ])
-    authRepo.findById.mockImplementation(async (userId: string) => {
-      return userId === 'user-1'
-        ? { id: 'user-1', emailValue: { trim: () => 'one@example.com' } }
-        : { id: 'user-2', emailValue: { trim: () => 'two@example.com' } }
+    const recipientResolver = { resolveByOrg: vi.fn() }
+    recipientResolver.resolveByOrg.mockResolvedValue({
+      orgId: 'org-1',
+      orgName: 'Org Name',
+      emails: ['one@example.com', 'two@example.com'],
     })
+
+    const service = new SendAlertService({
+      recipientResolver: recipientResolver as never,
+      alertEventRepo: alertEventRepo as never,
+      deliveryRepo: deliveryRepo as never,
+      mailer: mailer as never,
+      dispatchWebhooksService: webhookDispatch as never,
+    })
+
     deliveryRepo.existsSent.mockImplementation(async ({ target }) => target === 'one@example.com')
     mailer.send.mockResolvedValue(undefined)
-
-    const service = new SendAlertService(
-      mailer as never,
-      orgMemberRepo as never,
-      orgRepo as never,
-      authRepo as never,
-      alertEventRepo as never,
-      deliveryRepo as never,
-      webhookDispatch as never,
-    )
 
     await service.send({
       orgId: 'org-1',
@@ -100,20 +90,22 @@ describe('SendAlertService', () => {
   })
 
   it('returns before webhook dispatch completes', async () => {
-    orgRepo.findById.mockResolvedValue({ id: 'org-1', name: 'Org Name' })
-    orgMemberRepo.findByOrgId.mockResolvedValue([])
+    const recipientResolver = { resolveByOrg: vi.fn() }
+    recipientResolver.resolveByOrg.mockResolvedValue({
+      orgId: 'org-1',
+      orgName: 'Org Name',
+      emails: [],
+    })
     alertEventRepo.save.mockResolvedValue(undefined)
     webhookDispatch.dispatchAll.mockReturnValue(createDeferred().promise)
 
-    const service = new SendAlertService(
-      mailer as never,
-      orgMemberRepo as never,
-      orgRepo as never,
-      authRepo as never,
-      alertEventRepo as never,
-      deliveryRepo as never,
-      webhookDispatch as never,
-    )
+    const service = new SendAlertService({
+      recipientResolver: recipientResolver as never,
+      alertEventRepo: alertEventRepo as never,
+      deliveryRepo: deliveryRepo as never,
+      mailer: mailer as never,
+      dispatchWebhooksService: webhookDispatch as never,
+    })
 
     const timeout = new Promise<'timeout'>((resolve) => setTimeout(() => resolve('timeout'), 25))
     const result = await Promise.race([

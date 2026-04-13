@@ -38,12 +38,12 @@ function buildService() {
     send: vi.fn(),
   }
 
-  const service = new EvaluateThresholdsService(
-    alertConfigRepo as never,
-    usageRepo as never,
-    apiKeyRepo as never,
-    sendAlertService as never,
-  )
+  const service = new EvaluateThresholdsService({
+    configRepo: alertConfigRepo as never,
+    usageRepo: usageRepo as never,
+    apiKeyRepo: apiKeyRepo as never,
+    sendAlertService: sendAlertService as never,
+  })
 
   return { service, alertConfigRepo, usageRepo, apiKeyRepo, sendAlertService }
 }

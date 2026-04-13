@@ -11,7 +11,7 @@ import type { DeliveryChannel } from '../../Domain/ValueObjects/DeliveryStatus'
  * and `tier` columns added in migration 2026_04_13_000002 to avoid JOINs
  * in `existsSent` and `listByOrg`.
  */
-export class DrizzleAlertDeliveryRepository implements IAlertDeliveryRepository {
+export class AlertDeliveryRepository implements IAlertDeliveryRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async save(delivery: AlertDelivery): Promise<void> {

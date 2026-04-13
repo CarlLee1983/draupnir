@@ -29,29 +29,39 @@ import type { IAlertConfigRepository } from '../../Domain/Repositories/IAlertCon
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
 import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
-import { DrizzleAlertConfigRepository } from '../Repositories/DrizzleAlertConfigRepository'
-import { DrizzleAlertDeliveryRepository } from '../Repositories/DrizzleAlertDeliveryRepository'
-import { DrizzleAlertEventRepository } from '../Repositories/DrizzleAlertEventRepository'
-import { DrizzleWebhookEndpointRepository } from '../Repositories/DrizzleWebhookEndpointRepository'
+import { AlertConfigRepository } from '../Repositories/AlertConfigRepository'
+import { AlertDeliveryRepository } from '../Repositories/AlertDeliveryRepository'
+import { AlertEventRepository } from '../Repositories/AlertEventRepository'
+import { WebhookEndpointRepository } from '../Repositories/WebhookEndpointRepository'
+import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
+import { AlertRecipientResolverImpl } from '../Services/AlertRecipientResolverImpl'
 
 export class AlertsServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
     const db = container.make('database') as IDatabaseAccess
 
     container.singleton('alertConfigRepository', () => {
-      return new DrizzleAlertConfigRepository(db)
+      return new AlertConfigRepository(db)
     })
 
     container.singleton('alertEventRepository', () => {
-      return new DrizzleAlertEventRepository(db)
+      return new AlertEventRepository(db)
     })
 
     container.singleton('webhookEndpointRepository', () => {
-      return new DrizzleWebhookEndpointRepository(db)
+      return new WebhookEndpointRepository(db)
     })
 
     container.singleton('alertDeliveryRepository', () => {
-      return new DrizzleAlertDeliveryRepository(db)
+      return new AlertDeliveryRepository(db)
+    })
+
+    container.bind('alertRecipientResolver', (c: IContainer) => {
+      return new AlertRecipientResolverImpl({
+        orgRepo: c.make('organizationRepository') as IOrganizationRepository,
+        orgMemberRepo: c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        authRepo: c.make('authRepository') as IAuthRepository,
+      })
     })
 
     container.bind('setBudgetService', (c: IContainer) => {
@@ -144,24 +154,22 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
     })
 
     container.bind('sendAlertService', (c: IContainer) => {
-      return new SendAlertService(
-        c.make('mailer') as IMailer,
-        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
-        c.make('organizationRepository') as IOrganizationRepository,
-        c.make('authRepository') as IAuthRepository,
-        c.make('alertEventRepository') as IAlertEventRepository,
-        c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
-        c.make('dispatchAlertWebhooksService') as DispatchAlertWebhooksService,
-      )
+      return new SendAlertService({
+        mailer: c.make('mailer') as IMailer,
+        recipientResolver: c.make('alertRecipientResolver') as IAlertRecipientResolver,
+        alertEventRepo: c.make('alertEventRepository') as IAlertEventRepository,
+        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+        dispatchWebhooksService: c.make('dispatchAlertWebhooksService') as DispatchAlertWebhooksService,
+      })
     })
 
     container.bind('evaluateThresholdsService', (c: IContainer) => {
-      return new EvaluateThresholdsService(
-        c.make('alertConfigRepository') as IAlertConfigRepository,
-        c.make('drizzleUsageRepository') as IUsageRepository,
-        c.make('apiKeyRepository') as IApiKeyRepository,
-        c.make('sendAlertService') as SendAlertService,
-      )
+      return new EvaluateThresholdsService({
+        configRepo: c.make('alertConfigRepository') as IAlertConfigRepository,
+        usageRepo: c.make('drizzleUsageRepository') as IUsageRepository,
+        apiKeyRepo: c.make('apiKeyRepository') as IApiKeyRepository,
+        sendAlertService: c.make('sendAlertService') as SendAlertService,
+      })
     })
   }
 

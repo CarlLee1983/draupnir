@@ -1,9 +1,7 @@
 import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
-import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
-import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
+import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
 import { AlertEvent } from '../../Domain/Entities/AlertEvent'
 import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import {
@@ -21,34 +19,26 @@ export interface SendAlertParams extends Omit<AlertEmailTemplateParams, 'orgName
 
 /**
  * Dispatches alert emails to organization managers and records the alert event.
+ *
+ * Cross-module org/member/auth resolution is delegated to IAlertRecipientResolver
+ * (Alerts-owned Domain port, per D-05). This service no longer imports any
+ * Organization, Auth, or OrgMember repositories directly.
  */
 export class SendAlertService {
   constructor(
-    private readonly mailer: IMailer,
-    private readonly orgMemberRepo: IOrganizationMemberRepository,
-    private readonly orgRepo: IOrganizationRepository,
-    private readonly authRepo: IAuthRepository,
-    private readonly alertEventRepo: IAlertEventRepository,
-    private readonly deliveryRepo: IAlertDeliveryRepository,
-    private readonly webhookDispatch: DispatchAlertWebhooksService,
+    private readonly deps: {
+      readonly recipientResolver: IAlertRecipientResolver
+      readonly alertEventRepo: IAlertEventRepository
+      readonly deliveryRepo: IAlertDeliveryRepository
+      readonly mailer: IMailer
+      /** Kept in Plan 2; Plan 3 replaces with notifiers: readonly IAlertNotifier[] */
+      readonly dispatchWebhooksService: DispatchAlertWebhooksService
+    },
   ) {}
 
   async send(params: SendAlertParams): Promise<void> {
-    const org = await this.orgRepo.findById(params.orgId)
-    const orgName = org?.name ?? 'Unknown'
-    const members = await this.orgMemberRepo.findByOrgId(params.orgId)
-    const managers = members.filter((member) => member.isManager())
-
-    const emailSet = new Set<string>()
-    for (const manager of managers) {
-      const user = await this.authRepo.findById(manager.userId)
-      const email = user?.emailValue?.trim()
-      if (email) {
-        emailSet.add(email)
-      }
-    }
-
-    const recipients = [...emailSet]
+    const context = await this.deps.recipientResolver.resolveByOrg(params.orgId)
+    const { orgName, emails } = context
 
     const alertEvent = AlertEvent.create({
       orgId: params.orgId,
@@ -60,15 +50,15 @@ export class SendAlertService {
       recipients: [],
     })
 
-    await this.alertEventRepo.save(alertEvent)
+    await this.deps.alertEventRepo.save(alertEvent)
 
     const html =
       params.tier === 'critical'
         ? criticalAlertTemplate({ ...params, orgName })
         : warningAlertTemplate({ ...params, orgName })
 
-    for (const recipient of recipients) {
-      const skipped = await this.deliveryRepo.existsSent({
+    for (const recipient of emails) {
+      const skipped = await this.deps.deliveryRepo.existsSent({
         orgId: params.orgId,
         month: params.month,
         tier: params.tier,
@@ -92,15 +82,15 @@ export class SendAlertService {
       })
 
       try {
-        await this.mailer.send({
+        await this.deps.mailer.send({
           to: recipient,
           subject: `[Draupnir] ${params.tier === 'critical' ? 'CRITICAL' : 'Warning'}: Budget alert for ${orgName}`,
           html,
         })
 
-        await this.deliveryRepo.save(base.markSent(null, new Date().toISOString(), 1))
+        await this.deps.deliveryRepo.save(base.markSent(null, new Date().toISOString(), 1))
       } catch (error) {
-        await this.deliveryRepo.save(
+        await this.deps.deliveryRepo.save(
           base.markFailed(
             null,
             error instanceof Error ? error.message : 'Unknown email error',
@@ -111,7 +101,7 @@ export class SendAlertService {
     }
 
     queueMicrotask(() => {
-      void Promise.resolve(this.webhookDispatch.dispatchAll(alertEvent, orgName)).catch((error) =>
+      void Promise.resolve(this.deps.dispatchWebhooksService.dispatchAll(alertEvent, orgName)).catch((error) =>
         console.error('[SendAlertService] webhook dispatch unexpectedly threw', error),
       )
     })

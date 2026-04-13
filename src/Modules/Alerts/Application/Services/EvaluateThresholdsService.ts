@@ -20,10 +20,12 @@ type KeyCostRow = {
  */
 export class EvaluateThresholdsService {
   constructor(
-    private readonly alertConfigRepo: IAlertConfigRepository,
-    private readonly usageRepo: IUsageRepository,
-    private readonly apiKeyRepo: IApiKeyRepository,
-    private readonly sendAlertService: SendAlertService,
+    private readonly deps: {
+      readonly configRepo: IAlertConfigRepository
+      readonly usageRepo: IUsageRepository
+      readonly apiKeyRepo: IApiKeyRepository
+      readonly sendAlertService: SendAlertService
+    },
   ) {}
 
   async evaluateOrgs(orgIds: readonly string[]): Promise<void> {
@@ -35,7 +37,7 @@ export class EvaluateThresholdsService {
   }
 
   private async evaluateOrg(orgId: string): Promise<void> {
-    const config = await this.alertConfigRepo.findByOrgId(orgId)
+    const config = await this.deps.configRepo.findByOrgId(orgId)
     if (!config) {
       return
     }
@@ -46,7 +48,7 @@ export class EvaluateThresholdsService {
       endDate: currentMonth.endDate,
     }
 
-    const stats = await this.usageRepo.queryStatsByOrg(orgId, dateRange)
+    const stats = await this.deps.usageRepo.queryStatsByOrg(orgId, dateRange)
     const costDecimal = new Decimal(stats.totalCost ?? 0)
     const budgetDecimal = new Decimal(config.budgetUsd)
     const percentageDecimal = costDecimal.div(budgetDecimal).times(100)
@@ -63,7 +65,7 @@ export class EvaluateThresholdsService {
 
     const keyBreakdown = await this.buildKeyBreakdown(orgId, budgetDecimal, dateRange)
 
-    await this.sendAlertService.send({
+    await this.deps.sendAlertService.send({
       orgId,
       tier: tier.value,
       budgetUsd: config.budgetUsd,
@@ -74,7 +76,7 @@ export class EvaluateThresholdsService {
     })
 
     const updated = config.markAlerted(tier.value as AlertTier, currentMonth.key)
-    await this.alertConfigRepo.update(updated)
+    await this.deps.configRepo.update(updated)
   }
 
   private shouldSendAlert(config: { lastAlertedMonth: string | null; lastAlertedTier: string | null }, tier: AlertTier, currentMonthKey: string): boolean {
@@ -94,11 +96,11 @@ export class EvaluateThresholdsService {
     budgetDecimal: Decimal,
     range: { readonly startDate: string; readonly endDate: string },
   ): Promise<readonly AlertKeyBreakdownItem[]> {
-    const keys = await this.apiKeyRepo.findByOrgId(orgId)
+    const keys = await this.deps.apiKeyRepo.findByOrgId(orgId)
     const rows: KeyCostRow[] = []
 
     for (const key of keys) {
-      const stats = await this.usageRepo.queryStatsByKey(key.id, range)
+      const stats = await this.deps.usageRepo.queryStatsByKey(key.id, range)
       const cost = new Decimal(stats.totalCost ?? 0)
       if (cost.lte(0)) {
         continue
