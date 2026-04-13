@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { UserRegisteredHandler } from '@/Modules/Profile/Application/Services/UserRegisteredHandler'
 import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { ListUsersService } from '../Application/Services/ListUsersService'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
@@ -16,16 +18,20 @@ describe('ListUsersService', () => {
   let authRepo: IAuthRepository
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     const db = new MemoryDatabaseAccess()
     authRepo = new AuthRepository(db)
     const profileRepo = new UserProfileRepository(db)
     service = new ListUsersService(authRepo, profileRepo)
 
-    const registerService = new RegisterUserService(
-      authRepo,
-      profileRepo,
-      new ScryptPasswordHasher(),
-    )
+    // Wire up the UserRegisteredHandler so profiles are created via domain event
+    const handler = new UserRegisteredHandler(profileRepo)
+    const dispatcher = DomainEventDispatcher.getInstance()
+    dispatcher.on('auth.user_registered', async (event) => {
+      await handler.execute(event.data.userId as string, event.data.email as string)
+    })
+
+    const registerService = new RegisterUserService(authRepo, new ScryptPasswordHasher())
     await registerService.execute({ email: 'alice@example.com', password: 'StrongPass123' })
     await registerService.execute({ email: 'bob@example.com', password: 'StrongPass123' })
     await registerService.execute({ email: 'charlie@example.com', password: 'StrongPass123' })
@@ -47,7 +53,7 @@ describe('ListUsersService', () => {
     if (suspended) await authRepo.save(suspended.suspend())
 
     const profiles = await profileRepo.findAll()
-    const charlieProfile = profiles.find((p) => p.id === users[2].id)
+    const charlieProfile = profiles.find((p) => p.userId === users[2].id)
     if (charlieProfile) {
       await profileRepo.update(charlieProfile.updateProfile({ displayName: 'Charlie Zhao' }))
     }

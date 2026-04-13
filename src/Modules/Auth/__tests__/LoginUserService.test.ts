@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { LoginUserService } from '../Application/Services/LoginUserService'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
@@ -24,13 +24,13 @@ describe('LoginUserService Integration Test', () => {
   let jwtTokenService: JwtTokenService
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     const db = new MemoryDatabaseAccess()
     repository = new AuthRepository(db)
     tokenRepository = new AuthTokenRepository(db)
     jwtTokenService = new JwtTokenService()
-    const profileRepo = new UserProfileRepository(db)
     const passwordHasher = new ScryptPasswordHasher()
-    registerService = new RegisterUserService(repository, profileRepo, passwordHasher)
+    registerService = new RegisterUserService(repository, passwordHasher)
     loginService = new LoginUserService(
       repository,
       tokenRepository,

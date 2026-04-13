@@ -6,7 +6,7 @@ import { RegisterUserService } from '@/Modules/Auth/Application/Services/Registe
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
 import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
 import { InviteMemberService } from '../Application/Services/InviteMemberService'
@@ -21,9 +21,9 @@ describe('InviteMemberService', () => {
   let managerId: string
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     const db = new MemoryDatabaseAccess()
     const authRepo = new AuthRepository(db)
-    const profileRepo = new UserProfileRepository(db)
     const orgRepo = new OrganizationRepository(db)
     const memberRepo = new OrganizationMemberRepository(db)
     const invitationRepo = new OrganizationInvitationRepository(db)
@@ -42,11 +42,7 @@ describe('InviteMemberService', () => {
     )
     inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
 
-    const registerService = new RegisterUserService(
-      authRepo,
-      profileRepo,
-      new ScryptPasswordHasher(),
-    )
+    const registerService = new RegisterUserService(authRepo, new ScryptPasswordHasher())
     const userResult = await registerService.execute({
       email: 'manager@example.com',
       password: 'StrongPass123',

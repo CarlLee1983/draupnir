@@ -6,7 +6,7 @@ import { RegisterUserService } from '@/Modules/Auth/Application/Services/Registe
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
 import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
 import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
@@ -18,9 +18,9 @@ describe('CreateOrganizationService', () => {
   let managerId: string
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     db = new MemoryDatabaseAccess()
     const authRepo = new AuthRepository(db)
-    const profileRepo = new UserProfileRepository(db)
     const orgRepo = new OrganizationRepository(db)
     const memberRepo = new OrganizationMemberRepository(db)
     service = new CreateOrganizationService(
@@ -35,11 +35,7 @@ describe('CreateOrganizationService', () => {
       ),
     )
 
-    const registerService = new RegisterUserService(
-      authRepo,
-      profileRepo,
-      new ScryptPasswordHasher(),
-    )
+    const registerService = new RegisterUserService(authRepo, new ScryptPasswordHasher())
     const result = await registerService.execute({
       email: 'manager@example.com',
       password: 'StrongPass123',
@@ -78,12 +74,7 @@ describe('CreateOrganizationService', () => {
   it('重複的 slug 應回傳錯誤', async () => {
     await service.execute({ name: 'CMG', managerUserId: managerId })
     const authRepo = new AuthRepository(db)
-    const profileRepo = new UserProfileRepository(db)
-    const registerService = new RegisterUserService(
-      authRepo,
-      profileRepo,
-      new ScryptPasswordHasher(),
-    )
+    const registerService = new RegisterUserService(authRepo, new ScryptPasswordHasher())
     const result2 = await registerService.execute({
       email: 'manager2@example.com',
       password: 'StrongPass123',

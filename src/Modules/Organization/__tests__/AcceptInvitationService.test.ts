@@ -6,7 +6,7 @@ import { RegisterUserService } from '@/Modules/Auth/Application/Services/Registe
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
 import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { AcceptInvitationService } from '../Application/Services/AcceptInvitationService'
 import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
@@ -25,15 +25,15 @@ describe('AcceptInvitationService', () => {
   let newUserId: string
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     const db = new MemoryDatabaseAccess()
     const authRepo = new AuthRepository(db)
-    const profileRepo = new UserProfileRepository(db)
     const orgRepo = new OrganizationRepository(db)
     const memberRepo = new OrganizationMemberRepository(db)
     const invitationRepo = new OrganizationInvitationRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
 
-    registerService = new RegisterUserService(authRepo, profileRepo, new ScryptPasswordHasher())
+    registerService = new RegisterUserService(authRepo, new ScryptPasswordHasher())
     const createOrgService = new CreateOrganizationService(
       orgRepo,
       memberRepo,

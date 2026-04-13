@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { ChangeUserStatusService } from '../Application/Services/ChangeUserStatusService'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
@@ -15,17 +15,13 @@ describe('ChangeUserStatusService', () => {
   let authTokenRepo: IAuthTokenRepository
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     const db = new MemoryDatabaseAccess()
     authRepo = new AuthRepository(db)
     authTokenRepo = new AuthTokenRepository(db)
     service = new ChangeUserStatusService(authRepo, authTokenRepo)
 
-    const profileRepo = new UserProfileRepository(db)
-    const registerService = new RegisterUserService(
-      authRepo,
-      profileRepo,
-      new ScryptPasswordHasher(),
-    )
+    const registerService = new RegisterUserService(authRepo, new ScryptPasswordHasher())
     await registerService.execute({ email: 'user@example.com', password: 'StrongPass123' })
   })
 

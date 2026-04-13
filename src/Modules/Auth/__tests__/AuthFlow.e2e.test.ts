@@ -11,7 +11,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -64,14 +64,14 @@ describe('認證流程 E2E 測試', () => {
   }
 
   beforeEach(async () => {
+    DomainEventDispatcher.resetForTesting()
     const db = new MemoryDatabaseAccess()
     authRepository = new AuthRepository(db)
     tokenRepository = new AuthTokenRepository(db)
     jwtService = new JwtTokenService()
 
-    const profileRepo = new UserProfileRepository(db)
     const passwordHasher = new ScryptPasswordHasher()
-    registerService = new RegisterUserService(authRepository, profileRepo, passwordHasher)
+    registerService = new RegisterUserService(authRepository, passwordHasher)
     loginService = new LoginUserService(authRepository, tokenRepository, jwtService, passwordHasher)
     refreshService = new RefreshTokenService(authRepository, tokenRepository, jwtService)
     logoutService = new LogoutUserService(tokenRepository)
