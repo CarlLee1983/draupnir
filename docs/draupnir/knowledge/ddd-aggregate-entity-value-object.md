@@ -56,6 +56,110 @@ Value Object 沒有身份，只由值定義。
 
 如果物件需要更新，優先回傳新物件，而不是大量 mutate。
 
+## 不可變行為方法（Immutable Mutators）
+
+Aggregate 的狀態轉換方法，**應回傳新實例，而不是直接修改 `this`**。
+這樣才符合 `coding-style.md` 的不可變原則，且讓測試更容易驗證前後狀態。
+
+```typescript
+// 錯誤：直接 mutate
+suspend(): void {
+  this.props.status = UserStatus.SUSPENDED   // 改壞了 MUTATION
+  this.props.updatedAt = new Date()
+}
+
+// 正確：回傳新物件
+suspend(): User {
+  return new User({
+    ...this.props,
+    status: UserStatus.SUSPENDED,
+    updatedAt: new Date(),
+  })
+}
+```
+
+呼叫方必須捕捉回傳值：
+
+```typescript
+// 錯誤
+user.suspend()
+await this.authRepository.save(user)  // user 仍是舊狀態
+
+// 正確
+const suspended = user.suspend()
+await this.authRepository.save(suspended)
+```
+
+唯一例外：`AggregateRoot.addDomainEvent()` 這類內部追蹤輔助方法，不涉及業務狀態，可以 in-place 修改。
+
+## Repository 介面不應繞過 Aggregate
+
+Repository 的方法，**不要為單一欄位開 partial-update 的快捷方法**（例如 `updatePassword(id, hash)`）。
+這類方法：
+
+- 繞過 Aggregate 的不變式保護
+- 無法觸發 domain event
+- 使 `updatedAt` 等追蹤欄位容易脫同步
+
+正確做法：透過 Aggregate 方法修改狀態，再存整個 Aggregate：
+
+```typescript
+// 錯誤：繞過 Aggregate
+await this.authRepository.updatePassword(userId, hashedPassword)
+
+// 正確：走 Aggregate → 存整體
+const updated = user.withPassword(hashedPassword)
+await this.authRepository.save(updated)
+```
+
+## 跨 Bounded Context 耦合
+
+Application Service **不應直接呼叫另一個 bounded context 的 Repository 或 Aggregate**。
+例如 `RegisterUserService` 在完成用戶建立後直接建立 `UserProfile`，
+這讓 Auth 模組隱性依賴 Profile 模組的實作細節。
+
+正確做法：透過 Domain Event 解耦。
+
+```typescript
+// 錯誤：跨模組直接建立
+const profile = UserProfile.createDefault(user.id, email)
+await this.userProfileRepository.save(profile)
+
+// 正確：發出 domain event，由各自模組監聽處理
+this.eventDispatcher.dispatch(new UserRegistered(user.id, user.emailValue))
+```
+
+`UserRegistered` event 定義在 Auth 模組，Profile 模組的 handler 監聽並建立 profile。
+兩個模組都不需要知道對方的內部結構。
+
+## 基礎設施依賴應走 Port
+
+Application Service 如果需要使用外部整合（OAuth adapter、外部 API），
+應依賴定義在 `Application/Ports/` 的介面，**不要直接 import Infrastructure 的具體類別**。
+
+```typescript
+// 錯誤：直接依賴 Infrastructure
+import type { GoogleOAuthAdapter } from '../../Infrastructure/Services/GoogleOAuthAdapter'
+
+// 正確：依賴 Application Port
+import type { IGoogleOAuthAdapter } from '../Ports/IGoogleOAuthAdapter'
+```
+
+Port 介面定義在 Application 層，Infrastructure 實作後在 ServiceProvider 中注入。
+這樣 Application Service 可以在測試中輕鬆替換 mock。
+
+## Enum 值的管理原則
+
+Domain 中定義的 Enum 值，**若未被任何業務邏輯使用，應移除而非保留**。
+未使用的 enum 值會：
+
+- 讓開發者誤以為某條業務流程已存在
+- 在 mapper/switch 中產生 dead branch
+- 增加日後修改 schema 的認知負擔
+
+若確實有計畫實作但尚未完成，改用程式碼內的 `// TODO:` 或 issue tracker 記錄意圖，
+不要用「先放一個 enum 值」來佔位。
+
 ## 常見錯誤
 
 - 把狀態驗證寫在 Controller，讓 Domain 只剩資料容器。
@@ -63,4 +167,8 @@ Value Object 沒有身份，只由值定義。
 - 讓 Aggregate 直接查 Repository。
 - 把所有欄位都做成 public setter。
 - 把可獨立生命週期的概念硬塞進既有 Aggregate，造成過大的聚合。
+- Aggregate 行為方法直接 mutate `this`，而非回傳新實例（參見「不可變行為方法」）。
+- Repository 提供 partial-update 方法繞過 Aggregate（參見「Repository 介面不應繞過 Aggregate」）。
+- Application Service 跨 bounded context 直接呼叫外部模組（參見「跨 Bounded Context 耦合」）。
+- Application Service 直接 import Infrastructure 具體類別（參見「基礎設施依賴應走 Port」）。
 
