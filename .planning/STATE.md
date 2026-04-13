@@ -51,8 +51,9 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 | 260413-uzv | 修復 Auth 模組 DDD 戰術設計問題 | 2026-04-13 | 2a0ce69 | [260413-uzv-auth-ddd](.planning/quick/260413-uzv-auth-ddd/) |
 | 260413-vdk | 解耦 Auth ↔ Profile：引入 UserRegistered domain event | 2026-04-13 | 157ee29 | [260413-vdk-domain-event-userregistered-auth-profile](.planning/quick/260413-vdk-domain-event-userregistered-auth-profile/) |
 | 260413-vsz | ListUsersService 篩選下推 — role/status filter 移至 SQL WHERE | 2026-04-13 | f042e2c | [260413-vsz-listusersservice-iauthrepository-findall](.planning/quick/260413-vsz-listusersservice-iauthrepository-findall/) |
+| 260413-vzi | 修正 Profile 模組的 9 個 DDD 戰術設計問題 | 2026-04-13 | ce2e751 | [260413-vzi-profile-9-ddd](.planning/quick/260413-vzi-profile-9-ddd/) |
 
 ## Session continuity
 
-Last activity: 2026-04-13 - Completed quick task 260413-vsz: ListUsersService 篩選下推
+Last activity: 2026-04-13 - Completed quick task 260413-vzi: 修正 Profile 模組 9 個 DDD 戰術設計問題
 Next step: `/gsd-new-milestone` when ready to plan v1.5+.
