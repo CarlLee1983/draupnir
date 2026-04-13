@@ -61,8 +61,8 @@ describe('UserProfile Aggregate', () => {
     const profile = UserProfile.createDefault('user-123', 'user@example.com')
     const events = profile.domainEvents
     expect(events).toHaveLength(1)
-    expect(events[0].eventName).toBe('UserProfileCreated')
-    expect(events[0].payload).toMatchObject({ userId: 'user-123', email: 'user@example.com' })
+    expect(events[0].eventType).toBe('profile.user_profile_created')
+    expect(events[0].data).toMatchObject({ userId: 'user-123', email: 'user@example.com' })
   })
 
   it('updateProfile 應設置 UserProfileUpdated domain event', () => {
@@ -70,8 +70,8 @@ describe('UserProfile Aggregate', () => {
     const updated = profile.updateProfile({ displayName: '新名稱' })
     const events = updated.domainEvents
     expect(events).toHaveLength(1)
-    expect(events[0].eventName).toBe('UserProfileUpdated')
-    expect(events[0].payload.fields).toContain('displayName')
+    expect(events[0].eventType).toBe('profile.user_profile_updated')
+    expect(events[0].data.fields).toContain('displayName')
   })
 
   it('clearDomainEvents 應回傳無事件的新實例', () => {

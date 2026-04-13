@@ -3,34 +3,12 @@
  * Domain Aggregate: represents a user's identity and preferences within the system.
  */
 
+import { DomainEvent } from '@/Shared/Domain/DomainEvent'
 import { Locale } from '../ValueObjects/Locale'
 import { Phone } from '../ValueObjects/Phone'
 import { Timezone } from '../ValueObjects/Timezone'
-
-/**
- * Domain event base interface.
- */
-export interface DomainEvent {
-  eventName: string
-  occurredAt: Date
-  payload: Record<string, unknown>
-}
-
-/**
- * Emitted when a new user profile is created.
- */
-export interface UserProfileCreated extends DomainEvent {
-  eventName: 'UserProfileCreated'
-  payload: { profileId: string; userId: string; email: string }
-}
-
-/**
- * Emitted when an existing user profile is updated.
- */
-export interface UserProfileUpdated extends DomainEvent {
-  eventName: 'UserProfileUpdated'
-  payload: { profileId: string; userId: string; fields: string[] }
-}
+import { UserProfileCreated } from '../Events/UserProfileCreated'
+import { UserProfileUpdated } from '../Events/UserProfileUpdated'
 
 /**
  * Properties required to initialize a UserProfile (internal, using VOs).
@@ -97,11 +75,7 @@ export class UserProfile {
    */
   static createDefault(userId: string, email: string): UserProfile {
     const id = crypto.randomUUID()
-    const event: UserProfileCreated = {
-      eventName: 'UserProfileCreated',
-      occurredAt: new Date(),
-      payload: { profileId: id, userId, email },
-    }
+    const event = new UserProfileCreated(id, userId, email)
     return new UserProfile({
       id,
       userId,
@@ -125,7 +99,7 @@ export class UserProfile {
   static reconstitute(props: ReconstitutionProps): UserProfile {
     return new UserProfile({
       ...props,
-      phone: props.phone ? Phone.fromNullable(props.phone) : null,
+      phone: Phone.fromNullable(props.phone),
       timezone: new Timezone(props.timezone),
       locale: new Locale(props.locale),
       domainEvents: [],
@@ -138,17 +112,13 @@ export class UserProfile {
    * Sets a UserProfileUpdated domain event.
    */
   updateProfile(fields: UpdateProfileFields): UserProfile {
-    const event: UserProfileUpdated = {
-      eventName: 'UserProfileUpdated',
-      occurredAt: new Date(),
-      payload: {
-        profileId: this.props.id,
-        userId: this.props.userId,
-        fields: Object.keys(fields).filter(
-          (k) => fields[k as keyof UpdateProfileFields] !== undefined,
-        ),
-      },
-    }
+    const event = new UserProfileUpdated(
+      this.props.id,
+      this.props.userId,
+      Object.keys(fields).filter(
+        (k) => fields[k as keyof UpdateProfileFields] !== undefined,
+      ),
+    )
     return new UserProfile({
       ...this.props,
       ...(fields.displayName !== undefined && { displayName: fields.displayName }),
