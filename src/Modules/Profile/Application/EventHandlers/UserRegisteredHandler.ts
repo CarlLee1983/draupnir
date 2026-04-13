@@ -1,4 +1,4 @@
-// src/Modules/Profile/Application/Services/UserRegisteredHandler.ts
+// src/Modules/Profile/Application/EventHandlers/UserRegisteredHandler.ts
 import { UserProfile } from '../../Domain/Aggregates/UserProfile'
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
 

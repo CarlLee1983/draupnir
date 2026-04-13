@@ -10,6 +10,12 @@ import { UserIdSchema } from '../Requests'
 /**
  * Controller for Profile-related endpoints.
  * Orchestrates calls between HTTP requests and application services.
+ *
+ * Cross-boundary note: listUsers() and changeUserStatus() delegate to Auth module
+ * services (ListUsersService, ChangeUserStatusService). This is an intentional
+ * design decision — these admin operations are surfaced through the Profile routes
+ * for unified user management UX, while the Auth module owns the business logic.
+ * If boundaries need stricter enforcement in future, extract an AdminController.
  */
 export class ProfileController {
   constructor(

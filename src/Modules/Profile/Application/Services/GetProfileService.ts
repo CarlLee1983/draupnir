@@ -23,7 +23,7 @@ export class GetProfileService {
    */
   async execute(userId: string): Promise<UserProfileResponse> {
     try {
-      const profile = await this.profileRepository.findById(userId)
+      const profile = await this.profileRepository.findByUserId(userId)
       if (!profile) {
         return { success: false, message: 'Profile not found', error: 'PROFILE_NOT_FOUND' }
       }

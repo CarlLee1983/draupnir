@@ -6,6 +6,7 @@ export type {
   UpdateUserProfileRequest,
   UserProfileResponse,
 } from './Application/DTOs/UserProfileDTO'
+export { UserRegisteredHandler } from './Application/EventHandlers/UserRegisteredHandler'
 export { GetProfileService } from './Application/Services/GetProfileService'
 export { UpdateProfileService } from './Application/Services/UpdateProfileService'
 export type { UpdateProfileFields } from './Domain/Aggregates/UserProfile'

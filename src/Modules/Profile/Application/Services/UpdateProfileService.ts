@@ -3,16 +3,12 @@
  * Application service: handles updates to a user's personal profile information.
  *
  * Responsibilities:
- * - Retrieve the current user profile from the repository
- * - Validate optional field formats (phone, timezone, locale)
- * - Apply changes to the domain aggregate
+ * - Retrieve the current user profile from the repository using userId
+ * - Apply changes to the domain aggregate (VO validation occurs inside updateProfile)
  * - Persist the updated aggregate back to storage
  */
 
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
-import { Locale } from '../../Domain/ValueObjects/Locale'
-import { Phone } from '../../Domain/ValueObjects/Phone'
-import { Timezone } from '../../Domain/ValueObjects/Timezone'
 import { UserProfileMapper } from '../../Infrastructure/Mappers/UserProfileMapper'
 import type { UpdateUserProfileRequest, UserProfileResponse } from '../DTOs/UserProfileDTO'
 
@@ -24,26 +20,15 @@ export class UpdateProfileService {
 
   /**
    * Updates a user profile with the provided data.
-   * @param userId - ID of the user whose profile is being updated.
+   * @param userId - Auth user ID of the user whose profile is being updated.
    * @param request - The update payload containing optional fields.
    * @returns UserProfileResponse indicating success or failure.
    */
   async execute(userId: string, request: UpdateUserProfileRequest): Promise<UserProfileResponse> {
     try {
-      const profile = await this.profileRepository.findById(userId)
+      const profile = await this.profileRepository.findByUserId(userId)
       if (!profile) {
         return { success: false, message: 'Profile not found', error: 'PROFILE_NOT_FOUND' }
-      }
-
-      // Validate optional fields
-      if (request.phone !== undefined && request.phone !== null) {
-        new Phone(request.phone) // Validation logic; throws if invalid
-      }
-      if (request.timezone !== undefined) {
-        new Timezone(request.timezone)
-      }
-      if (request.locale !== undefined) {
-        new Locale(request.locale)
       }
 
       const updated = profile.updateProfile(request)

@@ -37,6 +37,6 @@ export class ProfileServiceProvider extends ModuleServiceProvider {
    * @param _context - Application context.
    */
   override boot(_context: any): void {
-    console.log('👤 [Profile] Module loaded')
+    // Profile module loaded
   }
 }
