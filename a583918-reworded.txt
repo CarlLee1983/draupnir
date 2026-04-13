@@ -1,0 +1,20 @@
+feat(phase20): enforce CI guardrails with repo-owned runners
+
+Phase 20 adds the guardrail stack for CI verification, including the coverage gate,
+commit linting, migration drift detection, route invariance checks, and the
+branch-protection runbook. The follow-up fixes keep the migration runner and routes
+smoke test aligned with what GitHub Actions runners can actually execute.
+
+Constraint: GitHub Actions runners do not provide the Bifrost service used by the
+dashboard sync job
+Constraint: Bun 1.3.10 coverage thresholds apply to repo-root test runs
+Rejected: Keep bun orbit migrate | fails with DB not configured in CI
+Rejected: Keep repo-root bun test for routes-check | Bun coverage thresholds fail the
+helper files
+Confidence: high
+Scope-risk: moderate
+Directive: Do not restore repo-root bun test for the routes smoke job without a
+separate coverage bypass
+Tested: bun run typecheck; bun run di:audit; DB_DATABASE=temp bun run migrate;
+DB_DATABASE=temp bun run migration:drift; temp-copy route-check bun test
+Not-tested: full GitHub Actions rerun after push
