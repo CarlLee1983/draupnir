@@ -26,6 +26,22 @@ export const users = sqliteTable('users', {
 })
 
 /**
+ * User Profiles 表
+ */
+export const user_profiles = sqliteTable('user_profiles', {
+  id: text('id').primaryKey(),
+  user_id: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  display_name: text('display_name'),
+  avatar_url: text('avatar_url'),
+  bio: text('bio'),
+  timezone: text('timezone').default('UTC'),
+  created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+})
+
+/**
  * Auth Tokens 表
  *
  * 儲存 JWT Token 記錄，用於 Token 撤銷追蹤與黑名單管理
@@ -265,6 +281,83 @@ export const alertDeliveries = sqliteTable(
     index('idx_alert_deliveries_dedup').on(table.alert_event_id, table.channel, table.target, table.status),
   ],
 )
+
+/**
+ * Organizations 表
+ */
+export const organizations = sqliteTable(
+  'organizations',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    slug: text('slug').notNull().unique(),
+    description: text('description'),
+    status: text('status').notNull().default('active'),
+    created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+    updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [index('idx_organizations_slug').on(table.slug)],
+)
+
+/**
+ * Organization Members 表
+ */
+export const organization_members = sqliteTable(
+  'organization_members',
+  {
+    id: text('id').primaryKey(),
+    organization_id: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    user_id: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: text('role').notNull().default('member'),
+    joined_at: text('joined_at').default(sql`CURRENT_TIMESTAMP`),
+    created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index('idx_org_members_org_id').on(table.organization_id),
+    index('idx_org_members_user_id').on(table.user_id),
+  ],
+)
+
+/**
+ * Organization Invitations 表
+ */
+export const organization_invitations = sqliteTable(
+  'organization_invitations',
+  {
+    id: text('id').primaryKey(),
+    organization_id: text('organization_id')
+      .notNull()
+      .references(() => organizations.id, { onDelete: 'cascade' }),
+    email: text('email').notNull(),
+    token_hash: text('token_hash').notNull().unique(),
+    role: text('role').notNull().default('member'),
+    invited_by_user_id: text('invited_by_user_id').notNull(),
+    status: text('status').notNull().default('pending'),
+    expires_at: text('expires_at').notNull(),
+    created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  },
+  (table) => [
+    index('idx_org_invitations_email').on(table.email),
+    index('idx_org_invitations_token').on(table.token_hash),
+  ],
+)
+
+/**
+ * App Modules 表
+ */
+export const app_modules = sqliteTable('app_modules', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull().unique(),
+  description: text('description'),
+  type: text('type').notNull().default('free'),
+  status: text('status').notNull().default('active'),
+  created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
+  updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
+})
 
 /**
  * Report Schedules 表 — 定期自動發送報告設定

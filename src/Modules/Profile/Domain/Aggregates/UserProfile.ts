@@ -8,6 +8,7 @@
  */
 export interface UserProfileProps {
   id: string
+  userId: string
   displayName: string
   avatarUrl: string | null
   phone: string | null
@@ -48,7 +49,8 @@ export class UserProfile {
    */
   static createDefault(userId: string, email: string): UserProfile {
     return new UserProfile({
-      id: userId,
+      id: crypto.randomUUID(),
+      userId: userId,
       displayName: email,
       avatarUrl: null,
       phone: null,
@@ -88,9 +90,13 @@ export class UserProfile {
     })
   }
 
-  /** Gets the user unique identifier. */
+  /** Gets the user profile unique identifier. */
   get id(): string {
     return this.props.id
+  }
+  /** Gets the associated user unique identifier. */
+  get userId(): string {
+    return this.props.userId
   }
   /** Gets the display name. */
   get displayName(): string {

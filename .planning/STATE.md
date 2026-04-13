@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Hardening & Refinement
-status: v1.4 milestone planning complete
-stopped_at: Phase 18 context gathered
-last_updated: "2026-04-12T16:04:07.261Z"
+status: Phase 18, Plan 01 complete
+stopped_at: Phase 18, Plan 01 execution finished
+last_updated: "2026-04-13T00:30:00.000Z"
 progress:
   total_phases: 18
   completed_phases: 17
-  total_plans: 52
-  completed_plans: 53
+  total_plans: 54
+  completed_plans: 54
 ---
 
 # Project State
@@ -23,14 +23,14 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 ## Current Position
 
-Phase: 18 (uniform-background-jobs) — PLANNING
-Plan: Ready to begin Phase 18 execution
+Phase: 18 (uniform-background-jobs) — EXECUTION
+Plan: 18-02-PLAN.md (Next)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9 (v1.3)
+- Total plans completed: 54
 - Average duration: -
 - Total execution time: -
 
@@ -42,6 +42,7 @@ Plan: Ready to begin Phase 18 execution
 | 15 | 4 | 4 | - |
 | 16 | 2 | 2 | - |
 | 17 | 5 | 5 | - |
+| 18 | 1 | 2 | - |
 
 *Updated after each plan completion*
 
@@ -61,14 +62,16 @@ Recent decisions affecting current work:
 - [Phase 17]: usage_records.credit_cost text-to-real migration to simplify repository logic.
 - [v1.4 Roadmap]: Uniform background jobs using Bun.cron; Redis persistence (BullMQ) deferred to v2
 - [v1.4 Roadmap]: ORM-agnostic pattern (from Phase 17) extended to Alerts module for full decoupling
+- [Phase 18-01]: IScheduler abstraction established with CronerScheduler adapter and FakeScheduler.
 
 ### Roadmap Evolution
 
 - Phase 17 added: 擴充 IQueryBuilder 聚合原語並重構 UsageRepository 去除 Drizzle 直接依賴
+- Phase 18: Established unified IScheduler port and Croner adapter.
 
 ### Pending Todos
 
-None yet.
+- [ ] Fix pre-existing regressions in AtlasQueryBuilder (Phase 17) — noted during Phase 18-01 verification.
 
 ### Blockers/Concerns
 
@@ -76,6 +79,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T16:04:07.258Z
-Stopped at: Phase 18 context gathered
-Next step: `/gsd:plan-phase 18` to begin Phase 18 planning
+Last session: 2026-04-13T00:30:00.000Z
+Stopped at: Phase 18, Plan 01 execution finished
+Next step: Execute Plan 18-02 to migrate existing jobs to the new scheduler.

@@ -78,10 +78,18 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 
 **Goal:** 核心架構加固與技術債清償 — 統一背景任務機制、Alerts 模組去耦合、提升 CI 驗證強度。
 
+**Core Value:** 提高系統穩定性、簡化維護流程、為未來功能擴展奠定基礎。
+
+**Success Criteria:**
+- ✅ 背景任務統一化：所有 cron/scheduled 任務使用統一的任務運行器
+- ✅ 警報模組完全解耦：Alerts 系統不依賴核心業務邏輯層，可獨立維護和擴展
+- ✅ CI 防護欄就位：自動化檢查防止不穩定代碼合併到 main
+- ✅ 全部 Phase 驗證通過：Phase 18-20 的 UAT 測試 100% 通過
+
 **Target features:**
-- **一致性定時器:** 將 `ScheduleReportService` 從 `boot()` 遷出，統一行政背景任務啟動邏輯。
-- **Alerts 倉庫重構:** 應用 Phase 17 建立的 ORM-agnostic 模式重構剩餘的警告配置倉庫。
-- **CI 加固:** 將 Playwright PDF 生成整合進 CI pipeline 流動驗證。
+- **Phase 18 - 背景任務統一化:** 將 `ScheduleReportService` 和其他定時任務遷至統一的任務運行器，移除 `boot()` 中的零散定時邏輯。
+- **Phase 19 - Alerts 模組解耦:** 應用 Phase 17 建立的 ORM-agnostic 模式重構 Alerts 倉庫，完全隔離警報系統。
+- **Phase 20 - CI 驗證加固:** 將 Playwright PDF 生成、type checking、測試覆蓋率驗證整合進 CI pipeline。
 
 ## Evolution
 

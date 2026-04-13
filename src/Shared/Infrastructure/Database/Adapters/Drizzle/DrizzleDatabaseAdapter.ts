@@ -30,7 +30,7 @@ class DrizzleDatabaseAccess implements IDatabaseAccess {
    */
   table(name: string): IQueryBuilder {
     const db = getDrizzleInstance()
-    const tableSchema = (schema as any)[name]
+    const tableSchema = this.resolveSchema(name)
 
     if (!tableSchema) {
       throw new Error(
@@ -39,6 +39,14 @@ class DrizzleDatabaseAccess implements IDatabaseAccess {
     }
 
     return new DrizzleQueryBuilder(db, name, tableSchema)
+  }
+
+  private resolveSchema(name: string): any {
+    if ((schema as any)[name]) return (schema as any)[name]
+
+    // Convert snake_case to camelCase
+    const camelName = name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    return (schema as any)[camelName]
   }
 
   async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
@@ -58,13 +66,19 @@ class DrizzleTransactionAccess implements IDatabaseAccess {
   constructor(private readonly txDb: any) {}
 
   table(name: string): IQueryBuilder {
-    const tableSchema = (schema as any)[name]
+    const tableSchema = this.resolveSchema(name)
     if (!tableSchema) {
       throw new Error(
         `Table "${name}" not found in schema. Available tables: ${Object.keys(schema).join(', ')}`,
       )
     }
     return new DrizzleQueryBuilder(this.txDb, name, tableSchema)
+  }
+
+  private resolveSchema(name: string): any {
+    if ((schema as any)[name]) return (schema as any)[name]
+    const camelName = name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    return (schema as any)[camelName]
   }
 
   async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {

@@ -46,6 +46,7 @@ export const UserProfileMapper = {
   fromDatabase(row: Record<string, unknown>): UserProfile {
     const props: UserProfileProps = {
       id: row.id as string,
+      userId: row.user_id as string,
       displayName: normalizeString(row.display_name),
       avatarUrl: normalizeNullableString(row.avatar_url),
       phone: normalizeNullableString(row.phone),
@@ -67,6 +68,7 @@ export const UserProfileMapper = {
   toDatabaseRow(profile: UserProfile): Record<string, unknown> {
     return {
       id: profile.id,
+      user_id: profile.userId,
       display_name: profile.displayName,
       avatar_url: profile.avatarUrl,
       phone: profile.phone,
