@@ -19,6 +19,7 @@ export default {
 			charset: 'utf8',
 			search_path: 'public',
 			sslmode: process.env.DB_SSLMODE ?? 'prefer',
+			useNativeDriver: process.env.DB_USE_NATIVE_DRIVER !== 'false',
 		},
 		mysql: {
 			driver: 'mysql',

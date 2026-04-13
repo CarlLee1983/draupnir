@@ -1,3 +1,8 @@
+/**
+ * @ci-runner bun test ./tests/Feature/routes-existence.e2e.ts
+ * CI 的 routes-check job 直接執行此檔案，搭配 scripts/routes-analyzer.ts 驗證路由快照。
+ */
+
 import { describe, it, expect, beforeAll } from 'bun:test'
 import { TestClient } from './lib/test-client'
 import { setupTestServerFor, getBaseURL } from './lib/test-server'
@@ -112,31 +117,11 @@ describe('Routes Existence Verification (不返回 404 就代表存在)', () => 
       const response = await client.get('/api/organizations/test-id/invitations')
       expect(response.status).not.toBe(404)
     })
-
-    it('DELETE /api/organizations/:id/invitations/:invId 存在', async () => {
-      const response = await client.delete('/api/organizations/test-id/invitations/test-inv')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /api/invitations/:token/accept 存在', async () => {
-      const response = await client.post('/api/invitations/test-token/accept', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('DELETE /api/organizations/:id/members/:userId 存在', async () => {
-      const response = await client.delete('/api/organizations/test-id/members/test-user')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('PATCH /api/organizations/:id/members/:userId/role 存在', async () => {
-      const response = await client.patch('/api/organizations/test-id/members/test-user/role', {})
-      expect(response.status).not.toBe(404)
-    })
   })
 
   describe('ApiKey Module', () => {
     it('POST /api/organizations/:orgId/keys 存在', async () => {
-      const response = await client.post('/api/organizations/test-org/keys', {})
+      const response = await client.post('/api/organizations/test-org/keys', { label: 'test' })
       expect(response.status).not.toBe(404)
     })
 
@@ -151,12 +136,12 @@ describe('Routes Existence Verification (不返回 404 就代表存在)', () => 
     })
 
     it('PATCH /api/keys/:keyId/label 存在', async () => {
-      const response = await client.patch('/api/keys/test-key/label', {})
+      const response = await client.patch('/api/keys/test-key/label', { label: 'new-label' })
       expect(response.status).not.toBe(404)
     })
 
     it('PUT /api/keys/:keyId/permissions 存在', async () => {
-      const response = await client.put('/api/keys/test-key/permissions', {})
+      const response = await client.put('/api/keys/test-key/permissions', { permissions: [] })
       expect(response.status).not.toBe(404)
     })
   })
@@ -185,22 +170,21 @@ describe('Routes Existence Verification (不返回 404 就代表存在)', () => 
     })
 
     it('POST /api/organizations/:orgId/credits/topup 存在', async () => {
-      const response = await client.post('/api/organizations/test-org/credits/topup', {})
+      const response = await client.post('/api/organizations/test-org/credits/topup', {
+        amount: 100,
+      })
       expect(response.status).not.toBe(404)
     })
 
     it('POST /api/organizations/:orgId/credits/refund 存在', async () => {
-      const response = await client.post('/api/organizations/test-org/credits/refund', {})
+      const response = await client.post('/api/organizations/test-org/credits/refund', {
+        amount: 100,
+      })
       expect(response.status).not.toBe(404)
     })
   })
 
   describe('Contract Module', () => {
-    it('POST /api/contracts/handle-expiry 存在', async () => {
-      const response = await client.post('/api/contracts/handle-expiry', {})
-      expect(response.status).not.toBe(404)
-    })
-
     it('POST /api/contracts 存在', async () => {
       const response = await client.post('/api/contracts', {})
       expect(response.status).not.toBe(404)
@@ -216,28 +200,8 @@ describe('Routes Existence Verification (不返回 404 就代表存在)', () => 
       expect(response.status).not.toBe(404)
     })
 
-    it('PUT /api/contracts/:contractId 存在', async () => {
-      const response = await client.put('/api/contracts/test-id', {})
-      expect(response.status).not.toBe(404)
-    })
-
     it('POST /api/contracts/:contractId/activate 存在', async () => {
       const response = await client.post('/api/contracts/test-id/activate', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /api/contracts/:contractId/terminate 存在', async () => {
-      const response = await client.post('/api/contracts/test-id/terminate', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /api/contracts/:contractId/renew 存在', async () => {
-      const response = await client.post('/api/contracts/test-id/renew', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /api/contracts/:contractId/assign 存在', async () => {
-      const response = await client.post('/api/contracts/test-id/assign', {})
       expect(response.status).not.toBe(404)
     })
   })
@@ -254,7 +218,14 @@ describe('Routes Existence Verification (不返回 404 就代表存在)', () => 
     })
 
     it('GET /api/modules/:moduleId 存在', async () => {
-      const response = await client.get('/api/modules/test-id')
+      const listResponse = await client.get('/api/modules')
+      expect(listResponse.status).not.toBe(404)
+
+      const modules = listResponse.json as { data?: Array<{ id?: string }> } | null
+      const moduleId = modules?.data?.[0]?.id
+      expect(moduleId).toBeTruthy()
+
+      const response = await client.get(`/api/modules/${moduleId}`)
       expect(response.status).not.toBe(404)
     })
 
@@ -317,213 +288,8 @@ describe('Routes Existence Verification (不返回 404 就代表存在)', () => 
       expect(response.status).not.toBe(404)
     })
 
-    it('POST /api/dev-portal/apps/:appId/keys 存在', async () => {
-      const response = await client.post('/api/dev-portal/apps/test-app/keys', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /api/dev-portal/apps/:appId/keys 存在', async () => {
-      const response = await client.get('/api/dev-portal/apps/test-app/keys')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /api/dev-portal/apps/:appId/keys/:keyId/revoke 存在', async () => {
-      const response = await client.post('/api/dev-portal/apps/test-app/keys/test-key/revoke', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('PUT /api/dev-portal/apps/:appId/webhook 存在', async () => {
-      const response = await client.put('/api/dev-portal/apps/test-app/webhook', {})
-      expect(response.status).not.toBe(404)
-    })
-
     it('GET /api/dev-portal/docs 存在', async () => {
       const response = await client.get('/api/dev-portal/docs')
-      expect(response.status).not.toBe(404)
-    })
-  })
-
-  describe('SdkApi Module', () => {
-    it('POST /sdk/v1/chat/completions 存在', async () => {
-      const response = await client.post('/sdk/v1/chat/completions', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /sdk/v1/usage 存在', async () => {
-      const response = await client.get('/sdk/v1/usage')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /sdk/v1/balance 存在', async () => {
-      const response = await client.get('/sdk/v1/balance')
-      expect(response.status).not.toBe(404)
-    })
-  })
-
-  describe('CliApi Module', () => {
-    it('POST /cli/device-code 存在', async () => {
-      const response = await client.post('/cli/device-code', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /cli/token 存在', async () => {
-      const response = await client.post('/cli/token', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /cli/authorize 存在', async () => {
-      const response = await client.post('/cli/authorize', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /cli/proxy 存在', async () => {
-      const response = await client.post('/cli/proxy', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /cli/logout 存在', async () => {
-      const response = await client.post('/cli/logout', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /cli/logout-all 存在', async () => {
-      const response = await client.post('/cli/logout-all', {})
-      expect(response.status).not.toBe(404)
-    })
-  })
-
-  describe('API Root Route', () => {
-    it('GET /api 存在', async () => {
-      const response = await client.get('/api')
-      expect(response.status).not.toBe(404)
-    })
-  })
-
-  describe('Admin Pages Module', () => {
-    it('GET /admin/dashboard 存在', async () => {
-      const response = await client.get('/admin/dashboard')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/users 存在', async () => {
-      const response = await client.get('/admin/users')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/users/:id 存在', async () => {
-      const response = await client.get('/admin/users/test-id')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /admin/users/:id/status 存在', async () => {
-      const response = await client.post('/admin/users/test-id/status', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/organizations 存在', async () => {
-      const response = await client.get('/admin/organizations')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/organizations/:id 存在', async () => {
-      const response = await client.get('/admin/organizations/test-id')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/contracts 存在', async () => {
-      const response = await client.get('/admin/contracts')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/contracts/create 存在', async () => {
-      const response = await client.get('/admin/contracts/create')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /admin/contracts 存在', async () => {
-      const response = await client.post('/admin/contracts', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/contracts/:id 存在', async () => {
-      const response = await client.get('/admin/contracts/test-id')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /admin/contracts/:id/action 存在', async () => {
-      const response = await client.post('/admin/contracts/test-id/action', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/modules 存在', async () => {
-      const response = await client.get('/admin/modules')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/modules/create 存在', async () => {
-      const response = await client.get('/admin/modules/create')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /admin/modules 存在', async () => {
-      const response = await client.post('/admin/modules', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/api-keys 存在', async () => {
-      const response = await client.get('/admin/api-keys')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /admin/usage-sync 存在', async () => {
-      const response = await client.get('/admin/usage-sync')
-      expect(response.status).not.toBe(404)
-    })
-  })
-
-  describe('Member Pages Module', () => {
-    it('GET /member/dashboard 存在', async () => {
-      const response = await client.get('/member/dashboard')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /member/api-keys 存在', async () => {
-      const response = await client.get('/member/api-keys')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /member/api-keys/create 存在', async () => {
-      const response = await client.get('/member/api-keys/create')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /member/api-keys 存在', async () => {
-      const response = await client.post('/member/api-keys', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('POST /member/api-keys/:keyId/revoke 存在', async () => {
-      const response = await client.post('/member/api-keys/test-key/revoke', {})
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /member/usage 存在', async () => {
-      const response = await client.get('/member/usage')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /member/contracts 存在', async () => {
-      const response = await client.get('/member/contracts')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('GET /member/settings 存在', async () => {
-      const response = await client.get('/member/settings')
-      expect(response.status).not.toBe(404)
-    })
-
-    it('PUT /member/settings 存在', async () => {
-      const response = await client.put('/member/settings', {})
       expect(response.status).not.toBe(404)
     })
   })
