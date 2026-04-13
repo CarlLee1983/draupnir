@@ -7,10 +7,10 @@
 
 ### 背景任務統一化 (Phase 18)
 
-- [ ] **JOBS-01**: 所有 cron/scheduled 任務使用統一的任務運行器（Bun.cron or similar）
-- [ ] **JOBS-02**: `ScheduleReportService` 從 `boot()` 遷出至統一任務管理器
-- [ ] **JOBS-03**: 移除 `boot()` 中的零散定時邏輯，集中定時任務定義
-- [ ] **JOBS-04**: 任務運行器支援單個任務重試和失敗恢復機制
+- [x] **JOBS-01**: 所有 cron/scheduled 任務使用統一的任務運行器（Bun.cron or similar）
+- [x] **JOBS-02**: `ScheduleReportService` 從 `boot()` 遷出至統一任務管理器
+- [x] **JOBS-03**: 移除 `boot()` 中的零散定時邏輯，集中定時任務定義
+- [x] **JOBS-04**: 任務運行器支援單個任務重試和失敗恢復機制
 
 ### Alerts 模組解耦 (Phase 19)
 
@@ -41,10 +41,10 @@
 
 | 需求 | 階段 | 狀態 |
 |------|------|------|
-| JOBS-01 | Phase 18 | Pending |
-| JOBS-02 | Phase 18 | Pending |
-| JOBS-03 | Phase 18 | Pending |
-| JOBS-04 | Phase 18 | Pending |
+| JOBS-01 | Phase 18 | Complete |
+| JOBS-02 | Phase 18 | Complete |
+| JOBS-03 | Phase 18 | Complete |
+| JOBS-04 | Phase 18 | Complete |
 | ALERTS-01 | Phase 19 | Pending |
 | ALERTS-02 | Phase 19 | Pending |
 | ALERTS-03 | Phase 19 | Pending |

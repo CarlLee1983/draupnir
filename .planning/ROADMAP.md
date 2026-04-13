@@ -49,13 +49,13 @@
 
 ### 🚧 v1.4 Hardening & Refinement (In Progress)
 
-- [ ] **Phase 18: Uniform Background Jobs (2 plans)**
+- [x] **Phase 18: Uniform Background Jobs (2 plans)** (completed 2026-04-13)
   **Requirements:** JOBS-01, JOBS-02, JOBS-03, JOBS-04
   **Goal:** 建立 IScheduler 抽象（Port/Adapter + retry/exponential backoff），將 BifrostSync setInterval 與 ScheduleReportService 的散佈定時邏輯全部遷移至統一 registerJobs() lifecycle hook；`bootstrap.ts` 零 setInterval、零 `new Cron(`。
   **Plans:** 2 plans
   Plans:
   - [x] 18-01-PLAN.md — Scheduler 抽象基礎：IScheduler port、CronerScheduler adapter（retry + backoff + runOnInit）、FakeScheduler 測試替身、DI `'scheduler'` singleton 綁定
-  - [ ] 18-02-PLAN.md — 現有任務遷移：ScheduleReportService 改為 IScheduler 代理、ReportsServiceProvider 移除 boot()、DashboardServiceProvider.registerJobs() 接手 BifrostSync、bootstrap.ts registerJobs 迴圈、BIFROST_SYNC_CRON config
+  - [x] 18-02-PLAN.md — 現有任務遷移：ScheduleReportService 改為 IScheduler 代理、ReportsServiceProvider 移除 boot()、DashboardServiceProvider.registerJobs() 接手 BifrostSync、bootstrap.ts registerJobs 迴圈、BIFROST_SYNC_CRON config
 - [ ] Phase 19: Alerts Module Decoupling (3 plans)
 - [ ] Phase 20: CI Verification Guardrails (2 plans)
 
@@ -68,6 +68,6 @@
 | 15. Webhook Alerts | v1.3 | 4/4 | Complete | 2026-04-12 |
 | 16. Automated Reports | v1.3 | 2/2 | Complete | 2026-04-12 |
 | 17. Repository Refactor | v1.3 | 5/5 | Complete | 2026-04-12 |
-| 18. Uniform Background Jobs | v1.4 | 1/2 | In Progress | - |
+| 18. Uniform Background Jobs | v1.4 | 2/2 | Complete   | 2026-04-13 |
 | 19. Alerts Decoupling | v1.4 | 0/3 | Not started | - |
 | 20. CI Guardrails | v1.4 | 0/2 | Not started | - |
