@@ -13,12 +13,24 @@ import { DrizzleSyncCursorRepository } from '../Repositories/DrizzleSyncCursorRe
 import { DrizzleUsageRepository } from '../Repositories/DrizzleUsageRepository'
 import { BifrostSyncService } from '../Services/BifrostSyncService'
 import { UsageAggregator } from '../Services/UsageAggregator'
+import { DatabaseUsageAggregator } from '../Services/DatabaseUsageAggregator'
 import { GetDashboardSummaryService } from '../../Application/Services/GetDashboardSummaryService'
 import { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
+import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
+import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
+import appConfig from '../../../../../config/app'
+import { getCurrentORM } from '@/wiring/RepositoryFactory'
 
-export class DashboardServiceProvider extends ModuleServiceProvider {
+export class DashboardServiceProvider extends ModuleServiceProvider implements IJobRegistrar {
+  private container!: IContainer
+
   override register(container: IContainer): void {
+    this.container = container
     container.singleton('usageAggregator', (c: IContainer) => {
+      const orm = getCurrentORM()
+      if (orm === 'drizzle') {
+        return new DatabaseUsageAggregator(c.make('drizzleUsageRepository') as IUsageRepository)
+      }
       return new UsageAggregator(c.make('llmGatewayClient') as ILLMGatewayClient)
     })
 
@@ -90,7 +102,20 @@ export class DashboardServiceProvider extends ModuleServiceProvider {
     })
   }
 
-  override boot(_context: unknown): void {
-    console.log('📊 [Dashboard] Module loaded')
+  registerJobs(scheduler: IScheduler): void {
+    const syncService = this.container.make('bifrostSyncService') as BifrostSyncService
+    scheduler.schedule(
+      {
+        name: 'bifrost-sync',
+        cron: appConfig.bifrostSyncCron,
+        runOnInit: true,
+        maxRetries: 2,
+        backoffMs: 2000,
+      },
+      async () => {
+        const result = await syncService.sync()
+        console.error(`[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`)
+      },
+    )
   }
 }

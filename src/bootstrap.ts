@@ -13,7 +13,6 @@ import { CliApiServiceProvider } from './Modules/CliApi/Infrastructure/Providers
 import { ContractServiceProvider } from './Modules/Contract/Infrastructure/Providers/ContractServiceProvider'
 import { CreditServiceProvider } from './Modules/Credit/Infrastructure/Providers/CreditServiceProvider'
 import { DashboardServiceProvider } from './Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
-import { BifrostSyncService } from './Modules/Dashboard/Infrastructure/Services/BifrostSyncService'
 import { AlertsServiceProvider } from './Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
 import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { DevPortalServiceProvider } from './Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
@@ -28,6 +27,12 @@ import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
 import { initializeRegistry } from './wiring/RepositoryRegistry'
+import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
+import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
+
+function isJobRegistrar(value: unknown): value is IJobRegistrar {
+  return typeof value === 'object' && value !== null && typeof (value as IJobRegistrar).registerJobs === 'function'
+}
 
 export async function bootstrap(port = 3000): Promise<PlanetCore> {
   // 註冊表單驗證器
@@ -39,25 +44,35 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   setCurrentDatabaseAccess(db)
   const config = defineConfig({ config: configObj })
   const core = new PlanetCore(config)
+  
+  // Register database service early
+  core.container.singleton('database', () => db)
+  
   await core.orbit(new OrbitPrism())
 
-  core.register(createGravitoServiceProvider(new HealthServiceProvider()))
-  core.register(createGravitoServiceProvider(new FoundationServiceProvider()))
-  core.register(createGravitoServiceProvider(new ProfileServiceProvider()))
-  core.register(createGravitoServiceProvider(new AuthServiceProvider()))
-  core.register(createGravitoServiceProvider(new OrganizationServiceProvider()))
-  core.register(createGravitoServiceProvider(new ApiKeyServiceProvider()))
-  core.register(createGravitoServiceProvider(new DashboardServiceProvider()))
-  core.register(createGravitoServiceProvider(new AlertsServiceProvider()))
-  core.register(createGravitoServiceProvider(new ReportsServiceProvider()))
-  core.register(createGravitoServiceProvider(new CreditServiceProvider()))
-  core.register(createGravitoServiceProvider(new ContractServiceProvider()))
-  core.register(createGravitoServiceProvider(new AppModuleServiceProvider()))
-  core.register(createGravitoServiceProvider(new AppApiKeyServiceProvider()))
-  core.register(createGravitoServiceProvider(new DevPortalServiceProvider()))
-  core.register(createGravitoServiceProvider(new SdkApiServiceProvider()))
-  core.register(createGravitoServiceProvider(new CliApiServiceProvider()))
-  core.register(createGravitoServiceProvider(new PagesServiceProvider()))
+  const modules = [
+    new HealthServiceProvider(),
+    new FoundationServiceProvider(),
+    new ProfileServiceProvider(),
+    new AuthServiceProvider(),
+    new OrganizationServiceProvider(),
+    new ApiKeyServiceProvider(),
+    new DashboardServiceProvider(),
+    new AlertsServiceProvider(),
+    new ReportsServiceProvider(),
+    new CreditServiceProvider(),
+    new ContractServiceProvider(),
+    new AppModuleServiceProvider(),
+    new AppApiKeyServiceProvider(),
+    new DevPortalServiceProvider(),
+    new SdkApiServiceProvider(),
+    new CliApiServiceProvider(),
+    new PagesServiceProvider(),
+  ]
+
+  for (const module of modules) {
+    core.register(createGravitoServiceProvider(module))
+  }
 
   await core.bootstrap()
   await warmInertiaService()
@@ -65,27 +80,13 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
     core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService
   ).execute()
   await registerRoutes(core)
-  // --- BifrostSyncService scheduler ---
-  // Must be after core.bootstrap() so DI container is fully initialized.
-  // Per RESEARCH.md anti-pattern warning: never register timer in ServiceProvider.boot().
-  const syncService = core.container.make('bifrostSyncService') as BifrostSyncService
-  const SYNC_INTERVAL_MS = Number(process.env.BIFROST_SYNC_INTERVAL_MS ?? 5 * 60 * 1000)
 
-  // Run once at startup to populate initial data
-  syncService.sync().catch((err) => {
-    console.error('[BifrostSync] Initial sync failed (non-fatal):', err)
-  })
-
-  // Then on interval
-  setInterval(() => {
-    syncService.sync().then((result) => {
-      console.error(`[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`)
-    }).catch((err) => {
-      console.error('[BifrostSync] Sync error (dashboard serves stale data):', err)
-      // DO NOT rethrow — server must not crash on sync failure
-    })
-  }, SYNC_INTERVAL_MS)
-  // --- End BifrostSyncService scheduler ---
+  const scheduler = core.container.make('scheduler') as IScheduler
+  for (const module of modules) {
+    if (isJobRegistrar(module)) {
+      await module.registerJobs(scheduler)
+    }
+  }
 
   core.registerGlobalErrorHandlers()
   return core
