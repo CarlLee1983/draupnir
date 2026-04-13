@@ -9,7 +9,7 @@
  */
 
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
-import { UserProfileMapper } from '../../Infrastructure/Mappers/UserProfileMapper'
+import { profileToDTO } from '../DTOs/UserProfileDTO'
 import type { UserProfileResponse } from '../DTOs/UserProfileDTO'
 
 /**
@@ -27,7 +27,7 @@ export class GetProfileService {
       if (!profile) {
         return { success: false, message: 'Profile not found', error: 'PROFILE_NOT_FOUND' }
       }
-      return { success: true, message: 'Profile retrieved', data: UserProfileMapper.toDTO(profile) }
+      return { success: true, message: 'Profile retrieved', data: profileToDTO(profile) }
     } catch (error: any) {
       return { success: false, message: error.message || 'Retrieval failed', error: error.message }
     }

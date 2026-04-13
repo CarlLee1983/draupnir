@@ -1,4 +1,5 @@
 // src/Modules/Profile/Application/EventHandlers/UserRegisteredHandler.ts
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { UserProfile } from '../../Domain/Aggregates/UserProfile'
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
 
@@ -15,5 +16,9 @@ export class UserRegisteredHandler {
     }
     const profile = UserProfile.createDefault(userId, email)
     await this.userProfileRepository.save(profile)
+
+    // Dispatch domain events created during aggregate creation
+    const dispatcher = DomainEventDispatcher.getInstance()
+    await dispatcher.dispatchAll(profile.domainEvents)
   }
 }

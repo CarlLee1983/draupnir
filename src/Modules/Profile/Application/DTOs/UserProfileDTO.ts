@@ -65,3 +65,24 @@ export interface ListUsersResponse {
   }
   error?: string
 }
+
+import type { UserProfile } from '../../Domain/Aggregates/UserProfile'
+
+/**
+ * Maps a UserProfile aggregate to a UserProfileDTO.
+ * Defined here to avoid Application Services importing from Infrastructure.
+ */
+export function profileToDTO(profile: UserProfile): UserProfileDTO {
+  return {
+    id: profile.id,
+    displayName: profile.displayName,
+    avatarUrl: profile.avatarUrl,
+    phone: profile.phone,
+    bio: profile.bio,
+    timezone: profile.timezone,
+    locale: profile.locale,
+    notificationPreferences: profile.notificationPreferences,
+    createdAt: profile.createdAt.toISOString(),
+    updatedAt: profile.updatedAt.toISOString(),
+  }
+}

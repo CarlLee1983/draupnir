@@ -1,5 +1,7 @@
 // src/Modules/Profile/index.ts
-// Domain
+// Domain Events
+export { UserProfileCreated } from './Domain/Events/UserProfileCreated'
+export { UserProfileUpdated } from './Domain/Events/UserProfileUpdated'
 
 // Application
 export type {
