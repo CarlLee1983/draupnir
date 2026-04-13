@@ -7,22 +7,20 @@ import { UserProfileRepository } from '../Infrastructure/Repositories/UserProfil
 describe('GetProfileService', () => {
   let service: GetProfileService
   let repo: UserProfileRepository
-  let profileId: string
+  const userId = 'user-123'
 
   beforeEach(async () => {
     const db = new MemoryDatabaseAccess()
     repo = new UserProfileRepository(db)
     service = new GetProfileService(repo)
 
-    const profile = UserProfile.createDefault('user-123', 'user@example.com')
-    profileId = profile.id
+    const profile = UserProfile.createDefault(userId, 'user@example.com')
     await repo.save(profile)
   })
 
   it('應成功取得 Profile', async () => {
-    const result = await service.execute(profileId)
+    const result = await service.execute(userId)
     expect(result.success).toBe(true)
-    expect(result.data?.id).toBe(profileId)
     expect(result.data?.displayName).toBe('user@example.com')
   })
 

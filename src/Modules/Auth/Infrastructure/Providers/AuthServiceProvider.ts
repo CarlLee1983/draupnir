@@ -8,7 +8,7 @@
  */
 
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
-import { UserRegisteredHandler } from '@/Modules/Profile/Application/Services/UserRegisteredHandler'
+import { UserRegisteredHandler } from '@/Modules/Profile/Application/EventHandlers/UserRegisteredHandler'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'

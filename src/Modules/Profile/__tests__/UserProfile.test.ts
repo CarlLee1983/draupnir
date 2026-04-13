@@ -56,4 +56,29 @@ describe('UserProfile Aggregate', () => {
     expect(dto.displayName).toBe('user@example.com')
     expect(dto.timezone).toBe('Asia/Taipei')
   })
+
+  it('createDefault 應設置 UserProfileCreated domain event', () => {
+    const profile = UserProfile.createDefault('user-123', 'user@example.com')
+    const events = profile.domainEvents
+    expect(events).toHaveLength(1)
+    expect(events[0].eventName).toBe('UserProfileCreated')
+    expect(events[0].payload).toMatchObject({ userId: 'user-123', email: 'user@example.com' })
+  })
+
+  it('updateProfile 應設置 UserProfileUpdated domain event', () => {
+    const profile = UserProfile.createDefault('user-123', 'user@example.com')
+    const updated = profile.updateProfile({ displayName: '新名稱' })
+    const events = updated.domainEvents
+    expect(events).toHaveLength(1)
+    expect(events[0].eventName).toBe('UserProfileUpdated')
+    expect(events[0].payload.fields).toContain('displayName')
+  })
+
+  it('clearDomainEvents 應回傳無事件的新實例', () => {
+    const profile = UserProfile.createDefault('user-123', 'user@example.com')
+    const cleared = profile.clearDomainEvents()
+    expect(cleared.domainEvents).toHaveLength(0)
+    // 原始物件不變
+    expect(profile.domainEvents).toHaveLength(1)
+  })
 })

@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { UserRegisteredHandler } from '../Application/Services/UserRegisteredHandler'
+import { UserRegisteredHandler } from '../Application/EventHandlers/UserRegisteredHandler'
 import type { IUserProfileRepository } from '../Domain/Repositories/IUserProfileRepository'
 
 describe('UserRegisteredHandler', () => {
@@ -13,7 +13,7 @@ describe('UserRegisteredHandler', () => {
   beforeEach(() => {
     mockRepository = {
       save: vi.fn().mockResolvedValue(undefined),
-      findById: vi.fn(),
+      findByUserId: vi.fn(),
       update: vi.fn(),
       findAll: vi.fn(),
       count: vi.fn(),
