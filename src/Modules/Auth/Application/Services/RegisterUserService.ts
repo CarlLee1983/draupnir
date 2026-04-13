@@ -6,12 +6,13 @@
  * - Validate input
  * - Ensure email is not already registered
  * - Create the User aggregate
- * - Persist to the database (and default profile)
+ * - Persist to the database
+ * - Dispatch UserRegistered domain event (Profile creation is handled by UserRegisteredHandler)
  */
 
-import { UserProfile } from '@/Modules/Profile/Domain/Aggregates/UserProfile'
-import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { User } from '../../Domain/Aggregates/User'
+import { UserRegistered } from '../../Domain/Events/UserRegistered'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
@@ -25,10 +26,10 @@ import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 export class RegisterUserService {
   /**
    * Creates an instance of RegisterUserService.
+   * Profile creation is decoupled via the UserRegistered domain event.
    */
   constructor(
     private authRepository: IAuthRepository,
-    private userProfileRepository: IUserProfileRepository,
     private passwordHasher: IPasswordHasher,
   ) {}
 
@@ -68,15 +69,9 @@ export class RegisterUserService {
       // 5. Save to database
       await this.authRepository.save(user)
 
-      // 6. Create User Profile
-      try {
-        const profile = UserProfile.createDefault(user.id, request.email)
-        await this.userProfileRepository.save(profile)
-      } catch (profileError) {
-        // Rollback auth user if profile creation fails
-        await this.authRepository.delete(user.id)
-        throw profileError
-      }
+      // 6. Dispatch UserRegistered event (Profile module listens and creates default profile)
+      const dispatcher = DomainEventDispatcher.getInstance()
+      await dispatcher.dispatch(new UserRegistered(user.id, user.emailValue))
 
       // 7. Return successful response
       return {
