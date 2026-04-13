@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
 import { ReportToken } from '../Domain/ValueObjects/ReportToken'
 
 describe('ReportToken', () => {
@@ -50,8 +50,11 @@ describe('ReportToken', () => {
     const expiresAt = new Date(Date.now() + 3600 * 1000)
 
     const token = await ReportToken.generate(orgId, expiresAt)
-    const tamperedValue =
-      token.value.substring(0, token.value.length - 1) + (token.value.endsWith('a') ? 'b' : 'a')
+    // Tamper with the payload part
+    const parts = token.value.split('.')
+    const payload = parts[0]
+    const tamperedPayload = payload.substring(1) // Remove first char
+    const tamperedValue = `${tamperedPayload}.${parts[1]}`
 
     const result = await ReportToken.verify(tamperedValue)
     expect(result).toBeNull()

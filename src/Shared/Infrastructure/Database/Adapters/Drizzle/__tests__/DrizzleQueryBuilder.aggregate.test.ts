@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
+import { afterAll, beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -10,11 +10,12 @@ import * as schema from '../schema'
 describe('DrizzleQueryBuilder.aggregate', () => {
   let db: IDatabaseAccess
   let drizzleDb: any
+  let configSpy: any
 
   beforeAll(async () => {
     const client = createClient({ url: 'file::memory:' })
     drizzleDb = drizzle(client, { schema })
-    spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
+    configSpy = spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
 
     // Setup table schema
     await client.execute(`
@@ -36,6 +37,11 @@ describe('DrizzleQueryBuilder.aggregate', () => {
     `)
 
     db = createDrizzleDatabaseAccess()
+  })
+
+  afterAll(() => {
+    configSpy.mockRestore()
+    config.resetDrizzleForTest()
   })
 
   beforeEach(async () => {

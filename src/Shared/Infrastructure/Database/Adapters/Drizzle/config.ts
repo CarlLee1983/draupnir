@@ -41,3 +41,11 @@ export function getDrizzleInstance() {
   }
   return db
 }
+
+/**
+ * 僅供測試使用的資料庫重置
+ * @internal
+ */
+export function resetDrizzleForTest() {
+  db = null
+}

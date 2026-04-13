@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, spyOn } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, it, spyOn } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -75,12 +75,13 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
   let drizzleAccess: IDatabaseAccess
   let memoryAccess: IDatabaseAccess
   let drizzleDb: any
+  let configSpy: any
 
   beforeAll(async () => {
     // Setup Drizzle
     const client = createClient({ url: 'file::memory:' })
     drizzleDb = drizzle(client, { schema })
-    spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
+    configSpy = spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
 
     await client.execute(`
       CREATE TABLE usage_records (
@@ -108,6 +109,11 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
     for (const row of seedRows) {
       await memoryAccess.table('usageRecords').insert(row)
     }
+  })
+
+  afterAll(() => {
+    configSpy.mockRestore()
+    config.resetDrizzleForTest()
   })
 
   async function runOnBoth<T>(

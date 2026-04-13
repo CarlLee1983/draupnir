@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import type { LogEntry } from '@/Foundation/Infrastructure/Services/LLMGateway/types'
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
@@ -61,12 +61,12 @@ function makeCursorRepo(): {
     repo: {
       get: async (cursorType: string) =>
         stored
-          ? {
-              cursorType,
-              lastSyncedAt: stored.lastSyncedAt,
-              lastBifrostLogId: stored.lastBifrostLogId ?? null,
-            }
-          : null,
+           ? {
+               cursorType,
+               lastSyncedAt: stored.lastSyncedAt,
+               lastBifrostLogId: stored.lastBifrostLogId ?? null,
+             }
+           : null,
       advance: async (
         _: string,
         update: { readonly lastSyncedAt: string; readonly lastBifrostLogId?: string },
@@ -197,11 +197,11 @@ describe('BifrostSyncService', () => {
     ])
 
     await service.sync()
-    const firstCursor = getCursorState()?.lastSyncedAt
+    const firstCursorAdvance = getCursorState()?.lastSyncedAt
     gateway.seedUsageLogs([])
     await service.sync()
     expect(gateway.calls.getUsageLogs[0]?.query?.startTime).toBe(new Date(0).toISOString())
-    expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(firstCursor)
+    expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(firstCursorAdvance)
   })
 
   it('uses logId as bifrost_log_id when present', async () => {
@@ -256,8 +256,14 @@ describe('BifrostSyncService', () => {
       }
     }
 
-    service = new BifrostSyncService(new ThrowingGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
-    await expect(service.sync()).resolves.toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      service = new BifrostSyncService(new ThrowingGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
+      const result = await service.sync()
+      expect(result).toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
+    } finally {
+      consoleSpy.mockRestore()
+    }
   })
 
   it('advances cursor after successful sync batch', async () => {
@@ -279,51 +285,78 @@ describe('BifrostSyncService', () => {
     ])
 
     await service.sync()
+    const cursorAfterFirst = getCursorState()?.lastSyncedAt
+    
     gateway.seedUsageLogs([])
     await service.sync()
-    expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(getCursorState()?.lastSyncedAt)
+    
+    // The second call should use the cursor advanced by the first call
+    expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(cursorAfterFirst)
   })
 
   it('returns { synced: 0, quarantined: 0 } when sync body exceeds 30 seconds', async () => {
-    vi.useFakeTimers()
+    let timeoutCb: any
+    const originalSetTimeout = globalThis.setTimeout
+    const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(
+      ((cb: any, ms?: number) => {
+        if (ms === 30000) {
+          timeoutCb = cb
+          return 123 as any
+        }
+        return originalSetTimeout(cb, ms)
+      }) as typeof setTimeout,
+    )
 
     try {
-      class SlowGateway extends MockGatewayClient {
+      class HangingGateway extends MockGatewayClient {
         override async getUsageLogs(): Promise<readonly LogEntry[]> {
-          await new Promise<void>((resolve) => setTimeout(resolve, 60_000))
-          return []
+          return new Promise(() => {}) // Never resolves
         }
       }
-
-      service = new BifrostSyncService(new SlowGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
+      service = new BifrostSyncService(new HangingGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
       const syncPromise = service.sync()
-      vi.advanceTimersByTime(30_001)
 
-      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
+      // Give syncInternal a tiny bit to start
+      await new Promise((r) => originalSetTimeout(r, 0))
+      
+      if (timeoutCb) timeoutCb()
+
+      const result = await syncPromise
+      expect(result).toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
     } finally {
-      vi.useRealTimers()
+      setTimeoutSpy.mockRestore()
     }
   })
 
   it('does not advance cursor when sync times out', async () => {
-    vi.useFakeTimers()
+    let timeoutCb: any
+    const originalSetTimeout = globalThis.setTimeout
+    const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(
+      ((cb: any, ms?: number) => {
+        if (ms === 30000) {
+          timeoutCb = cb
+          return 123 as any
+        }
+        return originalSetTimeout(cb, ms)
+      }) as typeof setTimeout,
+    )
 
     try {
-      class SlowGateway extends MockGatewayClient {
+      class HangingGateway extends MockGatewayClient {
         override async getUsageLogs(): Promise<readonly LogEntry[]> {
-          await new Promise<void>((resolve) => setTimeout(resolve, 60_000))
-          return []
+          return new Promise(() => {}) // Never resolves
         }
       }
-
-      service = new BifrostSyncService(new SlowGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
+      service = new BifrostSyncService(new HangingGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
       const syncPromise = service.sync()
-      vi.advanceTimersByTime(30_001)
+      
+      await new Promise((r) => originalSetTimeout(r, 0))
+      if (timeoutCb) timeoutCb()
 
-      await expect(syncPromise).resolves.toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
+      await syncPromise
       expect(getCursorState()).toBeNull()
     } finally {
-      vi.useRealTimers()
+      setTimeoutSpy.mockRestore()
     }
   })
 })
