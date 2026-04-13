@@ -64,13 +64,16 @@
   - [ ] 19-01-PLAN.md — ORM 解耦：4 個 Alerts repos 改用 IDatabaseAccess + IQueryBuilder；denormalize alert_deliveries 的 org_id/month/tier；DI binding 去除 drizzle 前綴
   - [ ] 19-02-PLAN.md — 依賴收斂：IAlertRecipientResolver port + 實作；SendAlertService / EvaluateThresholdsService object-literal ctor；MODULE.md
   - [ ] 19-03-PLAN.md — Notifier 統一 + DI-less fakes：IAlertNotifier port + Email/Webhook notifiers；ResendDeliveryService 接 notifierRegistry；`__tests__/fakes/` 共用 InMemory fixtures；刪除 DispatchAlertWebhooksService
-- [ ] **Phase 20: CI Verification Guardrails (2 plans)**
+- [ ] **Phase 20: CI Verification Guardrails (5 plans)**
   **Requirements:** CI-01, CI-02, CI-03, CI-04, CI-05, CI-06, CI-07, CI-08
   **Goal:** 把所有驗證守門點（typecheck、lint/format、unit test + coverage threshold、DB migration schema drift、routes invariance、DI binding 完整性、E2E smoke tests）串入 GitHub Actions CI pipeline，讓每個 PR 都必須通過全部檢查才能合併至 main/develop，建立防回歸護欄。
-  **Plans:** 2 plans
+  **Plans:** 5 plans
   Plans:
   - [x] 20-01-PLAN.md — Guardrail 工具建置：coverage threshold config、migration schema drift 檢查腳本、DI binding 完整性稽核腳本、routes-existence 測試補強、E2E smoke journey 挑選與 fixture 準備（completed 2026-04-13）
-  - [ ] 20-02-PLAN.md — CI workflow 串接：擴充 `.github/workflows/ci.yml`，將所有守門點分 job 並行（typecheck / lint+format / unit+coverage / migration-drift / routes-check / di-audit / e2e-smoke），設為 main/develop 的 required checks
+  - [x] 20-02-PLAN.md — CI workflow 串接：擴充 `.github/workflows/ci.yml`，將所有守門點分 job 並行（typecheck / lint+format / unit+coverage / migration-drift / routes-check / di-audit / e2e-smoke），設為 main/develop 的 required checks（completed 2026-04-13）
+  - [ ] 20-03-PLAN.md — Gap closure: 修復 9 個失敗 unit tests（Cluster A 替換 vi.mocked → bun:test；Cluster B Profile 測試容忍 auto-generated UUID；Cluster C 修復 MemoryQueryBuilder.insertOrIgnore 冪等測試）
+  - [ ] 20-04-PLAN.md — Gap closure: 應用 `biome check --write` 安全自動修復 231 format + 368 organizeImports 違規（~738 檔，獨立 style commit 便於審查）
+  - [ ] 20-05-PLAN.md — Gap closure: interactive rebase reword commit `a583918` 將 body 包裹至 100 字元 + force-push with lease（user-action checkpoint）
 
 ### Phase 20: CI Verification Guardrails
 
@@ -78,10 +81,13 @@
 
 **Goal:** 把所有驗證守門點（typecheck、lint/format、unit test + coverage threshold、DB migration schema drift、routes invariance、DI binding 完整性、E2E smoke tests）串入 GitHub Actions CI pipeline，讓每個 PR 都必須通過全部檢查才能合併至 main/develop，建立防回歸護欄。
 
-**Plans:** 2 plans
+**Plans:** 5 plans
 
 - 20-01-PLAN.md — Guardrail 工具建置：coverage threshold config、migration schema drift 檢查腳本、DI binding 完整性稽核腳本、routes-existence 測試補強、E2E smoke journey 挑選與 fixture 準備
 - 20-02-PLAN.md — CI workflow 串接：擴充 `.github/workflows/ci.yml`，將所有守門點分 job 並行（typecheck / lint+format / unit+coverage / migration-drift / routes-check / di-audit / e2e-smoke），設為 main/develop 的 required checks
+- 20-03-PLAN.md — Gap closure (unit-coverage): 修復 9 個失敗 unit tests（3 cluster）
+- 20-04-PLAN.md — Gap closure (lint-format): 應用 Biome safe auto-fix 清除 599 個 format/organizeImports 違規
+- 20-05-PLAN.md — Gap closure (commitlint): reword commit `a583918` body + force-push
 
 ## Progress
 
@@ -94,4 +100,4 @@
 | 17. Repository Refactor | v1.3 | 5/5 | Complete | 2026-04-12 |
 | 18. Uniform Background Jobs | v1.4 | 2/2 | Complete   | 2026-04-13 |
 | 19. Alerts Decoupling | v1.4 | 0/3 | Complete    | 2026-04-13 |
-| 20. CI Guardrails | v1.4 | 1/2 | In Progress | 2026-04-13 |
+| 20. CI Guardrails | v1.4 | 2/5 | In Progress | 2026-04-13 |
