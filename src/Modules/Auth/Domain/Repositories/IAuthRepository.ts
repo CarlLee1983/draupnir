@@ -9,6 +9,17 @@ import type { User } from '../Aggregates/User'
 import type { Email } from '../ValueObjects/Email'
 
 /**
+ * Filters for narrowing down the user list query at the persistence layer.
+ * role and status are pushed to SQL WHERE; limit/offset control pagination.
+ */
+export interface UserListFilters {
+  readonly role?: string
+  readonly status?: string
+  readonly limit?: number
+  readonly offset?: number
+}
+
+/**
  * Port for managing persistence of User aggregates.
  */
 export interface IAuthRepository {
@@ -43,7 +54,14 @@ export interface IAuthRepository {
   delete(id: string): Promise<void>
 
   /**
-   * Retrieves all users matching the pagination criteria.
+   * Retrieves users matching the given filters, ordered by createdAt DESC.
+   * role and status are applied as SQL WHERE conditions.
    */
-  findAll(limit?: number, offset?: number): Promise<User[]>
+  findAll(filters?: UserListFilters): Promise<User[]>
+
+  /**
+   * Returns the total count of users matching the given role/status filters.
+   * Used for server-side pagination metadata.
+   */
+  countAll(filters?: UserListFilters): Promise<number>
 }
