@@ -12,6 +12,7 @@ import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRe
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import { OrgInvitationRules } from '../../Domain/Services/OrgInvitationRules'
 import {
   type AcceptInvitationRequest,
   OrganizationMemberPresenter,
@@ -48,7 +49,10 @@ export class AcceptInvitationService {
         return { success: false, message: 'User not found', error: 'USER_NOT_FOUND' }
       }
 
-      if (user.emailValue.toLowerCase() !== invitation.email.toLowerCase()) {
+      // 業務規則委由 Domain Service 驗證
+      try {
+        OrgInvitationRules.assertEmailMatches(invitation, user.emailValue)
+      } catch {
         return {
           success: false,
           message: 'This invitation was not sent to you',
@@ -60,7 +64,10 @@ export class AcceptInvitationService {
         userId,
         invitation.organizationId,
       )
-      if (existingMembership) {
+
+      try {
+        OrgInvitationRules.assertNotAlreadyMember(existingMembership)
+      } catch {
         return {
           success: false,
           message: 'Already a member of this organization',

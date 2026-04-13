@@ -4,12 +4,27 @@ import {
   type OrganizationResponse,
   type UpdateOrganizationRequest,
 } from '../DTOs/OrganizationDTO'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 
 export class UpdateOrganizationService {
-  constructor(private orgRepository: IOrganizationRepository) {}
+  constructor(
+    private orgRepository: IOrganizationRepository,
+    private orgAuth: OrgAuthorizationHelper,
+  ) {}
 
-  async execute(orgId: string, request: UpdateOrganizationRequest): Promise<OrganizationResponse> {
+  async execute(
+    orgId: string,
+    request: UpdateOrganizationRequest,
+    callerUserId: string,
+    callerSystemRole: string,
+  ): Promise<OrganizationResponse> {
     try {
+      // 授權檢查：需為組織 Manager 或系統 Admin
+      const authResult = await this.orgAuth.requireOrgManager(orgId, callerUserId, callerSystemRole)
+      if (!authResult.authorized) {
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
+      }
+
       const org = await this.orgRepository.findById(orgId)
       if (!org) {
         return { success: false, message: 'Organization not found', error: 'ORG_NOT_FOUND' }

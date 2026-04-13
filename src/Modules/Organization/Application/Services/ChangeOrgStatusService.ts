@@ -1,11 +1,20 @@
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 import { OrgStatus } from '../../Domain/ValueObjects/OrgStatus'
 import { OrganizationPresenter, type OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 
 export class ChangeOrgStatusService {
-  constructor(private orgRepository: IOrganizationRepository) {}
+  constructor(
+    private orgRepository: IOrganizationRepository,
+    private orgAuth: OrgAuthorizationHelper,
+  ) {}
 
-  async execute(orgId: string, status: string): Promise<OrganizationResponse> {
+  async execute(
+    orgId: string,
+    status: string,
+    callerUserId: string,
+    callerSystemRole: string,
+  ): Promise<OrganizationResponse> {
     try {
       try {
         OrgStatus.from(status)
@@ -15,6 +24,12 @@ export class ChangeOrgStatusService {
           message: 'Invalid status value, only active or suspended are allowed',
           error: 'INVALID_STATUS',
         }
+      }
+
+      // 授權檢查：需為組織 Manager 或系統 Admin
+      const authResult = await this.orgAuth.requireOrgManager(orgId, callerUserId, callerSystemRole)
+      if (!authResult.authorized) {
+        return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
       const org = await this.orgRepository.findById(orgId)

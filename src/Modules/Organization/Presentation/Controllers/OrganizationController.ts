@@ -140,20 +140,24 @@ export class OrganizationController {
   }
 
   async update(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationId(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
     const body = ctx.get('validated') as UpdateOrganizationParams
-    const result = await this.updateOrgService.execute(orgId, body)
+    const result = await this.updateOrgService.execute(orgId, body, auth.userId, auth.role)
     return ctx.json(result, result.success ? 200 : 400)
   }
 
   async changeStatus(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationId(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
     const body = ctx.get('validated') as ChangeOrgStatusParams
-    const result = await this.changeOrgStatusService.execute(orgId, body.status)
+    const result = await this.changeOrgStatusService.execute(orgId, body.status, auth.userId, auth.role)
     return ctx.json(result, result.success ? 200 : 400)
   }
 

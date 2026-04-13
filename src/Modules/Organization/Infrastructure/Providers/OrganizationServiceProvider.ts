@@ -53,6 +53,7 @@ export class OrganizationServiceProvider extends ModuleServiceProvider {
     container.bind('updateOrganizationService', (c: IContainer) => {
       return new UpdateOrganizationService(
         c.make('organizationRepository') as IOrganizationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
       )
     })
 
@@ -70,7 +71,10 @@ export class OrganizationServiceProvider extends ModuleServiceProvider {
     })
 
     container.bind('changeOrgStatusService', (c: IContainer) => {
-      return new ChangeOrgStatusService(c.make('organizationRepository') as IOrganizationRepository)
+      return new ChangeOrgStatusService(
+        c.make('organizationRepository') as IOrganizationRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      )
     })
 
     container.bind('inviteMemberService', (c: IContainer) => {
