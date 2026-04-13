@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -7,12 +7,7 @@ import { DrizzleUsageRepository } from '../Infrastructure/Repositories/DrizzleUs
 import * as schema from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
 import type { UsageRecordInsert } from '../Application/Ports/IUsageRepository'
 
-// Mock config to use in-memory DB
-vi.mock('@/Shared/Infrastructure/Database/Adapters/Drizzle/config', () => ({
-  getDrizzleInstance: vi.fn(),
-}))
-
-import { getDrizzleInstance } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
+import * as config from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
 
 describe('DrizzleUsageRepository', () => {
   let db: IDatabaseAccess
@@ -22,7 +17,7 @@ describe('DrizzleUsageRepository', () => {
   beforeAll(async () => {
     const client = createClient({ url: 'file::memory:' })
     drizzleDb = drizzle(client, { schema })
-    vi.mocked(getDrizzleInstance).mockReturnValue(drizzleDb)
+    spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
 
     // Setup table schema
     await client.execute(`

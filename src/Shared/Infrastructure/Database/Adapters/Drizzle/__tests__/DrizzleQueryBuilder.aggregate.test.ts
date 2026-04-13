@@ -1,4 +1,4 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -16,12 +16,7 @@ import {
   sum,
 } from '../../../AggregateSpec'
 
-// Mock config to use in-memory DB
-vi.mock('../config', () => ({
-  getDrizzleInstance: vi.fn(),
-}))
-
-import { getDrizzleInstance } from '../config'
+import * as config from '../config'
 
 describe('DrizzleQueryBuilder.aggregate', () => {
   let db: IDatabaseAccess
@@ -30,7 +25,7 @@ describe('DrizzleQueryBuilder.aggregate', () => {
   beforeAll(async () => {
     const client = createClient({ url: 'file::memory:' })
     drizzleDb = drizzle(client, { schema })
-    vi.mocked(getDrizzleInstance).mockReturnValue(drizzleDb)
+    spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
 
     // Setup table schema
     await client.execute(`
@@ -282,8 +277,7 @@ describe('DrizzleQueryBuilder.aggregate', () => {
         created_at: '2026-04-12T00:00:01Z',
       }
       
-      await expect(db.table('usageRecords').insertOrIgnore(data, { conflictTarget: 'bifrost_log_id' }))
-        .resolves.not.toThrow()
+      await db.table('usageRecords').insertOrIgnore(data, { conflictTarget: 'bifrost_log_id' })
 
       const count = await db.table('usageRecords').where('bifrost_log_id', '=', 'l1').count()
       expect(count).toBe(1) // should not have inserted another row

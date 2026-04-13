@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { beforeAll, describe, expect, it, spyOn } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -15,12 +15,7 @@ import {
   type AggregateSpec,
 } from '../AggregateSpec'
 
-// Mock config for Drizzle
-vi.mock('../Adapters/Drizzle/config', () => ({
-  getDrizzleInstance: vi.fn(),
-}))
-
-import { getDrizzleInstance } from '../Adapters/Drizzle/config'
+import * as config from '../Adapters/Drizzle/config'
 
 const seedRows = [
   {
@@ -94,7 +89,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
     // Setup Drizzle
     const client = createClient({ url: 'file::memory:' })
     drizzleDb = drizzle(client, { schema })
-    vi.mocked(getDrizzleInstance).mockReturnValue(drizzleDb)
+    spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
 
     await client.execute(`
       CREATE TABLE usage_records (
