@@ -69,7 +69,7 @@
   **Goal:** 把所有驗證守門點（typecheck、lint/format、unit test + coverage threshold、DB migration schema drift、routes invariance、DI binding 完整性、E2E smoke tests）串入 GitHub Actions CI pipeline，讓每個 PR 都必須通過全部檢查才能合併至 main/develop，建立防回歸護欄。
   **Plans:** 2 plans
   Plans:
-  - [ ] 20-01-PLAN.md — Guardrail 工具建置：coverage threshold config、migration schema drift 檢查腳本、DI binding 完整性稽核腳本、routes-existence 測試補強、E2E smoke journey 挑選與 fixture 準備
+  - [x] 20-01-PLAN.md — Guardrail 工具建置：coverage threshold config、migration schema drift 檢查腳本、DI binding 完整性稽核腳本、routes-existence 測試補強、E2E smoke journey 挑選與 fixture 準備（completed 2026-04-13）
   - [ ] 20-02-PLAN.md — CI workflow 串接：擴充 `.github/workflows/ci.yml`，將所有守門點分 job 並行（typecheck / lint+format / unit+coverage / migration-drift / routes-check / di-audit / e2e-smoke），設為 main/develop 的 required checks
 
 ### Phase 20: CI Verification Guardrails
@@ -94,4 +94,4 @@
 | 17. Repository Refactor | v1.3 | 5/5 | Complete | 2026-04-12 |
 | 18. Uniform Background Jobs | v1.4 | 2/2 | Complete   | 2026-04-13 |
 | 19. Alerts Decoupling | v1.4 | 0/3 | Complete    | 2026-04-13 |
-| 20. CI Guardrails | v1.4 | 0/2 | Not started | - |
+| 20. CI Guardrails | v1.4 | 1/2 | In Progress | 2026-04-13 |

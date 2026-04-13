@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test'
  * End-to-end exercise of the CLI device flow over HTTP.
  * Routes are registered without the /api prefix (see registerCliApiRoutes).
  */
-test.describe('CLI device flow', () => {
+test.describe('CLI device flow', { tag: '@smoke' }, () => {
   test('initiate → authorize (authenticated) → token exchange', async ({ request }) => {
     const email = `cli-device-${Date.now()}@test.com`
     const password = 'Test1234!'

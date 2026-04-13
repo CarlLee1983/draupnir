@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Member Portal', () => {
+test.describe('Member Portal', { tag: '@smoke' }, () => {
   test('member with Bearer token loads dashboard', async ({ page, request }) => {
     const email = `member-e2e-${Date.now()}@test.com`
     const password = 'Test1234!'

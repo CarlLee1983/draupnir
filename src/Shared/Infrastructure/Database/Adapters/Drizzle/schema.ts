@@ -21,6 +21,7 @@ export const users = sqliteTable('users', {
   password: text('password').notNull(),
   role: text('role').notNull().default('user'),
   status: text('status').notNull().default('active'),
+  google_id: text('google_id').unique(),
   created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 })
@@ -89,6 +90,9 @@ export const apiKeys = sqliteTable(
     key_hash: text('key_hash').notNull().unique(),
     bifrost_virtual_key_id: text('bifrost_virtual_key_id').notNull(),
     status: text('status').notNull().default('active'),
+    suspension_reason: text('suspension_reason'),
+    pre_freeze_rate_limit: text('pre_freeze_rate_limit'),
+    suspended_at: text('suspended_at'),
     scope: text('scope').notNull(),
     expires_at: text('expires_at'),
     revoked_at: text('revoked_at'),
@@ -386,3 +390,62 @@ export const reportSchedules = sqliteTable(
   },
   (table) => [index('idx_report_schedules_org_id').on(table.org_id)],
 )
+
+/**
+ * App API Keys 表
+ */
+export const appApiKeys = sqliteTable(
+  'app_api_keys',
+  {
+    id: text('id').primaryKey(),
+    org_id: text('org_id').notNull(),
+    issued_by_user_id: text('issued_by_user_id').notNull(),
+    label: text('label').notNull(),
+    key_hash: text('key_hash').notNull().unique(),
+    bifrost_virtual_key_id: text('bifrost_virtual_key_id').notNull(),
+    status: text('status').notNull().default('pending'),
+    scope: text('scope').notNull().default('read'),
+    rotation_policy: text('rotation_policy'),
+    bound_modules: text('bound_modules').notNull().default('[]'),
+    previous_key_hash: text('previous_key_hash'),
+    previous_bifrost_virtual_key_id: text('previous_bifrost_virtual_key_id'),
+    grace_period_ends_at: text('grace_period_ends_at'),
+    expires_at: text('expires_at'),
+    revoked_at: text('revoked_at'),
+    created_at: text('created_at'),
+    updated_at: text('updated_at'),
+  },
+  (table) => [
+    index('idx_app_api_keys_org_id').on(table.org_id),
+    index('idx_app_api_keys_key_hash').on(table.key_hash),
+  ],
+)
+
+/**
+ * Applications 表
+ */
+export const applications = sqliteTable('applications', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
+  org_id: text('org_id').notNull(),
+  created_by_user_id: text('created_by_user_id').notNull(),
+  status: text('status').notNull().default('active'),
+  webhook_url: text('webhook_url'),
+  webhook_secret: text('webhook_secret'),
+  redirect_uris: text('redirect_uris'),
+  created_at: text('created_at'),
+  updated_at: text('updated_at'),
+})
+
+/**
+ * Webhook Configs 表
+ */
+export const webhookConfigs = sqliteTable('webhook_configs', {
+  id: text('id').primaryKey(),
+  application_id: text('application_id').notNull(),
+  event_type: text('event_type').notNull(),
+  enabled: integer('enabled', { mode: 'boolean' }).notNull().default(true),
+  created_at: text('created_at'),
+  updated_at: text('updated_at'),
+})

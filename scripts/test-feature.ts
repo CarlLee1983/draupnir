@@ -55,7 +55,7 @@ async function main(): Promise<void> {
 }
 
 async function runTests(baseURL: string, testFiles: string[]): Promise<void> {
-  const tests = Bun.spawn(['bun', 'test', ...testFiles], {
+  const tests = Bun.spawn(['bun', 'test', ...testFiles.map((file) => `./${file}`)], {
     env: {
       ...process.env,
       API_BASE_URL: baseURL,

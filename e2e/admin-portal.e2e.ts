@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 
-test.describe('Admin Portal', () => {
+test.describe('Admin Portal', { tag: '@smoke' }, () => {
   test('Admin Dashboard 未登入時回傳重導（不跟隨 redirect）', async ({ request }) => {
     const res = await request.get('/admin/dashboard', { maxRedirects: 0 })
     expect([302, 303]).toContain(res.status())
