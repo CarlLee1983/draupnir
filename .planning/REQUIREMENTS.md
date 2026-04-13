@@ -22,11 +22,14 @@
 
 ### CI 驗證加固 (Phase 20)
 
-- [ ] **CI-01**: Playwright PDF 生成測試集成進 CI pipeline
+- [ ] **CI-01**: Playwright E2E smoke tests（關鍵路徑：admin/member portal、CLI device flow、PDF 生成）集成進 CI pipeline
 - [ ] **CI-02**: 自動 TypeScript 類型檢查防止類型錯誤合併
 - [ ] **CI-03**: 測試覆蓋率驗證（最低 80%）於每次提交檢查
 - [ ] **CI-04**: 代碼品質檢查（linting、formatting）於 CI 中執行
 - [ ] **CI-05**: 提交歷史驗證防止無效提交信息進入 main
+- [ ] **CI-06**: DB migration schema drift 檢查（SQL migrations vs Drizzle schema 一致性）於 CI 執行
+- [ ] **CI-07**: Routes invariance 驗證（沿用 `scripts/routes-analyzer.ts` + `tests/Feature/routes-existence.test.ts`）於 CI 執行
+- [ ] **CI-08**: DI binding 完整性稽核（每個 port 都有 adapter 綁定、無漏綁）於 CI 執行
 
 ## Out of Scope
 
@@ -55,6 +58,9 @@
 | CI-03 | Phase 20 | Pending |
 | CI-04 | Phase 20 | Pending |
 | CI-05 | Phase 20 | Pending |
+| CI-06 | Phase 20 | Pending |
+| CI-07 | Phase 20 | Pending |
+| CI-08 | Phase 20 | Pending |
 
 **覆蓋率：**
 - v1.4 需求：14 個
