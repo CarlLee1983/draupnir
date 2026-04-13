@@ -1,342 +1,241 @@
 # 認證流程圖
 
-## 1. 用戶認證流程 (JWT)
+與程式對齊重點：`POST /api/auth/*`、`LoginUserService` + `IAuthTokenRepository`、`AuthMiddleware`（JWT + 可選撤銷檢查 + Cookie `auth_token`）、SDK 為 `AppAuthMiddleware` + `AuthenticateApp` + `drp_app_` 前綴與 `/sdk/v1/*` 路由。
+
+---
+
+## 1. 用戶認證流程（JWT）
+
+### 1a. API 登入（JSON）
 
 ```
 ┌─────────────┐
 │   用戶端     │
 └──────┬──────┘
        │
-       │ 1. POST /auth/login
+       │ 1. POST /api/auth/login
        │    { email, password }
        ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │                   Presentation Layer                             │
 │  AuthController.login()                                          │
-│  ├─ 驗證輸入 (Zod schema)                                         │
-│  └─ 呼叫 Application Service                                     │
+│  ├─ 輸入已由 LoginRequest (Zod / FormRequest) 驗證               │
+│  └─ 呼叫 LoginUserService.execute(body)                          │
 └──────────────────────────────────────────────────────────────────┘
        │
-       │ 2. 執行登入用例
+       │ 2. 登入用例
        ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │               Application Layer                                  │
-│  AuthenticateUserService.execute(email, password)                │
+│  LoginUserService.execute({ email, password })                   │
 │                                                                  │
-│  ├─ 查詢 User: await userRepo.findByEmail(email)                │
-│  │   ↓ (若不存在) → 拒絕                                          │
-│  │                                                               │
-│  ├─ 驗證密碼: user.verifyPassword(password)                      │
-│  │   ├─ 使用 ValueObject (HashedPassword) 驗證               │
-│  │   └─ (若失敗) → 拒絕                                          │
-│  │                                                               │
-│  ├─ 建立 AuthSession: AuthSession.create(userId)               │
-│  │   └─ 生成 JWT Token                                           │
-│  │                                                               │
-│  ├─ 持久化: await authSessionRepo.save(session)                │
-│  │   └─ 在交易中執行                                             │
-│  │                                                               │
-│  └─ 發佈事件: DomainEventDispatcher.dispatch(UserLoggedInEvent)│
+│  ├─ 以 Email 查詢: authRepository.findByEmail(email)            │
+│  │   └─ 不存在 → INVALID_CREDENTIALS                             │
+│  ├─ 帳號停權: user.isSuspended() → ACCOUNT_SUSPENDED             │
+│  ├─ 驗證密碼: passwordHasher.verify(hash, plainPassword)         │
+│  │   └─ 失敗 → INVALID_CREDENTIALS                               │
+│  ├─ 簽發 JWT: jwtTokenService.signAccessToken / signRefreshToken │
+│  │   └─ payload: userId, email, role, permissions[], jti,      │
+│  │                type(access|refresh), iat, exp               │
+│  ├─ 持久化 token 雜湊: authTokenRepository.save(×2)              │
+│  │   └─ access / refresh 各一筆（SHA-256 雜湊），供撤銷追蹤     │
+│  └─（目前實作未於此用例發佈網域事件）                            │
 └──────────────────────────────────────────────────────────────────┘
        │
        │ 3. 回應
        ↓
 ┌──────────────────────────────────────────────────────────────────┐
 │                   Presentation Layer                             │
-│  200 OK                                                          │
+│  200 OK — LoginResponse                                          │
 │  {                                                               │
 │    "success": true,                                              │
 │    "data": {                                                     │
-│      "token": "eyJ0eXAi...",      // JWT (access token)         │
-│      "refreshToken": "xxxxxx",    // 刷新令牌                   │
-│      "user": { id, email, role }  // 用戶資訊                   │
+│      "accessToken": "...",                                       │
+│      "refreshToken": "...",                                      │
+│      "user": { "id", "email", "role" }                           │
 │    }                                                             │
 │  }                                                               │
 └──────────────────────────────────────────────────────────────────┘
-       │
-       ↓
+```
+
+**相關端點：** `POST /api/auth/register`、`POST /api/auth/refresh`、`POST /api/auth/logout`（logout 需 Bearer access token，並透過 `LogoutUserService` 撤銷）。
+
+### 1b. Inertia 表單登入（Cookie）
+
+```
 ┌─────────────┐
-│   用戶端     │ 4. 保存 token，用於後續 API 呼叫
-└─────────────┘
-
-
-═══════════════════════════════════════════════════════════════════════
-
-
-Token 構成 (JWT)
-└─ Header: { alg: 'HS256', typ: 'JWT' }
-└─ Payload: { userId, email, role, iat, exp, ... }  (見 TokenClaims ValueObject)
-└─ Signature: HMAC-SHA256(header.payload, secret)
-
-Token 驗證時序：
-1. 接收 Authorization: Bearer {token}
-2. 驗證簽名
-3. 檢查過期時間 (exp)
-4. 提取 userId，查詢 AuthSession
+│  瀏覽器      │
+└──────┬──────┘
+       │ POST（表單）→ LoginPage.store
+       ↓
+┌──────────────────────────────────────────────────────────────────┐
+│  Pages/Auth/LoginPage                                            │
+│  ├─ LoginUserService.execute({ email, password })                │
+│  └─ 成功時 setCookie('auth_token', accessToken, httpOnly, ...)   │
+│      maxAge 與 access token 壽命策略一致（目前 3600s）           │
+└──────────────────────────────────────────────────────────────────┘
+       │ redirect → /member/dashboard
+       ↓
 ```
+
+**Token 構成（JWT）**  
+- 簽發／驗證：`JwtTokenService`（`jsonwebtoken`，`JWT_SECRET`）  
+- Access 約 15 分鐘、Refresh 約 7 天（見 `JwtTokenService` 常數）  
+- Payload 型別：`TokenPayload`（`AuthToken` 模組）— `userId`, `email`, `role`, `permissions`, `jti`, `type`, `iat`, `exp`
+
+**Token 驗證（受保護路由）** — `AuthMiddleware`：
+
+1. 擷取 token：`Authorization: Bearer <jwt>`，若無則 fallback `Cookie: auth_token`
+2. `jwtService.verify(token)` — 簽名與 `exp`
+3. 若注入 `IAuthTokenRepository`：以 SHA-256(token) 查是否已撤銷
+4. 寫入 `ctx`：`auth`（`AuthContext`）、`user`；失敗時設 `authError`（由後續 `requireAuth` / Controller 決定 401）
 
 ---
 
-## 2. API 密鑰認證流程 (用戶密鑰)
+## 2. 組織 API 密鑰（`drp_sk_*`）— 模組職責說明
 
-```
-┌──────────────────┐
-│   CLI 客戶端      │
-│   或 SDK 應用    │
-└────────┬─────────┘
-         │
-         │ 1. GET /api/endpoint
-         │    Authorization: Bearer {userApiKey}
-         ↓
-┌──────────────────────────────────────────────────────────────────┐
-│                   Middleware 層                                   │
-│  AuthMiddleware                                                  │
-│  ├─ 提取 Header: Authorization: Bearer xxxxx                    │
-│  ├─ 類型判斷: 是 JWT 還是 API Key？                             │
-│  │  └─ 長度、格式判斷                                            │
-│  └─ 若是 API Key，轉發到 ApiKeyAuthMiddleware                  │
-└──────────────────────────────────────────────────────────────────┘
-         │
-         │ 2. 驗證 API Key
-         ↓
-┌──────────────────────────────────────────────────────────────────┐
-│              Application Layer                                   │
-│  AuthenticateUserApiKeyService.execute(keyString)               │
-│                                                                  │
-│  ├─ 查詢 ApiKey: await apiKeyRepo.findByKey(keyString)          │
-│  │   └─ 使用 ValueObject KeySecret (加密)                       │
-│  │                                                               │
-│  ├─ 檢查狀態: if (key.status === 'REVOKED') → 拒絕              │
-│  │                                                               │
-│  ├─ 更新最後使用時間: key.markAsUsed(now)                       │
-│  │                                                               │
-│  ├─ 查詢用戶: const user = await userRepo.find(key.userId)      │
-│  │                                                               │
-│  └─ 返回 authenticated user context                             │
-└──────────────────────────────────────────────────────────────────┘
-         │
-         │ 3. 執行 Controller
-         ↓
-┌──────────────────────────────────────────────────────────────────┐
-│                  Presentation Layer                              │
-│  Controller 接收 IHttpContext (包含 authenticated user)           │
-│  ├─ 執行業務邏輯                                                 │
-│  └─ 回應 200 OK / 錯誤                                           │
-└──────────────────────────────────────────────────────────────────┘
+組織成員透過 **ApiKey** 模組建立／列出／撤銷密鑰；原始字串格式為 `drp_sk_<uuid>`，儲存為 **雜湊**（見 `CreateApiKeyService`、`ApiKeyRepository.findByKeyHash`）。
 
-API Key 生命週期：
-└─ 建立: POST /api/keys → 生成 secret，只顯示一次
-└─ 儲存: 加密後存在資料庫
-└─ 使用: 驗證 + 更新 last_used_at
-└─ 撤銷: 標記為 REVOKED，後續拒絕
-└─ 輪轉: (未來特性) 自動過期 + 生成新的
-```
+**與共用 `AuthMiddleware` 的關係：** 目前 `AuthMiddleware` **僅驗證 JWT**（及上述 Cookie），**未**在一般 `/api/*` 上依 Bearer 內容分流「JWT vs `drp_sk_`」。CLI／SDK 若以用戶 API 密鑰呼叫 API，需在路由層另有專用中介層或閘道整合（例如 Bifrost virtual key）；本文件不臆測尚未接線的中介層名稱。
+
+**生命週期（概念）：**
+
+- 建立：會員流程或 API 建立後回傳一次性明文（實作見 `CreateApiKeyService`）
+- 儲存：資料庫仅存雜湊與中繼資料
+- 撤銷：`RevokeApiKeyService` 等更新狀態，後續驗證應拒絕
 
 ---
 
-## 3. 應用級認證流程 (AppApiKey)
+## 3. 應用級認證（App API Key，`drp_app_*`）與 SDK 路由
 
 ```
 ┌──────────────────────────────┐
-│   SDK 應用                    │
-│ (需要調用 Draupnir API)     │
+│   持有 App Key 的整合端       │
 └────────┬─────────────────────┘
          │
-         │ 1. GET /sdk/model/call
-         │    Authorization: Bearer {appApiKey}
+         │ POST /sdk/v1/chat/completions
+         │ GET  /sdk/v1/usage | /sdk/v1/balance
+         │ Authorization: Bearer drp_app_...
          ↓
 ┌──────────────────────────────────────────────────────────────────┐
-│                Middleware 層                                      │
-│  SdkAppAuthMiddleware                                            │
-│  ├─ 提取 appApiKey                                               │
-│  └─ 轉發到 AuthenticateAppService                               │
-└──────────────────────────────────────────────────────────────────┘
-         │
-         │ 2. 驗證應用密鑰
-         ↓
-┌──────────────────────────────────────────────────────────────────┐
-│             Application Layer                                    │
-│  AuthenticateAppService.execute(appKeyString)                   │
-│                                                                  │
-│  ├─ 查詢 AppApiKey: await appKeyRepo.findByKey(keyString)       │
-│  │                                                               │
-│  ├─ 查詢應用: const app = await appModuleRepo.find(key.appId)   │
-│  │   └─ AppModule = Application 實體                             │
-│  │                                                               │
-│  ├─ 檢查應用所有者: app.checkOwner(organization)                │
-│  │                                                               │
-│  └─ 返回 app context (非 user)                                  │
-└──────────────────────────────────────────────────────────────────┘
-         │
-         │ 3. 檢查配額並執行請求
-         ↓
-┌──────────────────────────────────────────────────────────────────┐
-│             Application Layer                                    │
-│  SdkProxyService.proxyModelCall()                                │
-│                                                                  │
-│  ├─ 查詢組織額度: await creditRepo.findByOrgId(appOwnerOrgId)    │
-│  │   └─ 確保 balance > 0                                         │
-│  │                                                               │
-│  ├─ 代理請求至 Bifrost: await bifrostClient.invoke(...)         │
-│  │   └─ 返回結果                                                 │
-│  │                                                               │
-│  ├─ 計算消費: tokens = result.usage.total_tokens                │
-│  │   └─ 將 tokens 轉換為額度成本                                │
-│  │                                                               │
-│  ├─ 扣除額度: account.applyDeduction(cost)                      │
-│  │   └─ 發佈 CreditDeductedEvent                                │
-│  │                                                               │
-│  └─ 回應: { result, usage, newBalance }                         │
+│  SdkApi — AppAuthMiddleware                                      │
+│  ├─ 必須為 Bearer；缺漏或格式錯誤 → 401 + 結構化錯誤碼            │
+│  └─ authenticateApp.execute(rawKey) → ctx.set('appAuth', context)│
 └──────────────────────────────────────────────────────────────────┘
          │
          ↓
-┌──────────────────────────────┐
-│   SDK 應用                    │
-│ 接收結果 + 新餘額              │
-└──────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│  Application — AuthenticateApp                                   │
+│  ├─ 前綴必須為 drp_app_                                          │
+│  ├─ keyHash = KeyHashingService.hash(rawKey)                       │
+│  ├─ appApiKeyRepo.findByKeyHash；輪替寬限內可查 findByPreviousKeyHash │
+│  ├─ 狀態: active / revoked / 過期檢查                            │
+│  └─ AppAuthContext: appKeyId, orgId, gatewayKeyId, scope,        │
+│                     boundModuleIds                               │
+└──────────────────────────────────────────────────────────────────┘
+         │
+         ├─ chat/completions → ProxyModelCall.execute(auth, body)
+         │   ├─ scope === read → 403 INSUFFICIENT_SCOPE
+         │   ├─ boundModuleIds 非空且未含 ai_chat → 403 MODULE_NOT_ALLOWED
+         │   └─ 以 gatewayKeyId 作 Bearer 呼叫 Bifrost /v1/chat/completions
+         │
+         ├─ usage → QueryUsage
+         └─ balance → QueryBalance（讀取 Credit 帳戶；非於 Proxy 內扣款）
 ```
 
 ---
 
-## 4. 組織成員邀請與授權流程
+## 4. 組織成員邀請與接受
 
 ```
 ┌──────────────┐
-│ 組織管理員    │
+│ 已登入成員    │ 需能通過 requireOrganizationContext（該 org 成員）
 └────┬─────────┘
-     │ 1. POST /org/invite
-     │    { inviteeEmail }
+     │ POST /api/organizations/:id/invitations
+     │ { email, role? }  — role 預設 member（manager | member）
      ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                  Application Layer                              │
-│  InviteUserService.execute(orgId, inviteeEmail)                │
-│                                                                 │
-│  ├─ 建立邀請: OrgInvitation.create()                            │
-│  │   ├─ status: 'PENDING'                                       │
-│  │   ├─ token: 生成唯一 token                                    │
-│  │   └─ expiresAt: 現在 + 7 天                                   │
-│  │                                                              │
-│  ├─ 保存: await invitationRepo.save(invitation)                │
-│  │                                                              │
-│  └─ 發佈: InvitationCreatedEvent                                │
-│      └─ 觸發發送邀請郵件                                        │
+│  InviteMemberService.execute(orgId, invitedByUserId, systemRole, request) │
+│  ├─ orgAuth.requireOrgManager（或 admin 略過）                    │
+│  ├─ OrganizationInvitation.create(orgId, email, role, invitedBy)  │
+│  └─ invitationRepository.save                                   │
 └─────────────────────────────────────────────────────────────────┘
      │
-     │ 2. 邀請郵件寄送
+     │ 接受方須為已註冊用戶且已登入
      ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│            被邀請用戶                                            │
-│ 收到郵件 + 邀請連結:                                             │
-│  https://draupnir.com/accept-invite?token=xxx                  │
+│ POST /api/invitations/:token/accept  [requireAuth]              │
+│ Body: { "token": "<邀請 token>" }（AcceptInvitationRequest）     │
+│ 注意：服務層使用 body.token；呼叫端請送 JSON，勿僅依賴路徑占位   │
 └─────────────────────────────────────────────────────────────────┘
-     │
-     │ 3. 點擊連結，接受邀請
      ↓
 ┌─────────────────────────────────────────────────────────────────┐
-│                  Application Layer                              │
-│  AcceptInvitationService.execute(token)                         │
-│                                                                 │
-│  ├─ 查詢邀請: await invitationRepo.findByToken(token)          │
-│  │   └─ 驗證: 存在且未過期且狀態=PENDING                        │
-│  │                                                              │
-│  ├─ 建立用戶或取得現有用戶                                      │
-│  │                                                              │
-│  ├─ 建立成員: OrgMember.create()                               │
-│  │   ├─ orgId, userId, role (MEMBER)                           │
-│  │   └─ status: 'ACTIVE'                                        │
-│  │                                                              │
-│  ├─ 更新邀請: invitation.accept()                              │
-│  │   └─ status: 'ACCEPTED'                                      │
-│  │                                                              │
-│  └─ 發佈: MemberAddedEvent                                      │
-└─────────────────────────────────────────────────────────────────┘
-     │
-     ↓
-┌─────────────────────────────────────────────────────────────────┐
-│  用戶成為組織成員                                               │
-│  ├─ 存取組織資源                                                │
-│  ├─ 根據角色 (OWNER/ADMIN/MEMBER) 有不同權限                    │
-│  └─ 查看組織的額度、API 密鑰等                                   │
+│  AcceptInvitationService.execute(userId, { token })             │
+│  ├─ tokenHash = sha256(token) → findByTokenHash                 │
+│  ├─ invitation 必須 pending                                     │
+│  ├─ 登入者 email 必須與邀請 email 一致（大小寫不敏感）           │
+│  ├─ transaction: OrganizationMember.save + markAsAccepted       │
+│  └─ 不於此建立新 User（帳號應已存在）                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 5. 認證決策樹
+## 5. 認證決策（實作對齊版）
+
+**共用 JWT 管線（`AuthMiddleware`）**
 
 ```
-┌─────────────────────────────────────────┐
-│  HTTP 請求到達                          │
-│  Authorization: Bearer {token}         │
-└────────────┬────────────────────────────┘
-             │
-             ↓
-     ┌───────────────────┐
-     │ 有 Authorization？ │
-     └────────┬──────────┘
-              │
-      ┌───────┴──────────┐
-      │否               │是
-      ↓                  ↓
-   ┌──────────────┐  ┌─────────────────────┐
-   │ 拒絕 401     │  │ 判斷 token 類型      │
-   │ Unauthorized│  └────┬──────────┬──────┘
-   └──────────────┘      │          │
-                      是 JWT?   是 API Key?
-                         │          │
-                    ┌────┴─┐    ┌───┴────┐
-                    │yes   │no  │yes     │no
-                    ↓      │    ↓        ↓
-            ┌──────────┐   │  ┌────┐  拒絕
-            │ JWT 驗證 │   │  │AK │  401
-            │ (Profile)│   │  │驗證│  
-            │ + token  │   │  └────┘
-            │驗證      │   │
-            └──────────┘   │
-                    yes ── 403 Forbidden (無此認證類型)
-                    │
-                    ├─ 簽名有效？ yes →
-                    ├─ 未過期？    yes →
-                    └─ 用戶存在？   yes → 設定 IHttpContext
-                                no → 拒絕
+HTTP 請求
+    → 有 Bearer 或 auth_token Cookie？
+        否 → 不設定 auth（公開路由可繼續）
+        是 → verify JWT
+            → 無效 → authError = INVALID_TOKEN
+            → 可選：token 已撤銷？→ TOKEN_REVOKED
+            → 成功 → ctx.auth / ctx.user
 ```
+
+**需登入的 API：** `requireAuth()`（見 `RoleMiddleware`）檢查 `AuthMiddleware.getAuthContext`，無則 401。
+
+**SDK 路由：** 不使用上述 JWT 管線作為主要機制；由 `AppAuthMiddleware` 單獨驗證 `drp_app_`，失敗直接 401 JSON。
 
 ---
 
 ## 6. 權限檢查模式
 
-### 基於角色 (Role-Based Access Control, RBAC)
+### 系統角色（Auth 模組 `user.role`）
+
+全域 `admin` 在多處可繞過組織成員檢查（例如 `OrgAuthorizationHelper`）。
+
+### 組織內角色（Organization）
 
 ```
-┌─────────────────────────────────┐
-│ Organization 成員角色           │
-├─────────────────────────────────┤
-│ OWNER  - 完全控制               │
-│ ADMIN  - 管理成員、設定          │
-│ MEMBER - 查看、使用資源          │
-└─────────────────────────────────┘
-
-在 Controller 或 Service 中：
-  if (!await org.canMemberDelete(userId)) {
-    throw new ForbiddenException('無權限刪除成員')
-  }
+manager — 可管理邀請與成員（見 isManager / requireOrgManager）
+member  — 一般成員
 ```
 
-### 基於資源所有權 (Ownership)
+（非舊版文件中的 OWNER／ADMIN／MEMBER 三階；以 `OrgMemberRoleType` 為準。）
 
-```
-OrgAuthorizationHelper.canUserModifyOrg(userId, orgId)
-  ├─ 查詢用戶是否是該組織成員
-  ├─ 檢查角色 >= ADMIN
-  └─ 回應 true/false
-```
+### 組織操作範例
+
+- 邀請：`requireOrgManager` + `InviteMemberService`
+- 僅成員可讀：`requireOrgMembership`（`OrganizationMiddleware` / Controller 內）
 
 ---
 
-## 參考
+## 參考（原始碼）
+
+| 區域 | 路徑 |
+|------|------|
+| JWT 登入／刷新／登出 | `src/Modules/Auth/Application/Services/LoginUserService.ts` 等 |
+| HTTP 適配 | `src/Modules/Auth/Presentation/Controllers/AuthController.ts` |
+| 路由 | `src/Modules/Auth/Presentation/Routes/auth.routes.ts` |
+| JWT 與 Payload | `src/Modules/Auth/Infrastructure/Services/JwtTokenService.ts`、`Domain/ValueObjects/AuthToken.ts` |
+| 共用中介層 | `src/Shared/Infrastructure/Middleware/AuthMiddleware.ts` |
+| 登入頁 Cookie | `src/Pages/Auth/LoginPage.ts` |
+| 組織 API 密鑰 | `src/Modules/ApiKey/` |
+| App 密鑰與 SDK | `src/Modules/AppApiKey/`、`src/Modules/SdkApi/`（`AppAuthMiddleware`、`AuthenticateApp`、`ProxyModelCall`） |
+| 邀請／接受 | `src/Modules/Organization/Application/Services/InviteMemberService.ts`、`AcceptInvitationService.ts` |
+| 路由 | `src/Modules/Organization/Presentation/Routes/organization.routes.ts` |
 
 - [`ddd-layered-architecture.md`](./ddd-layered-architecture.md) — 四層架構
-- `src/Modules/Auth/` — 認證模組
-- `src/Modules/ApiKey/` — API 密鑰管理
-- `src/Modules/SdkApi/` — SDK 認證
-- `src/Shared/Middleware/` — 認證中間件

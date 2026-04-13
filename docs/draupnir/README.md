@@ -20,7 +20,7 @@
 | 檔案 | 內容 |
 |------|------|
 | [`architecture/README.md`](./architecture/README.md) | 🏛️ 架構導航索引 |
-| [`architecture/ddd-layered-architecture.md`](./architecture/ddd-layered-architecture.md) | DDD 四層架構圖 + 13 模組評分 |
+| [`architecture/ddd-layered-architecture.md`](./architecture/ddd-layered-architecture.md) | DDD 四層架構圖 + 15 模組分層表 |
 | [`architecture/module-dependency-map.md`](./architecture/module-dependency-map.md) | 模組依賴圖 + 耦合度分析 |
 | [`architecture/entity-relationship-overview.md`](./architecture/entity-relationship-overview.md) | ER 圖 + 資料庫映射 |
 | [`architecture/auth-flow-diagrams.md`](./architecture/auth-flow-diagrams.md) | 認證流程圖 (JWT、API Key、OAuth) |

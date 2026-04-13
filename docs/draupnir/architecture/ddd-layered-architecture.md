@@ -8,13 +8,18 @@
 ├─────────────────────────────────────────────────────────────────────┤
 │
 │  ┌──────────────────────────────────────────────────────────────┐
-│  │                  Presentation Layer                          │
+│  │                  Presentation Layer                           │
 │  │            (HTTP Controllers & Route Handlers)               │
 │  │                                                              │
 │  │  • DashboardController        • ProfileController           │
 │  │  • CreditController           • AuthController              │
 │  │  • SdkApiController           • OrganizationController      │
-│  │  • AdminPortalController      • ContractController          │
+│  │  • DevPortalController        • ContractController          │
+│  │  • ApiKeyController           • AppApiKeyController         │
+│  │  • AppModuleController        • CliApiController            │
+│  │  • HealthController           • ReportController            │
+│  │  • AlertController            • WebhookEndpointController  │
+│  │  • AlertHistoryController                                    │
 │  │                                                              │
 │  │  職責：HTTP 映射、輸入驗證 (Zod)、狀態碼回應               │
 │  └──────────────────────────────────────────────────────────────┘
@@ -23,11 +28,15 @@
 │  │                  Application Layer                           │
 │  │              (Use Case Services & DTOs)                      │
 │  │                                                              │
-│  │  Services (單一職責 - 一個服務 = 一個 Use Case):            │
+│  │  Services（單一職責 — 一例一服務，例示）:                    │
 │  │  • CreateOrganizationService     • DeductCreditService      │
 │  │  • TopUpCreditService            • CreateApiKeyService      │
-│  │  • AuthenticateAppService        • AcceptInvitationService  │
-│  │  • GetDashboardSummaryService    • CreateUserService       │
+│  │  • LoginUserService              • AcceptInvitationService  │
+│  │  • GetDashboardSummaryService    • RegisterUserService      │
+│  │  • ScheduleReportService         • ConfigureWebhookService   │
+│  │                                                              │
+│  │  協調／授權輔助（仍屬應用層，非 Domain）:                   │
+│  │  • OrgAuthorizationHelper（Organization/Application）       │
 │  │                                                              │
 │  │  職責：用例協調、交易邊界、授權檢查、事件發佈              │
 │  └──────────────────────────────────────────────────────────────┘
@@ -36,29 +45,32 @@
 │  │                    Domain Layer                              │
 │  │       (Business Rules, Aggregates, Value Objects)           │
 │  │                                                              │
-│  │  Aggregate Roots:                                           │
-│  │  • User / Profile               • CreditAccount             │
+│  │  Aggregate Roots（例示）:                                   │
+│  │  • User (Auth) / UserProfile    • CreditAccount             │
 │  │  • Organization                 • ApiKey / AppApiKey        │
-│  │  • AuthSession                  • AppModule                 │
-│  │  • Contract                                                 │
+│  │  • Contract / AppModule         • ReportSchedule (Reports)  │
+│  │  • AlertConfig, WebhookEndpoint (Alerts)                    │
 │  │                                                              │
-│  │  Value Objects:                                             │
-│  │  • Email, UserRole              • Balance, TransactionType │
-│  │  • OrgSlug, OrgRole             • KeyStatus                │
-│  │  • TokenClaims, JwtToken        • MemberStatus             │
+│  │  Value Objects（例示）:                                     │
+│  │  • Email, Role                  • Balance, TransactionType  │
+│  │  • OrgSlug, OrgMemberRole       • KeyStatus / rotation 等    │
+│  │  • Jwt / Token 相關值物件       • ReportToken 等                  │
 │  │                                                              │
-│  │  Domain Services (跨 Aggregate 的純規則):                   │
-│  │  • CreditDeductionService       • OrgAuthorizationHelper   │
+│  │  Domain Services / 純規則（例示）:                          │
+│  │  • ContractEnforcementService     • OrgMembershipRules      │
+│  │  • HealthCheckService             • Alerts 通知／解析埠型          │
 │  │                                                              │
-│  │  Domain Events:                                             │
-│  │  • CreditDeductedEvent          • UserCreatedEvent        │
-│  │  • CreditToppedUpEvent          • LowBalanceAlertEvent    │
-│  │  • MemberAddedEvent             • (可擴展)                 │
+│  │  Domain Events（例示，實際命名以程式為準）:                 │
+│  │  • CreditToppedUp / BalanceLow / BalanceDepleted           │
+│  │  • ContractActivated / ContractExpired / ContractExpiring  │
+│  │  • ModuleSubscribed / ModuleAccessRevoked                    │
+│  │  • AppApiKey: app_key.created / rotated / revoked            │
+│  │  • BifrostSyncCompletedEvent (Dashboard)                   │
 │  │                                                              │
-│  │  Repository 介面 (無實現):                                   │
-│  │  • IUserRepository              • ICreditAccountRepository │
-│  │  • IOrganizationRepository      • IApiKeyRepository        │
-│  │  • IAuthSessionRepository       (等 13 個模組)              │
+│  │  Repository 介面（無實現，例示）:                           │
+│  │  • IAuthRepository / IUserProfileRepository                  │
+│  │  • IOrganizationRepository      • ICreditAccountRepository │
+│  │  • IApiKeyRepository              （各模組另有專屬介面）     │
 │  │                                                              │
 │  │  職責：不變式、狀態轉換、業務規則、純計算                  │
 │  └──────────────────────────────────────────────────────────────┘
@@ -67,10 +79,10 @@
 │  │                 Infrastructure Layer                         │
 │  │      (Persistence, External APIs, DI Container)             │
 │  │                                                              │
-│  │  Repositories (實現):                                       │
-│  │  • UserRepository               • CreditAccountRepository  │
-│  │  • OrganizationRepository       • ApiKeyRepository         │
-│  │  • AuthSessionRepository        (12+ 其他實現)              │
+│  │  Repositories（實現，例示）:                                 │
+│  │  • UserRepository / Drizzle*Repository 等                   │
+│  │  • CreditAccountRepository      • ApiKeyRepository         │
+│  │  • 其餘依模組介面實作（含 Reports、Alerts 多表儲存）         │
 │  │                                                              │
 │  │  External Services:                                         │
 │  │  • BifrostGatewayClient         (LLM 模型呼叫)              │
@@ -173,25 +185,29 @@ Shared (無環形依賴)
 - Infrastructure 直接依賴 Presentation
 - 模組間循環依賴
 
-## 13 個模組的分層完整性
+## 15 個模組的分層完整性
+
+欄位 **Domain**：`✅` 表示具 Aggregate／實質領域模型；`△` 表示僅事件或極薄領域程式；`❌` 表示無 `Domain/`。
 
 | 模組 | Domain | Applic | Infra | Pres | 評分 | 備註 |
 |------|--------|--------|-------|------|------|------|
-| Profile | ✅ | ✅ | ✅ | ✅ | 9/10 | 完整 DDD |
-| Organization | ✅ | ✅ | ✅ | ✅ | 9/10 | 複雜業務邏輯 |
-| Auth | ✅ | ✅ | ✅ | ✅ | 8.5/10 | JWT 驗證清晰 |
+| Alerts | ✅ | ✅ | ✅ | ✅ | 8.5/10 | Webhook／預算／告警 |
 | ApiKey | ✅ | ✅ | ✅ | ✅ | 8.8/10 | 完整 |
-| Credit | ✅ | ✅ | ✅ | ✅ | 9/10 | 額度計算邏輯優雅 |
-| Health | ✅ | ✅ | ✅ | ✅ | 8.9/10 | 簡單實用 |
-| Dashboard | ❌ | ✅ | ✅ | ✅ | 7.9/10 | 應用層讀聚合 |
-| CliApi | ✅ | ✅ | ✅ | ✅ | 8.4/10 | 代理層 |
-| SdkApi | ❌ | ✅ | ✅ | ✅ | 7.6/10 | 認證代理 |
 | AppApiKey | ✅ | ✅ | ✅ | ✅ | 8.6/10 | 與 ApiKey 對稱 |
-| AppModule | ✅ | ✅ | ✅ | ✅ | 8.6/10 | 應用管理 |
+| AppModule | ✅ | ✅ | ✅ | ✅ | 8.6/10 | 應用／訂閱 |
+| Auth | ✅ | ✅ | ✅ | ✅ | 8.5/10 | JWT、User Aggregate |
+| CliApi | ✅ | ✅ | ✅ | ✅ | 8.4/10 | Device code／代理 |
+| Contract | ✅ | ✅ | ✅ | ✅ | 8.6/10 | Admin 合約 |
+| Credit | ✅ | ✅ | ✅ | ✅ | 9/10 | 額度與事件清晰 |
+| Dashboard | △ | ✅ | ✅ | ✅ | 8.0/10 | 讀模型為主；Domain 僅 `BifrostSyncCompletedEvent` |
 | DevPortal | ✅ | ✅ | ✅ | ✅ | 8.5/10 | 開發者入口 |
-| Contract | ✅ | ✅ | ✅ | ✅ | 8.6/10 | Admin 支援 |
+| Health | ✅ | ✅ | ✅ | ✅ | 8.9/10 | 簡單實用 |
+| Organization | ✅ | ✅ | ✅ | ✅ | 9/10 | 成員／邀請／授權 |
+| Profile | ✅ | ✅ | ✅ | ✅ | 9/10 | UserProfile |
+| Reports | ✅ | ✅ | ✅ | ✅ | 8.4/10 | 排程／PDF／寄信 |
+| SdkApi | ❌ | ✅ | ✅ | ✅ | 7.6/10 | 認證與代理，無 Domain 目錄 |
 
-**11/13 模組完整四層，整體評分 8.2/10**
+**摘要**：**14/15** 模組四層目錄齊備（**SdkApi** 無 `Domain/`）；其中 **13/15** 具實質領域模型（**Dashboard** 僅薄 Domain、**SdkApi** 無）。主觀整體約 **8.3/10**（隨模組演進可再調整）。
 
 ---
 
@@ -199,5 +215,6 @@ Shared (無環形依賴)
 
 - [`layer-decision-rules.md`](../knowledge/layer-decision-rules.md) — 分層判斷規則
 - [`domain-events.md`](../knowledge/domain-events.md) — Domain Events 實踐
+- [`module-boundaries.md`](../knowledge/module-boundaries.md) — bounded context
 - `src/Shared/` — 跨模組共享程式碼
-- `src/Modules/` — 13 個模組實現
+- `src/Modules/` — **15** 個模組實現（見各模組 `index.ts`／目錄）
