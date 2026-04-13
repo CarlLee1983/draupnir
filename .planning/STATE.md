@@ -53,9 +53,10 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 | 260413-vsz | ListUsersService 篩選下推 — role/status filter 移至 SQL WHERE | 2026-04-13 | f042e2c | [260413-vsz-listusersservice-iauthrepository-findall](.planning/quick/260413-vsz-listusersservice-iauthrepository-findall/) |
 | 260413-vzi | 修正 Profile 模組的 9 個 DDD 戰術設計問題 | 2026-04-13 | ce2e751 | [260413-vzi-profile-9-ddd](.planning/quick/260413-vzi-profile-9-ddd/) |
 | 260413-wj2 | 補充 skills/ddd-module domain events 說明並修正 Profile 模組 4 個 P3/P4 問題 | 2026-04-13 | 0b5b697 | [260413-wj2-skills-ddd-module-domain-events-profile-](.planning/quick/260413-wj2-skills-ddd-module-domain-events-profile-/) |
-| 260413-x8a | Fix RegisterPage: restore passwordRequirements on error rerenders and fix flash persistence across redirects | 2026-04-13 | — | [260413-x8a-fix-registerpage-restore-passwordrequire](.planning/quick/260413-x8a-fix-registerpage-restore-passwordrequire/) |
+| 260413-x8a | Fix RegisterPage: restore passwordRequirements on error rerenders and fix flash persistence across redirects | 2026-04-13 | 9f12713 | [260413-x8a-fix-registerpage-restore-passwordrequire](.planning/quick/260413-x8a-fix-registerpage-restore-passwordrequire/) |
+| 260413-wo3 | 修正 Organization 模組 9 個 DDD 戰術設計問題（fromDatabase 移除、VO 型別、DTO 拆分、Domain Service、授權、測試） | 2026-04-13 | 50b8d53 | [260413-wo3-organization-ddd-9-priority](.planning/quick/260413-wo3-organization-ddd-9-priority/) |
 
 ## Session continuity
 
-Last activity: 2026-04-13 - Completed quick task 260413-x8a: Fix RegisterPage passwordRequirements + flash persistence
+Last activity: 2026-04-13 - Completed quick task 260413-wo3: Organization 模組 9 個 DDD 問題修正（3 tasks, 39 new tests）
 Next step: `/gsd-new-milestone` when ready to plan v1.5+.
