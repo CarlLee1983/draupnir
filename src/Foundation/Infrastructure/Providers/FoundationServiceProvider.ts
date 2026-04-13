@@ -3,6 +3,8 @@ import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/Bi
 import { ConsoleMailer } from '../Services/Mail/ConsoleMailer'
 import { UpyoMailer } from '../Services/Mail/UpyoMailer'
 import { WebhookDispatcher } from '../Services/Webhook/WebhookDispatcher'
+import { CronerScheduler } from '../Services/Scheduler/CronerScheduler'
+import type { IScheduler } from '../Ports/Scheduler/IScheduler'
 import {
   BifrostClient,
   createBifrostClientConfig,
@@ -35,6 +37,10 @@ export class FoundationServiceProvider extends ModuleServiceProvider {
 
     container.singleton('webhookDispatcher', () => {
       return new WebhookDispatcher(3)
+    })
+
+    container.singleton('scheduler', (): IScheduler => {
+      return new CronerScheduler()
     })
   }
 
