@@ -13,11 +13,11 @@ export class UserProfileRepository implements IUserProfileRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   /**
-   * Finds a user profile by unique identifier.
-   * @param id - User ID.
+   * Finds a user profile by the Auth user ID (WHERE user_id = ?).
+   * @param userId - The Auth module user UUID.
    */
-  async findById(id: string): Promise<UserProfile | null> {
-    const row = await this.db.table('user_profiles').where('id', '=', id).first()
+  async findByUserId(userId: string): Promise<UserProfile | null> {
+    const row = await this.db.table('user_profiles').where('user_id', '=', userId).first()
     return row ? UserProfileMapper.fromDatabase(row as Record<string, unknown>) : null
   }
 

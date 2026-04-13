@@ -1,5 +1,5 @@
 import type { UserProfileDTO } from '../../Application/DTOs/UserProfileDTO'
-import { UserProfile, type UserProfileProps } from '../../Domain/Aggregates/UserProfile'
+import { UserProfile, type ReconstitutionProps } from '../../Domain/Aggregates/UserProfile'
 
 /**
  * Parses notification preferences from unknown database format.
@@ -44,7 +44,7 @@ export const UserProfileMapper = {
    * @param row - Raw data from the database.
    */
   fromDatabase(row: Record<string, unknown>): UserProfile {
-    const props: UserProfileProps = {
+    const props: ReconstitutionProps = {
       id: row.id as string,
       userId: row.user_id as string,
       displayName: normalizeString(row.display_name),

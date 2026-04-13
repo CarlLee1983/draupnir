@@ -4,8 +4,6 @@ import type { UserProfile } from '../Aggregates/UserProfile'
  * Filters for querying UserProfiles.
  */
 export interface UserProfileFilters {
-  role?: string
-  status?: string
   keyword?: string
 }
 
@@ -15,9 +13,9 @@ export interface UserProfileFilters {
  */
 export interface IUserProfileRepository {
   /**
-   * Finds a user profile by unique identifier.
+   * Finds a user profile by the Auth user ID (user_id column, not profile id).
    */
-  findById(id: string): Promise<UserProfile | null>
+  findByUserId(userId: string): Promise<UserProfile | null>
 
   /**
    * Persists a new user profile.
