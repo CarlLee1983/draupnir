@@ -1,10 +1,10 @@
+import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import type {
   AlertPayload,
   DeliveryResult,
   IAlertNotifier,
 } from '../../Domain/Services/IAlertNotifier'
 import type { DeliveryChannel } from '../../Domain/ValueObjects/DeliveryStatus'
-import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 
 export class FakeAlertNotifier implements IAlertNotifier {
   readonly calls: AlertPayload[] = []

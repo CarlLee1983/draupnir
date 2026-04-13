@@ -1,7 +1,7 @@
 // src/Modules/Contract/Application/Services/ListContractsService.ts
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import { ContractPresenter, type ContractListResponse } from '../DTOs/ContractDTO'
+import { type ContractListResponse, ContractPresenter } from '../DTOs/ContractDTO'
 
 /**
  * Lists contracts for a target organization; non-admins must pass org membership checks.

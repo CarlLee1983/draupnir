@@ -1,7 +1,7 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { GetAlertHistoryService } from '../Application/Services/GetAlertHistoryService'
-import { AlertEvent } from '../Domain/Entities/AlertEvent'
 import { AlertDelivery } from '../Domain/Entities/AlertDelivery'
+import { AlertEvent } from '../Domain/Entities/AlertEvent'
 import type { IAlertDeliveryRepository } from '../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertEventRepository } from '../Domain/Repositories/IAlertEventRepository'
 

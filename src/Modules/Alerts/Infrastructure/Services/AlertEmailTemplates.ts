@@ -37,14 +37,12 @@ function formatKeyRows(keyBreakdown: readonly AlertKeyBreakdownItem[]): string {
     .join('')
 }
 
-function buildTemplate(
-  params: AlertEmailTemplateParams,
-  severity: 'warning' | 'critical',
-): string {
+function buildTemplate(params: AlertEmailTemplateParams, severity: 'warning' | 'critical'): string {
   const accent = severity === 'critical' ? '#dc2626' : '#f59e0b'
   const accentSoft = severity === 'critical' ? '#fef2f2' : '#fffbeb'
   const title = severity === 'critical' ? 'Critical (100%)' : 'Warning (80%)'
-  const heading = severity === 'critical' ? 'Critical cost threshold reached' : 'Warning threshold reached'
+  const heading =
+    severity === 'critical' ? 'Critical cost threshold reached' : 'Warning threshold reached'
 
   return `
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0;padding:0;background:${accentSoft};font-family:Arial,Helvetica,sans-serif;">

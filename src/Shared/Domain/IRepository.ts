@@ -1,7 +1,7 @@
 /**
  * Base Repository Interface - Defines the common contract for all repositories.
  *
- * @public - Public interface defined in the Domain layer. All repository 
+ * @public - Public interface defined in the Domain layer. All repository
  * implementations must follow this contract.
  *
  * **Layered Design**
@@ -68,7 +68,7 @@ export interface IRepository<T extends BaseEntity> {
   /**
    * Saves an entity (Create or Update).
    *
-   * Implementation details are decided by the concrete Repository. Based on the 
+   * Implementation details are decided by the concrete Repository. Based on the
    * Entity's state, it decides whether to execute an INSERT or UPDATE operation.
    *
    * @param entity - The entity to save.
@@ -113,4 +113,3 @@ export interface IRepository<T extends BaseEntity> {
    */
   count(params?: { [key: string]: any }): Promise<number>
 }
-

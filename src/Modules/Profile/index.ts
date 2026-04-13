@@ -1,14 +1,5 @@
 // src/Modules/Profile/index.ts
 // Domain
-export { UserProfile } from './Domain/Aggregates/UserProfile'
-export type { UpdateProfileFields } from './Domain/Aggregates/UserProfile'
-export { Phone } from './Domain/ValueObjects/Phone'
-export { Timezone } from './Domain/ValueObjects/Timezone'
-export { Locale } from './Domain/ValueObjects/Locale'
-export type {
-  IUserProfileRepository,
-  UserProfileFilters,
-} from './Domain/Repositories/IUserProfileRepository'
 
 // Application
 export type {
@@ -17,10 +8,18 @@ export type {
 } from './Application/DTOs/UserProfileDTO'
 export { GetProfileService } from './Application/Services/GetProfileService'
 export { UpdateProfileService } from './Application/Services/UpdateProfileService'
-
+export type { UpdateProfileFields } from './Domain/Aggregates/UserProfile'
+export { UserProfile } from './Domain/Aggregates/UserProfile'
+export type {
+  IUserProfileRepository,
+  UserProfileFilters,
+} from './Domain/Repositories/IUserProfileRepository'
+export { Locale } from './Domain/ValueObjects/Locale'
+export { Phone } from './Domain/ValueObjects/Phone'
+export { Timezone } from './Domain/ValueObjects/Timezone'
+export { ProfileServiceProvider } from './Infrastructure/Providers/ProfileServiceProvider'
 // Infrastructure
 export { UserProfileRepository } from './Infrastructure/Repositories/UserProfileRepository'
-export { ProfileServiceProvider } from './Infrastructure/Providers/ProfileServiceProvider'
 
 // Presentation
 export { ProfileController } from './Presentation/Controllers/ProfileController'

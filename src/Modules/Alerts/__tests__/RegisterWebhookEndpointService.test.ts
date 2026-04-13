@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { lookup } from 'node:dns/promises'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { RegisterWebhookEndpointService } from '../Application/Services/RegisterWebhookEndpointService'
 import type { IWebhookEndpointRepository } from '../Domain/Repositories/IWebhookEndpointRepository'
 

@@ -1,6 +1,6 @@
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
-import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import { OrganizationPresenter, type OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 
 export class GetOrganizationService {
   constructor(
@@ -27,7 +27,11 @@ export class GetOrganizationService {
       if (!org) {
         return { success: false, message: 'Organization not found', error: 'ORG_NOT_FOUND' }
       }
-      return { success: true, message: 'Query successful', data: OrganizationPresenter.fromEntity(org) }
+      return {
+        success: true,
+        message: 'Query successful',
+        data: OrganizationPresenter.fromEntity(org),
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Fetch failed'
       return { success: false, message, error: message }

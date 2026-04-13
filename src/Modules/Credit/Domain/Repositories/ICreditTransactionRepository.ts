@@ -22,4 +22,3 @@ export interface ICreditTransactionRepository {
   /** Returns a new repository instance scoped to a transaction. */
   withTransaction(tx: IDatabaseAccess): ICreditTransactionRepository
 }
-

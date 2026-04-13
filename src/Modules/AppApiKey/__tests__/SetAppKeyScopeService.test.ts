@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { SetAppKeyScopeService } from '../Application/Services/SetAppKeyScopeService'
-import { AppApiKeyRepository } from '../Infrastructure/Repositories/AppApiKeyRepository'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationRepository'
-import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
-import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
+import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
+import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { SetAppKeyScopeService } from '../Application/Services/SetAppKeyScopeService'
+import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
+import { AppApiKeyRepository } from '../Infrastructure/Repositories/AppApiKeyRepository'
 
 const hashingService = new KeyHashingService()
 

@@ -16,8 +16,8 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
 import { Role } from '../../Domain/ValueObjects/Role'
-import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 import type { RegisterUserRequest, RegisterUserResponse } from '../DTOs/RegisterUserDTO'
+import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 
 /**
  * Service responsible for registering new users in the system.

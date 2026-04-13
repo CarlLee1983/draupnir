@@ -1,13 +1,13 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { type IReportRepository } from '../../Domain/Repositories/IReportRepository'
+import type { ScheduleReportService } from '../../Application/Services/ScheduleReportService'
 import { ReportSchedule } from '../../Domain/Aggregates/ReportSchedule'
-import { type ScheduleReportService } from '../../Application/Services/ScheduleReportService'
+import type { IReportRepository } from '../../Domain/Repositories/IReportRepository'
 import { ReportToken } from '../../Domain/ValueObjects/ReportToken'
 
 export class ReportController {
   constructor(
     private readonly reportRepository: IReportRepository,
-    private readonly scheduleReportService: ScheduleReportService
+    private readonly scheduleReportService: ScheduleReportService,
   ) {}
 
   async index(ctx: IHttpContext): Promise<Response> {
@@ -31,7 +31,7 @@ export class ReportController {
       })
 
       await this.reportRepository.save(schedule)
-      
+
       if (schedule.enabled) {
         await this.scheduleReportService.schedule(schedule.id)
       }

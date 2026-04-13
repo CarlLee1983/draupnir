@@ -69,7 +69,10 @@ export class WebhookUrl {
     }
 
     const octets = ip.split('.').map((part) => Number(part))
-    if (octets.length !== 4 || octets.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) {
+    if (
+      octets.length !== 4 ||
+      octets.some((part) => !Number.isInteger(part) || part < 0 || part > 255)
+    ) {
       return true
     }
 

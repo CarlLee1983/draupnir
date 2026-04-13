@@ -1,14 +1,17 @@
-import { type IContainer, ModuleServiceProvider } from '../../../../Shared/Infrastructure/IServiceProvider'
-import { DrizzleReportRepository } from '../Repositories/DrizzleReportRepository'
-import { GeneratePdfService } from '../../Application/Services/GeneratePdfService'
-import { SendReportEmailService } from '../../Application/Services/SendReportEmailService'
-import { ScheduleReportService } from '../../Application/Services/ScheduleReportService'
-import { ReportController } from '../../Presentation/Controllers/ReportController'
-import { type IMailer } from '../../../../Foundation/Infrastructure/Ports/IMailer'
-import { type IReportRepository } from '../../Domain/Repositories/IReportRepository'
-import { type IDatabaseAccess } from '../../../../Shared/Infrastructure/IDatabaseAccess'
+import type { IMailer } from '../../../../Foundation/Infrastructure/Ports/IMailer'
 import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
+import type { IDatabaseAccess } from '../../../../Shared/Infrastructure/IDatabaseAccess'
+import {
+  type IContainer,
+  ModuleServiceProvider,
+} from '../../../../Shared/Infrastructure/IServiceProvider'
+import { GeneratePdfService } from '../../Application/Services/GeneratePdfService'
+import { ScheduleReportService } from '../../Application/Services/ScheduleReportService'
+import { SendReportEmailService } from '../../Application/Services/SendReportEmailService'
+import type { IReportRepository } from '../../Domain/Repositories/IReportRepository'
+import { ReportController } from '../../Presentation/Controllers/ReportController'
+import { DrizzleReportRepository } from '../Repositories/DrizzleReportRepository'
 
 export class ReportsServiceProvider extends ModuleServiceProvider implements IJobRegistrar {
   private container!: IContainer

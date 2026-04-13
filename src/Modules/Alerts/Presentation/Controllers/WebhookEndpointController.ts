@@ -1,14 +1,14 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { toCreatedDTO, toListDTO } from '../../Application/DTOs/WebhookEndpointDTO'
-import type { RegisterWebhookEndpointInput } from '../Requests/RegisterWebhookEndpointRequest'
-import type { UpdateWebhookEndpointInput } from '../Requests/UpdateWebhookEndpointRequest'
+import type { DeleteWebhookEndpointService } from '../../Application/Services/DeleteWebhookEndpointService'
 import type { ListWebhookEndpointsService } from '../../Application/Services/ListWebhookEndpointsService'
 import type { RegisterWebhookEndpointService } from '../../Application/Services/RegisterWebhookEndpointService'
-import type { UpdateWebhookEndpointService } from '../../Application/Services/UpdateWebhookEndpointService'
 import type { RotateWebhookSecretService } from '../../Application/Services/RotateWebhookSecretService'
-import type { DeleteWebhookEndpointService } from '../../Application/Services/DeleteWebhookEndpointService'
 import type { TestWebhookEndpointService } from '../../Application/Services/TestWebhookEndpointService'
+import type { UpdateWebhookEndpointService } from '../../Application/Services/UpdateWebhookEndpointService'
+import type { RegisterWebhookEndpointInput } from '../Requests/RegisterWebhookEndpointRequest'
+import type { UpdateWebhookEndpointInput } from '../Requests/UpdateWebhookEndpointRequest'
 
 type WebhookEndpointControllerDeps = {
   listWebhookEndpointsService: ListWebhookEndpointsService

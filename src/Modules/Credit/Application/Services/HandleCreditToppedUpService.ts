@@ -1,6 +1,7 @@
 // src/Modules/Credit/Application/Services/HandleCreditToppedUpService.ts
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 
 export class HandleCreditToppedUpService {
   constructor(

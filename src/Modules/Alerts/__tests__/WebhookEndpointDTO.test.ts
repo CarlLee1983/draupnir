@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { WebhookEndpoint } from '../Domain/Aggregates/WebhookEndpoint'
 import { toCreatedDTO, toListDTO } from '../Application/DTOs/WebhookEndpointDTO'
+import { WebhookEndpoint } from '../Domain/Aggregates/WebhookEndpoint'
 
 describe('WebhookEndpointDTO', () => {
   it('omits plaintext secrets from the list DTO', () => {

@@ -1,7 +1,7 @@
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import type { DashboardSummaryResponse } from '../DTOs/DashboardDTO'
+import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import { DashboardKeyScopeResolver } from './DashboardKeyScopeResolver'
 
 export class GetDashboardSummaryService {
@@ -25,7 +25,7 @@ export class GetDashboardSummaryService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: 'Unauthorized to access this organization\'s dashboard',
+          message: "Unauthorized to access this organization's dashboard",
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }

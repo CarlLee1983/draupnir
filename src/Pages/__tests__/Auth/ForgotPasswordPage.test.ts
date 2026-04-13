@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../../InertiaService'
 import { ForgotPasswordPage } from '../../Auth/ForgotPasswordPage'
+import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()

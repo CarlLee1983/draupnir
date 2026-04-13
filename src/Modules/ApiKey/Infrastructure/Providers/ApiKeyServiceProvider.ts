@@ -1,16 +1,16 @@
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { ApiKeyRepository } from '../Repositories/ApiKeyRepository'
-import { ApiKeyBifrostSync } from '../Services/ApiKeyBifrostSync'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { CreateApiKeyService } from '../../Application/Services/CreateApiKeyService'
 import { ListApiKeysService } from '../../Application/Services/ListApiKeysService'
 import { RevokeApiKeyService } from '../../Application/Services/RevokeApiKeyService'
-import { UpdateKeyLabelService } from '../../Application/Services/UpdateKeyLabelService'
 import { SetKeyPermissionsService } from '../../Application/Services/SetKeyPermissionsService'
+import { UpdateKeyLabelService } from '../../Application/Services/UpdateKeyLabelService'
+import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
+import { ApiKeyRepository } from '../Repositories/ApiKeyRepository'
+import { ApiKeyBifrostSync } from '../Services/ApiKeyBifrostSync'
 
 export class ApiKeyServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {

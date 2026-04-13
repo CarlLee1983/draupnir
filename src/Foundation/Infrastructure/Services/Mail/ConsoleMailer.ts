@@ -10,9 +10,11 @@ export class ConsoleMailer implements IMailer {
 
     console.error(`[Mailer] To: ${recipients}, Subject: ${message.subject}`)
     console.error(`[Mailer] HTML: ${preview}`)
-    
+
     if (message.attachments?.length) {
-      console.error(`[Mailer] Attachments: ${message.attachments.map(a => a.filename).join(', ')}`)
+      console.error(
+        `[Mailer] Attachments: ${message.attachments.map((a) => a.filename).join(', ')}`,
+      )
     }
   }
 }

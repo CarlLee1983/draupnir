@@ -1,7 +1,7 @@
 import { describe, it } from 'bun:test'
-import { parseOpenAPI } from './lib/spec-parser'
-import { extractRoutesFromSource } from './lib/route-extractor'
 import { resolve } from 'path'
+import { extractRoutesFromSource } from './lib/route-extractor'
+import { parseOpenAPI } from './lib/spec-parser'
 
 const SPEC_PATH = resolve(import.meta.dir, '../../docs/openapi.yaml')
 

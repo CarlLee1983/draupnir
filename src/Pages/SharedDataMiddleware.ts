@@ -1,6 +1,6 @@
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import { loadMessages, resolvePageLocale } from '@/Shared/Infrastructure/I18n'
 import type { LocaleCode } from '@/Shared/Infrastructure/I18n'
+import { loadMessages, resolvePageLocale } from '@/Shared/Infrastructure/I18n'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 
 /**

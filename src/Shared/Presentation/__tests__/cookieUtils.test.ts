@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { buildCookieString, applyPendingCookies } from '../cookieUtils'
+import { applyPendingCookies, buildCookieString } from '../cookieUtils'
 
 describe('buildCookieString', () => {
   test('builds minimal cookie', () => {

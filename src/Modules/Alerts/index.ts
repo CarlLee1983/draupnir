@@ -1,5 +1,5 @@
 export { AlertsServiceProvider } from './Infrastructure/Providers/AlertsServiceProvider'
 export { AlertController } from './Presentation/Controllers/AlertController'
-export { WebhookEndpointController } from './Presentation/Controllers/WebhookEndpointController'
 export { AlertHistoryController } from './Presentation/Controllers/AlertHistoryController'
+export { WebhookEndpointController } from './Presentation/Controllers/WebhookEndpointController'
 export { registerAlertRoutes } from './Presentation/Routes/alert.routes'

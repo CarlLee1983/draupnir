@@ -21,7 +21,11 @@ describe('ChangeUserStatusService', () => {
     service = new ChangeUserStatusService(authRepo, authTokenRepo)
 
     const profileRepo = new UserProfileRepository(db)
-    const registerService = new RegisterUserService(authRepo, profileRepo, new ScryptPasswordHasher())
+    const registerService = new RegisterUserService(
+      authRepo,
+      profileRepo,
+      new ScryptPasswordHasher(),
+    )
     await registerService.execute({ email: 'user@example.com', password: 'StrongPass123' })
   })
 

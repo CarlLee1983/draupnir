@@ -1,5 +1,5 @@
-import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
 import type { ManageAppKeysRequest, ManageAppKeysResponse } from '../DTOs/WebhookConfigDTO'
 
 export interface IIssueAppKeyService {

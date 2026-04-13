@@ -9,8 +9,8 @@
  * - Provide sensible defaults for organizations without an established account
  */
 
-import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
 import type { BalanceResponse } from '../DTOs/CreditDTO'
 
 /**
@@ -34,9 +34,17 @@ export class GetBalanceService {
     callerSystemRole: string,
   ): Promise<BalanceResponse> {
     try {
-      const authResult = await this.orgAuth.requireOrgMembership(orgId, callerUserId, callerSystemRole)
+      const authResult = await this.orgAuth.requireOrgMembership(
+        orgId,
+        callerUserId,
+        callerSystemRole,
+      )
       if (!authResult.authorized) {
-        return { success: false, message: 'Unauthorized access to this organization', error: 'NOT_ORG_MEMBER' }
+        return {
+          success: false,
+          message: 'Unauthorized access to this organization',
+          error: 'NOT_ORG_MEMBER',
+        }
       }
 
       const account = await this.accountRepo.findByOrgId(orgId)
@@ -63,4 +71,3 @@ export class GetBalanceService {
     }
   }
 }
-

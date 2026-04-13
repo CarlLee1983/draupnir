@@ -10,15 +10,19 @@
  * - Manage persistence and activation lifecycle
  */
 
-import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
 import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
 import { AppApiKey } from '../../Domain/Aggregates/AppApiKey'
+import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import { AppKeyScope } from '../../Domain/ValueObjects/AppKeyScope'
-import { KeyRotationPolicy } from '../../Domain/ValueObjects/KeyRotationPolicy'
 import { BoundModules } from '../../Domain/ValueObjects/BoundModules'
-import { AppApiKeyPresenter, type IssueAppKeyRequest, type AppApiKeyCreatedResponse } from '../DTOs/AppApiKeyDTO'
+import { KeyRotationPolicy } from '../../Domain/ValueObjects/KeyRotationPolicy'
+import {
+  type AppApiKeyCreatedResponse,
+  AppApiKeyPresenter,
+  type IssueAppKeyRequest,
+} from '../DTOs/AppApiKeyDTO'
+import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
 
 /**
  * Service for issuing application-specific long-lived API keys.
@@ -107,7 +111,8 @@ export class IssueAppKeyService {
 
         return {
           success: true,
-          message: 'App API Key issued successfully (Please record the rawKey now, it cannot be retrieved again)',
+          message:
+            'App API Key issued successfully (Please record the rawKey now, it cannot be retrieved again)',
           data: { ...AppApiKeyPresenter.fromEntity(finalKey), rawKey },
         }
       } catch (bifrostError: unknown) {
@@ -120,4 +125,3 @@ export class IssueAppKeyService {
     }
   }
 }
-

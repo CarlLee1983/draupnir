@@ -1,14 +1,14 @@
-import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
-import type { UsageQuery, UsageStats } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type {
+  ILLMGatewayClient,
+  UsageQuery,
+  UsageStats,
+} from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { IUsageAggregator } from '../../Application/Ports/IUsageAggregator'
 
 export class UsageAggregator implements IUsageAggregator {
   constructor(private readonly gatewayClient: ILLMGatewayClient) {}
 
-  async getStats(
-    virtualKeyIds: readonly string[],
-    query?: UsageQuery,
-  ): Promise<UsageStats> {
+  async getStats(virtualKeyIds: readonly string[], query?: UsageQuery): Promise<UsageStats> {
     if (virtualKeyIds.length === 0) {
       return { totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }
     }
@@ -30,6 +30,8 @@ export class UsageAggregator implements IUsageAggregator {
       return []
     }
 
-    return (this.gatewayClient.getUsageLogs(virtualKeyIds, query) as unknown) as Promise<readonly Record<string, unknown>[]>
+    return this.gatewayClient.getUsageLogs(virtualKeyIds, query) as unknown as Promise<
+      readonly Record<string, unknown>[]
+    >
   }
 }

@@ -7,7 +7,9 @@ import { FormRequest, z } from '@gravito/impulse'
 export class ChangeStatusRequest extends FormRequest {
   /** Validation schema. */
   schema = z.object({
-    status: z.enum(['active', 'suspended'], { errorMap: () => ({ message: 'Invalid status value' }) }),
+    status: z.enum(['active', 'suspended'], {
+      errorMap: () => ({ message: 'Invalid status value' }),
+    }),
   })
 }
 
@@ -15,4 +17,3 @@ export class ChangeStatusRequest extends FormRequest {
  * Type inferred from the ChangeStatusRequest schema.
  */
 export type ChangeStatusParams = z.infer<ChangeStatusRequest['schema']>
-

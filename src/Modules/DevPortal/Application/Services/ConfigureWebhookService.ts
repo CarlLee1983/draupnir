@@ -1,8 +1,8 @@
-import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
-import type { IWebhookConfigRepository } from '../../Domain/Repositories/IWebhookConfigRepository'
+import { WebhookSecret } from '@/Foundation/Infrastructure/Services/Webhook/WebhookSecret'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { WebhookConfig } from '../../Domain/Entities/WebhookConfig'
-import { WebhookSecret } from '@/Foundation/Infrastructure/Services/Webhook/WebhookSecret'
+import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
+import type { IWebhookConfigRepository } from '../../Domain/Repositories/IWebhookConfigRepository'
 import { WebhookEventType } from '../../Domain/ValueObjects/WebhookEventType'
 import type { ConfigureWebhookRequest, ConfigureWebhookResponse } from '../DTOs/WebhookConfigDTO'
 

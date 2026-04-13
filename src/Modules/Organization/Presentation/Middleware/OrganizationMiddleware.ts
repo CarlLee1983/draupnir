@@ -1,9 +1,9 @@
-import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import { AuthTokenRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthTokenRepository'
-import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
+import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 
 export interface CurrentOrganizationContext {
   organizationId: string

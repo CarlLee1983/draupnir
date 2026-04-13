@@ -38,10 +38,12 @@ export class MemberContractsPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const shared = ctx.get('inertia:shared') as {
-      locale: 'zh-TW' | 'en'
-      messages: Record<string, string>
-    } | undefined
+    const shared = ctx.get('inertia:shared') as
+      | {
+          locale: 'zh-TW' | 'en'
+          messages: Record<string, string>
+        }
+      | undefined
     const messages = shared?.messages ?? {}
 
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')

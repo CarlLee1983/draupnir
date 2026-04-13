@@ -11,8 +11,8 @@
 
 import { KeyHash } from '../ValueObjects/KeyHash'
 import { KeyLabel } from '../ValueObjects/KeyLabel'
-import { KeyStatus } from '../ValueObjects/KeyStatus'
 import { KeyScope, type KeyScopeJSON } from '../ValueObjects/KeyScope'
+import { KeyStatus } from '../ValueObjects/KeyStatus'
 
 /** Properties defining an ApiKey's state. */
 interface ApiKeyProps {
@@ -182,40 +182,68 @@ export class ApiKey {
   }
 
   /** Unique identifier. */
-  get id(): string { return this.props.id }
+  get id(): string {
+    return this.props.id
+  }
   /** Associated organization. */
-  get orgId(): string { return this.props.orgId }
+  get orgId(): string {
+    return this.props.orgId
+  }
   /** ID of the creating user. */
-  get createdByUserId(): string { return this.props.createdByUserId }
+  get createdByUserId(): string {
+    return this.props.createdByUserId
+  }
   /** Human-readable label. */
-  get label(): string { return this.props.label.getValue() }
+  get label(): string {
+    return this.props.label.getValue()
+  }
   /** Securely stored key hash. */
-  get keyHashValue(): string { return this.props.keyHash.getValue() }
+  get keyHashValue(): string {
+    return this.props.keyHash.getValue()
+  }
   /** Gateway-specific key identifier. */
-  get gatewayKeyId(): string { return this.props.gatewayKeyId }
+  get gatewayKeyId(): string {
+    return this.props.gatewayKeyId
+  }
   /** Current status (active, pending, etc). */
-  get status(): string { return this.props.status.getValue() }
+  get status(): string {
+    return this.props.status.getValue()
+  }
   /** Key constraints and model access. */
-  get scope(): KeyScope { return this.props.scope }
+  get scope(): KeyScope {
+    return this.props.scope
+  }
   /** Snapshot of limits before credit-suspension. */
   get preFreezeRateLimit(): { rpm: number | null; tpm: number | null } | null {
     if (!this.props.preFreezeRateLimit) return null
     return JSON.parse(this.props.preFreezeRateLimit)
   }
   /** Raw JSON string of limits snapshot before credit-suspension. */
-  get preFreezeRateLimitRaw(): string | null { return this.props.preFreezeRateLimit }
+  get preFreezeRateLimitRaw(): string | null {
+    return this.props.preFreezeRateLimit
+  }
   /** Formal reason for current suspension. */
-  get suspensionReason(): string | null { return this.props.suspensionReason }
+  get suspensionReason(): string | null {
+    return this.props.suspensionReason
+  }
   /** Date when the key was suspended. */
-  get suspendedAt(): Date | null { return this.props.suspendedAt }
+  get suspendedAt(): Date | null {
+    return this.props.suspendedAt
+  }
   /** Date when the key naturally expires. */
-  get expiresAt(): Date | null { return this.props.expiresAt }
+  get expiresAt(): Date | null {
+    return this.props.expiresAt
+  }
   /** Date when the key was manualy revoked. */
-  get revokedAt(): Date | null { return this.props.revokedAt }
+  get revokedAt(): Date | null {
+    return this.props.revokedAt
+  }
   /** Record creation date. */
-  get createdAt(): Date { return this.props.createdAt }
+  get createdAt(): Date {
+    return this.props.createdAt
+  }
   /** Record last modification date. */
-  get updatedAt(): Date { return this.props.updatedAt }
-
+  get updatedAt(): Date {
+    return this.props.updatedAt
+  }
 }
-

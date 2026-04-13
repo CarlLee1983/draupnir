@@ -1,8 +1,8 @@
 // src/Modules/AppModule/Application/Services/CheckModuleAccessService.ts
 import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
-import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
-import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import { ContractEnforcementService } from '@/Modules/Contract/Domain/Services/ContractEnforcementService'
+import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
+import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 
 export interface ModuleAccessResult {
   allowed: boolean

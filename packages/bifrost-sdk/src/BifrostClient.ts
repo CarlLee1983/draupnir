@@ -1,19 +1,19 @@
 import type { BifrostClientConfig } from './BifrostClientConfig'
+import { BifrostApiError } from './errors'
+import { withRetry } from './retry'
 import type {
-  CreateVirtualKeyRequest,
-  UpdateVirtualKeyRequest,
-  BifrostVirtualKey,
-  VirtualKeyResponse,
-  VirtualKeyListResponse,
   BifrostLogsQuery,
   BifrostLogsResponse,
   BifrostLogsStats,
   BifrostModel,
   BifrostModelsQuery,
   BifrostModelsResponse,
+  BifrostVirtualKey,
+  CreateVirtualKeyRequest,
+  UpdateVirtualKeyRequest,
+  VirtualKeyListResponse,
+  VirtualKeyResponse,
 } from './types'
-import { BifrostApiError } from './errors'
-import { withRetry } from './retry'
 
 /**
  * Bifrost AI Gateway Client.

@@ -1,13 +1,13 @@
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositories/IAppApiKeyRepository'
-import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
-import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
 import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositories/IAppApiKeyRepository'
+import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
 import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { AuthenticateApp } from '../../Application/UseCases/AuthenticateApp'
 import { ProxyModelCall } from '../../Application/UseCases/ProxyModelCall'
-import { QueryUsage } from '../../Application/UseCases/QueryUsage'
 import { QueryBalance } from '../../Application/UseCases/QueryBalance'
+import { QueryUsage } from '../../Application/UseCases/QueryUsage'
 import { AppAuthMiddleware } from '../Middleware/AppAuthMiddleware'
 
 export class SdkApiServiceProvider extends ModuleServiceProvider {

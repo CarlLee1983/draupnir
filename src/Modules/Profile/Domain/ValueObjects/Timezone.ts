@@ -58,4 +58,3 @@ export class Timezone {
     return this.value
   }
 }
-

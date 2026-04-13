@@ -1,15 +1,15 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { ResendDeliveryService } from '../Application/Services/ResendDeliveryService'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { WebhookEndpointGoneError } from '../Application/Errors/WebhookEndpointGoneError'
-import { AlertEvent } from '../Domain/Entities/AlertEvent'
-import { AlertDelivery } from '../Domain/Entities/AlertDelivery'
+import { ResendDeliveryService } from '../Application/Services/ResendDeliveryService'
 import { WebhookEndpoint } from '../Domain/Aggregates/WebhookEndpoint'
+import { AlertDelivery } from '../Domain/Entities/AlertDelivery'
+import { AlertEvent } from '../Domain/Entities/AlertEvent'
 import type { IAlertDeliveryRepository } from '../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertEventRepository } from '../Domain/Repositories/IAlertEventRepository'
 import type { IWebhookEndpointRepository } from '../Domain/Repositories/IWebhookEndpointRepository'
 import { WebhookAlertNotifier } from '../Infrastructure/Services/WebhookAlertNotifier'
-import { InMemoryAlertRecipientResolver } from './fakes/InMemoryAlertRecipientResolver'
 import { FakeAlertNotifier } from './fakes/FakeAlertNotifier'
+import { InMemoryAlertRecipientResolver } from './fakes/InMemoryAlertRecipientResolver'
 
 describe('ResendDeliveryService', () => {
   let deliveryRepo: IAlertDeliveryRepository & {
@@ -131,7 +131,9 @@ describe('ResendDeliveryService', () => {
 
     deliveryRepo.findById.mockResolvedValue(delivery)
 
-    await expect(service.resend('org-1', delivery.id)).rejects.toThrow('Only failed deliveries can be resent')
+    await expect(service.resend('org-1', delivery.id)).rejects.toThrow(
+      'Only failed deliveries can be resent',
+    )
   })
 
   it('raises WebhookEndpointGoneError when the endpoint was deleted', async () => {
@@ -177,6 +179,8 @@ describe('ResendDeliveryService', () => {
     eventRepo.findById.mockResolvedValue(event)
     endpointRepo.findById.mockResolvedValue(null)
 
-    await expect(service.resend('org-1', failed.id)).rejects.toBeInstanceOf(WebhookEndpointGoneError)
+    await expect(service.resend('org-1', failed.id)).rejects.toBeInstanceOf(
+      WebhookEndpointGoneError,
+    )
   })
 })

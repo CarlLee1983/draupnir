@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { UsageAggregator } from '../Infrastructure/Services/UsageAggregator'
-import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { LogEntry } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { UsageAggregator } from '../Infrastructure/Services/UsageAggregator'
 
 describe('UsageAggregator', () => {
   let mock: MockGatewayClient
@@ -17,7 +17,12 @@ describe('UsageAggregator', () => {
   })
 
   it('應取得用量統計', async () => {
-    mock.seedUsageStats({ totalRequests: 500, totalCost: 12.5, totalTokens: 100000, avgLatency: 250 })
+    mock.seedUsageStats({
+      totalRequests: 500,
+      totalCost: 12.5,
+      totalTokens: 100000,
+      avgLatency: 250,
+    })
     const stats = await aggregator.getStats(['bfr-vk-1'])
     expect(stats.totalRequests).toBe(500)
     expect(stats.totalCost).toBeCloseTo(12.5)

@@ -1,10 +1,10 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
-import { AlertEvent } from '../Domain/Entities/AlertEvent'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WebhookEndpoint } from '../Domain/Aggregates/WebhookEndpoint'
-import { WebhookAlertNotifier } from '../Infrastructure/Services/WebhookAlertNotifier'
+import { AlertEvent } from '../Domain/Entities/AlertEvent'
 import type { IAlertDeliveryRepository } from '../Domain/Repositories/IAlertDeliveryRepository'
 import type { IWebhookEndpointRepository } from '../Domain/Repositories/IWebhookEndpointRepository'
 import type { AlertPayload } from '../Domain/Services/IAlertNotifier'
+import { WebhookAlertNotifier } from '../Infrastructure/Services/WebhookAlertNotifier'
 
 describe('WebhookAlertNotifier', () => {
   let endpointRepo: IWebhookEndpointRepository & {
@@ -79,14 +79,12 @@ describe('WebhookAlertNotifier', () => {
     endpointRepo.findActiveByOrg.mockResolvedValue([first, second, third])
     deliveryRepo.existsSent.mockImplementation(async ({ target }) => target === first.id)
 
-    dispatcher.dispatch
-      .mockRejectedValueOnce(new Error('boom'))
-      .mockResolvedValueOnce({
-        success: true,
-        statusCode: 200,
-        attempts: 1,
-        webhookId: 'wh_3',
-      })
+    dispatcher.dispatch.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce({
+      success: true,
+      statusCode: 200,
+      attempts: 1,
+      webhookId: 'wh_3',
+    })
 
     await expect(notifier.notify(basePayload(event, 'Org Name'))).resolves.toMatchObject({
       channel: 'webhook',
@@ -97,7 +95,9 @@ describe('WebhookAlertNotifier', () => {
     expect(endpointRepo.save).toHaveBeenCalledTimes(2)
     expect(logger.error).not.toHaveBeenCalled()
 
-    expect(dispatcher.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ url: first.url }))
+    expect(dispatcher.dispatch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ url: first.url }),
+    )
   })
 
   it('never throws when endpoint lookup fails', async () => {

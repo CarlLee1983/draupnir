@@ -1,14 +1,11 @@
 import Decimal from 'decimal.js'
-import type { IUsageRepository } from '@/Modules/Dashboard/Application/Ports/IUsageRepository'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import type { IAlertConfigRepository } from '../../Domain/Repositories/IAlertConfigRepository'
+import type { IUsageRepository } from '@/Modules/Dashboard/Application/Ports/IUsageRepository'
 import type { AlertTier } from '../../Domain/Aggregates/AlertConfig'
+import type { IAlertConfigRepository } from '../../Domain/Repositories/IAlertConfigRepository'
 import { MonthlyPeriod } from '../../Domain/ValueObjects/MonthlyPeriod'
 import { ThresholdTier } from '../../Domain/ValueObjects/ThresholdTier'
-import type {
-  SendAlertService,
-  AlertKeyBreakdownItem,
-} from './SendAlertService'
+import type { AlertKeyBreakdownItem, SendAlertService } from './SendAlertService'
 
 type KeyCostRow = {
   readonly label: string
@@ -79,7 +76,11 @@ export class EvaluateThresholdsService {
     await this.deps.configRepo.update(updated)
   }
 
-  private shouldSendAlert(config: { lastAlertedMonth: string | null; lastAlertedTier: string | null }, tier: AlertTier, currentMonthKey: string): boolean {
+  private shouldSendAlert(
+    config: { lastAlertedMonth: string | null; lastAlertedTier: string | null },
+    tier: AlertTier,
+    currentMonthKey: string,
+  ): boolean {
     if (config.lastAlertedMonth !== currentMonthKey) {
       return true
     }

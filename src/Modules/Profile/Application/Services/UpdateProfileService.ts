@@ -10,11 +10,11 @@
  */
 
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
-import type { UpdateUserProfileRequest, UserProfileResponse } from '../DTOs/UserProfileDTO'
+import { Locale } from '../../Domain/ValueObjects/Locale'
 import { Phone } from '../../Domain/ValueObjects/Phone'
 import { Timezone } from '../../Domain/ValueObjects/Timezone'
-import { Locale } from '../../Domain/ValueObjects/Locale'
 import { UserProfileMapper } from '../../Infrastructure/Mappers/UserProfileMapper'
+import type { UpdateUserProfileRequest, UserProfileResponse } from '../DTOs/UserProfileDTO'
 
 /**
  * Service for updating a user profile.
@@ -59,5 +59,3 @@ export class UpdateProfileService {
     }
   }
 }
-
-

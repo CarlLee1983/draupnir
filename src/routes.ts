@@ -3,8 +3,8 @@ import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/Gra
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { registerPageRoutes } from './Pages/page-routes'
 import {
-  registerApiKey,
   registerAlerts,
+  registerApiKey,
   registerAppApiKey,
   registerAppModule,
   registerAuth,

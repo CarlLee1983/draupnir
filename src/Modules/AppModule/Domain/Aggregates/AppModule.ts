@@ -75,24 +75,40 @@ export class AppModule {
   }
 
   /** Unique identifier. */
-  get id(): string { return this.props.id }
+  get id(): string {
+    return this.props.id
+  }
   /** Internal canonical name. */
-  get name(): string { return this.props.name }
+  get name(): string {
+    return this.props.name
+  }
   /** Human-readable description of capabilities. */
-  get description(): string { return this.props.description }
+  get description(): string {
+    return this.props.description
+  }
   /** Module category (free, paid, etc). */
-  get type(): string { return this.props.type.toString() }
+  get type(): string {
+    return this.props.type.toString()
+  }
   /** Current lifecycle status. */
-  get status(): string { return this.props.status }
+  get status(): string {
+    return this.props.status
+  }
   /** Date of registration. */
-  get createdAt(): Date { return this.props.createdAt }
+  get createdAt(): Date {
+    return this.props.createdAt
+  }
 
   /** Returns true if the module is currently operational. */
-  isActive(): boolean { return this.props.status === 'active' }
+  isActive(): boolean {
+    return this.props.status === 'active'
+  }
   /** Returns true if the module entails no billing cost. */
-  isFree(): boolean { return this.props.type.isFree() }
+  isFree(): boolean {
+    return this.props.type.isFree()
+  }
   /** Returns true if the module requires an active subscription or credit. */
-  isPaid(): boolean { return this.props.type.isPaid() }
-
+  isPaid(): boolean {
+    return this.props.type.isPaid()
+  }
 }
-

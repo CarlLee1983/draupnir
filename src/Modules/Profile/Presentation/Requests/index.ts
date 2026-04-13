@@ -1,5 +1,6 @@
 // src/Modules/Profile/Presentation/Requests/index.ts
-export { UpdateProfileRequest, type UpdateProfileParams } from './UpdateProfileRequest'
-export { ChangeStatusRequest, type ChangeStatusParams } from './ChangeStatusRequest'
-export { ListUsersRequest, type ListUsersQueryParams } from './ListUsersRequest'
-export { UserIdSchema, type UserIdParams } from './params'
+
+export { type ChangeStatusParams, ChangeStatusRequest } from './ChangeStatusRequest'
+export { type ListUsersQueryParams, ListUsersRequest } from './ListUsersRequest'
+export { type UserIdParams, UserIdSchema } from './params'
+export { type UpdateProfileParams, UpdateProfileRequest } from './UpdateProfileRequest'

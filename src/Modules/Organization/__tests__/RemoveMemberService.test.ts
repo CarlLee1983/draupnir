@@ -1,21 +1,21 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { RemoveMemberService } from '../Application/Services/RemoveMemberService'
-import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
-import { InviteMemberService } from '../Application/Services/InviteMemberService'
-import { AcceptInvitationService } from '../Application/Services/AcceptInvitationService'
-import { OrganizationRepository } from '../Infrastructure/Repositories/OrganizationRepository'
-import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
-import { OrganizationInvitationRepository } from '../Infrastructure/Repositories/OrganizationInvitationRepository'
-import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
-import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
-import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
-import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import { AppModuleRepository } from '@/Modules/AppModule/Infrastructure/Repositories/AppModuleRepository'
-import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
 import { ModuleSubscriptionRepository } from '@/Modules/AppModule/Infrastructure/Repositories/ModuleSubscriptionRepository'
+import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
+import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
+import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
+import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
+import { AcceptInvitationService } from '../Application/Services/AcceptInvitationService'
+import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
+import { InviteMemberService } from '../Application/Services/InviteMemberService'
+import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
+import { RemoveMemberService } from '../Application/Services/RemoveMemberService'
+import { OrganizationInvitationRepository } from '../Infrastructure/Repositories/OrganizationInvitationRepository'
+import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
+import { OrganizationRepository } from '../Infrastructure/Repositories/OrganizationRepository'
 
 describe('RemoveMemberService', () => {
   let removeService: RemoveMemberService
@@ -32,7 +32,11 @@ describe('RemoveMemberService', () => {
     const invitationRepo = new OrganizationInvitationRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
 
-    const registerService = new RegisterUserService(authRepo, profileRepo, new ScryptPasswordHasher())
+    const registerService = new RegisterUserService(
+      authRepo,
+      profileRepo,
+      new ScryptPasswordHasher(),
+    )
     const createOrgService = new CreateOrganizationService(
       orgRepo,
       memberRepo,

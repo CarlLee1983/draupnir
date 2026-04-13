@@ -1,8 +1,8 @@
 import { describe, expect, mock, test } from 'bun:test'
+import type { IEmailService } from '../Application/Ports/IEmailService'
 import { ForgotPasswordService } from '../Application/Services/ForgotPasswordService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import type { IPasswordResetRepository } from '../Domain/Repositories/IPasswordResetRepository'
-import type { IEmailService } from '../Application/Ports/IEmailService'
 import { PasswordResetToken } from '../Domain/ValueObjects/PasswordResetToken'
 
 function makeToken(email: string) {
@@ -22,7 +22,12 @@ describe('ForgotPasswordService', () => {
       sendPasswordReset: mock(async () => {}),
     } as any
 
-    const service = new ForgotPasswordService(authRepo, resetRepo, emailService, 'http://localhost:3000')
+    const service = new ForgotPasswordService(
+      authRepo,
+      resetRepo,
+      emailService,
+      'http://localhost:3000',
+    )
     const result = await service.execute('user@example.com')
 
     expect(result.success).toBe(true)
@@ -40,7 +45,12 @@ describe('ForgotPasswordService', () => {
       sendPasswordReset: mock(async () => {}),
     } as any
 
-    const service = new ForgotPasswordService(authRepo, resetRepo, emailService, 'http://localhost:3000')
+    const service = new ForgotPasswordService(
+      authRepo,
+      resetRepo,
+      emailService,
+      'http://localhost:3000',
+    )
     const result = await service.execute('unknown@example.com')
 
     expect(result.success).toBe(true)

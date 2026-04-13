@@ -1,9 +1,9 @@
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient'
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorRepository'
+import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
 import { BifrostSyncCompletedEvent } from '../../Domain/Events/BifrostSyncCompletedEvent'
 
 export interface SyncResult {

@@ -44,7 +44,8 @@ export class InitiateDeviceFlowService {
 
       return {
         success: true,
-        message: 'Device code generated. Please visit the verification page and enter the user code.',
+        message:
+          'Device code generated. Please visit the verification page and enter the user code.',
         data: {
           deviceCode: deviceCodeId,
           userCode,
@@ -59,4 +60,3 @@ export class InitiateDeviceFlowService {
     }
   }
 }
-

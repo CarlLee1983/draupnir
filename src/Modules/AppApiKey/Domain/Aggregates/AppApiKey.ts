@@ -13,8 +13,8 @@ import { KeyHash } from '@/Shared/Domain/ValueObjects/KeyHash'
 import { KeyLabel } from '@/Shared/Domain/ValueObjects/KeyLabel'
 import { KeyStatus } from '@/Shared/Domain/ValueObjects/KeyStatus'
 import { AppKeyScope } from '../ValueObjects/AppKeyScope'
-import { KeyRotationPolicy, type KeyRotationPolicyJSON } from '../ValueObjects/KeyRotationPolicy'
 import { BoundModules } from '../ValueObjects/BoundModules'
+import { KeyRotationPolicy, type KeyRotationPolicyJSON } from '../ValueObjects/KeyRotationPolicy'
 
 /** Properties defining an AppApiKey's state. */
 interface AppApiKeyProps {
@@ -212,39 +212,71 @@ export class AppApiKey {
   }
 
   /** Unique identifier. */
-  get id(): string { return this.props.id }
+  get id(): string {
+    return this.props.id
+  }
   /** Associated organization. */
-  get orgId(): string { return this.props.orgId }
+  get orgId(): string {
+    return this.props.orgId
+  }
   /** ID of the user who issued the key. */
-  get issuedByUserId(): string { return this.props.issuedByUserId }
+  get issuedByUserId(): string {
+    return this.props.issuedByUserId
+  }
   /** Human-readable label. */
-  get label(): string { return this.props.label.getValue() }
+  get label(): string {
+    return this.props.label.getValue()
+  }
   /** Hashed value of the current key. */
-  get keyHashValue(): string { return this.props.keyHash.getValue() }
+  get keyHashValue(): string {
+    return this.props.keyHash.getValue()
+  }
   /** Gateway identifier for the current key. */
-  get gatewayKeyId(): string { return this.props.gatewayKeyId }
+  get gatewayKeyId(): string {
+    return this.props.gatewayKeyId
+  }
   /** Current status. */
-  get status(): string { return this.props.status.getValue() }
+  get status(): string {
+    return this.props.status.getValue()
+  }
   /** Permission scope. */
-  get appKeyScope(): AppKeyScope { return this.props.scope }
+  get appKeyScope(): AppKeyScope {
+    return this.props.scope
+  }
   /** Configuration for key rotation. */
-  get rotationPolicy(): KeyRotationPolicy { return this.props.rotationPolicy }
+  get rotationPolicy(): KeyRotationPolicy {
+    return this.props.rotationPolicy
+  }
   /** Modules authorized for this key. */
-  get boundModules(): BoundModules { return this.props.boundModules }
+  get boundModules(): BoundModules {
+    return this.props.boundModules
+  }
   /** Hash of the previous key during grace period. */
-  get previousKeyHash(): string | null { return this.props.previousKeyHash }
+  get previousKeyHash(): string | null {
+    return this.props.previousKeyHash
+  }
   /** Gateway ID of the previous key during grace period. */
-  get previousGatewayKeyId(): string | null { return this.props.previousGatewayKeyId }
+  get previousGatewayKeyId(): string | null {
+    return this.props.previousGatewayKeyId
+  }
   /** Deadline for the rotation grace period. */
-  get gracePeriodEndsAt(): Date | null { return this.props.gracePeriodEndsAt }
+  get gracePeriodEndsAt(): Date | null {
+    return this.props.gracePeriodEndsAt
+  }
   /** Expiration timestamp. */
-  get expiresAt(): Date | null { return this.props.expiresAt }
+  get expiresAt(): Date | null {
+    return this.props.expiresAt
+  }
   /** Revocation timestamp. */
-  get revokedAt(): Date | null { return this.props.revokedAt }
+  get revokedAt(): Date | null {
+    return this.props.revokedAt
+  }
   /** Record creation timestamp. */
-  get createdAt(): Date { return this.props.createdAt }
+  get createdAt(): Date {
+    return this.props.createdAt
+  }
   /** Record update timestamp. */
-  get updatedAt(): Date { return this.props.updatedAt }
-
+  get updatedAt(): Date {
+    return this.props.updatedAt
+  }
 }
-

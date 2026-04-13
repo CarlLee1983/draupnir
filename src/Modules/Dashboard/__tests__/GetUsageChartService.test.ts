@@ -1,15 +1,15 @@
-import { describe, it, expect, beforeAll, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { GetUsageChartService } from '../Application/Services/GetUsageChartService'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import type { LogEntry } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
 import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
-import { UsageAggregator } from '../Infrastructure/Services/UsageAggregator'
-import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
-import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
-import type { LogEntry } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { GetUsageChartService } from '../Application/Services/GetUsageChartService'
+import { UsageAggregator } from '../Infrastructure/Services/UsageAggregator'
 
 const sampleLog: LogEntry = {
   timestamp: '2026-04-08T10:00:00Z',
@@ -38,7 +38,12 @@ beforeAll(async () => {
 function createMockAggregator(): UsageAggregator {
   const gatewayMock = new MockGatewayClient()
   gatewayMock.seedUsageLogs([sampleLog])
-  gatewayMock.seedUsageStats({ totalRequests: 1, totalCost: 0.03, totalTokens: 150, avgLatency: 200 })
+  gatewayMock.seedUsageStats({
+    totalRequests: 1,
+    totalCost: 0.03,
+    totalTokens: 150,
+    avgLatency: 200,
+  })
   return new UsageAggregator(gatewayMock)
 }
 
@@ -117,7 +122,12 @@ describe('GetUsageChartService', () => {
 
     const gatewayMock = new MockGatewayClient()
     gatewayMock.seedUsageLogs([sampleLog, { ...sampleLog, keyId: 'bfr-vk-2' }])
-    gatewayMock.seedUsageStats({ totalRequests: 2, totalCost: 0.06, totalTokens: 300, avgLatency: 200 })
+    gatewayMock.seedUsageStats({
+      totalRequests: 2,
+      totalCost: 0.06,
+      totalTokens: 300,
+      avgLatency: 200,
+    })
     const memberRepo = new OrganizationMemberRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     const aggregator = new UsageAggregator(gatewayMock)
@@ -167,7 +177,12 @@ describe('GetUsageChartService', () => {
       const gatewayMock = new MockGatewayClient()
       const aliceLog: LogEntry = { ...sampleLog, keyId: 'bfr-vk-alice' }
       gatewayMock.seedUsageLogs([aliceLog])
-      gatewayMock.seedUsageStats({ totalRequests: 1, totalCost: 0.03, totalTokens: 150, avgLatency: 200 })
+      gatewayMock.seedUsageStats({
+        totalRequests: 1,
+        totalCost: 0.03,
+        totalTokens: 150,
+        avgLatency: 200,
+      })
       const memberRepo = new OrganizationMemberRepository(db)
       const orgAuth = new OrgAuthorizationHelper(memberRepo)
       const aggregator = new UsageAggregator(gatewayMock)

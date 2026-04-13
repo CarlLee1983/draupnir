@@ -38,4 +38,3 @@ export class Password {
     return this.hashedPassword
   }
 }
-

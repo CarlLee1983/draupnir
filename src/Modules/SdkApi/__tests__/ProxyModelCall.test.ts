@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { ProxyModelCall } from '../Application/UseCases/ProxyModelCall'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AppAuthContext } from '../Application/DTOs/SdkApiDTO'
+import { ProxyModelCall } from '../Application/UseCases/ProxyModelCall'
 
 describe('ProxyModelCall', () => {
   let useCase: ProxyModelCall

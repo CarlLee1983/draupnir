@@ -40,10 +40,12 @@ export class AdminModuleCreatePage {
       type?: string
     }>()
 
-    const shared = ctx.get('inertia:shared') as {
-      locale: 'zh-TW' | 'en'
-      messages: Record<string, string>
-    } | undefined
+    const shared = ctx.get('inertia:shared') as
+      | {
+          locale: 'zh-TW' | 'en'
+          messages: Record<string, string>
+        }
+      | undefined
     const messages = shared?.messages ?? {}
 
     const name = typeof body.name === 'string' ? body.name.trim() : ''

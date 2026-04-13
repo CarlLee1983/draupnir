@@ -55,4 +55,3 @@ export class Locale {
     return this.value
   }
 }
-

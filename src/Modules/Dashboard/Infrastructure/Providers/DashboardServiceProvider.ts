@@ -1,25 +1,25 @@
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import { getCurrentORM } from '@/wiring/RepositoryFactory'
+import appConfig from '../../../../../config/app'
+import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
+import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorRepository'
+import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
 import { GetCostTrendsService } from '../../Application/Services/GetCostTrendsService'
+import { GetDashboardSummaryService } from '../../Application/Services/GetDashboardSummaryService'
 import { GetKpiSummaryService } from '../../Application/Services/GetKpiSummaryService'
 import { GetModelComparisonService } from '../../Application/Services/GetModelComparisonService'
 import { GetPerKeyCostService } from '../../Application/Services/GetPerKeyCostService'
+import { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
 import { DrizzleSyncCursorRepository } from '../Repositories/DrizzleSyncCursorRepository'
 import { DrizzleUsageRepository } from '../Repositories/DrizzleUsageRepository'
 import { BifrostSyncService } from '../Services/BifrostSyncService'
-import { UsageAggregator } from '../Services/UsageAggregator'
 import { DatabaseUsageAggregator } from '../Services/DatabaseUsageAggregator'
-import { GetDashboardSummaryService } from '../../Application/Services/GetDashboardSummaryService'
-import { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
-import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
-import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
-import appConfig from '../../../../../config/app'
-import { getCurrentORM } from '@/wiring/RepositoryFactory'
+import { UsageAggregator } from '../Services/UsageAggregator'
 
 export class DashboardServiceProvider extends ModuleServiceProvider implements IJobRegistrar {
   private container!: IContainer
@@ -114,7 +114,9 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
       },
       async () => {
         const result = await syncService.sync()
-        console.error(`[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`)
+        console.error(
+          `[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`,
+        )
       },
     )
   }

@@ -1,5 +1,5 @@
 // src/Modules/Credit/__tests__/Balance.test.ts
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { Balance } from '../Domain/ValueObjects/Balance'
 
 describe('Balance', () => {

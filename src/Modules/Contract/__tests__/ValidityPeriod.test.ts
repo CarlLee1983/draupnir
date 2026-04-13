@@ -1,5 +1,5 @@
 // src/Modules/Contract/__tests__/ValidityPeriod.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import { ValidityPeriod } from '../Domain/ValueObjects/ValidityPeriod'
 
 describe('ValidityPeriod', () => {

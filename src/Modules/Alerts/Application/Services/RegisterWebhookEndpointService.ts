@@ -1,5 +1,5 @@
-import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
 import { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
+import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
 import { WebhookUrl } from '../../Domain/ValueObjects/WebhookUrl'
 
 export class RegisterWebhookEndpointService {

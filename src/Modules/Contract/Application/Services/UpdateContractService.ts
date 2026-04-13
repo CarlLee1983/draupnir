@@ -1,6 +1,10 @@
 // src/Modules/Contract/Application/Services/UpdateContractService.ts
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import { ContractPresenter, type UpdateContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
+import {
+  ContractPresenter,
+  type ContractResponse,
+  type UpdateContractRequest,
+} from '../DTOs/ContractDTO'
 
 /**
  * Updates contract terms when the caller is an admin, then persists the aggregate.

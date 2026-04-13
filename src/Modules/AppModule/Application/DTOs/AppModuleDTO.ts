@@ -1,7 +1,8 @@
 // src/Modules/AppModule/Application/DTOs/AppModuleDTO.ts
-import type { ModuleTypeValue } from '../../Domain/ValueObjects/ModuleType'
+
 import type { AppModule } from '../../Domain/Aggregates/AppModule'
 import type { ModuleSubscription } from '../../Domain/Entities/ModuleSubscription'
+import type { ModuleTypeValue } from '../../Domain/ValueObjects/ModuleType'
 
 export class AppModulePresenter {
   static fromEntity(entity: AppModule): Record<string, unknown> {

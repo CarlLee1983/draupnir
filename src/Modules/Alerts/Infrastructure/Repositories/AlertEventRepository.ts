@@ -29,7 +29,10 @@ export class AlertEventRepository implements IAlertEventRepository {
     return row ? AlertEvent.fromDatabase(row) : null
   }
 
-  async listByOrg(orgId: string, opts?: { limit?: number; offset?: number }): Promise<readonly AlertEvent[]> {
+  async listByOrg(
+    orgId: string,
+    opts?: { limit?: number; offset?: number },
+  ): Promise<readonly AlertEvent[]> {
     const rows = await this.db
       .table('alert_events')
       .where('org_id', '=', orgId)

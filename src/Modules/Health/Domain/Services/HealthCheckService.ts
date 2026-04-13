@@ -5,7 +5,7 @@
 
 import type { SystemChecks } from './SystemChecks'
 
-export { type SystemChecks }
+export type { SystemChecks }
 
 /**
  * Domain service: determines overall system health from individual check results.
@@ -16,8 +16,7 @@ export class HealthCheckService {
     allHealthy: boolean
     message: string
   } {
-    const allHealthy =
-      checks.database && checks.redis !== false && checks.cache !== false
+    const allHealthy = checks.database && checks.redis !== false && checks.cache !== false
     return {
       allHealthy,
       message: allHealthy ? 'All systems operational' : 'Some services degraded',

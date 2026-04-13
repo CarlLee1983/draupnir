@@ -2,16 +2,16 @@
  * GoogleOAuthService — exchanges OAuth authorization codes for JWT access tokens.
  */
 
-import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import { UserProfile } from '@/Modules/Profile/Domain/Aggregates/UserProfile'
+import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import { User, UserStatus } from '../../Domain/Aggregates/User'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
 import { Role } from '../../Domain/ValueObjects/Role'
+import type { GoogleOAuthAdapter } from '../../Infrastructure/Services/GoogleOAuthAdapter'
 import type { IJwtTokenService } from '../Ports/IJwtTokenService'
 import type { IPasswordHasher } from '../Ports/IPasswordHasher'
-import type { GoogleOAuthAdapter } from '../../Infrastructure/Services/GoogleOAuthAdapter'
 
 export class GoogleOAuthService {
   constructor(

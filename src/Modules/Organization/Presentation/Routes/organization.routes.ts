@@ -1,17 +1,17 @@
+import {
+  createRoleMiddleware,
+  requireAuth,
+} from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { OrganizationController } from '../Controllers/OrganizationController'
-import {
-  requireAuth,
-  createRoleMiddleware,
-} from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { requireOrganizationContext } from '../Middleware/OrganizationMiddleware'
 import {
-  CreateOrganizationRequest,
-  UpdateOrganizationRequest,
-  ChangeOrgStatusRequest,
-  InviteMemberRequest,
   AcceptInvitationRequest,
   ChangeMemberRoleRequest,
+  ChangeOrgStatusRequest,
+  CreateOrganizationRequest,
+  InviteMemberRequest,
+  UpdateOrganizationRequest,
 } from '../Requests'
 
 export async function registerOrganizationRoutes(

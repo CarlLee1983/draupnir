@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeAll } from 'bun:test'
+import { beforeAll, describe, expect, it } from 'bun:test'
 import { TestClient } from './lib/test-client'
-import { setupTestServerFor, getBaseURL } from './lib/test-server'
+import { getBaseURL, setupTestServerFor } from './lib/test-server'
 
 setupTestServerFor('routes-connectivity')
 

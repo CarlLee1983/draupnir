@@ -1,13 +1,13 @@
-import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import {
   requireOrganizationContext,
   requireOrganizationManager,
 } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
+import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { AlertController } from '../Controllers/AlertController'
-import type { WebhookEndpointController } from '../Controllers/WebhookEndpointController'
 import type { AlertHistoryController } from '../Controllers/AlertHistoryController'
-import { SetBudgetRequest } from '../Requests/SetBudgetRequest'
+import type { WebhookEndpointController } from '../Controllers/WebhookEndpointController'
 import { RegisterWebhookEndpointRequest } from '../Requests/RegisterWebhookEndpointRequest'
+import { SetBudgetRequest } from '../Requests/SetBudgetRequest'
 import { UpdateWebhookEndpointRequest } from '../Requests/UpdateWebhookEndpointRequest'
 
 export function registerAlertRoutes(
@@ -19,11 +19,8 @@ export function registerAlertRoutes(
   const orgAccess = [requireOrganizationContext()]
   const managerAccess = [requireOrganizationManager()]
 
-  router.put(
-    '/api/organizations/:orgId/alerts/budget',
-    managerAccess,
-    SetBudgetRequest,
-    (ctx) => controller.setBudget(ctx),
+  router.put('/api/organizations/:orgId/alerts/budget', managerAccess, SetBudgetRequest, (ctx) =>
+    controller.setBudget(ctx),
   )
 
   router.get('/api/organizations/:orgId/alerts/budget', orgAccess, (ctx) =>
@@ -54,16 +51,12 @@ export function registerAlertRoutes(
     (ctx) => webhookController.rotateSecret(ctx),
   )
 
-  router.post(
-    '/api/organizations/:orgId/alerts/webhooks/:endpointId/test',
-    managerAccess,
-    (ctx) => webhookController.test(ctx),
+  router.post('/api/organizations/:orgId/alerts/webhooks/:endpointId/test', managerAccess, (ctx) =>
+    webhookController.test(ctx),
   )
 
-  router.delete(
-    '/api/organizations/:orgId/alerts/webhooks/:endpointId',
-    managerAccess,
-    (ctx) => webhookController.delete(ctx),
+  router.delete('/api/organizations/:orgId/alerts/webhooks/:endpointId', managerAccess, (ctx) =>
+    webhookController.delete(ctx),
   )
 
   router.get('/api/organizations/:orgId/alerts/history', managerAccess, (ctx) =>

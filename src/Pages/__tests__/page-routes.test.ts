@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'bun:test'
-import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
+import { describe, expect, it } from 'bun:test'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 
 /**
  * Test Coverage for page-routes refactor
@@ -29,7 +29,12 @@ describe('registerPageRoutes consolidation', () => {
     // Order matters: auth must come before admin, etc.
 
     const registrationCount = 4
-    const expectedLabels = ['Auth Inertia page', 'Admin Inertia page', 'Member Inertia page', 'Static page assets']
+    const expectedLabels = [
+      'Auth Inertia page',
+      'Admin Inertia page',
+      'Member Inertia page',
+      'Static page assets',
+    ]
 
     // Verify: all 4 route types are registered
     expect(registrationCount).toBe(expectedLabels.length)

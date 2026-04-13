@@ -1,6 +1,6 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IWebhookConfigRepository } from '../../Domain/Repositories/IWebhookConfigRepository'
 import { WebhookConfig } from '../../Domain/Entities/WebhookConfig'
+import type { IWebhookConfigRepository } from '../../Domain/Repositories/IWebhookConfigRepository'
 import { WebhookConfigMapper } from '../Mappers/WebhookConfigMapper'
 
 export class WebhookConfigRepository implements IWebhookConfigRepository {

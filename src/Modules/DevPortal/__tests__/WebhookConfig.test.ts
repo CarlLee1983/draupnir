@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { WebhookConfig } from '../Domain/Entities/WebhookConfig'
 import { WebhookConfigMapper } from '../Infrastructure/Mappers/WebhookConfigMapper'
 

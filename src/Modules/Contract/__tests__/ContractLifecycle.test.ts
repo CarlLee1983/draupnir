@@ -1,11 +1,11 @@
 // src/Modules/Contract/__tests__/ContractLifecycle.test.ts
-import { describe, test, expect, beforeEach } from 'bun:test'
-import { CreateContractService } from '../Application/Services/CreateContractService'
+import { beforeEach, describe, expect, test } from 'bun:test'
 import { ActivateContractService } from '../Application/Services/ActivateContractService'
-import { TerminateContractService } from '../Application/Services/TerminateContractService'
+import { CreateContractService } from '../Application/Services/CreateContractService'
 import { RenewContractService } from '../Application/Services/RenewContractService'
-import type { IContractRepository } from '../Domain/Repositories/IContractRepository'
+import { TerminateContractService } from '../Application/Services/TerminateContractService'
 import type { Contract } from '../Domain/Aggregates/Contract'
+import type { IContractRepository } from '../Domain/Repositories/IContractRepository'
 
 class InMemoryContractRepository implements IContractRepository {
   private contracts: Map<string, Contract> = new Map()

@@ -1,5 +1,5 @@
 // src/Modules/CliApi/__tests__/CliApiConfig.test.ts
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { loadCliApiConfig } from '../Infrastructure/Config/CliApiConfig'
 
 describe('loadCliApiConfig', () => {

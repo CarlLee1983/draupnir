@@ -1,6 +1,6 @@
+import { requireAuth } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { DevPortalController } from '../Controllers/DevPortalController'
-import { requireAuth } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 
 export function registerDevPortalRoutes(
   router: IModuleRouter,

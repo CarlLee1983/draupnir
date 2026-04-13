@@ -1,8 +1,8 @@
 // src/Modules/AppModule/__tests__/ModuleSubscription.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import { ModuleSubscriptionPresenter } from '../Application/DTOs/AppModuleDTO'
 import { ModuleSubscription } from '../Domain/Entities/ModuleSubscription'
 import { ModuleSubscriptionMapper } from '../Infrastructure/Mappers/ModuleSubscriptionMapper'
-import { ModuleSubscriptionPresenter } from '../Application/DTOs/AppModuleDTO'
 
 describe('ModuleSubscription', () => {
   test('建立訂閱', () => {

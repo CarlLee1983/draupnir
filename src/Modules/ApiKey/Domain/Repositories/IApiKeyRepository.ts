@@ -3,8 +3,8 @@
  * Domain Repository: contract for API key persistence.
  */
 
-import { ApiKey } from '../Aggregates/ApiKey'
 import type { IDatabaseAccess } from '@/Shared/Domain/IDatabaseAccess'
+import type { ApiKey } from '../Aggregates/ApiKey'
 
 export interface IApiKeyRepository {
   /** Finds a key by its unique identifier. */

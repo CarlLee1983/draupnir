@@ -19,9 +19,9 @@ describe('CronerScheduler', () => {
     scheduler.schedule({ name: 'job-1', cron: '* * * * * *' }, async () => {})
 
     expect(scheduler.has('job-1')).toBe(true)
-    expect(() => scheduler.schedule({ name: 'job-1', cron: '* * * * * *' }, async () => {})).toThrow(
-      /duplicate job name: job-1/,
-    )
+    expect(() =>
+      scheduler.schedule({ name: 'job-1', cron: '* * * * * *' }, async () => {}),
+    ).toThrow(/duplicate job name: job-1/)
 
     scheduler.unschedule('job-1')
   })

@@ -83,5 +83,4 @@ export class WebhookConfig {
   get updatedAt(): Date {
     return this.props.updatedAt
   }
-
 }

@@ -1,10 +1,10 @@
 // src/Modules/Credit/__tests__/GetBalanceService.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { GetBalanceService } from '../Application/Services/GetBalanceService'
-import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
 import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
-import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
 
 describe('GetBalanceService', () => {
   let db: MemoryDatabaseAccess

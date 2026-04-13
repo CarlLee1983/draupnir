@@ -1,8 +1,9 @@
 // src/Modules/Contract/Application/Services/HandleContractExpiryService.ts
-import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import { ContractExpiring } from '../../Domain/Events/ContractExpiring'
-import { ContractExpired } from '../../Domain/Events/ContractExpired'
+
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
+import { ContractExpired } from '../../Domain/Events/ContractExpired'
+import { ContractExpiring } from '../../Domain/Events/ContractExpiring'
+import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 
 /**
  * Runs expiry workflows for scheduled jobs: notifies expiring contracts and persists expired ones.

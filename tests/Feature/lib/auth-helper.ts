@@ -1,5 +1,5 @@
-import { TestClient } from './test-client'
 import { seedAdminRole } from './admin-seed'
+import type { TestClient } from './test-client'
 
 export type AuthRole = 'user' | 'admin'
 

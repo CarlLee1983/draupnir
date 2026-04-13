@@ -1,5 +1,5 @@
 // src/Modules/Credit/__tests__/TransactionType.test.ts
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { TransactionType } from '../Domain/ValueObjects/TransactionType'
 
 describe('TransactionType', () => {

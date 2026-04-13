@@ -1,7 +1,7 @@
 import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
-import { type IReportRepository } from '../../Domain/Repositories/IReportRepository'
-import { type GeneratePdfService } from './GeneratePdfService'
-import { type SendReportEmailService } from './SendReportEmailService'
+import type { IReportRepository } from '../../Domain/Repositories/IReportRepository'
+import type { GeneratePdfService } from './GeneratePdfService'
+import type { SendReportEmailService } from './SendReportEmailService'
 
 export class ScheduleReportService {
   constructor(
@@ -42,7 +42,10 @@ export class ScheduleReportService {
           await this.emailService.send(schedule.recipients, pdfBuffer, schedule.type)
           console.log(`[Reports] Successfully sent scheduled report for schedule ${scheduleId}`)
         } catch (error) {
-          console.error(`[Reports] Error executing scheduled report for schedule ${scheduleId}:`, error)
+          console.error(
+            `[Reports] Error executing scheduled report for schedule ${scheduleId}:`,
+            error,
+          )
         }
       },
     )

@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../../InertiaService'
 import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { VerifyDevicePage } from '../../Auth/VerifyDevicePage'
+import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -36,7 +36,13 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 function createMockContextWithAuth(userCode?: string): IHttpContext {
   const store = new Map<string, unknown>()
   store.set('inertia:shared', { csrfToken: 'test-csrf-token-123' })
-  store.set('auth', { userId: 'user-1', email: 'user@example.com', role: 'member', permissions: [], tokenType: 'access' })
+  store.set('auth', {
+    userId: 'user-1',
+    email: 'user@example.com',
+    role: 'member',
+    permissions: [],
+    tokenType: 'access',
+  })
   if (userCode !== undefined) {
     store.set('validated', { userCode })
   }
@@ -143,7 +149,7 @@ describe('VerifyDevicePage', () => {
       const ctx = createMockContextWithAuth('ABCD-1234')
       await page.authorize(ctx)
 
-      expect((authorizeDeviceService.execute as ReturnType<typeof mock>)).toHaveBeenCalledWith({
+      expect(authorizeDeviceService.execute as ReturnType<typeof mock>).toHaveBeenCalledWith({
         userCode: 'ABCD-1234',
         userId: 'user-1',
         email: 'user@example.com',
@@ -151,7 +157,9 @@ describe('VerifyDevicePage', () => {
       })
 
       const call = render.mock.calls[0] as unknown as [unknown, string, Record<string, unknown>]
-      expect(call[2].message).toBe('CLI device authorized successfully, return to CLI to complete login')
+      expect(call[2].message).toBe(
+        'CLI device authorized successfully, return to CLI to complete login',
+      )
       expect(call[2].error).toBeUndefined()
     })
 

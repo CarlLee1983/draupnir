@@ -1,9 +1,9 @@
+import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
-import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
 import type { AlertPayload, IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
+import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
 import type { DeliveryChannel } from '../../Domain/ValueObjects/DeliveryStatus'
-import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 
 export class ResendDeliveryService {
   constructor(

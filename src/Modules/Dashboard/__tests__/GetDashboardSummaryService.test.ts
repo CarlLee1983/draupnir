@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeAll, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { GetDashboardSummaryService } from '../Application/Services/GetDashboardSummaryService'
+import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
 import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
-import { UsageAggregator } from '../Infrastructure/Services/UsageAggregator'
-import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
-import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { GetDashboardSummaryService } from '../Application/Services/GetDashboardSummaryService'
+import { UsageAggregator } from '../Infrastructure/Services/UsageAggregator'
 
 const hashingService = new KeyHashingService()
 let key1Hash: string
@@ -23,7 +23,12 @@ beforeAll(async () => {
 
 function createMockAggregator(): UsageAggregator {
   const gatewayMock = new MockGatewayClient()
-  gatewayMock.seedUsageStats({ totalRequests: 42, totalCost: 1.5, totalTokens: 10000, avgLatency: 200 })
+  gatewayMock.seedUsageStats({
+    totalRequests: 42,
+    totalCost: 1.5,
+    totalTokens: 10000,
+    avgLatency: 200,
+  })
   return new UsageAggregator(gatewayMock)
 }
 

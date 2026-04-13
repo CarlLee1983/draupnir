@@ -1,8 +1,8 @@
-import { describe, expect, test, mock } from 'bun:test'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { describe, expect, mock, test } from 'bun:test'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
-import type { InertiaService } from '../../InertiaService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AdminModuleCreatePage } from '../../Admin/AdminModuleCreatePage'
+import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -144,12 +144,10 @@ describe('AdminModuleCreatePage', () => {
     const mockRegisterModuleService = { execute: mock(() => Promise.resolve({ success: true })) }
 
     const page = new AdminModuleCreatePage(inertia, mockRegisterModuleService as any)
-    const ctx = createAdminContextWithBody(
-      {
-        name: '',
-        description: 'Test module',
-      },
-    )
+    const ctx = createAdminContextWithBody({
+      name: '',
+      description: 'Test module',
+    })
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Modules/Create')

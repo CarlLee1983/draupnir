@@ -1,8 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { AppAuthMiddleware } from '../Infrastructure/Middleware/AppAuthMiddleware'
-import { AuthenticateApp } from '../Application/UseCases/AuthenticateApp'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { AppAuthContext } from '../Application/DTOs/SdkApiDTO'
+import type { AuthenticateApp } from '../Application/UseCases/AuthenticateApp'
+import { AppAuthMiddleware } from '../Infrastructure/Middleware/AppAuthMiddleware'
 
 function createMockCtx(authHeader?: string): IHttpContext {
   const store = new Map<string, unknown>()

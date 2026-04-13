@@ -1,6 +1,6 @@
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
-import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import { OrganizationMemberPresenter, type OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 
 export class ListMembersService {
   constructor(

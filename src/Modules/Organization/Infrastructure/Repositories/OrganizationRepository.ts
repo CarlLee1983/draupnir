@@ -1,6 +1,6 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 import { Organization } from '../../Domain/Aggregates/Organization'
+import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 import { OrganizationMapper } from '../Mappers/OrganizationMapper'
 
 export class OrganizationRepository implements IOrganizationRepository {
@@ -21,7 +21,10 @@ export class OrganizationRepository implements IOrganizationRepository {
   }
 
   async update(org: Organization): Promise<void> {
-    await this.db.table('organizations').where('id', '=', org.id).update(OrganizationMapper.toDatabaseRow(org))
+    await this.db
+      .table('organizations')
+      .where('id', '=', org.id)
+      .update(OrganizationMapper.toDatabaseRow(org))
   }
 
   async findAll(limit?: number, offset?: number): Promise<Organization[]> {

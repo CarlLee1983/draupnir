@@ -33,7 +33,11 @@ export class ListAdminContractsService {
   async execute(query: ListAdminContractsQuery): Promise<ListAdminContractsResponse> {
     try {
       if (query.callerRole !== 'admin') {
-        return { success: false, message: 'Only admins can view the contract list', error: 'FORBIDDEN' }
+        return {
+          success: false,
+          message: 'Only admins can view the contract list',
+          error: 'FORBIDDEN',
+        }
       }
 
       const page = query.page ?? 1

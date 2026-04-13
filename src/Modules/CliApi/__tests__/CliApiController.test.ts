@@ -1,17 +1,17 @@
 // src/Modules/CliApi/__tests__/CliApiController.test.ts
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import { CliApiController } from '../Presentation/Controllers/CliApiController'
-import { InitiateDeviceFlowService } from '../Application/Services/InitiateDeviceFlowService'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AuthorizeDeviceService } from '../Application/Services/AuthorizeDeviceService'
 import { ExchangeDeviceCodeService } from '../Application/Services/ExchangeDeviceCodeService'
+import { InitiateDeviceFlowService } from '../Application/Services/InitiateDeviceFlowService'
+import type { ICliProxyClient } from '../Application/Services/ProxyCliRequestService'
 import { ProxyCliRequestService } from '../Application/Services/ProxyCliRequestService'
 import { RevokeCliSessionService } from '../Application/Services/RevokeCliSessionService'
 import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
-import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
-import type { ICliProxyClient } from '../Application/Services/ProxyCliRequestService'
+import { CliApiController } from '../Presentation/Controllers/CliApiController'
 
 function createMockAuthTokenRepo(): IAuthTokenRepository {
   return {

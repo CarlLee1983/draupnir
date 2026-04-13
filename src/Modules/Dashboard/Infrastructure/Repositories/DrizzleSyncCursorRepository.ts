@@ -1,5 +1,8 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { ISyncCursorRepository, SyncCursor } from '../../Application/Ports/ISyncCursorRepository'
+import type {
+  ISyncCursorRepository,
+  SyncCursor,
+} from '../../Application/Ports/ISyncCursorRepository'
 
 export class DrizzleSyncCursorRepository implements ISyncCursorRepository {
   constructor(private readonly db: IDatabaseAccess) {}

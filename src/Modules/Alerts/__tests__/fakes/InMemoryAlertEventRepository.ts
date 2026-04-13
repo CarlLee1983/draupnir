@@ -1,4 +1,4 @@
-import { AlertEvent } from '../../Domain/Entities/AlertEvent'
+import type { AlertEvent } from '../../Domain/Entities/AlertEvent'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
 
 export class InMemoryAlertEventRepository implements IAlertEventRepository {
@@ -23,7 +23,10 @@ export class InMemoryAlertEventRepository implements IAlertEventRepository {
     return this.events.find((e) => e.id === id) ?? null
   }
 
-  async listByOrg(orgId: string, opts?: { limit?: number; offset?: number }): Promise<readonly AlertEvent[]> {
+  async listByOrg(
+    orgId: string,
+    opts?: { limit?: number; offset?: number },
+  ): Promise<readonly AlertEvent[]> {
     const limit = opts?.limit ?? 50
     const offset = opts?.offset ?? 0
     return this.events

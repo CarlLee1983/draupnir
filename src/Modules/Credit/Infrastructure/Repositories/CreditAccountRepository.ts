@@ -4,9 +4,9 @@
  * Infrastructure: SQL implementation for credit account persistence.
  */
 
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { CreditAccount } from '../../Domain/Aggregates/CreditAccount'
-import { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
-import { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
 
 export class CreditAccountRepository implements ICreditAccountRepository {
   constructor(private readonly db: IDatabaseAccess) {}
@@ -41,4 +41,3 @@ export class CreditAccountRepository implements ICreditAccountRepository {
     return new CreditAccountRepository(tx)
   }
 }
-

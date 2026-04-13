@@ -1,21 +1,22 @@
 // src/Modules/Credit/Infrastructure/Providers/CreditServiceProvider.ts
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import { CreditAccountRepository } from '../Repositories/CreditAccountRepository'
-import { CreditTransactionRepository } from '../Repositories/CreditTransactionRepository'
-import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
-import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
 import { DeductCreditService } from '../../Application/Services/DeductCreditService'
-import { TopUpCreditService } from '../../Application/Services/TopUpCreditService'
 import { GetBalanceService } from '../../Application/Services/GetBalanceService'
 import { GetTransactionHistoryService } from '../../Application/Services/GetTransactionHistoryService'
-import { RefundCreditService } from '../../Application/Services/RefundCreditService'
 import { HandleBalanceDepletedService } from '../../Application/Services/HandleBalanceDepletedService'
 import { HandleCreditToppedUpService } from '../../Application/Services/HandleCreditToppedUpService'
-import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
-import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
+import { RefundCreditService } from '../../Application/Services/RefundCreditService'
+import { TopUpCreditService } from '../../Application/Services/TopUpCreditService'
+import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
+import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
+import { CreditAccountRepository } from '../Repositories/CreditAccountRepository'
+import { CreditTransactionRepository } from '../Repositories/CreditTransactionRepository'
 
 export class CreditServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {

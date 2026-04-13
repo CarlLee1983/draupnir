@@ -1,11 +1,11 @@
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
+import { BalanceDepleted } from '../../Domain/Events/BalanceDepleted'
+import { BalanceLow } from '../../Domain/Events/BalanceLow'
 import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
 import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
-import { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
 import { TransactionType } from '../../Domain/ValueObjects/TransactionType'
-import { BalanceLow } from '../../Domain/Events/BalanceLow'
-import { BalanceDepleted } from '../../Domain/Events/BalanceDepleted'
-import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 
 export interface DeductCreditRequest {
   orgId: string

@@ -1,7 +1,7 @@
-import type { AlertEvent } from '../../Domain/Entities/AlertEvent'
 import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
-import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
+import type { AlertEvent } from '../../Domain/Entities/AlertEvent'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
+import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
 
 export class GetAlertHistoryService {
   constructor(
@@ -25,7 +25,9 @@ export class GetAlertHistoryService {
       })),
     )
 
-    histories.sort((left, right) => Date.parse(right.event.createdAt) - Date.parse(left.event.createdAt))
+    histories.sort(
+      (left, right) => Date.parse(right.event.createdAt) - Date.parse(left.event.createdAt),
+    )
     return histories
   }
 }

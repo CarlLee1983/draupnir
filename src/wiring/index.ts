@@ -1,19 +1,19 @@
 import type { PlanetCore } from '@gravito/core'
-import { registerHealthWithGravito } from '@/Shared/Infrastructure/Framework/GravitoHealthAdapter'
 import { registerDocsWithGravito } from '@/Shared/Infrastructure/Framework/GravitoDocsAdapter'
+import { registerHealthWithGravito } from '@/Shared/Infrastructure/Framework/GravitoHealthAdapter'
 import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import { getCurrentORM } from './RepositoryFactory'
 
-// 核心導出（應用啟動時使用）
-export { DatabaseAccessBuilder, createDatabaseAccess } from './DatabaseAccessBuilder'
 export {
-  setCurrentDatabaseAccess,
   getCurrentDatabaseAccess,
   hasCurrentDatabaseAccess,
+  setCurrentDatabaseAccess,
 } from './CurrentDatabaseAccess'
+// 核心導出（應用啟動時使用）
+export { createDatabaseAccess, DatabaseAccessBuilder } from './DatabaseAccessBuilder'
 export { getCurrentORM, getDatabaseAccess } from './RepositoryFactory'
-export { initializeRegistry, getRegistry, resetRegistry } from './RepositoryRegistry'
 export { createRepositoryFactory } from './RepositoryFactoryGenerator'
+export { getRegistry, initializeRegistry, resetRegistry } from './RepositoryRegistry'
 
 /**
  * 應用啟動時的 ORM 配置摘要
@@ -132,13 +132,13 @@ export const registerApiKey = (core: PlanetCore): void => {
   registerApiKeyRoutes(router, controller)
 }
 
-import { DashboardController, registerDashboardRoutes } from '@/Modules/Dashboard'
 import {
-  AlertController,
-  AlertHistoryController,
-  WebhookEndpointController,
+  type AlertController,
+  type AlertHistoryController,
   registerAlertRoutes,
+  type WebhookEndpointController,
 } from '@/Modules/Alerts'
+import { DashboardController, registerDashboardRoutes } from '@/Modules/Dashboard'
 
 /**
  * 註冊 Dashboard 模組
@@ -162,7 +162,9 @@ export const registerDashboard = (core: PlanetCore): void => {
 export const registerAlerts = (core: PlanetCore): void => {
   const router = createGravitoModuleRouter(core)
   const controller = core.container.make('alertController') as AlertController
-  const webhookController = core.container.make('webhookEndpointController') as WebhookEndpointController
+  const webhookController = core.container.make(
+    'webhookEndpointController',
+  ) as WebhookEndpointController
   const historyController = core.container.make('alertHistoryController') as AlertHistoryController
   registerAlertRoutes(router, controller, webhookController, historyController)
 }
@@ -205,8 +207,8 @@ export const registerContract = (core: PlanetCore): void => {
 }
 
 import { AppModuleController, registerAppModuleRoutes } from '@/Modules/AppModule'
-import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
 import type { CheckModuleAccessService } from '@/Modules/AppModule/Application/Services/CheckModuleAccessService'
+import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
 
 /**
  * 註冊 AppModule 模組
@@ -265,7 +267,7 @@ export const registerDevPortal = (core: PlanetCore): void => {
   registerDevPortalRoutes(router, controller)
 }
 
-import { SdkApiController, registerSdkApiRoutes, AppAuthMiddleware } from '@/Modules/SdkApi'
+import { type AppAuthMiddleware, registerSdkApiRoutes, SdkApiController } from '@/Modules/SdkApi'
 
 /**
  * 註冊 SdkApi 模組（App API Key Bearer /sdk/v1）
@@ -282,7 +284,7 @@ export const registerSdkApi = (core: PlanetCore): void => {
 }
 
 import { CliApiController, registerCliApiRoutes } from '@/Modules/CliApi'
-import { ReportController, registerReportRoutes } from '@/Modules/Reports'
+import { type ReportController, registerReportRoutes } from '@/Modules/Reports'
 
 /**
  * 註冊 Reports 模組

@@ -15,7 +15,7 @@ import type { AggregateSpec } from './Database/AggregateSpec'
  * Query Builder Interface (Abstract Fluent API, supports test substitution)
  *
  * Provides a fluid query API, hiding specific ORM implementation details.
- * All layers can interact with the database through this interface without 
+ * All layers can interact with the database through this interface without
  * knowing which ORM is actually being used.
  *
  * @public - ORM-agnostic public API.
@@ -171,7 +171,7 @@ export interface IDatabaseAccess {
    * Executes a callback function within a database transaction.
    *
    * Automatically commits on success and rolls back on error.
-   * The callback receives a transaction-scoped IDatabaseAccess instance, 
+   * The callback receives a transaction-scoped IDatabaseAccess instance,
    * ensuring all operations on this instance are performed within the same transaction.
    *
    * @template T - Callback return type.
@@ -186,4 +186,3 @@ export interface IDatabaseAccess {
  * @deprecated Use IDatabaseAccess instead.
  */
 export type DatabaseAccess = IDatabaseAccess
-

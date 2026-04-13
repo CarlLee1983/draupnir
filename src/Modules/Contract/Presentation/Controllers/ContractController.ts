@@ -1,21 +1,22 @@
 // src/Modules/Contract/Presentation/Controllers/ContractController.ts
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import type { CreateContractService } from '../../Application/Services/CreateContractService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { ActivateContractService } from '../../Application/Services/ActivateContractService'
-import type { UpdateContractService } from '../../Application/Services/UpdateContractService'
 import type { AssignContractService } from '../../Application/Services/AssignContractService'
-import type { TerminateContractService } from '../../Application/Services/TerminateContractService'
-import type { RenewContractService } from '../../Application/Services/RenewContractService'
-import type { ListContractsService } from '../../Application/Services/ListContractsService'
+import type { CreateContractService } from '../../Application/Services/CreateContractService'
 import type { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
 import type { HandleContractExpiryService } from '../../Application/Services/HandleContractExpiryService'
+import type { ListContractsService } from '../../Application/Services/ListContractsService'
+import type { RenewContractService } from '../../Application/Services/RenewContractService'
+import type { TerminateContractService } from '../../Application/Services/TerminateContractService'
+import type { UpdateContractService } from '../../Application/Services/UpdateContractService'
 import type {
-  CreateContractParams,
-  UpdateContractParams,
-  RenewContractParams,
   AssignContractParams,
+  CreateContractParams,
   ListContractsQueryParams,
+  RenewContractParams,
+  UpdateContractParams,
 } from '../Requests'
 
 /** HTTP adapter for contract commands and queries; delegates to application services. */
@@ -35,7 +36,8 @@ export class ContractController {
   /** POST /api/contracts — creates a contract for an admin-authenticated caller. */
   async create(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = ctx.get('validated') as CreateContractParams
     const result = await this.createService.execute({
       targetType: body.targetType,
@@ -50,7 +52,8 @@ export class ContractController {
   /** POST /api/contracts/:contractId/activate — activates a contract when allowed. */
   async activate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
     if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const result = await this.activateService.execute(contractId, auth.role)
@@ -60,7 +63,8 @@ export class ContractController {
   /** PUT /api/contracts/:contractId — updates DRAFT terms. */
   async update(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
     if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const body = ctx.get('validated') as UpdateContractParams
@@ -76,7 +80,8 @@ export class ContractController {
   /** POST /api/contracts/:contractId/assign — reassigns a DRAFT contract target. */
   async assign(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
     if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const body = ctx.get('validated') as AssignContractParams
@@ -93,7 +98,8 @@ export class ContractController {
   /** POST /api/contracts/:contractId/terminate — terminates a contract. */
   async terminate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
     if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const result = await this.terminateService.execute(contractId, auth.role)
@@ -103,7 +109,8 @@ export class ContractController {
   /** POST /api/contracts/:contractId/renew — renews an ACTIVE contract with new terms. */
   async renew(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
     if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const body = ctx.get('validated') as RenewContractParams
@@ -114,9 +121,13 @@ export class ContractController {
   /** POST /api/contracts/handle-expiry — admin-only job hook for expiring/expired processing. */
   async handleExpiry(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     if (auth.role !== 'admin') {
-      return ctx.json({ success: false, message: 'Only admins can perform this action', error: 'FORBIDDEN' }, 403)
+      return ctx.json(
+        { success: false, message: 'Only admins can perform this action', error: 'FORBIDDEN' },
+        403,
+      )
     }
     const counts = await this.handleContractExpiryService.execute()
     return ctx.json({ success: true, message: 'Contract expiry check processed', data: counts })
@@ -125,7 +136,8 @@ export class ContractController {
   /** GET /api/contracts — lists contracts for `targetId` with org membership checks for non-admins. */
   async list(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const query = ctx.get('validated') as ListContractsQueryParams
     const result = await this.listService.execute(query.targetId, auth.userId, auth.role)
     return ctx.json(result)
@@ -134,7 +146,8 @@ export class ContractController {
   /** GET /api/contracts/:contractId — returns one contract for admins. */
   async getDetail(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const contractId = ctx.getParam('contractId')
     if (!contractId) return ctx.json({ success: false, message: 'Missing contractId' }, 400)
     const result = await this.getDetailService.execute(contractId, auth.role)

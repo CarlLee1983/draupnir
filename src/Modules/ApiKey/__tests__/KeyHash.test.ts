@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { KeyHash } from '../Domain/ValueObjects/KeyHash'
+import { describe, expect, it } from 'vitest'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { KeyHash } from '../Domain/ValueObjects/KeyHash'
 
 describe('KeyHash', () => {
   it('應從已有 hash 重建', () => {

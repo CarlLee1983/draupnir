@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { BifrostClient, BifrostApiError } from '@draupnir/bifrost-sdk'
-import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
-import { BifrostGatewayAdapter } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/BifrostGatewayAdapter'
-import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway/errors'
+import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
 import type {
-  VirtualKeyResponse,
+  BifrostClientConfig,
   BifrostLogsResponse,
   BifrostLogsStats,
+  VirtualKeyResponse,
 } from '@draupnir/bifrost-sdk'
+import { BifrostApiError, BifrostClient } from '@draupnir/bifrost-sdk'
+import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway/errors'
+import { BifrostGatewayAdapter } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/BifrostGatewayAdapter'
 
 const TEST_CONFIG: BifrostClientConfig = {
   baseUrl: 'https://bifrost.test',

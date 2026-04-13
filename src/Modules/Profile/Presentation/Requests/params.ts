@@ -11,4 +11,3 @@ export const UserIdSchema = z.object({
  * Type inferred from the UserIdSchema.
  */
 export type UserIdParams = z.infer<typeof UserIdSchema>
-

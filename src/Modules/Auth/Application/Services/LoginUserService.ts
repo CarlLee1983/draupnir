@@ -22,9 +22,9 @@
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
-import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 import type { LoginRequest, LoginResponse } from '../DTOs/LoginDTO'
 import type { IJwtTokenService } from '../Ports/IJwtTokenService'
+import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 
 /**
  * Computes a SHA-256 hash of a string.
@@ -176,4 +176,3 @@ export class LoginUserService {
     return { isValid: true }
   }
 }
-

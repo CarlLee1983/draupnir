@@ -1,8 +1,8 @@
 // src/Modules/CliApi/__tests__/InitiateDeviceFlowService.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { InitiateDeviceFlowService } from '../Application/Services/InitiateDeviceFlowService'
 import type { IDeviceCodeStore } from '../Domain/Ports/IDeviceCodeStore'
+import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
 
 describe('InitiateDeviceFlowService', () => {
   let store: MemoryDeviceCodeStore

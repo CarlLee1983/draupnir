@@ -1,7 +1,10 @@
-import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
-import type { IAlertRecipientResolver, AlertRecipientContext } from '../../Domain/Services/IAlertRecipientResolver'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
+import type {
+  AlertRecipientContext,
+  IAlertRecipientResolver,
+} from '../../Domain/Services/IAlertRecipientResolver'
 
 /**
  * AlertRecipientResolverImpl

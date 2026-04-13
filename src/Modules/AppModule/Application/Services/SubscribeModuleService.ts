@@ -10,12 +10,16 @@
  * - Dispatch domain events for downstream side effects
  */
 
-import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
-import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { ModuleSubscription } from '../../Domain/Entities/ModuleSubscription'
 import { ModuleSubscribed } from '../../Domain/Events/ModuleSubscribed'
-import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import { ModuleSubscriptionPresenter, type SubscribeModuleRequest, type ModuleResponse } from '../DTOs/AppModuleDTO'
+import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
+import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
+import {
+  type ModuleResponse,
+  ModuleSubscriptionPresenter,
+  type SubscribeModuleRequest,
+} from '../DTOs/AppModuleDTO'
 
 /**
  * Service facilitating the subscription of organizations to functional modules.
@@ -36,7 +40,11 @@ export class SubscribeModuleService {
         return { success: false, message: 'Module not found', error: 'MODULE_NOT_FOUND' }
       }
       if (!module.isActive()) {
-        return { success: false, message: 'Module is currently disabled', error: 'MODULE_DEPRECATED' }
+        return {
+          success: false,
+          message: 'Module is currently disabled',
+          error: 'MODULE_DEPRECATED',
+        }
       }
 
       const existing = await this.subscriptionRepo.findByOrgAndModule(
@@ -44,7 +52,11 @@ export class SubscribeModuleService {
         request.moduleId,
       )
       if (existing && existing.isActive()) {
-        return { success: false, message: 'Already subscribed to this module', error: 'ALREADY_SUBSCRIBED' }
+        return {
+          success: false,
+          message: 'Already subscribed to this module',
+          error: 'ALREADY_SUBSCRIBED',
+        }
       }
 
       const subscription = ModuleSubscription.create(request.orgId, request.moduleId)
@@ -65,4 +77,3 @@ export class SubscribeModuleService {
     }
   }
 }
-

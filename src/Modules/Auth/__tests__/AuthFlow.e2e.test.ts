@@ -15,7 +15,6 @@ import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Reposito
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService'
 import { LoginUserService } from '../Application/Services/LoginUserService'
 import { LogoutUserService } from '../Application/Services/LogoutUserService'
 import { RefreshTokenService } from '../Application/Services/RefreshTokenService'
@@ -25,6 +24,7 @@ import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepo
 import { RoleType } from '../Domain/ValueObjects/Role'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
+import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService'
 import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 
 describe('認證流程 E2E 測試', () => {

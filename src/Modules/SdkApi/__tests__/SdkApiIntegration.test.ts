@@ -1,18 +1,18 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { AppApiKeyRepository } from '@/Modules/AppApiKey/Infrastructure/Repositories/AppApiKeyRepository'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { AppApiKey } from '@/Modules/AppApiKey/Domain/Aggregates/AppApiKey'
 import { AppKeyScope } from '@/Modules/AppApiKey/Domain/ValueObjects/AppKeyScope'
 import { BoundModules } from '@/Modules/AppApiKey/Domain/ValueObjects/BoundModules'
-import { AuthenticateApp } from '../Application/UseCases/AuthenticateApp'
-import { AppAuthMiddleware } from '../Infrastructure/Middleware/AppAuthMiddleware'
-import { ProxyModelCall } from '../Application/UseCases/ProxyModelCall'
-import { QueryUsage } from '../Application/UseCases/QueryUsage'
-import { QueryBalance } from '../Application/UseCases/QueryBalance'
-import { SdkApiController } from '../Presentation/Controllers/SdkApiController'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { AppApiKeyRepository } from '@/Modules/AppApiKey/Infrastructure/Repositories/AppApiKeyRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { AuthenticateApp } from '../Application/UseCases/AuthenticateApp'
+import { ProxyModelCall } from '../Application/UseCases/ProxyModelCall'
+import { QueryBalance } from '../Application/UseCases/QueryBalance'
+import { QueryUsage } from '../Application/UseCases/QueryUsage'
+import { AppAuthMiddleware } from '../Infrastructure/Middleware/AppAuthMiddleware'
+import { SdkApiController } from '../Presentation/Controllers/SdkApiController'
 
 function createMockCtx(options: {
   authHeader?: string
@@ -75,7 +75,12 @@ describe('SdkApi Integration', () => {
     const proxyModelCall = new ProxyModelCall('http://localhost:8787', mockFetch)
 
     const mockGatewayClient = new MockGatewayClient()
-    mockGatewayClient.seedUsageStats({ totalRequests: 50, totalCost: 2.5, totalTokens: 25000, avgLatency: 200 })
+    mockGatewayClient.seedUsageStats({
+      totalRequests: 50,
+      totalCost: 2.5,
+      totalTokens: 25000,
+      avgLatency: 200,
+    })
     const queryUsage = new QueryUsage(mockGatewayClient)
 
     const mockCreditRepo = {

@@ -15,5 +15,8 @@ export interface SyncCursor {
 
 export interface ISyncCursorRepository {
   get(cursorType: string): Promise<SyncCursor | null>
-  advance(cursorType: string, update: { readonly lastSyncedAt: string; readonly lastBifrostLogId?: string }): Promise<void>
+  advance(
+    cursorType: string,
+    update: { readonly lastSyncedAt: string; readonly lastBifrostLogId?: string },
+  ): Promise<void>
 }

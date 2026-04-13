@@ -1,7 +1,7 @@
-import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
-import type { ApiKeyController } from '../Controllers/ApiKeyController'
 import { requireAuth } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { createModuleAccessMiddleware } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
+import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
+import type { ApiKeyController } from '../Controllers/ApiKeyController'
 
 export function registerApiKeyRoutes(router: IModuleRouter, controller: ApiKeyController): void {
   const keysAccess = [requireAuth(), createModuleAccessMiddleware('api_keys')]

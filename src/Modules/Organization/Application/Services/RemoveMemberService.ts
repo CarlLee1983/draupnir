@@ -1,8 +1,8 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrgMembershipRules } from '../../Domain/Services/OrgMembershipRules'
-import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import type { OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 
 export class RemoveMemberService {
   constructor(

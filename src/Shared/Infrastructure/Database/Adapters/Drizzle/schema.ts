@@ -7,8 +7,8 @@
  * @see https://orm.drizzle.team/docs/sql-schema-declaration
  */
 
-import { sqliteTable, text, integer, index, real } from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
+import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 
 /**
  * Users 表
@@ -235,7 +235,10 @@ export const alertEvents = sqliteTable(
     recipients: text('recipients').notNull(),
     created_at: text('created_at').notNull(),
   },
-  (table) => [index('idx_alert_events_org_id').on(table.org_id), index('idx_alert_events_month').on(table.month)],
+  (table) => [
+    index('idx_alert_events_org_id').on(table.org_id),
+    index('idx_alert_events_month').on(table.month),
+  ],
 )
 
 /**
@@ -289,7 +292,12 @@ export const alertDeliveries = sqliteTable(
   (table) => [
     index('idx_alert_deliveries_event_id').on(table.alert_event_id),
     index('idx_alert_deliveries_channel_target').on(table.channel, table.target),
-    index('idx_alert_deliveries_dedup').on(table.alert_event_id, table.channel, table.target, table.status),
+    index('idx_alert_deliveries_dedup').on(
+      table.alert_event_id,
+      table.channel,
+      table.target,
+      table.status,
+    ),
     index('idx_alert_deliveries_org_month_tier').on(table.org_id, table.month, table.tier),
   ],
 )

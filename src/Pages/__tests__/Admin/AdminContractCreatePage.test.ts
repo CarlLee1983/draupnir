@@ -1,8 +1,8 @@
-import { describe, expect, test, mock } from 'bun:test'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { describe, expect, mock, test } from 'bun:test'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
-import type { InertiaService } from '../../InertiaService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AdminContractCreatePage } from '../../Admin/AdminContractCreatePage'
+import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -61,7 +61,10 @@ function createMemberContext(): IHttpContext {
   })
 }
 
-function createAdminContextWithBody(body: unknown, overrides: Partial<IHttpContext> = {}): IHttpContext {
+function createAdminContextWithBody(
+  body: unknown,
+  overrides: Partial<IHttpContext> = {},
+): IHttpContext {
   const store = new Map<string, unknown>()
   const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
   store.set('auth', auth)
@@ -141,21 +144,23 @@ describe('AdminContractCreatePage', () => {
     const mockCreateContractService = { execute: mock(() => Promise.resolve({ success: true })) }
 
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
-    const ctx = createAdminContextWithBody(
-      {
-        targetType: 'organization',
-        // missing targetId
-      }
-    )
+    const ctx = createAdminContextWithBody({
+      targetType: 'organization',
+      // missing targetId
+    })
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Contracts/Create')
-    expect(captured.lastCall?.props.formError).toBe('Please fill in all required fields, including target and terms')
+    expect(captured.lastCall?.props.formError).toBe(
+      'Please fill in all required fields, including target and terms',
+    )
   })
 
   test('store with valid body and successful service call redirects', async () => {
     const { inertia } = createMockInertia()
-    const mockCreateContractService = { execute: mock(() => Promise.resolve({ success: true, data: { id: 'contract-new-1' } })) }
+    const mockCreateContractService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { id: 'contract-new-1' } })),
+    }
 
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
     const ctx = createAdminContextWithBody({
@@ -176,7 +181,9 @@ describe('AdminContractCreatePage', () => {
 
   test('store with service failure re-renders with error message', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockCreateContractService = { execute: mock(() => Promise.resolve({ success: false, message: 'Service error' })) }
+    const mockCreateContractService = {
+      execute: mock(() => Promise.resolve({ success: false, message: 'Service error' })),
+    }
 
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
     const ctx = createAdminContextWithBody({

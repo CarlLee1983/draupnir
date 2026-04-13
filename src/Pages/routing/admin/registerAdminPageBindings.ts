@@ -21,8 +21,6 @@ import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 
 import { AdminApiKeysPage } from '../../Admin/AdminApiKeysPage'
-import { AdminReportsPage } from '../../Admin/AdminReportsPage'
-import { AdminReportTemplatePage } from '../../Admin/AdminReportTemplatePage'
 import { AdminContractCreatePage } from '../../Admin/AdminContractCreatePage'
 import { AdminContractDetailPage } from '../../Admin/AdminContractDetailPage'
 import { AdminContractsPage } from '../../Admin/AdminContractsPage'
@@ -31,6 +29,8 @@ import { AdminModuleCreatePage } from '../../Admin/AdminModuleCreatePage'
 import { AdminModulesPage } from '../../Admin/AdminModulesPage'
 import { AdminOrganizationDetailPage } from '../../Admin/AdminOrganizationDetailPage'
 import { AdminOrganizationsPage } from '../../Admin/AdminOrganizationsPage'
+import { AdminReportsPage } from '../../Admin/AdminReportsPage'
+import { AdminReportTemplatePage } from '../../Admin/AdminReportTemplatePage'
 import { AdminUsageSyncPage } from '../../Admin/AdminUsageSyncPage'
 import { AdminUserDetailPage } from '../../Admin/AdminUserDetailPage'
 import { AdminUsersPage } from '../../Admin/AdminUsersPage'
@@ -156,11 +156,7 @@ export function registerAdminPageBindings(container: IContainer): void {
 
   container.singleton(
     k.reports,
-    (c) =>
-      new AdminReportsPage(
-        c.make(i) as InertiaService,
-        c.make('reportRepository') as any,
-      ),
+    (c) => new AdminReportsPage(c.make(i) as InertiaService, c.make('reportRepository') as any),
   )
 
   container.singleton(

@@ -62,7 +62,10 @@ export function createRoleMiddleware(...roles: string[]): Middleware {
       return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
     if (!roles.includes(auth.role)) {
-      return ctx.json({ success: false, message: 'Insufficient permissions', error: 'FORBIDDEN' }, 403)
+      return ctx.json(
+        { success: false, message: 'Insufficient permissions', error: 'FORBIDDEN' },
+        403,
+      )
     }
     return next()
   }

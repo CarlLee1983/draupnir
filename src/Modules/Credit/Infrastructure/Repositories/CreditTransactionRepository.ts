@@ -1,14 +1,16 @@
 // src/Modules/Credit/Infrastructure/Repositories/CreditTransactionRepository.ts
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
 import { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
+import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
 import { CreditTransactionMapper } from '../Mappers/CreditTransactionMapper'
 
 export class CreditTransactionRepository implements ICreditTransactionRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async save(transaction: CreditTransaction): Promise<void> {
-    await this.db.table('credit_transactions').insert(CreditTransactionMapper.toDatabaseRow(transaction))
+    await this.db
+      .table('credit_transactions')
+      .insert(CreditTransactionMapper.toDatabaseRow(transaction))
   }
 
   async findByAccountId(

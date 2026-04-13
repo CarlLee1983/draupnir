@@ -1,8 +1,8 @@
 /**
  * Cache Service Interface (Port)
  *
- * The application layer depends on this interface rather than specific 
- * framework implementations (e.g., Gravito Stasis). 
+ * The application layer depends on this interface rather than specific
+ * framework implementations (e.g., Gravito Stasis).
  * Supports substitution with testing frameworks or other cache implementations.
  */
 
@@ -34,4 +34,3 @@ export interface ICacheService {
    */
   flush(): Promise<void>
 }
-

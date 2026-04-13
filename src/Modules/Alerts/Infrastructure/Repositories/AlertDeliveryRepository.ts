@@ -1,8 +1,8 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
-import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
-import { AlertDeliveryMapper } from '../Mappers/AlertDeliveryMapper'
 import type { DeliveryChannel } from '../../Domain/ValueObjects/DeliveryStatus'
+import { AlertDeliveryMapper } from '../Mappers/AlertDeliveryMapper'
 
 /**
  * Alert Delivery Repository — IDatabaseAccess Implementation
@@ -17,9 +17,12 @@ export class AlertDeliveryRepository implements IAlertDeliveryRepository {
   async save(delivery: AlertDelivery): Promise<void> {
     await this.db
       .table('alert_deliveries')
-      .insertOrIgnore(AlertDeliveryMapper.toPersistence(delivery) as unknown as Record<string, unknown>, {
-        conflictTarget: 'id',
-      })
+      .insertOrIgnore(
+        AlertDeliveryMapper.toPersistence(delivery) as unknown as Record<string, unknown>,
+        {
+          conflictTarget: 'id',
+        },
+      )
   }
 
   async findById(id: string): Promise<AlertDelivery | null> {
@@ -67,7 +70,10 @@ export class AlertDeliveryRepository implements IAlertDeliveryRepository {
    *
    * Uses the denormalized `org_id` column — no JOIN required.
    */
-  async listByOrg(orgId: string, opts?: { limit?: number; offset?: number }): Promise<AlertDelivery[]> {
+  async listByOrg(
+    orgId: string,
+    opts?: { limit?: number; offset?: number },
+  ): Promise<AlertDelivery[]> {
     const rows = await this.db
       .table('alert_deliveries')
       .where('org_id', '=', orgId)

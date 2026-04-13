@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { ApplicationPresenter } from '../Application/DTOs/RegisterAppDTO'
 import { Application } from '../Domain/Aggregates/Application'
 import { ApplicationMapper } from '../Infrastructure/Mappers/ApplicationMapper'
-import { ApplicationPresenter } from '../Application/DTOs/RegisterAppDTO'
 
 describe('Application', () => {
   const defaultParams = {
@@ -51,7 +51,9 @@ describe('Application', () => {
   it('已封存的應用不能更新資訊', () => {
     const app = Application.create(defaultParams)
     const archived = app.archive()
-    expect(() => archived.updateInfo('New', 'Desc')).toThrow('Archived applications cannot be modified')
+    expect(() => archived.updateInfo('New', 'Desc')).toThrow(
+      'Archived applications cannot be modified',
+    )
   })
 
   it('應設定 webhook URL 與 secret', () => {

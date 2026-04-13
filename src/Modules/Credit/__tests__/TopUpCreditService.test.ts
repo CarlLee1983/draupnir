@@ -1,10 +1,10 @@
 // src/Modules/Credit/__tests__/TopUpCreditService.test.ts
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { TopUpCreditService } from '../Application/Services/TopUpCreditService'
+import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
 import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
 import { CreditTransactionRepository } from '../Infrastructure/Repositories/CreditTransactionRepository'
-import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
 
 describe('TopUpCreditService', () => {
   let db: MemoryDatabaseAccess

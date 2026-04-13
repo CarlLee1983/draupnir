@@ -1,5 +1,9 @@
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
-import { OrganizationPresenter, type UpdateOrganizationRequest, type OrganizationResponse } from '../DTOs/OrganizationDTO'
+import {
+  OrganizationPresenter,
+  type OrganizationResponse,
+  type UpdateOrganizationRequest,
+} from '../DTOs/OrganizationDTO'
 
 export class UpdateOrganizationService {
   constructor(private orgRepository: IOrganizationRepository) {}
@@ -14,7 +18,11 @@ export class UpdateOrganizationService {
       const updated = org.update(request)
       await this.orgRepository.update(updated)
 
-      return { success: true, message: 'Organization updated successfully', data: OrganizationPresenter.fromEntity(updated) }
+      return {
+        success: true,
+        message: 'Organization updated successfully',
+        data: OrganizationPresenter.fromEntity(updated),
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Update failed'
       return { success: false, message, error: message }

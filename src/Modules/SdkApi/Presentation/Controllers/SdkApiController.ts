@@ -1,9 +1,9 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { AppAuthMiddleware } from '../../Infrastructure/Middleware/AppAuthMiddleware'
-import type { ProxyModelCall } from '../../Application/UseCases/ProxyModelCall'
-import type { QueryUsage } from '../../Application/UseCases/QueryUsage'
-import type { QueryBalance } from '../../Application/UseCases/QueryBalance'
 import type { ProxyCallRequest } from '../../Application/DTOs/SdkApiDTO'
+import type { ProxyModelCall } from '../../Application/UseCases/ProxyModelCall'
+import type { QueryBalance } from '../../Application/UseCases/QueryBalance'
+import type { QueryUsage } from '../../Application/UseCases/QueryUsage'
+import { AppAuthMiddleware } from '../../Infrastructure/Middleware/AppAuthMiddleware'
 
 export class SdkApiController {
   constructor(

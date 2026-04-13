@@ -10,16 +10,16 @@
  * - Dispatch domain events for downstream notification
  */
 
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
-import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
 import { CreditAccount } from '../../Domain/Aggregates/CreditAccount'
 import { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
-import { TransactionType } from '../../Domain/ValueObjects/TransactionType'
-import { Balance } from '../../Domain/ValueObjects/Balance'
 import { CreditToppedUp } from '../../Domain/Events/CreditToppedUp'
-import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import type { TopUpRequest, CreditResponse } from '../DTOs/CreditDTO'
+import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
+import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
+import { Balance } from '../../Domain/ValueObjects/Balance'
+import { TransactionType } from '../../Domain/ValueObjects/TransactionType'
+import type { CreditResponse, TopUpRequest } from '../DTOs/CreditDTO'
 
 /**
  * Service for topping up an organization's credits.
@@ -40,7 +40,11 @@ export class TopUpCreditService {
       try {
         Balance.fromPositiveAmount(request.amount)
       } catch {
-        return { success: false, message: 'Top-up amount must be positive', error: 'INVALID_AMOUNT' }
+        return {
+          success: false,
+          message: 'Top-up amount must be positive',
+          error: 'INVALID_AMOUNT',
+        }
       }
 
       let account = await this.accountRepo.findByOrgId(request.orgId)
@@ -84,4 +88,3 @@ export class TopUpCreditService {
     }
   }
 }
-

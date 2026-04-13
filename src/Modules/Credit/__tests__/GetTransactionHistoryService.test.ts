@@ -1,13 +1,13 @@
 // src/Modules/Credit/__tests__/GetTransactionHistoryService.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { GetTransactionHistoryService } from '../Application/Services/GetTransactionHistoryService'
-import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
-import { CreditTransactionRepository } from '../Infrastructure/Repositories/CreditTransactionRepository'
 import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
 import { CreditTransaction } from '../Domain/Entities/CreditTransaction'
 import { TransactionType } from '../Domain/ValueObjects/TransactionType'
-import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
+import { CreditTransactionRepository } from '../Infrastructure/Repositories/CreditTransactionRepository'
 
 describe('GetTransactionHistoryService', () => {
   let db: MemoryDatabaseAccess

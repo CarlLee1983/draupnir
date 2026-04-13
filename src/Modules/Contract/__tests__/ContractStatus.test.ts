@@ -1,5 +1,5 @@
 // src/Modules/Contract/__tests__/ContractStatus.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import { ContractStatus } from '../Domain/ValueObjects/ContractStatus'
 
 describe('ContractStatus', () => {

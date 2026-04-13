@@ -1,14 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { SetKeyPermissionsService } from '../Application/Services/SetKeyPermissionsService'
-import { ApiKeyRepository } from '../Infrastructure/Repositories/ApiKeyRepository'
-import { ApiKeyBifrostSync } from '../Infrastructure/Services/ApiKeyBifrostSync'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
-import { ApiKey } from '../Domain/Aggregates/ApiKey'
+import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { SetKeyPermissionsService } from '../Application/Services/SetKeyPermissionsService'
+import { ApiKey } from '../Domain/Aggregates/ApiKey'
+import { ApiKeyRepository } from '../Infrastructure/Repositories/ApiKeyRepository'
+import { ApiKeyBifrostSync } from '../Infrastructure/Services/ApiKeyBifrostSync'
 
 const hashingService = new KeyHashingService()
 

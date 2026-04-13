@@ -1,9 +1,9 @@
 import { describe, expect, mock, test } from 'bun:test'
+import type { IPasswordHasher } from '../Application/Ports/IPasswordHasher'
 import { ResetPasswordService } from '../Application/Services/ResetPasswordService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
-import type { IPasswordResetRepository } from '../Domain/Repositories/IPasswordResetRepository'
-import type { IPasswordHasher } from '../Application/Ports/IPasswordHasher'
 import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepository'
+import type { IPasswordResetRepository } from '../Domain/Repositories/IPasswordResetRepository'
 import { PasswordResetToken } from '../Domain/ValueObjects/PasswordResetToken'
 
 describe('ResetPasswordService', () => {

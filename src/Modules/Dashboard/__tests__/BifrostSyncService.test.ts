@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
-import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
-import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import type { LogEntry } from '@/Foundation/Infrastructure/Services/LLMGateway/types'
-import type { IUsageRepository } from '../Application/Ports/IUsageRepository'
+import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
+import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import type { ISyncCursorRepository } from '../Application/Ports/ISyncCursorRepository'
+import type { IUsageRepository } from '../Application/Ports/IUsageRepository'
 import { BifrostSyncService } from '../Infrastructure/Services/BifrostSyncService'
 
 const hashingService = new KeyHashingService()
@@ -34,8 +34,18 @@ function makeUsageRepo(db: MemoryDatabaseAccess): IUsageRepository {
     queryDailyCostByKeys: async () => [],
     queryModelBreakdown: async () => [],
     queryModelBreakdownByKeys: async () => [],
-    queryStatsByOrg: async () => ({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }),
-    queryStatsByKey: async () => ({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }),
+    queryStatsByOrg: async () => ({
+      totalRequests: 0,
+      totalCost: 0,
+      totalTokens: 0,
+      avgLatency: 0,
+    }),
+    queryStatsByKey: async () => ({
+      totalRequests: 0,
+      totalCost: 0,
+      totalTokens: 0,
+      avgLatency: 0,
+    }),
     queryPerKeyCost: async () => [],
     queryPerKeyCostByKeys: async () => [],
   }
@@ -57,7 +67,10 @@ function makeCursorRepo(): {
               lastBifrostLogId: stored.lastBifrostLogId ?? null,
             }
           : null,
-      advance: async (_: string, update: { readonly lastSyncedAt: string; readonly lastBifrostLogId?: string }) => {
+      advance: async (
+        _: string,
+        update: { readonly lastSyncedAt: string; readonly lastBifrostLogId?: string },
+      ) => {
         stored = update
       },
     },

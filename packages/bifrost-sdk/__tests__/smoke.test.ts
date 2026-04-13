@@ -1,12 +1,12 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
+import type { BifrostClientConfig } from '../src'
 import {
+  BifrostApiError,
   BifrostClient,
   createBifrostClientConfig,
-  BifrostApiError,
   isBifrostApiError,
   withRetry,
 } from '../src'
-import type { BifrostClientConfig } from '../src'
 
 describe('@draupnir/bifrost-sdk smoke', () => {
   it('exports BifrostClient constructor', () => {
@@ -83,9 +83,9 @@ describe('@draupnir/bifrost-sdk smoke', () => {
     delete process.env.BIFROST_MASTER_KEY
 
     try {
-      expect(() =>
-        createBifrostClientConfig({ baseUrl: 'https://test.example.com' }),
-      ).toThrow('BIFROST_MASTER_KEY is required')
+      expect(() => createBifrostClientConfig({ baseUrl: 'https://test.example.com' })).toThrow(
+        'BIFROST_MASTER_KEY is required',
+      )
     } finally {
       if (originalBaseUrl !== undefined) {
         process.env.BIFROST_API_URL = originalBaseUrl

@@ -10,13 +10,17 @@
  * - Handle rollback of gateway registration if persistence fails
  */
 
-import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
 import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
 import { ApiKey } from '../../Domain/Aggregates/ApiKey'
+import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import { KeyScope } from '../../Domain/ValueObjects/KeyScope'
-import { ApiKeyPresenter, type CreateApiKeyRequest, type ApiKeyCreatedResponse } from '../DTOs/ApiKeyDTO'
+import {
+  type ApiKeyCreatedResponse,
+  ApiKeyPresenter,
+  type CreateApiKeyRequest,
+} from '../DTOs/ApiKeyDTO'
+import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
 
 /**
  * Service responsible for creating new API keys and syncing them with the gateway.
@@ -102,7 +106,8 @@ export class CreateApiKeyService {
 
         return {
           success: true,
-          message: 'API Key established successfully (Please record the rawKey now, it cannot be retrieved again)',
+          message:
+            'API Key established successfully (Please record the rawKey now, it cannot be retrieved again)',
           data: { ...ApiKeyPresenter.fromEntity(finalKey), rawKey },
         }
       } catch (bifrostError: unknown) {
@@ -120,4 +125,3 @@ export class CreateApiKeyService {
     }
   }
 }
-

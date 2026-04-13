@@ -1,15 +1,16 @@
 // src/Modules/CliApi/Infrastructure/Providers/CliApiServiceProvider.ts
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import { loadCliApiConfig } from '../Config/CliApiConfig'
-import { MemoryDeviceCodeStore } from '../Services/MemoryDeviceCodeStore'
-import { InitiateDeviceFlowService } from '../../Application/Services/InitiateDeviceFlowService'
+
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import type { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { AuthorizeDeviceService } from '../../Application/Services/AuthorizeDeviceService'
 import { ExchangeDeviceCodeService } from '../../Application/Services/ExchangeDeviceCodeService'
+import { InitiateDeviceFlowService } from '../../Application/Services/InitiateDeviceFlowService'
+import type { ICliProxyClient } from '../../Application/Services/ProxyCliRequestService'
 import { ProxyCliRequestService } from '../../Application/Services/ProxyCliRequestService'
 import { RevokeCliSessionService } from '../../Application/Services/RevokeCliSessionService'
-import type { ICliProxyClient } from '../../Application/Services/ProxyCliRequestService'
-import type { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
-import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { loadCliApiConfig } from '../Config/CliApiConfig'
+import { MemoryDeviceCodeStore } from '../Services/MemoryDeviceCodeStore'
 
 export class CliApiServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {

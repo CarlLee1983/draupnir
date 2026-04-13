@@ -13,30 +13,30 @@ import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { getCurrentORM } from '@/wiring/RepositoryFactory'
 import { getRegistry } from '@/wiring/RepositoryRegistry'
-import { GoogleOAuthService } from '../../Application/Services/GoogleOAuthService'
+import type { IEmailService } from '../../Application/Ports/IEmailService'
 import { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
+import { EmailVerificationService } from '../../Application/Services/EmailVerificationService'
+import { ForgotPasswordService } from '../../Application/Services/ForgotPasswordService'
 import { GetUserDetailService } from '../../Application/Services/GetUserDetailService'
-import { JwtTokenService } from '../Services/JwtTokenService'
-import { GoogleOAuthAdapter } from '../Services/GoogleOAuthAdapter'
+import { GoogleOAuthService } from '../../Application/Services/GoogleOAuthService'
 import { ListUsersService } from '../../Application/Services/ListUsersService'
 import { LoginUserService } from '../../Application/Services/LoginUserService'
 import { LogoutUserService } from '../../Application/Services/LogoutUserService'
 import { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
 import { RegisterUserService } from '../../Application/Services/RegisterUserService'
+import { ResetPasswordService } from '../../Application/Services/ResetPasswordService'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import type { IEmailVerificationRepository } from '../../Domain/Repositories/IEmailVerificationRepository'
 import type { IPasswordResetRepository } from '../../Domain/Repositories/IPasswordResetRepository'
-import { EmailVerificationService } from '../../Application/Services/EmailVerificationService'
-import { ForgotPasswordService } from '../../Application/Services/ForgotPasswordService'
-import { ResetPasswordService } from '../../Application/Services/ResetPasswordService'
-import type { IEmailService } from '../../Application/Ports/IEmailService'
 import { configureAuthMiddleware } from '../../Presentation/Middleware/RoleMiddleware'
 import { AuthRepository } from '../Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Repositories/AuthTokenRepository'
 import { InMemoryEmailVerificationRepository } from '../Repositories/InMemoryEmailVerificationRepository'
 import { InMemoryPasswordResetRepository } from '../Repositories/InMemoryPasswordResetRepository'
 import { ConsoleEmailService } from '../Services/ConsoleEmailService'
+import { GoogleOAuthAdapter } from '../Services/GoogleOAuthAdapter'
+import { JwtTokenService } from '../Services/JwtTokenService'
 import { ScryptPasswordHasher } from '../Services/PasswordHasher'
 
 /**
@@ -148,11 +148,14 @@ export class AuthServiceProvider extends ModuleServiceProvider {
     })
 
     container.singleton('emailService', (): IEmailService => {
-      if (process.env.NODE_ENV === 'production' && process.env.EMAIL_TRANSPORT_CONFIGURED !== 'true') {
+      if (
+        process.env.NODE_ENV === 'production' &&
+        process.env.EMAIL_TRANSPORT_CONFIGURED !== 'true'
+      ) {
         throw new Error(
           '[Auth] Production email transport not configured. ' +
-          'Set EMAIL_TRANSPORT_CONFIGURED=true and wire a real IEmailService binding, ' +
-          'or replace ConsoleEmailService in AuthServiceProvider.',
+            'Set EMAIL_TRANSPORT_CONFIGURED=true and wire a real IEmailService binding, ' +
+            'or replace ConsoleEmailService in AuthServiceProvider.',
         )
       }
       return new ConsoleEmailService()

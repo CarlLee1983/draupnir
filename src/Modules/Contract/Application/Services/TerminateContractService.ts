@@ -14,7 +14,11 @@ export class TerminateContractService {
   async execute(contractId: string, callerRole: string): Promise<ContractResponse> {
     try {
       if (callerRole !== 'admin') {
-        return { success: false, message: 'Only admins can terminate contracts', error: 'FORBIDDEN' }
+        return {
+          success: false,
+          message: 'Only admins can terminate contracts',
+          error: 'FORBIDDEN',
+        }
       }
 
       const contract = await this.contractRepo.findById(contractId)

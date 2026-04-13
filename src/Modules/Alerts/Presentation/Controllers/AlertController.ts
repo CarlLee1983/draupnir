@@ -1,5 +1,5 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { GetBudgetService } from '../../Application/Services/GetBudgetService'
 import type { SetBudgetService } from '../../Application/Services/SetBudgetService'
 import type { SetBudgetInput } from '../Requests/SetBudgetRequest'
@@ -20,7 +20,10 @@ export class AlertController {
     }
 
     if (!currentOrg.isAdmin && currentOrg.role !== 'manager') {
-      return ctx.json({ success: false, message: 'Insufficient permissions', error: 'FORBIDDEN' }, 403)
+      return ctx.json(
+        { success: false, message: 'Insufficient permissions', error: 'FORBIDDEN' },
+        403,
+      )
     }
 
     const body = ctx.get('validated') as SetBudgetInput

@@ -1,12 +1,12 @@
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IUsageRepository } from '../Ports/IUsageRepository'
 import type {
   DashboardAnalyticsQuery,
   PerKeyCostResponse,
   PerKeyCostRow,
 } from '../DTOs/DashboardDTO'
+import type { IUsageRepository } from '../Ports/IUsageRepository'
 import { DashboardKeyScopeResolver } from './DashboardKeyScopeResolver'
 
 export class GetPerKeyCostService {
@@ -26,7 +26,7 @@ export class GetPerKeyCostService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: 'Unauthorized to access this organization\'s dashboard',
+          message: "Unauthorized to access this organization's dashboard",
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -96,7 +96,10 @@ export class GetPerKeyCostService {
   }
 }
 
-function resolveDateRange(startTime?: string, endTime?: string): { startDate: string; endDate: string } {
+function resolveDateRange(
+  startTime?: string,
+  endTime?: string,
+): { startDate: string; endDate: string } {
   if (startTime && endTime) {
     return { startDate: startTime, endDate: endTime }
   }

@@ -1,21 +1,23 @@
 import { afterEach, describe, expect, it, spyOn, vi } from 'bun:test'
-import { FakeScheduler } from '../Scheduler/FakeScheduler'
-import { ReportSchedule } from '../../../src/Modules/Reports/Domain/Aggregates/ReportSchedule'
-import { ScheduleReportService } from '../../../src/Modules/Reports/Application/Services/ScheduleReportService'
-import type { IReportRepository } from '../../../src/Modules/Reports/Domain/Repositories/IReportRepository'
 import type { GeneratePdfService } from '../../../src/Modules/Reports/Application/Services/GeneratePdfService'
+import { ScheduleReportService } from '../../../src/Modules/Reports/Application/Services/ScheduleReportService'
 import type { SendReportEmailService } from '../../../src/Modules/Reports/Application/Services/SendReportEmailService'
+import { ReportSchedule } from '../../../src/Modules/Reports/Domain/Aggregates/ReportSchedule'
+import type { IReportRepository } from '../../../src/Modules/Reports/Domain/Repositories/IReportRepository'
+import { FakeScheduler } from '../Scheduler/FakeScheduler'
 
-function makeSchedule(overrides: Partial<{
-  id: string
-  orgId: string
-  type: 'weekly' | 'monthly'
-  day: number
-  time: string
-  timezone: string
-  recipients: string[]
-  enabled: boolean
-}> = {}): ReportSchedule {
+function makeSchedule(
+  overrides: Partial<{
+    id: string
+    orgId: string
+    type: 'weekly' | 'monthly'
+    day: number
+    time: string
+    timezone: string
+    recipients: string[]
+    enabled: boolean
+  }> = {},
+): ReportSchedule {
   return ReportSchedule.create({
     id: overrides.id ?? 'report-1',
     orgId: overrides.orgId ?? 'org-1',
@@ -50,7 +52,12 @@ function makeService(schedules: ReportSchedule[], scheduler = new FakeScheduler(
     scheduler,
     pdfService,
     emailService,
-    service: new ScheduleReportService(makeRepository(schedules), pdfService, emailService, scheduler),
+    service: new ScheduleReportService(
+      makeRepository(schedules),
+      pdfService,
+      emailService,
+      scheduler,
+    ),
   }
 }
 
@@ -144,7 +151,11 @@ describe('ScheduleReportService', () => {
     await service.schedule(schedule.id)
     await scheduler.trigger(`report:${schedule.id}`)
 
-    expect(sendSpy).toHaveBeenCalledWith(schedule.recipients, Buffer.from(schedule.orgId), schedule.type)
+    expect(sendSpy).toHaveBeenCalledWith(
+      schedule.recipients,
+      Buffer.from(schedule.orgId),
+      schedule.type,
+    )
   })
 
   it('swallows handler errors so retry policy stays in the scheduler', async () => {

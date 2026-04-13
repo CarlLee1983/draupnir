@@ -1,6 +1,9 @@
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type {
+  CreateVirtualKeyResult,
+  IBifrostKeySync,
+} from '../../Application/Ports/IBifrostKeySync'
 import type { KeyScope } from '../../Domain/ValueObjects/KeyScope'
-import type { IBifrostKeySync, CreateVirtualKeyResult } from '../../Application/Ports/IBifrostKeySync'
 
 export class ApiKeyBifrostSync implements IBifrostKeySync {
   constructor(private readonly gatewayClient: ILLMGatewayClient) {}

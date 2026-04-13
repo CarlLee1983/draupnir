@@ -1,6 +1,6 @@
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
-import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import { OrganizationInvitationPresenter, type OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 
 export class ListInvitationsService {
   constructor(
@@ -23,7 +23,9 @@ export class ListInvitationsService {
       return {
         success: true,
         message: 'Invitations retrieved successfully',
-        data: { invitations: invitations.map((i) => OrganizationInvitationPresenter.fromEntity(i)) },
+        data: {
+          invitations: invitations.map((i) => OrganizationInvitationPresenter.fromEntity(i)),
+        },
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Fetch failed'

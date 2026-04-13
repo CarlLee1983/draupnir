@@ -1,6 +1,6 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
+import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrganizationMemberMapper } from '../Mappers/OrganizationMemberMapper'
 
 export class OrganizationMemberRepository implements IOrganizationMemberRepository {
@@ -33,7 +33,9 @@ export class OrganizationMemberRepository implements IOrganizationMemberReposito
   }
 
   async save(member: OrganizationMember): Promise<void> {
-    await this.db.table('organization_members').insert(OrganizationMemberMapper.toDatabaseRow(member))
+    await this.db
+      .table('organization_members')
+      .insert(OrganizationMemberMapper.toDatabaseRow(member))
   }
 
   async remove(memberId: string): Promise<void> {

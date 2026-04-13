@@ -2,7 +2,7 @@
  * HealthStatus Value Object Tests
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { HealthStatus } from '../../../src/Modules/Health/Domain/ValueObjects/HealthStatus'
 
 describe('HealthStatus Value Object', () => {

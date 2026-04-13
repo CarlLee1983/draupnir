@@ -3,8 +3,8 @@
  * Domain Repository: contract for organization membership persistence.
  */
 
-import { OrganizationMember } from '../Entities/OrganizationMember'
 import type { IDatabaseAccess } from '@/Shared/Domain/IDatabaseAccess'
+import type { OrganizationMember } from '../Entities/OrganizationMember'
 
 export interface IOrganizationMemberRepository {
   /** Finds a member by their user ID (assumes one membership per user). */
@@ -34,4 +34,3 @@ export interface IOrganizationMemberRepository {
   /** Returns a repository instance scoped to a transaction. */
   withTransaction(tx: IDatabaseAccess): IOrganizationMemberRepository
 }
-

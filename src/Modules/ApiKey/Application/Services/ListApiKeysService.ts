@@ -1,5 +1,5 @@
-import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import { ApiKeyPresenter, type ListApiKeysResponse } from '../DTOs/ApiKeyDTO'
 
 export class ListApiKeysService {

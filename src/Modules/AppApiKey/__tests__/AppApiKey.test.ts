@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { AppApiKeyPresenter } from '../Application/DTOs/AppApiKeyDTO'
 import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
 import { AppKeyScope } from '../Domain/ValueObjects/AppKeyScope'
-import { KeyRotationPolicy } from '../Domain/ValueObjects/KeyRotationPolicy'
 import { BoundModules } from '../Domain/ValueObjects/BoundModules'
-import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { KeyRotationPolicy } from '../Domain/ValueObjects/KeyRotationPolicy'
 import { AppApiKeyMapper } from '../Infrastructure/Mappers/AppApiKeyMapper'
-import { AppApiKeyPresenter } from '../Application/DTOs/AppApiKeyDTO'
 
 const hashingService = new KeyHashingService()
 
@@ -96,9 +96,7 @@ describe('AppApiKey', () => {
 
   it('非 active 狀態不能輪換', () => {
     const key = makeDefault()
-    expect(() => key.rotate(newKeyHash, 'bfr-vk-new')).toThrow(
-      'Only active keys can be rotated',
-    )
+    expect(() => key.rotate(newKeyHash, 'bfr-vk-new')).toThrow('Only active keys can be rotated')
   })
 
   it('completeRotation 應清除 previousKeyHash 和 gracePeriodEndsAt', () => {

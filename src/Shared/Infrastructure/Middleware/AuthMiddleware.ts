@@ -8,9 +8,9 @@
  * - Allow unauthenticated requests to pass (401 response is decided by the Controller)
  */
 
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 
 async function sha256(str: string): Promise<string> {
   const encoder = new TextEncoder()
@@ -134,4 +134,3 @@ export class AuthMiddleware {
     return sha256(token)
   }
 }
-

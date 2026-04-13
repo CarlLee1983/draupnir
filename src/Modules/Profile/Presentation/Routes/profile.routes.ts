@@ -1,10 +1,10 @@
+import {
+  createRoleMiddleware,
+  requireAuth,
+} from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { ProfileController } from '../Controllers/ProfileController'
-import {
-  requireAuth,
-  createRoleMiddleware,
-} from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
-import { UpdateProfileRequest, ChangeStatusRequest, ListUsersRequest } from '../Requests'
+import { ChangeStatusRequest, ListUsersRequest, UpdateProfileRequest } from '../Requests'
 
 /**
  * Registers profile-related routes for the module.
@@ -30,4 +30,3 @@ export async function registerProfileRoutes(
     (ctx) => controller.changeUserStatus(ctx),
   )
 }
-

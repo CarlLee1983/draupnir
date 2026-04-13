@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { OrgSlug } from '../Domain/ValueObjects/OrgSlug'
 
 describe('OrgSlug Value Object', () => {
@@ -19,7 +19,7 @@ describe('OrgSlug Value Object', () => {
 
   it('應從名稱移除特殊字元', () => {
     const slug = OrgSlug.fromName('CMG 科技公司 #1')
-    expect(slug.getValue()).toMatch(/^[a-z0-9][a-z0-9\-]*[a-z0-9]$/)
+    expect(slug.getValue()).toMatch(/^[a-z0-9][a-z0-9-]*[a-z0-9]$/)
   })
 
   it('純非 ASCII 名稱應產生帶隨機後綴的 slug 而非固定值', () => {

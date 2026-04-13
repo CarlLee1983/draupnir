@@ -18,13 +18,21 @@ export class GetApiDocsService {
   async execute(): Promise<GetApiDocsResponse> {
     const endpoints: ApiEndpoint[] = [
       { method: 'POST', path: '/api/dev-portal/apps', description: 'Register a new Application' },
-      { method: 'GET', path: '/api/dev-portal/apps', description: 'List all Applications in the organization' },
+      {
+        method: 'GET',
+        path: '/api/dev-portal/apps',
+        description: 'List all Applications in the organization',
+      },
       {
         method: 'PATCH',
         path: '/api/dev-portal/apps/:appId',
         description: 'Update Application information',
       },
-      { method: 'POST', path: '/api/dev-portal/apps/:appId/keys', description: 'Issue App API Key' },
+      {
+        method: 'POST',
+        path: '/api/dev-portal/apps/:appId/keys',
+        description: 'Issue App API Key',
+      },
       {
         method: 'GET',
         path: '/api/dev-portal/apps/:appId/keys',
@@ -35,7 +43,11 @@ export class GetApiDocsService {
         path: '/api/dev-portal/apps/:appId/keys/:keyId/revoke',
         description: 'Revoke App API Key',
       },
-      { method: 'PUT', path: '/api/dev-portal/apps/:appId/webhook', description: 'Configure Webhook' },
+      {
+        method: 'PUT',
+        path: '/api/dev-portal/apps/:appId/webhook',
+        description: 'Configure Webhook',
+      },
       {
         method: 'DELETE',
         path: '/api/dev-portal/apps/:appId/webhook',

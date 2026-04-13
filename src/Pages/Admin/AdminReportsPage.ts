@@ -1,11 +1,11 @@
-import { type IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { type IReportRepository } from '../../Modules/Reports/Domain/Repositories/IReportRepository'
-import { type InertiaService } from '../InertiaService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { IReportRepository } from '../../Modules/Reports/Domain/Repositories/IReportRepository'
+import type { InertiaService } from '../InertiaService'
 
 export class AdminReportsPage {
   constructor(
     private readonly inertia: InertiaService,
-    private readonly reportRepository: IReportRepository
+    private readonly reportRepository: IReportRepository,
   ) {}
 
   async handle(ctx: IHttpContext): Promise<Response> {
@@ -14,7 +14,7 @@ export class AdminReportsPage {
 
     return this.inertia.render(ctx, 'Admin/Reports/Index', {
       orgId,
-      schedules: schedules.map(s => ({
+      schedules: schedules.map((s) => ({
         id: s.id,
         type: s.type,
         day: s.day,
@@ -22,8 +22,8 @@ export class AdminReportsPage {
         timezone: s.timezone,
         recipients: s.recipients,
         enabled: s.enabled,
-        cronString: s.cronString
-      }))
+        cronString: s.cronString,
+      })),
     })
   }
 }

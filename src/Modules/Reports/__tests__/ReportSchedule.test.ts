@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { ReportSchedule } from '../Domain/Aggregates/ReportSchedule'
 
 describe('ReportSchedule', () => {
@@ -10,7 +10,7 @@ describe('ReportSchedule', () => {
       time: '09:00',
       timezone: 'UTC',
       recipients: ['admin@example.com'],
-      enabled: true
+      enabled: true,
     })
 
     expect(schedule.cronString).toBe('0 9 * * 1')
@@ -24,7 +24,7 @@ describe('ReportSchedule', () => {
       time: '09:00',
       timezone: 'UTC',
       recipients: ['admin@example.com'],
-      enabled: true
+      enabled: true,
     })
 
     expect(schedule.cronString).toBe('0 9 1 * *')
@@ -38,7 +38,7 @@ describe('ReportSchedule', () => {
       time: '14:30',
       timezone: 'UTC',
       recipients: ['admin@example.com'],
-      enabled: true
+      enabled: true,
     })
 
     expect(schedule.cronString).toBe('30 14 * * 5')

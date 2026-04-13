@@ -1,11 +1,11 @@
 // tests/Unit/Foundation/BifrostClient/types.test.ts
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import type {
+  BifrostLogEntry,
+  BifrostModel,
   BifrostVirtualKey,
   CreateVirtualKeyRequest,
   UpdateVirtualKeyRequest,
-  BifrostLogEntry,
-  BifrostModel,
 } from '@draupnir/bifrost-sdk'
 
 describe('Bifrost API Types', () => {

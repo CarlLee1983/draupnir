@@ -1,6 +1,6 @@
-import { Email } from '../../Domain/ValueObjects/Email'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IPasswordResetRepository } from '../../Domain/Repositories/IPasswordResetRepository'
+import { Email } from '../../Domain/ValueObjects/Email'
 import type { IEmailService } from '../Ports/IEmailService'
 
 export class ForgotPasswordService {

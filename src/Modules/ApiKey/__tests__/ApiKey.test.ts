@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeAll } from 'vitest'
+import { beforeAll, describe, expect, it } from 'vitest'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
+import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { ApiKey } from '../Domain/Aggregates/ApiKey'
 import { KeyScope } from '../Domain/ValueObjects/KeyScope'
-import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { ApiKeyMapper } from '../Infrastructure/Mappers/ApiKeyMapper'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { ApiKeyRepository } from '../Infrastructure/Repositories/ApiKeyRepository'
 
 const hashingService = new KeyHashingService()
@@ -26,7 +26,9 @@ beforeAll(async () => {
     'drp_sk_db',
     'drp_sk_rebuild',
   ]
-  const entries = await Promise.all(rawKeys.map(async (k) => [k, await hashingService.hash(k)] as const))
+  const entries = await Promise.all(
+    rawKeys.map(async (k) => [k, await hashingService.hash(k)] as const),
+  )
   hashes = Object.fromEntries(entries)
 })
 

@@ -1,7 +1,8 @@
 // src/Modules/Contract/Application/DTOs/ContractDTO.ts
-import type { ContractTargetType } from '../../Domain/ValueObjects/ContractTarget'
-import type { ContractTermProps } from '../../Domain/Entities/ContractTerm'
+
 import type { Contract } from '../../Domain/Aggregates/Contract'
+import type { ContractTermProps } from '../../Domain/Entities/ContractTerm'
+import type { ContractTargetType } from '../../Domain/ValueObjects/ContractTarget'
 
 /** Maps domain contracts into JSON-friendly records for HTTP responses. */
 export class ContractPresenter {

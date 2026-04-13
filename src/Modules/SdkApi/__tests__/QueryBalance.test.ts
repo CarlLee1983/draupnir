@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { QueryBalance } from '../Application/UseCases/QueryBalance'
-import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
-import type { AppAuthContext } from '../Application/DTOs/SdkApiDTO'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { CreditAccount } from '@/Modules/Credit/Domain/Aggregates/CreditAccount'
+import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { AppAuthContext } from '../Application/DTOs/SdkApiDTO'
+import { QueryBalance } from '../Application/UseCases/QueryBalance'
 
 class MockCreditAccountRepo implements ICreditAccountRepository {
   private accounts = new Map<string, CreditAccount>()

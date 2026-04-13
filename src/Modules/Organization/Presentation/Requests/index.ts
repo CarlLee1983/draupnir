@@ -1,23 +1,24 @@
 // src/Modules/Organization/Presentation/Requests/index.ts
+
+export { type AcceptInvitationParams, AcceptInvitationRequest } from './AcceptInvitationRequest'
+export { type ChangeMemberRoleParams, ChangeMemberRoleRequest } from './ChangeMemberRoleRequest'
+export { type ChangeOrgStatusParams, ChangeOrgStatusRequest } from './ChangeOrgStatusRequest'
 export {
-  CreateOrganizationRequest,
   type CreateOrganizationParams,
+  CreateOrganizationRequest,
 } from './CreateOrganizationRequest'
+export { type InviteMemberParams, InviteMemberRequest } from './InviteMemberRequest'
 export {
-  UpdateOrganizationRequest,
-  type UpdateOrganizationParams,
-} from './UpdateOrganizationRequest'
-export { ChangeOrgStatusRequest, type ChangeOrgStatusParams } from './ChangeOrgStatusRequest'
-export { InviteMemberRequest, type InviteMemberParams } from './InviteMemberRequest'
-export { AcceptInvitationRequest, type AcceptInvitationParams } from './AcceptInvitationRequest'
-export { ChangeMemberRoleRequest, type ChangeMemberRoleParams } from './ChangeMemberRoleRequest'
-export {
-  OrganizationIdSchema,
-  OrganizationMemberParamsSchema,
-  OrganizationInvitationParamsSchema,
+  type OrganizationAuthHeaderParams,
   OrganizationAuthHeaderSchema,
   type OrganizationIdParams,
-  type OrganizationMemberParams,
+  OrganizationIdSchema,
   type OrganizationInvitationParams,
-  type OrganizationAuthHeaderParams,
+  OrganizationInvitationParamsSchema,
+  type OrganizationMemberParams,
+  OrganizationMemberParamsSchema,
 } from './params'
+export {
+  type UpdateOrganizationParams,
+  UpdateOrganizationRequest,
+} from './UpdateOrganizationRequest'

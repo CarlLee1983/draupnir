@@ -1,8 +1,8 @@
 // src/Modules/Contract/__tests__/CreateContractService.test.ts
-import { describe, test, expect, beforeEach } from 'bun:test'
+import { beforeEach, describe, expect, test } from 'bun:test'
 import { CreateContractService } from '../Application/Services/CreateContractService'
-import type { IContractRepository } from '../Domain/Repositories/IContractRepository'
 import type { Contract } from '../Domain/Aggregates/Contract'
+import type { IContractRepository } from '../Domain/Repositories/IContractRepository'
 
 class InMemoryContractRepository implements IContractRepository {
   private contracts: Map<string, Contract> = new Map()

@@ -85,5 +85,4 @@ export class ModuleSubscription {
   isActive(): boolean {
     return this.props.status.isActive()
   }
-
 }

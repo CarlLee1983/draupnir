@@ -1,7 +1,7 @@
-import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
+import { ApiKeyPresenter, type ApiKeyResponse, type RevokeApiKeyRequest } from '../DTOs/ApiKeyDTO'
 import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
-import { ApiKeyPresenter, type RevokeApiKeyRequest, type ApiKeyResponse } from '../DTOs/ApiKeyDTO'
 
 export class RevokeApiKeyService {
   constructor(
@@ -31,7 +31,11 @@ export class RevokeApiKeyService {
       }
 
       if (apiKey.status === 'revoked') {
-        return { success: false, message: 'This key has already been revoked', error: 'ALREADY_REVOKED' }
+        return {
+          success: false,
+          message: 'This key has already been revoked',
+          error: 'ALREADY_REVOKED',
+        }
       }
 
       if (apiKey.gatewayKeyId) {
@@ -41,7 +45,11 @@ export class RevokeApiKeyService {
       const revoked = apiKey.revoke()
       await this.apiKeyRepository.update(revoked)
 
-      return { success: true, message: 'Key revoked successfully', data: ApiKeyPresenter.fromEntity(revoked) }
+      return {
+        success: true,
+        message: 'Key revoked successfully',
+        data: ApiKeyPresenter.fromEntity(revoked),
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Revoke failed'
       return { success: false, message, error: message }

@@ -1,7 +1,7 @@
 // src/Modules/AppModule/Infrastructure/Repositories/ModuleSubscriptionRepository.ts
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 import { ModuleSubscription } from '../../Domain/Entities/ModuleSubscription'
+import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 import { ModuleSubscriptionMapper } from '../Mappers/ModuleSubscriptionMapper'
 
 export class ModuleSubscriptionRepository implements IModuleSubscriptionRepository {
@@ -31,7 +31,9 @@ export class ModuleSubscriptionRepository implements IModuleSubscriptionReposito
   }
 
   async save(subscription: ModuleSubscription): Promise<void> {
-    await this.db.table('module_subscriptions').insert(ModuleSubscriptionMapper.toDatabaseRow(subscription))
+    await this.db
+      .table('module_subscriptions')
+      .insert(ModuleSubscriptionMapper.toDatabaseRow(subscription))
   }
 
   async update(subscription: ModuleSubscription): Promise<void> {

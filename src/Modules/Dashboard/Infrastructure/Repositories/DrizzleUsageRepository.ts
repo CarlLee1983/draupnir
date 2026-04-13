@@ -1,5 +1,13 @@
+import {
+  add,
+  avg,
+  coalesce,
+  col,
+  count,
+  dateTrunc,
+  sum,
+} from '@/Shared/Infrastructure/Database/AggregateSpec'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { sum, count, avg, coalesce, add, col, dateTrunc } from '@/Shared/Infrastructure/Database/AggregateSpec'
 import type {
   DailyCostBucket,
   DateRange,
@@ -35,30 +43,40 @@ export class DrizzleUsageRepository implements IUsageRepository {
   }
 
   async queryDailyCostByOrg(orgId: string, range: DateRange): Promise<readonly DailyCostBucket[]> {
-    return this.db.table('usageRecords')
+    return this.db
+      .table('usageRecords')
       .where('org_id', '=', orgId)
       .whereBetween('occurred_at', [range.startDate, range.endDate])
       .aggregate<DailyCostBucket>(this.dailyCostSpec())
   }
 
-  async queryDailyCostByKeys(apiKeyIds: readonly string[], range: DateRange): Promise<readonly DailyCostBucket[]> {
+  async queryDailyCostByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly DailyCostBucket[]> {
     if (apiKeyIds.length === 0) return []
-    return this.db.table('usageRecords')
+    return this.db
+      .table('usageRecords')
       .where('api_key_id', 'in', [...apiKeyIds])
       .whereBetween('occurred_at', [range.startDate, range.endDate])
       .aggregate<DailyCostBucket>(this.dailyCostSpec())
   }
 
   async queryModelBreakdown(orgId: string, range: DateRange): Promise<readonly ModelUsageBucket[]> {
-    return this.db.table('usageRecords')
+    return this.db
+      .table('usageRecords')
       .where('org_id', '=', orgId)
       .whereBetween('occurred_at', [range.startDate, range.endDate])
       .aggregate<ModelUsageBucket>(this.modelBreakdownSpec())
   }
 
-  async queryModelBreakdownByKeys(apiKeyIds: readonly string[], range: DateRange): Promise<readonly ModelUsageBucket[]> {
+  async queryModelBreakdownByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly ModelUsageBucket[]> {
     if (apiKeyIds.length === 0) return []
-    return this.db.table('usageRecords')
+    return this.db
+      .table('usageRecords')
       .where('api_key_id', 'in', [...apiKeyIds])
       .whereBetween('occurred_at', [range.startDate, range.endDate])
       .aggregate<ModelUsageBucket>(this.modelBreakdownSpec())
@@ -73,15 +91,20 @@ export class DrizzleUsageRepository implements IUsageRepository {
   }
 
   async queryPerKeyCost(orgId: string, range: DateRange): Promise<readonly PerKeyCostBucket[]> {
-    return this.db.table('usageRecords')
+    return this.db
+      .table('usageRecords')
       .where('org_id', '=', orgId)
       .whereBetween('occurred_at', [range.startDate, range.endDate])
       .aggregate<PerKeyCostBucket>(this.perKeyCostSpec())
   }
 
-  async queryPerKeyCostByKeys(apiKeyIds: readonly string[], range: DateRange): Promise<readonly PerKeyCostBucket[]> {
+  async queryPerKeyCostByKeys(
+    apiKeyIds: readonly string[],
+    range: DateRange,
+  ): Promise<readonly PerKeyCostBucket[]> {
     if (apiKeyIds.length === 0) return []
-    return this.db.table('usageRecords')
+    return this.db
+      .table('usageRecords')
       .where('api_key_id', 'in', [...apiKeyIds])
       .whereBetween('occurred_at', [range.startDate, range.endDate])
       .aggregate<PerKeyCostBucket>(this.perKeyCostSpec())
@@ -131,8 +154,13 @@ export class DrizzleUsageRepository implements IUsageRepository {
     }
   }
 
-  private async runStats(column: 'org_id' | 'api_key_id', value: string, range: DateRange): Promise<UsageStats> {
-    const rows = await this.db.table('usageRecords')
+  private async runStats(
+    column: 'org_id' | 'api_key_id',
+    value: string,
+    range: DateRange,
+  ): Promise<UsageStats> {
+    const rows = await this.db
+      .table('usageRecords')
       .where(column, '=', value)
       .whereBetween('occurred_at', [range.startDate, range.endDate])
       .aggregate<UsageStats>({

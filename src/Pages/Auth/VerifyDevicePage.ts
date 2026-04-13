@@ -1,6 +1,6 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
 
 /**
@@ -43,7 +43,7 @@ export class VerifyDevicePage {
    */
   async authorize(ctx: IHttpContext): Promise<Response> {
     const sharedData = ctx.get('inertia:shared') || {}
-    const csrfToken = (sharedData as Record<string, unknown>).csrfToken as string || ''
+    const csrfToken = ((sharedData as Record<string, unknown>).csrfToken as string) || ''
 
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) {

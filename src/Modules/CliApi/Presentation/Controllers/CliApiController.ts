@@ -1,8 +1,8 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import type { InitiateDeviceFlowService } from '../../Application/Services/InitiateDeviceFlowService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { AuthorizeDeviceService } from '../../Application/Services/AuthorizeDeviceService'
 import type { ExchangeDeviceCodeService } from '../../Application/Services/ExchangeDeviceCodeService'
+import type { InitiateDeviceFlowService } from '../../Application/Services/InitiateDeviceFlowService'
 import type { ProxyCliRequestService } from '../../Application/Services/ProxyCliRequestService'
 import type { RevokeCliSessionService } from '../../Application/Services/RevokeCliSessionService'
 
@@ -31,7 +31,8 @@ export class CliApiController {
 
   async authorizeDevice(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
 
     const body = await ctx.getJsonBody<{ userCode?: string }>()
     if (!body.userCode) {
@@ -75,7 +76,8 @@ export class CliApiController {
 
   async proxyRequest(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
 
     const body = await ctx.getJsonBody<{
       model?: string
@@ -95,11 +97,15 @@ export class CliApiController {
 
   async logout(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
 
     const token = this.extractRawToken(ctx)
     if (!token) {
-      return ctx.json({ success: false, message: 'Unable to extract token', error: 'TOKEN_MISSING' }, 400)
+      return ctx.json(
+        { success: false, message: 'Unable to extract token', error: 'TOKEN_MISSING' },
+        400,
+      )
     }
 
     const tokenHash = await sha256(token)
@@ -112,7 +118,8 @@ export class CliApiController {
 
   async logoutAll(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
 
     const result = await this.revokeService.executeRevokeAll({ userId: auth.userId })
     return ctx.json(result, result.success ? 200 : 500)

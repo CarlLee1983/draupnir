@@ -1,19 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { InviteMemberService } from '../Application/Services/InviteMemberService'
-import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
-import { OrganizationRepository } from '../Infrastructure/Repositories/OrganizationRepository'
-import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
-import { OrganizationInvitationRepository } from '../Infrastructure/Repositories/OrganizationInvitationRepository'
-import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
-import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
-import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
-import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
-import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import { AppModuleRepository } from '@/Modules/AppModule/Infrastructure/Repositories/AppModuleRepository'
-import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
 import { ModuleSubscriptionRepository } from '@/Modules/AppModule/Infrastructure/Repositories/ModuleSubscriptionRepository'
+import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
+import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
+import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
+import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
+import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
+import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
+import { InviteMemberService } from '../Application/Services/InviteMemberService'
+import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
+import { OrganizationInvitationRepository } from '../Infrastructure/Repositories/OrganizationInvitationRepository'
+import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
+import { OrganizationRepository } from '../Infrastructure/Repositories/OrganizationRepository'
 
 describe('InviteMemberService', () => {
   let inviteService: InviteMemberService
@@ -42,7 +42,11 @@ describe('InviteMemberService', () => {
     )
     inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
 
-    const registerService = new RegisterUserService(authRepo, profileRepo, new ScryptPasswordHasher())
+    const registerService = new RegisterUserService(
+      authRepo,
+      profileRepo,
+      new ScryptPasswordHasher(),
+    )
     const userResult = await registerService.execute({
       email: 'manager@example.com',
       password: 'StrongPass123',

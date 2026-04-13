@@ -113,6 +113,4 @@ export class Organization {
   get updatedAt(): Date {
     return this.props.updatedAt
   }
-
 }
-

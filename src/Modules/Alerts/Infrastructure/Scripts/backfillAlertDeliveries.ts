@@ -1,5 +1,8 @@
 import { getDrizzleInstance } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
-import { alertDeliveries, alertEvents } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
+import {
+  alertDeliveries,
+  alertEvents,
+} from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
 
 type RecipientDeliveryRow = {
   alert_event_id: string
@@ -35,7 +38,9 @@ export async function backfillAlertDeliveries(): Promise<void> {
   const existing = new Set<string>()
 
   for (const delivery of deliveries) {
-    existing.add(`${String(delivery.alert_event_id)}::${String(delivery.channel)}::${String(delivery.target)}`)
+    existing.add(
+      `${String(delivery.alert_event_id)}::${String(delivery.channel)}::${String(delivery.target)}`,
+    )
   }
 
   const rowsToInsert: RecipientDeliveryRow[] = []

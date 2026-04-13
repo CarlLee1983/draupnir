@@ -38,4 +38,3 @@ export function withGuard(...middlewares: Middleware[]): (handler: RouteHandler)
     return (ctx) => composed(ctx, () => handler(ctx))
   }
 }
-

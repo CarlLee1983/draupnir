@@ -1,14 +1,14 @@
 import type { PlanetCore } from '@gravito/core'
 import type { RedisClientContract } from '@gravito/plasma'
 import type { CacheManager } from '@gravito/stasis'
+import { PerformHealthCheckService } from '@/Modules/Health/Application/Services/PerformHealthCheckService'
+import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Repositories/MemoryHealthCheckRepository'
+import { SystemHealthChecker } from '@/Modules/Health/Infrastructure/Services/SystemHealthChecker'
+import { HealthController } from '@/Modules/Health/Presentation/Controllers/HealthController'
+import { createGravitoDatabaseConnectivityCheck } from '../Database/Adapters/Atlas'
+import { GravitoCacheAdapter } from './GravitoCacheAdapter'
 import { createGravitoModuleRouter } from './GravitoModuleRouter'
 import { GravitoRedisAdapter } from './GravitoRedisAdapter'
-import { GravitoCacheAdapter } from './GravitoCacheAdapter'
-import { createGravitoDatabaseConnectivityCheck } from '../Database/Adapters/Atlas'
-import { SystemHealthChecker } from '@/Modules/Health/Infrastructure/Services/SystemHealthChecker'
-import { PerformHealthCheckService } from '@/Modules/Health/Application/Services/PerformHealthCheckService'
-import { HealthController } from '@/Modules/Health/Presentation/Controllers/HealthController'
-import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Repositories/MemoryHealthCheckRepository'
 
 /**
  * Gravito Health Module Adapter

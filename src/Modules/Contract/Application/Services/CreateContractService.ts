@@ -1,7 +1,12 @@
 // src/Modules/Contract/Application/Services/CreateContractService.ts
-import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
+
 import { Contract } from '../../Domain/Aggregates/Contract'
-import { ContractPresenter, type CreateContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
+import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
+import {
+  ContractPresenter,
+  type ContractResponse,
+  type CreateContractRequest,
+} from '../DTOs/ContractDTO'
 
 /**
  * Creates and persists a new contract when the caller is an admin.

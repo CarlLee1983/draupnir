@@ -1,6 +1,10 @@
 // src/Modules/Contract/Application/Services/AssignContractService.ts
 import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import { ContractPresenter, type AssignContractRequest, type ContractResponse } from '../DTOs/ContractDTO'
+import {
+  type AssignContractRequest,
+  ContractPresenter,
+  type ContractResponse,
+} from '../DTOs/ContractDTO'
 
 /**
  * Reassigns a contract to another target when the caller is an admin, then persists it.

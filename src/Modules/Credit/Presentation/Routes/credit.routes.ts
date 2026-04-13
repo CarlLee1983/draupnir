@@ -1,12 +1,13 @@
 // src/Modules/Credit/Presentation/Routes/credit.routes.ts
-import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
-import type { CreditController } from '../Controllers/CreditController'
+
 import {
-  requireAuth,
   createRoleMiddleware,
+  requireAuth,
 } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { createModuleAccessMiddleware } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
-import { TopUpRequest, RefundRequest } from '../Requests'
+import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
+import type { CreditController } from '../Controllers/CreditController'
+import { RefundRequest, TopUpRequest } from '../Requests'
 
 export function registerCreditRoutes(router: IModuleRouter, controller: CreditController): void {
   const creditAccess = [requireAuth(), createModuleAccessMiddleware('credit')]

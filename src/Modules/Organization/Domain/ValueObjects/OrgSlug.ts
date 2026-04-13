@@ -12,7 +12,9 @@ export class OrgSlug {
   constructor(slug: string) {
     const normalized = slug.toLowerCase().trim()
     if (!this.isValid(normalized)) {
-      throw new Error(`Invalid organization slug: ${slug}. Only lowercase letters, numbers, and hyphens are allowed.`)
+      throw new Error(
+        `Invalid organization slug: ${slug}. Only lowercase letters, numbers, and hyphens are allowed.`,
+      )
     }
     this.value = normalized
   }
@@ -42,7 +44,7 @@ export class OrgSlug {
   private isValid(slug: string): boolean {
     if (!slug || slug.length === 0) return false
     if (slug.length > 100) return false
-    return /^[a-z0-9][a-z0-9\-]*[a-z0-9]$|^[a-z0-9]$/.test(slug)
+    return /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/.test(slug)
   }
 
   /** Gets the underlying slug string. */
@@ -60,4 +62,3 @@ export class OrgSlug {
     return this.value
   }
 }
-

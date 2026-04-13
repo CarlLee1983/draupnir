@@ -47,4 +47,3 @@ export abstract class BaseEntity {
     return `${this.constructor.name}(${this.id})`
   }
 }
-

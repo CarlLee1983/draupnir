@@ -24,10 +24,12 @@ export class AdminUserDetailPage {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
 
-    const shared = ctx.get('inertia:shared') as {
-      locale: 'zh-TW' | 'en'
-      messages: Record<string, string>
-    } | undefined
+    const shared = ctx.get('inertia:shared') as
+      | {
+          locale: 'zh-TW' | 'en'
+          messages: Record<string, string>
+        }
+      | undefined
     const messages = shared?.messages ?? {}
 
     const userId = ctx.getParam('id')

@@ -96,4 +96,3 @@ export async function registerDocsWithGravito(core: PlanetCore): Promise<void> {
 
   console.log('✅ Docs routes registered: /api/docs, /api/openapi.json')
 }
-

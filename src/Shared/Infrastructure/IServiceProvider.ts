@@ -3,7 +3,7 @@
  *
  * @public - Public interface usable by all layers.
  *
- * Defines the registration and resolution mechanisms for dependency injection, 
+ * Defines the registration and resolution mechanisms for dependency injection,
  * hiding the specific container implementation of the framework (Gravito, Nest, Express, etc.).
  *
  * **Design Principles**
@@ -66,7 +66,7 @@ export interface IContainer {
  * @public - All Modules should extend this class to define their service providers.
  *
  * Modules should inherit from this class rather than directly from framework-specific ServiceProviders.
- * The framework adaptation layer is responsible for adapting this class to the specific framework's 
+ * The framework adaptation layer is responsible for adapting this class to the specific framework's
  * ServiceProvider format (e.g., Nest.js's @Injectable).
  *
  * **Responsibilities**
@@ -126,7 +126,7 @@ export abstract class ModuleServiceProvider {
   /**
    * Boots the service (optional).
    *
-   * Called after the application has finished starting, used for initialization logic 
+   * Called after the application has finished starting, used for initialization logic
    * (e.g., building database indexes, preheating cache, etc.).
    * Note: This may require framework-specific resources, which should be passed in by the framework adaptation layer.
    *
@@ -136,4 +136,3 @@ export abstract class ModuleServiceProvider {
     // Default empty implementation
   }
 }
-

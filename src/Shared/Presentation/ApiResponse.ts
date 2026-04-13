@@ -1,6 +1,6 @@
 /**
  * API Response Formatter
- * 
+ *
  * Unifies all API response formats across the platform.
  */
 export interface ApiResponseData {
@@ -77,4 +77,3 @@ export class ApiResponse {
     }
   }
 }
-

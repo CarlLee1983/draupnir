@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { QueryUsage } from '../Application/UseCases/QueryUsage'
-import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import type { AppAuthContext } from '../Application/DTOs/SdkApiDTO'
+import { QueryUsage } from '../Application/UseCases/QueryUsage'
 
 describe('QueryUsage', () => {
   let useCase: QueryUsage
@@ -18,7 +18,12 @@ describe('QueryUsage', () => {
 
   beforeEach(() => {
     mock = new MockGatewayClient()
-    mock.seedUsageStats({ totalRequests: 100, totalCost: 5.25, totalTokens: 50000, avgLatency: 320 })
+    mock.seedUsageStats({
+      totalRequests: 100,
+      totalCost: 5.25,
+      totalTokens: 50000,
+      avgLatency: 320,
+    })
     useCase = new QueryUsage(mock)
   })
 

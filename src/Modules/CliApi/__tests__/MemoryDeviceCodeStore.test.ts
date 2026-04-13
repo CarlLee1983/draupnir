@@ -1,7 +1,7 @@
 // src/Modules/CliApi/__tests__/MemoryDeviceCodeStore.test.ts
-import { describe, it, expect, beforeEach } from 'vitest'
-import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { DeviceCode } from '../Domain/ValueObjects/DeviceCode'
+import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
 
 describe('MemoryDeviceCodeStore', () => {
   let store: MemoryDeviceCodeStore

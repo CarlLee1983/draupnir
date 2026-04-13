@@ -1,8 +1,8 @@
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IUsageRepository, UsageStats } from '../Ports/IUsageRepository'
-import type { ISyncCursorRepository } from '../Ports/ISyncCursorRepository'
 import type { DashboardAnalyticsQuery, KpiSummaryResponse } from '../DTOs/DashboardDTO'
+import type { ISyncCursorRepository } from '../Ports/ISyncCursorRepository'
+import type { IUsageRepository, UsageStats } from '../Ports/IUsageRepository'
 import { DashboardKeyScopeResolver } from './DashboardKeyScopeResolver'
 
 type StatsAccumulator = {
@@ -30,7 +30,7 @@ export class GetKpiSummaryService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: 'Unauthorized to access this organization\'s dashboard',
+          message: "Unauthorized to access this organization's dashboard",
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -60,8 +60,7 @@ export class GetKpiSummaryService {
         visibleKeys,
       )
 
-      const windowMs =
-        new Date(range.endDate).getTime() - new Date(range.startDate).getTime()
+      const windowMs = new Date(range.endDate).getTime() - new Date(range.startDate).getTime()
       const priorRange = {
         startDate: new Date(new Date(range.startDate).getTime() - windowMs).toISOString(),
         endDate: range.startDate,
@@ -107,15 +106,16 @@ export class GetKpiSummaryService {
   }
 }
 
-function resolveDateRange(startTime?: string, endTime?: string): { startDate: string; endDate: string } {
+function resolveDateRange(
+  startTime?: string,
+  endTime?: string,
+): { startDate: string; endDate: string } {
   if (startTime && endTime) {
     return { startDate: startTime, endDate: endTime }
   }
 
   const endDate = endTime ?? new Date().toISOString()
-  const startDate =
-    startTime ??
-    new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString()
+  const startDate = startTime ?? new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString()
 
   return { startDate, endDate }
 }

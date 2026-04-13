@@ -1,20 +1,21 @@
 // src/Modules/AppModule/Infrastructure/Providers/AppModuleServiceProvider.ts
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+
+import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import { AppModuleRepository } from '../Repositories/AppModuleRepository'
-import { ModuleSubscriptionRepository } from '../Repositories/ModuleSubscriptionRepository'
+import { CheckModuleAccessService } from '../../Application/Services/CheckModuleAccessService'
+import { EnsureCoreAppModulesService } from '../../Application/Services/EnsureCoreAppModulesService'
+import { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
+import { ListModulesService } from '../../Application/Services/ListModulesService'
+import { ListOrgSubscriptionsService } from '../../Application/Services/ListOrgSubscriptionsService'
+import { ProvisionOrganizationDefaultsService } from '../../Application/Services/ProvisionOrganizationDefaultsService'
 import { RegisterModuleService } from '../../Application/Services/RegisterModuleService'
 import { SubscribeModuleService } from '../../Application/Services/SubscribeModuleService'
 import { UnsubscribeModuleService } from '../../Application/Services/UnsubscribeModuleService'
-import { CheckModuleAccessService } from '../../Application/Services/CheckModuleAccessService'
-import { ListModulesService } from '../../Application/Services/ListModulesService'
-import { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
-import { ListOrgSubscriptionsService } from '../../Application/Services/ListOrgSubscriptionsService'
-import { EnsureCoreAppModulesService } from '../../Application/Services/EnsureCoreAppModulesService'
-import { ProvisionOrganizationDefaultsService } from '../../Application/Services/ProvisionOrganizationDefaultsService'
-import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
 import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
+import { AppModuleRepository } from '../Repositories/AppModuleRepository'
+import { ModuleSubscriptionRepository } from '../Repositories/ModuleSubscriptionRepository'
 
 export class AppModuleServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {

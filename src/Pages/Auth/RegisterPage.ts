@@ -29,12 +29,14 @@ export class RegisterPage {
   async store(ctx: IHttpContext): Promise<Response> {
     const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
     const csrfToken = (shared?.csrfToken as string) ?? ''
-    const validated = ctx.get('validated') as {
-      email?: string
-      password?: string
-      passwordConfirmation?: string
-      agreedToTerms?: boolean
-    } | undefined
+    const validated = ctx.get('validated') as
+      | {
+          email?: string
+          password?: string
+          passwordConfirmation?: string
+          agreedToTerms?: boolean
+        }
+      | undefined
 
     const email = validated?.email ?? ''
     const password = validated?.password ?? ''

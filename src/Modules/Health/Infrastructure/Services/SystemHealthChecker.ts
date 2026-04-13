@@ -4,10 +4,10 @@
  * Handles actual DB/Redis/Cache connectivity via framework-agnostic port interfaces.
  */
 
-import type { ISystemHealthChecker } from '../../Domain/Ports/ISystemHealthChecker'
+import type { ICacheService } from '@/Shared/Infrastructure/ICacheService'
 import type { IDatabaseConnectivityCheck } from '@/Shared/Infrastructure/IDatabaseConnectivityCheck'
 import type { IRedisService } from '@/Shared/Infrastructure/IRedisService'
-import type { ICacheService } from '@/Shared/Infrastructure/ICacheService'
+import type { ISystemHealthChecker } from '../../Domain/Ports/ISystemHealthChecker'
 
 export class SystemHealthChecker implements ISystemHealthChecker {
   constructor(

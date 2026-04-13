@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { GetPerKeyCostService } from '../Application/Services/GetPerKeyCostService'
 
-function createService(overrides: {
-  apiKeyRepository?: Record<string, unknown>
-  orgAuth?: Record<string, unknown>
-  usageRepository?: Record<string, unknown>
-} = {}) {
+function createService(
+  overrides: {
+    apiKeyRepository?: Record<string, unknown>
+    orgAuth?: Record<string, unknown>
+    usageRepository?: Record<string, unknown>
+  } = {},
+) {
   const apiKeyRepository =
     overrides.apiKeyRepository ??
     ({
@@ -24,7 +26,11 @@ function createService(overrides: {
     } as const)
 
   return {
-    service: new GetPerKeyCostService(apiKeyRepository as any, orgAuth as any, usageRepository as any),
+    service: new GetPerKeyCostService(
+      apiKeyRepository as any,
+      orgAuth as any,
+      usageRepository as any,
+    ),
     apiKeyRepository,
     orgAuth,
     usageRepository,

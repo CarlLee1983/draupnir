@@ -1,11 +1,11 @@
-import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
+import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import {
   AppApiKeyPresenter,
-  type RevokeAppKeyRequest,
   type AppApiKeyResponse,
+  type RevokeAppKeyRequest,
 } from '../DTOs/AppApiKeyDTO'
+import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
 
 export class RevokeAppKeyService {
   constructor(

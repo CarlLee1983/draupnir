@@ -1,6 +1,6 @@
-import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { Application } from '../../Domain/Aggregates/Application'
+import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
 import {
   ApplicationPresenter,
   type RegisterAppRequest,

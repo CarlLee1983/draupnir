@@ -1,6 +1,6 @@
 // src/Modules/CliApi/Infrastructure/Services/MemoryDeviceCodeStore.ts
 import type { IDeviceCodeStore } from '../../Domain/Ports/IDeviceCodeStore'
-import { DeviceCode } from '../../Domain/ValueObjects/DeviceCode'
+import type { DeviceCode } from '../../Domain/ValueObjects/DeviceCode'
 
 interface StoredEntry {
   readonly deviceCode: DeviceCode

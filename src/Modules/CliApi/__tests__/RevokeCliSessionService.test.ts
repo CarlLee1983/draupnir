@@ -1,7 +1,7 @@
 // src/Modules/CliApi/__tests__/RevokeCliSessionService.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { RevokeCliSessionService } from '../Application/Services/RevokeCliSessionService'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { RevokeCliSessionService } from '../Application/Services/RevokeCliSessionService'
 
 function createMockAuthTokenRepo(): IAuthTokenRepository {
   return {

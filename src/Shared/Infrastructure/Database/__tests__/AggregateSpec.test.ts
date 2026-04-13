@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
+  type AggregateExpression,
+  type AggregateSpec,
   add,
   avg,
-  col,
   coalesce,
+  col,
   count,
   dateTrunc,
   max,
   min,
   sum,
-  type AggregateSpec,
-  type AggregateExpression
 } from '../AggregateSpec'
 
 describe('AggregateSpec Builders', () => {
@@ -39,14 +39,14 @@ describe('AggregateSpec Builders', () => {
     expect(dateTrunc('day', 'created_at')).toEqual({
       kind: 'dateTrunc',
       unit: 'day',
-      column: 'created_at'
+      column: 'created_at',
     })
   })
 
   it('coalesce() produces coalesce kind with operands', () => {
     expect(coalesce('latency', 0)).toEqual({
       kind: 'coalesce',
-      operands: ['latency', 0]
+      operands: ['latency', 0],
     })
   })
 
@@ -54,7 +54,7 @@ describe('AggregateSpec Builders', () => {
     expect(add('in', 'out')).toEqual({
       kind: 'add',
       left: 'in',
-      right: 'out'
+      right: 'out',
     })
   })
 
@@ -67,7 +67,7 @@ describe('AggregateSpec Builders', () => {
       const nested = sum(add('input', 'output'))
       expect(nested).toEqual({
         kind: 'sum',
-        column: { kind: 'add', left: 'input', right: 'output' }
+        column: { kind: 'add', left: 'input', right: 'output' },
       })
     })
 
@@ -75,21 +75,18 @@ describe('AggregateSpec Builders', () => {
       const nested = avg(coalesce('latency', 0))
       expect(nested).toEqual({
         kind: 'avg',
-        column: { kind: 'coalesce', operands: ['latency', 0] }
+        column: { kind: 'coalesce', operands: ['latency', 0] },
       })
     })
-    
+
     it('supports deep nesting', () => {
       const deep = sum(coalesce(add('a', 'b'), 0))
       expect(deep).toEqual({
         kind: 'sum',
         column: {
           kind: 'coalesce',
-          operands: [
-            { kind: 'add', left: 'a', right: 'b' },
-            0
-          ]
-        }
+          operands: [{ kind: 'add', left: 'a', right: 'b' }, 0],
+        },
       })
     })
   })
@@ -100,11 +97,11 @@ describe('AggregateSpec Builders', () => {
         date: dateTrunc('day', 'occurred_at'),
         totalCost: sum('credit_cost'),
         totalRequests: count('*'),
-        totalTokens: sum(add('input_tokens', 'output_tokens'))
+        totalTokens: sum(add('input_tokens', 'output_tokens')),
       },
       groupBy: ['date'],
       orderBy: [{ column: 'date', direction: 'ASC' }],
-      limit: 10
+      limit: 10,
     }
 
     expect(spec.select.totalTokens).toBeDefined()

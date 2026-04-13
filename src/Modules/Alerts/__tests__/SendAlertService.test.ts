@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { SendAlertService } from '../Application/Services/SendAlertService'
 import type { DeliveryResult, IAlertNotifier } from '../Domain/Services/IAlertNotifier'
+import { FakeAlertNotifier } from './fakes/FakeAlertNotifier'
 import { InMemoryAlertEventRepository } from './fakes/InMemoryAlertEventRepository'
 import { InMemoryAlertRecipientResolver } from './fakes/InMemoryAlertRecipientResolver'
-import { FakeAlertNotifier } from './fakes/FakeAlertNotifier'
 
 function createDeferred<T = void>() {
   let resolve!: (value: T | PromiseLike<T>) => void
@@ -18,7 +18,11 @@ function createDeferred<T = void>() {
 describe('SendAlertService', () => {
   it('invokes email and webhook notifiers with the same payload after persisting the event', async () => {
     const recipientResolver = new InMemoryAlertRecipientResolver({
-      'org-1': { orgId: 'org-1', orgName: 'Org Name', emails: ['one@example.com', 'two@example.com'] },
+      'org-1': {
+        orgId: 'org-1',
+        orgName: 'Org Name',
+        emails: ['one@example.com', 'two@example.com'],
+      },
     })
     const alertEventRepo = new InMemoryAlertEventRepository()
     const emailNotifier = new FakeAlertNotifier('email')

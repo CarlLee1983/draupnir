@@ -1,8 +1,8 @@
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
 import { AlertDelivery } from '../Domain/Entities/AlertDelivery'
-import { EmailAlertNotifier } from '../Infrastructure/Services/EmailAlertNotifier'
 import type { AlertPayload } from '../Domain/Services/IAlertNotifier'
+import { EmailAlertNotifier } from '../Infrastructure/Services/EmailAlertNotifier'
 import { InMemoryAlertDeliveryRepository } from './fakes/InMemoryAlertDeliveryRepository'
 
 describe('EmailAlertNotifier', () => {

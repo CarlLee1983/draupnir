@@ -1,4 +1,7 @@
-import type { IAlertRecipientResolver, AlertRecipientContext } from '../../Domain/Services/IAlertRecipientResolver'
+import type {
+  AlertRecipientContext,
+  IAlertRecipientResolver,
+} from '../../Domain/Services/IAlertRecipientResolver'
 
 /**
  * InMemoryAlertRecipientResolver

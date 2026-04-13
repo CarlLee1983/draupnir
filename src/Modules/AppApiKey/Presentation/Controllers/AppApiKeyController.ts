@@ -1,11 +1,11 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { GetAppKeyUsageService } from '../../Application/Services/GetAppKeyUsageService'
 import type { IssueAppKeyService } from '../../Application/Services/IssueAppKeyService'
 import type { ListAppKeysService } from '../../Application/Services/ListAppKeysService'
-import type { RotateAppKeyService } from '../../Application/Services/RotateAppKeyService'
 import type { RevokeAppKeyService } from '../../Application/Services/RevokeAppKeyService'
+import type { RotateAppKeyService } from '../../Application/Services/RotateAppKeyService'
 import type { SetAppKeyScopeService } from '../../Application/Services/SetAppKeyScopeService'
-import type { GetAppKeyUsageService } from '../../Application/Services/GetAppKeyUsageService'
 
 export class AppApiKeyController {
   constructor(
@@ -19,7 +19,8 @@ export class AppApiKeyController {
 
   async issue(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = await ctx.getJsonBody<{
       label?: string
       scope?: string
@@ -48,7 +49,8 @@ export class AppApiKeyController {
 
   async list(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const page = ctx.getQuery('page') ? parseInt(ctx.getQuery('page')!, 10) : 1
@@ -59,7 +61,8 @@ export class AppApiKeyController {
 
   async rotate(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
     if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.rotateService.execute({
@@ -73,7 +76,8 @@ export class AppApiKeyController {
 
   async revoke(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
     if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.revokeService.execute({
@@ -87,7 +91,8 @@ export class AppApiKeyController {
 
   async setScope(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
     if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const body = await ctx.getJsonBody<{ scope?: string; boundModuleIds?: string[] }>()
@@ -104,7 +109,8 @@ export class AppApiKeyController {
 
   async getUsage(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
     if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.getUsageService.execute({

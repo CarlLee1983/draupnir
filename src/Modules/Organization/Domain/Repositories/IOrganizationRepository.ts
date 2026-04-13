@@ -3,8 +3,8 @@
  * Domain Repository: contract for organization persistence.
  */
 
-import { Organization } from '../Aggregates/Organization'
 import type { IDatabaseAccess } from '@/Shared/Domain/IDatabaseAccess'
+import type { Organization } from '../Aggregates/Organization'
 
 export interface IOrganizationRepository {
   /** Finds an organization by its unique identifier. */
@@ -28,4 +28,3 @@ export interface IOrganizationRepository {
   /** Returns a repository instance scoped to a transaction. */
   withTransaction(tx: IDatabaseAccess): IOrganizationRepository
 }
-

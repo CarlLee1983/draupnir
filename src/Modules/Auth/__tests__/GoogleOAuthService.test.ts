@@ -3,16 +3,16 @@
  */
 
 import { beforeEach, describe, expect, it, mock } from 'bun:test'
-import { GoogleOAuthService } from '../Application/Services/GoogleOAuthService'
-import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import type { IJwtTokenService } from '../Application/Ports/IJwtTokenService'
 import type { IPasswordHasher } from '../Application/Ports/IPasswordHasher'
-import type { GoogleOAuthAdapter } from '../Infrastructure/Services/GoogleOAuthAdapter'
+import { GoogleOAuthService } from '../Application/Services/GoogleOAuthService'
+import { User, UserStatus } from '../Domain/Aggregates/User'
+import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import { Email } from '../Domain/ValueObjects/Email'
 import { Password } from '../Domain/ValueObjects/Password'
 import { Role } from '../Domain/ValueObjects/Role'
-import { User, UserStatus } from '../Domain/Aggregates/User'
+import type { GoogleOAuthAdapter } from '../Infrastructure/Services/GoogleOAuthAdapter'
 
 describe('GoogleOAuthService', () => {
   let service: GoogleOAuthService

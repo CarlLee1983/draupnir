@@ -23,10 +23,12 @@ export class AdminOrganizationDetailPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const shared = ctx.get('inertia:shared') as {
-      locale: 'zh-TW' | 'en'
-      messages: Record<string, string>
-    } | undefined
+    const shared = ctx.get('inertia:shared') as
+      | {
+          locale: 'zh-TW' | 'en'
+          messages: Record<string, string>
+        }
+      | undefined
     const messages = shared?.messages ?? {}
 
     const orgId = ctx.getParam('id')

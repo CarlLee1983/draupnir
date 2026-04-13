@@ -67,13 +67,27 @@ export class CreditAccount {
     return this.props.balance.isNegativeOrZero()
   }
 
-  get id(): string { return this.props.id }
-  get orgId(): string { return this.props.orgId }
-  get balance(): string { return this.props.balance.toString() }
-  get lowBalanceThreshold(): string { return this.props.lowBalanceThreshold.toString() }
-  get status(): string { return this.props.status }
-  get createdAt(): Date { return this.props.createdAt }
-  get updatedAt(): Date { return this.props.updatedAt }
+  get id(): string {
+    return this.props.id
+  }
+  get orgId(): string {
+    return this.props.orgId
+  }
+  get balance(): string {
+    return this.props.balance.toString()
+  }
+  get lowBalanceThreshold(): string {
+    return this.props.lowBalanceThreshold.toString()
+  }
+  get status(): string {
+    return this.props.status
+  }
+  get createdAt(): Date {
+    return this.props.createdAt
+  }
+  get updatedAt(): Date {
+    return this.props.updatedAt
+  }
 
   toDatabaseRow(): Record<string, unknown> {
     return {

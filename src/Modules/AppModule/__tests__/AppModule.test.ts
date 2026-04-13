@@ -1,8 +1,8 @@
 // src/Modules/AppModule/__tests__/AppModule.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import { AppModulePresenter } from '../Application/DTOs/AppModuleDTO'
 import { AppModule } from '../Domain/Aggregates/AppModule'
 import { AppModuleMapper } from '../Infrastructure/Mappers/AppModuleMapper'
-import { AppModulePresenter } from '../Application/DTOs/AppModuleDTO'
 
 describe('AppModule', () => {
   test('建立模組', () => {
@@ -23,7 +23,9 @@ describe('AppModule', () => {
   })
 
   test('空名稱拋出錯誤', () => {
-    expect(() => AppModule.create({ name: '', type: 'free' })).toThrow('Module name cannot be empty')
+    expect(() => AppModule.create({ name: '', type: 'free' })).toThrow(
+      'Module name cannot be empty',
+    )
   })
 
   test('deprecate 回傳新實例', () => {

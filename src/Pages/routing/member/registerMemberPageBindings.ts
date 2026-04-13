@@ -1,13 +1,14 @@
 /**
  * Registers member Inertia page classes as container singletons with their Application-layer dependencies.
  */
+
+import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
+import type { GetBudgetService } from '@/Modules/Alerts/Application/Services/GetBudgetService'
+import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/Services/ListWebhookEndpointsService'
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
-import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
-import type { GetBudgetService } from '@/Modules/Alerts/Application/Services/GetBudgetService'
-import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/Services/ListWebhookEndpointsService'
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
@@ -15,12 +16,11 @@ import type { UpdateProfileService } from '@/Modules/Profile/Application/Service
 import type { InertiaService } from '@/Pages/InertiaService'
 import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-
+import { MemberAlertsPage } from '../../Member/MemberAlertsPage'
 import { MemberApiKeyCreatePage } from '../../Member/MemberApiKeyCreatePage'
 import { MemberApiKeyRevokeHandler } from '../../Member/MemberApiKeyRevokeHandler'
 import { MemberApiKeysPage } from '../../Member/MemberApiKeysPage'
 import { MemberContractsPage } from '../../Member/MemberContractsPage'
-import { MemberAlertsPage } from '../../Member/MemberAlertsPage'
 import { MemberCostBreakdownPage } from '../../Member/MemberCostBreakdownPage'
 import { MemberDashboardPage } from '../../Member/MemberDashboardPage'
 import { MemberSettingsPage } from '../../Member/MemberSettingsPage'

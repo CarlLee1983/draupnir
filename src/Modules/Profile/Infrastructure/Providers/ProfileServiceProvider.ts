@@ -1,9 +1,9 @@
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
-import { UserProfileRepository } from '../Repositories/UserProfileRepository'
 import { GetProfileService } from '../../Application/Services/GetProfileService'
 import { UpdateProfileService } from '../../Application/Services/UpdateProfileService'
+import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
+import { UserProfileRepository } from '../Repositories/UserProfileRepository'
 
 /**
  * Service Provider for the Profile Module.
@@ -40,4 +40,3 @@ export class ProfileServiceProvider extends ModuleServiceProvider {
     console.log('👤 [Profile] Module loaded')
   }
 }
-

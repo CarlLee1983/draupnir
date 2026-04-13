@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { GetKpiSummaryService } from '../Application/Services/GetKpiSummaryService'
 
-function createService(overrides: {
-  apiKeyRepository?: Record<string, unknown>
-  orgAuth?: Record<string, unknown>
-  usageRepository?: Record<string, unknown>
-  cursorRepo?: Record<string, unknown>
-} = {}) {
+function createService(
+  overrides: {
+    apiKeyRepository?: Record<string, unknown>
+    orgAuth?: Record<string, unknown>
+    usageRepository?: Record<string, unknown>
+    cursorRepo?: Record<string, unknown>
+  } = {},
+) {
   const apiKeyRepository =
     overrides.apiKeyRepository ??
     ({
@@ -209,8 +211,13 @@ describe('GetKpiSummaryService', () => {
     // current period calls (1x for key-1)
     // prior period calls (1x for key-1)
     ;(usageRepository.queryStatsByKey as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ totalRequests: 10, totalCost: 2.0, totalTokens: 400, avgLatency: 100 }) // current key-1
-      .mockResolvedValueOnce({ totalRequests: 5, totalCost: 1.0, totalTokens: 200, avgLatency: 80 })  // prior key-1
+      .mockResolvedValueOnce({
+        totalRequests: 10,
+        totalCost: 2.0,
+        totalTokens: 400,
+        avgLatency: 100,
+      }) // current key-1
+      .mockResolvedValueOnce({ totalRequests: 5, totalCost: 1.0, totalTokens: 200, avgLatency: 80 }) // prior key-1
 
     const result = await service.execute({
       orgId: 'org-1',
@@ -241,8 +248,13 @@ describe('GetKpiSummaryService', () => {
       membership: { role: 'manager', userId: 'user-1' },
     })
     ;(usageRepository.queryStatsByOrg as ReturnType<typeof vi.fn>)
-      .mockResolvedValueOnce({ totalRequests: 8, totalCost: 1.5, totalTokens: 300, avgLatency: 120 }) // current
-      .mockResolvedValueOnce({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 })       // prior
+      .mockResolvedValueOnce({
+        totalRequests: 8,
+        totalCost: 1.5,
+        totalTokens: 300,
+        avgLatency: 120,
+      }) // current
+      .mockResolvedValueOnce({ totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }) // prior
 
     const result = await service.execute({
       orgId: 'org-1',
@@ -269,7 +281,10 @@ describe('GetKpiSummaryService', () => {
       membership: null,
     })
     ;(usageRepository.queryStatsByOrg as ReturnType<typeof vi.fn>).mockResolvedValue({
-      totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0,
+      totalRequests: 0,
+      totalCost: 0,
+      totalTokens: 0,
+      avgLatency: 0,
     })
 
     const startTime = '2026-03-13T00:00:00.000Z'

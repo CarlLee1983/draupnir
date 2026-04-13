@@ -1,7 +1,7 @@
 // src/Modules/AppModule/Infrastructure/Repositories/AppModuleRepository.ts
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import { AppModule } from '../../Domain/Aggregates/AppModule'
+import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import { AppModuleMapper } from '../Mappers/AppModuleMapper'
 
 export class AppModuleRepository implements IAppModuleRepository {
@@ -27,6 +27,9 @@ export class AppModuleRepository implements IAppModuleRepository {
   }
 
   async update(module: AppModule): Promise<void> {
-    await this.db.table('app_modules').where('id', '=', module.id).update(AppModuleMapper.toDatabaseRow(module))
+    await this.db
+      .table('app_modules')
+      .where('id', '=', module.id)
+      .update(AppModuleMapper.toDatabaseRow(module))
   }
 }

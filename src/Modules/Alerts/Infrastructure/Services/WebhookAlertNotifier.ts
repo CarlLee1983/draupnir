@@ -1,11 +1,15 @@
 import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
 import { WebhookSecret } from '@/Foundation/Infrastructure/Services/Webhook/WebhookSecret'
 import { WebhookEndpointGoneError } from '../../Application/Errors/WebhookEndpointGoneError'
+import type { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
 import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
-import type { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
-import type { AlertPayload, DeliveryResult, IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
+import type {
+  AlertPayload,
+  DeliveryResult,
+  IAlertNotifier,
+} from '../../Domain/Services/IAlertNotifier'
 
 function buildWebhookPayload(payload: AlertPayload): Record<string, unknown> {
   return {
@@ -100,7 +104,10 @@ export class WebhookAlertNotifier implements IAlertNotifier {
     return final.status === 'sent' ? 'sent' : 'failed'
   }
 
-  private async runDispatch(payload: AlertPayload, endpoint: WebhookEndpoint): Promise<AlertDelivery> {
+  private async runDispatch(
+    payload: AlertPayload,
+    endpoint: WebhookEndpoint,
+  ): Promise<AlertDelivery> {
     const dispatchedAt = new Date().toISOString()
     const base = AlertDelivery.create({
       alertEventId: payload.alertEventId,
@@ -129,7 +136,11 @@ export class WebhookAlertNotifier implements IAlertNotifier {
 
       const finalDelivery = result.success
         ? base.markSent(result.statusCode ?? null, deliveredAt, result.attempts)
-        : base.markFailed(result.statusCode ?? null, result.error ?? 'Unknown webhook error', result.attempts)
+        : base.markFailed(
+            result.statusCode ?? null,
+            result.error ?? 'Unknown webhook error',
+            result.attempts,
+          )
       await this.deps.deliveryRepo.save(finalDelivery)
       return finalDelivery
     } catch (error) {

@@ -1,6 +1,6 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import { AppApiKey } from '../../Domain/Aggregates/AppApiKey'
+import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import { AppApiKeyMapper } from '../Mappers/AppApiKeyMapper'
 
 export class AppApiKeyRepository implements IAppApiKeyRepository {

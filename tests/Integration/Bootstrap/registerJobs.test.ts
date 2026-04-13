@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'bun:test'
+import { parseBifrostSyncCron } from '../../../config/app'
 import { DashboardServiceProvider } from '../../../src/Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
-import { ReportsServiceProvider } from '../../../src/Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { ReportSchedule } from '../../../src/Modules/Reports/Domain/Aggregates/ReportSchedule'
+import { ReportsServiceProvider } from '../../../src/Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import type { IContainer } from '../../../src/Shared/Infrastructure/IServiceProvider'
 import { FakeScheduler } from '../../Unit/Scheduler/FakeScheduler'
-import { parseBifrostSyncCron } from '../../../config/app'
 
 class TestContainer implements IContainer {
   private readonly bindings = new Map<string, (c: IContainer) => unknown>()

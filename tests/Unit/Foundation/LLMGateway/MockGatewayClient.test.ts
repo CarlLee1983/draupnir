@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'bun:test'
-import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { beforeEach, describe, expect, it } from 'bun:test'
 import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway/errors'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 
 describe('MockGatewayClient', () => {
   let mock: MockGatewayClient

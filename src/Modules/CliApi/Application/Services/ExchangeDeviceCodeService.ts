@@ -1,8 +1,9 @@
 // src/Modules/CliApi/Application/Services/ExchangeDeviceCodeService.ts
-import type { IDeviceCodeStore } from '../../Domain/Ports/IDeviceCodeStore'
-import { DeviceCodeStatus } from '../../Domain/ValueObjects/DeviceCode'
+
 import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import type { IDeviceCodeStore } from '../../Domain/Ports/IDeviceCodeStore'
+import { DeviceCodeStatus } from '../../Domain/ValueObjects/DeviceCode'
 import type { ExchangeDeviceCodeRequest, ExchangeDeviceCodeResponse } from '../DTOs/DeviceFlowDTO'
 
 async function sha256(str: string): Promise<string> {

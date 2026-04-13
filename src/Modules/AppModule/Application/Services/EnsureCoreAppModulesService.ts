@@ -1,7 +1,8 @@
 // src/Modules/AppModule/Application/Services/EnsureCoreAppModulesService.ts
-import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
+
 import { AppModule } from '../../Domain/Aggregates/AppModule'
 import { CORE_APP_MODULE_SPECS } from '../../Domain/CoreAppModules'
+import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 
 export class EnsureCoreAppModulesService {
   constructor(private readonly moduleRepo: IAppModuleRepository) {}

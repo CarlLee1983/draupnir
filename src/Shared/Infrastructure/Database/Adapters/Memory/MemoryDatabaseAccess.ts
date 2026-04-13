@@ -8,10 +8,7 @@
  */
 
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type {
-  AggregateSpec,
-  AggregateExpression,
-} from '../../AggregateSpec'
+import type { AggregateExpression, AggregateSpec } from '../../AggregateSpec'
 
 type WhereCondition = { column: string; operator: string; value: unknown }
 
@@ -182,7 +179,7 @@ class MemoryQueryBuilder implements IQueryBuilder {
     // 1. Group
     const groups = new Map<string, Record<string, unknown>[]>()
     const groupCols = spec.groupBy ?? []
-    
+
     if (filtered.length === 0 && groupCols.length === 0) {
       // SQL behavior: without GROUP BY, always returns 1 row even for empty table
       groups.set('_all', [])

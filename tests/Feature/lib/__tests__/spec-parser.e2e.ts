@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'bun:test'
-import { parseOpenAPI } from '../spec-parser'
+import { describe, expect, it } from 'bun:test'
 import { resolve } from 'path'
+import { parseOpenAPI } from '../spec-parser'
 
 const SPEC_PATH = resolve(import.meta.dir, '../../../../docs/openapi.yaml')
 

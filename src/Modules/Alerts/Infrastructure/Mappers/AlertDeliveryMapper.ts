@@ -38,13 +38,21 @@ export class AlertDeliveryMapper {
       alertEventId: String(row.alert_event_id),
       channel: String(row.channel) as AlertDeliveryProps['channel'],
       target: String(row.target),
-      targetUrl: row.target_url === null || row.target_url === undefined ? null : String(row.target_url),
+      targetUrl:
+        row.target_url === null || row.target_url === undefined ? null : String(row.target_url),
       status: String(row.status) as AlertDeliveryProps['status'],
       attempts: Number(row.attempts ?? 0),
-      statusCode: row.status_code === null || row.status_code === undefined ? null : Number(row.status_code),
-      errorMessage: row.error_message === null || row.error_message === undefined ? null : String(row.error_message),
+      statusCode:
+        row.status_code === null || row.status_code === undefined ? null : Number(row.status_code),
+      errorMessage:
+        row.error_message === null || row.error_message === undefined
+          ? null
+          : String(row.error_message),
       dispatchedAt: String(row.dispatched_at),
-      deliveredAt: row.delivered_at === null || row.delivered_at === undefined ? null : String(row.delivered_at),
+      deliveredAt:
+        row.delivered_at === null || row.delivered_at === undefined
+          ? null
+          : String(row.delivered_at),
       createdAt: String(row.created_at),
       orgId: String(orgId),
       month: String(month),

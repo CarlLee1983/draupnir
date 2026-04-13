@@ -1,15 +1,15 @@
 // src/Modules/AppModule/__tests__/CheckModuleAccessService.test.ts
-import { describe, test, expect, beforeEach } from 'bun:test'
-import { CheckModuleAccessService } from '../Application/Services/CheckModuleAccessService'
-import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
-import type { IModuleSubscriptionRepository } from '../Domain/Repositories/IModuleSubscriptionRepository'
-import type { IAppModuleRepository } from '../Domain/Repositories/IAppModuleRepository'
-import { Contract } from '@/Modules/Contract/Domain/Aggregates/Contract'
-import { AppModule } from '../Domain/Aggregates/AppModule'
-import { ModuleSubscription } from '../Domain/Entities/ModuleSubscription'
-import type { AppModule as AppModuleType } from '../Domain/Aggregates/AppModule'
-import type { ModuleSubscription as SubType } from '../Domain/Entities/ModuleSubscription'
+import { beforeEach, describe, expect, test } from 'bun:test'
 import type { Contract as ContractType } from '@/Modules/Contract/Domain/Aggregates/Contract'
+import { Contract } from '@/Modules/Contract/Domain/Aggregates/Contract'
+import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
+import { CheckModuleAccessService } from '../Application/Services/CheckModuleAccessService'
+import type { AppModule as AppModuleType } from '../Domain/Aggregates/AppModule'
+import { AppModule } from '../Domain/Aggregates/AppModule'
+import type { ModuleSubscription as SubType } from '../Domain/Entities/ModuleSubscription'
+import { ModuleSubscription } from '../Domain/Entities/ModuleSubscription'
+import type { IAppModuleRepository } from '../Domain/Repositories/IAppModuleRepository'
+import type { IModuleSubscriptionRepository } from '../Domain/Repositories/IModuleSubscriptionRepository'
 
 class MockContractRepo implements IContractRepository {
   contracts: Map<string, ContractType> = new Map()

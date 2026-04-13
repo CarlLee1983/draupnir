@@ -65,4 +65,3 @@ export interface ListUsersResponse {
   }
   error?: string
 }
-

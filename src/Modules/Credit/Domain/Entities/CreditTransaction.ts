@@ -105,6 +105,4 @@ export class CreditTransaction {
   get createdAt(): Date {
     return this.props.createdAt
   }
-
 }
-

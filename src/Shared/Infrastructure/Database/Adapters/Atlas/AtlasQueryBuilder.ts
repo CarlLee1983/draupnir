@@ -7,8 +7,11 @@
  * @internal 此實現是基礎設施層細節
  */
 
+import type {
+  AggregateExpression,
+  AggregateSpec,
+} from '@/Shared/Infrastructure/Database/AggregateSpec'
 import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { AggregateSpec, AggregateExpression } from '@/Shared/Infrastructure/Database/AggregateSpec'
 
 /**
  * 懶加載 Atlas DB 實例
@@ -295,7 +298,9 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 
     const DB = require('@gravito/atlas').DB
     const result = await DB.raw(sql, bindings)
-    return Array.isArray(result) ? (result as T[]) : ((result as Record<string, unknown>).rows ?? []) as T[]
+    return Array.isArray(result)
+      ? (result as T[])
+      : (((result as Record<string, unknown>).rows ?? []) as T[])
   }
 
   /**
@@ -318,8 +323,12 @@ export class AtlasQueryBuilder implements IQueryBuilder {
         // SQLite: strftime for date truncation
         return `strftime('%Y-%m-%d', "${expr.column}")`
       case 'coalesce': {
-        const operand = typeof expr.operands[0] === 'string' ? `"${expr.operands[0]}"` : this.compileExpr(expr.operands[0] as AggregateExpression)
-        const fallback = typeof expr.operands[1] === 'string' ? `'${expr.operands[1]}'` : String(expr.operands[1])
+        const operand =
+          typeof expr.operands[0] === 'string'
+            ? `"${expr.operands[0]}"`
+            : this.compileExpr(expr.operands[0] as AggregateExpression)
+        const fallback =
+          typeof expr.operands[1] === 'string' ? `'${expr.operands[1]}'` : String(expr.operands[1])
         return `COALESCE(${operand}, ${fallback})`
       }
       case 'add':

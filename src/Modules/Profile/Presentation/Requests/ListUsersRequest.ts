@@ -22,4 +22,3 @@ export class ListUsersRequest extends FormRequest {
  * Type inferred from the ListUsersRequest schema.
  */
 export type ListUsersQueryParams = z.infer<ListUsersRequest['schema']>
-

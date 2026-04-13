@@ -1,12 +1,13 @@
 // src/Modules/AppModule/Presentation/Controllers/AppModuleController.ts
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
+import type { ListModulesService } from '../../Application/Services/ListModulesService'
+import type { ListOrgSubscriptionsService } from '../../Application/Services/ListOrgSubscriptionsService'
 import type { RegisterModuleService } from '../../Application/Services/RegisterModuleService'
 import type { SubscribeModuleService } from '../../Application/Services/SubscribeModuleService'
 import type { UnsubscribeModuleService } from '../../Application/Services/UnsubscribeModuleService'
-import type { ListModulesService } from '../../Application/Services/ListModulesService'
-import type { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
-import type { ListOrgSubscriptionsService } from '../../Application/Services/ListOrgSubscriptionsService'
 import type { RegisterModuleParams, SubscribeModuleParams } from '../Requests'
 
 export class AppModuleController {
@@ -21,7 +22,8 @@ export class AppModuleController {
 
   async register(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = ctx.get('validated') as RegisterModuleParams
     const result = await this.registerService.execute({
       name: body.name,
@@ -47,7 +49,8 @@ export class AppModuleController {
 
   async subscribe(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const body = ctx.get('validated') as SubscribeModuleParams
@@ -62,7 +65,8 @@ export class AppModuleController {
 
   async unsubscribe(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     const moduleId = ctx.getParam('moduleId')
     if (!orgId || !moduleId) return ctx.json({ success: false, message: 'Missing parameters' }, 400)
@@ -72,7 +76,8 @@ export class AppModuleController {
 
   async listOrgSubscriptions(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.listOrgSubscriptionsService.execute(orgId)

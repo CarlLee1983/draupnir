@@ -2,20 +2,11 @@ import { beforeAll, describe, expect, it, spyOn } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { createDrizzleDatabaseAccess } from '../Adapters/Drizzle/DrizzleDatabaseAdapter'
-import { MemoryDatabaseAccess } from '../Adapters/Memory/MemoryDatabaseAccess'
-import * as schema from '../Adapters/Drizzle/schema'
-import {
-  add,
-  avg,
-  coalesce,
-  count,
-  dateTrunc,
-  sum,
-  type AggregateSpec,
-} from '../AggregateSpec'
-
 import * as config from '../Adapters/Drizzle/config'
+import { createDrizzleDatabaseAccess } from '../Adapters/Drizzle/DrizzleDatabaseAdapter'
+import * as schema from '../Adapters/Drizzle/schema'
+import { MemoryDatabaseAccess } from '../Adapters/Memory/MemoryDatabaseAccess'
+import { type AggregateSpec, add, avg, coalesce, count, dateTrunc, sum } from '../AggregateSpec'
 
 const seedRows = [
   {
@@ -27,7 +18,7 @@ const seedRows = [
     provider: 'openai',
     input_tokens: 10,
     output_tokens: 5,
-    credit_cost: 1.00,
+    credit_cost: 1.0,
     latency_ms: 100,
     status: 'success',
     occurred_at: '2026-04-10T10:00:00Z',
@@ -42,7 +33,7 @@ const seedRows = [
     provider: 'openai',
     input_tokens: 20,
     output_tokens: 10,
-    credit_cost: 2.50,
+    credit_cost: 2.5,
     latency_ms: null,
     status: 'success',
     occurred_at: '2026-04-10T15:00:00Z',
@@ -57,7 +48,7 @@ const seedRows = [
     provider: 'anthropic',
     input_tokens: 30,
     output_tokens: 15,
-    credit_cost: 3.00,
+    credit_cost: 3.0,
     latency_ms: 200,
     status: 'success',
     occurred_at: '2026-04-11T09:00:00Z',
@@ -72,12 +63,12 @@ const seedRows = [
     provider: 'anthropic',
     input_tokens: 40,
     output_tokens: 20,
-    credit_cost: 0.50,
+    credit_cost: 0.5,
     latency_ms: null,
     status: 'success',
     occurred_at: '2026-04-11T21:00:00Z',
     created_at: '2026-04-11T21:00:01Z',
-  }
+  },
 ]
 
 describe('Aggregate parity across Drizzle and Memory adapters', () => {
@@ -120,8 +111,8 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
   })
 
   async function runOnBoth<T>(
-    spec: AggregateSpec, 
-    chain: (qb: IQueryBuilder) => IQueryBuilder = qb => qb
+    spec: AggregateSpec,
+    chain: (qb: IQueryBuilder) => IQueryBuilder = (qb) => qb,
   ): Promise<[readonly T[], readonly T[]]> {
     const dRows = await chain(drizzleAccess.table('usageRecords')).aggregate<T>(spec)
     const mRows = await chain(memoryAccess.table('usageRecords')).aggregate<T>(spec)
@@ -140,8 +131,13 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
       groupBy: ['date'],
       orderBy: [{ column: 'date', direction: 'ASC' }],
     }
-    const [drizzle, memory] = await runOnBoth(spec, qb =>
-      qb.where('org_id', '=', 'org-1').whereBetween('occurred_at', [new Date('2026-04-10T00:00:00Z'), new Date('2026-04-11T23:59:59Z')])
+    const [drizzle, memory] = await runOnBoth(spec, (qb) =>
+      qb
+        .where('org_id', '=', 'org-1')
+        .whereBetween('occurred_at', [
+          new Date('2026-04-10T00:00:00Z'),
+          new Date('2026-04-11T23:59:59Z'),
+        ]),
     )
     expect(memory).toEqual(drizzle)
     expect(memory).toHaveLength(2)
@@ -150,7 +146,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
       totalCost: 3.5,
       totalRequests: 2,
       totalInputTokens: 30,
-      totalOutputTokens: 15
+      totalOutputTokens: 15,
     })
   })
 
@@ -162,7 +158,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
         totalCost: sum('credit_cost'),
       },
       groupBy: ['model'],
-      orderBy: [{ column: 'totalCost', direction: 'DESC' }]
+      orderBy: [{ column: 'totalCost', direction: 'DESC' }],
     }
     const [drizzle, memory] = await runOnBoth(spec)
     expect(memory).toEqual(drizzle)
@@ -183,7 +179,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
         totalCost: sum('credit_cost'),
       },
       groupBy: ['apiKeyId'],
-      orderBy: [{ column: 'totalTokens', direction: 'DESC' }]
+      orderBy: [{ column: 'totalTokens', direction: 'DESC' }],
     }
     const [drizzle, memory] = await runOnBoth(spec)
     expect(memory).toEqual(drizzle)
@@ -200,7 +196,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
         totalCost: sum('credit_cost'),
         totalTokens: sum(add('input_tokens', 'output_tokens')),
         avgLatency: avg(coalesce('latency_ms', 0)),
-      }
+      },
     }
     const [drizzle, memory] = await runOnBoth(spec)
     expect(memory).toEqual(drizzle)
@@ -209,7 +205,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
       totalRequests: 4,
       totalCost: 7.0,
       totalTokens: 150,
-      avgLatency: 75
+      avgLatency: 75,
     })
   })
 
@@ -217,14 +213,14 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
     // Clear both
     await drizzleDb.delete(schema.usageRecords)
     const memAccess = new MemoryDatabaseAccess() // New instance is empty
-    
+
     const spec: AggregateSpec = {
-      select: { total: sum('credit_cost'), cnt: count('*') }
+      select: { total: sum('credit_cost'), cnt: count('*') },
     }
-    
+
     const dRows = await drizzleAccess.table('usageRecords').aggregate(spec)
     const mRows = await memAccess.table('usageRecords').aggregate(spec)
-    
+
     expect(mRows).toEqual(dRows)
     // SQL returns one row with 0/null for empty table without groupBy
     // Drizzle: [{ total: 0, cnt: 0 }] (due to Number coercion we added)

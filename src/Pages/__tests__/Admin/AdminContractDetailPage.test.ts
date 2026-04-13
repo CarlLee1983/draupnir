@@ -1,8 +1,8 @@
-import { describe, expect, test, mock } from 'bun:test'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { describe, expect, mock, test } from 'bun:test'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
-import type { InertiaService } from '../../InertiaService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AdminContractDetailPage } from '../../Admin/AdminContractDetailPage'
+import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -61,7 +61,10 @@ function createMemberContext(): IHttpContext {
   })
 }
 
-function createAdminContextWithBody(body: unknown, overrides: Partial<IHttpContext> = {}): IHttpContext {
+function createAdminContextWithBody(
+  body: unknown,
+  overrides: Partial<IHttpContext> = {},
+): IHttpContext {
   const store = new Map<string, unknown>()
   const auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }
   store.set('auth', auth)
@@ -143,7 +146,11 @@ describe('AdminContractDetailPage', () => {
 
   test('authenticated admin request renders with correct component (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockGetDetailService = { execute: mock(() => Promise.resolve({ success: true, data: { id: 'contract-1', status: 'active' } })) }
+    const mockGetDetailService = {
+      execute: mock(() =>
+        Promise.resolve({ success: true, data: { id: 'contract-1', status: 'active' } }),
+      ),
+    }
     const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
 
@@ -156,7 +163,7 @@ describe('AdminContractDetailPage', () => {
     const ctx = createAdminContext()
     const ctxWithId = {
       ...ctx,
-      getParam: (name: string) => name === 'id' ? 'contract-1' : undefined,
+      getParam: (name: string) => (name === 'id' ? 'contract-1' : undefined),
     }
     await page.handle(ctxWithId as IHttpContext)
 
@@ -194,9 +201,12 @@ describe('AdminContractDetailPage', () => {
       mockActivateService as any,
       mockTerminateService as any,
     )
-    const ctx = createAdminContextWithBody({ action: 'activate' }, {
-      getParam: (name: string) => name === 'id' ? 'contract-123' : undefined,
-    })
+    const ctx = createAdminContextWithBody(
+      { action: 'activate' },
+      {
+        getParam: (name: string) => (name === 'id' ? 'contract-123' : undefined),
+      },
+    )
     const response = await page.postAction(ctx as IHttpContext)
 
     expect(response.status).toBe(302)
@@ -216,9 +226,12 @@ describe('AdminContractDetailPage', () => {
       mockActivateService as any,
       mockTerminateService as any,
     )
-    const ctx = createAdminContextWithBody({ action: 'terminate' }, {
-      getParam: (name: string) => name === 'id' ? 'contract-123' : undefined,
-    })
+    const ctx = createAdminContextWithBody(
+      { action: 'terminate' },
+      {
+        getParam: (name: string) => (name === 'id' ? 'contract-123' : undefined),
+      },
+    )
     const response = await page.postAction(ctx as IHttpContext)
 
     expect(response.status).toBe(302)
@@ -238,9 +251,12 @@ describe('AdminContractDetailPage', () => {
       mockActivateService as any,
       mockTerminateService as any,
     )
-    const ctx = createAdminContextWithBody({ action: 'unknown' }, {
-      getParam: (name: string) => name === 'id' ? 'contract-123' : undefined,
-    })
+    const ctx = createAdminContextWithBody(
+      { action: 'unknown' },
+      {
+        getParam: (name: string) => (name === 'id' ? 'contract-123' : undefined),
+      },
+    )
     const response = await page.postAction(ctx as IHttpContext)
 
     expect(response.status).toBe(302)

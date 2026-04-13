@@ -1,13 +1,14 @@
 // src/Modules/Contract/Presentation/Routes/contract.routes.ts
+
+import { createRoleMiddleware } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { ContractController } from '../Controllers/ContractController'
-import { createRoleMiddleware } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import {
-  CreateContractRequest,
-  UpdateContractRequest,
-  RenewContractRequest,
   AssignContractRequest,
+  CreateContractRequest,
   ListContractsRequest,
+  RenewContractRequest,
+  UpdateContractRequest,
 } from '../Requests'
 
 /** Registers contract REST endpoints and wires them to {@link ContractController} handlers. */

@@ -1,4 +1,4 @@
-import { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
+import type { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
 import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
 
 export class InMemoryWebhookEndpointRepository implements IWebhookEndpointRepository {

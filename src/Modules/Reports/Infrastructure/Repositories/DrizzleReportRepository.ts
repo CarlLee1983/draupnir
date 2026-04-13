@@ -1,6 +1,6 @@
-import { type IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { type IReportRepository } from '../../Domain/Repositories/IReportRepository'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { ReportSchedule, type ReportType } from '../../Domain/Aggregates/ReportSchedule'
+import type { IReportRepository } from '../../Domain/Repositories/IReportRepository'
 
 export class DrizzleReportRepository implements IReportRepository {
   constructor(private readonly db: IDatabaseAccess) {}

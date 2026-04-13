@@ -1,9 +1,9 @@
 // src/Modules/Contract/__tests__/HandleContractExpiryService.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { ContractRepository } from '../Infrastructure/Repositories/ContractRepository'
 import { HandleContractExpiryService } from '../Application/Services/HandleContractExpiryService'
 import { Contract } from '../Domain/Aggregates/Contract'
+import { ContractRepository } from '../Infrastructure/Repositories/ContractRepository'
 
 describe('HandleContractExpiryService', () => {
   test('將 endDate 已過的 ACTIVE 合約標為 EXPIRED', async () => {

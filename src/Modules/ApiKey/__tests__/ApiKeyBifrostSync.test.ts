@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { ApiKeyBifrostSync } from '../Infrastructure/Services/ApiKeyBifrostSync'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { KeyScope } from '../Domain/ValueObjects/KeyScope'
+import { ApiKeyBifrostSync } from '../Infrastructure/Services/ApiKeyBifrostSync'
 
 describe('ApiKeyBifrostSync', () => {
   let mock: MockGatewayClient

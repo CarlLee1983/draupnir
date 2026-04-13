@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../../InertiaService'
 import { EmailVerificationPage } from '../../Auth/EmailVerificationPage'
+import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   return {

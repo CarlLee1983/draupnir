@@ -1,8 +1,8 @@
 // src/Modules/AppModule/__tests__/ProvisionOrganizationDefaultsService.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { ProvisionOrganizationDefaultsService } from '../Application/Services/ProvisionOrganizationDefaultsService'
-import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
 import { AppModuleRepository } from '../Infrastructure/Repositories/AppModuleRepository'
 import { ModuleSubscriptionRepository } from '../Infrastructure/Repositories/ModuleSubscriptionRepository'
 

@@ -1,7 +1,8 @@
 // src/Modules/AppModule/Presentation/Routes/appModule.routes.ts
+
+import { createRoleMiddleware } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { AppModuleController } from '../Controllers/AppModuleController'
-import { createRoleMiddleware } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { RegisterModuleRequest, SubscribeModuleRequest } from '../Requests'
 
 export function registerAppModuleRoutes(

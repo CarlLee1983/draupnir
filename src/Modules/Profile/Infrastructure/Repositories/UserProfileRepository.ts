@@ -1,9 +1,9 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { UserProfile } from '../../Domain/Aggregates/UserProfile'
 import type {
   IUserProfileRepository,
   UserProfileFilters,
 } from '../../Domain/Repositories/IUserProfileRepository'
-import { UserProfile } from '../../Domain/Aggregates/UserProfile'
 import { UserProfileMapper } from '../Mappers/UserProfileMapper'
 
 /**
@@ -77,4 +77,3 @@ export class UserProfileRepository implements IUserProfileRepository {
     return query.count()
   }
 }
-

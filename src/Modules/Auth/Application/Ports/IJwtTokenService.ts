@@ -1,4 +1,4 @@
-import { AuthToken, type TokenPayload } from '../../Domain/ValueObjects/AuthToken'
+import type { AuthToken, TokenPayload } from '../../Domain/ValueObjects/AuthToken'
 
 /**
  * Payload data used to sign a new token.

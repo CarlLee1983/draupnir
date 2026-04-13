@@ -34,7 +34,10 @@ export function toListDTO(endpoint: WebhookEndpoint): WebhookEndpointListDTO {
   }
 }
 
-export function toCreatedDTO(endpoint: WebhookEndpoint, plaintextSecret: string): WebhookEndpointCreatedDTO {
+export function toCreatedDTO(
+  endpoint: WebhookEndpoint,
+  plaintextSecret: string,
+): WebhookEndpointCreatedDTO {
   return {
     id: endpoint.id,
     orgId: endpoint.orgId,

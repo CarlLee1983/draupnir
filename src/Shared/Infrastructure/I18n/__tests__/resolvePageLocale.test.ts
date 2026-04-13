@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { resolvePageLocale } from '../resolvePageLocale'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { resolvePageLocale } from '../resolvePageLocale'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()

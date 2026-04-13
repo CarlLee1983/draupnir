@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'bun:test'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { GetProfileService } from '../Application/Services/GetProfileService'
-import { UserProfileRepository } from '../Infrastructure/Repositories/UserProfileRepository'
 import { UserProfile } from '../Domain/Aggregates/UserProfile'
+import { UserProfileRepository } from '../Infrastructure/Repositories/UserProfileRepository'
 
 describe('GetProfileService', () => {
   let service: GetProfileService

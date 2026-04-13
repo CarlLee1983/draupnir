@@ -1,11 +1,11 @@
-import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import { AppKeyScope } from '../../Domain/ValueObjects/AppKeyScope'
 import { BoundModules } from '../../Domain/ValueObjects/BoundModules'
 import {
   AppApiKeyPresenter,
-  type SetAppKeyScopeRequest,
   type AppApiKeyResponse,
+  type SetAppKeyScopeRequest,
 } from '../DTOs/AppApiKeyDTO'
 
 export class SetAppKeyScopeService {

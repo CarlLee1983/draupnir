@@ -6,35 +6,31 @@
  * @internal 此實現是基礎設施層細節
  */
 
-import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
 import {
   and,
-  eq,
-  ne,
-  gt,
-  lt,
-  gte,
-  lte,
-  like,
-  inArray,
-  between,
   asc,
-  desc,
+  between,
   countDistinct,
-  sql,
-  sum as drizzleSum,
-  count as drizzleCount,
+  desc,
   avg as drizzleAvg,
-  min as drizzleMin,
+  count as drizzleCount,
   max as drizzleMax,
+  min as drizzleMin,
+  sum as drizzleSum,
+  eq,
+  gt,
+  gte,
+  inArray,
+  like,
+  lt,
+  lte,
+  ne,
   type SQL,
+  sql,
 } from 'drizzle-orm'
-import type {
-  AggregateSpec,
-  AggregateExpression,
-  AggregateOrderBy,
-} from '../../AggregateSpec'
-import { getDrizzleInstance } from './config'
+import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { AggregateExpression, AggregateOrderBy, AggregateSpec } from '../../AggregateSpec'
+import type { getDrizzleInstance } from './config'
 
 /**
  * Drizzle QueryBuilder 實現
@@ -190,7 +186,6 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
       throw error
     }
   }
-
 
   /**
    * 更新記錄
@@ -375,29 +370,34 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
   private translateExpression(expr: AggregateExpression): SQL {
     switch (expr.kind) {
       case 'sum':
-        return (typeof expr.column === 'string'
-          ? drizzleSum(this.resolveColumn(expr.column) as any)
-          : drizzleSum(this.translateExpression(expr.column))
+        return (
+          typeof expr.column === 'string'
+            ? drizzleSum(this.resolveColumn(expr.column) as any)
+            : drizzleSum(this.translateExpression(expr.column))
         ).mapWith(Number)
       case 'count':
-        return (expr.column === '*'
-          ? drizzleCount()
-          : drizzleCount(this.resolveColumn(expr.column) as any)
+        return (
+          expr.column === '*'
+            ? drizzleCount()
+            : drizzleCount(this.resolveColumn(expr.column) as any)
         ).mapWith(Number)
       case 'avg':
-        return (typeof expr.column === 'string'
-          ? drizzleAvg(this.resolveColumn(expr.column) as any)
-          : drizzleAvg(this.translateExpression(expr.column))
+        return (
+          typeof expr.column === 'string'
+            ? drizzleAvg(this.resolveColumn(expr.column) as any)
+            : drizzleAvg(this.translateExpression(expr.column))
         ).mapWith(Number)
       case 'min':
-        return (typeof expr.column === 'string'
-          ? drizzleMin(this.resolveColumn(expr.column) as any)
-          : drizzleMin(this.translateExpression(expr.column))
+        return (
+          typeof expr.column === 'string'
+            ? drizzleMin(this.resolveColumn(expr.column) as any)
+            : drizzleMin(this.translateExpression(expr.column))
         ).mapWith(Number)
       case 'max':
-        return (typeof expr.column === 'string'
-          ? drizzleMax(this.resolveColumn(expr.column) as any)
-          : drizzleMax(this.translateExpression(expr.column))
+        return (
+          typeof expr.column === 'string'
+            ? drizzleMax(this.resolveColumn(expr.column) as any)
+            : drizzleMax(this.translateExpression(expr.column))
         ).mapWith(Number)
       case 'dateTrunc':
         if (expr.unit !== 'day') throw new Error(`Unsupported dateTrunc unit: ${expr.unit}`)

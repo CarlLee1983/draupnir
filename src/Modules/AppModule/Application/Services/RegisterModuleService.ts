@@ -1,10 +1,11 @@
 // src/Modules/AppModule/Application/Services/RegisterModuleService.ts
-import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
+
 import { AppModule } from '../../Domain/Aggregates/AppModule'
+import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleRepository'
 import {
   AppModulePresenter,
-  type RegisterModuleRequest,
   type ModuleResponse,
+  type RegisterModuleRequest,
 } from '../DTOs/AppModuleDTO'
 
 export class RegisterModuleService {

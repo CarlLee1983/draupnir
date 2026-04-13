@@ -1,8 +1,12 @@
-import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
+import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import { KeyScope } from '../../Domain/ValueObjects/KeyScope'
-import { ApiKeyPresenter, type SetKeyPermissionsRequest, type ApiKeyResponse } from '../DTOs/ApiKeyDTO'
+import {
+  ApiKeyPresenter,
+  type ApiKeyResponse,
+  type SetKeyPermissionsRequest,
+} from '../DTOs/ApiKeyDTO'
+import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
 
 export class SetKeyPermissionsService {
   constructor(
@@ -41,7 +45,11 @@ export class SetKeyPermissionsService {
       await this.apiKeyRepository.update(updated)
       await this.bifrostSync.syncPermissions(apiKey.gatewayKeyId, newScope)
 
-      return { success: true, message: 'Permissions updated successfully', data: ApiKeyPresenter.fromEntity(updated) }
+      return {
+        success: true,
+        message: 'Permissions updated successfully',
+        data: ApiKeyPresenter.fromEntity(updated),
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Update failed'
       return { success: false, message, error: message }

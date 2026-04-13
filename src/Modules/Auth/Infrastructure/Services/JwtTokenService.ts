@@ -10,8 +10,8 @@
  */
 
 import jwt from 'jsonwebtoken'
-import { AuthToken, type TokenPayload, TokenType } from '../../Domain/ValueObjects/AuthToken'
 import type { IJwtTokenService, TokenSignPayload } from '../../Application/Ports/IJwtTokenService'
+import { AuthToken, type TokenPayload, TokenType } from '../../Domain/ValueObjects/AuthToken'
 
 /** Secret key used for signing JWTs. */
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'

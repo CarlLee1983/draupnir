@@ -1,4 +1,4 @@
-import { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
+import type { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
 import type { IHealthCheckRepository } from '../../Domain/Repositories/IHealthCheckRepository'
 
 export class MemoryHealthCheckRepository implements IHealthCheckRepository {

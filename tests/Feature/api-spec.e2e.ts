@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeAll, beforeEach } from 'bun:test'
+import { beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { resolve } from 'path'
-import { parseOpenAPI, type Operation } from './lib/spec-parser'
+import { ensureAuth, resetAuth } from './lib/auth-helper'
+import { extractValue, resolveRefs } from './lib/jsonpath'
 import { buildValidRequest } from './lib/request-builder'
 import { validateSchema } from './lib/schema-validator'
+import { type Operation, parseOpenAPI } from './lib/spec-parser'
 import { TestClient } from './lib/test-client'
-import { setupTestServerFor, getBaseURL } from './lib/test-server'
-import { ensureAuth, resetAuth } from './lib/auth-helper'
-import { resolveRefs, extractValue } from './lib/jsonpath'
+import { getBaseURL, setupTestServerFor } from './lib/test-server'
 
 const SPEC_PATH = resolve(import.meta.dir, '../../docs/openapi.yaml')
 

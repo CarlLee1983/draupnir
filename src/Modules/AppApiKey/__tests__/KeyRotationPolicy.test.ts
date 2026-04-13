@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { KeyRotationPolicy } from '../Domain/ValueObjects/KeyRotationPolicy'
 
 describe('KeyRotationPolicy', () => {
@@ -16,8 +16,12 @@ describe('KeyRotationPolicy', () => {
   })
 
   it('輪換天數不能為零或負數', () => {
-    expect(() => KeyRotationPolicy.auto(0, 24)).toThrow('Rotation interval days must be greater than 0')
-    expect(() => KeyRotationPolicy.auto(-1, 24)).toThrow('Rotation interval days must be greater than 0')
+    expect(() => KeyRotationPolicy.auto(0, 24)).toThrow(
+      'Rotation interval days must be greater than 0',
+    )
+    expect(() => KeyRotationPolicy.auto(-1, 24)).toThrow(
+      'Rotation interval days must be greater than 0',
+    )
   })
 
   it('寬限期不能為負數', () => {

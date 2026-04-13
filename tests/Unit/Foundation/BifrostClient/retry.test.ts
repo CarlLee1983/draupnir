@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'bun:test'
-import { withRetry, BifrostApiError } from '@draupnir/bifrost-sdk'
+import { describe, expect, it } from 'bun:test'
+import { BifrostApiError, withRetry } from '@draupnir/bifrost-sdk'
 
 describe('withRetry', () => {
   it('should return result on first success', async () => {

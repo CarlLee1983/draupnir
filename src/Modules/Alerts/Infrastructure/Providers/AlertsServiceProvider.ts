@@ -1,39 +1,39 @@
 import type { PlanetCore } from '@gravito/core'
 import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
 import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
-import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IUsageRepository } from '@/Modules/Dashboard/Application/Ports/IUsageRepository'
 import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { AlertController } from '../../Presentation/Controllers/AlertController'
-import { AlertHistoryController } from '../../Presentation/Controllers/AlertHistoryController'
-import { WebhookEndpointController } from '../../Presentation/Controllers/WebhookEndpointController'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { DeleteWebhookEndpointService } from '../../Application/Services/DeleteWebhookEndpointService'
-import { GetBudgetService } from '../../Application/Services/GetBudgetService'
-import { GetAlertHistoryService } from '../../Application/Services/GetAlertHistoryService'
 import { EvaluateThresholdsService } from '../../Application/Services/EvaluateThresholdsService'
+import { GetAlertHistoryService } from '../../Application/Services/GetAlertHistoryService'
+import { GetBudgetService } from '../../Application/Services/GetBudgetService'
 import { ListWebhookEndpointsService } from '../../Application/Services/ListWebhookEndpointsService'
 import { RegisterWebhookEndpointService } from '../../Application/Services/RegisterWebhookEndpointService'
 import { ResendDeliveryService } from '../../Application/Services/ResendDeliveryService'
 import { RotateWebhookSecretService } from '../../Application/Services/RotateWebhookSecretService'
 import { SendAlertService } from '../../Application/Services/SendAlertService'
-import { TestWebhookEndpointService } from '../../Application/Services/TestWebhookEndpointService'
 import { SetBudgetService } from '../../Application/Services/SetBudgetService'
+import { TestWebhookEndpointService } from '../../Application/Services/TestWebhookEndpointService'
 import { UpdateWebhookEndpointService } from '../../Application/Services/UpdateWebhookEndpointService'
 import type { IAlertConfigRepository } from '../../Domain/Repositories/IAlertConfigRepository'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
 import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
+import type { IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
+import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
+import { AlertController } from '../../Presentation/Controllers/AlertController'
+import { AlertHistoryController } from '../../Presentation/Controllers/AlertHistoryController'
+import { WebhookEndpointController } from '../../Presentation/Controllers/WebhookEndpointController'
 import { AlertConfigRepository } from '../Repositories/AlertConfigRepository'
 import { AlertDeliveryRepository } from '../Repositories/AlertDeliveryRepository'
 import { AlertEventRepository } from '../Repositories/AlertEventRepository'
 import { WebhookEndpointRepository } from '../Repositories/WebhookEndpointRepository'
-import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
-import type { IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
 import { AlertRecipientResolverImpl } from '../Services/AlertRecipientResolverImpl'
 import { EmailAlertNotifier } from '../Services/EmailAlertNotifier'
 import { WebhookAlertNotifier } from '../Services/WebhookAlertNotifier'
@@ -104,19 +104,27 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
     })
 
     container.bind('listWebhookEndpointsService', (c: IContainer) => {
-      return new ListWebhookEndpointsService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+      return new ListWebhookEndpointsService(
+        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+      )
     })
 
     container.bind('updateWebhookEndpointService', (c: IContainer) => {
-      return new UpdateWebhookEndpointService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+      return new UpdateWebhookEndpointService(
+        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+      )
     })
 
     container.bind('rotateWebhookSecretService', (c: IContainer) => {
-      return new RotateWebhookSecretService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+      return new RotateWebhookSecretService(
+        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+      )
     })
 
     container.bind('deleteWebhookEndpointService', (c: IContainer) => {
-      return new DeleteWebhookEndpointService(c.make('webhookEndpointRepository') as IWebhookEndpointRepository)
+      return new DeleteWebhookEndpointService(
+        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+      )
     })
 
     container.bind('testWebhookEndpointService', (c: IContainer) => {
@@ -128,12 +136,24 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
 
     container.bind('webhookEndpointController', (c: IContainer) => {
       return new WebhookEndpointController({
-        listWebhookEndpointsService: c.make('listWebhookEndpointsService') as ListWebhookEndpointsService,
-        registerWebhookEndpointService: c.make('registerWebhookEndpointService') as RegisterWebhookEndpointService,
-        updateWebhookEndpointService: c.make('updateWebhookEndpointService') as UpdateWebhookEndpointService,
-        rotateWebhookSecretService: c.make('rotateWebhookSecretService') as RotateWebhookSecretService,
-        deleteWebhookEndpointService: c.make('deleteWebhookEndpointService') as DeleteWebhookEndpointService,
-        testWebhookEndpointService: c.make('testWebhookEndpointService') as TestWebhookEndpointService,
+        listWebhookEndpointsService: c.make(
+          'listWebhookEndpointsService',
+        ) as ListWebhookEndpointsService,
+        registerWebhookEndpointService: c.make(
+          'registerWebhookEndpointService',
+        ) as RegisterWebhookEndpointService,
+        updateWebhookEndpointService: c.make(
+          'updateWebhookEndpointService',
+        ) as UpdateWebhookEndpointService,
+        rotateWebhookSecretService: c.make(
+          'rotateWebhookSecretService',
+        ) as RotateWebhookSecretService,
+        deleteWebhookEndpointService: c.make(
+          'deleteWebhookEndpointService',
+        ) as DeleteWebhookEndpointService,
+        testWebhookEndpointService: c.make(
+          'testWebhookEndpointService',
+        ) as TestWebhookEndpointService,
       })
     })
 
@@ -186,7 +206,9 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
 
   override boot(context: unknown): void {
     const core = context as PlanetCore
-    const evaluateThresholdsService = core.container.make('evaluateThresholdsService') as EvaluateThresholdsService
+    const evaluateThresholdsService = core.container.make(
+      'evaluateThresholdsService',
+    ) as EvaluateThresholdsService
 
     DomainEventDispatcher.getInstance().on('bifrost.sync.completed', async (event) => {
       const orgIds = Array.isArray(event.data.orgIds)

@@ -39,5 +39,3 @@ export interface IUserProfileRepository {
    */
   count(filters?: UserProfileFilters): Promise<number>
 }
-
-

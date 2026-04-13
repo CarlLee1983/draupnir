@@ -1,7 +1,7 @@
 import { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
-import { HealthCheckDTO } from '../DTOs/HealthCheckDTO'
-import type { IHealthCheckRepository } from '../../Domain/Repositories/IHealthCheckRepository'
 import type { ISystemHealthChecker } from '../../Domain/Ports/ISystemHealthChecker'
+import type { IHealthCheckRepository } from '../../Domain/Repositories/IHealthCheckRepository'
+import { HealthCheckDTO } from '../DTOs/HealthCheckDTO'
 
 export class PerformHealthCheckService {
   constructor(

@@ -1,5 +1,5 @@
-import type { AlertEvent } from '../../Domain/Entities/AlertEvent'
 import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
+import type { AlertEvent } from '../../Domain/Entities/AlertEvent'
 
 export interface AlertDeliveryDTO {
   id: string

@@ -3,7 +3,7 @@
  * 健康檢查 Repository 介面 (倒依賴)
  */
 
-import { HealthCheck } from '../Aggregates/HealthCheck'
+import type { HealthCheck } from '../Aggregates/HealthCheck'
 
 export interface IHealthCheckRepository {
   /**

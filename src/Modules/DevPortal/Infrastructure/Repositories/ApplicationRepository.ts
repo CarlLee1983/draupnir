@@ -1,6 +1,6 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
 import { Application } from '../../Domain/Aggregates/Application'
+import type { IApplicationRepository } from '../../Domain/Repositories/IApplicationRepository'
 import { ApplicationMapper } from '../Mappers/ApplicationMapper'
 
 export class ApplicationRepository implements IApplicationRepository {

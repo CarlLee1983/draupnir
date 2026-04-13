@@ -1,7 +1,7 @@
 // src/Modules/Contract/__tests__/ContractEnforcementService.test.ts
-import { describe, test, expect } from 'bun:test'
-import { ContractEnforcementService } from '../Domain/Services/ContractEnforcementService'
+import { describe, expect, test } from 'bun:test'
 import { Contract } from '../Domain/Aggregates/Contract'
+import { ContractEnforcementService } from '../Domain/Services/ContractEnforcementService'
 
 const enforcementService = new ContractEnforcementService()
 

@@ -1,12 +1,12 @@
+import { toHistoryDTO } from '@/Modules/Alerts/Application/DTOs/AlertHistoryDTO'
+import { toListDTO } from '@/Modules/Alerts/Application/DTOs/WebhookEndpointDTO'
 import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
 import type { GetBudgetService } from '@/Modules/Alerts/Application/Services/GetBudgetService'
 import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/Services/ListWebhookEndpointsService'
-import { toHistoryDTO } from '@/Modules/Alerts/Application/DTOs/AlertHistoryDTO'
-import { toListDTO } from '@/Modules/Alerts/Application/DTOs/WebhookEndpointDTO'
+import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../InertiaService'
 import { requireMember } from './helpers/requireMember'
-import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 
 /**
  * Member alerts hub for the selected organization (`Member/Alerts/Index`).
@@ -24,11 +24,14 @@ export class MemberAlertsPage {
     if (!check.ok) return check.response!
 
     const currentOrg = ctx.get<CurrentOrganizationContext>('currentOrg')
-    const orgId = currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
-    const shared = ctx.get('inertia:shared') as {
-      locale: 'zh-TW' | 'en'
-      messages: Record<string, string>
-    } | undefined
+    const orgId =
+      currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
+    const shared = ctx.get('inertia:shared') as
+      | {
+          locale: 'zh-TW' | 'en'
+          messages: Record<string, string>
+        }
+      | undefined
     const messages = shared?.messages ?? {}
 
     if (!orgId) {

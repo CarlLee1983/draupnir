@@ -1,5 +1,5 @@
 // src/Modules/CliApi/__tests__/DeviceCode.test.ts
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { DeviceCode, DeviceCodeStatus } from '../Domain/ValueObjects/DeviceCode'
 
 describe('DeviceCode', () => {

@@ -1,7 +1,7 @@
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import type { UsageChartQuery, UsageChartResponse } from '../DTOs/DashboardDTO'
+import type { IUsageAggregator } from '../Ports/IUsageAggregator'
 import { DashboardKeyScopeResolver } from './DashboardKeyScopeResolver'
 
 export class GetUsageChartService {
@@ -21,7 +21,7 @@ export class GetUsageChartService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: 'Unauthorized to access this organization\'s usage data',
+          message: "Unauthorized to access this organization's usage data",
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }

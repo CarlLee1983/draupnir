@@ -20,10 +20,17 @@ export class WebhookEndpointMapper {
       url: String(row.url),
       secret: String(row.secret),
       active: Boolean(row.active),
-      description: row.description === null || row.description === undefined ? null : String(row.description),
+      description:
+        row.description === null || row.description === undefined ? null : String(row.description),
       createdAt: String(row.created_at),
-      lastSuccessAt: row.last_success_at === null || row.last_success_at === undefined ? null : String(row.last_success_at),
-      lastFailureAt: row.last_failure_at === null || row.last_failure_at === undefined ? null : String(row.last_failure_at),
+      lastSuccessAt:
+        row.last_success_at === null || row.last_success_at === undefined
+          ? null
+          : String(row.last_success_at),
+      lastFailureAt:
+        row.last_failure_at === null || row.last_failure_at === undefined
+          ? null
+          : String(row.last_failure_at),
     } satisfies WebhookEndpointProps)
   }
 

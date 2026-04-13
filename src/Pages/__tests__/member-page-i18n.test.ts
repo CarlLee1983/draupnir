@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
+import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { MemberDashboardPage } from '../Member/MemberDashboardPage'
-import { loadMessages } from '@/Shared/Infrastructure/I18n'
 
 describe('MemberDashboardPage i18n', () => {
   test('returns localized message when orgId is missing', async () => {
@@ -15,7 +15,13 @@ describe('MemberDashboardPage i18n', () => {
       flash: {},
     })
     // 設定 auth context（模擬 AuthMiddleware 已執行的結果）
-    store.set('auth', { userId: 'u1', email: 'test@test.com', role: 'member', permissions: [], tokenType: 'access' })
+    store.set('auth', {
+      userId: 'u1',
+      email: 'test@test.com',
+      role: 'member',
+      permissions: [],
+      tokenType: 'access',
+    })
 
     const ctx: IHttpContext = {
       getBodyText: async () => '',

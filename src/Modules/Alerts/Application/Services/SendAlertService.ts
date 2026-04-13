@@ -1,7 +1,7 @@
-import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
-import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
-import type { AlertPayload, IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
 import { AlertEvent } from '../../Domain/Entities/AlertEvent'
+import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
+import type { AlertPayload, IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
+import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
 import type { AlertEmailTemplateParams } from '../../Infrastructure/Services/AlertEmailTemplates'
 
 export interface SendAlertParams extends Omit<AlertEmailTemplateParams, 'orgName'> {
@@ -59,9 +59,11 @@ export class SendAlertService {
     const webhookNotifiers = this.deps.notifiers.filter((n) => n.channel === 'webhook')
     queueMicrotask(() => {
       for (const n of webhookNotifiers) {
-        void n.notify(payload).catch((error) =>
-          console.error('[SendAlertService] webhook notifier unexpectedly threw', error),
-        )
+        void n
+          .notify(payload)
+          .catch((error) =>
+            console.error('[SendAlertService] webhook notifier unexpectedly threw', error),
+          )
       }
     })
   }

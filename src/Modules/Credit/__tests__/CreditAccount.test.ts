@@ -1,5 +1,5 @@
 // src/Modules/Credit/__tests__/CreditAccount.test.ts
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
 
 describe('CreditAccount', () => {

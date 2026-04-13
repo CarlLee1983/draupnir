@@ -1,6 +1,6 @@
 import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
-import type { IHttpContext, PendingCookie } from '@/Shared/Presentation/IHttpContext'
 import { applyPendingCookies } from '@/Shared/Presentation/cookieUtils'
+import type { IHttpContext, PendingCookie } from '@/Shared/Presentation/IHttpContext'
 import type { RouteHandler } from '@/Shared/Presentation/IModuleRouter'
 
 import { injectSharedData } from '../SharedDataMiddleware'

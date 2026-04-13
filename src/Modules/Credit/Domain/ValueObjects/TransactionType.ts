@@ -72,4 +72,3 @@ export class TransactionType {
     return other instanceof TransactionType && other.value === this.value
   }
 }
-

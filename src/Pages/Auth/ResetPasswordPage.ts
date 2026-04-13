@@ -26,10 +26,12 @@ export class ResetPasswordPage {
     const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
     const csrfToken = (shared?.csrfToken as string) ?? ''
     const token = ctx.getParam('token') ?? ''
-    const validated = ctx.get('validated') as {
-      password?: string
-      passwordConfirmation?: string
-    } | undefined
+    const validated = ctx.get('validated') as
+      | {
+          password?: string
+          passwordConfirmation?: string
+        }
+      | undefined
     const password = validated?.password ?? ''
 
     const result = await this.resetPasswordService.execute(token, password)

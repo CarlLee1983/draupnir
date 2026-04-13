@@ -1,7 +1,7 @@
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IUsageRepository } from '../Ports/IUsageRepository'
 import type { CostTrendsResponse, DashboardAnalyticsQuery } from '../DTOs/DashboardDTO'
+import type { IUsageRepository } from '../Ports/IUsageRepository'
 import { DashboardKeyScopeResolver } from './DashboardKeyScopeResolver'
 
 export class GetCostTrendsService {
@@ -21,7 +21,7 @@ export class GetCostTrendsService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: 'Unauthorized to access this organization\'s dashboard',
+          message: "Unauthorized to access this organization's dashboard",
           error: authResult.error ?? 'NOT_ORG_MEMBER',
         }
       }
@@ -53,15 +53,16 @@ export class GetCostTrendsService {
   }
 }
 
-function resolveDateRange(startTime?: string, endTime?: string): { startDate: string; endDate: string } {
+function resolveDateRange(
+  startTime?: string,
+  endTime?: string,
+): { startDate: string; endDate: string } {
   if (startTime && endTime) {
     return { startDate: startTime, endDate: endTime }
   }
 
   const endDate = endTime ?? new Date().toISOString()
-  const startDate =
-    startTime ??
-    new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString()
+  const startDate = startTime ?? new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString()
 
   return { startDate, endDate }
 }

@@ -6,8 +6,8 @@ type EventHandler = (event: DomainEvent) => Promise<void>
 /**
  * Synchronous Domain Event Dispatcher (Singleton).
  *
- * After registering handlers, call dispatch() to trigger the corresponding 
- * handlers in sequence. Designed as fire-and-forget: handler failures are 
+ * After registering handlers, call dispatch() to trigger the corresponding
+ * handlers in sequence. Designed as fire-and-forget: handler failures are
  * logged but do not interrupt the flow.
  */
 export class DomainEventDispatcher {

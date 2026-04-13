@@ -1,7 +1,7 @@
 // src/Modules/Contract/Infrastructure/Repositories/ContractRepository.ts
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { Contract } from '../../Domain/Aggregates/Contract'
+import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractMapper } from '../Mappers/ContractMapper'
 
 /** SQL-backed implementation of {@link IContractRepository} using the shared DB access layer. */
@@ -76,6 +76,9 @@ export class ContractRepository implements IContractRepository {
 
   /** @inheritdoc */
   async update(contract: Contract): Promise<void> {
-    await this.db.table('contracts').where('id', '=', contract.id).update(ContractMapper.toDatabaseRow(contract))
+    await this.db
+      .table('contracts')
+      .where('id', '=', contract.id)
+      .update(ContractMapper.toDatabaseRow(contract))
   }
 }

@@ -7,7 +7,11 @@
  * Enforced by CI grep check: grep -r "MockGatewayClient" src/ --include="*.ts"
  * must return zero matches in non-test files (files outside __tests__/).
  */
+
+export type { GatewayErrorCode } from './errors'
+export { GatewayError } from './errors'
 export type { ILLMGatewayClient } from './ILLMGatewayClient'
+export { MockGatewayClient } from './implementations/MockGatewayClient'
 export type {
   CreateKeyRequest,
   KeyResponse,
@@ -18,6 +22,3 @@ export type {
   UsageQuery,
   UsageStats,
 } from './types'
-export { GatewayError } from './errors'
-export type { GatewayErrorCode } from './errors'
-export { MockGatewayClient } from './implementations/MockGatewayClient'

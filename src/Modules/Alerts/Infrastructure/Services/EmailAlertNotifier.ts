@@ -1,8 +1,12 @@
 import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
-import { criticalAlertTemplate, warningAlertTemplate } from './AlertEmailTemplates'
 import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
-import type { AlertPayload, DeliveryResult, IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
+import type {
+  AlertPayload,
+  DeliveryResult,
+  IAlertNotifier,
+} from '../../Domain/Services/IAlertNotifier'
+import { criticalAlertTemplate, warningAlertTemplate } from './AlertEmailTemplates'
 
 export class EmailAlertNotifier implements IAlertNotifier {
   readonly channel = 'email' as const

@@ -1,12 +1,12 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
+import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
+import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
+import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { RegisterAppService } from '../Application/Services/RegisterAppService'
 import { ApplicationRepository } from '../Infrastructure/Repositories/ApplicationRepository'
-import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationRepository'
-import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
-import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
-import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 
 describe('RegisterAppService', () => {
   let service: RegisterAppService

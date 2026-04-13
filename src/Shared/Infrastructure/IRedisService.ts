@@ -1,7 +1,7 @@
 /**
  * Redis Service Interface (Port)
- * 
- * Completely unaware of Gravito/Plasma, allowing future framework changes 
+ *
+ * Completely unaware of Gravito/Plasma, allowing future framework changes
  * or testing with InMemory implementations.
  */
 
@@ -35,4 +35,3 @@ export interface IRedisService {
    */
   exists(key: string): Promise<boolean>
 }
-

@@ -1,10 +1,10 @@
 // src/Modules/Credit/Application/Services/RefundCreditService.ts
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
 import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
 import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
-import { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
-import { TransactionType } from '../../Domain/ValueObjects/TransactionType'
 import { Balance } from '../../Domain/ValueObjects/Balance'
+import { TransactionType } from '../../Domain/ValueObjects/TransactionType'
 import type { CreditResponse } from '../DTOs/CreditDTO'
 
 export interface RefundRequest {
@@ -29,7 +29,11 @@ export class RefundCreditService {
       try {
         Balance.fromPositiveAmount(request.amount)
       } catch {
-        return { success: false, message: 'Refund amount must be a positive number', error: 'INVALID_AMOUNT' }
+        return {
+          success: false,
+          message: 'Refund amount must be a positive number',
+          error: 'INVALID_AMOUNT',
+        }
       }
 
       const account = await this.accountRepo.findByOrgId(request.orgId)

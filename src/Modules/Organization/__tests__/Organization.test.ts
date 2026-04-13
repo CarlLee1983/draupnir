@@ -1,14 +1,14 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { Organization } from '../Domain/Aggregates/Organization'
-import { OrganizationMember } from '../Domain/Entities/OrganizationMember'
 import { OrganizationInvitation } from '../Domain/Entities/OrganizationInvitation'
+import { OrganizationMember } from '../Domain/Entities/OrganizationMember'
 
 describe('Organization Aggregate', () => {
   it('應成功建立 Organization', () => {
     const org = Organization.create('org-1', 'CMG 科技', '公司描述')
     expect(org.id).toBe('org-1')
     expect(org.name).toBe('CMG 科技')
-    expect(org.slug).toMatch(/^[a-z0-9\-]+$/)
+    expect(org.slug).toMatch(/^[a-z0-9-]+$/)
     expect(org.status).toBe('active')
   })
 

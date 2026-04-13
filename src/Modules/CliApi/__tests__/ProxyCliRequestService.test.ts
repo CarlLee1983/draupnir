@@ -1,7 +1,7 @@
 // src/Modules/CliApi/__tests__/ProxyCliRequestService.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { ProxyCliRequestService } from '../Application/Services/ProxyCliRequestService'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ICliProxyClient } from '../Application/Services/ProxyCliRequestService'
+import { ProxyCliRequestService } from '../Application/Services/ProxyCliRequestService'
 
 function createMockBifrostClient(response?: unknown): ICliProxyClient {
   return {

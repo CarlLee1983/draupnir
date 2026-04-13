@@ -1,8 +1,8 @@
 /**
  * Application Exception Hierarchy
  *
- * Provides a global unified exception base class `AppException`. All custom business 
- * exceptions should inherit from this class. It includes a machine-readable error 
+ * Provides a global unified exception base class `AppException`. All custom business
+ * exceptions should inherit from this class. It includes a machine-readable error
  * code, user message, and HTTP status code.
  */
 export class AppException extends Error {

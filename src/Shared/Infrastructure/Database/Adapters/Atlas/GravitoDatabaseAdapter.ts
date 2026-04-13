@@ -14,8 +14,8 @@ function getDB(): any {
 /**
  * Atlas DatabaseAccess Implementation
  *
- * Implements the IDatabaseAccess interface, adapting the Gravito Atlas ORM to our 
- * public interface. Hides all Atlas-specific API details and provides a unified 
+ * Implements the IDatabaseAccess interface, adapting the Gravito Atlas ORM to our
+ * public interface. Hides all Atlas-specific API details and provides a unified
  * query interface.
  *
  * @internal This implementation is an infrastructure layer detail.
@@ -46,7 +46,7 @@ class AtlasDatabaseAccess implements IDatabaseAccess {
 /**
  * Transaction-scoped Atlas DatabaseAccess
  *
- * An IDatabaseAccess implementation for use within transactions; all queries 
+ * An IDatabaseAccess implementation for use within transactions; all queries
  * are executed via the same connection.
  *
  * @internal
@@ -89,7 +89,7 @@ export function createAtlasDatabaseAccess(): IDatabaseAccess {
 }
 
 /**
- * Adapter: Performs a database connectivity check (SELECT 1) using Atlas, 
+ * Adapter: Performs a database connectivity check (SELECT 1) using Atlas,
  * implementing IDatabaseConnectivityCheck.
  *
  * For use cases like health checks; the Application layer does not depend on @gravito/atlas.
@@ -106,4 +106,3 @@ export function createGravitoDatabaseConnectivityCheck(): IDatabaseConnectivityC
     },
   }
 }
-

@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it } from 'vitest'
 import Decimal from 'decimal.js'
+import { afterEach, describe, expect, it } from 'vitest'
 import { BudgetAmount } from '../Domain/ValueObjects/BudgetAmount'
 import { MonthlyPeriod } from '../Domain/ValueObjects/MonthlyPeriod'
 

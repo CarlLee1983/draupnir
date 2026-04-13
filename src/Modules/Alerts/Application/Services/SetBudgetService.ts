@@ -1,6 +1,6 @@
 import { AlertConfig } from '../../Domain/Aggregates/AlertConfig'
-import { BudgetAmount } from '../../Domain/ValueObjects/BudgetAmount'
 import type { IAlertConfigRepository } from '../../Domain/Repositories/IAlertConfigRepository'
+import { BudgetAmount } from '../../Domain/ValueObjects/BudgetAmount'
 
 export interface SetBudgetResult {
   readonly success: boolean

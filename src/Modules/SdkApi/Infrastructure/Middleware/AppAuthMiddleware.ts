@@ -1,6 +1,6 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { AuthenticateApp } from '../../Application/UseCases/AuthenticateApp'
 import type { AppAuthContext } from '../../Application/DTOs/SdkApiDTO'
+import type { AuthenticateApp } from '../../Application/UseCases/AuthenticateApp'
 
 export class AppAuthMiddleware {
   constructor(private readonly authenticateApp: AuthenticateApp) {}

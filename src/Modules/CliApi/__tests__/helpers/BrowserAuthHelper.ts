@@ -1,4 +1,4 @@
-import { chromium, type Browser, type Page } from '@playwright/test'
+import { type Browser, chromium, type Page } from '@playwright/test'
 
 /**
  * Automates browser interactions for Device Flow authorization.
@@ -18,7 +18,10 @@ export class BrowserAuthHelper {
       this.page = await this.browser.newPage()
     } catch (error) {
       // 在沒有 X11 或其他顯示伺服器的環境（如 CI/CD）中，瀏覽器啟動會失敗
-      console.warn('Failed to launch browser, skipping browser-based tests:', error instanceof Error ? error.message : String(error))
+      console.warn(
+        'Failed to launch browser, skipping browser-based tests:',
+        error instanceof Error ? error.message : String(error),
+      )
     }
   }
 

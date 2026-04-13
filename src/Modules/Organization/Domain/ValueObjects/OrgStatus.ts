@@ -14,7 +14,9 @@ export class OrgStatus extends ValueObject {
 
   static from(value: string): OrgStatus {
     if (!VALID_STATUSES.includes(value)) {
-      throw new Error(`Invalid organization status: ${value}. Must be one of: ${VALID_STATUSES.join(', ')}`)
+      throw new Error(
+        `Invalid organization status: ${value}. Must be one of: ${VALID_STATUSES.join(', ')}`,
+      )
     }
     return new OrgStatus(value as OrgStatusType)
   }

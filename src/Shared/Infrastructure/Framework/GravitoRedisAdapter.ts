@@ -1,5 +1,5 @@
-import type { IRedisService } from '@/Shared/Infrastructure/IRedisService'
 import type { RedisClientContract } from '@gravito/plasma'
+import type { IRedisService } from '@/Shared/Infrastructure/IRedisService'
 
 /**
  * Adapter: Adapts Gravito Plasma RedisClientContract to IRedisService.
@@ -27,4 +27,3 @@ export class GravitoRedisAdapter implements IRedisService {
     return (await this.redis.exists(key)) > 0
   }
 }
-

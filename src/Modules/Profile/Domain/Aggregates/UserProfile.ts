@@ -135,5 +135,3 @@ export class UserProfile {
     return this.props.updatedAt
   }
 }
-
-

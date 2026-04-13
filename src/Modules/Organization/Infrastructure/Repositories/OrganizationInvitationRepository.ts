@@ -1,13 +1,15 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import { OrganizationInvitation } from '../../Domain/Entities/OrganizationInvitation'
+import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import { OrganizationInvitationMapper } from '../Mappers/OrganizationInvitationMapper'
 
 export class OrganizationInvitationRepository implements IOrganizationInvitationRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async save(invitation: OrganizationInvitation): Promise<void> {
-    await this.db.table('organization_invitations').insert(OrganizationInvitationMapper.toDatabaseRow(invitation))
+    await this.db
+      .table('organization_invitations')
+      .insert(OrganizationInvitationMapper.toDatabaseRow(invitation))
   }
 
   async findById(id: string): Promise<OrganizationInvitation | null> {

@@ -1,13 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
-import { BifrostClient, BifrostApiError } from '@draupnir/bifrost-sdk'
-import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
+import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
 import type {
-  VirtualKeyResponse,
-  VirtualKeyListResponse,
+  BifrostClientConfig,
   BifrostLogsResponse,
   BifrostLogsStats,
   BifrostModelsResponse,
+  VirtualKeyListResponse,
+  VirtualKeyResponse,
 } from '@draupnir/bifrost-sdk'
+import { BifrostApiError, BifrostClient } from '@draupnir/bifrost-sdk'
 
 const TEST_CONFIG: BifrostClientConfig = {
   baseUrl: 'https://bifrost.test',

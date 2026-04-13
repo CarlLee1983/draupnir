@@ -28,7 +28,9 @@ export function requireAdmin(ctx: IHttpContext): AdminAuthResult {
     return {
       ok: false,
       response: new Response(
-        '<html><body><h1>403 Forbidden</h1><p>' + t('auth.forbidden.adminOnly') + '</p></body></html>',
+        '<html><body><h1>403 Forbidden</h1><p>' +
+          t('auth.forbidden.adminOnly') +
+          '</p></body></html>',
         { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
       ),
     }

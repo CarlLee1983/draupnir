@@ -1,11 +1,11 @@
 // src/Modules/Credit/__tests__/HandleCreditToppedUpService.test.ts
-import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
-import { HandleCreditToppedUpService } from '../Application/Services/HandleCreditToppedUpService'
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import { KeyScope } from '@/Modules/ApiKey/Domain/ValueObjects/KeyScope'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { HandleCreditToppedUpService } from '../Application/Services/HandleCreditToppedUpService'
 
 const hashingService = new KeyHashingService()
 const TEST_RAW_KEY = 'drp_sk_test_12345678901234567890123456789012'

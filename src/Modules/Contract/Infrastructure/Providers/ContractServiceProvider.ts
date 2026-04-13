@@ -1,19 +1,20 @@
 // src/Modules/Contract/Infrastructure/Providers/ContractServiceProvider.ts
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import { ContractRepository } from '../Repositories/ContractRepository'
-import { ContractEnforcementService } from '../../Domain/Services/ContractEnforcementService'
-import { CreateContractService } from '../../Application/Services/CreateContractService'
-import { ActivateContractService } from '../../Application/Services/ActivateContractService'
-import { UpdateContractService } from '../../Application/Services/UpdateContractService'
-import { AssignContractService } from '../../Application/Services/AssignContractService'
-import { TerminateContractService } from '../../Application/Services/TerminateContractService'
-import { RenewContractService } from '../../Application/Services/RenewContractService'
-import { HandleContractExpiryService } from '../../Application/Services/HandleContractExpiryService'
+
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { ListContractsService } from '../../Application/Services/ListContractsService'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import { ActivateContractService } from '../../Application/Services/ActivateContractService'
+import { AssignContractService } from '../../Application/Services/AssignContractService'
+import { CreateContractService } from '../../Application/Services/CreateContractService'
 import { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
+import { HandleContractExpiryService } from '../../Application/Services/HandleContractExpiryService'
 import { ListAdminContractsService } from '../../Application/Services/ListAdminContractsService'
+import { ListContractsService } from '../../Application/Services/ListContractsService'
+import { RenewContractService } from '../../Application/Services/RenewContractService'
+import { TerminateContractService } from '../../Application/Services/TerminateContractService'
+import { UpdateContractService } from '../../Application/Services/UpdateContractService'
+import { ContractEnforcementService } from '../../Domain/Services/ContractEnforcementService'
+import { ContractRepository } from '../Repositories/ContractRepository'
 
 /** Registers contract repositories, domain helpers, and application services in the DI container. */
 export class ContractServiceProvider extends ModuleServiceProvider {

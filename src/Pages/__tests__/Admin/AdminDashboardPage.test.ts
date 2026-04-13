@@ -1,8 +1,8 @@
-import { describe, expect, test, mock } from 'bun:test'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { describe, expect, mock, test } from 'bun:test'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
-import type { InertiaService } from '../../InertiaService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AdminDashboardPage } from '../../Admin/AdminDashboardPage'
+import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -79,9 +79,30 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 describe('AdminDashboardPage', () => {
   test('unauthenticated request returns 302 redirect to /login (PAGE-03)', async () => {
     const { inertia } = createMockInertia()
-    const mockListUsersService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } } })) }
-    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } } })) }
+    const mockListUsersService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } },
+        }),
+      ),
+    }
+    const mockListOrgsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } },
+        }),
+      ),
+    }
+    const mockListAdminContractsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } },
+        }),
+      ),
+    }
 
     const page = new AdminDashboardPage(
       inertia,
@@ -99,9 +120,30 @@ describe('AdminDashboardPage', () => {
 
   test('authenticated non-admin request returns 403 (PAGE-04)', async () => {
     const { inertia } = createMockInertia()
-    const mockListUsersService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } } })) }
-    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } } })) }
+    const mockListUsersService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } },
+        }),
+      ),
+    }
+    const mockListOrgsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } },
+        }),
+      ),
+    }
+    const mockListAdminContractsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 0, page: 1, limit: 1, totalPages: 0 } },
+        }),
+      ),
+    }
 
     const page = new AdminDashboardPage(
       inertia,
@@ -118,9 +160,30 @@ describe('AdminDashboardPage', () => {
 
   test('authenticated admin request renders with correct component and totals (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockListUsersService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 10, page: 1, limit: 1, totalPages: 10 } } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 5, page: 1, limit: 1, totalPages: 5 } } })) }
-    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 3, page: 1, limit: 1, totalPages: 3 } } })) }
+    const mockListUsersService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 10, page: 1, limit: 1, totalPages: 10 } },
+        }),
+      ),
+    }
+    const mockListOrgsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 5, page: 1, limit: 1, totalPages: 5 } },
+        }),
+      ),
+    }
+    const mockListAdminContractsService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { meta: { total: 3, page: 1, limit: 1, totalPages: 3 } },
+        }),
+      ),
+    }
 
     const page = new AdminDashboardPage(
       inertia,

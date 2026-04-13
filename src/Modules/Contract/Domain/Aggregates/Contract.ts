@@ -1,7 +1,8 @@
 // src/Modules/Contract/Domain/Aggregates/Contract.ts
+
+import { ContractTerm, type ContractTermProps } from '../Entities/ContractTerm'
 import { ContractStatus } from '../ValueObjects/ContractStatus'
 import { ContractTarget, type ContractTargetType } from '../ValueObjects/ContractTarget'
-import { ContractTerm, type ContractTermProps } from '../Entities/ContractTerm'
 
 /** Immutable snapshot backing the contract aggregate. */
 interface ContractProps {
@@ -150,5 +151,4 @@ export class Contract {
   isDraft(): boolean {
     return this.props.status.isDraft()
   }
-
 }

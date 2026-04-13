@@ -85,4 +85,3 @@ export class Balance {
     return this.value
   }
 }
-

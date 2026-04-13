@@ -9,8 +9,8 @@
  */
 
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
-import type { UserProfileResponse } from '../DTOs/UserProfileDTO'
 import { UserProfileMapper } from '../../Infrastructure/Mappers/UserProfileMapper'
+import type { UserProfileResponse } from '../DTOs/UserProfileDTO'
 
 /**
  * Service for retrieving a user profile.
@@ -33,5 +33,3 @@ export class GetProfileService {
     }
   }
 }
-
-

@@ -1,8 +1,8 @@
 // src/Modules/Contract/__tests__/Contract.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import { ContractPresenter } from '../Application/DTOs/ContractDTO'
 import { Contract } from '../Domain/Aggregates/Contract'
 import { ContractMapper } from '../Infrastructure/Mappers/ContractMapper'
-import { ContractPresenter } from '../Application/DTOs/ContractDTO'
 
 const validTerms = {
   creditQuota: 10000,
@@ -94,7 +94,9 @@ describe('Contract', () => {
       terms: validTerms,
       createdBy: 'admin-1',
     }).activate()
-    expect(() => active.updateTerms(validTerms)).toThrow('Only DRAFT contracts can have their terms modified')
+    expect(() => active.updateTerms(validTerms)).toThrow(
+      'Only DRAFT contracts can have their terms modified',
+    )
   })
 
   test('assignTo 僅 DRAFT 可重新指派', () => {

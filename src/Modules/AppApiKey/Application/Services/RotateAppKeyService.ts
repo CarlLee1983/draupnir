@@ -1,12 +1,12 @@
-import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
 import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
+import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import {
+  type AppApiKeyCreatedResponse,
   AppApiKeyPresenter,
   type RotateAppKeyRequest,
-  type AppApiKeyCreatedResponse,
 } from '../DTOs/AppApiKeyDTO'
+import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
 
 export class RotateAppKeyService {
   constructor(

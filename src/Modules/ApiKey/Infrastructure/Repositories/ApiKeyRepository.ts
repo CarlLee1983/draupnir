@@ -1,6 +1,6 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import { ApiKey } from '../../Domain/Aggregates/ApiKey'
+import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import { ApiKeyMapper } from '../Mappers/ApiKeyMapper'
 
 export class ApiKeyRepository implements IApiKeyRepository {
@@ -52,7 +52,10 @@ export class ApiKeyRepository implements IApiKeyRepository {
   }
 
   async update(apiKey: ApiKey): Promise<void> {
-    await this.db.table('api_keys').where('id', '=', apiKey.id).update(ApiKeyMapper.toDatabaseRow(apiKey))
+    await this.db
+      .table('api_keys')
+      .where('id', '=', apiKey.id)
+      .update(ApiKeyMapper.toDatabaseRow(apiKey))
   }
 
   async countByOrgId(orgId: string): Promise<number> {
@@ -72,7 +75,10 @@ export class ApiKeyRepository implements IApiKeyRepository {
   }
 
   async findByBifrostVirtualKeyId(bifrostVirtualKeyId: string): Promise<ApiKey | null> {
-    const row = await this.db.table('api_keys').where('bifrost_virtual_key_id', '=', bifrostVirtualKeyId).first()
+    const row = await this.db
+      .table('api_keys')
+      .where('bifrost_virtual_key_id', '=', bifrostVirtualKeyId)
+      .first()
     return row ? ApiKey.fromDatabase(row) : null
   }
 

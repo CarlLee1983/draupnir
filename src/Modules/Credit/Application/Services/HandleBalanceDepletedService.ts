@@ -1,7 +1,8 @@
 // src/Modules/Credit/Application/Services/HandleBalanceDepletedService.ts
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 
 export class HandleBalanceDepletedService {
   constructor(
@@ -68,7 +69,6 @@ export class HandleBalanceDepletedService {
         })
       } catch (error: unknown) {
         if (error instanceof GatewayError && error.retryable) {
-          continue
         } else if (error instanceof GatewayError && !error.retryable) {
           console.error(
             `Key ${key.id} permanent error, no more retries (${error.code}):`,

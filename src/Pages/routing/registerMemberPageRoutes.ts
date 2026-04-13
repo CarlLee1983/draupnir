@@ -4,6 +4,8 @@
  * Instances are registered in `registerMemberPageBindings`; handlers are wrapped with
  * `withInertiaPageHandler` for JWT and shared props.
  */
+
+import { requireOrganizationManager } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type {
@@ -11,7 +13,6 @@ import type {
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
-import { requireOrganizationManager } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 
 import { bindPageAction } from './bindPageAction'
 import type { MemberPageBindingKey } from './member/memberPageKeys'
@@ -139,7 +140,11 @@ export function registerMemberPageRoutes(
     registerMemberHttpRoute(router, method, path, withInertiaPageHandler(inner), opts)
   }
 
-  const alertsHandler = bindPageAction(container, MEMBER_PAGE_KEYS.ALERTS, 'handle') as InertiaHandler
+  const alertsHandler = bindPageAction(
+    container,
+    MEMBER_PAGE_KEYS.ALERTS,
+    'handle',
+  ) as InertiaHandler
   router.get(
     '/member/alerts',
     [requireOrganizationManager()],

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { DrizzleUsageRepository } from '../Infrastructure/Repositories/DrizzleUsageRepository'
 import type { UsageRecordInsert } from '../Application/Ports/IUsageRepository'
+import { DrizzleUsageRepository } from '../Infrastructure/Repositories/DrizzleUsageRepository'
 
 describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
   let db: MemoryDatabaseAccess
@@ -35,7 +35,7 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
 
   it('can upsert a usage record', async () => {
     const record = await seedRecord()
-    
+
     const rows = await db.table('usageRecords').select()
     expect(rows).toHaveLength(1)
     expect(rows[0].bifrost_log_id).toBe(record.bifrostLogId)
@@ -67,9 +67,9 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
   })
 
   it('aggregates daily cost by organization', async () => {
-    await seedRecord({ occurredAt: '2026-04-11T10:00:00Z', creditCost: 1.00 })
-    await seedRecord({ occurredAt: '2026-04-11T15:00:00Z', creditCost: 2.50 })
-    await seedRecord({ occurredAt: '2026-04-12T09:00:00Z', creditCost: 3.00 })
+    await seedRecord({ occurredAt: '2026-04-11T10:00:00Z', creditCost: 1.0 })
+    await seedRecord({ occurredAt: '2026-04-11T15:00:00Z', creditCost: 2.5 })
+    await seedRecord({ occurredAt: '2026-04-12T09:00:00Z', creditCost: 3.0 })
 
     const result = await repository.queryDailyCostByOrg('org-1', {
       startDate: '2026-04-11T00:00:00Z',
@@ -88,9 +88,9 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
   })
 
   it('returns model usage breakdown', async () => {
-    await seedRecord({ model: 'gpt-4o', provider: 'openai', creditCost: 1.00 })
-    await seedRecord({ model: 'gpt-4o', provider: 'openai', creditCost: 2.50 })
-    await seedRecord({ model: 'claude-3', provider: 'anthropic', creditCost: 3.00 })
+    await seedRecord({ model: 'gpt-4o', provider: 'openai', creditCost: 1.0 })
+    await seedRecord({ model: 'gpt-4o', provider: 'openai', creditCost: 2.5 })
+    await seedRecord({ model: 'claude-3', provider: 'anthropic', creditCost: 3.0 })
 
     const result = await repository.queryModelBreakdown('org-1', {
       startDate: '2026-04-11T00:00:00Z',
@@ -103,9 +103,9 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
   })
 
   it('aggregates per-key cost correctly', async () => {
-    await seedRecord({ apiKeyId: 'key-1', creditCost: 1.00, inputTokens: 10, outputTokens: 20 })
-    await seedRecord({ apiKeyId: 'key-1', creditCost: 2.00, inputTokens: 30, outputTokens: 40 })
-    await seedRecord({ apiKeyId: 'key-2', creditCost: 5.00, inputTokens: 50, outputTokens: 60 })
+    await seedRecord({ apiKeyId: 'key-1', creditCost: 1.0, inputTokens: 10, outputTokens: 20 })
+    await seedRecord({ apiKeyId: 'key-1', creditCost: 2.0, inputTokens: 30, outputTokens: 40 })
+    await seedRecord({ apiKeyId: 'key-2', creditCost: 5.0, inputTokens: 50, outputTokens: 60 })
 
     const result = await repository.queryPerKeyCost('org-1', {
       startDate: '2026-04-11T00:00:00Z',
@@ -128,8 +128,8 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
   })
 
   it('returns overall stats for an organization', async () => {
-    await seedRecord({ creditCost: 1.00, inputTokens: 10, outputTokens: 20, latencyMs: 100 })
-    await seedRecord({ creditCost: 2.50, inputTokens: 30, outputTokens: 40, latencyMs: 250 })
+    await seedRecord({ creditCost: 1.0, inputTokens: 10, outputTokens: 20, latencyMs: 100 })
+    await seedRecord({ creditCost: 2.5, inputTokens: 30, outputTokens: 40, latencyMs: 250 })
 
     const result = await repository.queryStatsByOrg('org-1', {
       startDate: '2026-04-11T00:00:00Z',
@@ -145,7 +145,13 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
   })
 
   it('returns aggregate stats scoped to a single API key', async () => {
-    await seedRecord({ apiKeyId: 'key-1', inputTokens: 10, outputTokens: 20, creditCost: 1.00, latencyMs: 100 })
+    await seedRecord({
+      apiKeyId: 'key-1',
+      inputTokens: 10,
+      outputTokens: 20,
+      creditCost: 1.0,
+      latencyMs: 100,
+    })
     await repository.upsert({
       id: 'row-2',
       bifrostLogId: 'log-2',
@@ -155,7 +161,7 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
       provider: 'openai',
       inputTokens: 30,
       outputTokens: 40,
-      creditCost: 5.00,
+      creditCost: 5.0,
       latencyMs: 500,
       status: 'success',
       occurredAt: '2026-04-11T11:00:00Z',

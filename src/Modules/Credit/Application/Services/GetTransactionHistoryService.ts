@@ -1,7 +1,8 @@
 // src/Modules/Credit/Application/Services/GetTransactionHistoryService.ts
+
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { ICreditAccountRepository } from '../../Domain/Repositories/ICreditAccountRepository'
 import type { ICreditTransactionRepository } from '../../Domain/Repositories/ICreditTransactionRepository'
-import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { CreditTransactionPresenter, type TransactionHistoryResponse } from '../DTOs/CreditDTO'
 
 export class GetTransactionHistoryService {

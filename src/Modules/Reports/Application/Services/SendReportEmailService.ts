@@ -1,4 +1,4 @@
-import { type IMailer } from '../../../../Foundation/Infrastructure/Ports/IMailer'
+import type { IMailer } from '../../../../Foundation/Infrastructure/Ports/IMailer'
 
 export class SendReportEmailService {
   constructor(private readonly mailer: IMailer) {}
@@ -7,7 +7,7 @@ export class SendReportEmailService {
     const date = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     })
 
     await this.mailer.send({
@@ -22,9 +22,9 @@ export class SendReportEmailService {
       attachments: [
         {
           filename: `Draupnir-Report-${type}-${new Date().toISOString().split('T')[0]}.pdf`,
-          content: pdfBuffer
-        }
-      ]
+          content: pdfBuffer,
+        },
+      ],
     })
   }
 }

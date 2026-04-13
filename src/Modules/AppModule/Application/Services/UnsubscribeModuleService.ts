@@ -1,8 +1,9 @@
 // src/Modules/AppModule/Application/Services/UnsubscribeModuleService.ts
-import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
-import { ModuleAccessRevoked } from '../../Domain/Events/ModuleAccessRevoked'
+
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import { ModuleSubscriptionPresenter, type ModuleResponse } from '../DTOs/AppModuleDTO'
+import { ModuleAccessRevoked } from '../../Domain/Events/ModuleAccessRevoked'
+import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
+import { type ModuleResponse, ModuleSubscriptionPresenter } from '../DTOs/AppModuleDTO'
 
 export class UnsubscribeModuleService {
   constructor(private readonly subscriptionRepo: IModuleSubscriptionRepository) {}

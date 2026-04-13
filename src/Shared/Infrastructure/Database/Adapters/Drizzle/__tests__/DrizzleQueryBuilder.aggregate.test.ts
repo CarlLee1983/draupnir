@@ -2,21 +2,10 @@ import { beforeAll, beforeEach, describe, expect, it, spyOn } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { add, avg, coalesce, col, count, dateTrunc, max, min, sum } from '../../../AggregateSpec'
+import * as config from '../config'
 import { createDrizzleDatabaseAccess } from '../DrizzleDatabaseAdapter'
 import * as schema from '../schema'
-import {
-  add,
-  avg,
-  col,
-  coalesce,
-  count,
-  dateTrunc,
-  max,
-  min,
-  sum,
-} from '../../../AggregateSpec'
-
-import * as config from '../config'
 
 describe('DrizzleQueryBuilder.aggregate', () => {
   let db: IDatabaseAccess
@@ -68,7 +57,7 @@ describe('DrizzleQueryBuilder.aggregate', () => {
         provider: 'openai',
         input_tokens: 10,
         output_tokens: 5,
-        credit_cost: 1.00,
+        credit_cost: 1.0,
         latency_ms: 100,
         status: 'success',
         occurred_at: '2026-04-10T10:00:00Z',
@@ -83,7 +72,7 @@ describe('DrizzleQueryBuilder.aggregate', () => {
         provider: 'openai',
         input_tokens: 20,
         output_tokens: 10,
-        credit_cost: 2.50,
+        credit_cost: 2.5,
         latency_ms: null,
         status: 'success',
         occurred_at: '2026-04-10T15:00:00Z',
@@ -98,7 +87,7 @@ describe('DrizzleQueryBuilder.aggregate', () => {
         provider: 'anthropic',
         input_tokens: 30,
         output_tokens: 15,
-        credit_cost: 3.00,
+        credit_cost: 3.0,
         latency_ms: 200,
         status: 'success',
         occurred_at: '2026-04-11T09:00:00Z',
@@ -113,49 +102,49 @@ describe('DrizzleQueryBuilder.aggregate', () => {
         provider: 'anthropic',
         input_tokens: 40,
         output_tokens: 20,
-        credit_cost: 0.50,
+        credit_cost: 0.5,
         latency_ms: null,
         status: 'success',
         occurred_at: '2026-04-11T21:00:00Z',
         created_at: '2026-04-11T21:00:01Z',
-      }
+      },
     ])
   })
 
   describe('single-aggregate, no groupBy', () => {
     it('sum returns total', async () => {
       const result = await db.table('usageRecords').aggregate<{ total: number }>({
-        select: { total: sum('credit_cost') }
+        select: { total: sum('credit_cost') },
       })
-      expect(result[0].total).toBe(7.00)
+      expect(result[0].total).toBe(7.0)
     })
 
     it('count(*) returns row count', async () => {
       const result = await db.table('usageRecords').aggregate<{ count: number }>({
-        select: { count: count('*') }
+        select: { count: count('*') },
       })
       expect(Number(result[0].count)).toBe(4)
     })
 
     it('avg returns mean', async () => {
       const result = await db.table('usageRecords').aggregate<{ avgInput: number }>({
-        select: { avgInput: avg('input_tokens') }
+        select: { avgInput: avg('input_tokens') },
       })
       expect(Number(result[0].avgInput)).toBe(25)
     })
 
     it('min returns minimum', async () => {
       const result = await db.table('usageRecords').aggregate<{ minCost: number }>({
-        select: { minCost: min('credit_cost') }
+        select: { minCost: min('credit_cost') },
       })
-      expect(result[0].minCost).toBe(0.50)
+      expect(result[0].minCost).toBe(0.5)
     })
 
     it('max returns maximum', async () => {
       const result = await db.table('usageRecords').aggregate<{ maxCost: number }>({
-        select: { maxCost: max('credit_cost') }
+        select: { maxCost: max('credit_cost') },
       })
-      expect(result[0].maxCost).toBe(3.00)
+      expect(result[0].maxCost).toBe(3.0)
     })
   })
 
@@ -164,22 +153,22 @@ describe('DrizzleQueryBuilder.aggregate', () => {
       const result = await db.table('usageRecords').aggregate<{ date: string; total: number }>({
         select: {
           date: dateTrunc('day', 'occurred_at'),
-          total: sum('credit_cost')
+          total: sum('credit_cost'),
         },
         groupBy: ['date'],
-        orderBy: [{ column: 'date', direction: 'ASC' }]
+        orderBy: [{ column: 'date', direction: 'ASC' }],
       })
 
       expect(result).toHaveLength(2)
-      expect(result[0]).toEqual({ date: '2026-04-10', total: 3.50 })
-      expect(result[1]).toEqual({ date: '2026-04-11', total: 3.50 })
+      expect(result[0]).toEqual({ date: '2026-04-10', total: 3.5 })
+      expect(result[1]).toEqual({ date: '2026-04-11', total: 3.5 })
     })
 
     it('coalesce wrapped by avg treats NULLs as 0', async () => {
       const result = await db.table('usageRecords').aggregate<{ avgLatency: number }>({
         select: {
-          avgLatency: avg(coalesce('latency_ms', 0))
-        }
+          avgLatency: avg(coalesce('latency_ms', 0)),
+        },
       })
       // (100 + 0 + 200 + 0) / 4 = 75
       expect(Number(result[0].avgLatency)).toBe(75)
@@ -188,8 +177,8 @@ describe('DrizzleQueryBuilder.aggregate', () => {
     it('add("a", "b") wrapped by sum returns element-wise sum', async () => {
       const result = await db.table('usageRecords').aggregate<{ totalTokens: number }>({
         select: {
-          totalTokens: sum(add('input_tokens', 'output_tokens'))
-        }
+          totalTokens: sum(add('input_tokens', 'output_tokens')),
+        },
       })
       // (10+5) + (20+10) + (30+15) + (40+20) = 15 + 30 + 45 + 60 = 150
       expect(Number(result[0].totalTokens)).toBe(150)
@@ -201,11 +190,11 @@ describe('DrizzleQueryBuilder.aggregate', () => {
       const result = await db.table('usageRecords').aggregate<{ model: string; total: number }>({
         select: {
           model: col('model'),
-          total: sum('credit_cost')
+          total: sum('credit_cost'),
         },
         groupBy: ['model'],
         orderBy: [{ column: 'total', direction: 'DESC' }],
-        limit: 1
+        limit: 1,
       })
 
       expect(result).toHaveLength(1)
@@ -216,12 +205,13 @@ describe('DrizzleQueryBuilder.aggregate', () => {
 
   describe('where/whereBetween integration', () => {
     it('.where() filter applies before aggregation', async () => {
-      const result = await db.table('usageRecords')
+      const result = await db
+        .table('usageRecords')
         .where('model', '=', 'gpt-4')
         .aggregate<{ total: number }>({
-          select: { total: sum('credit_cost') }
+          select: { total: sum('credit_cost') },
         })
-      expect(result[0].total).toBe(3.50)
+      expect(result[0].total).toBe(3.5)
     })
 
     it('.whereBetween() with string range filters correctly', async () => {
@@ -229,40 +219,48 @@ describe('DrizzleQueryBuilder.aggregate', () => {
       // Should pick Row 2 (10th 15:00) and Row 3 (11th 09:00)
       const start = new Date('2026-04-10T12:00:00Z')
       const end = new Date('2026-04-11T12:00:00Z')
-      
-      const result = await db.table('usageRecords')
+
+      const result = await db
+        .table('usageRecords')
         .whereBetween('occurred_at', [start, end])
         .aggregate<{ total: number }>({
-          select: { total: sum('credit_cost') }
+          select: { total: sum('credit_cost') },
         })
-      
+
       // 2.50 + 3.00 = 5.50
-      expect(result[0].total).toBe(5.50)
+      expect(result[0].total).toBe(5.5)
     })
 
     it('whereBetween accepts string range', async () => {
-      const result = await db.table('usageRecords')
+      const result = await db
+        .table('usageRecords')
         .whereBetween('occurred_at', ['2026-04-10T12:00:00Z', '2026-04-11T12:00:00Z'])
         .aggregate<{ total: number }>({
-          select: { total: sum('credit_cost') }
+          select: { total: sum('credit_cost') },
         })
-      expect(result[0].total).toBe(5.50)
+      expect(result[0].total).toBe(5.5)
     })
   })
 
   describe('insertOrIgnore', () => {
     it('inserts a new row when no conflict', async () => {
-      await db.table('usageRecords').insertOrIgnore({
-        id: 'new-1',
-        bifrost_log_id: 'unique-log',
-        api_key_id: 'k1',
-        org_id: 'org-1',
-        model: 'gpt-4',
-        occurred_at: '2026-04-12T00:00:00Z',
-        created_at: '2026-04-12T00:00:01Z',
-      }, { conflictTarget: 'bifrost_log_id' })
+      await db.table('usageRecords').insertOrIgnore(
+        {
+          id: 'new-1',
+          bifrost_log_id: 'unique-log',
+          api_key_id: 'k1',
+          org_id: 'org-1',
+          model: 'gpt-4',
+          occurred_at: '2026-04-12T00:00:00Z',
+          created_at: '2026-04-12T00:00:01Z',
+        },
+        { conflictTarget: 'bifrost_log_id' },
+      )
 
-      const count = await db.table('usageRecords').where('bifrost_log_id', '=', 'unique-log').count()
+      const count = await db
+        .table('usageRecords')
+        .where('bifrost_log_id', '=', 'unique-log')
+        .count()
       expect(count).toBe(1)
     })
 
@@ -276,7 +274,7 @@ describe('DrizzleQueryBuilder.aggregate', () => {
         occurred_at: '2026-04-12T00:00:00Z',
         created_at: '2026-04-12T00:00:01Z',
       }
-      
+
       await db.table('usageRecords').insertOrIgnore(data, { conflictTarget: 'bifrost_log_id' })
 
       const count = await db.table('usageRecords').where('bifrost_log_id', '=', 'l1').count()

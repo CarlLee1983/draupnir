@@ -1,5 +1,5 @@
 // src/Modules/AppModule/__tests__/SubscriptionStatus.test.ts
-import { describe, test, expect } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import { SubscriptionStatus } from '../Domain/ValueObjects/SubscriptionStatus'
 
 describe('SubscriptionStatus', () => {

@@ -1,5 +1,5 @@
-import { UserProfile, type UserProfileProps } from '../../Domain/Aggregates/UserProfile'
 import type { UserProfileDTO } from '../../Application/DTOs/UserProfileDTO'
+import { UserProfile, type UserProfileProps } from '../../Domain/Aggregates/UserProfile'
 
 /**
  * Parses notification preferences from unknown database format.
@@ -100,4 +100,3 @@ export const UserProfileMapper = {
     }
   },
 }
-

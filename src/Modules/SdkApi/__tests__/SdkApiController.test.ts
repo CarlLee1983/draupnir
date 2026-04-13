@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { SdkApiController } from '../Presentation/Controllers/SdkApiController'
-import type { ProxyModelCall } from '../Application/UseCases/ProxyModelCall'
-import type { QueryUsage } from '../Application/UseCases/QueryUsage'
-import type { QueryBalance } from '../Application/UseCases/QueryBalance'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { AppAuthContext } from '../Application/DTOs/SdkApiDTO'
+import type { ProxyModelCall } from '../Application/UseCases/ProxyModelCall'
+import type { QueryBalance } from '../Application/UseCases/QueryBalance'
+import type { QueryUsage } from '../Application/UseCases/QueryUsage'
+import { SdkApiController } from '../Presentation/Controllers/SdkApiController'
 
 const validAuth: AppAuthContext = {
   appKeyId: 'appkey-1',

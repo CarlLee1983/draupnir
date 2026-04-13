@@ -1,7 +1,8 @@
 // src/Modules/Contract/Application/Services/RenewContractService.ts
-import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
+
 import { Contract } from '../../Domain/Aggregates/Contract'
 import type { ContractTermProps } from '../../Domain/Entities/ContractTerm'
+import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
 /**
@@ -30,7 +31,11 @@ export class RenewContractService {
       }
 
       if (!oldContract.isActive()) {
-        return { success: false, message: 'Only ACTIVE contracts can be renewed', error: 'INVALID_STATUS' }
+        return {
+          success: false,
+          message: 'Only ACTIVE contracts can be renewed',
+          error: 'INVALID_STATUS',
+        }
       }
 
       const expired = oldContract.expire()

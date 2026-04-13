@@ -10,7 +10,7 @@ import type { DomainEvent } from './DomainEvent'
  * - Uncommitted event management (getUncommittedEvents, markEventsAsCommitted)
  * - Aggregate versioning (getVersion)
  *
- * Subclasses must implement the applyEvent() method to define how events 
+ * Subclasses must implement the applyEvent() method to define how events
  * affect the aggregate state.
  */
 export abstract class AggregateRoot extends BaseEntity {
@@ -21,7 +21,7 @@ export abstract class AggregateRoot extends BaseEntity {
   private uncommittedEvents: DomainEvent[] = []
 
   /**
-   * Generates a domain event: first applies the state change, 
+   * Generates a domain event: first applies the state change,
    * then adds it to the uncommitted list.
    */
   protected raiseEvent(event: DomainEvent): void {

@@ -7,5 +7,8 @@ export interface UsageSummary {
 
 export interface IUsageAggregator {
   getStats(virtualKeyIds: readonly string[], query?: Record<string, unknown>): Promise<UsageSummary>
-  getLogs(virtualKeyIds: readonly string[], query?: Record<string, unknown>): Promise<readonly Record<string, unknown>[]>
+  getLogs(
+    virtualKeyIds: readonly string[],
+    query?: Record<string, unknown>,
+  ): Promise<readonly Record<string, unknown>[]>
 }

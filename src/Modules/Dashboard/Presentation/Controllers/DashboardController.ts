@@ -1,10 +1,10 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { GetCostTrendsService } from '../../Application/Services/GetCostTrendsService'
+import type { GetDashboardSummaryService } from '../../Application/Services/GetDashboardSummaryService'
 import type { GetKpiSummaryService } from '../../Application/Services/GetKpiSummaryService'
 import type { GetModelComparisonService } from '../../Application/Services/GetModelComparisonService'
 import type { GetPerKeyCostService } from '../../Application/Services/GetPerKeyCostService'
-import type { GetDashboardSummaryService } from '../../Application/Services/GetDashboardSummaryService'
 import type { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
 
 export class DashboardController {
@@ -19,7 +19,8 @@ export class DashboardController {
 
   async summary(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.summaryService.execute(orgId, auth.userId, auth.role)
@@ -28,7 +29,8 @@ export class DashboardController {
 
   async usage(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.usageChartService.execute({
@@ -46,7 +48,8 @@ export class DashboardController {
 
   async kpiSummary(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.kpiSummaryService.execute({
@@ -61,7 +64,8 @@ export class DashboardController {
 
   async costTrends(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.costTrendsService.execute({
@@ -76,7 +80,8 @@ export class DashboardController {
 
   async modelComparison(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.modelComparisonService.execute({
@@ -85,14 +90,17 @@ export class DashboardController {
       callerSystemRole: auth.role,
       startTime: ctx.getQuery('start_time') ?? undefined,
       endTime: ctx.getQuery('end_time') ?? undefined,
-      apiKeyIds: parseApiKeyIds(ctx.getQuery('api_key_ids') ?? ctx.getQuery('api_key_id') ?? undefined),
+      apiKeyIds: parseApiKeyIds(
+        ctx.getQuery('api_key_ids') ?? ctx.getQuery('api_key_id') ?? undefined,
+      ),
     })
     return ctx.json(result)
   }
 
   async perKeyCost(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const result = await this.perKeyCostService.execute({

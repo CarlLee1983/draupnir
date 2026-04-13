@@ -1,6 +1,6 @@
-import { type IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { type InertiaService } from '../InertiaService'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { ReportToken } from '../../Modules/Reports/Domain/ValueObjects/ReportToken'
+import type { InertiaService } from '../InertiaService'
 
 export class AdminReportTemplatePage {
   constructor(private readonly inertia: InertiaService) {}
@@ -22,7 +22,7 @@ export class AdminReportTemplatePage {
       orgId: payload.orgId,
       isAnimationActive,
       isPrinterFriendly: true,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
     })
   }
 }

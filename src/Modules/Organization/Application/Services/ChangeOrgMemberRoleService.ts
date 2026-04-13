@@ -1,7 +1,7 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
-import { OrgMemberRole } from '../../Domain/ValueObjects/OrgMemberRole'
 import { OrgMembershipRules } from '../../Domain/Services/OrgMembershipRules'
+import { OrgMemberRole } from '../../Domain/ValueObjects/OrgMemberRole'
 import { OrganizationMemberPresenter, type OrganizationResponse } from '../DTOs/OrganizationDTO'
 
 export class ChangeOrgMemberRoleService {
@@ -34,7 +34,11 @@ export class ChangeOrgMemberRoleService {
         await txMemberRepo.update(updated)
       })
 
-      return { success: true, message: 'Member role updated successfully', data: OrganizationMemberPresenter.fromEntity(updated) }
+      return {
+        success: true,
+        message: 'Member role updated successfully',
+        data: OrganizationMemberPresenter.fromEntity(updated),
+      }
     } catch (error: unknown) {
       if (error instanceof Error && error.message.includes('last manager')) {
         return {

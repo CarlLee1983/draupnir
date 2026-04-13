@@ -10,14 +10,18 @@
  * - Orchestrate atomic transaction for all setup steps
  */
 
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
-import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { Organization } from '../../Domain/Aggregates/Organization'
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
-import { OrganizationPresenter, type CreateOrganizationRequest, type OrganizationResponse } from '../DTOs/OrganizationDTO'
-import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
+import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
+import {
+  type CreateOrganizationRequest,
+  OrganizationPresenter,
+  type OrganizationResponse,
+} from '../DTOs/OrganizationDTO'
 
 /**
  * Service for establishing a new organization.
@@ -42,7 +46,11 @@ export class CreateOrganizationService {
 
       const manager = await this.authRepository.findById(request.managerUserId)
       if (!manager) {
-        return { success: false, message: 'Designated manager not found', error: 'MANAGER_NOT_FOUND' }
+        return {
+          success: false,
+          message: 'Designated manager not found',
+          error: 'MANAGER_NOT_FOUND',
+        }
       }
 
       const orgId = crypto.randomUUID()
@@ -67,11 +75,14 @@ export class CreateOrganizationService {
         await this.provisionOrganizationDefaults.execute(orgId, request.managerUserId)
       })
 
-      return { success: true, message: 'Organization established successfully', data: OrganizationPresenter.fromEntity(org) }
+      return {
+        success: true,
+        message: 'Organization established successfully',
+        data: OrganizationPresenter.fromEntity(org),
+      }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Establishment failed'
       return { success: false, message, error: message }
     }
   }
 }
-

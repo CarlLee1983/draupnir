@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { AuthenticateApp } from '../Application/UseCases/AuthenticateApp'
-import { AppApiKeyRepository } from '@/Modules/AppApiKey/Infrastructure/Repositories/AppApiKeyRepository'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { AppApiKey } from '@/Modules/AppApiKey/Domain/Aggregates/AppApiKey'
 import { AppKeyScope } from '@/Modules/AppApiKey/Domain/ValueObjects/AppKeyScope'
 import { BoundModules } from '@/Modules/AppApiKey/Domain/ValueObjects/BoundModules'
+import { AppApiKeyRepository } from '@/Modules/AppApiKey/Infrastructure/Repositories/AppApiKeyRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { AuthenticateApp } from '../Application/UseCases/AuthenticateApp'
 
 describe('AuthenticateApp', () => {
   let useCase: AuthenticateApp

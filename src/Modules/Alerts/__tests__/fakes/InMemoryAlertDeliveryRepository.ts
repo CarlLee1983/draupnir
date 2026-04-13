@@ -1,6 +1,6 @@
-import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
-import type { DeliveryChannel } from '../../Domain/ValueObjects/DeliveryStatus'
+import type { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
+import type { DeliveryChannel } from '../../Domain/ValueObjects/DeliveryStatus'
 
 export class InMemoryAlertDeliveryRepository implements IAlertDeliveryRepository {
   private rows: AlertDelivery[] = []
@@ -40,7 +40,10 @@ export class InMemoryAlertDeliveryRepository implements IAlertDeliveryRepository
     )
   }
 
-  async listByOrg(orgId: string, opts?: { limit?: number; offset?: number }): Promise<AlertDelivery[]> {
+  async listByOrg(
+    orgId: string,
+    opts?: { limit?: number; offset?: number },
+  ): Promise<AlertDelivery[]> {
     const limit = opts?.limit ?? 50
     const offset = opts?.offset ?? 0
     return this.rows

@@ -27,4 +27,3 @@ export class UpdateProfileRequest extends FormRequest {
  * Type inferred from the UpdateProfileRequest schema.
  */
 export type UpdateProfileParams = z.infer<UpdateProfileRequest['schema']>
-

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test'
-import { requireAdmin } from '../Admin/helpers/requireAdmin'
-import type { IHttpContext } from '../../Shared/Presentation/IHttpContext'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
+import type { IHttpContext } from '../../Shared/Presentation/IHttpContext'
+import { requireAdmin } from '../Admin/helpers/requireAdmin'
 
 describe('requireAdmin', () => {
   test('returns a localized 403 body', async () => {

@@ -1,10 +1,10 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
 import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { GetProfileService } from '../../Application/Services/GetProfileService'
 import type { UpdateProfileService } from '../../Application/Services/UpdateProfileService'
-import type { UpdateProfileParams, ListUsersQueryParams, ChangeStatusParams } from '../Requests'
+import type { ChangeStatusParams, ListUsersQueryParams, UpdateProfileParams } from '../Requests'
 import { UserIdSchema } from '../Requests'
 
 /**
@@ -92,4 +92,3 @@ export class ProfileController {
     return ctx.json(result, result.success ? 200 : 400)
   }
 }
-

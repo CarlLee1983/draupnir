@@ -188,5 +188,4 @@ export class Application {
   get updatedAt(): Date {
     return this.props.updatedAt
   }
-
 }

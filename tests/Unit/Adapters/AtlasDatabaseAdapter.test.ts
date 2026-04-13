@@ -4,7 +4,7 @@
  * 驗證 AtlasQueryBuilder 正確實現 IQueryBuilder 介面
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { AtlasQueryBuilder } from '@/Shared/Infrastructure/Database/Adapters/Atlas/AtlasQueryBuilder'
 
 describe('AtlasQueryBuilder', () => {

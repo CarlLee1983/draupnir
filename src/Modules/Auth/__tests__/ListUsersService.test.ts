@@ -21,7 +21,11 @@ describe('ListUsersService', () => {
     const profileRepo = new UserProfileRepository(db)
     service = new ListUsersService(authRepo, profileRepo)
 
-    const registerService = new RegisterUserService(authRepo, profileRepo, new ScryptPasswordHasher())
+    const registerService = new RegisterUserService(
+      authRepo,
+      profileRepo,
+      new ScryptPasswordHasher(),
+    )
     await registerService.execute({ email: 'alice@example.com', password: 'StrongPass123' })
     await registerService.execute({ email: 'bob@example.com', password: 'StrongPass123' })
     await registerService.execute({ email: 'charlie@example.com', password: 'StrongPass123' })

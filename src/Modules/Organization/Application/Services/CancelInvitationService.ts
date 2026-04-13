@@ -1,6 +1,6 @@
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
-import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 import type { OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { OrgAuthorizationHelper } from './OrgAuthorizationHelper'
 
 export class CancelInvitationService {
   constructor(

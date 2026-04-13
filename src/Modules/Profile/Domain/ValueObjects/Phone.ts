@@ -11,7 +11,7 @@ export class Phone {
    * @throws {Error} If the phone format is invalid.
    */
   constructor(phone: string) {
-    const cleaned = phone.replace(/[\s\-\(\)]/g, '')
+    const cleaned = phone.replace(/[\s\-()]/g, '')
     if (!this.isValid(cleaned)) {
       throw new Error(`Invalid phone number format: ${phone}`)
     }
@@ -59,4 +59,3 @@ export class Phone {
     return this.value
   }
 }
-

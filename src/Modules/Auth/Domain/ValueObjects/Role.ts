@@ -89,4 +89,3 @@ export class Role {
     return this.value
   }
 }
-

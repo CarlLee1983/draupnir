@@ -1,12 +1,12 @@
 // src/Modules/Credit/__tests__/HandleBalanceDepletedService.test.ts
-import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest'
-import { HandleBalanceDepletedService } from '../Application/Services/HandleBalanceDepletedService'
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import { KeyScope } from '@/Modules/ApiKey/Domain/ValueObjects/KeyScope'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
+import { HandleBalanceDepletedService } from '../Application/Services/HandleBalanceDepletedService'
 
 const hashingService = new KeyHashingService()
 const TEST_RAW_KEY = 'drp_sk_test_12345678901234567890123456789012'

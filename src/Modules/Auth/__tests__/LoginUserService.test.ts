@@ -5,16 +5,16 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { UserProfileRepository } from '@/Modules/Profile/Infrastructure/Repositories/UserProfileRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService'
 import { LoginUserService } from '../Application/Services/LoginUserService'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
-import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../Domain/Repositories/IAuthTokenRepository'
 import { Email } from '../Domain/ValueObjects/Email'
 import { RoleType } from '../Domain/ValueObjects/Role'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Infrastructure/Repositories/AuthTokenRepository'
+import { JwtTokenService } from '../Infrastructure/Services/JwtTokenService'
+import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
 
 describe('LoginUserService Integration Test', () => {
   let registerService: RegisterUserService
@@ -31,7 +31,12 @@ describe('LoginUserService Integration Test', () => {
     const profileRepo = new UserProfileRepository(db)
     const passwordHasher = new ScryptPasswordHasher()
     registerService = new RegisterUserService(repository, profileRepo, passwordHasher)
-    loginService = new LoginUserService(repository, tokenRepository, jwtTokenService, passwordHasher)
+    loginService = new LoginUserService(
+      repository,
+      tokenRepository,
+      jwtTokenService,
+      passwordHasher,
+    )
 
     // 建立測試用戶
     await registerService.execute({

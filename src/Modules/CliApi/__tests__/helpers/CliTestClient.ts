@@ -39,7 +39,13 @@ export class CliTestClient {
 
     const body = (await response.json()) as {
       success?: boolean
-      data?: { deviceCode: string; userCode: string; verificationUri: string; expiresIn: number; interval: number }
+      data?: {
+        deviceCode: string
+        userCode: string
+        verificationUri: string
+        expiresIn: number
+        interval: number
+      }
       message?: string
     }
     if (!body.success || !body.data) {
@@ -77,7 +83,11 @@ export class CliTestClient {
 
     const body = (await response.json()) as {
       success?: boolean
-      data?: { accessToken: string; refreshToken: string; user: { id: string; email: string; role: string } }
+      data?: {
+        accessToken: string
+        refreshToken: string
+        user: { id: string; email: string; role: string }
+      }
       message?: string
     }
     if (!body.success || !body.data) {
@@ -115,7 +125,11 @@ export class CliTestClient {
       throw new Error(`LLM proxy failed: ${response.status}`)
     }
 
-    const body = (await response.json()) as { success?: boolean; message?: string; data?: { choices: Array<{ role: string; content: string }> } }
+    const body = (await response.json()) as {
+      success?: boolean
+      message?: string
+      data?: { choices: Array<{ role: string; content: string }> }
+    }
     if (!body.success) {
       throw new Error(`LLM request failed: ${body.message}`)
     }

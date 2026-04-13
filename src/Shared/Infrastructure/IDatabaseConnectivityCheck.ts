@@ -62,7 +62,7 @@ export interface IDatabaseConnectivityCheck {
   /**
    * Executes a database connectivity check.
    *
-   * The implementation should perform a simple database query (e.g., `SELECT 1`) 
+   * The implementation should perform a simple database query (e.g., `SELECT 1`)
    * to verify the connection. It should not perform complex queries or modifications.
    *
    * @returns `true` if the database connection is normal, `false` otherwise.
@@ -70,4 +70,3 @@ export interface IDatabaseConnectivityCheck {
    */
   ping(): Promise<boolean>
 }
-

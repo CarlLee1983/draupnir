@@ -1,10 +1,10 @@
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { CreateApiKeyService } from '../../Application/Services/CreateApiKeyService'
 import type { ListApiKeysService } from '../../Application/Services/ListApiKeysService'
 import type { RevokeApiKeyService } from '../../Application/Services/RevokeApiKeyService'
-import type { UpdateKeyLabelService } from '../../Application/Services/UpdateKeyLabelService'
 import type { SetKeyPermissionsService } from '../../Application/Services/SetKeyPermissionsService'
+import type { UpdateKeyLabelService } from '../../Application/Services/UpdateKeyLabelService'
 
 export class ApiKeyController {
   constructor(
@@ -17,7 +17,8 @@ export class ApiKeyController {
 
   async create(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const body = await ctx.getJsonBody<{
       label?: string
       allowedModels?: string[]
@@ -43,7 +44,8 @@ export class ApiKeyController {
 
   async list(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
     const page = ctx.getQuery('page') ? parseInt(ctx.getQuery('page')!, 10) : 1
@@ -54,7 +56,8 @@ export class ApiKeyController {
 
   async revoke(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
     if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const result = await this.revokeService.execute({
@@ -68,7 +71,8 @@ export class ApiKeyController {
 
   async updateLabel(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
     if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const body = await ctx.getJsonBody<{ label?: string }>()
@@ -84,7 +88,8 @@ export class ApiKeyController {
 
   async setPermissions(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
-    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    if (!auth)
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const keyId = ctx.getParam('keyId')
     if (!keyId) return ctx.json({ success: false, message: 'Missing keyId' }, 400)
     const body = await ctx.getJsonBody<{

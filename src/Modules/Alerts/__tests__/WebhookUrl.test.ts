@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { lookup } from 'node:dns/promises'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { WebhookUrl } from '../Domain/ValueObjects/WebhookUrl'
 
 vi.mock('node:dns/promises', () => ({

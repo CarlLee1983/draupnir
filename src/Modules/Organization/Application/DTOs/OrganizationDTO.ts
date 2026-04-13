@@ -1,6 +1,6 @@
 import type { Organization } from '../../Domain/Aggregates/Organization'
-import type { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 import type { OrganizationInvitation } from '../../Domain/Entities/OrganizationInvitation'
+import type { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 
 export class OrganizationPresenter {
   static fromEntity(entity: Organization): Record<string, unknown> {

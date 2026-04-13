@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, expect, it } from 'bun:test'
 import { BifrostApiError, isBifrostApiError } from '@draupnir/bifrost-sdk'
 
 describe('BifrostApiError', () => {

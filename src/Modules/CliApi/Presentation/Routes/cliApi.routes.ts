@@ -1,6 +1,6 @@
+import { requireAuth } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { CliApiController } from '../Controllers/CliApiController'
-import { requireAuth } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 
 export function registerCliApiRoutes(router: IModuleRouter, controller: CliApiController): void {
   router.post('/cli/device-code', [], (ctx) => controller.initiateDeviceFlow(ctx))

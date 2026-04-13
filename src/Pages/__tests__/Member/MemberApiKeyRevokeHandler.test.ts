@@ -1,4 +1,4 @@
-import { describe, expect, test, mock } from 'bun:test'
+import { describe, expect, mock, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { MemberApiKeyRevokeHandler } from '../../Member/MemberApiKeyRevokeHandler'
 
@@ -33,7 +33,8 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
 function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   return createMockContext({
     get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
+      if (key === 'auth')
+        return { userId: 'member-1', email: 'member@test.com', role: 'member' } as T
       return undefined
     },
     getCookie: (_name: string) => undefined,

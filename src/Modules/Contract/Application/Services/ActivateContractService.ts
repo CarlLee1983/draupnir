@@ -1,7 +1,8 @@
 // src/Modules/Contract/Application/Services/ActivateContractService.ts
-import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
-import { ContractActivated } from '../../Domain/Events/ContractActivated'
+
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
+import { ContractActivated } from '../../Domain/Events/ContractActivated'
+import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import { ContractPresenter, type ContractResponse } from '../DTOs/ContractDTO'
 
 /**

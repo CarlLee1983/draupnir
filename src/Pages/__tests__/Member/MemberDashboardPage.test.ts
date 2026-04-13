@@ -1,6 +1,6 @@
-import { describe, expect, test, mock } from 'bun:test'
-import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { describe, expect, mock, test } from 'bun:test'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '../../InertiaService'
 import { MemberDashboardPage } from '../../Member/MemberDashboardPage'
 
@@ -105,7 +105,9 @@ describe('MemberDashboardPage', () => {
     const ctx = createMemberContext()
     const { inertia, captured } = createMockInertia()
 
-    const mockBalanceService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
+    const mockBalanceService = {
+      execute: mock(() => Promise.resolve({ success: true, data: null })),
+    }
 
     const page = new MemberDashboardPage(inertia, mockBalanceService as any)
     await page.handle(ctx)
@@ -122,7 +124,9 @@ describe('MemberDashboardPage', () => {
     })
     const { inertia, captured } = createMockInertia()
 
-    const mockBalanceService = { execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })) }
+    const mockBalanceService = {
+      execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })),
+    }
 
     const page = new MemberDashboardPage(inertia, mockBalanceService as any)
     await page.handle(ctx)

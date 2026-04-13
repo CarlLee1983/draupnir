@@ -1,8 +1,8 @@
-import { Email } from '../../Domain/ValueObjects/Email'
-import type { IPasswordResetRepository } from '../../Domain/Repositories/IPasswordResetRepository'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
-import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
+import type { IPasswordResetRepository } from '../../Domain/Repositories/IPasswordResetRepository'
+import { Email } from '../../Domain/ValueObjects/Email'
+import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 
 export class ResetPasswordService {
   constructor(

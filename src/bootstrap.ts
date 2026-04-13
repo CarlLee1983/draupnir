@@ -3,7 +3,10 @@ import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { OrbitPrism } from '@gravito/prism'
 import { createGravitoServiceProvider } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { buildConfig } from '../config/index'
+import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
+import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import { FoundationServiceProvider } from './Foundation/Infrastructure/Providers/FoundationServiceProvider'
+import { AlertsServiceProvider } from './Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
 import { ApiKeyServiceProvider } from './Modules/ApiKey/Infrastructure/Providers/ApiKeyServiceProvider'
 import { AppApiKeyServiceProvider } from './Modules/AppApiKey'
 import type { EnsureCoreAppModulesService } from './Modules/AppModule/Application/Services/EnsureCoreAppModulesService'
@@ -13,12 +16,11 @@ import { CliApiServiceProvider } from './Modules/CliApi/Infrastructure/Providers
 import { ContractServiceProvider } from './Modules/Contract/Infrastructure/Providers/ContractServiceProvider'
 import { CreditServiceProvider } from './Modules/Credit/Infrastructure/Providers/CreditServiceProvider'
 import { DashboardServiceProvider } from './Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
-import { AlertsServiceProvider } from './Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
-import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { DevPortalServiceProvider } from './Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
 import { HealthServiceProvider } from './Modules/Health/Infrastructure/Providers/HealthServiceProvider'
 import { OrganizationServiceProvider } from './Modules/Organization/Infrastructure/Providers/OrganizationServiceProvider'
 import { ProfileServiceProvider } from './Modules/Profile/Infrastructure/Providers/ProfileServiceProvider'
+import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
 import { PagesServiceProvider } from './Pages/Infrastructure/Providers/PagesServiceProvider'
 import { warmInertiaService } from './Pages/routing/inertiaFactory'
@@ -27,11 +29,13 @@ import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
 import { initializeRegistry } from './wiring/RepositoryRegistry'
-import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
-import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 
 function isJobRegistrar(value: unknown): value is IJobRegistrar {
-  return typeof value === 'object' && value !== null && typeof (value as IJobRegistrar).registerJobs === 'function'
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as IJobRegistrar).registerJobs === 'function'
+  )
 }
 
 export async function bootstrap(port = 3000): Promise<PlanetCore> {
@@ -44,10 +48,10 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   setCurrentDatabaseAccess(db)
   const config = defineConfig({ config: configObj })
   const core = new PlanetCore(config)
-  
+
   // Register database service early
   core.container.singleton('database', () => db)
-  
+
   await core.orbit(new OrbitPrism())
 
   const modules = [

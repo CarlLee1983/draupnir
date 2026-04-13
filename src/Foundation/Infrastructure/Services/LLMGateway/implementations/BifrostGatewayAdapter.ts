@@ -5,8 +5,10 @@
  * This class owns the translation boundary between gateway-neutral camelCase DTOs
  * and Bifrost's snake_case wire format. No other file should perform this mapping.
  */
-import { GatewayError } from '../errors'
+
+import { type BifrostClient, isBifrostApiError } from '@draupnir/bifrost-sdk'
 import type { GatewayErrorCode } from '../errors'
+import { GatewayError } from '../errors'
 import type { ILLMGatewayClient } from '../ILLMGatewayClient'
 import type {
   CreateKeyRequest,
@@ -16,7 +18,6 @@ import type {
   UsageQuery,
   UsageStats,
 } from '../types'
-import { isBifrostApiError, type BifrostClient } from '@draupnir/bifrost-sdk'
 
 export class BifrostGatewayAdapter implements ILLMGatewayClient {
   constructor(private readonly bifrostClient: BifrostClient) {}

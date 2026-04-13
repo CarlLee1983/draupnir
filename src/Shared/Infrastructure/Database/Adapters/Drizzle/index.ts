@@ -22,6 +22,6 @@
  * 4. 完成！所有業務層代碼無需改動
  */
 
-export { createDrizzleDatabaseAccess } from './DrizzleDatabaseAdapter'
 export { createDrizzleConnectivityCheck } from './DrizzleConnectivityCheck'
+export { createDrizzleDatabaseAccess } from './DrizzleDatabaseAdapter'
 export type { DrizzleQueryBuilder } from './DrizzleQueryBuilder'

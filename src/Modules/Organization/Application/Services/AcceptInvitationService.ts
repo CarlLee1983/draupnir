@@ -7,11 +7,16 @@ async function sha256(str: string): Promise<string> {
   const hashArray = Array.from(new Uint8Array(hashBuffer))
   return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
 }
-import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
-import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
-import { OrganizationMemberPresenter, type AcceptInvitationRequest, type OrganizationResponse } from '../DTOs/OrganizationDTO'
+import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
+import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import {
+  type AcceptInvitationRequest,
+  OrganizationMemberPresenter,
+  type OrganizationResponse,
+} from '../DTOs/OrganizationDTO'
 
 export class AcceptInvitationService {
   constructor(
@@ -31,7 +36,11 @@ export class AcceptInvitationService {
       const invitation = await this.invitationRepository.findByTokenHash(tokenHash)
 
       if (!invitation || !invitation.isPending()) {
-        return { success: false, message: 'Invalid or expired invitation', error: 'INVALID_INVITATION' }
+        return {
+          success: false,
+          message: 'Invalid or expired invitation',
+          error: 'INVALID_INVITATION',
+        }
       }
 
       const user = await this.authRepository.findById(userId)
@@ -40,7 +49,11 @@ export class AcceptInvitationService {
       }
 
       if (user.emailValue.toLowerCase() !== invitation.email.toLowerCase()) {
-        return { success: false, message: 'This invitation was not sent to you', error: 'EMAIL_MISMATCH' }
+        return {
+          success: false,
+          message: 'This invitation was not sent to you',
+          error: 'EMAIL_MISMATCH',
+        }
       }
 
       const existingMembership = await this.memberRepository.findByUserAndOrgId(
@@ -48,7 +61,11 @@ export class AcceptInvitationService {
         invitation.organizationId,
       )
       if (existingMembership) {
-        return { success: false, message: 'Already a member of this organization', error: 'USER_ALREADY_IN_ORG' }
+        return {
+          success: false,
+          message: 'Already a member of this organization',
+          error: 'USER_ALREADY_IN_ORG',
+        }
       }
 
       const member = OrganizationMember.create(

@@ -116,23 +116,39 @@ export class DeviceCode {
   }
 
   /** Unique device-side identifier. */
-  get deviceCode(): string { return this.props.deviceCode }
+  get deviceCode(): string {
+    return this.props.deviceCode
+  }
   /** Human-readable code for user entry. */
-  get userCode(): string { return this.props.userCode }
+  get userCode(): string {
+    return this.props.userCode
+  }
   /** Target URI for user verification. */
-  get verificationUri(): string { return this.props.verificationUri }
+  get verificationUri(): string {
+    return this.props.verificationUri
+  }
   /** Current state of the flow. */
-  get status(): DeviceCodeStatus { return this.props.status }
+  get status(): DeviceCodeStatus {
+    return this.props.status
+  }
   /** ID of the authorized user (null if pending). */
-  get userId(): string | null { return this.props.userId }
+  get userId(): string | null {
+    return this.props.userId
+  }
   /** Email of the authorized user. */
-  get userEmail(): string | null { return this.props.userEmail }
+  get userEmail(): string | null {
+    return this.props.userEmail
+  }
   /** System role of the authorized user. */
-  get userRole(): string | null { return this.props.userRole }
+  get userRole(): string | null {
+    return this.props.userRole
+  }
   /** Expiration deadline. */
-  get expiresAt(): Date { return this.props.expiresAt }
+  get expiresAt(): Date {
+    return this.props.expiresAt
+  }
   /** Creation timestamp. */
-  get createdAt(): Date { return this.props.createdAt }
-
+  get createdAt(): Date {
+    return this.props.createdAt
+  }
 }
-

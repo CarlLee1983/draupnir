@@ -1,6 +1,6 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
 import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
-import { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
 import { WebhookEndpointMapper } from '../Mappers/WebhookEndpointMapper'
 
 /**

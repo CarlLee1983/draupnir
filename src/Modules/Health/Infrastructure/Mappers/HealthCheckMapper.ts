@@ -1,4 +1,4 @@
-import { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
+import type { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
 
 export class HealthCheckMapper {
   static toDatabaseRow(entity: HealthCheck): Record<string, unknown> {

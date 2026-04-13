@@ -1,6 +1,6 @@
 import type { IModuleRouter, Middleware } from '@/Shared/Presentation/IModuleRouter'
-import type { SdkApiController } from '../Controllers/SdkApiController'
 import type { AppAuthMiddleware } from '../../Infrastructure/Middleware/AppAuthMiddleware'
+import type { SdkApiController } from '../Controllers/SdkApiController'
 
 export function createAppAuthMiddlewareHandler(appAuthMiddleware: AppAuthMiddleware): Middleware {
   return (ctx, next) => appAuthMiddleware.handle(ctx, next)

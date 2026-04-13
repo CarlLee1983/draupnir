@@ -1,5 +1,5 @@
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
-import { OrganizationPresenter, type ListOrganizationsResponse } from '../DTOs/OrganizationDTO'
+import { type ListOrganizationsResponse, OrganizationPresenter } from '../DTOs/OrganizationDTO'
 
 export class ListOrganizationsService {
   constructor(private orgRepository: IOrganizationRepository) {}

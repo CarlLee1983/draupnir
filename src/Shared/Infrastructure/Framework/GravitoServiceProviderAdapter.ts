@@ -5,8 +5,8 @@
  * 這是框架耦合的唯一地點。
  */
 
-import { ServiceProvider, type Container as GravitoContainer, type PlanetCore } from '@gravito/core'
-import type { ModuleServiceProvider, IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import { type Container as GravitoContainer, type PlanetCore, ServiceProvider } from '@gravito/core'
+import type { IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 
 /**
  * 將 Gravito 的 Container 適配為框架無關的 IContainer
@@ -68,4 +68,3 @@ export function createGravitoServiceProvider(
 ): ServiceProvider {
   return new GravitoServiceProviderAdapter(moduleProvider)
 }
-

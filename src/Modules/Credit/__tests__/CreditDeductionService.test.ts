@@ -1,11 +1,11 @@
 // src/Modules/Credit/__tests__/DeductCreditService.test.ts
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { DeductCreditService } from '../Application/Services/DeductCreditService'
+import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
 import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
 import { CreditTransactionRepository } from '../Infrastructure/Repositories/CreditTransactionRepository'
-import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
-import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 
 describe('DeductCreditService', () => {
   let db: MemoryDatabaseAccess

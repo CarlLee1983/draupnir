@@ -87,6 +87,4 @@ export class OrganizationMember {
   isManager(): boolean {
     return this.props.role === 'manager'
   }
-
 }
-

@@ -1,8 +1,8 @@
 /**
  * IHttpContext - HTTP Context Interface (Framework Agnostic)
  *
- * Controllers depend on this interface instead of a specific framework 
- * implementation (like GravitoContext), allowing for future framework 
+ * Controllers depend on this interface instead of a specific framework
+ * implementation (like GravitoContext), allowing for future framework
  * migration or pure mock unit testing.
  */
 
@@ -40,9 +40,9 @@ export interface IHttpContext {
   /** Retrieves a route parameter */
   getParam(name: string): string | undefined
 
-  /** 
-   * The request pathname (excluding query). 
-   * Used as a fallback for route parameter resolution. 
+  /**
+   * The request pathname (excluding query).
+   * Used as a fallback for route parameter resolution.
    */
   getPathname(): string
 
@@ -89,8 +89,8 @@ export interface IHttpContext {
  * )
  */
 
-/** 
- * Gravito 2 sometimes fails to populate req.param; resolution via pathname fallback 
+/**
+ * Gravito 2 sometimes fails to populate req.param; resolution via pathname fallback
  */
 function fallbackPathParam(pathname: string, name: string): string | undefined {
   if (!pathname) return undefined
@@ -215,8 +215,9 @@ export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
     get: <T>(key: string) => ctx.get(key as any) as T | undefined,
     set: (key, value) => ctx.set(key as any, value),
     getCookie: (name: string) => {
-      const cookieHeader =
-        (ctx.req.header('Cookie') ?? ctx.req.header('cookie')) as string | undefined
+      const cookieHeader = (ctx.req.header('Cookie') ?? ctx.req.header('cookie')) as
+        | string
+        | undefined
       if (!cookieHeader) return undefined
       for (const pair of cookieHeader.split(';')) {
         const [rawKey, ...rest] = pair.split('=')
@@ -225,8 +226,7 @@ export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
       return undefined
     },
     setCookie: (name: string, value: string, options: CookieOptions = {}) => {
-      const pending: PendingCookie[] =
-        (ctx.get('__pending_cookies__') as PendingCookie[]) ?? []
+      const pending: PendingCookie[] = (ctx.get('__pending_cookies__') as PendingCookie[]) ?? []
       pending.push({ name, value, options })
       ctx.set('__pending_cookies__', pending)
     },

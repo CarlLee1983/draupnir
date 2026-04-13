@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WebhookDispatcher } from '../Infrastructure/Services/Webhook/WebhookDispatcher'
 import { WebhookSecret } from '../Infrastructure/Services/Webhook/WebhookSecret'
 

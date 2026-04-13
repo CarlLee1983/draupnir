@@ -116,5 +116,4 @@ export class OrganizationInvitation {
   cancel(): OrganizationInvitation {
     return new OrganizationInvitation({ ...this.props, status: 'cancelled' })
   }
-
 }

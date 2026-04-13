@@ -1,10 +1,10 @@
 // src/Modules/CliApi/__tests__/ExchangeDeviceCodeService.test.ts
-import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
 import { ExchangeDeviceCodeService } from '../Application/Services/ExchangeDeviceCodeService'
 import { DeviceCode } from '../Domain/ValueObjects/DeviceCode'
-import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
-import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { MemoryDeviceCodeStore } from '../Infrastructure/Services/MemoryDeviceCodeStore'
 
 function createMockAuthTokenRepo(): IAuthTokenRepository {
   return {

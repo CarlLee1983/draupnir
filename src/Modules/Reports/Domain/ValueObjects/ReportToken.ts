@@ -9,21 +9,21 @@ export class ReportToken {
 
     const payload = JSON.stringify({ orgId, expiresAt: expiresAt.getTime() })
     const base64Payload = Buffer.from(payload).toString('base64url')
-    
+
     const key = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(secret),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['sign']
+      ['sign'],
     )
-    
+
     const signatureBuffer = await crypto.subtle.sign(
       'HMAC',
       key,
-      new TextEncoder().encode(base64Payload)
+      new TextEncoder().encode(base64Payload),
     )
-    
+
     const signature = Buffer.from(signatureBuffer).toString('base64url')
 
     return new ReportToken(`${base64Payload}.${signature}`)
@@ -42,20 +42,20 @@ export class ReportToken {
       }
 
       const [base64Payload, signature] = parts
-      
+
       const key = await crypto.subtle.importKey(
         'raw',
         new TextEncoder().encode(secret),
         { name: 'HMAC', hash: 'SHA-256' },
         false,
-        ['verify']
+        ['verify'],
       )
-      
+
       const isValid = await crypto.subtle.verify(
         'HMAC',
         key,
         Buffer.from(signature, 'base64url'),
-        new TextEncoder().encode(base64Payload)
+        new TextEncoder().encode(base64Payload),
       )
 
       if (!isValid) {

@@ -1,15 +1,15 @@
-import { ModuleServiceProvider, type IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import {
+  BifrostClient,
+  type BifrostClientConfig,
+  createBifrostClientConfig,
+} from '@draupnir/bifrost-sdk'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IScheduler } from '../Ports/Scheduler/IScheduler'
 import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/BifrostGatewayAdapter'
 import { ConsoleMailer } from '../Services/Mail/ConsoleMailer'
 import { UpyoMailer } from '../Services/Mail/UpyoMailer'
-import { WebhookDispatcher } from '../Services/Webhook/WebhookDispatcher'
 import { CronerScheduler } from '../Services/Scheduler/CronerScheduler'
-import type { IScheduler } from '../Ports/Scheduler/IScheduler'
-import {
-  BifrostClient,
-  createBifrostClientConfig,
-  type BifrostClientConfig,
-} from '@draupnir/bifrost-sdk'
+import { WebhookDispatcher } from '../Services/Webhook/WebhookDispatcher'
 
 export class FoundationServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
