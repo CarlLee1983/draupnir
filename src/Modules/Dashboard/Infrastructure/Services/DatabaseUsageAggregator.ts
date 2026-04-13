@@ -8,7 +8,7 @@ export class DatabaseUsageAggregator implements IUsageAggregator {
 
   async getStats(
     virtualKeyIds: readonly string[],
-    query?: UsageQuery,
+    _query?: UsageQuery,
   ): Promise<UsageStats> {
     if (virtualKeyIds.length === 0) {
       return { totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }
@@ -31,7 +31,7 @@ export class DatabaseUsageAggregator implements IUsageAggregator {
 
   async getLogs(
     virtualKeyIds: readonly string[],
-    query?: UsageQuery,
+    _query?: UsageQuery,
   ): Promise<readonly Record<string, unknown>[]> {
     if (virtualKeyIds.length === 0) {
       return []
