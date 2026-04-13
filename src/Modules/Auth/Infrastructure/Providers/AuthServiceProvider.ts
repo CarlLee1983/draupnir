@@ -8,6 +8,8 @@
  */
 
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
+import { UserRegisteredHandler } from '@/Modules/Profile/Application/Services/UserRegisteredHandler'
+import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
@@ -83,9 +85,8 @@ export class AuthServiceProvider extends ModuleServiceProvider {
 
     container.bind('registerUserService', (c: IContainer) => {
       const repository = c.make('authRepository') as IAuthRepository
-      const profileRepo = c.make('profileRepository') as IUserProfileRepository
       const passwordHasher = c.make('passwordHasher') as ScryptPasswordHasher
-      return new RegisterUserService(repository, profileRepo, passwordHasher)
+      return new RegisterUserService(repository, passwordHasher)
     })
 
     container.bind('loginUserService', (c: IContainer) => {
@@ -200,9 +201,20 @@ export class AuthServiceProvider extends ModuleServiceProvider {
 
   /**
    * Module boot hook. Executed after all providers are registered.
-   * Useful for logging or one-time module initialization.
+   * Wires the UserRegisteredHandler to the DomainEventDispatcher so the Profile
+   * module creates a default profile when a user successfully registers.
    */
-  override boot(_context: any): void {
+  override boot(context: any): void {
+    const container: IContainer = context
+    const profileRepo = container.make('profileRepository') as IUserProfileRepository
+    const handler = new UserRegisteredHandler(profileRepo)
+    const dispatcher = DomainEventDispatcher.getInstance()
+    dispatcher.on('auth.user_registered', async (event) => {
+      await handler.execute(
+        event.data.userId as string,
+        event.data.email as string,
+      )
+    })
     console.log('🔐 [Auth] Module loaded')
   }
 }
