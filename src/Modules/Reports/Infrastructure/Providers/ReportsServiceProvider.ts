@@ -1,4 +1,3 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IContainer, ModuleServiceProvider } from '../../../../Shared/Infrastructure/IServiceProvider'
 import { DrizzleReportRepository } from '../Repositories/DrizzleReportRepository'
 import { GeneratePdfService } from '../../Application/Services/GeneratePdfService'
@@ -8,9 +7,14 @@ import { ReportController } from '../../Presentation/Controllers/ReportControlle
 import { type IMailer } from '../../../../Foundation/Infrastructure/Ports/IMailer'
 import { type IReportRepository } from '../../Domain/Repositories/IReportRepository'
 import { type IDatabaseAccess } from '../../../../Shared/Infrastructure/IDatabaseAccess'
+import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
+import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 
-export class ReportsServiceProvider extends ModuleServiceProvider {
+export class ReportsServiceProvider extends ModuleServiceProvider implements IJobRegistrar {
+  private container!: IContainer
+
   override register(container: IContainer): void {
+    this.container = container
     container.singleton('reportRepository', (c: IContainer) => {
       return new DrizzleReportRepository(c.make('database') as IDatabaseAccess)
     })
@@ -27,25 +31,22 @@ export class ReportsServiceProvider extends ModuleServiceProvider {
       return new ScheduleReportService(
         c.make('reportRepository') as IReportRepository,
         c.make('generatePdfService') as GeneratePdfService,
-        c.make('sendReportEmailService') as SendReportEmailService
+        c.make('sendReportEmailService') as SendReportEmailService,
+        c.make('scheduler') as IScheduler,
       )
     })
 
     container.bind('reportController', (c: IContainer) => {
       return new ReportController(
         c.make('reportRepository') as IReportRepository,
-        c.make('scheduleReportService') as ScheduleReportService
+        c.make('scheduleReportService') as ScheduleReportService,
       )
     })
   }
 
-  override async boot(context: unknown): Promise<void> {
-    const core = context as PlanetCore
-    const scheduleService = core.container.make('scheduleReportService') as ScheduleReportService
-    
-    // Bootstrap existing schedules
+  async registerJobs(_scheduler: IScheduler): Promise<void> {
+    const scheduleService = this.container.make('scheduleReportService') as ScheduleReportService
     await scheduleService.bootstrap()
-    
-    console.log('[Reports] Module booted and schedules registered')
+    console.log('[Reports] registered scheduled report jobs')
   }
 }

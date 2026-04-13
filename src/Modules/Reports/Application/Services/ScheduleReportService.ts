@@ -1,36 +1,40 @@
-import { Cron } from 'croner'
+import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import { type IReportRepository } from '../../Domain/Repositories/IReportRepository'
 import { type GeneratePdfService } from './GeneratePdfService'
 import { type SendReportEmailService } from './SendReportEmailService'
 
 export class ScheduleReportService {
-  private jobs: Map<string, Cron> = new Map()
-
   constructor(
     private readonly reportRepository: IReportRepository,
     private readonly pdfService: GeneratePdfService,
-    private readonly emailService: SendReportEmailService
+    private readonly emailService: SendReportEmailService,
+    private readonly scheduler: IScheduler,
   ) {}
 
   async bootstrap(): Promise<void> {
     const schedules = await this.reportRepository.findAllEnabled()
     for (const schedule of schedules) {
-      this.schedule(schedule.id)
+      await this.schedule(schedule.id)
     }
   }
 
   async schedule(scheduleId: string): Promise<void> {
-    // Stop existing job if any
-    this.stop(scheduleId)
+    const jobName = this.jobName(scheduleId)
+    if (this.scheduler.has(jobName)) {
+      this.scheduler.unschedule(jobName)
+    }
 
     const schedule = await this.reportRepository.findById(scheduleId)
     if (!schedule || !schedule.enabled) {
       return
     }
 
-    const job = new Cron(
-      schedule.cronString,
-      { timezone: schedule.timezone },
+    this.scheduler.schedule(
+      {
+        name: jobName,
+        cron: schedule.cronString,
+        timezone: schedule.timezone,
+      },
       async () => {
         try {
           console.log(`[Reports] Generating scheduled report for schedule ${scheduleId}`)
@@ -40,21 +44,22 @@ export class ScheduleReportService {
         } catch (error) {
           console.error(`[Reports] Error executing scheduled report for schedule ${scheduleId}:`, error)
         }
-      }
+      },
     )
-
-    this.jobs.set(scheduleId, job)
   }
 
   stop(scheduleId: string): void {
-    const job = this.jobs.get(scheduleId)
-    if (job) {
-      job.stop()
-      this.jobs.delete(scheduleId)
+    const jobName = this.jobName(scheduleId)
+    if (this.scheduler.has(jobName)) {
+      this.scheduler.unschedule(jobName)
     }
   }
 
   isScheduled(scheduleId: string): boolean {
-    return this.jobs.has(scheduleId)
+    return this.scheduler.has(this.jobName(scheduleId))
+  }
+
+  private jobName(scheduleId: string): string {
+    return `report:${scheduleId}`
   }
 }

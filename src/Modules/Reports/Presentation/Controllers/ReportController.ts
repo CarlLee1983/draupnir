@@ -7,7 +7,7 @@ import { ReportToken } from '../../Domain/ValueObjects/ReportToken'
 export class ReportController {
   constructor(
     private readonly reportRepository: IReportRepository,
-    private readonly scheduleService: ScheduleReportService
+    private readonly scheduleReportService: ScheduleReportService
   ) {}
 
   async index(ctx: IHttpContext): Promise<Response> {
@@ -33,7 +33,7 @@ export class ReportController {
       await this.reportRepository.save(schedule)
       
       if (schedule.enabled) {
-        await this.scheduleService.schedule(schedule.id)
+        await this.scheduleReportService.schedule(schedule.id)
       }
 
       return ctx.json(schedule, 201)
@@ -65,9 +65,9 @@ export class ReportController {
       await this.reportRepository.save(updatedSchedule)
 
       if (updatedSchedule.enabled) {
-        await this.scheduleService.schedule(updatedSchedule.id)
+        await this.scheduleReportService.schedule(updatedSchedule.id)
       } else {
-        this.scheduleService.stop(updatedSchedule.id)
+        this.scheduleReportService.stop(updatedSchedule.id)
       }
 
       return ctx.json(updatedSchedule)
@@ -84,7 +84,7 @@ export class ReportController {
     }
 
     await this.reportRepository.delete(schedule.id)
-    this.scheduleService.stop(schedule.id)
+    this.scheduleReportService.stop(schedule.id)
 
     return new Response(null, { status: 204 })
   }
