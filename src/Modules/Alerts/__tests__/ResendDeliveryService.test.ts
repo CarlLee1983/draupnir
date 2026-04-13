@@ -7,6 +7,9 @@ import { WebhookEndpoint } from '../Domain/Aggregates/WebhookEndpoint'
 import type { IAlertDeliveryRepository } from '../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertEventRepository } from '../Domain/Repositories/IAlertEventRepository'
 import type { IWebhookEndpointRepository } from '../Domain/Repositories/IWebhookEndpointRepository'
+import { WebhookAlertNotifier } from '../Infrastructure/Services/WebhookAlertNotifier'
+import { InMemoryAlertRecipientResolver } from './fakes/InMemoryAlertRecipientResolver'
+import { FakeAlertNotifier } from './fakes/FakeAlertNotifier'
 
 describe('ResendDeliveryService', () => {
   let deliveryRepo: IAlertDeliveryRepository & {
@@ -21,8 +24,6 @@ describe('ResendDeliveryService', () => {
     save: ReturnType<typeof vi.fn>
   }
   let dispatcher: { dispatch: ReturnType<typeof vi.fn> }
-  let mailer: { send: ReturnType<typeof vi.fn> }
-  let orgRepo: { findById: ReturnType<typeof vi.fn> }
 
   beforeEach(() => {
     deliveryRepo = {
@@ -47,19 +48,27 @@ describe('ResendDeliveryService', () => {
       delete: vi.fn(),
     } as never
     dispatcher = { dispatch: vi.fn() }
-    mailer = { send: vi.fn() }
-    orgRepo = { findById: vi.fn() }
   })
 
   it('re-sends webhook deliveries and creates a new row', async () => {
-    const service = new ResendDeliveryService({
-      deliveryRepo,
-      eventRepo,
-      endpointRepo,
+    const webhookNotifier = new WebhookAlertNotifier({
+      endpointRepo: endpointRepo as never,
+      deliveryRepo: deliveryRepo as never,
       dispatcher: dispatcher as never,
-      mailer: mailer as never,
-      orgRepo: orgRepo as never,
     })
+
+    const service = new ResendDeliveryService({
+      deliveryRepo: deliveryRepo as never,
+      eventRepo: eventRepo as never,
+      recipientResolver: new InMemoryAlertRecipientResolver({
+        'org-1': { orgId: 'org-1', orgName: 'Org Name', emails: [] },
+      }),
+      notifierRegistry: {
+        email: new FakeAlertNotifier('email'),
+        webhook: webhookNotifier,
+      },
+    })
+
     const event = AlertEvent.create({
       orgId: 'org-1',
       tier: 'critical',
@@ -84,7 +93,6 @@ describe('ResendDeliveryService', () => {
     deliveryRepo.findById.mockResolvedValue(failed)
     eventRepo.findById.mockResolvedValue(event)
     endpointRepo.findById.mockResolvedValue(endpoint)
-    orgRepo.findById.mockResolvedValue({ id: 'org-1', name: 'Org Name' })
     dispatcher.dispatch.mockResolvedValue({
       success: true,
       statusCode: 200,
@@ -102,12 +110,13 @@ describe('ResendDeliveryService', () => {
 
   it('rejects non-failed deliveries', async () => {
     const service = new ResendDeliveryService({
-      deliveryRepo,
-      eventRepo,
-      endpointRepo,
-      dispatcher: dispatcher as never,
-      mailer: mailer as never,
-      orgRepo: orgRepo as never,
+      deliveryRepo: deliveryRepo as never,
+      eventRepo: eventRepo as never,
+      recipientResolver: new InMemoryAlertRecipientResolver(),
+      notifierRegistry: {
+        email: new FakeAlertNotifier('email'),
+        webhook: new FakeAlertNotifier('webhook'),
+      },
     })
     const delivery = AlertDelivery.create({
       alertEventId: 'event-1',
@@ -126,14 +135,24 @@ describe('ResendDeliveryService', () => {
   })
 
   it('raises WebhookEndpointGoneError when the endpoint was deleted', async () => {
-    const service = new ResendDeliveryService({
-      deliveryRepo,
-      eventRepo,
-      endpointRepo,
+    const webhookNotifier = new WebhookAlertNotifier({
+      endpointRepo: endpointRepo as never,
+      deliveryRepo: deliveryRepo as never,
       dispatcher: dispatcher as never,
-      mailer: mailer as never,
-      orgRepo: orgRepo as never,
     })
+
+    const service = new ResendDeliveryService({
+      deliveryRepo: deliveryRepo as never,
+      eventRepo: eventRepo as never,
+      recipientResolver: new InMemoryAlertRecipientResolver({
+        'org-1': { orgId: 'org-1', orgName: 'Org Name', emails: [] },
+      }),
+      notifierRegistry: {
+        email: new FakeAlertNotifier('email'),
+        webhook: webhookNotifier,
+      },
+    })
+
     const event = AlertEvent.create({
       orgId: 'org-1',
       tier: 'warning',

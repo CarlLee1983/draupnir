@@ -13,7 +13,6 @@ import { AlertController } from '../../Presentation/Controllers/AlertController'
 import { AlertHistoryController } from '../../Presentation/Controllers/AlertHistoryController'
 import { WebhookEndpointController } from '../../Presentation/Controllers/WebhookEndpointController'
 import { DeleteWebhookEndpointService } from '../../Application/Services/DeleteWebhookEndpointService'
-import { DispatchAlertWebhooksService } from '../../Application/Services/DispatchAlertWebhooksService'
 import { GetBudgetService } from '../../Application/Services/GetBudgetService'
 import { GetAlertHistoryService } from '../../Application/Services/GetAlertHistoryService'
 import { EvaluateThresholdsService } from '../../Application/Services/EvaluateThresholdsService'
@@ -34,7 +33,10 @@ import { AlertDeliveryRepository } from '../Repositories/AlertDeliveryRepository
 import { AlertEventRepository } from '../Repositories/AlertEventRepository'
 import { WebhookEndpointRepository } from '../Repositories/WebhookEndpointRepository'
 import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
+import type { IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
 import { AlertRecipientResolverImpl } from '../Services/AlertRecipientResolverImpl'
+import { EmailAlertNotifier } from '../Services/EmailAlertNotifier'
+import { WebhookAlertNotifier } from '../Services/WebhookAlertNotifier'
 
 export class AlertsServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
@@ -61,6 +63,21 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
         orgRepo: c.make('organizationRepository') as IOrganizationRepository,
         orgMemberRepo: c.make('organizationMemberRepository') as IOrganizationMemberRepository,
         authRepo: c.make('authRepository') as IAuthRepository,
+      })
+    })
+
+    container.singleton('emailAlertNotifier', (c: IContainer) => {
+      return new EmailAlertNotifier({
+        mailer: c.make('mailer') as IMailer,
+        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+      })
+    })
+
+    container.singleton('webhookAlertNotifier', (c: IContainer) => {
+      return new WebhookAlertNotifier({
+        endpointRepo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
+        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+        dispatcher: c.make('webhookDispatcher') as IWebhookDispatcher,
       })
     })
 
@@ -109,14 +126,6 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
       })
     })
 
-    container.bind('dispatchAlertWebhooksService', (c: IContainer) => {
-      return new DispatchAlertWebhooksService({
-        endpointRepo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
-        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
-        dispatcher: c.make('webhookDispatcher') as IWebhookDispatcher,
-      })
-    })
-
     container.bind('webhookEndpointController', (c: IContainer) => {
       return new WebhookEndpointController({
         listWebhookEndpointsService: c.make('listWebhookEndpointsService') as ListWebhookEndpointsService,
@@ -135,6 +144,18 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
       })
     })
 
+    container.bind('resendDeliveryService', (c: IContainer) => {
+      return new ResendDeliveryService({
+        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
+        eventRepo: c.make('alertEventRepository') as IAlertEventRepository,
+        recipientResolver: c.make('alertRecipientResolver') as IAlertRecipientResolver,
+        notifierRegistry: {
+          email: c.make('emailAlertNotifier') as IAlertNotifier,
+          webhook: c.make('webhookAlertNotifier') as IAlertNotifier,
+        },
+      })
+    })
+
     container.bind('alertHistoryController', (c: IContainer) => {
       return new AlertHistoryController({
         getAlertHistoryService: c.make('getAlertHistoryService') as GetAlertHistoryService,
@@ -142,24 +163,14 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
       })
     })
 
-    container.bind('resendDeliveryService', (c: IContainer) => {
-      return new ResendDeliveryService({
-        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
-        eventRepo: c.make('alertEventRepository') as IAlertEventRepository,
-        endpointRepo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
-        dispatcher: c.make('webhookDispatcher') as IWebhookDispatcher,
-        mailer: c.make('mailer') as IMailer,
-        orgRepo: c.make('organizationRepository') as IOrganizationRepository,
-      })
-    })
-
     container.bind('sendAlertService', (c: IContainer) => {
       return new SendAlertService({
-        mailer: c.make('mailer') as IMailer,
         recipientResolver: c.make('alertRecipientResolver') as IAlertRecipientResolver,
         alertEventRepo: c.make('alertEventRepository') as IAlertEventRepository,
-        deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
-        dispatchWebhooksService: c.make('dispatchAlertWebhooksService') as DispatchAlertWebhooksService,
+        notifiers: [
+          c.make('emailAlertNotifier') as IAlertNotifier,
+          c.make('webhookAlertNotifier') as IAlertNotifier,
+        ],
       })
     })
 

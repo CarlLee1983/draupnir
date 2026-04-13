@@ -1,21 +1,36 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { AlertEvent } from '../Domain/Entities/AlertEvent'
 import { WebhookEndpoint } from '../Domain/Aggregates/WebhookEndpoint'
-import { DispatchAlertWebhooksService } from '../Application/Services/DispatchAlertWebhooksService'
+import { WebhookAlertNotifier } from '../Infrastructure/Services/WebhookAlertNotifier'
 import type { IAlertDeliveryRepository } from '../Domain/Repositories/IAlertDeliveryRepository'
 import type { IWebhookEndpointRepository } from '../Domain/Repositories/IWebhookEndpointRepository'
+import type { AlertPayload } from '../Domain/Services/IAlertNotifier'
 
-describe('DispatchAlertWebhooksService', () => {
+describe('WebhookAlertNotifier', () => {
   let endpointRepo: IWebhookEndpointRepository & {
     findActiveByOrg: ReturnType<typeof vi.fn>
+    findById: ReturnType<typeof vi.fn>
     save: ReturnType<typeof vi.fn>
   }
   let deliveryRepo: IAlertDeliveryRepository & {
     existsSent: ReturnType<typeof vi.fn>
     save: ReturnType<typeof vi.fn>
   }
-  let dispatcher: any
-  let logger: any
+  let dispatcher: { dispatch: ReturnType<typeof vi.fn> }
+  let logger: { error: ReturnType<typeof vi.fn> }
+
+  const basePayload = (event: AlertEvent, orgName: string): AlertPayload => ({
+    orgId: event.orgId,
+    orgName,
+    alertEventId: event.id,
+    tier: event.tier,
+    budgetUsd: event.budgetUsd,
+    actualCostUsd: event.actualCostUsd,
+    percentage: event.percentage,
+    month: event.month,
+    keyBreakdown: [],
+    emails: [],
+  })
 
   beforeEach(() => {
     endpointRepo = {
@@ -33,12 +48,8 @@ describe('DispatchAlertWebhooksService', () => {
       existsSent: vi.fn(),
       listByOrg: vi.fn(),
     } as never
-    dispatcher = {
-      dispatch: vi.fn(),
-    }
-    logger = {
-      error: vi.fn(),
-    }
+    dispatcher = { dispatch: vi.fn() }
+    logger = { error: vi.fn() }
   })
 
   afterEach(() => {
@@ -46,11 +57,11 @@ describe('DispatchAlertWebhooksService', () => {
   })
 
   it('skips deduped endpoints and records sent/failed rows independently', async () => {
-    const service = new DispatchAlertWebhooksService({
-      endpointRepo,
-      deliveryRepo,
+    const notifier = new WebhookAlertNotifier({
+      endpointRepo: endpointRepo as never,
+      deliveryRepo: deliveryRepo as never,
       dispatcher: dispatcher as never,
-      logger,
+      logger: logger as { error: (...args: unknown[]) => void },
     })
     const event = AlertEvent.create({
       orgId: 'org-1',
@@ -66,35 +77,35 @@ describe('DispatchAlertWebhooksService', () => {
     const third = WebhookEndpoint.create('org-1', 'https://example.com/three')
 
     endpointRepo.findActiveByOrg.mockResolvedValue([first, second, third])
-    // first is already sent
     deliveryRepo.existsSent.mockImplementation(async ({ target }) => target === first.id)
 
     dispatcher.dispatch
-      .mockRejectedValueOnce(new Error('boom')) // second fails
-      .mockResolvedValueOnce({ // third succeeds
+      .mockRejectedValueOnce(new Error('boom'))
+      .mockResolvedValueOnce({
         success: true,
         statusCode: 200,
         attempts: 1,
         webhookId: 'wh_3',
       })
 
-    await expect(service.dispatchAll(event, 'Org Name')).resolves.toBeUndefined()
+    await expect(notifier.notify(basePayload(event, 'Org Name'))).resolves.toMatchObject({
+      channel: 'webhook',
+    })
 
-    expect(dispatcher.dispatch).toHaveBeenCalledTimes(2) // second and third
+    expect(dispatcher.dispatch).toHaveBeenCalledTimes(2)
     expect(deliveryRepo.save).toHaveBeenCalledTimes(2)
     expect(endpointRepo.save).toHaveBeenCalledTimes(2)
     expect(logger.error).not.toHaveBeenCalled()
 
-    // Verify first was skipped
     expect(dispatcher.dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ url: first.url }))
   })
 
   it('never throws when endpoint lookup fails', async () => {
-    const service = new DispatchAlertWebhooksService({
-      endpointRepo,
-      deliveryRepo,
+    const notifier = new WebhookAlertNotifier({
+      endpointRepo: endpointRepo as never,
+      deliveryRepo: deliveryRepo as never,
       dispatcher: dispatcher as never,
-      logger,
+      logger: logger as { error: (...args: unknown[]) => void },
     })
     const event = AlertEvent.create({
       orgId: 'org-1',
@@ -108,7 +119,11 @@ describe('DispatchAlertWebhooksService', () => {
 
     endpointRepo.findActiveByOrg.mockRejectedValueOnce(new Error('database down'))
 
-    await expect(service.dispatchAll(event, 'Org Name')).resolves.toBeUndefined()
+    await expect(notifier.notify(basePayload(event, 'Org Name'))).resolves.toEqual({
+      channel: 'webhook',
+      successes: 0,
+      failures: 0,
+    })
     expect(logger.error).toHaveBeenCalled()
   })
 })

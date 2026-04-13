@@ -56,7 +56,7 @@
   Plans:
   - [x] 18-01-PLAN.md — Scheduler 抽象基礎：IScheduler port、CronerScheduler adapter（retry + backoff + runOnInit）、FakeScheduler 測試替身、DI `'scheduler'` singleton 綁定
   - [x] 18-02-PLAN.md — 現有任務遷移：ScheduleReportService 改為 IScheduler 代理、ReportsServiceProvider 移除 boot()、DashboardServiceProvider.registerJobs() 接手 BifrostSync、bootstrap.ts registerJobs 迴圈、BIFROST_SYNC_CRON config
-- [ ] **Phase 19: Alerts Module Decoupling (3 plans)**
+- [x] **Phase 19: Alerts Module Decoupling (3 plans)** (completed 2026-04-13)
   **Requirements:** ALERTS-01, ALERTS-02, ALERTS-03, ALERTS-04, ALERTS-05
   **Goal:** 讓 Alerts 模組遵循 Phase 17 建立的 ORM-agnostic 模式，徹底斷絕與 Drizzle 的直接耦合、收斂跨模組依賴面、建立統一 IAlertNotifier 策略與可在無 DI 容器下運行的測試 fixtures。
   **Plans:** 3 plans
@@ -76,5 +76,5 @@
 | 16. Automated Reports | v1.3 | 2/2 | Complete | 2026-04-12 |
 | 17. Repository Refactor | v1.3 | 5/5 | Complete | 2026-04-12 |
 | 18. Uniform Background Jobs | v1.4 | 2/2 | Complete   | 2026-04-13 |
-| 19. Alerts Decoupling | v1.4 | 0/3 | Planned | - |
+| 19. Alerts Decoupling | v1.4 | 0/3 | Complete    | 2026-04-13 |
 | 20. CI Guardrails | v1.4 | 0/2 | Not started | - |

@@ -1,16 +1,8 @@
-import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
 import type { IAlertEventRepository } from '../../Domain/Repositories/IAlertEventRepository'
-import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import type { IAlertRecipientResolver } from '../../Domain/Services/IAlertRecipientResolver'
+import type { AlertPayload, IAlertNotifier } from '../../Domain/Services/IAlertNotifier'
 import { AlertEvent } from '../../Domain/Entities/AlertEvent'
-import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
-import {
-  criticalAlertTemplate,
-  warningAlertTemplate,
-  type AlertEmailTemplateParams,
-  type AlertKeyBreakdownItem,
-} from '../../Infrastructure/Services/AlertEmailTemplates'
-import { DispatchAlertWebhooksService } from './DispatchAlertWebhooksService'
+import type { AlertEmailTemplateParams } from '../../Infrastructure/Services/AlertEmailTemplates'
 
 export interface SendAlertParams extends Omit<AlertEmailTemplateParams, 'orgName'> {
   readonly orgId: string
@@ -18,21 +10,17 @@ export interface SendAlertParams extends Omit<AlertEmailTemplateParams, 'orgName
 }
 
 /**
- * Dispatches alert emails to organization managers and records the alert event.
+ * Dispatches alert emails and webhooks and records the alert event.
  *
- * Cross-module org/member/auth resolution is delegated to IAlertRecipientResolver
- * (Alerts-owned Domain port, per D-05). This service no longer imports any
- * Organization, Auth, or OrgMember repositories directly.
+ * Cross-module recipient resolution uses {@link IAlertRecipientResolver}.
+ * Channel delivery is delegated to {@link IAlertNotifier} strategies.
  */
 export class SendAlertService {
   constructor(
     private readonly deps: {
       readonly recipientResolver: IAlertRecipientResolver
       readonly alertEventRepo: IAlertEventRepository
-      readonly deliveryRepo: IAlertDeliveryRepository
-      readonly mailer: IMailer
-      /** Kept in Plan 2; Plan 3 replaces with notifiers: readonly IAlertNotifier[] */
-      readonly dispatchWebhooksService: DispatchAlertWebhooksService
+      readonly notifiers: readonly IAlertNotifier[]
     },
   ) {}
 
@@ -52,60 +40,31 @@ export class SendAlertService {
 
     await this.deps.alertEventRepo.save(alertEvent)
 
-    const html =
-      params.tier === 'critical'
-        ? criticalAlertTemplate({ ...params, orgName })
-        : warningAlertTemplate({ ...params, orgName })
-
-    for (const recipient of emails) {
-      const skipped = await this.deps.deliveryRepo.existsSent({
-        orgId: params.orgId,
-        month: params.month,
-        tier: params.tier,
-        channel: 'email',
-        target: recipient,
-      })
-      if (skipped) {
-        continue
-      }
-
-      const dispatchedAt = new Date().toISOString()
-      const base = AlertDelivery.create({
-        alertEventId: alertEvent.id,
-        channel: 'email',
-        target: recipient,
-        targetUrl: null,
-        dispatchedAt,
-        orgId: alertEvent.orgId,
-        month: alertEvent.month,
-        tier: alertEvent.tier,
-      })
-
-      try {
-        await this.deps.mailer.send({
-          to: recipient,
-          subject: `[Draupnir] ${params.tier === 'critical' ? 'CRITICAL' : 'Warning'}: Budget alert for ${orgName}`,
-          html,
-        })
-
-        await this.deps.deliveryRepo.save(base.markSent(null, new Date().toISOString(), 1))
-      } catch (error) {
-        await this.deps.deliveryRepo.save(
-          base.markFailed(
-            null,
-            error instanceof Error ? error.message : 'Unknown email error',
-            1,
-          ),
-        )
-      }
+    const payload: AlertPayload = {
+      orgId: params.orgId,
+      orgName,
+      alertEventId: alertEvent.id,
+      tier: params.tier,
+      budgetUsd: params.budgetUsd,
+      actualCostUsd: params.actualCostUsd,
+      percentage: params.percentage,
+      month: params.month,
+      keyBreakdown: params.keyBreakdown,
+      emails: [...emails],
     }
 
+    const emailNotifiers = this.deps.notifiers.filter((n) => n.channel === 'email')
+    await Promise.allSettled(emailNotifiers.map((n) => n.notify(payload)))
+
+    const webhookNotifiers = this.deps.notifiers.filter((n) => n.channel === 'webhook')
     queueMicrotask(() => {
-      void Promise.resolve(this.deps.dispatchWebhooksService.dispatchAll(alertEvent, orgName)).catch((error) =>
-        console.error('[SendAlertService] webhook dispatch unexpectedly threw', error),
-      )
+      for (const n of webhookNotifiers) {
+        void n.notify(payload).catch((error) =>
+          console.error('[SendAlertService] webhook notifier unexpectedly threw', error),
+        )
+      }
     })
   }
 }
 
-export type { AlertKeyBreakdownItem }
+export type { AlertKeyBreakdownItem } from '../../Infrastructure/Services/AlertEmailTemplates'
