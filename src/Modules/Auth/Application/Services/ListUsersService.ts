@@ -4,16 +4,17 @@
  *
  * Responsibilities:
  * - Load users and profiles, join display metadata (name, avatar)
- * - Filter by role, status, and keyword (email / display name)
- * - Sort by `createdAt` descending and apply page/limit
+ * - Filter by role and status at the DB layer via IAuthRepository
+ * - Filter by keyword (email / display name) in-memory (requires profile join)
+ * - Apply server-side pagination (limit/offset at DB layer when no keyword)
  *
- * Implementation note: loads full user and profile sets from repositories, then filters in
- * memory. Suitable for modest datasets; consider DB-level paging if lists grow large.
+ * Implementation note: role/status filtering is pushed to SQL WHERE for efficiency.
+ * keyword filtering remains in-memory as it requires a profile join for displayName.
  */
 
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import { UserProfileMapper } from '@/Modules/Profile/Infrastructure/Mappers/UserProfileMapper'
-import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
+import type { IAuthRepository, UserListFilters } from '../../Domain/Repositories/IAuthRepository'
 import type { ListUsersQuery, ListUsersResponse, UserListItemDTO } from '../DTOs/UserListDTO'
 
 /**
@@ -35,20 +36,29 @@ export class ListUsersService {
     try {
       const page = request.page ?? 1
       const limit = request.limit ?? 20
+      const offset = (page - 1) * limit
       const keyword = request.keyword?.trim().toLowerCase()
 
-      const [users, profiles] = await Promise.all([
-        this.authRepository.findAll(),
-        this.profileRepository.findAll(),
-      ])
+      const repoFilters: UserListFilters = {
+        role: request.role,
+        status: request.status,
+      }
 
-      const profileById = new Map(profiles.map((profile) => [profile.id, profile] as const))
+      let total: number
+      let pageItems: UserListItemDTO[]
 
-      const filtered = users
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .filter((user) => (request.role ? user.role.getValue() === request.role : true))
-        .filter((user) => (request.status ? user.status === request.status : true))
-        .map((user): UserListItemDTO => {
+      if (!keyword) {
+        // No keyword: pagination fully at DB layer
+        const [count, users, profiles] = await Promise.all([
+          this.authRepository.countAll(repoFilters),
+          this.authRepository.findAll({ ...repoFilters, limit, offset }),
+          this.profileRepository.findAll(),
+        ])
+
+        const profileById = new Map(profiles.map((profile) => [profile.id, profile] as const))
+
+        total = count
+        pageItems = users.map((user): UserListItemDTO => {
           const profile = profileById.get(user.id)
           const dto = profile ? UserProfileMapper.toDTO(profile) : null
           return {
@@ -62,17 +72,39 @@ export class ListUsersService {
             updatedAt: user.updatedAt.toISOString(),
           }
         })
-        .filter((user) => {
-          if (!keyword) return true
-          return (
-            user.email.toLowerCase().includes(keyword) ||
-            user.displayName.toLowerCase().includes(keyword)
-          )
-        })
+      } else {
+        // keyword: fetch all matching role/status, then in-memory keyword filter + slice
+        const [users, profiles] = await Promise.all([
+          this.authRepository.findAll(repoFilters),
+          this.profileRepository.findAll(),
+        ])
 
-      const total = filtered.length
-      const offset = (page - 1) * limit
-      const pageItems = filtered.slice(offset, offset + limit)
+        const profileById = new Map(profiles.map((profile) => [profile.id, profile] as const))
+
+        const filtered = users
+          .map((user): UserListItemDTO => {
+            const profile = profileById.get(user.id)
+            const dto = profile ? UserProfileMapper.toDTO(profile) : null
+            return {
+              id: user.id,
+              email: user.emailValue,
+              role: user.role.getValue(),
+              status: user.status,
+              displayName: dto?.displayName ?? user.emailValue,
+              avatarUrl: dto?.avatarUrl ?? null,
+              createdAt: user.createdAt.toISOString(),
+              updatedAt: user.updatedAt.toISOString(),
+            }
+          })
+          .filter(
+            (user) =>
+              user.email.toLowerCase().includes(keyword) ||
+              user.displayName.toLowerCase().includes(keyword),
+          )
+
+        total = filtered.length
+        pageItems = filtered.slice(offset, offset + limit)
+      }
 
       return {
         success: true,
