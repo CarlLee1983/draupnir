@@ -67,13 +67,6 @@ export class AuthRepository implements IAuthRepository {
     }
   }
 
-  async updatePassword(id: string, hashedPassword: string): Promise<void> {
-    await this.db
-      .table('users')
-      .where('id', '=', id)
-      .update({ password: hashedPassword, updated_at: new Date().toISOString() })
-  }
-
   /**
    * Deletes a user account from the system.
    */

@@ -25,7 +25,12 @@ describe('ResetPasswordService', () => {
     new Date(Date.now() + 3600000),
     true,
   )
-  const mockUser = { id: 'user-1', emailValue: 'user@example.com' } as any
+  const mockUpdatedUser = { id: 'user-1', emailValue: 'user@example.com' } as any
+  const mockUser = {
+    id: 'user-1',
+    emailValue: 'user@example.com',
+    withPassword: mock(() => mockUpdatedUser),
+  } as any
 
   function makeTokenRepo(): IAuthTokenRepository {
     return {
@@ -40,7 +45,7 @@ describe('ResetPasswordService', () => {
     } as any
     const authRepo: IAuthRepository = {
       findByEmail: mock(async () => mockUser),
-      updatePassword: mock(async () => {}),
+      save: mock(async () => {}),
     } as any
     const hasher: IPasswordHasher = {
       hash: mock(async () => 'hashed-new-password'),
@@ -51,7 +56,8 @@ describe('ResetPasswordService', () => {
     const result = await service.execute('valid-token-abc', 'NewPassword123!')
 
     expect(result.success).toBe(true)
-    expect(authRepo.updatePassword).toHaveBeenCalledWith('user-1', 'hashed-new-password')
+    expect(mockUser.withPassword).toHaveBeenCalledWith('hashed-new-password')
+    expect(authRepo.save).toHaveBeenCalledWith(mockUpdatedUser)
     expect(resetRepo.markUsed).toHaveBeenCalledWith('valid-token-abc')
   })
 
@@ -62,7 +68,7 @@ describe('ResetPasswordService', () => {
     } as any
     const authRepo: IAuthRepository = {
       findByEmail: mock(async () => mockUser),
-      updatePassword: mock(async () => {}),
+      save: mock(async () => {}),
     } as any
     const hasher: IPasswordHasher = {
       hash: mock(async () => 'hashed-new-password'),

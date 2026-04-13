@@ -38,7 +38,8 @@ export class ResetPasswordService {
     }
 
     const hashedPassword = await this.passwordHasher.hash(newPassword)
-    await this.authRepository.updatePassword(user.id, hashedPassword)
+    const updated = user.withPassword(hashedPassword)
+    await this.authRepository.save(updated)
     await this.tokenRepository.revokeAllByUserId(user.id)
     await this.passwordResetRepository.markUsed(token)
 

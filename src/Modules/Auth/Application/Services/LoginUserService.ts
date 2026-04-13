@@ -25,17 +25,7 @@ import { Email } from '../../Domain/ValueObjects/Email'
 import type { LoginRequest, LoginResponse } from '../DTOs/LoginDTO'
 import type { IJwtTokenService } from '../Ports/IJwtTokenService'
 import type { IPasswordHasher } from '../Ports/IPasswordHasher'
-
-/**
- * Computes a SHA-256 hash of a string.
- */
-async function sha256(str: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(str)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
-}
+import { sha256 } from '../Utils/sha256'
 
 /**
  * Service responsible for authenticating users and issuing access/refresh tokens.
@@ -116,7 +106,7 @@ export class LoginUserService {
       const accessTokenStr = accessTokenObj.getValue()
       const accessTokenHash = await sha256(accessTokenStr)
       await this.authTokenRepository.save({
-        id: `${user.id}_access_${Date.now()}`,
+        id: crypto.randomUUID(),
         userId: user.id,
         tokenHash: accessTokenHash,
         type: 'access',
@@ -127,7 +117,7 @@ export class LoginUserService {
       const refreshTokenStr = refreshTokenObj.getValue()
       const refreshTokenHash = await sha256(refreshTokenStr)
       await this.authTokenRepository.save({
-        id: `${user.id}_refresh_${Date.now()}`,
+        id: crypto.randomUUID(),
         userId: user.id,
         tokenHash: refreshTokenHash,
         type: 'refresh',

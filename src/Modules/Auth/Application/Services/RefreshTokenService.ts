@@ -11,17 +11,7 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import type { IJwtTokenService, TokenSignPayload } from '../Ports/IJwtTokenService'
-
-/**
- * Computes a SHA-256 hash of a string.
- */
-async function sha256(str: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(str)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
-}
+import { sha256 } from '../Utils/sha256'
 
 /**
  * Request payload for refreshing an access token.
@@ -112,7 +102,7 @@ export class RefreshTokenService {
       const newAccessTokenStr = newAccessToken.getValue()
       const newAccessTokenHash = await this.hashToken(newAccessTokenStr)
       await this.authTokenRepository.save({
-        id: `${user.id}_access_refresh_${Date.now()}`,
+        id: crypto.randomUUID(),
         userId: user.id,
         tokenHash: newAccessTokenHash,
         type: 'access',
