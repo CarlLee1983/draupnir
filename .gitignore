@@ -13,6 +13,11 @@ node_modules/
 /dist
 playwright-report/
 test-results/
+test_failures.txt
+
+# Local experiments / temp DB (do not commit)
+scratch/
+local.db
 
 # IDEs
 .vscode/
