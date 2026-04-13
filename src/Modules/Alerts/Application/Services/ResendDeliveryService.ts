@@ -74,6 +74,9 @@ export class ResendDeliveryService {
         target: endpoint.id,
         targetUrl: endpoint.url,
         dispatchedAt,
+        orgId: event.orgId,
+        month: event.month,
+        tier: event.tier,
       })
 
       try {
@@ -137,6 +140,9 @@ export class ResendDeliveryService {
       target: delivery.target,
       targetUrl: null,
       dispatchedAt,
+      orgId: event.orgId,
+      month: event.month,
+      tier: event.tier,
     })
 
     try {

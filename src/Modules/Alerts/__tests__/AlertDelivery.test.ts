@@ -9,6 +9,9 @@ describe('AlertDelivery', () => {
       target: 'endpoint-1',
       targetUrl: 'https://example.com/hook',
       dispatchedAt: '2026-04-12T00:00:00.000Z',
+      orgId: 'org-1',
+      month: '2026-04',
+      tier: 'warning',
     })
 
     expect(delivery.status).toBe('pending')

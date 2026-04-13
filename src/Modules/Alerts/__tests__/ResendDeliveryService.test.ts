@@ -75,6 +75,9 @@ describe('ResendDeliveryService', () => {
       target: 'endpoint-1',
       targetUrl: 'https://example.com/hook',
       dispatchedAt: '2026-04-01T00:00:00.000Z',
+      orgId: 'org-1',
+      month: '2026-04',
+      tier: 'critical',
     }).markFailed(500, 'boom', 2)
     const endpoint = WebhookEndpoint.create('org-1', 'https://example.com/hook')
 
@@ -112,6 +115,9 @@ describe('ResendDeliveryService', () => {
       target: 'endpoint-1',
       targetUrl: 'https://example.com/hook',
       dispatchedAt: '2026-04-01T00:00:00.000Z',
+      orgId: 'org-1',
+      month: '2026-04',
+      tier: 'warning',
     }).markSent(200, '2026-04-01T00:01:00.000Z', 1)
 
     deliveryRepo.findById.mockResolvedValue(delivery)
@@ -143,6 +149,9 @@ describe('ResendDeliveryService', () => {
       target: 'endpoint-missing',
       targetUrl: 'https://example.com/hook',
       dispatchedAt: '2026-04-01T00:00:00.000Z',
+      orgId: 'org-1',
+      month: '2026-04',
+      tier: 'warning',
     }).markFailed(500, 'boom', 1)
 
     deliveryRepo.findById.mockResolvedValue(failed)

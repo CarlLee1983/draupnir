@@ -1,73 +1,62 @@
-import { and, desc, eq, sql } from 'drizzle-orm'
-import { getDrizzleInstance } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
-import { webhookEndpoints } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IWebhookEndpointRepository } from '../../Domain/Repositories/IWebhookEndpointRepository'
 import { WebhookEndpoint } from '../../Domain/Aggregates/WebhookEndpoint'
 import { WebhookEndpointMapper } from '../Mappers/WebhookEndpointMapper'
 
+/**
+ * Webhook Endpoint Repository — IDatabaseAccess Implementation
+ *
+ * Replaces the Drizzle-coupled version using the ORM-agnostic IDatabaseAccess port.
+ * The `save` operation performs an upsert via delete-then-insert semantics since
+ * IDatabaseAccess does not expose an `onConflictDoUpdate` API.
+ */
 export class DrizzleWebhookEndpointRepository implements IWebhookEndpointRepository {
-  constructor(_db: unknown) {}
+  constructor(private readonly db: IDatabaseAccess) {}
 
   async findById(id: string): Promise<WebhookEndpoint | null> {
-    const db = getDrizzleInstance()
-    const rows = await db.select().from(webhookEndpoints).where(eq(webhookEndpoints.id, id)).limit(1)
-    return rows[0] ? WebhookEndpointMapper.toDomain(rows[0] as Record<string, unknown>) : null
+    const row = await this.db.table('webhook_endpoints').where('id', '=', id).first()
+    return row ? WebhookEndpointMapper.toDomain(row) : null
   }
 
   async findByOrg(orgId: string): Promise<WebhookEndpoint[]> {
-    const db = getDrizzleInstance()
-    const rows = await db
+    const rows = await this.db
+      .table('webhook_endpoints')
+      .where('org_id', '=', orgId)
+      .orderBy('created_at', 'DESC')
       .select()
-      .from(webhookEndpoints)
-      .where(eq(webhookEndpoints.org_id, orgId))
-      .orderBy(desc(webhookEndpoints.created_at))
-
-    return rows.map((row: Record<string, unknown>) => WebhookEndpointMapper.toDomain(row))
+    return rows.map((row) => WebhookEndpointMapper.toDomain(row))
   }
 
   async findActiveByOrg(orgId: string): Promise<WebhookEndpoint[]> {
-    const db = getDrizzleInstance()
-    const rows = await db
+    const rows = await this.db
+      .table('webhook_endpoints')
+      .where('org_id', '=', orgId)
+      .where('active', '=', true)
+      .orderBy('created_at', 'DESC')
       .select()
-      .from(webhookEndpoints)
-      .where(and(eq(webhookEndpoints.org_id, orgId), eq(webhookEndpoints.active, true)))
-      .orderBy(desc(webhookEndpoints.created_at))
-
-    return rows.map((row: Record<string, unknown>) => WebhookEndpointMapper.toDomain(row))
+    return rows.map((row) => WebhookEndpointMapper.toDomain(row))
   }
 
   async countByOrg(orgId: string): Promise<number> {
-    const db = getDrizzleInstance()
-    const rows = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(webhookEndpoints)
-      .where(eq(webhookEndpoints.org_id, orgId))
-
-    return Number(rows[0]?.count ?? 0)
+    return this.db.table('webhook_endpoints').where('org_id', '=', orgId).count()
   }
 
+  /**
+   * Upserts a WebhookEndpoint.
+   *
+   * Uses a transaction with delete-then-insert because IDatabaseAccess does not
+   * expose an `onConflictDoUpdate` API. This is semantically equivalent to the
+   * Drizzle `onConflictDoUpdate` pattern.
+   */
   async save(endpoint: WebhookEndpoint): Promise<void> {
-    const db = getDrizzleInstance()
-    await db
-      .insert(webhookEndpoints)
-      .values(WebhookEndpointMapper.toPersistence(endpoint))
-      .onConflictDoUpdate({
-        target: webhookEndpoints.id,
-        set: {
-          org_id: endpoint.orgId,
-          url: endpoint.url,
-          secret: endpoint.secret,
-          active: endpoint.active,
-          description: endpoint.description,
-          created_at: endpoint.createdAt,
-          last_success_at: endpoint.lastSuccessAt,
-          last_failure_at: endpoint.lastFailureAt,
-        },
-      })
+    const data = WebhookEndpointMapper.toPersistence(endpoint) as unknown as Record<string, unknown>
+    await this.db.transaction(async (tx) => {
+      await tx.table('webhook_endpoints').where('id', '=', endpoint.id).delete()
+      await tx.table('webhook_endpoints').insert(data)
+    })
   }
 
   async delete(id: string): Promise<void> {
-    const db = getDrizzleInstance()
-    await db.delete(webhookEndpoints).where(eq(webhookEndpoints.id, id))
+    await this.db.table('webhook_endpoints').where('id', '=', id).delete()
   }
 }

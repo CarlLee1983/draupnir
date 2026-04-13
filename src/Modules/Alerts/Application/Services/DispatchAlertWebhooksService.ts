@@ -57,6 +57,9 @@ export class DispatchAlertWebhooksService {
       target: endpoint.id,
       targetUrl: endpoint.url,
       dispatchedAt,
+      orgId: event.orgId,
+      month: event.month,
+      tier: event.tier,
     })
 
     try {

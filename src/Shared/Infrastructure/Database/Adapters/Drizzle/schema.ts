@@ -258,6 +258,9 @@ export const webhookEndpoints = sqliteTable(
 
 /**
  * Alert Deliveries 表 — 記錄 email / webhook 每次遞送結果
+ *
+ * Denormalized columns (org_id, month, tier) eliminate JOIN on alert_events
+ * for existsSent / listByOrg queries, enabling purely single-table queries.
  */
 export const alertDeliveries = sqliteTable(
   'alert_deliveries',
@@ -274,11 +277,16 @@ export const alertDeliveries = sqliteTable(
     dispatched_at: text('dispatched_at').notNull(),
     delivered_at: text('delivered_at'),
     created_at: text('created_at').notNull(),
+    // Denormalized from alert_events to avoid JOIN in existsSent / listByOrg
+    org_id: text('org_id').notNull().default(''),
+    month: text('month').notNull().default(''),
+    tier: text('tier').notNull().default(''),
   },
   (table) => [
     index('idx_alert_deliveries_event_id').on(table.alert_event_id),
     index('idx_alert_deliveries_channel_target').on(table.channel, table.target),
     index('idx_alert_deliveries_dedup').on(table.alert_event_id, table.channel, table.target, table.status),
+    index('idx_alert_deliveries_org_month_tier').on(table.org_id, table.month, table.tier),
   ],
 )
 

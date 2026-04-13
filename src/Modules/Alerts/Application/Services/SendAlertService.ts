@@ -86,6 +86,9 @@ export class SendAlertService {
         target: recipient,
         targetUrl: null,
         dispatchedAt,
+        orgId: alertEvent.orgId,
+        month: alertEvent.month,
+        tier: alertEvent.tier,
       })
 
       try {

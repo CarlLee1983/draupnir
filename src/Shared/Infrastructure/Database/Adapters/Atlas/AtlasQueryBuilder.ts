@@ -8,6 +8,7 @@
  */
 
 import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { AggregateSpec, AggregateExpression } from '@/Shared/Infrastructure/Database/AggregateSpec'
 
 /**
  * 懶加載 Atlas DB 實例
@@ -229,7 +230,107 @@ export class AtlasQueryBuilder implements IQueryBuilder {
   }
 
   /**
-   * 範圍查詢
+   * Inserts a record, silently ignoring if the conflictTarget already exists.
+   *
+   * Implemented via SQLite's `INSERT OR IGNORE INTO ... VALUES (...)`
+   * using `DB.raw()` since Atlas QueryBuilderContract has no native on-conflict API.
+   *
+   * @param data - The data to insert.
+   * @param options.conflictTarget - Ignored (SQLite OR IGNORE applies globally on any UNIQUE constraint).
+   */
+  async insertOrIgnore(
+    data: Record<string, unknown>,
+    _options: { readonly conflictTarget: string | readonly string[] },
+  ): Promise<void> {
+    const columns = Object.keys(data)
+    const placeholders = columns.map(() => '?').join(', ')
+    const values = Object.values(data)
+    const sql = `INSERT OR IGNORE INTO "${this.tableName}" (${columns.map((c) => `"${c}"`).join(', ')}) VALUES (${placeholders})`
+    const DB = require('@gravito/atlas').DB
+    await DB.raw(sql, values)
+  }
+
+  /**
+   * Declarative aggregate query translator.
+   *
+   * Translates an `AggregateSpec` (select / groupBy / orderBy / limit) into
+   * a raw SQL query executed via `DB.raw()`. Returns typed result rows.
+   *
+   * @param spec - Declarative aggregate specification.
+   * @returns Array of typed result rows.
+   */
+  async aggregate<T>(spec: AggregateSpec): Promise<readonly T[]> {
+    const selectParts: string[] = Object.entries(spec.select).map(([alias, expr]) => {
+      return `${this.compileExpr(expr)} AS "${alias}"`
+    })
+
+    const whereParts: string[] = []
+    const bindings: unknown[] = []
+    for (const cond of this.whereConditions) {
+      if (cond.operator === '=') {
+        whereParts.push(`"${cond.column}" = ?`)
+        bindings.push(cond.value)
+      } else if (cond.operator === 'between' && Array.isArray(cond.value)) {
+        whereParts.push(`"${cond.column}" BETWEEN ? AND ?`)
+        bindings.push(cond.value[0], cond.value[1])
+      } else {
+        whereParts.push(`"${cond.column}" ${cond.operator} ?`)
+        bindings.push(cond.value)
+      }
+    }
+
+    let sql = `SELECT ${selectParts.join(', ')} FROM "${this.tableName}"`
+    if (whereParts.length > 0) {
+      sql += ` WHERE ${whereParts.join(' AND ')}`
+    }
+    if (spec.groupBy && spec.groupBy.length > 0) {
+      sql += ` GROUP BY ${spec.groupBy.map((c) => `"${c}"`).join(', ')}`
+    }
+    if (spec.orderBy && spec.orderBy.length > 0) {
+      sql += ` ORDER BY ${spec.orderBy.map((o) => `"${o.column}" ${o.direction}`).join(', ')}`
+    }
+    if (spec.limit !== undefined) {
+      sql += ` LIMIT ${spec.limit}`
+    }
+
+    const DB = require('@gravito/atlas').DB
+    const result = await DB.raw(sql, bindings)
+    return Array.isArray(result) ? (result as T[]) : ((result as Record<string, unknown>).rows ?? []) as T[]
+  }
+
+  /**
+   * Compiles an AggregateExpression into a SQL fragment.
+   * @private
+   */
+  private compileExpr(expr: AggregateExpression): string {
+    switch (expr.kind) {
+      case 'sum':
+        return `SUM(${typeof expr.column === 'string' ? `"${expr.column}"` : this.compileExpr(expr.column)})`
+      case 'count':
+        return expr.column === '*' ? 'COUNT(*)' : `COUNT("${expr.column}")`
+      case 'avg':
+        return `AVG(${typeof expr.column === 'string' ? `"${expr.column}"` : this.compileExpr(expr.column)})`
+      case 'min':
+        return `MIN(${typeof expr.column === 'string' ? `"${expr.column}"` : this.compileExpr(expr.column)})`
+      case 'max':
+        return `MAX(${typeof expr.column === 'string' ? `"${expr.column}"` : this.compileExpr(expr.column)})`
+      case 'dateTrunc':
+        // SQLite: strftime for date truncation
+        return `strftime('%Y-%m-%d', "${expr.column}")`
+      case 'coalesce': {
+        const operand = typeof expr.operands[0] === 'string' ? `"${expr.operands[0]}"` : this.compileExpr(expr.operands[0] as AggregateExpression)
+        const fallback = typeof expr.operands[1] === 'string' ? `'${expr.operands[1]}'` : String(expr.operands[1])
+        return `COALESCE(${operand}, ${fallback})`
+      }
+      case 'add':
+        return `("${expr.left}" + "${expr.right}")`
+      case 'column':
+        return `"${expr.column}"`
+    }
+  }
+
+  /**
+   * Range query.
    *
    * @param column 欄位名稱
    * @param range 範圍 [開始, 結束]

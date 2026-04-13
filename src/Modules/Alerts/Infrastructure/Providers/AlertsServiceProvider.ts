@@ -38,11 +38,11 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
   override register(container: IContainer): void {
     const db = container.make('database') as IDatabaseAccess
 
-    container.singleton('drizzleAlertConfigRepository', () => {
+    container.singleton('alertConfigRepository', () => {
       return new DrizzleAlertConfigRepository(db)
     })
 
-    container.singleton('drizzleAlertEventRepository', () => {
+    container.singleton('alertEventRepository', () => {
       return new DrizzleAlertEventRepository(db)
     })
 
@@ -55,11 +55,11 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
     })
 
     container.bind('setBudgetService', (c: IContainer) => {
-      return new SetBudgetService(c.make('drizzleAlertConfigRepository') as IAlertConfigRepository)
+      return new SetBudgetService(c.make('alertConfigRepository') as IAlertConfigRepository)
     })
 
     container.bind('getBudgetService', (c: IContainer) => {
-      return new GetBudgetService(c.make('drizzleAlertConfigRepository') as IAlertConfigRepository)
+      return new GetBudgetService(c.make('alertConfigRepository') as IAlertConfigRepository)
     })
 
     container.bind('alertController', (c: IContainer) => {
@@ -120,7 +120,7 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
 
     container.bind('getAlertHistoryService', (c: IContainer) => {
       return new GetAlertHistoryService({
-        eventRepo: c.make('drizzleAlertEventRepository') as IAlertEventRepository,
+        eventRepo: c.make('alertEventRepository') as IAlertEventRepository,
         deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
       })
     })
@@ -135,7 +135,7 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
     container.bind('resendDeliveryService', (c: IContainer) => {
       return new ResendDeliveryService({
         deliveryRepo: c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
-        eventRepo: c.make('drizzleAlertEventRepository') as IAlertEventRepository,
+        eventRepo: c.make('alertEventRepository') as IAlertEventRepository,
         endpointRepo: c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
         dispatcher: c.make('webhookDispatcher') as IWebhookDispatcher,
         mailer: c.make('mailer') as IMailer,
@@ -149,7 +149,7 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
         c.make('organizationMemberRepository') as IOrganizationMemberRepository,
         c.make('organizationRepository') as IOrganizationRepository,
         c.make('authRepository') as IAuthRepository,
-        c.make('drizzleAlertEventRepository') as IAlertEventRepository,
+        c.make('alertEventRepository') as IAlertEventRepository,
         c.make('alertDeliveryRepository') as IAlertDeliveryRepository,
         c.make('dispatchAlertWebhooksService') as DispatchAlertWebhooksService,
       )
@@ -157,7 +157,7 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
 
     container.bind('evaluateThresholdsService', (c: IContainer) => {
       return new EvaluateThresholdsService(
-        c.make('drizzleAlertConfigRepository') as IAlertConfigRepository,
+        c.make('alertConfigRepository') as IAlertConfigRepository,
         c.make('drizzleUsageRepository') as IUsageRepository,
         c.make('apiKeyRepository') as IApiKeyRepository,
         c.make('sendAlertService') as SendAlertService,

@@ -13,6 +13,9 @@ export interface AlertDeliveriesInsert {
   dispatched_at: string
   delivered_at: string | null
   created_at: string
+  org_id: string
+  month: string
+  tier: string
 }
 
 export class AlertDeliveryMapper {
@@ -30,6 +33,9 @@ export class AlertDeliveryMapper {
       dispatchedAt: String(row.dispatched_at),
       deliveredAt: row.delivered_at === null || row.delivered_at === undefined ? null : String(row.delivered_at),
       createdAt: String(row.created_at),
+      orgId: String(row.org_id ?? ''),
+      month: String(row.month ?? ''),
+      tier: String(row.tier ?? ''),
     } satisfies AlertDeliveryProps)
   }
 
@@ -47,6 +53,9 @@ export class AlertDeliveryMapper {
       dispatched_at: delivery.dispatchedAt,
       delivered_at: delivery.deliveredAt,
       created_at: delivery.createdAt,
+      org_id: delivery.orgId,
+      month: delivery.month,
+      tier: delivery.tier,
     }
   }
 }

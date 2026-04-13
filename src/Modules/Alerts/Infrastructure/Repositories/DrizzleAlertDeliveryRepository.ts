@@ -1,79 +1,80 @@
-import { and, desc, eq } from 'drizzle-orm'
-import { getDrizzleInstance } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
-import { alertDeliveries, alertEvents } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IAlertDeliveryRepository } from '../../Domain/Repositories/IAlertDeliveryRepository'
 import { AlertDelivery } from '../../Domain/Entities/AlertDelivery'
 import { AlertDeliveryMapper } from '../Mappers/AlertDeliveryMapper'
+import type { DeliveryChannel } from '../../Domain/ValueObjects/DeliveryStatus'
 
+/**
+ * Alert Delivery Repository — IDatabaseAccess Implementation
+ *
+ * Replaces the Drizzle-coupled version. Uses denormalized `org_id`, `month`,
+ * and `tier` columns added in migration 2026_04_13_000002 to avoid JOINs
+ * in `existsSent` and `listByOrg`.
+ */
 export class DrizzleAlertDeliveryRepository implements IAlertDeliveryRepository {
-  constructor(_db: unknown) {}
+  constructor(private readonly db: IDatabaseAccess) {}
 
   async save(delivery: AlertDelivery): Promise<void> {
-    const db = getDrizzleInstance()
-    await db
-      .insert(alertDeliveries)
-      .values(AlertDeliveryMapper.toPersistence(delivery))
-      .onConflictDoNothing({ target: alertDeliveries.id })
+    await this.db
+      .table('alert_deliveries')
+      .insertOrIgnore(AlertDeliveryMapper.toPersistence(delivery) as unknown as Record<string, unknown>, {
+        conflictTarget: 'id',
+      })
   }
 
   async findById(id: string): Promise<AlertDelivery | null> {
-    const db = getDrizzleInstance()
-    const rows = await db.select().from(alertDeliveries).where(eq(alertDeliveries.id, id)).limit(1)
-    return rows[0] ? AlertDeliveryMapper.toDomain(rows[0] as Record<string, unknown>) : null
+    const row = await this.db.table('alert_deliveries').where('id', '=', id).first()
+    return row ? AlertDeliveryMapper.toDomain(row) : null
   }
 
   async findByAlertEventId(alertEventId: string): Promise<AlertDelivery[]> {
-    const db = getDrizzleInstance()
-    const rows = await db
+    const rows = await this.db
+      .table('alert_deliveries')
+      .where('alert_event_id', '=', alertEventId)
+      .orderBy('created_at', 'DESC')
       .select()
-      .from(alertDeliveries)
-      .where(eq(alertDeliveries.alert_event_id, alertEventId))
-      .orderBy(desc(alertDeliveries.created_at))
-
-    return rows.map((row: Record<string, unknown>) => AlertDeliveryMapper.toDomain(row))
+    return rows.map((row) => AlertDeliveryMapper.toDomain(row))
   }
 
+  /**
+   * Checks whether a delivery for the given org/month/tier/channel/target
+   * has already been sent.
+   *
+   * Uses the denormalized `org_id`, `month`, and `tier` columns to avoid
+   * any JOIN on alert_events.
+   */
   async existsSent(params: {
     orgId: string
     month: string
     tier: string
-    channel: 'email' | 'webhook'
+    channel: DeliveryChannel
     target: string
   }): Promise<boolean> {
-    const db = getDrizzleInstance()
-    const rows = await db
-      .select({ id: alertDeliveries.id })
-      .from(alertDeliveries)
-      .innerJoin(alertEvents, eq(alertDeliveries.alert_event_id, alertEvents.id))
-      .where(
-        and(
-          eq(alertEvents.org_id, params.orgId),
-          eq(alertEvents.month, params.month),
-          eq(alertEvents.tier, params.tier),
-          eq(alertDeliveries.channel, params.channel),
-          eq(alertDeliveries.target, params.target),
-          eq(alertDeliveries.status, 'sent'),
-        ),
-      )
-      .limit(1)
-
-    return rows.length > 0
+    const row = await this.db
+      .table('alert_deliveries')
+      .where('org_id', '=', params.orgId)
+      .where('month', '=', params.month)
+      .where('tier', '=', params.tier)
+      .where('channel', '=', params.channel)
+      .where('target', '=', params.target)
+      .where('status', '=', 'sent')
+      .first()
+    return row !== null
   }
 
+  /**
+   * Lists deliveries for an organisation, ordered by most recent first.
+   *
+   * Uses the denormalized `org_id` column — no JOIN required.
+   */
   async listByOrg(orgId: string, opts?: { limit?: number; offset?: number }): Promise<AlertDelivery[]> {
-    const db = getDrizzleInstance()
-    const rows = await db
-      .select({
-        delivery: alertDeliveries,
-        event: alertEvents,
-      })
-      .from(alertDeliveries)
-      .innerJoin(alertEvents, eq(alertDeliveries.alert_event_id, alertEvents.id))
-      .where(eq(alertEvents.org_id, orgId))
-      .orderBy(desc(alertEvents.created_at), desc(alertDeliveries.created_at))
+    const rows = await this.db
+      .table('alert_deliveries')
+      .where('org_id', '=', orgId)
+      .orderBy('created_at', 'DESC')
       .limit(opts?.limit ?? 50)
       .offset(opts?.offset ?? 0)
-
-    return rows.map((row: { delivery: Record<string, unknown> }) => AlertDeliveryMapper.toDomain(row.delivery))
+      .select()
+    return rows.map((row) => AlertDeliveryMapper.toDomain(row))
   }
 }

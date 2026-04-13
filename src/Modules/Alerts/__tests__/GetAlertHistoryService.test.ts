@@ -61,6 +61,9 @@ describe('GetAlertHistoryService', () => {
       target: 'manager@example.com',
       targetUrl: null,
       dispatchedAt: '2026-03-01T00:00:00.000Z',
+      orgId: 'org-1',
+      month: '2026-03',
+      tier: 'warning',
     }).markSent(null, '2026-03-01T00:01:00.000Z', 1)
     const delivery2 = AlertDelivery.create({
       alertEventId: 'event-2',
@@ -68,6 +71,9 @@ describe('GetAlertHistoryService', () => {
       target: 'endpoint-1',
       targetUrl: 'https://example.com/hook',
       dispatchedAt: '2026-04-01T00:00:00.000Z',
+      orgId: 'org-1',
+      month: '2026-04',
+      tier: 'critical',
     }).markFailed(500, 'boom', 3)
 
     deliveryRepo.findByAlertEventId.mockImplementation(async (eventId: string) => {
