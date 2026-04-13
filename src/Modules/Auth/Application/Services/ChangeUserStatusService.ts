@@ -27,25 +27,24 @@ export class ChangeUserStatusService {
         return { success: false, message: 'User not found', error: 'USER_NOT_FOUND' }
       }
 
+      const updated = request.status === 'suspended' ? user.suspend() : user.activate()
+
       if (request.status === 'suspended') {
-        user.suspend()
         await this.authTokenRepository.revokeAllByUserId(userId)
-      } else {
-        user.activate()
       }
 
-      await this.authRepository.save(user)
+      await this.authRepository.save(updated)
 
       return {
         success: true,
         message: `Account ${request.status === 'suspended' ? 'suspended' : 'activated'} successfully`,
         data: {
-          id: user.id,
-          email: user.emailValue,
-          role: user.role.getValue(),
-          status: user.status,
-          createdAt: user.createdAt.toISOString(),
-          updatedAt: user.updatedAt.toISOString(),
+          id: updated.id,
+          email: updated.emailValue,
+          role: updated.role.getValue(),
+          status: updated.status,
+          createdAt: updated.createdAt.toISOString(),
+          updatedAt: updated.updatedAt.toISOString(),
         },
       }
     } catch (error: any) {

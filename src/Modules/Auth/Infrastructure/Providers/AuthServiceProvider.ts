@@ -14,6 +14,7 @@ import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { getCurrentORM } from '@/wiring/RepositoryFactory'
 import { getRegistry } from '@/wiring/RepositoryRegistry'
 import type { IEmailService } from '../../Application/Ports/IEmailService'
+import type { IGoogleOAuthAdapter } from '../../Application/Ports/IGoogleOAuthAdapter'
 import { ChangeUserStatusService } from '../../Application/Services/ChangeUserStatusService'
 import { EmailVerificationService } from '../../Application/Services/EmailVerificationService'
 import { ForgotPasswordService } from '../../Application/Services/ForgotPasswordService'
@@ -141,7 +142,7 @@ export class AuthServiceProvider extends ModuleServiceProvider {
       return new GoogleOAuthService(
         c.make('authRepository') as IAuthRepository,
         c.make('jwtTokenService') as JwtTokenService,
-        c.make('googleOAuthAdapter') as GoogleOAuthAdapter,
+        c.make('googleOAuthAdapter') as IGoogleOAuthAdapter,
         c.make('profileRepository') as IUserProfileRepository,
         c.make('passwordHasher') as ScryptPasswordHasher,
       )

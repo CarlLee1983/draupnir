@@ -93,33 +93,31 @@ export class User {
   }
 
   /**
-   * Updates the user's account status.
+   * Returns a new User with an updated status (immutable pattern).
    */
-  setStatus(status: UserStatus): void {
-    this.props.status = status
-    this.props.updatedAt = new Date()
+  withStatus(status: UserStatus): User {
+    return new User({ ...this.props, status, updatedAt: new Date() })
   }
 
   /**
-   * Suspends the user's account, preventing login.
+   * Returns a new User with status set to SUSPENDED (immutable pattern).
    */
-  suspend(): void {
-    this.setStatus(UserStatus.SUSPENDED)
+  suspend(): User {
+    return this.withStatus(UserStatus.SUSPENDED)
   }
 
   /**
-   * Activates the user's account, allowing login.
+   * Returns a new User with status set to ACTIVE (immutable pattern).
    */
-  activate(): void {
-    this.setStatus(UserStatus.ACTIVE)
+  activate(): User {
+    return this.withStatus(UserStatus.ACTIVE)
   }
 
   /**
-   * Associates a Google account with this user (e.g. first OAuth login for an email-only account).
+   * Returns a new User with the given Google account linked (immutable pattern).
    */
-  linkGoogleAccount(googleId: string): void {
-    this.props.googleId = googleId
-    this.props.updatedAt = new Date()
+  withGoogleId(googleId: string): User {
+    return new User({ ...this.props, googleId, updatedAt: new Date() })
   }
 
   /**

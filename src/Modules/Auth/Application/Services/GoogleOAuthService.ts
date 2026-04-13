@@ -9,7 +9,7 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
 import { Role } from '../../Domain/ValueObjects/Role'
-import type { GoogleOAuthAdapter } from '../../Infrastructure/Services/GoogleOAuthAdapter'
+import type { IGoogleOAuthAdapter } from '../Ports/IGoogleOAuthAdapter'
 import type { IJwtTokenService } from '../Ports/IJwtTokenService'
 import type { IPasswordHasher } from '../Ports/IPasswordHasher'
 
@@ -17,7 +17,7 @@ export class GoogleOAuthService {
   constructor(
     private readonly authRepository: IAuthRepository,
     private readonly jwtTokenService: IJwtTokenService,
-    private readonly googleOAuthAdapter: GoogleOAuthAdapter,
+    private readonly googleOAuthAdapter: IGoogleOAuthAdapter,
     private readonly userProfileRepository: IUserProfileRepository,
     private readonly passwordHasher: IPasswordHasher,
   ) {}
@@ -46,8 +46,9 @@ export class GoogleOAuthService {
           return { success: false, error: 'OAUTH_ACCOUNT_CONFLICT' }
         }
         if (!user.googleId) {
-          user.linkGoogleAccount(googleUserInfo.id)
-          await this.authRepository.save(user)
+          const linked = user.withGoogleId(googleUserInfo.id)
+          await this.authRepository.save(linked)
+          return this.issueSuccess(linked)
         }
         return this.issueSuccess(user)
       }
