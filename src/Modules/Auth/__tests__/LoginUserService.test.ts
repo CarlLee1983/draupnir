@@ -106,8 +106,7 @@ describe('LoginUserService Integration Test', () => {
     // 暫停用戶
     const user = await repository.findByEmail(new Email('user@example.com'))
     if (user) {
-      user.suspend()
-      await repository.save(user)
+      await repository.save(user.suspend())
     }
 
     const result = await loginService.execute({

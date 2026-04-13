@@ -32,13 +32,15 @@ describe('User Aggregate Root', () => {
     const email = new Email('user@example.com')
     const user = User.create('user-id', email, Password.fromHashed('salt:hash'))
 
-    user.suspend()
-    expect(user.status).toBe(UserStatus.SUSPENDED)
-    expect(user.isSuspended()).toBe(true)
-
-    user.activate()
+    const suspended = user.suspend()
+    expect(suspended.status).toBe(UserStatus.SUSPENDED)
+    expect(suspended.isSuspended()).toBe(true)
+    // original user is unchanged (immutable)
     expect(user.status).toBe(UserStatus.ACTIVE)
-    expect(user.isSuspended()).toBe(false)
+
+    const activated = suspended.activate()
+    expect(activated.status).toBe(UserStatus.ACTIVE)
+    expect(activated.isSuspended()).toBe(false)
   })
 
   it('應該從 domain props 重構', () => {

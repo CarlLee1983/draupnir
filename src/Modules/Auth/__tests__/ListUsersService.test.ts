@@ -44,8 +44,7 @@ describe('ListUsersService', () => {
     await authRepo.save(adminUser)
 
     const suspended = await authRepo.findById(users[1].id)
-    suspended?.suspend()
-    if (suspended) await authRepo.save(suspended)
+    if (suspended) await authRepo.save(suspended.suspend())
 
     const profiles = await profileRepo.findAll()
     const charlieProfile = profiles.find((p) => p.id === users[2].id)
