@@ -16,18 +16,18 @@ export class ChangeOrgMemberRoleService {
     newRole: string,
   ): Promise<OrganizationResponse> {
     try {
-      new OrgMemberRole(newRole)
+      const newRoleVO = new OrgMemberRole(newRole)
 
       const member = await this.memberRepository.findByUserAndOrgId(targetUserId, orgId)
       if (!member) {
         return { success: false, message: 'Member not found', error: 'MEMBER_NOT_FOUND' }
       }
 
-      const updated = member.changeRole(newRole)
+      const updated = member.changeRole(newRoleVO)
 
       await this.db.transaction(async (tx) => {
         const txMemberRepo = this.memberRepository.withTransaction(tx)
-        if (member.isManager() && newRole !== 'manager') {
+        if (member.isManager() && !newRoleVO.isManager()) {
           const managerCount = await txMemberRepo.countManagersByOrgId(orgId)
           OrgMembershipRules.assertNotLastManager(member, managerCount)
         }

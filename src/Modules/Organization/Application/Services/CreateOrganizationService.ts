@@ -17,6 +17,7 @@ import { Organization } from '../../Domain/Aggregates/Organization'
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
+import { OrgMemberRole } from '../../Domain/ValueObjects/OrgMemberRole'
 import {
   type CreateOrganizationRequest,
   OrganizationPresenter,
@@ -69,7 +70,7 @@ export class CreateOrganizationService {
           crypto.randomUUID(),
           orgId,
           request.managerUserId,
-          'manager',
+          new OrgMemberRole('manager'),
         )
         await txMemberRepo.save(member)
         await this.provisionOrganizationDefaults.execute(orgId, request.managerUserId)

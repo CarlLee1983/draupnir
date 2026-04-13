@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { Organization } from '../Domain/Aggregates/Organization'
 import { OrganizationInvitation } from '../Domain/Entities/OrganizationInvitation'
 import { OrganizationMember } from '../Domain/Entities/OrganizationMember'
+import { OrgMemberRole } from '../Domain/ValueObjects/OrgMemberRole'
 
 describe('Organization Aggregate', () => {
   it('應成功建立 Organization', () => {
@@ -30,10 +31,10 @@ describe('Organization Aggregate', () => {
 
 describe('OrganizationMember Entity', () => {
   it('應成功建立成員', () => {
-    const member = OrganizationMember.create('m-1', 'org-1', 'user-1', 'manager')
+    const member = OrganizationMember.create('m-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
     expect(member.organizationId).toBe('org-1')
     expect(member.userId).toBe('user-1')
-    expect(member.role).toBe('manager')
+    expect(member.role.getValue()).toBe('manager')
   })
 })
 
@@ -42,12 +43,12 @@ describe('OrganizationInvitation Entity', () => {
     const invitation = await OrganizationInvitation.create(
       'org-1',
       'new@example.com',
-      'member',
+      new OrgMemberRole('member'),
       'inviter-1',
     )
     expect(invitation.organizationId).toBe('org-1')
     expect(invitation.email).toBe('new@example.com')
-    expect(invitation.status).toBe('pending')
+    expect(invitation.status.getValue()).toBe('pending')
     expect(invitation.token).toBeTruthy()
     expect(invitation.isExpired()).toBe(false)
   })
@@ -56,7 +57,7 @@ describe('OrganizationInvitation Entity', () => {
     const invitation = await OrganizationInvitation.create(
       'org-1',
       'new@example.com',
-      'member',
+      new OrgMemberRole('member'),
       'inviter-1',
     )
     expect(invitation.getTokenHash()).toMatch(/^[a-f0-9]{64}$/)

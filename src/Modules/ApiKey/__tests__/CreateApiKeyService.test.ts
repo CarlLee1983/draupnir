@@ -3,6 +3,7 @@ import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
+import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationRepository'
@@ -32,7 +33,7 @@ describe('CreateApiKeyService', () => {
 
     const org = Organization.create('org-1', 'Test Org', 'test')
     await orgRepo.save(org)
-    const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
+    const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
     await memberRepo.save(member)
   })
 

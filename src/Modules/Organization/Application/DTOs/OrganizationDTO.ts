@@ -22,7 +22,7 @@ export class OrganizationMemberPresenter {
       id: entity.id,
       organizationId: entity.organizationId,
       userId: entity.userId,
-      role: entity.role,
+      role: entity.role.getValue(),
       joinedAt: entity.joinedAt.toISOString(),
     }
   }
@@ -34,8 +34,8 @@ export class OrganizationInvitationPresenter {
       id: entity.id,
       organizationId: entity.organizationId,
       email: entity.email,
-      role: entity.role,
-      status: entity.status,
+      role: entity.role.getValue(),
+      status: entity.status.getValue(),
       expiresAt: entity.expiresAt.toISOString(),
       createdAt: entity.createdAt.toISOString(),
     }

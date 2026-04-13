@@ -43,7 +43,7 @@ export class OrgAuthorizationHelper {
 
     return {
       authorized: true,
-      membership: { role: membership.role, userId: membership.userId },
+      membership: { role: membership.role.getValue(), userId: membership.userId },
     }
   }
 
@@ -71,7 +71,7 @@ export class OrgAuthorizationHelper {
 
     return {
       authorized: true,
-      membership: { role: membership.role, userId: membership.userId },
+      membership: { role: membership.role.getValue(), userId: membership.userId },
     }
   }
 }

@@ -68,6 +68,7 @@ export class AcceptInvitationService {
         }
       }
 
+      // invitation.role 已是 OrgMemberRole VO
       const member = OrganizationMember.create(
         crypto.randomUUID(),
         invitation.organizationId,
@@ -79,7 +80,9 @@ export class AcceptInvitationService {
         const txMemberRepo = this.memberRepository.withTransaction(tx)
         const txInvitationRepo = this.invitationRepository.withTransaction(tx)
         await txMemberRepo.save(member)
-        await txInvitationRepo.markAsAccepted(invitation.id)
+        // 呼叫 Domain 方法後再透過 repo.update() 持久化狀態變更
+        const accepted = invitation.markAsAccepted()
+        await txInvitationRepo.update(accepted)
       })
 
       return {

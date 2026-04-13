@@ -1,5 +1,5 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { OrganizationInvitation } from '../../Domain/Entities/OrganizationInvitation'
+import type { OrganizationInvitation } from '../../Domain/Entities/OrganizationInvitation'
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import { OrganizationInvitationMapper } from '../Mappers/OrganizationInvitationMapper'
 
@@ -12,9 +12,16 @@ export class OrganizationInvitationRepository implements IOrganizationInvitation
       .insert(OrganizationInvitationMapper.toDatabaseRow(invitation))
   }
 
+  async update(invitation: OrganizationInvitation): Promise<void> {
+    await this.db
+      .table('organization_invitations')
+      .where('id', '=', invitation.id)
+      .update(OrganizationInvitationMapper.toDatabaseRow(invitation))
+  }
+
   async findById(id: string): Promise<OrganizationInvitation | null> {
     const row = await this.db.table('organization_invitations').where('id', '=', id).first()
-    return row ? OrganizationInvitation.fromDatabase(row) : null
+    return row ? OrganizationInvitationMapper.toEntity(row) : null
   }
 
   async findByTokenHash(tokenHash: string): Promise<OrganizationInvitation | null> {
@@ -22,7 +29,7 @@ export class OrganizationInvitationRepository implements IOrganizationInvitation
       .table('organization_invitations')
       .where('token_hash', '=', tokenHash)
       .first()
-    return row ? OrganizationInvitation.fromDatabase(row) : null
+    return row ? OrganizationInvitationMapper.toEntity(row) : null
   }
 
   async findByOrgId(orgId: string): Promise<OrganizationInvitation[]> {
@@ -31,21 +38,7 @@ export class OrganizationInvitationRepository implements IOrganizationInvitation
       .where('organization_id', '=', orgId)
       .orderBy('created_at', 'DESC')
       .select()
-    return rows.map((row) => OrganizationInvitation.fromDatabase(row))
-  }
-
-  async markAsAccepted(invitationId: string): Promise<void> {
-    await this.db
-      .table('organization_invitations')
-      .where('id', '=', invitationId)
-      .update({ status: 'accepted' })
-  }
-
-  async cancel(invitationId: string): Promise<void> {
-    await this.db
-      .table('organization_invitations')
-      .where('id', '=', invitationId)
-      .update({ status: 'cancelled' })
+    return rows.map((row) => OrganizationInvitationMapper.toEntity(row))
   }
 
   async deleteExpired(): Promise<void> {

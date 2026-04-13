@@ -1,5 +1,5 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
-import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
+import type { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrganizationMemberMapper } from '../Mappers/OrganizationMemberMapper'
 
@@ -8,7 +8,7 @@ export class OrganizationMemberRepository implements IOrganizationMemberReposito
 
   async findByUserId(userId: string): Promise<OrganizationMember | null> {
     const row = await this.db.table('organization_members').where('user_id', '=', userId).first()
-    return row ? OrganizationMember.fromDatabase(row) : null
+    return row ? OrganizationMemberMapper.toEntity(row) : null
   }
 
   async findByUserAndOrgId(userId: string, orgId: string): Promise<OrganizationMember | null> {
@@ -17,7 +17,7 @@ export class OrganizationMemberRepository implements IOrganizationMemberReposito
       .where('user_id', '=', userId)
       .where('organization_id', '=', orgId)
       .first()
-    return row ? OrganizationMember.fromDatabase(row) : null
+    return row ? OrganizationMemberMapper.toEntity(row) : null
   }
 
   async findByOrgId(orgId: string, limit?: number, offset?: number): Promise<OrganizationMember[]> {
@@ -29,7 +29,7 @@ export class OrganizationMemberRepository implements IOrganizationMemberReposito
       query = query.limit(limit)
     }
     const rows = await query.select()
-    return rows.map((row) => OrganizationMember.fromDatabase(row))
+    return rows.map((row) => OrganizationMemberMapper.toEntity(row))
   }
 
   async save(member: OrganizationMember): Promise<void> {

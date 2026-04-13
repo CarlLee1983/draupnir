@@ -3,12 +3,14 @@
  * Domain Entity: represents the relationship between a User and an Organization.
  */
 
+import { OrgMemberRole } from '../ValueObjects/OrgMemberRole'
+
 /** Properties defining an OrganizationMember's state. */
 interface OrganizationMemberProps {
   id: string
   organizationId: string
   userId: string
-  role: string
+  role: OrgMemberRole
   joinedAt: Date
   createdAt: Date
 }
@@ -29,7 +31,7 @@ export class OrganizationMember {
     id: string,
     organizationId: string,
     userId: string,
-    role: string,
+    role: OrgMemberRole,
   ): OrganizationMember {
     return new OrganizationMember({
       id,
@@ -41,20 +43,13 @@ export class OrganizationMember {
     })
   }
 
-  /** Reconstitutes a member from database row. */
-  static fromDatabase(row: Record<string, unknown>): OrganizationMember {
-    return new OrganizationMember({
-      id: row.id as string,
-      organizationId: row.organization_id as string,
-      userId: row.user_id as string,
-      role: row.role as string,
-      joinedAt: new Date(row.joined_at as string),
-      createdAt: new Date(row.created_at as string),
-    })
+  /** 從持久層重建 OrganizationMember（不含業務邏輯）。 */
+  static reconstitute(props: OrganizationMemberProps): OrganizationMember {
+    return new OrganizationMember(props)
   }
 
   /** Returns a new member instance with the updated role. */
-  changeRole(newRole: string): OrganizationMember {
+  changeRole(newRole: OrgMemberRole): OrganizationMember {
     return new OrganizationMember({ ...this.props, role: newRole })
   }
 
@@ -70,8 +65,8 @@ export class OrganizationMember {
   get userId(): string {
     return this.props.userId
   }
-  /** Assigned role (e.g., "manager", "member"). */
-  get role(): string {
+  /** Assigned role as OrgMemberRole VO. */
+  get role(): OrgMemberRole {
     return this.props.role
   }
   /** Timestamp when the user joined. */
@@ -85,6 +80,6 @@ export class OrganizationMember {
 
   /** Returns true if the member holds the manager role. */
   isManager(): boolean {
-    return this.props.role === 'manager'
+    return this.props.role.isManager()
   }
 }

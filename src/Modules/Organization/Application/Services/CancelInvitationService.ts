@@ -25,7 +25,10 @@ export class CancelInvitationService {
         return { success: false, message: 'Invitation not found', error: 'INVITATION_NOT_FOUND' }
       }
 
-      await this.invitationRepository.cancel(invitationId)
+      // 呼叫 Domain 方法後再透過 repo.update() 持久化狀態變更
+      const cancelled = invitation.cancel()
+      await this.invitationRepository.update(cancelled)
+
       return { success: true, message: 'Invitation cancelled' }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Cancellation failed'

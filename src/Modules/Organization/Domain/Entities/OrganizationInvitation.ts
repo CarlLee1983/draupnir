@@ -1,3 +1,6 @@
+import { InvitationStatus } from '../ValueObjects/InvitationStatus'
+import { OrgMemberRole } from '../ValueObjects/OrgMemberRole'
+
 const EXPIRY_DAYS = 7
 
 async function sha256(str: string): Promise<string> {
@@ -14,9 +17,9 @@ interface OrganizationInvitationProps {
   email: string
   token: string
   tokenHash: string
-  role: string
+  role: OrgMemberRole
   invitedByUserId: string
-  status: string
+  status: InvitationStatus
   expiresAt: Date
   createdAt: Date
 }
@@ -31,7 +34,7 @@ export class OrganizationInvitation {
   static async create(
     organizationId: string,
     email: string,
-    role: string,
+    role: OrgMemberRole,
     invitedByUserId: string,
   ): Promise<OrganizationInvitation> {
     const buffer = new Uint8Array(32)
@@ -48,25 +51,15 @@ export class OrganizationInvitation {
       tokenHash,
       role,
       invitedByUserId,
-      status: 'pending',
+      status: new InvitationStatus('pending'),
       expiresAt: new Date(Date.now() + EXPIRY_DAYS * 24 * 60 * 60 * 1000),
       createdAt: new Date(),
     })
   }
 
-  static fromDatabase(row: Record<string, unknown>): OrganizationInvitation {
-    return new OrganizationInvitation({
-      id: row.id as string,
-      organizationId: row.organization_id as string,
-      email: row.email as string,
-      token: '',
-      tokenHash: row.token_hash as string,
-      role: row.role as string,
-      invitedByUserId: row.invited_by_user_id as string,
-      status: row.status as string,
-      expiresAt: new Date(row.expires_at as string),
-      createdAt: new Date(row.created_at as string),
-    })
+  /** 從持久層重建 OrganizationInvitation（不含業務邏輯）。 */
+  static reconstitute(props: OrganizationInvitationProps): OrganizationInvitation {
+    return new OrganizationInvitation(props)
   }
 
   get id(): string {
@@ -81,13 +74,15 @@ export class OrganizationInvitation {
   get token(): string {
     return this.props.token
   }
-  get role(): string {
+  /** Assigned role as OrgMemberRole VO. */
+  get role(): OrgMemberRole {
     return this.props.role
   }
   get invitedByUserId(): string {
     return this.props.invitedByUserId
   }
-  get status(): string {
+  /** Invitation status as InvitationStatus VO. */
+  get status(): InvitationStatus {
     return this.props.status
   }
   get expiresAt(): Date {
@@ -106,14 +101,20 @@ export class OrganizationInvitation {
   }
 
   isPending(): boolean {
-    return this.props.status === 'pending' && !this.isExpired()
+    return this.props.status.isPending() && !this.isExpired()
   }
 
   markAsAccepted(): OrganizationInvitation {
-    return new OrganizationInvitation({ ...this.props, status: 'accepted' })
+    return new OrganizationInvitation({
+      ...this.props,
+      status: new InvitationStatus('accepted'),
+    })
   }
 
   cancel(): OrganizationInvitation {
-    return new OrganizationInvitation({ ...this.props, status: 'cancelled' })
+    return new OrganizationInvitation({
+      ...this.props,
+      status: new InvitationStatus('cancelled'),
+    })
   }
 }

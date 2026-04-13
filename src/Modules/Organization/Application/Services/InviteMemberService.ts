@@ -1,6 +1,7 @@
 import { OrganizationInvitation } from '../../Domain/Entities/OrganizationInvitation'
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
+import { OrgMemberRole } from '../../Domain/ValueObjects/OrgMemberRole'
 import {
   type InviteMemberRequest,
   OrganizationInvitationPresenter,
@@ -44,7 +45,7 @@ export class InviteMemberService {
         return { success: false, message: 'Organization is suspended', error: 'ORG_SUSPENDED' }
       }
 
-      const role = request.role || 'member'
+      const role = new OrgMemberRole(request.role ?? 'member')
       const invitation = await OrganizationInvitation.create(
         orgId,
         request.email,

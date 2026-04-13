@@ -52,17 +52,9 @@ export class Organization {
     })
   }
 
-  /** Reconstitutes an organization from database record. */
-  static fromDatabase(row: Record<string, unknown>): Organization {
-    return new Organization({
-      id: row.id as string,
-      name: row.name as string,
-      slug: row.slug as string,
-      description: (row.description as string) || '',
-      status: row.status as 'active' | 'suspended',
-      createdAt: new Date(row.created_at as string),
-      updatedAt: new Date(row.updated_at as string),
-    })
+  /** 從持久層重建 Organization（不含業務邏輯）。 */
+  static reconstitute(props: OrganizationProps): Organization {
+    return new Organization(props)
   }
 
   /** Updates optional organization fields. */

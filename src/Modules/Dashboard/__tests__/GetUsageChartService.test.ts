@@ -4,6 +4,7 @@ import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGatew
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
 import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
@@ -60,7 +61,7 @@ describe('GetUsageChartService', () => {
     const aggregator = createMockAggregator()
     service = new GetUsageChartService(apiKeyRepo, orgAuth, aggregator)
 
-    const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', 'manager')
+    const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
     await memberRepo.save(member)
 
     const key = ApiKey.create({
@@ -151,7 +152,7 @@ describe('GetUsageChartService', () => {
       const aggregator = createMockAggregator()
       service = new GetUsageChartService(apiKeyRepo, orgAuth, aggregator)
 
-      await memberRepo.save(OrganizationMember.create('mem-a', 'org-m', 'alice', 'member'))
+      await memberRepo.save(OrganizationMember.create('mem-a', 'org-m', 'alice', new OrgMemberRole('member')))
 
       const aliceKey = ApiKey.create({
         id: 'key-alice',
