@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'bun:test'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { GetProfileService } from '../Application/Services/GetProfileService'
 import { UserProfileRepository } from '../Infrastructure/Repositories/UserProfileRepository'
@@ -7,6 +7,7 @@ import { UserProfile } from '../Domain/Aggregates/UserProfile'
 describe('GetProfileService', () => {
   let service: GetProfileService
   let repo: UserProfileRepository
+  let profileId: string
 
   beforeEach(async () => {
     const db = new MemoryDatabaseAccess()
@@ -14,13 +15,14 @@ describe('GetProfileService', () => {
     service = new GetProfileService(repo)
 
     const profile = UserProfile.createDefault('user-123', 'user@example.com')
+    profileId = profile.id
     await repo.save(profile)
   })
 
   it('應成功取得 Profile', async () => {
-    const result = await service.execute('user-123')
+    const result = await service.execute(profileId)
     expect(result.success).toBe(true)
-    expect(result.data?.id).toBe('user-123')
+    expect(result.data?.id).toBe(profileId)
     expect(result.data?.displayName).toBe('user@example.com')
   })
 

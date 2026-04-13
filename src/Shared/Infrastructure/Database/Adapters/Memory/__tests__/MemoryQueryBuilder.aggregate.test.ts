@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'bun:test'
 import { MemoryDatabaseAccess } from '../MemoryDatabaseAccess'
 import {
   add,
@@ -252,8 +252,7 @@ describe('MemoryQueryBuilder.aggregate', () => {
         created_at: '2026-04-12T00:00:01Z',
       }
       
-      await expect(db.table('usage_records').insertOrIgnore(data, { conflictTarget: 'bifrost_log_id' }))
-        .resolves.not.toThrow()
+      await db.table('usage_records').insertOrIgnore(data, { conflictTarget: 'bifrost_log_id' })
 
       const count = await db.table('usage_records').where('bifrost_log_id', '=', 'l1').count()
       expect(count).toBe(1) // should not have inserted another row

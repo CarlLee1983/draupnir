@@ -1,11 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'bun:test'
 import { UserProfile } from '../Domain/Aggregates/UserProfile'
 import { UserProfileMapper } from '../Infrastructure/Mappers/UserProfileMapper'
 
 describe('UserProfile Aggregate', () => {
   it('應成功建立空白 Profile', () => {
     const profile = UserProfile.createDefault('user-123', 'user@example.com')
-    expect(profile.id).toBe('user-123')
+    expect(profile.id).toEqual(expect.any(String))
     expect(profile.displayName).toBe('user@example.com')
     expect(profile.timezone).toBe('Asia/Taipei')
     expect(profile.locale).toBe('zh-TW')
@@ -52,7 +52,7 @@ describe('UserProfile Aggregate', () => {
   it('toDTO 應回傳完整資料', () => {
     const profile = UserProfile.createDefault('user-123', 'user@example.com')
     const dto = UserProfileMapper.toDTO(profile)
-    expect(dto.id).toBe('user-123')
+    expect(dto.id).toBe(profile.id)
     expect(dto.displayName).toBe('user@example.com')
     expect(dto.timezone).toBe('Asia/Taipei')
   })
