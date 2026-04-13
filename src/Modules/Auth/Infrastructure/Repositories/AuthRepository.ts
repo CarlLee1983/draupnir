@@ -8,7 +8,7 @@
 
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { User, UserStatus } from '../../Domain/Aggregates/User'
-import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
+import type { IAuthRepository, UserListFilters } from '../../Domain/Repositories/IAuthRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
 import { Role } from '../../Domain/ValueObjects/Role'
@@ -75,14 +75,28 @@ export class AuthRepository implements IAuthRepository {
   }
 
   /**
-   * Retrieves all users in the system with optional pagination.
+   * Retrieves all users matching the given filters, ordered by createdAt DESC.
+   * role and status are applied as SQL WHERE conditions; limit/offset control pagination.
    */
-  async findAll(limit?: number, offset?: number): Promise<User[]> {
-    let query = this.db.table('users')
-    if (offset) query = query.offset(offset)
-    if (limit) query = query.limit(limit)
+  async findAll(filters?: UserListFilters): Promise<User[]> {
+    let query = this.db.table('users').orderBy('created_at', 'DESC')
+    if (filters?.role) query = query.where('role', '=', filters.role)
+    if (filters?.status) query = query.where('status', '=', filters.status)
+    if (filters?.offset !== undefined) query = query.offset(filters.offset)
+    if (filters?.limit !== undefined) query = query.limit(filters.limit)
     const rows = await query.select()
     return rows.map((row) => this.mapRowToUser(row))
+  }
+
+  /**
+   * Returns the total count of users matching the given role/status filters.
+   * Used for server-side pagination metadata.
+   */
+  async countAll(filters?: UserListFilters): Promise<number> {
+    let query = this.db.table('users')
+    if (filters?.role) query = query.where('role', '=', filters.role)
+    if (filters?.status) query = query.where('status', '=', filters.status)
+    return query.count()
   }
 
   /**
