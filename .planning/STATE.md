@@ -44,7 +44,13 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 - `bun orbit` CLI can fail auto-discovery; migrations may need a manual path.
 - Align default Git branch (`master` vs `main` / `develop`) with branch protection and CI docs.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260413-uzv | 修復 Auth 模組 DDD 戰術設計問題 | 2026-04-13 | 2a0ce69 | [260413-uzv-auth-ddd](.planning/quick/260413-uzv-auth-ddd/) |
+
 ## Session continuity
 
-Last session: 2026-04-13 — `/gsd-complete-milestone` for v1.4.
+Last activity: 2026-04-13 - Completed quick task 260413-uzv: 修復 Auth 模組 DDD 戰術設計問題
 Next step: `/gsd-new-milestone` when ready to plan v1.5+.
