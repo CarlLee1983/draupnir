@@ -48,7 +48,7 @@ describe('User Aggregate Root', () => {
       email,
       password: Password.fromHashed('salt:hash'),
       role: Role.member(),
-      status: UserStatus.INACTIVE,
+      status: UserStatus.SUSPENDED,
       googleId: null,
       createdAt: new Date('2024-01-01T00:00:00.000Z'),
       updatedAt: new Date('2024-01-02T00:00:00.000Z'),
@@ -57,6 +57,6 @@ describe('User Aggregate Root', () => {
     expect(user.id).toBe('user-id')
     expect(user.emailValue).toBe('user@example.com')
     expect(user.role.getValue()).toBe(RoleType.MEMBER)
-    expect(user.status).toBe(UserStatus.INACTIVE)
+    expect(user.status).toBe(UserStatus.SUSPENDED)
   })
 })

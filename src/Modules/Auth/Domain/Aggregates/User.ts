@@ -17,8 +17,6 @@ import { Role, type RoleType } from '../ValueObjects/Role'
 export enum UserStatus {
   /** User is fully active and can access the system. */
   ACTIVE = 'active',
-  /** User account has been created but is not yet active. */
-  INACTIVE = 'inactive',
   /** User account has been suspended by an administrator. */
   SUSPENDED = 'suspended',
 }

@@ -138,8 +138,6 @@ export class AuthRepository implements IAuthRepository {
    */
   private mapStatus(status: unknown): UserStatus {
     switch (status) {
-      case UserStatus.INACTIVE:
-        return UserStatus.INACTIVE
       case UserStatus.SUSPENDED:
         return UserStatus.SUSPENDED
       default:
