@@ -1,5 +1,19 @@
 # Shipped Milestones
 
+## v1.4 Hardening & Refinement (Shipped: 2026-04-13)
+
+**Phases completed:** 3 phases, 10 plans
+
+**Key accomplishments:**
+
+- **Uniform scheduling:** `IScheduler` port with Croner adapter, retry/backoff, and `registerJobs()` lifecycle — no ad-hoc `setInterval` / `new Cron(` in `bootstrap.ts`.
+- **Alerts decoupling:** Alerts repositories on `IDatabaseAccess` + `IQueryBuilder`; `IAlertRecipientResolver`, `IAlertNotifier` strategy; shared in-memory test fixtures without DI.
+- **CI guardrails:** GitHub Actions workflow with eight parallel jobs (typecheck, lint-format, unit+coverage, migration drift, routes, DI audit, E2E smoke, commitlint); branch-protection runbook; gap closure on tests, Biome, and commitlint.
+
+**Archives:** `.planning/milestones/v1.4-ROADMAP.md`, `.planning/milestones/v1.4-REQUIREMENTS.md`
+
+---
+
 ## v1.3 Advanced Analytics & Alerts (Shipped: 2026-04-12)
 
 **Phases completed:** 17 phases, 52 plans, 50 tasks
