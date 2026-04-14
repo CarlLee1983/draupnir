@@ -1,3 +1,8 @@
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { DevPortalController } from '../../Presentation/Controllers/DevPortalController'
+import { registerDevPortalRoutes } from '../../Presentation/Routes/devPortal.routes'
 import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
 import type { IssueAppKeyService } from '@/Modules/AppApiKey/Application/Services/IssueAppKeyService'
 import type { ListAppKeysService } from '@/Modules/AppApiKey/Application/Services/ListAppKeysService'
@@ -13,7 +18,7 @@ import { RegisterAppService } from '../../Application/Services/RegisterAppServic
 import { ApplicationRepository } from '../Repositories/ApplicationRepository'
 import { WebhookConfigRepository } from '../Repositories/WebhookConfigRepository'
 
-export class DevPortalServiceProvider extends ModuleServiceProvider {
+export class DevPortalServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
 
@@ -58,6 +63,18 @@ export class DevPortalServiceProvider extends ModuleServiceProvider {
     container.bind('getApiDocsService', () => {
       return new GetApiDocsService()
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new DevPortalController(
+      core.container.make('registerAppService') as any,
+      core.container.make('listAppsService') as any,
+      core.container.make('manageAppKeysService') as any,
+      core.container.make('configureWebhookService') as any,
+      core.container.make('getApiDocsService') as any,
+    )
+    registerDevPortalRoutes(router, controller)
   }
 
   override boot(_context: unknown): void {
