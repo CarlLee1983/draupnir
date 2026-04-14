@@ -84,8 +84,13 @@ describe('CorsGlobalMiddleware', () => {
 
   it('parseCorsAllowedOrigins: 逗號分隔字串解析正確', async () => {
     const { parseCorsAllowedOrigins } = await import('../CorsGlobalMiddleware')
+    const original = process.env.CORS_ALLOWED_ORIGINS
     process.env.CORS_ALLOWED_ORIGINS = ' https://a.com , https://b.com '
     expect(parseCorsAllowedOrigins()).toEqual(['https://a.com', 'https://b.com'])
-    delete process.env.CORS_ALLOWED_ORIGINS
+    if (original === undefined) {
+      delete process.env.CORS_ALLOWED_ORIGINS
+    } else {
+      process.env.CORS_ALLOWED_ORIGINS = original
+    }
   })
 })
