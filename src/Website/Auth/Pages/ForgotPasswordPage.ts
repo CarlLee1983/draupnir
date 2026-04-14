@@ -2,16 +2,29 @@ import type { ForgotPasswordService } from '@/Modules/Auth/Application/Services/
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
+/**
+ * Inertia page controller for the forgot password view.
+ *
+ * Handles rendering the form and processing password reset requests.
+ */
 export class ForgotPasswordPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly forgotPasswordService: ForgotPasswordService,
   ) {}
 
+  /**
+   * Renders the forgot password page.
+   * `GET /forgot-password`
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     return this.inertia.render(ctx, 'Auth/ForgotPassword', {})
   }
 
+  /**
+   * Processes the forgot password form submission.
+   * `POST /forgot-password`
+   */
   async store(ctx: IHttpContext): Promise<Response> {
     const validated = ctx.get('validated') as { email?: string } | undefined
     const email = validated?.email ?? ''

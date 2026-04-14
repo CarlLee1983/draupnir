@@ -7,6 +7,10 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 export class GoogleOAuthCallbackPage {
   constructor(private readonly googleOAuthService: GoogleOAuthService) {}
 
+  /**
+   * Handles the Google OAuth callback.
+   * `GET /oauth/google/callback`
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const code = ctx.getQuery('code')
     const state = ctx.getQuery('state')

@@ -16,10 +16,8 @@ export class VerifyDevicePage {
   ) {}
 
   /**
-   * GET /verify-device: Display the device authorization form.
-   *
-   * @param ctx - HTTP context
-   * @returns Inertia response rendering Auth/VerifyDevice component
+   * Display the device authorization form.
+   * `GET /verify-device`
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     return this.inertia.render(ctx, 'Auth/VerifyDevice', {
@@ -29,13 +27,11 @@ export class VerifyDevicePage {
   }
 
   /**
-   * POST /verify-device: Authorize the device with the provided user code.
+   * Authorize the device with the provided user code.
+   * `POST /verify-device`
    *
    * Validates the authenticated user's identity, reads the validated userCode from the
    * FormRequest context, and delegates to AuthorizeDeviceService to complete the authorization.
-   *
-   * @param ctx - HTTP context
-   * @returns Inertia response with success/error message
    */
   async authorize(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)

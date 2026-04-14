@@ -1,6 +1,10 @@
 /**
- * Registers Auth Inertia page classes as container singletons.
+ * Dependency injection bindings for Auth area Inertia pages.
+ *
+ * Registers page controllers as singletons in the DI container, resolving
+ * required Application services and the shared InertiaService.
  */
+
 import type { EmailVerificationService } from '@/Modules/Auth/Application/Services/EmailVerificationService'
 import type { ForgotPasswordService } from '@/Modules/Auth/Application/Services/ForgotPasswordService'
 import type { GoogleOAuthService } from '@/Modules/Auth/Application/Services/GoogleOAuthService'
@@ -22,7 +26,7 @@ import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { AUTH_PAGE_KEYS } from '../keys'
 
 /**
- * @param container - DI container; `InertiaService` must already be bound.
+ * Registers Auth Inertia page classes as container singletons.
  */
 export function registerAuthBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService

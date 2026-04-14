@@ -13,6 +13,8 @@ const PASSWORD_REQUIREMENTS = {
 
 /**
  * Inertia page controller for the registration view.
+ *
+ * Handles rendering the registration form and processing registration submissions.
  */
 export class RegisterPage {
   constructor(
@@ -21,7 +23,7 @@ export class RegisterPage {
   ) {}
 
   /**
-   * Render the registration page.
+   * Renders the registration page.
    * `GET /register`
    */
   async handle(ctx: IHttpContext): Promise<Response> {
@@ -31,7 +33,7 @@ export class RegisterPage {
   }
 
   /**
-   * Process the registration form submission.
+   * Processes the registration form submission.
    * `POST /register`
    */
   async store(ctx: IHttpContext): Promise<Response> {

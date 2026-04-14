@@ -2,12 +2,21 @@ import type { LoginUserService } from '@/Modules/Auth/Application/Services/Login
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
+/**
+ * Inertia page controller for the login view.
+ *
+ * Handles rendering the login form and processing login submissions.
+ */
 export class LoginPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly loginService: LoginUserService,
   ) {}
 
+  /**
+   * Renders the login page.
+   * `GET /login`
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     if (ctx.getCookie('auth_token')) {
       return ctx.redirect('/member/dashboard')
@@ -18,6 +27,10 @@ export class LoginPage {
     })
   }
 
+  /**
+   * Processes the login form submission.
+   * `POST /login`
+   */
   async store(ctx: IHttpContext): Promise<Response> {
     const validated = ctx.get('validated') as { email?: string; password?: string } | undefined
     const email = validated?.email ?? ''

@@ -1,5 +1,8 @@
 /**
  * Container binding keys for Auth Inertia pages.
+ *
+ * Defines stable strings used to register and resolve Inertia page
+ * controllers from the dependency injection container.
  */
 export const AUTH_PAGE_KEYS = {
   login: 'page:auth:login',

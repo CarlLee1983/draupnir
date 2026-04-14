@@ -1,5 +1,9 @@
 /**
  * Declarative auth Inertia routes.
+ *
+ * This module defines the mapping between URL paths and Auth Inertia page classes
+ * using a declarative routing table. Each route is resolved via the DI container
+ * using bindPageAction to ensure proper dependency injection for page controllers.
  */
 
 import type { FormRequestClass } from '@gravito/core'
