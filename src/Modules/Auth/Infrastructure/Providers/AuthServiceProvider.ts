@@ -1,3 +1,16 @@
+/**
+ * AuthServiceProvider
+ *
+ * Infrastructure: `ModuleServiceProvider` for the Auth bounded context—repository and adapter
+ * bindings, application services, HTTP controller, route registration, and boot-time side effects.
+ *
+ * Implementation notes:
+ * - `authRepository` is resolved through the repository registry for ORM switching; other auth
+ *   repositories use `getCurrentDatabaseAccess()` directly.
+ * - First resolution of `emailService` in `production` without `EMAIL_TRANSPORT_CONFIGURED=true`
+ *   throws `Error` (see `registerInfraServices`).
+ */
+
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
@@ -38,6 +51,10 @@ import { GoogleOAuthAdapter } from '../Services/GoogleOAuthAdapter'
 import { JwtTokenService } from '../Services/JwtTokenService'
 import { ScryptPasswordHasher } from '../Services/PasswordHasher'
 
+/**
+ * Wires Auth into the shared container using the four `ModuleServiceProvider` phases, implements
+ * `IRouteRegistrar`, and runs middleware/event setup in `boot`.
+ */
 export class AuthServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   protected override registerRepositories(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
@@ -132,6 +149,12 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
     ))
   }
 
+  /**
+   * Mounts auth HTTP routes on `context.router`; when the current ORM is `memory`, also registers
+   * test seed routes (local/dev convenience only).
+   *
+   * @param context - Framework route context (router + container).
+   */
   registerRoutes(context: IRouteContext): void {
     const controller = context.container.make('authController') as AuthController
     void registerAuthRoutes(context.router, controller)
@@ -140,6 +163,10 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
     }
   }
 
+  /**
+   * Side effects at startup: configures auth/role middleware (token revocation checks) and
+   * subscribes to `auth.user_registered` so `UserRegisteredHandler` can create profile rows.
+   */
   override boot(container: IContainer): void {
     // Middleware 初始化
     configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
