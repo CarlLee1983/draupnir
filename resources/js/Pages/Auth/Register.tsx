@@ -75,19 +75,19 @@ export default function Register({ passwordRequirements, error }: Props) {
               />
               <ul className="text-xs text-muted-foreground space-y-1 mt-1">
                 <li className={password.length >= passwordRequirements.minLength ? 'text-green-600' : ''}>
-                  最少 {passwordRequirements.minLength} 個字元
+                  {t('ui.auth.register.passwordMinLength', { min: passwordRequirements.minLength })}
                 </li>
                 {passwordRequirements.requiresUppercase && (
-                  <li className={/[A-Z]/.test(password) ? 'text-green-600' : ''}>包含大寫字母</li>
+                  <li className={/[A-Z]/.test(password) ? 'text-green-600' : ''}>{t('ui.auth.register.passwordUppercase')}</li>
                 )}
                 {passwordRequirements.requiresLowercase && (
-                  <li className={/[a-z]/.test(password) ? 'text-green-600' : ''}>包含小寫字母</li>
+                  <li className={/[a-z]/.test(password) ? 'text-green-600' : ''}>{t('ui.auth.register.passwordLowercase')}</li>
                 )}
                 {passwordRequirements.requiresNumbers && (
-                  <li className={/[0-9]/.test(password) ? 'text-green-600' : ''}>包含數字</li>
+                  <li className={/[0-9]/.test(password) ? 'text-green-600' : ''}>{t('ui.auth.register.passwordNumbers')}</li>
                 )}
                 {passwordRequirements.requiresSpecialChars && (
-                  <li className={/[^A-Za-z0-9]/.test(password) ? 'text-green-600' : ''}>包含特殊符號</li>
+                  <li className={/[^A-Za-z0-9]/.test(password) ? 'text-green-600' : ''}>{t('ui.auth.register.passwordSpecial')}</li>
                 )}
               </ul>
             </div>

@@ -62,6 +62,11 @@ const frontendCatalog = {
   'ui.auth.register.submitLoading': true,
   'ui.auth.register.hasAccount': true,
   'ui.auth.register.loginLink': true,
+  'ui.auth.register.passwordMinLength': true,
+  'ui.auth.register.passwordUppercase': true,
+  'ui.auth.register.passwordLowercase': true,
+  'ui.auth.register.passwordNumbers': true,
+  'ui.auth.register.passwordSpecial': true,
   // Auth — EmailVerification
   'ui.auth.emailVerification.title': true,
   'ui.auth.emailVerification.successTitle': true,
