@@ -1,7 +1,7 @@
 # ServiceProvider 架構規範設計
 
 **日期：** 2026-04-14  
-**狀態：** 已確認，待實作  
+**狀態：** 已實作（模組 ServiceProvider 遷移與計畫驗收完成；專案全域 `tsc` 仍可能有與本規格無關之預存錯誤）  
 **涉及檔案：**
 - `src/Shared/Infrastructure/IServiceProvider.ts`（base class 修改）
 - `src/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter.ts`（驗證解包邏輯）
