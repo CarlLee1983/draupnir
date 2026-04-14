@@ -22,8 +22,8 @@ import { OrganizationServiceProvider } from './Modules/Organization/Infrastructu
 import { ProfileServiceProvider } from './Modules/Profile/Infrastructure/Providers/ProfileServiceProvider'
 import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
-import { PagesServiceProvider } from './Pages/Infrastructure/Providers/PagesServiceProvider'
-import { warmInertiaService } from './Pages/routing/inertiaFactory'
+import { WebsiteServiceProvider } from './Website/bootstrap/WebsiteServiceProvider'
+import { warmInertiaService } from './Website/Http/Inertia/createInertiaRequestHandler'
 import { registerRoutes } from './routes'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
@@ -71,7 +71,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
     new DevPortalServiceProvider(),
     new SdkApiServiceProvider(),
     new CliApiServiceProvider(),
-    new PagesServiceProvider(),
+    new WebsiteServiceProvider(),
   ]
 
   for (const module of modules) {

@@ -1,6 +1,7 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, mock, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { resolvePageLocale } from '../resolvePageLocale'
+import { ForgotPasswordPage } from '../../Auth/Pages/ForgotPasswordPage'
+import type { InertiaService } from '../../Http/Inertia/InertiaRequestHandler'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -10,7 +11,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     getBody: async <T>() => ({}) as T,
     getHeader: () => undefined,
     getParam: () => undefined,
-    getPathname: () => '/admin/dashboard',
+    getPathname: () => '/forgot-password',
     getQuery: () => undefined,
     params: {},
     query: {},
@@ -32,15 +33,19 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
   }
 }
 
-describe('resolvePageLocale', () => {
-  test('uses Accept-Language when no higher-priority locale exists', () => {
-    const ctx = createMockContext({
-      getHeader: (name: string) => {
-        if (name.toLowerCase() === 'accept-language') return 'en'
-        return undefined
-      },
-      headers: { 'accept-language': 'en' },
-    })
-    expect(resolvePageLocale(ctx)).toBe('en')
+const mockForgotService = {
+  execute: mock(async () => ({ success: true, message: '' })),
+}
+
+describe('ForgotPasswordPage', () => {
+  test('should render forgot password form on GET', async () => {
+    const render = mock(() => new Response())
+    const inertia = { render } as unknown as InertiaService
+    const page = new ForgotPasswordPage(inertia, mockForgotService as any)
+    const ctx = createMockContext()
+
+    await page.handle(ctx)
+
+    expect(render).toHaveBeenCalledWith(ctx, 'Auth/ForgotPassword', {})
   })
 })

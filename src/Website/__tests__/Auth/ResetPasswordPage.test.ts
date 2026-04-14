@@ -1,6 +1,7 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, mock, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { resolvePageLocale } from '../resolvePageLocale'
+import { ResetPasswordPage } from '../../Auth/Pages/ResetPasswordPage'
+import type { InertiaService } from '../../Http/Inertia/InertiaRequestHandler'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -9,10 +10,10 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     getJsonBody: async <T>() => ({}) as T,
     getBody: async <T>() => ({}) as T,
     getHeader: () => undefined,
-    getParam: () => undefined,
-    getPathname: () => '/admin/dashboard',
+    getParam: () => 'tok-1',
+    getPathname: () => '/reset-password/tok-1',
     getQuery: () => undefined,
-    params: {},
+    params: { token: 'tok-1' },
     query: {},
     headers: {},
     json: (data: unknown, statusCode?: number) =>
@@ -32,15 +33,25 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
   }
 }
 
-describe('resolvePageLocale', () => {
-  test('uses Accept-Language when no higher-priority locale exists', () => {
-    const ctx = createMockContext({
-      getHeader: (name: string) => {
-        if (name.toLowerCase() === 'accept-language') return 'en'
-        return undefined
-      },
-      headers: { 'accept-language': 'en' },
-    })
-    expect(resolvePageLocale(ctx)).toBe('en')
+const mockResetPasswordService = {
+  validateToken: mock(async () => ({ valid: true })),
+  execute: mock(async () => ({ success: true, message: 'ok' })),
+}
+
+describe('ResetPasswordPage', () => {
+  test('should render reset password form with token on GET', async () => {
+    const render = mock(() => new Response())
+    const inertia = { render } as unknown as InertiaService
+    const page = new ResetPasswordPage(inertia, mockResetPasswordService as any)
+    const ctx = createMockContext()
+
+    await page.handle(ctx)
+
+    expect(render).toHaveBeenCalled()
+    const call = render.mock.calls[0] as unknown as
+      | [unknown, string, Record<string, unknown>]
+      | undefined
+    expect(call?.[1]).toBe('Auth/ResetPassword')
+    expect(call?.[2]?.token).toBe('tok-1')
   })
 })
