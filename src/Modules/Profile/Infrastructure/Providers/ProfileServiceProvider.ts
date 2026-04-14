@@ -1,6 +1,6 @@
-import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { GetProfileService } from '../../Application/Services/GetProfileService'
 import { UpdateProfileService } from '../../Application/Services/UpdateProfileService'
@@ -9,48 +9,31 @@ import { UserProfileRepository } from '../Repositories/UserProfileRepository'
 import { ProfileController } from '../../Presentation/Controllers/ProfileController'
 import { registerProfileRoutes } from '../../Presentation/Routes/profile.routes'
 
-/**
- * Service Provider for the Profile Module.
- * Handles dependency injection registration for repositories and services.
- */
 export class ProfileServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  /**
-   * Registers dependencies in the container.
-   * @param container - The application container.
-   */
-  override register(container: IContainer): void {
-    const db = getCurrentDatabaseAccess()
+  protected override registerRepositories(container: IContainer): void {
+    container.singleton('profileRepository', () => new UserProfileRepository(getCurrentDatabaseAccess()))
+  }
 
-    container.singleton('profileRepository', () => {
-      return new UserProfileRepository(db)
-    })
+  protected override registerApplicationServices(container: IContainer): void {
+    container.bind('getProfileService', (c: IContainer) =>
+      new GetProfileService(c.make('profileRepository') as IUserProfileRepository)
+    )
+    container.bind('updateProfileService', (c: IContainer) =>
+      new UpdateProfileService(c.make('profileRepository') as IUserProfileRepository)
+    )
+  }
 
-    container.bind('getProfileService', (c: IContainer) => {
-      const repo = c.make('profileRepository') as IUserProfileRepository
-      return new GetProfileService(repo)
-    })
-
-    container.bind('updateProfileService', (c: IContainer) => {
-      const repo = c.make('profileRepository') as IUserProfileRepository
-      return new UpdateProfileService(repo)
-    })
+  protected override registerControllers(container: IContainer): void {
+    container.bind('profileController', (c: IContainer) => new ProfileController(
+      c.make('getProfileService') as GetProfileService,
+      c.make('updateProfileService') as UpdateProfileService,
+      c.make('listUsersService') as any,
+      c.make('changeUserStatusService') as any,
+    ))
   }
 
   registerRoutes(context: IRouteContext): void {
-    const controller = new ProfileController(
-      context.container.make('getProfileService') as any,
-      context.container.make('updateProfileService') as any,
-      context.container.make('listUsersService') as any,
-      context.container.make('changeUserStatusService') as any,
-    )
+    const controller = context.container.make('profileController') as ProfileController
     registerProfileRoutes(context.router, controller)
-  }
-
-  /**
-   * Boots the module.
-   * @param _context - Application context.
-   */
-  override boot(_context: any): void {
-    // Profile module loaded
   }
 }
