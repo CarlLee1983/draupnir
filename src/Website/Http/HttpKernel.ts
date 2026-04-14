@@ -45,8 +45,6 @@ function pendingCookiesMiddleware(): Middleware {
 
 // ─── HttpKernel ────────────────────────────────────────────────────────────────
 
-const corsOrigins = parseCorsAllowedOrigins()
-
 /** 所有 page group 共用的基底 middleware 鏈 */
 const webBase = (): Middleware[] => [
   attachJwt(),
@@ -71,12 +69,15 @@ export const HttpKernel = {
    * 層一：Global middleware — 每個請求都經過。
    * 掛載順序：SecurityHeaders → CORS（有設定時）
    */
-  global: (): Middleware[] => [
-    createSecurityHeadersMiddleware(),
-    ...(corsOrigins.length > 0
-      ? [createCorsMiddleware({ allowedOrigins: corsOrigins, allowCredentials: true })]
-      : []),
-  ],
+  global: (): Middleware[] => {
+    const corsOrigins = parseCorsAllowedOrigins()
+    return [
+      createSecurityHeadersMiddleware(),
+      ...(corsOrigins.length > 0
+        ? [createCorsMiddleware({ allowedOrigins: corsOrigins, allowCredentials: true })]
+        : []),
+    ]
+  },
 
   /**
    * 層二：Page middleware groups — 依 Inertia 存取區域套用。
