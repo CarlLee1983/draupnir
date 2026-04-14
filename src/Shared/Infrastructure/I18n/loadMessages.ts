@@ -1,35 +1,37 @@
 export type LocaleCode = 'zh-TW' | 'en'
 
+const zhTW = {
+  'auth.logout.unauthorized': '未經授權',
+  'auth.logout.missingToken': '缺少 Token',
+  'auth.logout.invalidAuthHeader': '無效的 Authorization 格式',
+  'auth.forbidden.adminOnly': '需要管理員權限',
+  'admin.apiKeys.loadFailed': '讀取 API Key 失敗',
+  'admin.contracts.loadFailed': '讀取合約失敗',
+  'admin.contracts.missingId': '缺少 contract id',
+  'admin.contracts.validationFailed': '請填寫完整欄位（含目標與條款）',
+  'admin.contracts.createFailed': '建立失敗',
+  'admin.modules.loadFailed': '讀取模組失敗',
+  'admin.modules.nameRequired': '模組識別名稱為必填',
+  'admin.modules.createFailed': '註冊失敗',
+  'admin.organizations.loadFailed': '讀取組織失敗',
+  'admin.organizations.missingId': '缺少 org id',
+  'admin.users.loadFailed': '讀取使用者失敗',
+  'admin.users.missingId': '缺少 user id',
+  'admin.usageSync.notEnabled': 'UsageSync 模組尚未啟用（Phase 4 待完成）',
+  'member.apiKeys.createFailed': '建立失敗',
+  'member.apiKeys.missingOrgId': '缺少 orgId',
+  'member.apiKeys.selectOrg': '請先選擇組織',
+  'member.contracts.loadFailed': '讀取合約失敗',
+  'member.contracts.selectOrg': '請先選擇組織',
+  'member.dashboard.selectOrg': '請先選擇組織',
+  'member.settings.loadFailed': '讀取設定失敗',
+  'member.usage.loadFailed': '讀取用量失敗',
+  'member.usage.selectOrg': '請先選擇組織',
+  'sdkApi.unauthorized': '未經授權',
+} as const
+
 const catalogs = {
-  'zh-TW': {
-    'auth.logout.unauthorized': '未經授權',
-    'auth.logout.missingToken': '缺少 Token',
-    'auth.logout.invalidAuthHeader': '無效的 Authorization 格式',
-    'auth.forbidden.adminOnly': '需要管理員權限',
-    'admin.apiKeys.loadFailed': '讀取 API Key 失敗',
-    'admin.contracts.loadFailed': '讀取合約失敗',
-    'admin.contracts.missingId': '缺少 contract id',
-    'admin.contracts.validationFailed': '請填寫完整欄位（含目標與條款）',
-    'admin.contracts.createFailed': '建立失敗',
-    'admin.modules.loadFailed': '讀取模組失敗',
-    'admin.modules.nameRequired': '模組識別名稱為必填',
-    'admin.modules.createFailed': '註冊失敗',
-    'admin.organizations.loadFailed': '讀取組織失敗',
-    'admin.organizations.missingId': '缺少 org id',
-    'admin.users.loadFailed': '讀取使用者失敗',
-    'admin.users.missingId': '缺少 user id',
-    'admin.usageSync.notEnabled': 'UsageSync 模組尚未啟用（Phase 4 待完成）',
-    'member.apiKeys.createFailed': '建立失敗',
-    'member.apiKeys.missingOrgId': '缺少 orgId',
-    'member.apiKeys.selectOrg': '請先選擇組織',
-    'member.contracts.loadFailed': '讀取合約失敗',
-    'member.contracts.selectOrg': '請先選擇組織',
-    'member.dashboard.selectOrg': '請先選擇組織',
-    'member.settings.loadFailed': '讀取設定失敗',
-    'member.usage.loadFailed': '讀取用量失敗',
-    'member.usage.selectOrg': '請先選擇組織',
-    'sdkApi.unauthorized': '未經授權',
-  },
+  'zh-TW': zhTW,
   en: {
     'auth.logout.unauthorized': 'Unauthorized',
     'auth.logout.missingToken': 'Missing token',
@@ -59,8 +61,20 @@ const catalogs = {
     'member.usage.loadFailed': 'Failed to load usage',
     'member.usage.selectOrg': 'Please select an organization first',
     'sdkApi.unauthorized': 'Unauthorized',
-  },
-} as const
+  } satisfies Record<keyof typeof zhTW, string>,
+}
+
+/** Union of all canonical translation keys (zh-TW is the source of truth). */
+export type MessageKey = keyof typeof zhTW
+
+/** Full translation map for a given locale. */
+export type Messages = Record<MessageKey, string>
+
+/** Structured translation payload passed over the wire (server → client). */
+export interface I18nMessage {
+  key: MessageKey
+  params?: Record<string, string | number>
+}
 
 export function loadMessages(
   locale: LocaleCode,

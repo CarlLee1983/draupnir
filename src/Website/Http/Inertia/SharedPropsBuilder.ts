@@ -1,4 +1,4 @@
-import type { LocaleCode } from '@/Shared/Infrastructure/I18n'
+import type { I18nMessage, LocaleCode, Messages } from '@/Shared/Infrastructure/I18n'
 import { loadMessages, resolvePageLocale } from '@/Shared/Infrastructure/I18n'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -18,10 +18,15 @@ export interface InertiaSharedData {
   }
   currentOrgId: string | null
   locale: LocaleCode
-  messages: Record<string, string>
+  /**
+   * Partial<Messages> at the transport boundary — catalog completeness is guaranteed by
+   * loadMessages() at load time, but the DTO shape is partial to allow safe defaults
+   * (e.g. `messages: {}` in tests / non-Inertia callers).
+   */
+  messages: Partial<Messages>
   flash: {
-    success?: string
-    error?: string
+    success?: I18nMessage
+    error?: I18nMessage
   }
 }
 
@@ -53,12 +58,51 @@ export function resolveCsrfTokenForInertia(ctx: IHttpContext): string {
 }
 
 /**
+ * Writes a structured flash message as a JSON cookie.
+ * The cookie expires after 60 seconds (one-time read on next page load).
+ */
+export function setFlash(ctx: IHttpContext, type: 'success' | 'error', msg: I18nMessage): void {
+  ctx.setCookie(`flash:${type}`, encodeURIComponent(JSON.stringify(msg)), {
+    path: '/',
+    maxAge: 60,
+    sameSite: 'Lax',
+  })
+}
+
+/**
+ * Parses a raw flash cookie value into an I18nMessage.
+ * Supports both new JSON format `{"key":"..."}` and legacy plain-string format.
+ * Legacy strings are treated as { key } where key is cast to MessageKey for backwards compatibility.
+ */
+function parseFlashValue(raw: string): I18nMessage {
+  try {
+    const decoded = decodeURIComponent(raw)
+    const parsed: unknown = JSON.parse(decoded)
+    if (parsed !== null && typeof parsed === 'object' && 'key' in parsed) {
+      return parsed as I18nMessage
+    }
+  } catch {
+    // fall through to legacy handling
+  }
+  const decoded = (() => {
+    try {
+      return decodeURIComponent(raw)
+    } catch {
+      return raw
+    }
+  })()
+  return { key: decoded as I18nMessage['key'] }
+}
+
+/**
  * Reads a flash value for `key`, preferring in-context value over cookie.
  * When the value comes from a cookie, queues a clearing Set-Cookie so flash is one-time.
  */
-function readFlash(ctx: IHttpContext, key: string): string | undefined {
+function readFlash(ctx: IHttpContext, key: string): I18nMessage | undefined {
   const fromCtx = ctx.get<string>(key)
-  if (fromCtx !== undefined) return fromCtx
+  if (fromCtx !== undefined) {
+    return parseFlashValue(encodeURIComponent(fromCtx))
+  }
 
   const raw = ctx.getCookie(key)
   if (!raw) return undefined
@@ -66,11 +110,7 @@ function readFlash(ctx: IHttpContext, key: string): string | undefined {
   // Clear the one-time flash cookie immediately
   ctx.setCookie(key, '', { path: '/', maxAge: 0, sameSite: 'Lax' })
 
-  try {
-    return decodeURIComponent(raw)
-  } catch {
-    return raw
-  }
+  return parseFlashValue(raw)
 }
 
 /**

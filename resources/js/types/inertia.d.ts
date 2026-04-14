@@ -1,3 +1,5 @@
+import type { I18nMessage, Messages } from '@/lib/i18n'
+
 export interface AuthUser {
   id: string
   email: string
@@ -9,9 +11,11 @@ export interface SharedProps {
     user: AuthUser | null
   }
   currentOrgId: string | null
+  locale: string
+  messages: Partial<Messages>
   flash: {
-    success?: string
-    error?: string
+    success?: I18nMessage
+    error?: I18nMessage
   }
 }
 
