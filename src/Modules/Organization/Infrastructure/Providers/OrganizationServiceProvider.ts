@@ -1,3 +1,8 @@
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { OrganizationController } from '../../Presentation/Controllers/OrganizationController'
+import { registerOrganizationRoutes } from '../../Presentation/Routes/organization.routes'
 import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -23,7 +28,7 @@ import { OrganizationInvitationRepository } from '../Repositories/OrganizationIn
 import { OrganizationMemberRepository } from '../Repositories/OrganizationMemberRepository'
 import { OrganizationRepository } from '../Repositories/OrganizationRepository'
 
-export class OrganizationServiceProvider extends ModuleServiceProvider {
+export class OrganizationServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
 
@@ -129,6 +134,25 @@ export class OrganizationServiceProvider extends ModuleServiceProvider {
         c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
       )
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new OrganizationController(
+      core.container.make('createOrganizationService') as any,
+      core.container.make('updateOrganizationService') as any,
+      core.container.make('listOrganizationsService') as any,
+      core.container.make('inviteMemberService') as any,
+      core.container.make('acceptInvitationService') as any,
+      core.container.make('removeMemberService') as any,
+      core.container.make('listMembersService') as any,
+      core.container.make('changeOrgMemberRoleService') as any,
+      core.container.make('getOrganizationService') as any,
+      core.container.make('changeOrgStatusService') as any,
+      core.container.make('listInvitationsService') as any,
+      core.container.make('cancelInvitationService') as any,
+    )
+    void registerOrganizationRoutes(router, controller)
   }
 
   override boot(_context: unknown): void {
