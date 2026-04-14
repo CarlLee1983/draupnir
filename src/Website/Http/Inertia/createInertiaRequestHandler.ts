@@ -77,7 +77,7 @@ export async function createInertiaService(): Promise<InertiaService> {
   const viteHelper = new ViteTagHelper(tagEnv, devServerUrl, manifest, viteDevBase)
   const viteTags = viteHelper.generateTags(['resources/js/app.tsx', 'resources/css/app.css'])
 
-  const viewDir = joinPath(process.cwd(), 'src/views')
+  const viewDir = joinPath(process.cwd(), 'resources/views')
   const templatePath = joinPath(viewDir, 'app.html')
   const templateContent = await Bun.file(templatePath).text()
 

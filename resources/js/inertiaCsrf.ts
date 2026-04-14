@@ -1,6 +1,6 @@
 import { router } from '@inertiajs/react'
 
-/** Must match `WEB_CSRF_COOKIE_NAME` in `src/Pages/routing/webCsrfMiddleware.ts`. */
+/** Must match `WEB_CSRF_COOKIE_NAME` in `src/Website/Http/Security/CsrfMiddleware.ts`. */
 const CSRF_COOKIE_NAME = 'XSRF-TOKEN'
 
 /**
