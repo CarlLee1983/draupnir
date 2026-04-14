@@ -4,7 +4,10 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
- * Member API key list for the selected organization (`Member/ApiKeys/Index`).
+ * Page handler for listing API keys.
+ *
+ * Path: `/member/api-keys`
+ * React Page: `Member/ApiKeys/Index`
  */
 export class MemberApiKeysPage {
   constructor(
@@ -13,8 +16,10 @@ export class MemberApiKeysPage {
   ) {}
 
   /**
-   * @param ctx - Query `page`, `limit`, `orgId` (or org header).
-   * @returns Paginated keys, error state, or login redirect.
+   * Lists API keys for the selected organization.
+   *
+   * @param ctx - Context for retrieving pagination and organization parameters.
+   * @returns Inertia render response with paginated keys.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)

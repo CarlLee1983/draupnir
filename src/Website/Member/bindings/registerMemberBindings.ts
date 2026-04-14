@@ -29,10 +29,14 @@ import { MemberUsagePage } from '../Pages/MemberUsagePage'
 import { MEMBER_PAGE_KEYS } from '../keys'
 
 /**
- * @param container - Gravito DI container; `InertiaService` must already be bound under
- *   `PAGE_CONTAINER_KEYS.inertiaService`.
+ * Member Page Bindings
+ *
+ * Registers member-area page handlers as container singletons. Each binding
+ * injects the required Application-layer services to bridge the presentation
+ * layer with core business logic.
  */
-export function registerMemberBindings(container: IContainer): void {
+
+import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MEMBER_PAGE_KEYS
 

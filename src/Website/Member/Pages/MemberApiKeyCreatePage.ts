@@ -4,7 +4,10 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
- * Member flow to create an API key within an org (`Member/ApiKeys/Create`).
+ * Page handler for creating API keys.
+ *
+ * Path: `/member/api-keys/create`
+ * React Page: `Member/ApiKeys/Create`
  */
 export class MemberApiKeyCreatePage {
   constructor(
@@ -13,7 +16,10 @@ export class MemberApiKeyCreatePage {
   ) {}
 
   /**
-   * @returns Create form with optional `orgId` from query or header.
+   * Displays the creation form for a new API key.
+   *
+   * @param ctx - Context for retrieving the initial organization ID.
+   * @returns Inertia render response with the form.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)
@@ -29,9 +35,10 @@ export class MemberApiKeyCreatePage {
   }
 
   /**
-   * POST `/member/api-keys`: creates a key from JSON body (`orgId`, `label`, rate limits).
+   * Creates a new API key based on the provided JSON body.
    *
-   * @returns Re-renders create page with `createdKey` on success or `formError` on failure.
+   * @param ctx - Context containing key parameters (label, rate limits).
+   * @returns Inertia render with result or validation error.
    */
   async store(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)

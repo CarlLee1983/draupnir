@@ -1,8 +1,9 @@
 /**
- * Declarative member (org user) Inertia routes: DI page key + action name per row.
+ * Member Area Routes
  *
- * Instances are registered in `registerMemberPageBindings`; handlers are wrapped with
- * `withInertiaPageHandler` for JWT and shared props.
+ * Registers the declarative routing for the member portal. Each route maps a path
+ * to a DI container key and a specific page class action. Handlers are automatically
+ * wrapped with Inertia middleware to handle authentication and shared state.
  */
 
 import { requireOrganizationManager } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'

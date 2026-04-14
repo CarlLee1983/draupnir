@@ -3,7 +3,12 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
-/** Maps a list-contract DTO row to the Inertia table shape. */
+/**
+ * Maps a list-contract DTO row to the Inertia table shape.
+ *
+ * @param dto - Contract data row containing status, terms, and ID.
+ * @returns Standardized contract object for frontend rendering.
+ */
 function mapContractRow(dto: Record<string, unknown>) {
   const terms = dto.terms as {
     creditQuota: number
@@ -30,7 +35,9 @@ export class MemberContractsPage {
   ) {}
 
   /**
-   * @param ctx - Query `orgId` or org header required to list contracts.
+   * Renders the contract list for the organization.
+   *
+   * @param ctx - HTTP context to retrieve `orgId` from query or header.
    * @returns Inertia list, missing-org error, or login redirect.
    */
   async handle(ctx: IHttpContext): Promise<Response> {

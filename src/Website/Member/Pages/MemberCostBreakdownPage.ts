@@ -8,6 +8,12 @@ import { requireMember } from '@/Website/Member/middleware/requireMember'
 export class MemberCostBreakdownPage {
   constructor(private readonly inertia: InertiaService) {}
 
+  /**
+   * Renders the cost breakdown page.
+   *
+   * @param ctx - HTTP context to retrieve `orgId` from query or header.
+   * @returns Inertia render response with organization data.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)
     if (!check.ok) return check.response!

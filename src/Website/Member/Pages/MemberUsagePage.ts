@@ -4,7 +4,10 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
- * Member usage chart page (`Member/Usage/Index`).
+ * Page handler for member usage charts.
+ *
+ * Path: `/member/usage`
+ * React Page: `Member/Usage/Index`
  */
 export class MemberUsagePage {
   constructor(
@@ -13,8 +16,10 @@ export class MemberUsagePage {
   ) {}
 
   /**
-   * @param ctx - Query `orgId` or org header; optional chart range query params as defined by the service.
-   * @returns Inertia chart props or login redirect.
+   * Renders usage charts for the selected organization.
+   *
+   * @param ctx - Context for retrieving time range and organization filter.
+   * @returns Inertia render response with usage stats.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)

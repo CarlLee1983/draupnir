@@ -5,7 +5,10 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
- * Member profile settings: view and update display name (`Member/Settings/Index`).
+ * Page handler for member profile settings.
+ *
+ * Path: `/member/settings`
+ * React Page: `Member/Settings/Index`
  */
 export class MemberSettingsPage {
   constructor(
@@ -15,7 +18,10 @@ export class MemberSettingsPage {
   ) {}
 
   /**
-   * @returns Current profile for the authenticated user or login redirect.
+   * Displays the profile settings page.
+   *
+   * @param ctx - Context to identify the authenticated user.
+   * @returns Current user profile in Inertia response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)
@@ -31,9 +37,10 @@ export class MemberSettingsPage {
   }
 
   /**
-   * PUT `/member/settings`: updates `displayName` from JSON body.
+   * Updates the member's profile information.
    *
-   * @returns Re-rendered settings page with `formError` when update fails.
+   * @param ctx - Context containing updated profile fields in JSON body.
+   * @returns Updated settings page or failure message.
    */
   async update(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)

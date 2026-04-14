@@ -4,7 +4,10 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
- * Member dashboard shell for the selected organization (`Member/Dashboard/Index`).
+ * Page handler for the member dashboard.
+ *
+ * Path: `/member/dashboard`
+ * React Page: `Member/Dashboard/Index`
  */
 export class MemberDashboardPage {
   constructor(
@@ -13,8 +16,10 @@ export class MemberDashboardPage {
   ) {}
 
   /**
-   * @param ctx - Query `orgId` or header `X-Organization-Id` selects the active org.
-   * @returns Inertia shell, missing-org message, or login redirect.
+   * Renders the member dashboard with organization balance data.
+   *
+   * @param ctx - Context providing organization and user session info.
+   * @returns Inertia render response or missing-org message.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)

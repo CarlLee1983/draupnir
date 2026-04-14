@@ -9,7 +9,10 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
- * Member alerts hub for the selected organization (`Member/Alerts/Index`).
+ * Page handler for member-area alerts.
+ *
+ * Path: `/member/alerts`
+ * React Page: `Member/Alerts/Index`
  */
 export class MemberAlertsPage {
   constructor(
@@ -19,6 +22,12 @@ export class MemberAlertsPage {
     private readonly getAlertHistoryService: GetAlertHistoryService,
   ) {}
 
+  /**
+   * Renders the alerts hub with organization budget and history.
+   *
+   * @param ctx - Context providing organization and shared messages.
+   * @returns Inertia render response.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const check = requireMember(ctx)
     if (!check.ok) return check.response!
