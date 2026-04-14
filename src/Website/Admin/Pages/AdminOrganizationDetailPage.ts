@@ -2,7 +2,7 @@ import type { GetOrganizationService } from '@/Modules/Organization/Application/
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin organization detail with member list (`Admin/Organizations/Show`).
@@ -19,9 +19,7 @@ export class AdminOrganizationDetailPage {
    * @returns Inertia detail payload or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const orgId = ctx.getParam('id')
     if (!orgId) {

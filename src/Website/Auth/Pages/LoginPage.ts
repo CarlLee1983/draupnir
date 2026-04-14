@@ -1,4 +1,5 @@
 import type { LoginUserService } from '@/Modules/Auth/Application/Services/LoginUserService'
+import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
@@ -50,6 +51,7 @@ export class LoginPage {
       sameSite: 'Lax',
       path: '/',
       maxAge: 3600,
+      secure: isSecureRequest(ctx),
     })
 
     return ctx.redirect('/member/dashboard')

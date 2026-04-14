@@ -99,17 +99,27 @@ export async function testWebhook(
   orgId: string,
   endpointId: string,
 ): Promise<{ success: boolean; statusCode: number | null; attempts: number; error: string | null }> {
-  const payload = await requestJson<{
-    success: boolean
-    data: { statusCode: number | null; attempts: number; error: string | null }
-  }>(
+  type TestResult = {
+    statusCode: number | null
+    attempts: number
+    error: string | null
+  }
+  const payload = await fetch(
     `/api/organizations/${encodeURIComponent(orgId)}/alerts/webhooks/${encodeURIComponent(endpointId)}/test`,
     {
       method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'X-CSRF-Token': readCsrfToken(),
+      },
     },
   )
 
-  return payload.data
+  const result = (await payload.json()) as { success: boolean; data: TestResult }
+  return {
+    success: result.success,
+    ...result.data,
+  }
 }
 
 export async function deleteWebhook(orgId: string, endpointId: string): Promise<void> {

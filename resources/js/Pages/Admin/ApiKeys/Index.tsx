@@ -1,9 +1,10 @@
-import { Head, router } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DataTable } from '@/components/tables/DataTable'
 import { Label } from '@/components/ui/label'
-import { adminApiKeyColumns, type AdminApiKeyRow } from './columns'
+import { DataTable } from '@/components/tables/DataTable'
+import { createAdminApiKeyColumns, type AdminApiKeyRow } from './columns'
+import { router } from '@inertiajs/react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -21,9 +22,14 @@ interface Props {
 
 export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error }: Props) {
   const { t } = useTranslation()
+  const columns = createAdminApiKeyColumns(t)
+
   const handleOrgChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const orgId = e.target.value
-    router.visit(`/admin/api-keys${orgId ? `?orgId=${orgId}` : ''}`)
+    router.get('/admin/api-keys', orgId ? { orgId } : {}, {
+      preserveState: true,
+      replace: true,
+    })
   }
 
   return (
@@ -56,12 +62,14 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
         </Card>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
+          <div className="rounded-md border border-destructive p-4 text-destructive">
+            {t(error.key, error.params)}
+          </div>
         )}
 
         {selectedOrgId ? (
           <DataTable
-            columns={adminApiKeyColumns}
+            columns={columns}
             data={keys}
             searchPlaceholder={t('ui.admin.apiKeys.searchPlaceholder')}
             searchColumn="label"

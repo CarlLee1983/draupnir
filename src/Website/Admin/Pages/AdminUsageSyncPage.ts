@@ -1,7 +1,5 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
-
 /** Placeholder sync metrics until UsageSync is fully implemented. */
 interface SyncStatus {
   enabled: boolean
@@ -22,9 +20,6 @@ export class AdminUsageSyncPage {
    * @returns Static placeholder props until Phase 4 UsageSync is enabled.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
     const status: SyncStatus = {
       enabled: false,
       lastSyncAt: null,

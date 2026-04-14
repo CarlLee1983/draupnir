@@ -3,7 +3,7 @@ import type { ListAdminContractsService } from '@/Modules/Contract/Application/S
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin home: aggregate counts for users, organizations, and contracts (`Admin/Dashboard/Index`).
@@ -18,13 +18,10 @@ export class AdminDashboardPage {
 
   /**
    * @param ctx - HTTP context after JWT middleware.
-   * @returns Inertia response with summary totals or redirect/403 from `requireAdmin`.
+   * @returns Inertia response with summary totals.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const [usersResult, orgsResult, contractsResult] = await Promise.all([
       this.listUsersService.execute({ page: 1, limit: 1 }),

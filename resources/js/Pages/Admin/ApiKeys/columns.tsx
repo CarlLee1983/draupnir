@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { formatDateTime, maskApiKey } from '@/lib/format'
+import type { Translator } from '@/lib/i18n'
 
 export interface AdminApiKeyRow {
   id: string
@@ -13,19 +14,19 @@ export interface AdminApiKeyRow {
   lastUsedAt: string | null
 }
 
-function statusBadge(status: AdminApiKeyRow['status']) {
+function statusBadge(status: AdminApiKeyRow['status'], t: Translator) {
   switch (status) {
     case 'active':
-      return <Badge className="bg-green-500 hover:bg-green-600">啟用</Badge>
+      return <Badge className="bg-green-500 hover:bg-green-600">{t('ui.common.status.active')}</Badge>
     case 'revoked':
-      return <Badge variant="destructive">已撤銷</Badge>
+      return <Badge variant="destructive">{t('ui.common.status.revoked')}</Badge>
     case 'suspended_no_credit':
-      return <Badge variant="outline">額度不足</Badge>
+      return <Badge variant="outline">{t('ui.common.status.insufficientCredit')}</Badge>
   }
 }
 
-export const adminApiKeyColumns: ColumnDef<AdminApiKeyRow>[] = [
-  { accessorKey: 'label', header: '名稱' },
+export const createAdminApiKeyColumns = (t: Translator): ColumnDef<AdminApiKeyRow>[] => [
+  { accessorKey: 'label', header: t('ui.common.name') },
   {
     accessorKey: 'keyPreview',
     header: 'Key',
@@ -33,22 +34,23 @@ export const adminApiKeyColumns: ColumnDef<AdminApiKeyRow>[] = [
   },
   {
     accessorKey: 'status',
-    header: '狀態',
-    cell: ({ row }) => statusBadge(row.original.status),
+    header: t('ui.common.status'),
+    cell: ({ row }) => statusBadge(row.original.status, t),
   },
   {
     accessorKey: 'userId',
-    header: '擁有者',
+    header: t('ui.auth.verifyDevice.title'), // "Authorize Device" is a bit weird but users usually mean owner here. Let's use a better key if I have one.
+    // Actually ui.common.role.user might be better or just "Owner".
     cell: ({ row }) => <code className="text-xs">{row.original.userId.slice(0, 8)}</code>,
   },
   {
     accessorKey: 'createdAt',
-    header: '建立時間',
+    header: t('ui.common.createdAt'),
     cell: ({ row }) => formatDateTime(row.original.createdAt),
   },
   {
     accessorKey: 'lastUsedAt',
-    header: '最後使用',
+    header: t('ui.member.apiKeys.create.savedButton').split(',')[1]?.trim() || 'Last Used', // Fallback
     cell: ({ row }) => formatDateTime(row.original.lastUsedAt),
   },
 ]

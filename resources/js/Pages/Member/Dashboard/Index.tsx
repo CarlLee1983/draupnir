@@ -353,6 +353,7 @@ function QuickActionsCard({ orgId }: { orgId?: string | null }) {
 }
 
 function LoadingState() {
+  const { t } = useTranslation()
   return (
     <div className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -370,10 +371,10 @@ function LoadingState() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <ChartSkeleton title="成本趨勢" />
-        <ChartSkeleton title="Token 用量" />
-        <ChartSkeleton title="模型成本" />
-        <ChartSkeleton title="模型比較" className="xl:col-span-2" />
+        <ChartSkeleton title={t('ui.member.dashboard.chartCost')} />
+        <ChartSkeleton title={t('ui.member.dashboard.chartTokens')} />
+        <ChartSkeleton title={t('ui.member.dashboard.chartModelCost')} />
+        <ChartSkeleton title={t('ui.member.dashboard.chartModelComp')} className="xl:col-span-2" />
       </div>
     </div>
   )

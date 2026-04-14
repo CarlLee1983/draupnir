@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useTranslation } from '@/lib/i18n'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -31,9 +32,10 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  searchPlaceholder = '搜尋...',
+  searchPlaceholder,
   searchColumn,
 }: DataTableProps<TData, TValue>) {
+  const { t } = useTranslation()
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
@@ -53,7 +55,7 @@ export function DataTable<TData, TValue>({
     <div className="space-y-4">
       {searchColumn && (
         <Input
-          placeholder={searchPlaceholder}
+          placeholder={searchPlaceholder ?? t('ui.common.search') + '...'}
           value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ''}
           onChange={(e) => table.getColumn(searchColumn)?.setFilterValue(e.target.value)}
           className="max-w-sm"
@@ -89,7 +91,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  無資料
+                  {t('ui.common.noData')}
                 </TableCell>
               </TableRow>
             )}
@@ -98,7 +100,9 @@ export function DataTable<TData, TValue>({
       </div>
 
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">共 {table.getFilteredRowModel().rows.length} 筆</p>
+        <p className="text-sm text-muted-foreground">
+          {t('ui.common.totalCount', { total: table.getFilteredRowModel().rows.length })}
+        </p>
         <div className="flex gap-2">
           <Button
             variant="outline"
@@ -106,7 +110,7 @@ export function DataTable<TData, TValue>({
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            上一頁
+            {t('ui.common.prevPage')}
           </Button>
           <Button
             variant="outline"
@@ -114,7 +118,7 @@ export function DataTable<TData, TValue>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            下一頁
+            {t('ui.common.nextPage')}
           </Button>
         </div>
       </div>

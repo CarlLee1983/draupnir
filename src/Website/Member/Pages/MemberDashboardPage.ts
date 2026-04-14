@@ -1,7 +1,7 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireMember } from '@/Website/Member/middleware/requireMember'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Page handler for the member dashboard.
@@ -22,9 +22,7 @@ export class MemberDashboardPage {
    * @returns Inertia render response or missing-org message.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireMember(ctx)
-    if (!check.ok) return check.response!
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {

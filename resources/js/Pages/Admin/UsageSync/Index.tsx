@@ -2,98 +2,98 @@ import { Head } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import { formatDateTime, formatNumber } from '@/lib/format'
+import { CheckCircle2, XCircle, Clock, Database, AlertTriangle } from 'lucide-react'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
-interface SyncStatus {
+interface UsageSyncStatus {
   enabled: boolean
-  lastSyncAt: string | null
+  lastSyncedAt: string | null
   nextSyncAt: string | null
-  lastCursor: string | null
-  totalRecordsProcessed: number
+  processedCount: number
   lastError: string | null
 }
 
 interface Props {
-  status: SyncStatus
-  message: string | null
+  status: UsageSyncStatus
+  error: I18nMessage | null
 }
 
-export default function UsageSyncIndex({ status, message }: Props) {
+export default function UsageSyncIndex({ status, error }: Props) {
+  const { t } = useTranslation()
   return (
     <AdminLayout>
-      <Head title="用量同步狀態" />
+      <Head title={t('ui.admin.usageSync.title')} />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">用量同步狀態</h1>
+          <h1 className="text-2xl font-bold">{t('ui.admin.usageSync.title')}</h1>
           {status.enabled ? (
-            <Badge className="bg-green-500">
+            <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400">
               <CheckCircle2 className="mr-1 h-3 w-3" />
-              運行中
+              {t('ui.admin.usageSync.running')}
             </Badge>
           ) : (
-            <Badge variant="outline">
-              <AlertCircle className="mr-1 h-3 w-3" />
-              未啟用
+            <Badge variant="secondary">
+              <XCircle className="mr-1 h-3 w-3" />
+              {t('ui.common.status.inactive')}
             </Badge>
           )}
         </div>
 
-        {message && (
-          <Card className="border-yellow-500">
-            <CardContent className="flex items-center gap-2 pt-6 text-sm text-yellow-700 dark:text-yellow-400">
-              <AlertCircle className="h-4 w-4" />
-              {message}
-            </CardContent>
-          </Card>
+        {error && (
+          <div className="rounded-md border border-destructive p-4 text-destructive">
+            {t(error.key, error.params)}
+          </div>
         )}
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">上次同步時間</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t('ui.admin.usageSync.lastSync')}</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-medium">{formatDateTime(status.lastSyncAt)}</div>
+              <div className="text-2xl font-bold">
+                {status.lastSyncedAt ? formatDateTime(status.lastSyncedAt) : '—'}
+              </div>
             </CardContent>
           </Card>
-
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">下次同步時間</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t('ui.admin.usageSync.nextSync')}</CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-lg font-medium">{formatDateTime(status.nextSyncAt)}</div>
+              <div className="text-2xl font-bold">
+                {status.nextSyncAt ? formatDateTime(status.nextSyncAt) : '—'}
+              </div>
             </CardContent>
           </Card>
-
           <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">累計處理筆數</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">{t('ui.admin.usageSync.processedCount')}</CardTitle>
+              <Database className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatNumber(status.totalRecordsProcessed)}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Sync Cursor</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <code className="text-xs">{status.lastCursor ?? '—'}</code>
+              <div className="text-2xl font-bold">{formatNumber(status.processedCount)}</div>
             </CardContent>
           </Card>
         </div>
 
         {status.lastError && (
-          <Card className="border-destructive">
+          <Card className="border-destructive/50 bg-destructive/5">
             <CardHeader>
-              <CardTitle className="text-destructive">上次錯誤</CardTitle>
+              <CardTitle className="text-destructive flex items-center">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                {t('ui.admin.usageSync.lastError')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <pre className="overflow-auto text-xs">{status.lastError}</pre>
+              <pre className="text-sm text-destructive overflow-auto p-4 bg-background rounded-md border border-destructive/20">
+                {status.lastError}
+              </pre>
             </CardContent>
           </Card>
         )}

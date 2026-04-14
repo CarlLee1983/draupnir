@@ -15,7 +15,7 @@ import type {
 import type { AdminPageBindingKey } from '../keys'
 import { ADMIN_PAGE_KEYS } from '../keys'
 import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
-import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
+import { withAdminInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -198,6 +198,6 @@ export function registerAdminRoutes(
   for (const { method, path, page, action, name } of ADMIN_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerAdminHttpRoute(router, method, path, withInertiaPageHandler(inner), opts)
+    registerAdminHttpRoute(router, method, path, withAdminInertiaPageHandler(inner), opts)
   }
 }

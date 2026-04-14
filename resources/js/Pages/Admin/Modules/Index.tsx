@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { DataTable } from '@/components/tables/DataTable'
+import { createModuleColumns, type ModuleRow } from './columns'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { moduleColumns, type ModuleRow } from './columns'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -14,6 +14,8 @@ interface Props {
 
 export default function ModulesIndex({ modules, error }: Props) {
   const { t } = useTranslation()
+  const columns = createModuleColumns(t)
+
   return (
     <AdminLayout>
       <Head title={t('ui.admin.modules.title')} />
@@ -34,7 +36,7 @@ export default function ModulesIndex({ modules, error }: Props) {
         )}
 
         <DataTable
-          columns={moduleColumns}
+          columns={columns}
           data={modules}
           searchPlaceholder={t('ui.admin.modules.searchPlaceholder')}
           searchColumn="name"

@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Link } from '@inertiajs/react'
 import { formatDate } from '@/lib/format'
+import type { Translator } from '@/lib/i18n'
 
 export interface AdminContractRow {
   id: string
@@ -14,37 +15,37 @@ export interface AdminContractRow {
   endDate: string
 }
 
-function statusBadge(status: AdminContractRow['status']) {
+function statusBadge(status: AdminContractRow['status'], t: Translator) {
   const map = {
-    draft: { label: '草稿', variant: 'outline' as const },
-    active: { label: '生效中', variant: 'default' as const },
-    expired: { label: '已過期', variant: 'secondary' as const },
-    terminated: { label: '已終止', variant: 'destructive' as const },
+    draft: { label: t('ui.common.status.draft'), variant: 'outline' as const },
+    active: { label: t('ui.common.status.active'), variant: 'default' as const },
+    expired: { label: t('ui.common.status.expired'), variant: 'secondary' as const },
+    terminated: { label: t('ui.common.status.terminated'), variant: 'destructive' as const },
   }
   const { label, variant } = map[status]
   return <Badge variant={variant}>{label}</Badge>
 }
 
-export const adminContractColumns: ColumnDef<AdminContractRow>[] = [
-  { accessorKey: 'name', header: '合約 / 對象' },
+export const createAdminContractColumns = (t: Translator): ColumnDef<AdminContractRow>[] => [
+  { accessorKey: 'name', header: `${t('ui.admin.contracts.contract')} / ${t('ui.admin.contracts.target')}` },
   {
     accessorKey: 'status',
-    header: '狀態',
-    cell: ({ row }) => statusBadge(row.original.status),
+    header: t('ui.common.status'),
+    cell: ({ row }) => statusBadge(row.original.status, t),
   },
   {
     accessorKey: 'targetType',
-    header: '對象',
-    cell: ({ row }) => (row.original.targetType === 'organization' ? '組織' : '使用者'),
+    header: t('ui.admin.contracts.create.targetTypeLabel'),
+    cell: ({ row }) => (row.original.targetType === 'organization' ? t('ui.admin.contracts.create.targetOrg') : t('ui.admin.contracts.create.targetUser')),
   },
   {
     accessorKey: 'startDate',
-    header: '生效日',
+    header: t('ui.admin.contracts.create.startDateLabel'),
     cell: ({ row }) => formatDate(row.original.startDate),
   },
   {
     accessorKey: 'endDate',
-    header: '到期日',
+    header: t('ui.admin.contracts.create.endDateLabel'),
     cell: ({ row }) => formatDate(row.original.endDate),
   },
   {
@@ -52,7 +53,7 @@ export const adminContractColumns: ColumnDef<AdminContractRow>[] = [
     header: '',
     cell: ({ row }) => (
       <Button variant="ghost" size="sm" asChild>
-        <Link href={`/admin/contracts/${row.original.id}`}>檢視</Link>
+        <Link href={`/admin/contracts/${row.original.id}`}>{t('ui.common.view')}</Link>
       </Button>
     ),
   },

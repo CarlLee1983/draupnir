@@ -3,8 +3,6 @@ import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/G
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
-
 /**
  * Admin user profile view and account status transitions (`Admin/Users/Show`).
  */
@@ -21,9 +19,6 @@ export class AdminUserDetailPage {
    * @returns Inertia user detail or error state.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
     const userId = ctx.getParam('id')
     if (!userId) {
       return this.inertia.render(ctx, 'Admin/Users/Show', {
@@ -71,9 +66,6 @@ export class AdminUserDetailPage {
    * @returns Redirect back to the user detail path.
    */
   async postStatus(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
     const userId = ctx.getParam('id')
     if (!userId) {
       return ctx.redirect('/admin/users')

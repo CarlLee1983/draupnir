@@ -1,7 +1,7 @@
 import type { RegisterModuleService } from '@/Modules/AppModule/Application/Services/RegisterModuleService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin module registration form and submit (`Admin/Modules/Create`).
@@ -16,9 +16,6 @@ export class AdminModuleCreatePage {
    * @returns Empty create form (Inertia).
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
     return this.inertia.render(ctx, 'Admin/Modules/Create', {
       formError: null,
     })
@@ -30,9 +27,7 @@ export class AdminModuleCreatePage {
    * @returns Redirect to `/admin/modules` on success or re-render with validation error.
    */
   async store(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const body = await ctx.getJsonBody<{
       name?: string

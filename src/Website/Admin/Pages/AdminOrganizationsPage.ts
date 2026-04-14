@@ -1,8 +1,6 @@
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
-
 /**
  * Admin organization list with pagination (`Admin/Organizations/Index`).
  */
@@ -17,9 +15,6 @@ export class AdminOrganizationsPage {
    * @returns Inertia list payload or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
     const page = parseInt(ctx.getQuery('page') ?? '1', 10)
     const limit = parseInt(ctx.getQuery('limit') ?? '20', 10)
 

@@ -6,8 +6,6 @@ import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/S
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireMember } from '@/Website/Member/middleware/requireMember'
-
 /**
  * Page handler for member-area alerts.
  *
@@ -29,9 +27,6 @@ export class MemberAlertsPage {
    * @returns Inertia render response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireMember(ctx)
-    if (!check.ok) return check.response!
-
     const currentOrg = ctx.get<CurrentOrganizationContext>('currentOrg')
     const orgId =
       currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')

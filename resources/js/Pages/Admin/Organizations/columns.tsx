@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Link } from '@inertiajs/react'
 import { formatDateTime } from '@/lib/format'
+import type { Translator } from '@/lib/i18n'
 
 export interface OrgRow {
   id: string
@@ -13,10 +14,10 @@ export interface OrgRow {
   createdAt: string
 }
 
-export const orgColumns: ColumnDef<OrgRow>[] = [
+export const createOrgColumns = (t: Translator): ColumnDef<OrgRow>[] => [
   {
     accessorKey: 'name',
-    header: '組織名稱',
+    header: t('ui.common.org') + t('ui.common.name'),
   },
   {
     accessorKey: 'slug',
@@ -25,21 +26,21 @@ export const orgColumns: ColumnDef<OrgRow>[] = [
   },
   {
     accessorKey: 'status',
-    header: '狀態',
+    header: t('ui.common.status'),
     cell: ({ row }) =>
       row.original.status === 'active' ? (
-        <Badge className="bg-green-500">啟用</Badge>
+        <Badge className="bg-green-500">{t('ui.common.status.active')}</Badge>
       ) : (
-        <Badge variant="destructive">暫停</Badge>
+        <Badge variant="destructive">{t('ui.common.status.suspended')}</Badge>
       ),
   },
   {
     accessorKey: 'memberCount',
-    header: '成員數',
+    header: t('ui.admin.organizations.membersTitle', { count: '' }).replace('（）', ''), // Simple fix for header
   },
   {
     accessorKey: 'createdAt',
-    header: '建立時間',
+    header: t('ui.common.createdAt'),
     cell: ({ row }) => formatDateTime(row.original.createdAt),
   },
   {
@@ -47,7 +48,7 @@ export const orgColumns: ColumnDef<OrgRow>[] = [
     header: '',
     cell: ({ row }) => (
       <Button variant="ghost" size="sm" asChild>
-        <Link href={`/admin/organizations/${row.original.id}`}>檢視</Link>
+        <Link href={`/admin/organizations/${row.original.id}`}>{t('ui.common.view')}</Link>
       </Button>
     ),
   },

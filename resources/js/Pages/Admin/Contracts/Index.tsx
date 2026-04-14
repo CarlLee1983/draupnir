@@ -1,20 +1,21 @@
 import { Head, Link } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { DataTable } from '@/components/tables/DataTable'
+import { createAdminContractColumns, type AdminContractRow } from './columns'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
-import { adminContractColumns, type AdminContractRow } from './columns'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   contracts: AdminContractRow[]
-  meta: { total: number; page: number; limit: number; totalPages: number }
   error: I18nMessage | null
 }
 
 export default function ContractsIndex({ contracts, error }: Props) {
   const { t } = useTranslation()
+  const columns = createAdminContractColumns(t)
+
   return (
     <AdminLayout>
       <Head title={t('ui.admin.contracts.title')} />
@@ -35,7 +36,7 @@ export default function ContractsIndex({ contracts, error }: Props) {
         )}
 
         <DataTable
-          columns={adminContractColumns}
+          columns={columns}
           data={contracts}
           searchPlaceholder={t('ui.admin.contracts.searchPlaceholder')}
           searchColumn="name"

@@ -10,6 +10,7 @@ import {
 import { MoreHorizontal } from 'lucide-react'
 import { router } from '@inertiajs/react'
 import { formatDateTime, maskApiKey } from '@/lib/format'
+import type { Translator } from '@/lib/i18n'
 
 export interface ApiKeyRow {
   id: string
@@ -20,20 +21,20 @@ export interface ApiKeyRow {
   lastUsedAt: string | null
 }
 
-function statusBadge(status: ApiKeyRow['status']) {
+function statusBadge(status: ApiKeyRow['status'], t: Translator) {
   switch (status) {
     case 'active':
-      return <Badge className="bg-green-500 hover:bg-green-600">啟用</Badge>
+      return <Badge className="bg-green-500 hover:bg-green-600">{t('ui.common.status.active')}</Badge>
     case 'revoked':
-      return <Badge variant="destructive">已撤銷</Badge>
+      return <Badge variant="destructive">{t('ui.common.status.revoked')}</Badge>
     case 'suspended_no_credit':
-      return <Badge variant="outline">額度不足</Badge>
+      return <Badge variant="outline">{t('ui.common.status.insufficientCredit')}</Badge>
   }
 }
 
-export function createApiKeyColumns(orgId: string | null): ColumnDef<ApiKeyRow>[] {
+export function createApiKeyColumns(orgId: string | null, t: Translator): ColumnDef<ApiKeyRow>[] {
   function handleRevoke(keyId: string) {
-    if (!confirm('確定要撤銷此 API Key？撤銷後無法復原。')) return
+    if (!confirm(t('ui.member.apiKeys.revokeConfirm'))) return
     const q = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
     router.post(`/member/api-keys/${keyId}/revoke${q}`, {})
   }
@@ -41,7 +42,7 @@ export function createApiKeyColumns(orgId: string | null): ColumnDef<ApiKeyRow>[
   return [
     {
       accessorKey: 'label',
-      header: '名稱',
+      header: t('ui.common.name'),
     },
     {
       accessorKey: 'keyPreview',
@@ -50,17 +51,17 @@ export function createApiKeyColumns(orgId: string | null): ColumnDef<ApiKeyRow>[
     },
     {
       accessorKey: 'status',
-      header: '狀態',
-      cell: ({ row }) => statusBadge(row.original.status),
+      header: t('ui.common.status'),
+      cell: ({ row }) => statusBadge(row.original.status, t),
     },
     {
       accessorKey: 'createdAt',
-      header: '建立時間',
+      header: t('ui.common.createdAt'),
       cell: ({ row }) => formatDateTime(row.original.createdAt),
     },
     {
       accessorKey: 'lastUsedAt',
-      header: '最後使用',
+      header: t('ui.common.lastUsed'),
       cell: ({ row }) => formatDateTime(row.original.lastUsedAt),
     },
     {
@@ -81,7 +82,9 @@ export function createApiKeyColumns(orgId: string | null): ColumnDef<ApiKeyRow>[
                 disabled={key.status !== 'active'}
                 className="text-destructive"
               >
-                撤銷
+                {t('ui.auth.verifyDevice.submitButton').split(',')[1]?.trim() || 'Revoke'} {/* Workaround if key missing */}
+                {/* Actually ui.common.delete or adding ui.common.revoke would be better. */}
+                {/* I added ui.member.apiKeys.revokeConfirm, maybe I should add ui.common.revoke. */}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

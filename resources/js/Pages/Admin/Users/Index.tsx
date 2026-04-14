@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { DataTable } from '@/components/tables/DataTable'
-import { userColumns, type UserRow } from './columns'
+import { createUserColumns, type UserRow } from './columns'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -14,6 +14,8 @@ interface Props {
 
 export default function UsersIndex({ users, error }: Props) {
   const { t } = useTranslation()
+  const columns = createUserColumns(t)
+
   return (
     <AdminLayout>
       <Head title={t('ui.admin.users.title')} />
@@ -26,7 +28,7 @@ export default function UsersIndex({ users, error }: Props) {
         )}
 
         <DataTable
-          columns={userColumns}
+          columns={columns}
           data={users}
           searchPlaceholder={t('ui.admin.users.searchPlaceholder')}
           searchColumn="email"

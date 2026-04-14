@@ -3,7 +3,7 @@ import type { GetContractDetailService } from '@/Modules/Contract/Application/Se
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin contract detail with activate/terminate actions (`Admin/Contracts/Show`).
@@ -21,10 +21,7 @@ export class AdminContractDetailPage {
    * @returns Inertia detail payload or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const contractId = ctx.getParam('id')
     if (!contractId) {
@@ -49,10 +46,7 @@ export class AdminContractDetailPage {
    * @returns Redirect to the same contract detail path.
    */
   async postAction(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
     const contractId = ctx.getParam('id')
     if (!contractId) {
       return ctx.redirect('/admin/contracts')

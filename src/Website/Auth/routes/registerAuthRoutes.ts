@@ -16,9 +16,14 @@ import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type {
   IModuleRouter,
+  Middleware,
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
+import {
+  forgotPasswordRateLimit,
+  loginRateLimit,
+} from '@/Website/Http/Security/AuthRateLimitMiddleware'
 
 import { AUTH_PAGE_KEYS } from '../keys'
 import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
@@ -38,6 +43,7 @@ type AuthRouteDef = {
   readonly page: (typeof AUTH_PAGE_KEYS)[keyof typeof AUTH_PAGE_KEYS]
   readonly action: keyof AuthPageInstance & string
   readonly formRequest?: FormRequestClass
+  readonly middlewares?: Middleware[]
   readonly name?: string
 }
 
@@ -55,6 +61,7 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     page: AUTH_PAGE_KEYS.login,
     action: 'store',
     formRequest: LoginRequest,
+    middlewares: [loginRateLimit],
     name: 'pages.auth.login.submit',
   },
   {
@@ -70,6 +77,7 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     page: AUTH_PAGE_KEYS.register,
     action: 'store',
     formRequest: RegisterRequest,
+    middlewares: [loginRateLimit],
     name: 'pages.auth.register.submit',
   },
   {
@@ -85,6 +93,7 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     page: AUTH_PAGE_KEYS.forgotPassword,
     action: 'store',
     formRequest: ForgotPasswordRequest,
+    middlewares: [forgotPasswordRateLimit],
     name: 'pages.auth.password.email',
   },
   {
@@ -139,10 +148,15 @@ function registerAuthHttpRoute(
   path: string,
   handler: RouteHandler,
   formRequest?: FormRequestClass,
+  middlewares?: Middleware[],
   routeOptions?: ModuleRouteOptions,
 ): void {
   if (method === 'get') {
     router.get(path, handler, routeOptions)
+  } else if (middlewares && middlewares.length > 0 && formRequest) {
+    router.post(path, middlewares, formRequest, handler, routeOptions)
+  } else if (middlewares && middlewares.length > 0) {
+    router.post(path, middlewares, handler, routeOptions)
   } else if (formRequest) {
     router.post(path, formRequest, handler, routeOptions)
   } else {
@@ -157,9 +171,9 @@ export function registerAuthRoutes(
   router: Pick<IModuleRouter, 'get' | 'post'>,
   container: IContainer,
 ): void {
-  for (const { method, path, page, action, formRequest, name } of AUTH_PAGE_ROUTES) {
+  for (const { method, path, page, action, formRequest, middlewares, name } of AUTH_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerAuthHttpRoute(router, method, path, withInertiaPageHandler(inner), formRequest, opts)
+    registerAuthHttpRoute(router, method, path, withInertiaPageHandler(inner), formRequest, middlewares, opts)
   }
 }

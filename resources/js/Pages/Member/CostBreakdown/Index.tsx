@@ -56,6 +56,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
       return
     }
 
+    const targetOrgId = orgId
     const controller = new AbortController()
     setPerKeyLoading(true)
     setFetchError(null)
@@ -68,7 +69,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
     async function loadPerKeyCost(): Promise<void> {
       try {
         const response = await fetch(
-          `/api/organizations/${encodeURIComponent(orgId)}/dashboard/per-key-cost?${query.toString()}`,
+          `/api/organizations/${encodeURIComponent(targetOrgId)}/dashboard/per-key-cost?${query.toString()}`,
           { signal: controller.signal },
         )
         const payload = (await response.json()) as {
@@ -104,6 +105,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
       return
     }
 
+    const targetOrgId = orgId
     const controller = new AbortController()
     setModelLoading(true)
     const { startTime, endTime } = resolveDateRange(selectedWindow)
@@ -115,7 +117,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
     async function loadModelDistribution(): Promise<void> {
       try {
         const response = await fetch(
-          `/api/organizations/${encodeURIComponent(orgId)}/dashboard/model-comparison?${query.toString()}`,
+          `/api/organizations/${encodeURIComponent(targetOrgId)}/dashboard/model-comparison?${query.toString()}`,
           { signal: controller.signal },
         )
         const payload = (await response.json()) as {
@@ -176,21 +178,21 @@ export default function CostBreakdown({ orgId, error }: Props) {
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
               Member Analytics
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight">成本分析</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">{t('ui.member.costBreakdown.title')}</h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
-              以 7 / 30 / 90 天時間窗查看 per-key 成本、效率指標與模型分布。
+              {t('ui.member.costBreakdown.description')}
             </p>
           </div>
           <div className="flex flex-col items-end gap-2">
             <WindowSelector value={selectedWindow} onChange={setSelectedWindow} />
             <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}>
-              Download Report
+              {t('ui.member.dashboard.downloadReport')}
             </Button>
           </div>
         </header>
 
         <div className="hidden print:block">
-          <h1 className="text-3xl font-semibold tracking-tight">成本分析報告</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{t('ui.member.costBreakdown.reportTitle')}</h1>
           <p className="text-sm text-muted-foreground">
             Generated: {new Date().toLocaleDateString('zh-TW')}
           </p>
@@ -201,7 +203,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
 
         {!orgId ? (
           <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-            請選擇一個組織以查看成本分析。
+            {t('ui.member.costBreakdown.selectOrgPrompt')}
           </div>
         ) : (
           <>
@@ -229,7 +231,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
 
             <Card className="print-page-break">
               <CardHeader>
-                <CardTitle className="text-base">模型分佈</CardTitle>
+                <CardTitle className="text-base">{t('ui.member.costBreakdown.modelDistTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? <Skeleton className="h-72 w-full" /> : <ModelDistributionDonut rows={modelRows} />}

@@ -1,6 +1,6 @@
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { requireMember } from '@/Website/Member/middleware/requireMember'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * POST handler for revoking a member API key (`/member/api-keys/:keyId/revoke`).
@@ -13,9 +13,7 @@ export class MemberApiKeyRevokeHandler {
    * @returns Redirect to `/member/api-keys` or login when unauthenticated.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireMember(ctx)
-    if (!check.ok) return check.response!
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const keyId = ctx.getParam('keyId')
     if (!keyId) {

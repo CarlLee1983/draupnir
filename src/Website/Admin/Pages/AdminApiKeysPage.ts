@@ -1,8 +1,8 @@
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
  * Admin view of API keys scoped by organization (`Admin/ApiKeys/Index`).
@@ -15,13 +15,11 @@ export class AdminApiKeysPage {
   ) {}
 
   /**
-   * @param ctx - Query `orgId` selects which org’s keys to list (required for listing).
+   * @param ctx - Query `orgId` selects which org's keys to list (required for listing).
    * @returns Inertia payload with org picker and keys or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const orgId = ctx.getQuery('orgId')
     const orgsResult = await this.listOrgsService.execute(1, 100)

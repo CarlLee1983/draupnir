@@ -1,6 +1,11 @@
 import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { OrbitPrism } from '@gravito/prism'
+import {
+  createCorsMiddleware,
+  parseCorsAllowedOrigins,
+} from '@/Shared/Infrastructure/Middleware/CorsGlobalMiddleware'
+import { createSecurityHeadersMiddleware } from '@/Shared/Infrastructure/Middleware/SecurityHeadersGlobalMiddleware'
 import { adaptGravitoContainer, createGravitoServiceProvider, isRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
@@ -80,6 +85,23 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   }
 
   await core.bootstrap()
+
+  // ─── Global middleware ────────────────────────────────────────────────────
+  // Registered after bootstrap() (adapter is locked after that) but before
+  // route registration.  Order matters: security headers → CORS.
+  core.adapter.useGlobal(createSecurityHeadersMiddleware())
+
+  const corsAllowedOrigins = parseCorsAllowedOrigins()
+  if (corsAllowedOrigins.length > 0) {
+    core.adapter.useGlobal(
+      createCorsMiddleware({
+        allowedOrigins: corsAllowedOrigins,
+        allowCredentials: true,
+      }),
+    )
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   await warmInertiaService()
   await (
     core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService

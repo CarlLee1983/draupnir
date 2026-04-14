@@ -2,7 +2,7 @@ import type { GetProfileService } from '@/Modules/Profile/Application/Services/G
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireMember } from '@/Website/Member/middleware/requireMember'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Page handler for member profile settings.
@@ -24,10 +24,7 @@ export class MemberSettingsPage {
    * @returns Current user profile in Inertia response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireMember(ctx)
-    if (!check.ok) return check.response!
-
-    const result = await this.getProfileService.execute(check.auth!.userId)
+    const result = await this.getProfileService.execute(AuthMiddleware.getAuthContext(ctx)!.userId)
 
     return this.inertia.render(ctx, 'Member/Settings/Index', {
       profile: result.success ? result.data : null,
@@ -43,9 +40,7 @@ export class MemberSettingsPage {
    * @returns Updated settings page or failure message.
    */
   async update(ctx: IHttpContext): Promise<Response> {
-    const check = requireMember(ctx)
-    if (!check.ok) return check.response!
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const body = await ctx.getJsonBody<{ displayName?: string }>()
     const displayName = typeof body.displayName === 'string' ? body.displayName : ''

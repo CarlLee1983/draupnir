@@ -1,7 +1,6 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { ReportToken } from '@/Modules/Reports/Domain/ValueObjects/ReportToken'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-
 export class AdminReportTemplatePage {
   constructor(private readonly inertia: InertiaService) {}
 

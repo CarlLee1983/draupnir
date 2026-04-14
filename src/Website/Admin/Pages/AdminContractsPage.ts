@@ -1,7 +1,7 @@
 import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin contract directory with status filter (`Admin/Contracts/Index`).
@@ -17,10 +17,7 @@ export class AdminContractsPage {
    * @returns Inertia list payload or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
     const page = parseInt(ctx.getQuery('page') ?? '1', 10)
     const limit = parseInt(ctx.getQuery('limit') ?? '20', 10)
     const status = ctx.getQuery('status')

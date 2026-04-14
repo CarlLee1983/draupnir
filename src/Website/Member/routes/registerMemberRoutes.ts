@@ -18,7 +18,7 @@ import type {
 import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
 import type { MemberPageBindingKey } from '../keys'
 import { MEMBER_PAGE_KEYS } from '../keys'
-import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
+import { withMemberInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -138,7 +138,7 @@ export function registerMemberRoutes(
   for (const { method, path, page, action, name } of MEMBER_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerMemberHttpRoute(router, method, path, withInertiaPageHandler(inner), opts)
+    registerMemberHttpRoute(router, method, path, withMemberInertiaPageHandler(inner), opts)
   }
 
   const alertsHandler = bindPageAction(
@@ -149,7 +149,7 @@ export function registerMemberRoutes(
   router.get(
     '/member/alerts',
     [requireOrganizationManager()],
-    withInertiaPageHandler(alertsHandler),
+    withMemberInertiaPageHandler(alertsHandler),
     { name: 'pages.member.alerts' },
   )
 }

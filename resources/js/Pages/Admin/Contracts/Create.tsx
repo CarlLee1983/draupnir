@@ -56,7 +56,7 @@ export default function ContractCreate({ formError }: Props) {
               </div>
             )}
             {form.errors && Object.keys(form.errors).length > 0 && (
-              <div className="mb-4 text-sm text-destructive">請檢查表單欄位</div>
+              <div className="mb-4 text-sm text-destructive">{t('ui.admin.contracts.create.validationError')}</div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">

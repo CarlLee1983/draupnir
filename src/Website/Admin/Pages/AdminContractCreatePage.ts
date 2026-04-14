@@ -1,7 +1,7 @@
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin contract creation form and submit handler (`Admin/Contracts/Create`).
@@ -16,9 +16,6 @@ export class AdminContractCreatePage {
    * @returns Empty create form (Inertia).
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
     return this.inertia.render(ctx, 'Admin/Contracts/Create', {
       formError: null,
     })
@@ -31,9 +28,7 @@ export class AdminContractCreatePage {
    * @returns Redirect to contract list on success or re-render with `formError`.
    */
   async store(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-    const auth = check.auth!
+    const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const body = await ctx.getJsonBody<{
       targetType?: string

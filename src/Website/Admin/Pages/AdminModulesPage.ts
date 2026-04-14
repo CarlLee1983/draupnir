@@ -1,8 +1,6 @@
 import type { ListModulesService } from '@/Modules/AppModule/Application/Services/ListModulesService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
-
 /**
  * Admin catalog of app modules (`Admin/Modules/Index`).
  */
@@ -16,9 +14,6 @@ export class AdminModulesPage {
    * @returns Inertia list of modules or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const check = requireAdmin(ctx)
-    if (!check.ok) return check.response!
-
     const result = await this.listService.execute()
 
     const modules =

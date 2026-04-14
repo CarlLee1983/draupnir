@@ -1,68 +1,91 @@
-import { Head, router } from '@inertiajs/react'
-import { useState } from 'react'
-import { AuthLayout } from '@/layouts/AuthLayout'
+import { Head, Link, useForm } from '@inertiajs/react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ArrowLeft, Mail, CheckCircle2 } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
 
-interface Props {
-  csrfToken: string
-  message?: string
-}
-
-export default function ForgotPassword({ message }: Props) {
+export default function ForgotPassword() {
   const { t } = useTranslation()
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isSent, setIsSent] = useState(false)
+  const { data, setData, post, processing, errors } = useForm({
+    email: '',
+  })
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    router.post('/forgot-password', { email }, {
-      onFinish: () => setLoading(false),
+    post('/forgot-password', {
+      onSuccess: () => setIsSent(true),
     })
   }
 
+  if (isSent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <CardTitle>{t('ui.common.success')}</CardTitle>
+            <CardDescription>
+              We've sent a password reset link to <strong>{data.email}</strong>.
+              Please check your inbox.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" className="w-full" asChild>
+              <Link href="/login">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t('ui.auth.forgotPassword.backToLogin')}
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
-    <AuthLayout>
+    <div className="flex min-h-screen items-center justify-center bg-muted/50 p-4">
       <Head title={t('ui.auth.forgotPassword.title')} />
-      <Card>
+      <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>{t('ui.auth.forgotPassword.title')}</CardTitle>
-          <CardDescription>輸入您的電子郵件，我們將寄送重設連結</CardDescription>
+          <CardTitle className="text-2xl">{t('ui.auth.forgotPassword.title')}</CardTitle>
+          <CardDescription>{t('ui.auth.login.forgotPassword').replace('？', '')}</CardDescription>
         </CardHeader>
         <CardContent>
-          {message ? (
-            <div className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-800">
-              {message}
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">{t('ui.auth.forgotPassword.emailLabel')}</Label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">{t('ui.auth.forgotPassword.emailLabel')}</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="pl-10"
+                  value={data.email}
+                  onChange={(e) => setData('email', e.target.value)}
                   required
-                  autoFocus
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {t('ui.auth.forgotPassword.submitButton')}
-              </Button>
-            </form>
-          )}
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            <a href="/login" className="underline hover:text-foreground">
-              {t('ui.auth.forgotPassword.backToLogin')}
-            </a>
-          </p>
+              {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+            </div>
+            <Button type="submit" className="w-full" disabled={processing}>
+              {processing ? t('ui.common.loading') : t('ui.auth.forgotPassword.submitButton')}
+            </Button>
+            <Button variant="ghost" className="w-full" asChild>
+              <Link href="/login">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                {t('ui.auth.forgotPassword.backToLogin')}
+              </Link>
+            </Button>
+          </form>
         </CardContent>
       </Card>
-    </AuthLayout>
+    </div>
   )
 }

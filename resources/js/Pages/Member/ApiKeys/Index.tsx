@@ -17,7 +17,7 @@ interface Props {
 
 export default function ApiKeysIndex({ orgId, keys, error }: Props) {
   const { t } = useTranslation()
-  const columns = useMemo(() => createApiKeyColumns(orgId), [orgId])
+  const columns = useMemo(() => createApiKeyColumns(orgId, t), [orgId, t])
   const createQuery = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
 
   return (

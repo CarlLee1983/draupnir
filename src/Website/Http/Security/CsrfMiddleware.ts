@@ -1,3 +1,4 @@
+import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 
@@ -67,7 +68,7 @@ export function validateWebCsrf(ctx: IHttpContext): boolean {
 export function issueWebCsrfToken(ctx: IHttpContext): void {
   const token = randomCsrfToken()
   ctx.set('csrfToken', token)
-  const secure = process.env.NODE_ENV === 'production'
+  const secure = isSecureRequest(ctx)
   ctx.setCookie(WEB_CSRF_COOKIE_NAME, encodeURIComponent(token), {
     path: '/',
     sameSite: 'Lax',
