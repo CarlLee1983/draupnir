@@ -1,7 +1,7 @@
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireAdmin } from './helpers/requireAdmin'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
  * Admin organization list with pagination (`Admin/Organizations/Index`).

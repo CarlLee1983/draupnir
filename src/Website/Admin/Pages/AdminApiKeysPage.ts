@@ -1,8 +1,8 @@
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireAdmin } from './helpers/requireAdmin'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
  * Admin view of API keys scoped by organization (`Admin/ApiKeys/Index`).

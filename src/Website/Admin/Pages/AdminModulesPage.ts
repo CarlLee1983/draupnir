@@ -1,7 +1,7 @@
 import type { ListModulesService } from '@/Modules/AppModule/Application/Services/ListModulesService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireAdmin } from './helpers/requireAdmin'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
  * Admin catalog of app modules (`Admin/Modules/Index`).

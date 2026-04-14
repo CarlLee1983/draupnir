@@ -2,8 +2,8 @@ import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListU
 import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireAdmin } from './helpers/requireAdmin'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
  * Admin home: aggregate counts for users, organizations, and contracts (`Admin/Dashboard/Index`).

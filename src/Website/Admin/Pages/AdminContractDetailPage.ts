@@ -2,8 +2,8 @@ import type { ActivateContractService } from '@/Modules/Contract/Application/Ser
 import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireAdmin } from './helpers/requireAdmin'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
  * Admin contract detail with activate/terminate actions (`Admin/Contracts/Show`).

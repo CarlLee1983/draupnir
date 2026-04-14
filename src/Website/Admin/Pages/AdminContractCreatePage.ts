@@ -1,7 +1,7 @@
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireAdmin } from './helpers/requireAdmin'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
  * Admin contract creation form and submit handler (`Admin/Contracts/Create`).
