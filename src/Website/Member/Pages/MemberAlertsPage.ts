@@ -6,6 +6,7 @@ import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/S
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
@@ -35,13 +36,7 @@ export class MemberAlertsPage {
     const currentOrg = ctx.get<CurrentOrganizationContext>('currentOrg')
     const orgId =
       currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
-    const shared = ctx.get('inertia:shared') as
-      | {
-          locale: 'zh-TW' | 'en'
-          messages: Record<string, string>
-        }
-      | undefined
-    const messages = shared?.messages ?? {}
+    const { messages } = getInertiaShared(ctx)
 
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Alerts/Index', {

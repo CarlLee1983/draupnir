@@ -74,6 +74,25 @@ function readFlash(ctx: IHttpContext, key: string): string | undefined {
 }
 
 /**
+ * Retrieves the shared Inertia props injected by {@link injectSharedData}.
+ *
+ * Use this in page handlers instead of manually casting `ctx.get('inertia:shared')`.
+ * Returns a safe default when called outside an Inertia page handler (e.g. in tests).
+ *
+ * @param ctx - Current request context.
+ */
+export function getInertiaShared(ctx: IHttpContext): InertiaSharedData {
+  return (ctx.get('inertia:shared') as InertiaSharedData | undefined) ?? {
+    csrfToken: '',
+    auth: { user: null },
+    currentOrgId: null,
+    locale: 'zh-TW' as LocaleCode,
+    messages: {},
+    flash: {},
+  }
+}
+
+/**
  * Attaches cross-cutting Inertia props on the request context under `inertia:shared`.
  *
  * @param ctx - Current request; reads JWT-derived auth via {@link AuthMiddleware.getAuthContext}.

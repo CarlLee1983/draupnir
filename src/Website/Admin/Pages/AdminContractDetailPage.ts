@@ -3,6 +3,7 @@ import type { GetContractDetailService } from '@/Modules/Contract/Application/Se
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
@@ -26,13 +27,7 @@ export class AdminContractDetailPage {
 
     const auth = check.auth!
 
-    const shared = ctx.get('inertia:shared') as
-      | {
-          locale: 'zh-TW' | 'en'
-          messages: Record<string, string>
-        }
-      | undefined
-    const messages = shared?.messages ?? {}
+    const { messages } = getInertiaShared(ctx)
 
     const contractId = ctx.getParam('id')
     if (!contractId) {

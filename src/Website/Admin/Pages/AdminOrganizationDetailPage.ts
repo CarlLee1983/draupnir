@@ -2,6 +2,7 @@ import type { GetOrganizationService } from '@/Modules/Organization/Application/
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
@@ -23,13 +24,7 @@ export class AdminOrganizationDetailPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const shared = ctx.get('inertia:shared') as
-      | {
-          locale: 'zh-TW' | 'en'
-          messages: Record<string, string>
-        }
-      | undefined
-    const messages = shared?.messages ?? {}
+    const { messages } = getInertiaShared(ctx)
 
     const orgId = ctx.getParam('id')
     if (!orgId) {

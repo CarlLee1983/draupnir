@@ -1,4 +1,5 @@
 import { type AuthContext, AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 
 /** Result of {@link requireAdmin}: either proceed with `auth` or return a ready `Response`. */
@@ -23,8 +24,8 @@ export function requireAdmin(ctx: IHttpContext): AdminAuthResult {
   }
 
   if (auth.role !== 'admin') {
-    const shared = ctx.get('inertia:shared') as { messages?: Record<string, string> } | undefined
-    const t = (key: string) => shared?.messages?.[key] ?? key
+    const { messages } = getInertiaShared(ctx)
+    const t = (key: string) => messages[key] ?? key
     return {
       ok: false,
       response: new Response(

@@ -1,6 +1,7 @@
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
@@ -35,13 +36,7 @@ export class AdminContractCreatePage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const shared = ctx.get('inertia:shared') as
-      | {
-          locale: 'zh-TW' | 'en'
-          messages: Record<string, string>
-        }
-      | undefined
-    const messages = shared?.messages ?? {}
+    const { messages } = getInertiaShared(ctx)
 
     const body = await ctx.getJsonBody<{
       targetType?: string
