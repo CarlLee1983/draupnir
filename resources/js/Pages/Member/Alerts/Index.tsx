@@ -6,6 +6,7 @@ import type { AlertsPageProps, AlertsTab } from './types'
 import BudgetsTab from './tabs/BudgetsTab'
 import WebhooksTab from './tabs/WebhooksTab'
 import HistoryTab from './tabs/HistoryTab'
+import { useTranslation } from '@/lib/i18n'
 
 const TAB_LABELS: Record<AlertsTab, string> = {
   budgets: 'Budgets',
@@ -14,6 +15,7 @@ const TAB_LABELS: Record<AlertsTab, string> = {
 }
 
 export default function AlertsIndex(props: AlertsPageProps) {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<AlertsTab>('budgets')
 
   return (
@@ -43,7 +45,7 @@ export default function AlertsIndex(props: AlertsPageProps) {
 
             {props.error ? (
               <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {props.error}
+                {t(props.error.key, props.error.params)}
               </div>
             ) : null}
           </div>

@@ -132,7 +132,7 @@ describe('MemberContractsPage', () => {
     expect(captured.lastCall?.component).toBe('Member/Contracts/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.contracts).toEqual([])
-    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.contracts.selectOrg' })
   })
 
   test('service failure passes error message to Inertia', async () => {
@@ -153,6 +153,6 @@ describe('MemberContractsPage', () => {
     const page = new MemberContractsPage(inertia, mockListService as any)
     await page.handle(ctx)
 
-    expect(captured.lastCall?.props.error).toBe('Failed to load contracts')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.contracts.loadFailed' })
   })
 })

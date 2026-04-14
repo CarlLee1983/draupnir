@@ -1,7 +1,6 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
@@ -27,14 +26,12 @@ export class MemberDashboardPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const { messages } = getInertiaShared(ctx)
-
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Dashboard/Index', {
         orgId: null,
         balance: null,
-        error: messages['member.dashboard.selectOrg'],
+        error: { key: 'member.dashboard.selectOrg' },
       })
     }
 
@@ -43,7 +40,7 @@ export class MemberDashboardPage {
     return this.inertia.render(ctx, 'Member/Dashboard/Index', {
       orgId,
       balance: balanceResult.success ? (balanceResult.data ?? null) : null,
-      error: balanceResult.success ? null : balanceResult.message,
+      error: balanceResult.success ? null : { key: 'member.dashboard.loadFailed' },
     })
   }
 }

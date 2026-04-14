@@ -2,6 +2,8 @@ import { Head } from '@inertiajs/react'
 import { MemberLayout } from '@/layouts/MemberLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UsageLineChart, type UsageDataPoint } from '@/components/charts/UsageLineChart'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface UsageStats {
   totalRequests: number
@@ -14,7 +16,7 @@ interface Props {
   orgId: string | null
   usageLogs: Record<string, unknown>[]
   usageStats: UsageStats | null
-  error: string | null
+  error: I18nMessage | null
 }
 
 function logsToChartData(logs: Record<string, unknown>[]): UsageDataPoint[] {
@@ -35,6 +37,7 @@ function logsToChartData(logs: Record<string, unknown>[]): UsageDataPoint[] {
 }
 
 export default function Usage({ usageLogs, usageStats, error }: Props) {
+  const { t } = useTranslation()
   const chartData = logsToChartData(usageLogs)
   const totalRequests = usageStats?.totalRequests ?? chartData.reduce((sum, p) => sum + p.requests, 0)
   const totalTokens = usageStats?.totalTokens ?? chartData.reduce((sum, p) => sum + p.tokens, 0)
@@ -48,7 +51,7 @@ export default function Usage({ usageLogs, usageStats, error }: Props) {
 
         {error && (
           <Card className="border-destructive">
-            <CardContent className="pt-6 text-destructive">{error}</CardContent>
+            <CardContent className="pt-6 text-destructive">{t(error.key, error.params)}</CardContent>
           </Card>
         )}
 

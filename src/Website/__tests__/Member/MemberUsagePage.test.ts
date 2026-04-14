@@ -129,7 +129,7 @@ describe('MemberUsagePage', () => {
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.usageLogs).toEqual([])
     expect(captured.lastCall?.props.usageStats).toBe(null)
-    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.usage.selectOrg' })
   })
 
   test('service failure passes error message to Inertia', async () => {
@@ -150,6 +150,6 @@ describe('MemberUsagePage', () => {
     const page = new MemberUsagePage(inertia, mockUsageChartService as any)
     await page.handle(ctx)
 
-    expect(captured.lastCall?.props.error).toBe('Failed to load usage')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.usage.loadFailed' })
   })
 })

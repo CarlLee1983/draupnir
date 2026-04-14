@@ -22,7 +22,7 @@ export class MemberCostBreakdownPage {
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/CostBreakdown/Index', {
         orgId: null,
-        error: 'Select an organization to view cost breakdown.',
+        error: { key: 'member.costBreakdown.selectOrg' },
       })
     }
 

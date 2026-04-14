@@ -5,15 +5,18 @@ import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/tables/DataTable'
 import { createApiKeyColumns, type ApiKeyRow } from './columns'
 import { Plus } from 'lucide-react'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   orgId: string | null
   keys: ApiKeyRow[]
   meta: { total: number; page: number; limit: number; totalPages: number }
-  error: string | null
+  error: I18nMessage | null
 }
 
 export default function ApiKeysIndex({ orgId, keys, error }: Props) {
+  const { t } = useTranslation()
   const columns = useMemo(() => createApiKeyColumns(orgId), [orgId])
   const createQuery = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
 
@@ -32,7 +35,7 @@ export default function ApiKeysIndex({ orgId, keys, error }: Props) {
           </Button>
         </div>
 
-        {error && <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>}
+        {error && <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>}
 
         <DataTable columns={columns} data={keys} searchPlaceholder="搜尋 Key 名稱..." searchColumn="label" />
       </div>

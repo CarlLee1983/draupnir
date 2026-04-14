@@ -118,7 +118,7 @@ describe('MemberDashboardPage', () => {
     expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.balance).toBe(null)
-    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.dashboard.selectOrg' })
   })
 
   test('service failure passes error message to Inertia', async () => {
@@ -134,6 +134,6 @@ describe('MemberDashboardPage', () => {
     const page = new MemberDashboardPage(inertia, mockBalanceService as any)
     await page.handle(ctx)
 
-    expect(captured.lastCall?.props.error).toBe('組織不存在')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.dashboard.loadFailed' })
   })
 })

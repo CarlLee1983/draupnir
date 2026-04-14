@@ -1,7 +1,6 @@
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
@@ -27,15 +26,13 @@ export class MemberApiKeysPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const { messages } = getInertiaShared(ctx)
-
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/ApiKeys/Index', {
         orgId: null,
         keys: [],
         meta: { total: 0, page: 1, limit: 20, totalPages: 0 },
-        error: messages['member.apiKeys.selectOrg'],
+        error: { key: 'member.apiKeys.selectOrg' },
       })
     }
 
@@ -65,7 +62,7 @@ export class MemberApiKeysPage {
       meta: result.success
         ? (result.data?.meta ?? { total: 0, page: 1, limit: 20, totalPages: 0 })
         : { total: 0, page: 1, limit: 20, totalPages: 0 },
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'member.apiKeys.loadFailed' },
     })
   }
 }

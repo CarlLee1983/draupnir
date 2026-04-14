@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MemberLayout } from '@/layouts/MemberLayout'
 import { cn } from '@/lib/utils'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 import {
   PerKeyCostTable,
   type PerKeyCostGrandTotal,
@@ -24,7 +26,7 @@ interface PerKeyCostData {
 
 interface Props {
   orgId?: string | null
-  error: string | null
+  error: I18nMessage | null
 }
 
 const WINDOW_OPTIONS: readonly { value: WindowOption; label: string }[] = [
@@ -36,6 +38,7 @@ const WINDOW_OPTIONS: readonly { value: WindowOption; label: string }[] = [
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export default function CostBreakdown({ orgId, error }: Props) {
+  const { t } = useTranslation()
   const [selectedWindow, setSelectedWindow] = useState<WindowOption>(30)
   const [perKeyData, setPerKeyData] = useState<PerKeyCostData | null>(null)
   const [modelRows, setModelRows] = useState<readonly ModelRow[]>([])
@@ -193,7 +196,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
           </p>
         </div>
 
-        {error ? <InfoBanner title="Organization" message={error} /> : null}
+        {error ? <InfoBanner title="Organization" message={t(error.key, error.params)} /> : null}
         {fetchError ? <InfoBanner title="Analytics" message={fetchError} /> : null}
 
         {!orgId ? (

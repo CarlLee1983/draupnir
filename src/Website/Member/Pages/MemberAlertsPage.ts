@@ -6,7 +6,6 @@ import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/S
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
@@ -36,7 +35,6 @@ export class MemberAlertsPage {
     const currentOrg = ctx.get<CurrentOrganizationContext>('currentOrg')
     const orgId =
       currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
-    const { messages } = getInertiaShared(ctx)
 
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Alerts/Index', {
@@ -44,7 +42,7 @@ export class MemberAlertsPage {
         budget: null,
         webhookEndpoints: [],
         alertHistory: [],
-        error: messages['member.alerts.selectOrg'] ?? 'Select an organization to view alerts.',
+        error: { key: 'member.alerts.selectOrg' },
       })
     }
 

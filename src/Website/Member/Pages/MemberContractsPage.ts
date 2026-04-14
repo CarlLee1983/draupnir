@@ -1,7 +1,6 @@
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
@@ -46,14 +45,12 @@ export class MemberContractsPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const { messages } = getInertiaShared(ctx)
-
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Contracts/Index', {
         orgId: null,
         contracts: [],
-        error: messages['member.contracts.selectOrg'],
+        error: { key: 'member.contracts.selectOrg' },
       })
     }
 
@@ -67,7 +64,7 @@ export class MemberContractsPage {
     return this.inertia.render(ctx, 'Member/Contracts/Index', {
       orgId,
       contracts,
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'member.contracts.loadFailed' },
     })
   }
 }

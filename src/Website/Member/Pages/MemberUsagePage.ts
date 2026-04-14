@@ -1,7 +1,6 @@
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
@@ -27,15 +26,13 @@ export class MemberUsagePage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const { messages } = getInertiaShared(ctx)
-
     const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Usage/Index', {
         orgId: null,
         usageLogs: [],
         usageStats: null,
-        error: messages['member.usage.selectOrg'],
+        error: { key: 'member.usage.selectOrg' },
       })
     }
 
@@ -51,7 +48,7 @@ export class MemberUsagePage {
       orgId,
       usageLogs: result.success ? (result.data?.logs ?? []) : [],
       usageStats: result.success ? (result.data?.stats ?? null) : null,
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'member.usage.loadFailed' },
     })
   }
 }

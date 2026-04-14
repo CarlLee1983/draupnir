@@ -39,12 +39,14 @@ export interface AlertEventHistoryDTO {
   deliveries: AlertDeliveryDTO[]
 }
 
+import type { I18nMessage } from '@/lib/i18n'
+
 export interface AlertsPageProps {
   orgId: string | null
   budget: { budgetUsd: string | null; warningPct: number; criticalPct: number } | null
   webhookEndpoints: WebhookEndpointListDTO[]
   alertHistory: AlertEventHistoryDTO[]
-  error?: string | null
+  error?: I18nMessage | null
 }
 
 export type AlertsTab = 'budgets' | 'webhooks' | 'history'

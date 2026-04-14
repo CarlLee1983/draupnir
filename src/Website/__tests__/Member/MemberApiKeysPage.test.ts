@@ -135,7 +135,7 @@ describe('MemberApiKeysPage', () => {
     expect(captured.lastCall?.component).toBe('Member/ApiKeys/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.keys).toEqual([])
-    expect(captured.lastCall?.props.error).toBe('Please select an organization first')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.apiKeys.selectOrg' })
   })
 
   test('service failure passes error message to Inertia', async () => {
@@ -156,6 +156,6 @@ describe('MemberApiKeysPage', () => {
     const page = new MemberApiKeysPage(inertia, mockListService as any)
     await page.handle(ctx)
 
-    expect(captured.lastCall?.props.error).toBe('Failed to load API keys')
+    expect(captured.lastCall?.props.error).toEqual({ key: 'member.apiKeys.loadFailed' })
   })
 })

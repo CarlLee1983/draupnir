@@ -15,6 +15,8 @@ import {
 import { formatCredit, formatNumber } from '@/lib/format'
 import { BarChart3, Clock3, CreditCard, RefreshCcw, Sparkles, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 type WindowOption = 7 | 30 | 90
 
@@ -48,7 +50,7 @@ interface DashboardBundle {
 interface Props {
   orgId?: string | null
   balance: Balance | null
-  error: string | null
+  error: I18nMessage | null
 }
 
 const WINDOW_OPTIONS: readonly { value: WindowOption; label: string }[] = [
@@ -60,6 +62,7 @@ const WINDOW_OPTIONS: readonly { value: WindowOption; label: string }[] = [
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export default function MemberDashboard({ orgId, balance, error }: Props) {
+  const { t } = useTranslation()
   const [selectedWindow, setSelectedWindow] = useState<WindowOption>(30)
   const [bundle, setBundle] = useState<DashboardBundle | null>(null)
   const [loading, setLoading] = useState(true)
@@ -150,7 +153,7 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
           </div>
         </header>
 
-        {error && <InfoCard tone="destructive" title="Organization" message={error} />}
+        {error && <InfoCard tone="destructive" title="Organization" message={t(error.key, error.params)} />}
         {fetchError && <InfoCard tone="destructive" title="Analytics" message={fetchError} />}
 
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] print:hidden">
