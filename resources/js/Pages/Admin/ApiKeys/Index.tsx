@@ -28,24 +28,24 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
 
   return (
     <AdminLayout>
-      <Head title="API Keys 總覽" />
+      <Head title={t('ui.admin.apiKeys.title')} />
 
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">API Keys 總覽</h1>
+        <h1 className="text-2xl font-bold">{t('ui.admin.apiKeys.title')}</h1>
 
         <Card>
           <CardHeader>
-            <CardTitle>選擇組織</CardTitle>
+            <CardTitle>{t('ui.admin.apiKeys.selectOrgTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="max-w-md space-y-2">
-            <Label htmlFor="orgSelect">組織</Label>
+            <Label htmlFor="orgSelect">{t('ui.admin.apiKeys.orgLabel')}</Label>
             <select
               id="orgSelect"
               value={selectedOrgId ?? ''}
               onChange={handleOrgChange}
               className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
             >
-              <option value="">— 請選擇 —</option>
+              <option value="">{t('ui.admin.apiKeys.orgPlaceholder')}</option>
               {organizations.map((org) => (
                 <option key={org.id} value={org.id}>
                   {org.name}
@@ -63,13 +63,13 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
           <DataTable
             columns={adminApiKeyColumns}
             data={keys}
-            searchPlaceholder="搜尋 Key 名稱..."
+            searchPlaceholder={t('ui.admin.apiKeys.searchPlaceholder')}
             searchColumn="label"
           />
         ) : (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              請先選擇組織以查看 API Keys
+              {t('ui.admin.apiKeys.emptyState')}
             </CardContent>
           </Card>
         )}

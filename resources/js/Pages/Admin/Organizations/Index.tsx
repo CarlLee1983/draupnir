@@ -15,10 +15,10 @@ export default function OrganizationsIndex({ organizations, error }: Props) {
   const { t } = useTranslation()
   return (
     <AdminLayout>
-      <Head title="組織管理" />
+      <Head title={t('ui.admin.organizations.title')} />
 
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">組織管理</h1>
+        <h1 className="text-2xl font-bold">{t('ui.admin.organizations.title')}</h1>
 
         {error && (
           <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
@@ -27,7 +27,7 @@ export default function OrganizationsIndex({ organizations, error }: Props) {
         <DataTable
           columns={orgColumns}
           data={organizations}
-          searchPlaceholder="搜尋組織..."
+          searchPlaceholder={t('ui.admin.organizations.searchPlaceholder')}
           searchColumn="name"
         />
       </div>

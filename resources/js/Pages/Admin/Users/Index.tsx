@@ -16,10 +16,10 @@ export default function UsersIndex({ users, error }: Props) {
   const { t } = useTranslation()
   return (
     <AdminLayout>
-      <Head title="使用者管理" />
+      <Head title={t('ui.admin.users.title')} />
 
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">使用者管理</h1>
+        <h1 className="text-2xl font-bold">{t('ui.admin.users.title')}</h1>
 
         {error && (
           <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
@@ -28,7 +28,7 @@ export default function UsersIndex({ users, error }: Props) {
         <DataTable
           columns={userColumns}
           data={users}
-          searchPlaceholder="搜尋 Email 或名稱..."
+          searchPlaceholder={t('ui.admin.users.searchPlaceholder')}
           searchColumn="email"
         />
       </div>
