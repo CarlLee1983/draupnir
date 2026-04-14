@@ -16,32 +16,32 @@ import type { GetOrganizationService } from '@/Modules/Organization/Application/
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
-import type { InertiaService } from '@/Pages/InertiaService'
-import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 
-import { AdminApiKeysPage } from '../../Admin/AdminApiKeysPage'
-import { AdminContractCreatePage } from '../../Admin/AdminContractCreatePage'
-import { AdminContractDetailPage } from '../../Admin/AdminContractDetailPage'
-import { AdminContractsPage } from '../../Admin/AdminContractsPage'
-import { AdminDashboardPage } from '../../Admin/AdminDashboardPage'
-import { AdminModuleCreatePage } from '../../Admin/AdminModuleCreatePage'
-import { AdminModulesPage } from '../../Admin/AdminModulesPage'
-import { AdminOrganizationDetailPage } from '../../Admin/AdminOrganizationDetailPage'
-import { AdminOrganizationsPage } from '../../Admin/AdminOrganizationsPage'
-import { AdminReportsPage } from '../../Admin/AdminReportsPage'
-import { AdminReportTemplatePage } from '../../Admin/AdminReportTemplatePage'
-import { AdminUsageSyncPage } from '../../Admin/AdminUsageSyncPage'
-import { AdminUserDetailPage } from '../../Admin/AdminUserDetailPage'
-import { AdminUsersPage } from '../../Admin/AdminUsersPage'
+import { AdminApiKeysPage } from '../Pages/AdminApiKeysPage'
+import { AdminContractCreatePage } from '../Pages/AdminContractCreatePage'
+import { AdminContractDetailPage } from '../Pages/AdminContractDetailPage'
+import { AdminContractsPage } from '../Pages/AdminContractsPage'
+import { AdminDashboardPage } from '../Pages/AdminDashboardPage'
+import { AdminModuleCreatePage } from '../Pages/AdminModuleCreatePage'
+import { AdminModulesPage } from '../Pages/AdminModulesPage'
+import { AdminOrganizationDetailPage } from '../Pages/AdminOrganizationDetailPage'
+import { AdminOrganizationsPage } from '../Pages/AdminOrganizationsPage'
+import { AdminReportsPage } from '../Pages/AdminReportsPage'
+import { AdminReportTemplatePage } from '../Pages/AdminReportTemplatePage'
+import { AdminUsageSyncPage } from '../Pages/AdminUsageSyncPage'
+import { AdminUserDetailPage } from '../Pages/AdminUserDetailPage'
+import { AdminUsersPage } from '../Pages/AdminUsersPage'
 
-import { ADMIN_PAGE_KEYS } from './adminPageKeys'
+import { ADMIN_PAGE_KEYS } from '../keys'
 
 /**
  * @param container - Gravito DI container; `InertiaService` must already be bound under
  *   `PAGE_CONTAINER_KEYS.inertiaService`.
  */
-export function registerAdminPageBindings(container: IContainer): void {
+export function registerAdminBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = ADMIN_PAGE_KEYS
 

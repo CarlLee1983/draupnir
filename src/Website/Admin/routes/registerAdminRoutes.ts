@@ -12,10 +12,10 @@ import type {
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
 
-import type { AdminPageBindingKey } from './admin/adminPageKeys'
-import { ADMIN_PAGE_KEYS } from './admin/adminPageKeys'
-import { bindPageAction } from './bindPageAction'
-import { withInertiaPageHandler } from './withInertiaPage'
+import type { AdminPageBindingKey } from '../keys'
+import { ADMIN_PAGE_KEYS } from '../keys'
+import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
+import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -191,7 +191,7 @@ function registerAdminHttpRoute(
  * @param router - Router supporting GET/POST.
  * @param container - DI container with admin page bindings.
  */
-export function registerAdminPageRoutes(
+export function registerAdminRoutes(
   router: Pick<IModuleRouter, 'get' | 'post'>,
   container: IContainer,
 ): void {
