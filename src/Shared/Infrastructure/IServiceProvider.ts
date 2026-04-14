@@ -70,69 +70,64 @@ export interface IContainer {
  * ServiceProvider format (e.g., Nest.js's @Injectable).
  *
  * **Responsibilities**
- * - `register()`: Defines the services provided by this module (Repository, Service, Controller).
+ * - `register()`: Sealed method — calls four protected hooks in fixed order.
+ *   - `registerRepositories()`: Layer 1 — Repository implementations (infrastructure → domain port bindings).
+ *   - `registerInfraServices()`: Layer 2 — Technical adapters (JWT / Email / OAuth / Queue / Dispatcher, etc.).
+ *   - `registerApplicationServices()`: Layer 3 — Application Services (use-case services).
+ *   - `registerControllers()`: Layer 4 — Controllers (registered for use by registerRoutes).
  * - `boot()`: Optional, executes initialization logic when the application starts.
  *
  * **Design Principles**
  * - Completely framework-agnostic: Only uses the IContainer interface.
- * - Hides framework details: Framework Adapter is responsible for converting this class into a framework-specific format.
+ * - Sealed `register()`: Implemented as a readonly arrow property — subclasses declaring a same-name method
+ *   will produce a TypeScript compile error, preventing accidental override.
+ * - Four-hook architecture: Forces consistent DI registration order across all modules.
  *
  * @example
  * ```typescript
- * // Domain Layer
- * export interface IUserRepository extends IRepository<User> {
- *   findByEmail(email: string): Promise<User | null>
- * }
- *
- * // Infrastructure Layer
  * export class UserServiceProvider extends ModuleServiceProvider {
- *   register(container: IContainer): void {
- *     // Register Repository (automatically using IDatabaseAccess)
- *     container.singleton(
- *       'UserRepository',
- *       (c) => new UserRepository(c.make('db'))
- *     )
- *
- *     // Register Service
- *     container.singleton(
- *       'UserService',
- *       (c) => new UserService(c.make('UserRepository'))
- *     )
+ *   protected override registerRepositories(container: IContainer): void {
+ *     container.singleton('UserRepository', (c) => new UserRepository(c.make('db')))
  *   }
  *
- *   boot(_context: any): void {
- *     // Initialization logic when application starts (optional)
+ *   protected override registerApplicationServices(container: IContainer): void {
+ *     container.singleton('UserService', (c) => new UserService(c.make('UserRepository')))
  *   }
- * }
  *
- * // Wiring Layer (Framework Adapter)
- * export function registerUserModule(core: PlanetCore): void {
- *   const provider = new UserServiceProvider()
- *   provider.register(core.container)
- *   provider.boot(core)
+ *   protected override registerControllers(container: IContainer): void {
+ *     container.bind('UserController', (c) => new UserController(c.make('UserService')))
+ *   }
  * }
  * ```
  */
 export abstract class ModuleServiceProvider {
   /**
-   * Registers services into the container.
-   *
-   * This method is called during application startup where the module defines all provided services.
-   *
-   * @param container - Framework-agnostic container interface (safely assumed to support singleton and bind).
+   * Sealed：固定呼叫四個 hook，不可 override。
+   * readonly arrow function property — 子類宣告同名 method 會產生 TypeScript 編譯錯誤。
    */
-  abstract register(container: IContainer): void
+  readonly register: (container: IContainer) => void = (container) => {
+    this.registerRepositories(container)
+    this.registerInfraServices(container)
+    this.registerApplicationServices(container)
+    this.registerControllers(container)
+  }
+
+  /** Layer 1：Repository 實作（infrastructure → domain port 綁定） */
+  protected registerRepositories(_container: IContainer): void {}
+
+  /** Layer 2：技術 adapter（JWT / Email / OAuth / Queue / Dispatcher 等） */
+  protected registerInfraServices(_container: IContainer): void {}
+
+  /** Layer 3：Application Services（use-case services） */
+  protected registerApplicationServices(_container: IContainer): void {}
+
+  /** Layer 4：Controllers（登記至容器，供 registerRoutes 取用） */
+  protected registerControllers(_container: IContainer): void {}
 
   /**
-   * Boots the service (optional).
-   *
-   * Called after the application has finished starting, used for initialization logic
-   * (e.g., building database indexes, preheating cache, etc.).
-   * Note: This may require framework-specific resources, which should be passed in by the framework adaptation layer.
-   *
-   * @param _context - Application context (framework-specific, Modules should not depend on it).
+   * Boot hook：初始化用途（event 訂閱 / warmup / middleware 設定）。
+   * 禁止在此做 DI 註冊（container.singleton / container.bind）。
+   * 解包責任在 framework adapter，此處永遠收到 IContainer。
    */
-  boot(_context: any): void {
-    // Default empty implementation
-  }
+  boot(_container: IContainer): void {}
 }
