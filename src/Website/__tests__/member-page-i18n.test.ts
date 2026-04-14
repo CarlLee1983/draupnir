@@ -63,6 +63,6 @@ describe('MemberDashboardPage i18n', () => {
     const page = new MemberDashboardPage(mockInertia, {} as any)
     await page.handle(ctx)
 
-    expect(capturedProps.error).toBe('Please select an organization first')
+    expect(capturedProps.error).toEqual({ key: 'member.dashboard.selectOrg' })
   })
 })
