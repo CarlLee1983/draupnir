@@ -7,6 +7,9 @@
  * - Single `AuthRepository` factory; concrete DB adapter is chosen by Shared wiring.
  */
 
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import { UserRegisteredHandler } from '@/Modules/Profile/Application/EventHandlers/UserRegisteredHandler'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
@@ -32,6 +35,9 @@ import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 import type { IEmailVerificationRepository } from '../../Domain/Repositories/IEmailVerificationRepository'
 import type { IPasswordResetRepository } from '../../Domain/Repositories/IPasswordResetRepository'
+import { AuthController } from '../../Presentation/Controllers/AuthController'
+import { registerAuthRoutes } from '../../Presentation/Routes/auth.routes'
+import { registerTestSeedRoutes } from '../../Presentation/Routes/test-seed.routes'
 import { configureAuthMiddleware } from '../../Presentation/Middleware/RoleMiddleware'
 import { AuthRepository } from '../Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Repositories/AuthTokenRepository'
@@ -46,7 +52,7 @@ import { ScryptPasswordHasher } from '../Services/PasswordHasher'
  * Service provider for the Auth module.
  * Handles registration of repositories and application services into the DI container.
  */
-export class AuthServiceProvider extends ModuleServiceProvider {
+export class AuthServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   /**
    * Registers repository factories and Auth services on the container.
    * Database access comes from `getCurrentDatabaseAccess()`.
@@ -197,6 +203,21 @@ export class AuthServiceProvider extends ModuleServiceProvider {
 
     // Configure middleware with the registered token repository
     configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new AuthController(
+      core.container.make('registerUserService') as any,
+      core.container.make('loginUserService') as any,
+      core.container.make('refreshTokenService') as any,
+      core.container.make('logoutUserService') as any,
+    )
+    void registerAuthRoutes(router, controller)
+
+    if (getCurrentORM() === 'memory') {
+      registerTestSeedRoutes(router, getCurrentDatabaseAccess())
+    }
   }
 
   /**
