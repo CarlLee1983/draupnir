@@ -1,712 +1,192 @@
-# Draupnir v1 架构概览与模块指南
+# Draupnir v1 架構概覽與模組指南
 
-> 完整的系统架构、模块划分、依赖关系和开发指南。  
-> 配置详情见 `DESIGN_DECISIONS.md`，技术细节见 `specs/` 目录。
+> 完整的系統架構、模組劃分、依賴關係和開發指南。  
+> 配置詳情見 `DESIGN_DECISIONS.md`，技術細節見 `.planning/codebase/` 目錄。
 
-**文档版本**: v1.1  
-**更新日期**: 2026-04-09  
-**项目**: Draupnir — AI 服务管理平台（建构于 Bifrost 之上）
+**文檔版本**: v1.4  
+**更新日期**: 2026-04-13  
+**專案**: Draupnir — 企業級 AI 服務管理平台（建構於 Bifrost 之上）
 
 ---
 
-## 架构全景图
+## 架構全景圖
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                   Frontend (Inertia.js + React)             │
+│        (Admin Shell / Dev Portal / Member Portal)           │
 └──────────────────────┬──────────────────────────────────────┘
                        │ HTTP/JSON
 ┌──────────────────────▼──────────────────────────────────────┐
-│                   API Gateway (SdkApi)                       │
-│              (认证代理、请求转发、限流)                       │
+│                   API Gateway (SdkApi / CliApi)              │
+│         (認證代理、請求轉發、設備流、限流、餘額預檢)          │
 └──────────────────────┬──────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
-│          Presentation Layer (Controllers)                    │
-│  ├─ Auth Controller                                          │
-│  ├─ User Controller                                          │
-│  ├─ Organization Controller                                  │
-│  ├─ ApiKey Controller                                        │
-│  ├─ Credit Controller                                        │
-│  ├─ Billing Controller                                       │
-│  ├─ Dashboard Controller                                     │
-│  └─ SdkApi Controller                                        │
+│          Presentation Layer (Controllers & Routes)           │
+│  ├─ Auth / Profile / Organization                            │
+│  ├─ ApiKey / AppApiKey (應用級金鑰)                          │
+│  ├─ Credit / Contract (合約與餘額)                           │
+│  ├─ Alerts / Reports / Dashboard                             │
+│  └─ AppModule / DevPortal / Health                           │
 └──────────────────────┬──────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
-│        Application Layer (Services & DTOs)                   │
-│  ├─ AuthService                                              │
-│  ├─ UserService                                              │
-│  ├─ OrganizationService                                      │
-│  ├─ ApiKeyService                                            │
-│  ├─ CreditService                                            │
-│  ├─ BillingService                                           │
-│  └─ DashboardService (聚合逻辑)                              │
+│        Application Layer (Services, DTOs & Ports)            │
+│  ├─ Domain Event Dispatcher (跨模組通訊)                     │
+│  ├─ Background Jobs (IScheduler / BackgroundService)         │
+│  └─ Module Services (編排邏輯、外部 Client 包裝)             │
 └──────────────────────┬──────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
-│         Domain Layer (Aggregates & Events)                   │
-│                                                              │
-│  ┌─ User Aggregate                                           │
-│  │  ├─ User (值对象: email, role, status)                   │
-│  │  ├─ PasswordResetToken                                    │
-│  │  └─ UserRegisteredEvent                                   │
-│  │                                                            │
-│  ├─ Organization Aggregate                                   │
-│  │  ├─ Organization                                          │
-│  │  ├─ OrganizationMember                                    │
-│  │  └─ InvitationToken                                       │
-│  │                                                            │
-│  ├─ ApiKey Aggregate                                         │
-│  │  ├─ ApiKey (值对象: key_hash, models, status)            │
-│  │  └─ ApiKeyRevokedEvent                                    │
-│  │                                                            │
-│  ├─ Credit Aggregate                                         │
-│  │  ├─ Credit (值对象: balance, unit_price)                 │
-│  │  └─ CreditUsageDeductedEvent                              │
-│  │                                                            │
-│  └─ Domain Services                                          │
-│     ├─ AuthorizationService (权限检查)                       │
-│     ├─ TokenManager (JWT 操作)                               │
-│     └─ CreditCalculator (积分计算)                           │
+│        Domain Layer (Aggregates, Events & Rules)             │
+│  ├─ Auth/Profile: User, UserProfile, AuthToken               │
+│  ├─ Organization: Organization, Member, Invitation           │
+│  ├─ Billing: CreditAccount, Contract, AppModule              │
+│  ├─ Alerts: AlertConfig, AlertEvent, WebhookEndpoint         │
+│  └─ DevPortal: Application, WebhookConfig                   │
 └──────────────────────┬──────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
-│        Infrastructure Layer (Repos & Externals)              │
-│  ├─ UserRepository (DB 持久化)                               │
-│  ├─ OrganizationRepository                                   │
-│  ├─ ApiKeyRepository                                         │
-│  ├─ CreditRepository                                         │
-│  ├─ BifrostClient (Bifrost API 调用)                        │
-│  ├─ MailService (邮件服务)                                   │
-│  └─ CacheService (Redis 缓存)                                │
+│        Infrastructure Layer (Repos & Adapters)               │
+│  ├─ Repositories (Drizzle ORM + PostgreSQL)                  │
+│  ├─ Bifrost Client (API 代理與同步)                          │
+│  ├─ Mailer (Email 交付) / Webhook Dispatcher                 │
+│  └─ PDF Generator (Chromium/Puppeteer)                       │
 └──────────────────────┬──────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
-│         Foundation Layer (共享基础设施)                       │
-│  ├─ Database (PostgreSQL + Drizzle ORM)                     │
-│  ├─ Redis Cache                                              │
-│  ├─ JWT Token Manager                                        │
-│  ├─ Logging & Monitoring                                     │
-│  └─ Error Handling                                           │
+│         Foundation Layer (共享基礎設施)                       │
+│  ├─ Database (Drizzle ORM / PostgreSQL)                      │
+│  ├─ Redis (Cache & Pub/Sub)                                  │
+│  ├─ Security (JWT / HMAC / AES-256)                          │
+│  └─ Monitoring (Health Checks / Logger)                      │
 └──────────────────────────────────────────────────────────────┘
          ↓ 下游
    Bifrost AI Gateway
-   (Virtual Key 管理、模型列表、用量计费)
+   (Virtual Key 管理、模型代理、用量統計)
 ```
 
 ---
 
-## 模块架构详解
+## 核心模組詳解
 
-### 1. Auth 模块（认证与会话）
+### 1. Auth & Profile 模組（身分與檔案）
 
-**职责**：用户登录、注册、密码管理、JWT 颁发  
-**关键 Aggregate**：User、PasswordResetToken
+**職責**：認證、授權、用戶檔案、OAuth 集成。  
+**關鍵項**：`User` (Auth) 與 `UserProfile` (Profile) 物理分離，通過 `userId` 關聯。
 
-```
-Domain 层
-├─ User (聚合根)
-│  ├─ id: UUID
-│  ├─ email: Email (VO)
-│  ├─ passwordHash: string
-│  ├─ role: Role (VO: ADMIN/MANAGER/MEMBER)
-│  ├─ status: UserStatus (VO: ACTIVE/INACTIVE/SUSPENDED)
-│  └─ Methods
-│     ├─ authenticate(password: string): boolean
-│     ├─ resetPassword(newPassword: string): void
-│     └─ changeRole(newRole: Role): void
-│
-├─ PasswordResetToken (VO)
-│  ├─ token: string
-│  ├─ userId: UUID
-│  ├─ expiresAt: Date
-│  └─ isUsed: boolean
-│
-└─ Events
-   ├─ UserRegisteredEvent
-   ├─ PasswordResetRequestedEvent
-   └─ PasswordResetExecutedEvent
-
-Application 层
-├─ RegisterUserService
-│  └─ Input: { email, password, confirmPassword }
-│  └─ Output: { userId, token }
-│
-├─ LoginService
-│  └─ Input: { email, password }
-│  └─ Output: { token, refreshToken, user }
-│
-├─ RequestPasswordResetService
-├─ ExecutePasswordResetService
-└─ RoleMiddleware (权限检查)
-
-API 端点
-├─ POST /api/auth/register
-├─ POST /api/auth/login
-├─ POST /api/auth/logout
-├─ POST /api/auth/password-reset/request
-├─ POST /api/auth/password-reset/execute
-└─ POST /api/auth/refresh
-```
+- **Auth**: 處理登錄、註冊、密碼重置、JWT 簽發及 Google OAuth。
+- **Profile**: 管理用戶偏好（Timezone/Locale）、通知設置及多語言檔案。
+- **CLI Auth**: 提供 `/cli-api/device/code` 端點支持設備碼流程（Device Flow）。
 
 ---
 
-### 2. User 模块（用户档案）
+### 2. Organization 模組（多租戶管理）
 
-**职责**：用户档案管理、偏好设置  
-**关键 Aggregate**：UserProfile
+**職責**：租戶隔離、成員邀請、RBAC 權限分配。  
+**關鍵項**：`Organization` 聚合根控制所有資源的歸屬。
 
-```
-Domain 层
-├─ UserProfile (聚合根，与 Auth.User 分离)
-│  ├─ id: UUID (= Auth.User.id)
-│  ├─ displayName: string
-│  ├─ avatarUrl: string
-│  ├─ phone: string
-│  ├─ bio: string
-│  ├─ timezone: string (e.g., "Asia/Taipei")
-│  ├─ locale: string (e.g., "zh-TW")
-│  ├─ notificationPreferences: JSON
-│  └─ Methods
-│     └─ updateProfile(updates: Partial): void
-│
-└─ Events
-   └─ UserProfileUpdatedEvent
-
-Application 层
-├─ GetUserProfileService
-├─ UpdateUserProfileService
-└─ GetUserPreferencesService
-
-API 端点
-├─ GET /api/users/profile
-├─ PUT /api/users/profile
-└─ GET /api/users/preferences
-```
+- **邀請流**: 生成加密 Token 發送郵件，支持受邀者註冊並自動加入組織。
+- **Slug 支持**: 組織支持自定義 Slug，用於子域名或特定路由（Phase 03）。
 
 ---
 
-### 3. Organization 模块（组织与成员管理）
+### 3. Credit & Contract 模組（計費與協議）
 
-**职责**：多租户管理、成员邀请、权限分配  
-**关键 Aggregate**：Organization、OrganizationMember、InvitationToken
+**職責**：積分餘額管理、預付費/後付費合約、用量扣費。  
+**關鍵項**：`CreditAccount` 處理實時餘額，`Contract` 處理服務等級協議 (SLA)。
 
-```
-Domain 层
-├─ Organization (聚合根)
-│  ├─ id: UUID
-│  ├─ name: string
-│  ├─ createdById: UUID
-│  ├─ status: OrgStatus (ACTIVE/ARCHIVED)
-│  └─ Methods
-│     ├─ inviteMember(email, role): InvitationToken
-│     ├─ addMember(userId, role): void
-│     └─ removeMember(userId): void
-│
-├─ OrganizationMember (实体)
-│  ├─ id: UUID
-│  ├─ organizationId: UUID
-│  ├─ userId: UUID
-│  ├─ role: Role (VO: ADMIN/MANAGER/MEMBER)
-│  ├─ joinedAt: Date
-│  └─ Methods
-│     └─ updateRole(newRole: Role): void
-│
-├─ InvitationToken (VO)
-│  ├─ token: string
-│  ├─ organizationId: UUID
-│  ├─ inviteeEmail: string
-│  ├─ expiresAt: Date (7 天)
-│  └─ acceptedAt: Date | null
-│
-└─ Events
-   ├─ OrganizationCreatedEvent
-   ├─ MemberInvitedEvent
-   └─ MemberAcceptedInviteEvent
-
-Application 层
-├─ CreateOrganizationService
-├─ InviteMemberService
-├─ AcceptInvitationService
-├─ ListOrganizationMembersService
-└─ RemoveMemberService
-
-API 端点
-├─ POST /api/organizations
-├─ GET /api/organizations/:id
-├─ POST /api/organizations/:id/invite
-├─ POST /api/organizations/:id/members/accept-invite
-├─ GET /api/organizations/:id/members
-└─ DELETE /api/organizations/:id/members/:userId
-```
+- **Credit**: 支持 Top-up（充值）、Deduction（扣費）及餘額告警（Balance Low）。
+- **Contract**: 維護有效期限、模型範圍及資源限制，支持自動續約與到期強制執行。
 
 ---
 
-### 4. ApiKey 模块（密钥管理）
+### 4. Alerts 模組（智能告警）
 
-**职责**：生成、列表、撤销 API 密钥  
-**关键 Aggregate**：ApiKey
+**職責**：跨模組預算監控、閾值觸發、多渠道通知。  
+**關鍵項**：`AlertConfig` 聚合根定義監控邏輯。
 
-```
-Domain 层
-├─ ApiKey (聚合根)
-│  ├─ id: UUID
-│  ├─ organizationId: UUID
-│  ├─ userId: UUID (所有者)
-│  ├─ name: string
-│  ├─ keyHash: string (SHA-256，仅存储哈希)
-│  ├─ bifrostVirtualKeyId: UUID (Bifrost 对应 Key ID)
-│  ├─ allowedModels: string[] (e.g., ["gpt-4", "claude-3"])
-│  ├─ isActive: boolean
-│  ├─ lastUsedAt: Date | null
-│  └─ Methods
-│     ├─ revoke(): void
-│     └─ markAsUsed(): void
-│
-└─ Events
-   ├─ ApiKeyCreatedEvent
-   └─ ApiKeyRevokedEvent
-
-Application 层
-├─ CreateApiKeyService
-│  └─ 调用 BifrostClient 创建 Virtual Key
-│  └─ 存储本地记录 + 权限映射
-│
-├─ ListApiKeysService
-├─ RevokeApiKeyService
-│  └─ 调用 BifrostClient 撤销 Virtual Key
-│  └─ 标记本地记录为已撤销
-│
-└─ ValidateApiKeyService
-   └─ 快速验证（内存缓存）
-
-API 端点
-├─ POST /api/api-keys (需 MANAGER+ 权限)
-├─ GET /api/api-keys
-├─ DELETE /api/api-keys/:keyId
-└─ GET /api/api-keys/:keyId/validate
-```
+- **評估流**: 監聽 `bifrost.sync.completed` 事件，通過 `EvaluateThresholdsService` 掃描組織用量。
+- **通知管道**: 支持 `EmailAlertNotifier` 和 `WebhookAlertNotifier`（支持簽名驗證）。
+- **預算隔離**: 支持按組織或按特定 API Key 設置月度預算門檻。
 
 ---
 
-### 5. Credit 模块（积分系统）
+### 5. ApiKey & AppApiKey 模組（金鑰管理）
 
-**职责**：积分余额、用量扣费、同步 Bifrost 账单  
-**关键 Aggregate**：Credit、UsageTransaction
+**職責**：用戶級金鑰與應用級金鑰管理。  
+**關鍵項**：`ApiKey` 映射至 Bifrost 的 Virtual Keys。
 
-```
-Domain 层
-├─ Credit (聚合根)
-│  ├─ organizationId: UUID
-│  ├─ balance: Decimal (精确小数)
-│  ├─ unitPrice: Decimal (单位：USD/K tokens)
-│  ├─ updatedAt: Date
-│  ├─ lastSyncedAt: Date (与 Bifrost 同步时间)
-│  └─ Methods
-│     ├─ deductUsage(tokensUsed: number): void
-│     ├─ purchase(amount: Decimal): void
-│     └─ validateSufficientCredit(): void
-│
-├─ UsageTransaction (实体，审计日志)
-│  ├─ id: UUID
-│  ├─ organizationId: UUID
-│  ├─ amount: Decimal (扣费金额)
-│  ├─ tokensUsed: number (消耗 tokens)
-│  ├─ transactionType: enum (USAGE/PURCHASE/REFUND)
-│  ├─ externalRef: string (Bifrost 账单 ID)
-│  └─ createdAt: Date
-│
-└─ Events
-   ├─ CreditUsageDeductedEvent
-   ├─ CreditPurchasedEvent
-   └─ CreditLowEvent (余额低于阈值)
-
-Application 层
-├─ SyncCreditFromBifrostService
-│  └─ 定时任务，从 Bifrost 获取最新用量
-│  └─ 计算费用，更新 Credit.balance
-│
-├─ GetCreditBalanceService
-├─ ValidateCreditSufficientService
-│  └─ 在 SdkApi 请求前检查
-│  └─ 若余额不足，阻止请求
-│
-├─ GetUsageHistoryService
-└─ PurchaseCreditService (Phase 4)
-
-API 端点
-├─ GET /api/credits/balance
-├─ GET /api/credits/usage-history
-├─ POST /api/credits/purchase (Phase 4)
-└─ GET /api/credits/transactions (管理员)
-```
+- **ApiKey**: 用戶為日常使用生成的金鑰。
+- **AppApiKey**: 專為開發者註冊的應用（App）生成的金鑰，支持 Scope 限制（如僅限 Chat 或 Embeddings）。
 
 ---
 
-### 6. Billing 模块（账单管理）
+### 6. AppModule & DevPortal 模組（功能管理與門戶）
 
-**职责**：生成发票、充值流程、费用报表  
-**关键 Aggregate**：Invoice、Subscription
+**職責**：模組訂閱、開發者自助服務。  
+**關鍵項**：`AppModule` 定義系統功能單元及其計費屬性（Free/Paid）。
 
-```
-Domain 层
-├─ Invoice (聚合根)
-│  ├─ id: UUID
-│  ├─ organizationId: UUID
-│  ├─ billingPeriod: { from, to }
-│  ├─ totalAmount: Decimal
-│  ├─ paidAt: Date | null
-│  ├─ status: InvoiceStatus (DRAFT/ISSUED/PAID/OVERDUE)
-│  └─ Methods
-│     ├─ issue(): void
-│     └─ markAsPaid(): void
-│
-└─ Events
-   ├─ InvoiceGeneratedEvent
-   └─ InvoicePaidEvent
-
-Application 层
-├─ GenerateInvoiceService (定时，每月)
-├─ GetBillingHistoryService
-└─ SendInvoiceService
-
-API 端点
-├─ GET /api/billing/invoices
-├─ GET /api/billing/invoices/:invoiceId
-└─ POST /api/billing/invoices/:invoiceId/download
-```
+- **AppModule**: 控制組織是否可以使用特定功能（如「告警模組」、「高級報表」）。
+- **DevPortal**: 允許開發者註冊應用、配置 Webhook Endpoint、查看 API 調用文檔。
 
 ---
 
-### 7. Dashboard 模块（数据聚合，无 Domain 层）
+### 7. Dashboard & Reports 模組（數據分析）
 
-**职责**：多数据源聚合、实时统计、报表生成
+**職責**：實時指標聚合、PDF 報表調度。  
+**關鍵項**：`Dashboard` 採用讀寫分離（CQRS 讀側），`Reports` 處理非同步長任務。
 
-```
-架构说明：纯读操作，无业务规则 → 无需 Domain 层
-         符合 CQRS 读侧设计 → 应用层直接查询
-
-Application 层
-├─ GetDashboardOverviewService
-│  ├─ 获取用户信息（名字、角色）
-│  ├─ 获取组织成员数
-│  ├─ 获取积分余额
-│  ├─ 获取本月用量 (Bifrost 同步)
-│  └─ 返回聚合结果
-│
-├─ GetApiKeyStatsService
-│  ├─ Key 总数、活跃 Key 数
-│  ├─ 最近使用的 Key（top 5）
-│  └─ 按模型分组的使用统计
-│
-├─ GetCreditTrendService
-│  ├─ 过去 30 天的用量曲线
-│  ├─ 日均消耗
-│  └─ 预测剩余可用天数
-│
-└─ GetOrganizationStatsService
-   ├─ 成员活跃度
-   └─ 模型热度排行
-
-API 端点
-├─ GET /api/dashboard/overview
-├─ GET /api/dashboard/api-key-stats
-├─ GET /api/dashboard/credit-trend
-└─ GET /api/dashboard/organization-stats
-```
+- **指標**: 模型消耗分佈、成本趨勢預測、KPI 匯總（Tokens/Tokens Per Second）。
+- **Reports**: 通過 `IScheduler` 調度月度或週度報表，使用 `GeneratePdfService` 生成 PDF 並發送郵件。
 
 ---
 
-### 8. SdkApi 模块（请求代理，无 Domain 层）
+### 8. SdkApi & CliApi 模組（訪問層代理）
 
-**职责**：验证 API Key、转发请求到 Bifrost、检查余额
+**職責**：透明轉發請求至下游 Bifrost，執行准入檢查。  
+**關鍵項**：高性能中間件。
 
-```
-架构说明：纯认证 + 转发，无业务逻辑 → 无需 Domain 层
-         API 网关职责 → 中间件处理
-
-Middleware
-├─ AppAuthMiddleware
-│  ├─ 解析 Authorization: Bearer <key>
-│  ├─ 验证 Key 有效性（缓存 + Bifrost 后台验证）
-│  ├─ 验证 Key 权限（允许的模型）
-│  └─ 验证租户隔离（Key 所属组织）
-│
-└─ RateLimitMiddleware
-   ├─ 按 Key 限流
-   └─ 与 Bifrost 限流联动
-
-Application 层
-├─ ValidateApiKeyService
-├─ CheckCreditSufficientService
-└─ ForwardRequestService
-   ├─ 构建 Bifrost 请求
-   ├─ 转发请求
-   ├─ 记录日志
-   └─ 返回响应
-
-Controller
-├─ POST /v1/chat/completions (代理端点)
-├─ POST /v1/embeddings
-├─ GET /v1/models
-└─ GET /v1/usage (Bifrost 用量)
-```
+- **檢查項**: 驗證 Key 有效性 -> 檢查組織狀態 -> 檢查模組訂閱 -> 檢查餘額/合約。
+- **代理**: 請求成功後非同步投遞用量統計任務，確保主路徑延遲最低。
 
 ---
 
-## 数据流示例
+## 跨模組通訊
 
-### 用户注册 → 组织邀请 → Key 创建 → API 调用
+### 1. 同步依賴 (Ports)
+Application 層定義 Port（接口），Infrastructure 層注入具體實現（如 `IAlertRecipientResolver` 調用 `AuthRepository`）。
 
-```
-1. 用户注册
-   POST /api/auth/register { email, password }
-   ├─ RegisterUserService
-   ├─ 创建 User Aggregate
-   ├─ 发布 UserRegisteredEvent
-   └─ 返回 JWT Token
+### 2. 非同步通訊 (Events)
+使用 `DomainEventDispatcher` 進行進程內通訊。例如：
+- `UserRegisteredEvent` -> 自動創建默認組織。
+- `BalanceDepleted` -> 觸發告警通知並使關聯 API Key 失效。
+- `BifrostSyncCompleted` -> 觸發告警評估。
 
-2. 管理员创建组织
-   POST /api/organizations { name }
-   ├─ CreateOrganizationService
-   ├─ 创建 Organization Aggregate
-   ├─ 发布 OrganizationCreatedEvent
-   └─ 返回 organizationId
-
-3. 管理员邀请成员
-   POST /api/organizations/:id/invite { email, role: MANAGER }
-   ├─ InviteMemberService
-   ├─ 生成 InvitationToken（7 天过期）
-   ├─ 发布 MemberInvitedEvent
-   ├─ 邮件服务发送邀请链接
-   └─ 返回 { token }
-
-4. 被邀请用户注册 / 接受邀请
-   POST /api/organizations/:id/members/accept-invite { token }
-   ├─ AcceptInvitationService
-   ├─ 验证 Token 有效性
-   ├─ 添加 OrganizationMember
-   ├─ 发布 MemberAcceptedInviteEvent
-   └─ 用户成为组织成员
-
-5. 管理员创建 API Key
-   POST /api/api-keys { name, allowedModels: ["gpt-4"] }
-   ├─ CreateApiKeyService
-   ├─ 调用 BifrostClient.createVirtualKey()
-   ├─ 生成密钥、存储哈希
-   ├─ 发布 ApiKeyCreatedEvent
-   └─ 返回 { key: "sk-xxx" } (仅返回一次)
-
-6. 用户通过 SDK 调用 API
-   curl -H "Authorization: Bearer sk-xxx" \
-        https://api.draupnir.io/v1/chat/completions \
-        -d { model: "gpt-4", ... }
-   
-   ├─ AppAuthMiddleware
-   │  ├─ 验证 Key 有效性（缓存）
-   │  └─ 验证权限（gpt-4 在 allowedModels）
-   │
-   ├─ RateLimitMiddleware
-   │  └─ 检查 Key 的请求频率
-   │
-   ├─ SdkApi.Controller
-   │  ├─ CheckCreditSufficientService
-   │  │  └─ 验证余额充足（缓存 + 定时检查）
-   │  │
-   │  └─ ForwardRequestService
-   │     ├─ 调用 BifrostClient 代理请求
-   │     ├─ 返回 Bifrost 响应
-   │     └─ 记录使用日志（异步）
-   │
-   └─ 返回 { choices: [...], usage: { ... } }
-
-7. 后台异步处理
-   ├─ UsageLogService（定时，每 5 分钟）
-   │  └─ 从日志聚合本组织的 token 用量
-   │  └─ 调用 SyncCreditFromBifrostService
-   │
-   └─ SyncCreditFromBifrostService
-      ├─ 调用 BifrostClient.getUsageLogs()
-      ├─ 计算费用（tokens * unitPrice）
-      ├─ 更新 Credit.balance
-      └─ 发布 CreditUsageDeductedEvent
-```
+### 3. 統一調度 (IScheduler)
+Phase 18 引入的 `IScheduler` 提供標準化的後台任務管理，確保報表、合約到期掃描等任務在分佈式環境下安全運行。
 
 ---
 
-## 依赖关系图
+## 數據持久化規範
 
-```
-Presentation (Controller)
-    ↓
-Application Service (编排、聚合)
-    ↓
-Domain (Aggregate、VO、Event、Repository Interface)
-    ↓
-Infrastructure (Repository Impl、外部服务)
-    ↑
-Foundation (Database、Redis、JWT、Logger)
-```
-
-**关键规则**：
-- Domain 无外向依赖（唯一例外：Event 发布）
-- Application 依赖 Domain（调用 Service、Aggregate）
-- Infrastructure 依赖 Domain（实现 Repository）
-- Presentation 只调用 Application
-- 不允许跨模块 Aggregate 直接访问
+專案全面採用 **Drizzle ORM**。
+- **Schema**: 集中定義於 `src/Foundation/Infrastructure/Database/schema.ts`。
+- **Migrations**: 位於 `database/migrations/`，通過 `bun orbit` 或 `migrate.ts` 執行。
+- **Repository**: 每個模組在 `Infrastructure/Repositories` 下實現對應的接口。
 
 ---
 
-## 模块间通讯方式
+## 開發流程指引
 
-### 1. 同步通讯（Service 注入）
-```typescript
-// OrganizationService 需要 AuthorizationService
-class OrganizationService {
-  constructor(
-    private authService: AuthorizationService,
-    private orgRepository: OrganizationRepository
-  ) {}
-  
-  async inviteMember(orgId, email, role) {
-    this.authService.requirePermission(user, 'INVITE_MEMBER')
-    // 业务逻辑...
-  }
-}
-```
-
-### 2. 异步通讯（Domain Events）
-```typescript
-// Auth Module 发布事件
-await this.userRepository.save(user) // user.events = [UserRegisteredEvent]
-
-// Subscriber 监听（可在不同模块）
-class SendWelcomeEmailSubscriber {
-  async handle(event: UserRegisteredEvent) {
-    await this.mailService.sendWelcomeEmail(event.email)
-  }
-}
-```
-
-### 3. 外部服务调用（Infrastructure）
-```typescript
-// ApiKeyService 调用 Bifrost
-class CreateApiKeyService {
-  constructor(private bifrostClient: BifrostClient) {}
-  
-  async execute() {
-    const virtualKey = await this.bifrostClient.createVirtualKey(...)
-    // 存储本地映射...
-  }
-}
-```
+### 新增功能模組的推薦路徑：
+1. **Domain**: 定義核心邏輯、驗證規則和事件。
+2. **Application**: 編寫 Service 處理業務流程，定義 DTO。
+3. **Infrastructure**: 實現 Drizzle Repository 和外部服務 Adapter。
+4. **Presentation**: 編寫 Controller 和路由，使用 `Inertia::render` 或 `Response::json`。
+5. **ServiceProvider**: 在模組的 `Infrastructure/Providers` 下註冊 DI 綁定，並在 `AppModule` 中註冊模組信息。
 
 ---
 
-## 文件位置参考
-
-```
-src/
-├── Modules/
-│   ├── Auth/
-│   │   ├── Domain/
-│   │   │   ├── User.ts (Aggregate Root)
-│   │   │   ├── PasswordResetToken.ts (VO)
-│   │   │   ├── Role.ts (VO)
-│   │   │   ├── IUserRepository.ts (Interface)
-│   │   │   └── Events/
-│   │   │       ├── UserRegisteredEvent.ts
-│   │   │       ├── PasswordResetRequestedEvent.ts
-│   │   │       └── PasswordResetExecutedEvent.ts
-│   │   ├── Application/
-│   │   │   ├── Services/
-│   │   │   │   ├── RegisterUserService.ts
-│   │   │   │   ├── LoginService.ts
-│   │   │   │   ├── RequestPasswordResetService.ts
-│   │   │   │   └── ExecutePasswordResetService.ts
-│   │   │   └── DTOs/
-│   │   │       ├── RegisterUserRequest.ts
-│   │   │       ├── LoginRequest.ts
-│   │   │       └── AuthResponse.ts
-│   │   ├── Infrastructure/
-│   │   │   └── Repositories/
-│   │   │       ├── DrizzleUserRepository.ts
-│   │   │       └── DrizzlePasswordResetTokenRepository.ts
-│   │   └── Presentation/
-│   │       └── Controllers/
-│   │           └── AuthController.ts
-│   ├── User/
-│   ├── Organization/
-│   ├── ApiKey/
-│   ├── Credit/
-│   ├── Billing/
-│   ├── Dashboard/
-│   └── SdkApi/
-│
-├── Foundation/
-│   ├── Infrastructure/
-│   │   ├── Services/
-│   │   │   ├── BifrostClient/
-│   │   │   ├── MailService.ts
-│   │   │   └── CacheService.ts
-│   │   └── Database/
-│   │       ├── schema.ts (Drizzle)
-│   │       └── migrations/
-│   └── Providers/
-│       └── ServiceProvider.ts
-│
-└── Shared/
-    ├── Domain/
-    │   ├── Errors/
-    │   │   ├── AppException.ts
-    │   │   ├── ValidationException.ts
-    │   │   └── NotFoundException.ts
-    │   └── Interfaces/
-    │       ├── IRepository.ts
-    │       └── IEvent.ts
-    ├── Application/
-    │   └── DTOs/
-    │       ├── ApiResponse.ts
-    │       └── PaginationDto.ts
-    └── Presentation/
-        └── Middleware/
-            ├── AuthMiddleware.ts
-            ├── RoleMiddleware.ts
-            └── ErrorHandler.ts
-```
-
----
-
-## 快速开发指南
-
-### 添加新模块的步骤
-
-1. **创建 Domain 层**
-   - 定义 Aggregate Root 和关键 Value Objects
-   - 编写业务规则（验证、不变式）
-   - 定义 Repository Interface
-   - 定义 Events
-
-2. **创建 Application 层**
-   - 实现 Service（编排、聚合）
-   - 定义 Request/Response DTO
-   - 添加单元测试
-
-3. **创建 Infrastructure 层**
-   - 实现 Repository（Drizzle ORM）
-   - 实现外部服务调用（如需）
-   - 添加集成测试
-
-4. **创建 Presentation 层**
-   - 实现 Controller（HTTP 端点）
-   - 添加路由（routes.ts）
-   - 添加 E2E 测试
-
-5. **注册模块**
-   - 在 ServiceProvider 中注册 Service 和 Repository
-   - 在 routes.ts 中注册路由
-
----
-
-**更多详情请查阅** `DESIGN_DECISIONS.md` 和 `specs/` 目录下的完整设计文档。
+**更多詳情請查閱** `.planning/codebase/` 下的各專題文檔。

@@ -9,8 +9,8 @@
 ```bash
 # 從 Draupnir 項目複製驗證工具
 cp draupnir/scripts/routes-analyzer.ts your-project/scripts/
-cp draupnir/tests/lib/test-client.ts your-project/tests/lib/
-cp draupnir/tests/Feature/routes-existence.test.ts your-project/tests/Feature/
+cp draupnir/tests/Feature/lib/test-client.ts your-project/tests/Feature/lib/
+cp draupnir/tests/Feature/routes-existence.e2e.ts your-project/tests/Feature/
 ```
 
 ### 步驟 2: 安裝依賴（如需）
@@ -29,47 +29,34 @@ npm install --save-dev @types/bun
 {
   "scripts": {
     "routes:analyze": "bun scripts/routes-analyzer.ts",
-    "test:routes": "bun test tests/Feature/routes-existence.test.ts",
-    "verify:routes": "npm run routes:analyze && npm run test:routes"
+    "test:feature": "bun scripts/test-feature.ts",
+    "verify:routes": "bun scripts/routes-analyzer.ts && bun run test:feature"
   }
 }
 ```
 
+（Draupnir 內建 `test:feature`；其他專案可改為在設定 `API_BASE_URL` 後執行 `bun test ./tests/Feature/routes-existence.e2e.ts`。）
+
 ### 步驟 4: 運行驗證
 
 ```bash
-npm run verify:routes
+bun run verify:routes
 ```
 
 ## 預期輸出
 
 ```
-🔍 正在分析路由: src/Modules
+🔍 正在分析路由: .../src/Modules
 
 ╔════════════════════════════════════════╗
-║        Routes 分析報告                  ║
-╠════════════════════════════════════════╣
-║ 總 Routes 數:                        68 ║
+║ 總 Routes 數:                       43 ║   ← regex 快照，實際數以你的 repo 為準
 ╚════════════════════════════════════════╝
-
-📊 按 HTTP 方法分類:
-  GET    25
-  POST   32
-  PUT     3
-  PATCH   5
-  DELETE  3
-
-📦 按模組分類:
-  Organization           12
-  Contract                9
-  ...
 
 ✅ 分析完成
 💾 詳細分析已保存至: routes-analysis.json
-
-✅ 72 pass
-Ran 72 tests across 1 file. [1.81s]
 ```
+
+動態測試請用 `bun run test:feature`（Draupnir）或 `API_BASE_URL=... bun test ./tests/Feature/routes-existence.e2e.ts`；通過數以控制台為準。
 
 ## 常見的項目結構調整
 
@@ -263,7 +250,7 @@ setupTestServer({ timeout: 120000 }) // 120 秒
 // 或者在 package.json 中
 {
   "scripts": {
-    "test:routes": "bun test tests/Feature/routes-existence.test.ts --timeout 120000"
+    "test:routes": "bun test ./tests/Feature/routes-existence.e2e.ts --timeout 120000"
   }
 }
 ```

@@ -95,7 +95,7 @@ grep -rn "BifrostClient|bifrostClient" src/Modules/ | grep -v "CliApi|bifrostVir
 ```
 
 ### TypeScript
-No new type errors in changed files. Pre-existing errors in `IHttpContext.ts` and `routes-connectivity.test.ts` are unrelated to this plan.
+No new type errors in changed files. Pre-existing errors in `IHttpContext.ts` and `routes-connectivity.e2e.ts` are unrelated to this plan.
 
 ### Full Test Suite
 762 pass, 17 fail (all failures are pre-existing: Routes Connectivity Verification + Playwright tests unrelated to Dashboard or LLMGateway migration).

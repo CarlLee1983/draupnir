@@ -115,7 +115,7 @@ None — plan executed exactly as written.
 
 ## Issues Encountered
 
-Pre-existing TypeScript errors in `tests/Feature/routes-connectivity.test.ts` (4 errors about `Property 'data' does not exist on type 'TestResponse'`) — these are unrelated to this plan's changes and were present before execution. Out of scope per deviation rules.
+Pre-existing TypeScript errors in `tests/Feature/routes-connectivity.e2e.ts` (4 errors about `Property 'data' does not exist on type 'TestResponse'`) — these are unrelated to this plan's changes and were present before execution. Out of scope per deviation rules.
 
 ## Phase 1 Completion Statement
 

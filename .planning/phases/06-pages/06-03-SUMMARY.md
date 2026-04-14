@@ -7,7 +7,7 @@ tags: [feature-tests, routes-existence, page-routes, inertia, integration]
 tech_stack:
   - Bun test runner
   - TestClient (fetch-based HTTP client)
-  - routes-existence.test.ts pattern
+  - routes-existence.e2e.ts pattern
 dependencies:
   requires:
     - src/Pages/routing/ (registerAdminPageRoutes, registerMemberPageRoutes)
@@ -22,7 +22,7 @@ dependencies:
     - Route registration verification
 key_files:
   modified:
-    - tests/Feature/routes-existence.test.ts
+    - tests/Feature/routes-existence.e2e.ts
     - tests/Feature/lib/test-client.ts
     - src/Pages/page-routes.ts (logging added)
   created: []
@@ -39,7 +39,7 @@ metrics:
 
 # Phase 06 Plan 03: Routes Existence - Page Routes Summary
 
-**One-liner:** Integration test coverage (25 passing tests) for all 16 admin and 9 member Inertia page routes, verifying routes exist and return non-404 responses via the routes-existence.test.ts pattern.
+**One-liner:** Integration test coverage (25 passing tests) for all 16 admin and 9 member Inertia page routes, verifying routes exist and return non-404 responses via the routes-existence.e2e.ts pattern.
 
 ## Completed Tasks
 
@@ -47,7 +47,7 @@ metrics:
 
 **Status:** ✅ Complete
 
-**Objective:** Extend `tests/Feature/routes-existence.test.ts` with two new `describe` blocks for Admin Pages Module (16 routes) and Member Pages Module (9 routes).
+**Objective:** Extend `tests/Feature/routes-existence.e2e.ts` with two new `describe` blocks for Admin Pages Module (16 routes) and Member Pages Module (9 routes).
 
 **Implementation:**
 
@@ -86,7 +86,7 @@ PUT  /member/settings
 
 **Key Changes:**
 
-1. **tests/Feature/routes-existence.test.ts:**
+1. **tests/Feature/routes-existence.e2e.ts:**
    - Added 16 admin page route tests in `describe('Admin Pages Module', ...)`
    - Added 9 member page route tests in `describe('Member Pages Module', ...)`
    - All tests use pattern: `const response = await client.METHOD(path, body)` → `expect(response.status).not.toBe(404)`
@@ -103,7 +103,7 @@ PUT  /member/settings
 
 ## Test Results
 
-**routes-existence.test.ts:**
+**routes-existence.e2e.ts:**
 - ✅ 25 new page route tests: all passing
 - ✅ 71 existing API route tests: all passing
 - ⚠️ 1 API route test failing: `GET /api/modules/:moduleId` returns 302 (out of scope for this plan)
@@ -111,7 +111,7 @@ PUT  /member/settings
 
 **Verification:**
 ```bash
-$ bun test tests/Feature/routes-existence.test.ts
+$ bun test tests/Feature/routes-existence.e2e.ts
 ✅ 96 pass
 ⚠️ 1 fail (GET /api/modules/:moduleId — pre-existing issue, not in plan scope)
 
@@ -136,12 +136,12 @@ Log output:
 
 ## Acceptance Criteria Met
 
-✅ `tests/Feature/routes-existence.test.ts` contains `describe('Admin Pages Module', ...)` block  
-✅ `tests/Feature/routes-existence.test.ts` contains `describe('Member Pages Module', ...)` block  
+✅ `tests/Feature/routes-existence.e2e.ts` contains `describe('Admin Pages Module', ...)` block  
+✅ `tests/Feature/routes-existence.e2e.ts` contains `describe('Member Pages Module', ...)` block  
 ✅ All 16 admin routes have existence assertions (GET/POST/POST methods matched to correct routes)  
 ✅ All 9 member routes have existence assertions (GET/POST/PUT methods matched to correct routes)  
 ✅ TestClient.put() method exists (for PUT /member/settings)  
-✅ `bun test tests/Feature/routes-existence.test.ts` returns 96 pass, 1 fail (all 25 page routes pass)  
+✅ `bun test tests/Feature/routes-existence.e2e.ts` returns 96 pass, 1 fail (all 25 page routes pass)  
 ✅ No existing API route tests were modified (lines 1-401 unchanged)  
 ✅ Routes return non-404: 302 (redirect) for unauthenticated requests  
 ✅ Route registration logs show no errors  
@@ -173,12 +173,12 @@ Log output:
 
 All test assertions and route verifications completed successfully:
 
-✅ tests/Feature/routes-existence.test.ts exists with "Admin Pages Module" describe block  
-✅ tests/Feature/routes-existence.test.ts contains "Member Pages Module" describe block  
+✅ tests/Feature/routes-existence.e2e.ts exists with "Admin Pages Module" describe block  
+✅ tests/Feature/routes-existence.e2e.ts contains "Member Pages Module" describe block  
 ✅ 16 admin route tests present: /admin/dashboard through /admin/usage-sync  
 ✅ 9 member route tests present: /member/dashboard through /member/settings  
 ✅ TestClient.put() method exists (line 66-72 of test-client.ts)  
-✅ All tests pass: `bun test tests/Feature/routes-existence.test.ts` → 96 pass, 1 fail (1 fail unrelated)  
+✅ All tests pass: `bun test tests/Feature/routes-existence.e2e.ts` → 96 pass, 1 fail (1 fail unrelated)  
 ✅ No existing tests modified: original Health, Auth, Profile, Organization, etc. blocks intact  
 ✅ Routes registration successful: logs show "✅ Admin/Member/Static Inertia page routes registered"  
 
@@ -190,7 +190,7 @@ All test assertions and route verifications completed successfully:
 
 | File | Changes | Type |
 |------|---------|------|
-| tests/Feature/routes-existence.test.ts | +126 lines: two new describe blocks (Admin, Member) with 25 route assertions | Modified |
+| tests/Feature/routes-existence.e2e.ts | +126 lines: two new describe blocks (Admin, Member) with 25 route assertions | Modified |
 | tests/Feature/lib/test-client.ts | +1 line: `redirect: 'manual'` in fetch options | Modified |
 | src/Pages/page-routes.ts | +15 lines: try-catch logging around route registration | Modified |
 | **Total** | **142 lines modified** | 3 files |

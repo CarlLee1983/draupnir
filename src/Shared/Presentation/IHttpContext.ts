@@ -46,6 +46,9 @@ export interface IHttpContext {
    */
   getPathname(): string
 
+  /** HTTP method (e.g. `GET`, `POST`), uppercased by the Gravito adapter. */
+  getMethod(): string
+
   /** Retrieves a query string parameter */
   getQuery(name: string): string | undefined
 
@@ -205,6 +208,7 @@ export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
       return fallbackPathParam(resolvePathname(), name)
     },
     getPathname: () => resolvePathname(),
+    getMethod: () => String((ctx.req as { method?: string }).method ?? 'GET').toUpperCase(),
     getQuery: (name) => query[name],
     params: Object.keys(routeParams).length > 0 ? routeParams : legacyParams,
     query,

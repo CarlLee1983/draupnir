@@ -42,7 +42,7 @@ created: 2026-04-10
 | 06-02-02 | 02 | 1 | PAGE-02 | unit | `bun test src/Pages/__tests__/Member` | ❌ W0 | ⬜ pending |
 | 06-01-03 | 01 | 1 | PAGE-03 | unit | `bun test src/Pages` | ❌ W0 | ⬜ pending |
 | 06-01-04 | 01 | 1 | PAGE-04 | unit | `bun test src/Pages` | ❌ W0 | ⬜ pending |
-| 06-02-01 | 02 | 2 | PAGE-05 | integration | `bun test tests/Feature/routes-existence.test.ts` | ✅ (needs additions) | ⬜ pending |
+| 06-02-01 | 02 | 2 | PAGE-05 | integration | `bun test tests/Feature/routes-existence.e2e.ts` | ✅ (needs additions) | ⬜ pending |
 | 06-01-05 | 01 | 1 | PAGE-06 | unit | `bun test src/Pages` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*

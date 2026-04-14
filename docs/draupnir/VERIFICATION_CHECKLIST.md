@@ -1,7 +1,7 @@
 # Draupnir v1 詳細驗收清單
-> **驗收日期**: 2026-04-09 | **驗收模式**: 代碼審計 + 功能驗證
+> **驗收日期**: 2026-04-13 | **驗收模式**: 代碼審計 + 功能驗證
 > 
-> **總進度**: 8/10 v1 完成標準已達成 | **整體完成度**: ~85%
+> **總進度**: 9/10 v1 完成標準已達成 | **整體完成度**: ~95%
 
 ---
 
@@ -13,9 +13,9 @@
 | **Phase 2** | Identity | 100% | ✅ 完成 | — |
 | **Phase 3** | Key Management | 100% | ✅ 完成 | — |
 | **Phase 4** | Credit System | 100% | ✅ 完成 | — |
-| **Phase 5** | Contract & Module | 95% | ✅ 幾乎完成 | 模組使用量獨立追蹤 |
-| **Phase 6** | Application Distribution | 90% | ✅ 幾乎完成 | SDK/CLI 本體在獨立 Repo |
-| **Phase 7** | Admin & Member Portal | 70% | 🔄 可用 | 內建 Cron、通知通道 |
+| **Phase 5** | Contract & Module | 95% | ✅ 幾乎完成 | 模組使用量獨立追蹤、訂閱表遷移 |
+| **Phase 6** | Application Distribution | 100% | ✅ 完成 | — |
+| **Phase 7** | Admin & Member Portal | 90% | ✅ 幾乎完成 | 實時監控 (Polling) |
 
 ---
 
@@ -192,23 +192,22 @@ curl http://localhost:3000/api/keys/key123/usage
 
 | 檢查項 | 預期 | 實際 | 驗證位置 |
 |--------|------|------|---------|
-| 定時同步 Bifrost 用量日誌 | ✅ 後台任務 | ✅ `UsageSyncService` 實現 | 支持 Cron（需補充內建 Cron —見缺口） |
+| 定時同步 Bifrost 用量日誌 | ✅ 後台任務 | ✅ `UsageSyncService` 透過 `IScheduler` 調度 | `BifrostSyncServiceProvider.registerJobs()` |
 | 用量 → Credit 轉換 | ✅ 定價規則引擎 | ✅ `PricingRule` + `CalculateCostService` | `pricing_rules` 表管理定價；計算邏輯正確 |
 | 異常偵測 | ✅ 告警機制 | ✅ 邏輯實現 | `quarantined_logs` 隔離異常日誌，可人工審核 |
 | 同步狀態監控 | ✅ API 端點 | ✅ `sync_cursors` 追蹤同步位置 | 可查詢最近同步時間 + 同步狀態 |
 | 單元測試 | ✅ 完整 | ✅ 5+ 測試 | `/src/Modules/UsageSync/__tests__/` |
 
-**驗收結論**: ✅ **通過** — 用量同步核心邏輯完整（缺內建 Cron 調度）
+**驗收結論**: ✅ **通過** — 用量同步已透過統一調度器 (IScheduler) 自動化
 
-**⚠️ 缺口**:
-- [ ] **內建 Cron 任務調度** — 當前依賴外部 APScheduler/Node Schedule；建議集成 Bun 原生 Cron 或 node-cron
-- [ ] **同步失敗告警** — 若同步中斷應發出告警（可配合通知通道）
+**建議**:
+- [ ] 補充同步失敗告警與 `IAlertNotifier` 的整合測試
 
 ---
 
 ## Phase 5：Contract & Module — 合約與模組管理
 
-### 5.1 Contract 模組 ✅ (95%)
+### 5.1 Contract 模組 ✅
 
 | 檢查項 | 預期 | 實際 | 驗證位置 | 狀態 |
 |--------|------|------|---------|------|
@@ -217,54 +216,30 @@ curl http://localhost:3000/api/keys/key123/usage
 | 合約指派 | ✅ Organization / User 層級 | ✅ 雙向支持 | `contract.assignee_type` ('org'/'user') + `assignee_id` | ✅ |
 | 合約到期處理 | ✅ 停用 + 事件 | ✅ Status 更新 + `ContractExpiredEvent` 發送 | 到期自動置為 `expired` | ✅ |
 | 合約續約/變更 | ✅ 流程實現 | ✅ 專用 API 端點 | `POST /api/contracts/{id}/renew` | ✅ |
-| **通知通道** | ⚠️ 事件已發，但**無通知實現** | ❌ 事件未串聯通知服務 | 事件在 `ContractExpiredEvent` 發送，無訊息發送邏輯 | ⚠️ |
-| **內建 Cron** | ⚠️ 到期檢查**非週期性** | ❌ 非 Cron 觸發，依賴外部調用 | `POST /api/contracts/handle-expiry` 須外部定時觸發 | ⚠️ |
+| **通知通道** | ✅ `IAlertNotifier` 集成 | ✅ 已實現 Email/Webhook | `Alerts` 模組訂閱事件並派送 | ✅ |
+| **內建 Cron** | ✅ 定期到期檢查 | ✅ `IScheduler` 定時任務 | `ContractServiceProvider.registerJobs()` | ✅ |
 | 單元測試 | ✅ 完整 | ✅ 8+ 測試 | `/src/Modules/Contract/__tests__/` | ✅ |
 
-**驗收結論**: ✅ **部分通過** — 合約核心邏輯完整；通知和 Cron 需補充
-
-**⚠️ 缺口清單**:
-1. [ ] **通知通道** — 集成郵件/Webhook 發送合約到期通知
-2. [ ] **內建 Cron** — 定期檢查合約到期（而非被動觸發）
-
-**建議實現方案**:
-```typescript
-// 建議：在 Bootstrap 中註冊 Cron 任務
-const cronService = container.make(CronService)
-cronService.schedule('0 0 * * *', async () => {
-  await container.make(ContractExpiryHandler).handle()
-})
-```
+**驗收結論**: ✅ **通過** — 合約生命週期管理已完全自動化且具備通知能力
 
 ---
 
-### 5.2 AppModule 模組 ✅ (95%)
+### 5.2 AppModule 模組 ✅ (90%)
 
 | 檢查項 | 預期 | 實際 | 驗證位置 | 狀態 |
 |--------|------|------|---------|------|
 | 應用模組註冊 | ✅ 管理員定義 | ✅ Domain Entity + CRUD API | `POST /api/app-modules` | ✅ |
 | 模組訂閱 | ✅ 免費/付費 | ✅ 訂閱類型 + 計費邏輯 | `subscription_type`, `subscription_cost` | ✅ |
 | 權限檢查 Middleware | ✅ 已掛載 | ✅ `AppModuleAccessMiddleware` | 在 org 路徑下自動檢查（dashboard、credit、api_keys） | ✅ |
+| **模組訂閱表遷移** | ❌ **未實現** | ❌ 缺 migration 建立 `module_subscriptions` 表 | `ModuleSubscriptionRepository` 參考不存在的表 | ❌ |
 | **模組使用量獨立追蹤** | ❌ **未實現** | ❌ 無獨立統計 | 用量記錄仍依附 ApiKey，無模組維度分組 | ❌ |
 | 單元測試 | ✅ 完整 | ✅ 6+ 測試 | `/src/Modules/AppModule/__tests__/` | ✅ |
 
-**驗收結論**: ✅ **部分通過** — 模組管理與權限可用；缺獨立用量追蹤
+**驗收結論**: ✅ **部分通過** — 核心邏輯就位，但持久化層與用量追蹤尚有嚴重缺口
 
 **❌ 缺口 (高優先級)**:
+- [ ] **建立 `module_subscriptions` 遷移** — `ModuleSubscriptionRepository` 目前因表不存在而無法運作
 - [ ] **模組使用量獨立追蹤** — 需在 `usage_records` 表新增 `module_id` 欄位，並在 UsageSync 時依模組分組計費
-
-**建議實現方案**:
-```typescript
-// 1. 遷移：ALTER TABLE usage_records ADD COLUMN module_id UUID
-// 2. UsageSync 時，根據 ApiKey 關聯的 AppModule 填充 module_id
-// 3. Dashboard API 新增 module 維度的聚合查詢
-SELECT 
-  module_id, 
-  SUM(tokens_used) as total_tokens,
-  SUM(cost) as total_cost
-FROM usage_records
-GROUP BY module_id
-```
 
 ---
 
@@ -332,13 +307,10 @@ GROUP BY module_id
 |--------|------|------|---------|------|
 | 應用註冊 API | ✅ 第三方開發者註冊 | ✅ `POST /api/dev-portal/apps` | DevPortal 模組 | ✅ |
 | API Key 自助申請 | ✅ 申請 + 管理 | ✅ `/api/dev-portal/apps/{appId}/keys` | 自動配發 | ✅ |
-| Webhook 設定 | ✅ 用量告警、Key 到期通知 | ⚠️ 儲存端點實現，但**事件實際發送尚待補充** | `/api/dev-portal/apps/{appId}/webhook` | ⚠️ |
+| Webhook 設定 | ✅ 用量告警、Key 到期通知 | ✅ 透過 `WebhookAlertNotifier` 實現 | `src/Modules/Alerts/Infrastructure/Notifiers/` | ✅ |
 | API 文件自動生成 | ✅ 自動文檔 | ✅ OpenAPI 規範 | `/docs/openapi.yaml` (1,979 行) | ✅ |
 
-**驗收結論**: ✅ **部分通過** — Portal 基礎實現完整；Webhook 實際發送邏輯待補充
-
-**⚠️ 缺口**:
-- [ ] **Webhook 事件發送** — 當用量達閾值、Key 到期時，實際發送 HTTP POST 至 Webhook URL
+**驗收結論**: ✅ **通過** — Portal 核心功能與 Webhook 整合完整
 
 ---
 
@@ -393,18 +365,14 @@ GROUP BY module_id
 | 2 | API Key 與 Bifrost 虛擬 Key 正確映射 | ✅ | ✅ 1:1 映射、創建時同步 | ApiKey 服務驗證 | ✅ |
 | 3 | 用量從 Bifrost 同步並反映 | ✅ | ✅ UsageSync 服務 + Dashboard 顯示 | Phase 4 驗證 | ✅ |
 | 4 | Credit 系統正常運作 | ✅ | ✅ 充值、消耗、餘額管理 | Phase 4 通過 | ✅ |
-| 5 | 管理者可建立合約並指派 | ✅ | ✅ Contract CRUD + 指派邏輯 | Phase 5 通過 | ✅ |
-| 6 | 應用模組可被註冊、訂閱、權限控制 | ✅ | ✅ AppModule + Middleware | Phase 5 通過 | ✅ |
-| 7 | CLI 工具可透過 Draupnir 認證 | ✅ | ✅ CliApi 端點就位，CLI 本體在獨立 Repo | Phase 6.3 通過 | ✅ API |
-| 8 | 管理後台與會員 Portal 基本功能 | ✅ | ✅ 13 + 7 頁面實現 | Phase 7 通過 | ✅ |
-| 9 | **測試覆蓋率 ≥ 80%** | ✅ | ⚠️ **需驗證** | 執行 `bun run test:coverage` | ⚠️ |
+| 5 | 管理者可建立合約並指派 | ✅ | ✅ Contract CRUD + 自動到期檢查 | Phase 5 通過 | ✅ |
+| 6 | 應用模組可註冊、訂閱、權限控制 | ✅ | ⚠️ 核心邏輯完成，**缺訂閱表遷移** | Phase 5.2 驗證 | ⚠️ |
+| 7 | CLI 工具可透過 Draupnir 認證 | ✅ | ✅ CliApi 端點就位 | Phase 6.3 通過 | ✅ API |
+| 8 | 管理後台與會員 Portal 基本功能 | ✅ | ✅ 完整頁面實現 | Phase 7 通過 | ✅ |
+| 9 | **測試覆蓋率 ≥ 80%** | ✅ | ✅ 已由 CI Guardrails (Phase 20) 驗收 | `bun run test:coverage` | ✅ |
 | 10 | **API 文件完整** | ✅ | ✅ OpenAPI 規範 1,979 行 | `/docs/openapi.yaml` | ✅ |
 
-**v1 完成度**: **8/10** 標準達成
-
-**待補充驗證**:
-- [ ] 執行 `bun run test:coverage` 確認測試覆蓋率是否達 80%
-- [ ] 如未達，補充 E2E 和集成測試
+**v1 完成度**: **9/10** 標準達成
 
 ---
 
@@ -414,12 +382,12 @@ GROUP BY module_id
 
 | 維度 | 評分 | 備註 |
 |------|------|------|
-| 架構清晰度 | ⭐⭐⭐⭐⭐ | 嚴格遵循 DDD 分層，框架無關設計 |
-| 測試覆蓋 | ⭐⭐⭐⭐ | 89 個單元測試，缺 E2E 和部分集成測試 |
-| 錯誤處理 | ⭐⭐⭐⭐ | ApiException + ErrorCode 統一，缺全局異常處理器完善 |
-| 安全性 | ⭐⭐⭐⭐ | JWT + RBAC + 組織隔離，密碼加密，缺 Rate Limit 完善和 CSRF 保護 |
-| 文檔完整性 | ⭐⭐⭐⭐ | OpenAPI 完整，缺內部架構文檔 |
-| 性能優化 | ⭐⭐⭐ | 基本優化完成，缺查詢優化和快取策略 |
+| 架構清晰度 | ⭐⭐⭐⭐⭐ | 嚴格遵循 DDD 分層，Phase 19 完成警報模組解耦 |
+| 測試覆蓋 | ⭐⭐⭐⭐⭐ | CI 強制 80%+ 覆蓋率，包含 DI 與路由自動校驗 |
+| 錯誤處理 | ⭐⭐⭐⭐⭐ | 統一 ApiException，Phase 18 引入任務重試與退避 |
+| 安全性 | ⭐⭐⭐⭐ | JWT + RBAC + 組織隔離，Webhook 簽章驗證 |
+| 文檔完整性 | ⭐⭐⭐⭐ | OpenAPI + 內部架構總結，文件同步率高 |
+| 性能優化 | ⭐⭐⭐⭐ | 緩存同步、IScheduler 異步任務處理 |
 
 ---
 
@@ -427,111 +395,45 @@ GROUP BY module_id
 
 ### 高優先級 ❌
 
-1. **模組使用量獨立追蹤** (Phase 5.2)
-   - 影響：無法按模組分組計費
-   - 工作量：1-2 天（數據庫遷移 + 查詢邏輯）
+1. **模組訂閱表遷移** (Phase 5.2)
+   - 影響：無法在生產環境持久化模組訂閱關係
+   - 工作量：0.5 天（建立 `module_subscriptions` 遷移檔）
    
-2. **內建 Cron 任務調度** (Phase 4.2, 5.1)
-   - 影響：合約到期、用量同步需外部觸發
-   - 工作量：1 天（集成 node-cron 或 Bun 原生方案）
-
-3. **通知通道實現** (Phase 5.1)
-   - 影響：用戶無法收到合約到期、用量告警通知
-   - 工作量：2-3 天（郵件/Webhook 集成）
+2. **模組使用量獨立追蹤** (Phase 5.2)
+   - 影響：無法按模組分組計費與顯示圖表
+   - 工作量：1 天（`usage_records` 欄位遷移 + UsageSync 邏輯更新）
 
 ### 中優先級 ⚠️
 
-4. **Webhook 事件實際發送** (Phase 6.4)
-   - 影響：開發者無法接收事件通知
+3. **實時監控 (Polling/WebSocket)** (Phase 7.1)
+   - 影響：UI 需手動刷新查看最新用量
    - 工作量：1 天
 
-5. **測試覆蓋率驗證** (整體)
-   - 工作量：0.5 天（補充缺失的集成/E2E 測試）
-
-6. **用量儀表板實時性** (Phase 7.1)
-   - 影響：管理員無法實時監控
-   - 工作量：1-2 天（WebSocket 或 Polling）
-
-### 低優先級 📋
-
-7. SDK / CLI 本體實現（獨立倉庫）
-8. 用量詳情頁進階功能（過濾、匯出）
-9. 內部架構文檔補充
-
----
-
-## 驗收檢查清單使用指南
-
-### 執行驗收流程
-
-```bash
-# 1. 執行全量測試
-bun run test:coverage
-
-# 2. 類型檢查
-bun run typecheck
-
-# 3. 構建驗證
-bun run build
-
-# 4. 啟動開發環境
-bun run dev
-
-# 5. 功能驗證（可選，若需手工測試）
-# 使用 Postman 或 `curl` 驗證 API 端點
-```
-
-### 常見驗收場景
-
-**場景 1：新使用者完整流程**
-```bash
-1. POST /api/auth/register → 註冊
-2. POST /api/auth/login → 登入
-3. POST /api/organizations → 創建組織
-4. POST /api/organizations/{orgId}/keys → 創建 API Key
-5. GET /api/organizations/{orgId}/dashboard → 查看 Dashboard
-6. GET /api/organizations/{orgId}/credits/balance → 查詢額度
-```
-
-**場景 2：管理員合約指派**
-```bash
-1. POST /api/contracts → 創建合約
-2. POST /api/contracts/{id}/assign → 指派給組織/用戶
-3. GET /api/contracts → 驗證合約列表
-```
-
-**場景 3：應用分發**
-```bash
-1. POST /api/dev-portal/apps → 註冊應用
-2. POST /api/dev-portal/apps/{appId}/keys → 申請 App Key
-3. GET /api/dev-portal/docs → 獲取 API 文檔
-```
+4. **SDK / CLI 本體發佈**
+   - 影響：開發者無法直接使用套件
+   - 工作量：1-2 天（獨立倉庫 CI/CD 配置與發佈）
 
 ---
 
 ## 簽核與後續行動
 
-**驗收日期**: 2026-04-09  
-**驗收人員**: Code Review Team  
-**整體評分**: ⭐⭐⭐⭐ (4/5)
+**驗收日期**: 2026-04-13  
+**驗收人員**: Gemini CLI Architect  
+**整體評分**: ⭐⭐⭐⭐✨ (4.5/5)
 
 ### 建議發布清單
 
-- [ ] **立即修復（Release Blocker）**: 無（功能齊全，缺口為非核心功能）
+- [ ] **立即修復（Release Blocker）**: `module_subscriptions` 遷移
 - [ ] **下個迭代修復**:
-  1. 內建 Cron 任務調度
-  2. 通知通道實現
-  3. 模組使用量獨立追蹤
-  4. 測試覆蓋率補充至 80%+
+  1. 模組使用量獨立追蹤
+  2. 實時監控 UI 優化
 - [ ] **後續優化**:
-  1. 用量儀表板實時性
-  2. SDK / CLI 本體發佈
-  3. Webhook 事件完善
+  1. 多維度分析報告匯出
 
 ### 推薦版本標籤
 
 ```bash
-git tag -a v1.0.0-rc.1 -m "Release Candidate: Core features complete, minor gaps identified"
+git tag -a v1.4.0 -m "Milestone v1.4 complete: Hardened operations, CI guardrails, and unified scheduling"
 ```
 
 ---

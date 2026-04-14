@@ -115,8 +115,8 @@ After this phase, Draupnir no longer reads `BifrostClient` from `src/Foundation/
 - `tests/Unit/Foundation/BifrostClient/retry.test.ts` - Retry tests for the extracted package
 - `tests/Unit/Foundation/BifrostClient/types.test.ts` - Type surface tests for the extracted package
 - `tests/Unit/Foundation/LLMGateway/BifrostGatewayAdapter.test.ts` - Adapter tests that will need the new package import path
-- `tests/Feature/routes-connectivity.test.ts` - Route-level smoke check in the final verification phase
-- `tests/Feature/routes-existence.test.ts` - Route existence smoke check in the final verification phase
+- `tests/Feature/routes-connectivity.e2e.ts` - Route-level smoke check in the final verification phase
+- `tests/Feature/routes-existence.e2e.ts` - Route existence smoke check in the final verification phase
 
 ### Project-level constraints
 - `.planning/codebase/CONCERNS.md` - Coupling and configuration risks being resolved by this phase

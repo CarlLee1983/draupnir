@@ -9,14 +9,24 @@
 - 當兩個模組的資料生命週期、授權模型、寫入責任明顯不同，就應該分開。
 - 當一個模組需要被另一個模組當作「穩定的上游能力」來使用，就應該維持明確的介面，而不是直接共享內部實作。
 
+## 程式碼目錄對照
+
+| 路徑 | 說明 |
+|------|------|
+| `src/Foundation/` | 跨模組基礎建設（郵件、Bifrost / LLM 閘道、Webhook、排程等），**不是** `src/Modules` 底下的一包 |
+| `src/Modules/*` | 依 bounded context 切分的業務與交付模組（見下列） |
+
+目前 `src/Modules` 頂層目錄：`Alerts`、`ApiKey`、`AppApiKey`、`AppModule`、`Auth`、`CliApi`、`Contract`、`Credit`、`Dashboard`、`DevPortal`、`Health`、`Organization`、`Profile`、`Reports`、`SdkApi`。
+
 ## Draupnir 的主要 bounded context
 
-### 1. Foundation
+### 1. Foundation（`src/Foundation`）
 
 職責：
 
-- 封裝外部整合
-- 提供 BifrostClient 等基礎服務
+- 封裝外部整合（例如 Bifrost / LLM Gateway adapter）
+- 郵件寄送（`IMailer`）
+- Webhook 派送、排程器介面等橫切能力
 
 邊界：
 
@@ -36,18 +46,18 @@
 - 管理的是「誰能登入系統」
 - 不負責 profile、組織歸屬、API Key 業務細節
 
-### 3. User
+### 3. Profile（程式碼模組名；概念上即「使用者 profile」）
 
 職責：
 
-- 使用者 profile
-- 個人設定
-- 使用者狀態管理的業務視圖
+- 使用者 profile（`UserProfile`）
+- 個人設定與展示用欄位
+- 與身分帳號對應的業務視圖
 
 邊界：
 
 - 管理的是「這個人是誰、偏好是什麼」
-- 不負責登入憑證
+- 不負責登入憑證（密碼、JWT 等屬於 `Auth`）
 
 ### 4. Organization
 
@@ -139,6 +149,73 @@
 - 是應用分發 context
 - 不是使用者個人 API Key 的延伸版
 
+### 11. SdkApi
+
+職責：
+
+- SDK 面向的 HTTP 閘道：驗證 `AppApiKey`、代理模型呼叫、查用量 / 餘額等
+- 以用例與中介層為主（見模組內 `README` 與 `layer-decision-rules`）
+
+邊界：
+
+- **不是**傳統意義下擁有聚合的 bounded context；避免在此新增核心業務不變式或成為主要寫入來源
+- 應透過埠 / 既有模組服務讀寫，不複製 Domain 規則
+
+### 12. CliApi
+
+職責：
+
+- CLI 場景的認證與裝置碼等交付路徑
+- 與 `Auth` 的 token 流程銜接
+
+邊界：
+
+- 屬於「認證交付通道」，不替代 `Auth` 擁有身分聚合
+
+### 13. Alerts
+
+職責：
+
+- 告警設定、Webhook 端點、通知派送
+- 與用量 / 預算等訊號相關的提醒（依產品規則與實作）
+
+邊界：
+
+- 管理的是「何時、向誰、用什麼管道通知」
+- 不應成為 ApiKey / Credit 的權威來源；應讀取上游模組或埠
+
+### 14. DevPortal
+
+職責：
+
+- 開發者入口：註冊「應用程式」（`Application` aggregate）、相關設定
+- 與組織成員資格、應用金鑰發放流程協作
+
+邊界：
+
+- **DevPortal 的 Application** 是「開發者註冊的應用實體」，與 **AppModule**（平台上可訂閱的功能模組）語意不同，不可混用
+
+### 15. Reports
+
+職責：
+
+- 排程報表（例如週期、收件人、PDF / 寄信）
+- 以 `orgId` 等識別子劃分資料範圍
+
+邊界：
+
+- 偏報表與派送流程；依賴 `Foundation`（郵件、排程）與 persistence，不應偷偷成為計費或授權的來源
+
+### 16. Health
+
+職責：
+
+- 存活檢查與依賴狀態（資料庫、快取等）的呈現
+
+邊界：
+
+- 維運語意為主；即使有完整 DDD 分層，仍應保持精簡，不與業務 context 互相滲透
+
 ## 切分準則
 
 當你在考慮要不要切出新模組時，先看這幾個訊號。
@@ -185,21 +262,31 @@
 - `Application` → `Domain`
 - `Infrastructure` → `Domain`
 - `Modules` → `Shared`
+- `Modules` → `Foundation`（取用郵件、閘道、排程等埠的實作）
 - 上游 context 不應反向依賴下游 context 的內部細節
 
 在實務上，Draupnir 允許少數跨模組查詢與授權依賴，但要維持單向介面，不要互相鑽進對方內部。
 
-## 本專案可接受的跨模組關係
+## 本專案可接受的跨模組關係（示例）
 
-- `Auth` → `User`：註冊時建立 profile
-- `Organization` → `Auth`：確認 user 存在
-- `ApiKey` → `BifrostClient`：同步 virtual key
-- `Credit` → `ApiKey`：餘額不足時凍結 key
-- `Dashboard` → `ApiKey` / `Credit`：讀取匯總資料
-- `Contract` → `Organization` / `AppModule`：套用授權政策
-- `AppApiKey` → `ApiKey` / `AppModule`：管理應用 key 的生命週期
+下列為目前程式中常見、且合理的協作方向（透過 repository 介面、`OrgAuthorizationHelper`、用例編排等，而非直接共用 ORM 實作）。
 
-這些依賴是「業務上必要」的，不代表可以互相偷看對方的內部實作。
+- `Auth` → `Profile`：註冊或 OAuth 成功後建立 profile
+- `Organization` → `Auth`：確認 user 存在等
+- `ApiKey` → `Organization`：組織層授權檢查
+- `ApiKey` → `Foundation` / Bifrost：同步 virtual key
+- `Credit` → `ApiKey`：餘額不足時凍結 key；→ `Organization`：授權
+- `Dashboard` → `ApiKey`、`Organization`：讀取匯總與授權
+- `Contract` → `Organization`：管理合約與授權語境下的組織關係
+- `AppModule` → `Contract`：例如組織預設開通、訂閱邏輯需對齊合約
+- `AppApiKey` → `Organization`：簽發與管理應用 key 時的成員資格
+- `SdkApi` → `AppApiKey`、`Credit`：驗證應用金鑰、查詢餘額等
+- `DevPortal` → `AppApiKey`、`Organization`：應用註冊與 key 流程
+- `Alerts` → `ApiKey`、`Auth`、`Dashboard`（用量等讀埠）、`Organization`：組告警與通知
+- `CliApi` → `Auth`：CLI 認證與 token
+- `Reports` → `Foundation`：郵件、排程；報表資料以租戶邊界為主
+
+這些依賴是「業務或交付上必要」的，不代表可以互相偷看對方的內部實作。
 
 ## 常見錯誤
 
@@ -209,6 +296,8 @@
 - 把 Contract 和 AppModule 混成同一個 context，導致政策與資產混在一起。
 - 把 Credit、ApiKey、Organization 三者的責任混掉，最後找不到單一權威來源。
 - 在模組間直接共享 ORM model 或 repository class。
+- 把 **DevPortal 的 Application** 與 **AppModule** 混為一談（前者是開發者應用實體，後者是可訂閱的平台模組目錄）。
+- 在 **SdkApi** 內複製或新增核心領域規則（應留在對應 bounded context）。
 
 ## 判斷問題清單
 
@@ -221,4 +310,3 @@
 5. 這個依賴是讀取、授權、還是寫入？
 
 如果答案開始模糊，通常就是 context 切太大了。
-

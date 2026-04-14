@@ -1,408 +1,417 @@
-# Draupnir v1 核心设计决策汇总
+# Draupnir v1 核心設計決策匯總
 
-> 本文档汇总所有关键的架构、技术、功能设计决策及其理由。  
-> 详细设计规格见 `specs/` 目录。
+> 本文匯總關鍵的架構、技術與功能設計決策及其理由。  
+> 詳細設計規格見 [`specs/`](./specs/)；架構全景與模組說明見 [`ARCHITECTURE_SUMMARY.md`](./ARCHITECTURE_SUMMARY.md)。
 
-**文档版本**: v1.1  
-**更新日期**: 2026-04-09  
-**涵盖范围**: Phase 1-7 所有模块的关键决策
-
----
-
-## 一、整体架构决策
-
-### 1.1 技术栈选型
-
-| 组件 | 选择 | 理由 |
-|------|------|------|
-| **运行时** | Bun | 性能优于 Node.js，原生 TypeScript 支持，快速启动 |
-| **Web 框架** | Gravito DDD 2.0 | 内置 DDD 分层，与 gravito-impulse 一致性 |
-| **ORM** | Drizzle | 类型安全，轻量，Bun 原生支持 |
-| **数据库** | PostgreSQL | ACID，JSON 支持，生产级可靠性 |
-| **缓存** | Redis | 会话存储、用量缓存、发布订阅 |
-| **认证** | JWT + HttpOnly Cookie | 安全性 + 无状态扩展性 |
-| **前端框架** | Inertia.js + React | 动态 SPA，后端驱动路由，开发效率高 |
-
-### 1.2 架构分层（DDD）
-
-```
-Presentation 层（HTTP Controller）
-    ↓
-Application 层（服务编排、DTO 转换）
-    ↓
-Domain 层（业务逻辑、聚合、值对象、事件）
-    ↓
-Infrastructure 层（数据持久化、外部服务调用）
-```
-
-**分层规则**：
-- Domain 层无依赖（纯业务逻辑）
-- Application 依赖 Domain（编排编排、Service 调用）
-- Infrastructure 依赖 Domain（实现 Repository 接口）
-- Presentation 依赖 Application（调用 Service，转换 DTO）
-
-### 1.3 多租户隔离策略
-
-| 决策 | 选择 | 理由 |
-|------|------|------|
-| **数据隔离方式** | 行级隔离（Row-Level Security）+ organization_id 过滤 | 简单有效，适合初期规模 |
-| **用户关联** | 一个用户 ↔ 一个组织 | 简化权限模型，降低复杂度 |
-| **跨租户数据共享** | 不允许 | 防止数据泄露，强化隔离 |
+**文件版本**：v1.2  
+**更新日期**：2026-04-13  
+**涵蓋範圍**：Phase 1–7 主要模組的關鍵決策（含 Auth／Profile、Organization、ApiKey、Credit、Contract、Dashboard、SdkApi／CliApi、Alerts 等）
 
 ---
 
-## 二、身份与权限决策
+## 一、整體架構決策
+
+### 1.1 技術棧選型
+
+| 元件 | 選擇 | 理由 |
+|------|------|------|
+| **執行時** | Bun | 相較典型 Node.js 啟動與執行效能佳，原生 TypeScript，開發迴圈快 |
+| **Web 框架** | Gravito DDD 2.0 | 內建 DDD 分層，與 gravito-impulse 等模組一致 |
+| **ORM** | Drizzle | 型別安全、輕量，與 Bun 生態相容 |
+| **資料庫** | PostgreSQL | ACID、JSON 支援，生產環境成熟度佳 |
+| **快取** | Redis | 工作階段、用量快取、發佈／訂閱 |
+| **認證** | JWT + HttpOnly Cookie | 安全與無狀態擴充性的平衡 |
+| **前端** | Inertia.js + React | 後端驅動路由的 SPA 體驗，開發效率高 |
+
+### 1.2 架構分層（DDD）
+
+```
+Presentation 層（HTTP Controller）
+    ↓
+Application 層（服務編排、DTO 轉換）
+    ↓
+Domain 層（業務邏輯、聚合、值物件、事件）
+    ↓
+Infrastructure 層（資料持久化、外部服務呼叫）
+```
+
+**分層規則**：
+
+- Domain 層無向外依賴（純業務邏輯）
+- Application 依賴 Domain（編排用例、呼叫 Domain／Application Service）
+- Infrastructure 依賴 Domain（實作 Repository 等埠）
+- Presentation 依賴 Application（呼叫 Service、對外 DTO／回應轉換）
+
+### 1.3 多租戶隔離策略
+
+| 決策 | 選擇 | 理由 |
+|------|------|------|
+| **資料隔離** | 列級隔離（Row-Level Security）+ `organization_id` 篩選 | 實作單純，適合現階段規模 |
+| **使用者與組織** | 一個使用者對應一個組織 | 簡化權限模型、降低複雜度 |
+| **跨租戶資料共用** | 不允許 | 降低外洩風險、強化隔離 |
+
+---
+
+## 二、身分與權限決策
 
 ### 2.1 RBAC 三角色模型
 
 ```
-ADMIN       → 完全权限（系统管理、所有数据访问）
-MANAGER     → 组织运营（成员管理、用量查看、密钥管理）
-MEMBER      → 个人操作（个人档案、个人密钥）
+ADMIN       → 完整權限（系統管理、資料範圍內操作）
+MANAGER     → 組織營運（成員管理、用量檢視、金鑰管理）
+MEMBER      → 個人操作（個人檔案、個人金鑰等）
 ```
 
-**理由**：符合 Draupnir 的用户分级，避免过度复杂的细粒度权限系统。
+**理由**：符合 Draupnir 的使用者分級，避免過早引入過細的權限矩陣。
 
-### 2.2 密码重设流程
-
-```
-用户请求密码重设 
-  ↓
-验证邮箱存在，生成 PasswordResetToken（1小时过期）
-  ↓
-非生产环境：返回 token（测试便利）
-生产环境：仅返回成功消息（防账户枚举）
-  ↓
-用户验证 token 并输入新密码
-  ↓
-撤销该用户所有既有 JWT（强制重新登录）
-```
-
-### 2.3 组织邀请机制
+### 2.2 密碼重設流程
 
 ```
-Admin/Manager 发起邀请
+使用者請求密碼重設
   ↓
-生成带 token 的邀请链接
+驗證信箱存在，產生 PasswordResetToken（例如 1 小時過期）
   ↓
-未注册用户：走注册流程 → 邀请链接自动关联
-已注册用户：点击链接 → 直接加入组织
+非正式環境：可回傳 token（方便測試）
+正式環境：僅回傳成功訊息（降低帳號枚舉風險）
+  ↓
+使用者驗證 token 並輸入新密碼
+  ↓
+撤銷該使用者既有 JWT（強制重新登入）
+```
+
+### 2.3 組織邀請機制
+
+```
+Admin／Manager 發起邀請
+  ↓
+產生含 token 的邀請連結
+  ↓
+未註冊使用者：走註冊流程 → 邀請連結自動關聯
+已註冊使用者：點擊連結 → 直接加入組織
 ```
 
 ---
 
-## 三、核心模块设计决策
+## 三、核心模組設計決策
 
-### 3.1 Credit 系统（积分/余额）
+### 3.1 Credit 系統（點數／餘額）
 
-| 决策 | 选择 | 理由 |
+| 決策 | 選擇 | 理由 |
 |------|------|------|
-| **数据来源** | 从 Bifrost 同步用量 → 折算 Credit | 单一真实源，防止双重记账 |
-| **更新频率** | 异步 + 定时同步 | 实时性与性能的平衡 |
-| **余额检查** | 请求时同步，每 5 分钟后台验证 | 防止超额、降低实时查询压力 |
-| **充值渠道** | 暂不实现（Phase 4 预留） | 先完成核心业务流，后扩展 |
+| **資料來源** | 自 Bifrost 同步用量 → 折算 Credit | 單一真實來源，避免重複記帳 |
+| **更新頻率** | 非同步 + 排程同步 | 即時性與負載的平衡 |
+| **餘額檢查** | 請求路徑上同步檢查，並輔以週期性後台驗證 | 抑制超用、降低即時查詢壓力 |
+| **儲值／金流渠道** | 可階段性擴充（見 Phase 4 規格） | 先打通主流程，再擴充付費整合 |
 
-### 3.2 API Key 模块
+### 3.2 API Key 模組
 
-| 决策 | 选择 | 理由 |
+| 決策 | 選擇 | 理由 |
 |------|------|------|
-| **密钥生成** | 使用 crypto.randomUUID()，SHA-256 哈希存储 | 标准加密实践 |
-| **权限粒度** | 绑定到 Bifrost Virtual Key 的 Models | 复用 Bifrost 的权限模型 |
-| **撤销方式** | 软删除 + Bifrost 同步撤销 | 审计追踪 + 真实撤销 |
+| **金鑰產生** | `crypto.randomUUID()` 等隨機來源，SHA-256 雜湊儲存 | 符合常見密鑰實務 |
+| **權限粒度** | 綁定至 Bifrost Virtual Key 的 Models | 沿用 Bifrost 權限模型 |
+| **撤銷方式** | 軟刪除／停用 + Bifrost 同步撤銷 | 稽核軌跡與實際失效並重 |
 
-### 3.3 Dashboard 模块（读聚合）
+### 3.3 Dashboard 模組（讀聚合）
 
-**设计决定**：无需 Domain 层
+**設計決定**：不建立獨立 Domain 聚合層。
 
 ```
 理由：
-  ✅ 纯读操作，无业务规则
-  ✅ 多个数据源聚合（应用层职责）
-  ✅ 符合 CQRS 读侧模式
+  ✅ 以讀取為主，無需承載複雜業務不變式
+  ✅ 多資料來源聚合屬 Application／查詢職責
+  ✅ 貼近 CQRS 讀側
 
-分层：
-  Application Service → 聚合逻辑（获取用户信息、Key 统计、用量统计）
-  Infrastructure Service → 数据库查询
-  Presentation Controller → HTTP 映射
+分層：
+  Application Service → 聚合邏輯（使用者／金鑰／用量等統計）
+  Infrastructure Service → 資料庫查詢
+  Presentation Controller → HTTP 對應
 ```
 
-### 3.4 SdkApi 模块（请求代理）
+### 3.4 SdkApi 模組（SDK 閘道）
 
-**设计决定**：无需 Domain 层
+**設計決定**：不以獨立聚合根擴充 Domain；以用例、中介層與既有模組埠為主。
 
 ```
 理由：
-  ✅ 纯认证 + 转发，无业务逻辑
-  ✅ 中间件职责（API 网关）
-  ✅ 框架层设计
+  ✅ 職責為驗證 AppApiKey、餘額預檢、請求轉發等閘道行為
+  ✅ 核心規則仍歸屬 Credit、AppApiKey 等 bounded context
+  ✅ 避免在閘道內複製領域不變式（見 module-boundaries）
 
-分层：
-  Middleware → 密钥验证 + 请求转发
-  Service → 代理逻辑
-  Controller → HTTP 端点
+分層：
+  Middleware → 金鑰驗證、上下文建立
+  Application／Service → 代理與編排
+  Controller → HTTP 端點
 ```
 
 ---
 
-## 四、Domain Events 事件驱动
+## 四、Domain Events 事件驅動
 
-### 4.1 核心事件
+### 4.1 核心事件（示例）
 
 ```typescript
-// 认证相关
-UserRegisteredEvent       // 用户注册完成
-PasswordResetRequestedEvent // 密码重设请求
-PasswordResetExecutedEvent // 密码重设完成
+// 認證相關
+UserRegisteredEvent          // 使用者註冊完成
+PasswordResetRequestedEvent  // 密碼重設請求
+PasswordResetExecutedEvent   // 密碼重設完成
 
-// 组织相关
-OrganizationCreatedEvent   // 组织创建
-MemberInvitedEvent         // 成员邀请
-MemberAcceptedInviteEvent  // 成员接受邀请
+// 組織相關
+OrganizationCreatedEvent     // 組織建立
+MemberInvitedEvent           // 成員邀請
+MemberAcceptedInviteEvent    // 成員接受邀請
 
-// 积分相关
-CreditPurchasedEvent       // 充值完成
-CreditUsageDeductedEvent   // 用量扣费
+// 點數相關
+CreditPurchasedEvent         // 儲值／購點完成
+CreditUsageDeductedEvent     // 用量扣費
 
-// Key 相关
-ApiKeyCreatedEvent         // Key 创建
-ApiKeyRevokedEvent         // Key 撤销
+// 金鑰相關
+ApiKeyCreatedEvent           // 金鑰建立
+ApiKeyRevokedEvent           // 金鑰撤銷
 ```
 
-### 4.2 事件处理规则
+### 4.2 事件處理規則
 
 ```
-Domain 层发布事件（Aggregate Root）
+Domain 層發佈事件（Aggregate Root）
     ↓
-Application Service 接收事件（通过 Repository）
+Application Service 訂閱／轉送（經由 Dispatcher／Handler）
     ↓
-Domain Event Handler 处理：
-  - 发送通知
-  - 触发外部系统调用
-  - 更新其他聚合的关联数据
+Domain／Application Event Handler：
+  - 發送通知
+  - 觸發外部系統呼叫
+  - 更新其他聚合的關聯資料（仍經邊界與介面）
 ```
 
 ---
 
-## 五、测试策略
+## 五、測試策略
 
-### 5.1 最小覆盖率标准
+### 5.1 最小覆蓋率目標（指引）
 
-| 层级 | 目标覆盖率 | 实际 | 状态 |
-|------|----------|------|------|
-| Domain 层 | ≥ 85% | 85-90% | ✅ |
-| Application 层 | ≥ 80% | 80-85% | ✅ |
-| Infrastructure 层 | ≥ 75% | 75-80% | ✅ |
-| Presentation 层 | ≥ 70% | 70-75% | ⭐ |
+| 層級 | 目標覆蓋率 | 說明 |
+|------|------------|------|
+| Domain 層 | ≥ 85% | 不變式與規則需高覆蓋 |
+| Application 層 | ≥ 80% | 編排與用例 |
+| Infrastructure 層 | ≥ 75% | Repository、Adapter |
+| Presentation 層 | ≥ 70% | Controller 與 HTTP 對應（依模組調整） |
 
-### 5.2 测试类型
+實際門檻以 `bunfig.toml` 與 CI 為準。
+
+### 5.2 測試類型
 
 ```
 Unit Tests
-  ├─ ValueObjects（验证、不变式）
-  ├─ Aggregates（业务规则、方法）
-  ├─ Domain Services（跨聚合逻辑）
-  └─ Utilities（Helper 函数）
+  ├─ ValueObjects（驗證、不變式）
+  ├─ Aggregates（規則、方法）
+  ├─ Domain Services（跨聚合邏輯）
+  └─ Utilities（Helper）
 
 Integration Tests
-  ├─ Repository（数据持久化）
-  ├─ Application Service（流程编排）
-  ├─ API Controller（端点集成）
-  └─ 外部服务集成（Bifrost Client）
+  ├─ Repository（持久化）
+  ├─ Application Service（流程編排）
+  ├─ API Controller（端點整合）
+  └─ 外部服務整合（Bifrost Client 等）
 
-E2E Tests (Playwright)
-  ├─ 用户注册流程
-  ├─ 组织邀请流程
-  ├─ API Key 创建与使用
-  └─ 积分购买与使用
+E2E Tests（Playwright）
+  ├─ 註冊／登入流程
+  ├─ 組織邀請流程
+  ├─ API Key 建立與使用
+  └─ 點數／用量相關路徑（依產品進度）
 ```
 
 ---
 
-## 六、数据库设计决策
+## 六、資料庫設計決策
 
-### 6.1 表隔离原则
+### 6.1 表隔離原則
 
 ```
-共享数据库 + organization_id 行级隔离
+共用資料庫 + organization_id 列級隔離
   ↓
-禁止跨租户 JOIN
+避免跨租戶任意 JOIN
   ↓
-强制过滤条件（WHERE organization_id = $1）
+強制帶入租戶條件（例如 WHERE organization_id = $1）
 ```
 
-### 6.2 关键表设计
+### 6.2 關鍵表設計（概念）
 
 **users**
+
 ```
-id, email (unique), password_hash, 
+id, email (unique), password_hash,
 created_at, updated_at
 ```
 
 **user_profiles**
+
 ```
-id (fk users), display_name, avatar_url, 
-phone, bio, timezone, locale, 
-notification_preferences (JSON), 
+id (fk users), display_name, avatar_url,
+phone, bio, timezone, locale,
+notification_preferences (JSON),
 created_at, updated_at
 ```
 
 **organizations**
+
 ```
-id, name, created_by_id (fk users), 
+id, name, created_by_id (fk users),
 created_at, updated_at
 ```
 
 **organization_members**
+
 ```
-id, organization_id (fk), user_id (fk), 
-role (ADMIN/MANAGER/MEMBER), 
+id, organization_id (fk), user_id (fk),
+role (ADMIN/MANAGER/MEMBER),
 joined_at, created_at, updated_at
 ```
 
 **api_keys**
+
 ```
-id, organization_id (fk), user_id (fk), 
-name, key_hash (SHA-256), 
-bifrost_virtual_key_id (fk Bifrost), 
+id, organization_id (fk), user_id (fk),
+name, key_hash (SHA-256),
+bifrost_virtual_key_id (fk Bifrost),
 is_active, last_used_at,
 created_at, updated_at
 ```
 
 **credits**
+
 ```
-id, organization_id (fk), 
-balance (decimal), 
+id, organization_id (fk),
+balance (decimal),
 updated_at, synced_at
 ```
 
 ---
 
-## 七、安全性决策
+## 七、安全性決策
 
-### 7.1 密码存储
-
-```
-使用 bcrypt（Gravito 标准）
-  ↓
-轮次数：10（平衡安全性与性能）
-  ↓
-绝不明文存储或可逆加密
-```
-
-### 7.2 敏感数据处理
+### 7.1 密碼儲存
 
 ```
-API Key 哈希存储（SHA-256）
+使用 bcrypt（Gravito 慣例）
   ↓
-密码重设 Token 一次性使用
+成本因子（例如 10）平衡安全與效能
   ↓
-JWT 时间限制（15 分钟）+ Refresh Token（7天）
-  ↓
-HttpOnly Cookie（防 XSS）
+禁止明文或可逆加密儲存
 ```
 
-### 7.3 请求认证
+### 7.2 敏感資料處理
 
 ```
-所有受保护端点必须提交有效 JWT
+API Key 以雜湊儲存（SHA-256）
   ↓
-权限检查 + 租户隔离验证
+密碼重設 Token 單次有效
   ↓
-审计日志记录关键操作
+JWT 存取時效受控 + Refresh 機制（實際數值以實作與設定為準）
+  ↓
+HttpOnly Cookie（降低 XSS 竊取風險）
+```
+
+### 7.3 請求認證
+
+```
+受保護端點須具備有效 JWT（或對應閘道認證）
+  ↓
+權限檢查 + 租戶隔離驗證
+  ↓
+稽核／日誌記錄關鍵操作
 ```
 
 ---
 
-## 八、性能优化决策
+## 八、效能優化決策
 
-### 8.1 缓存策略
-
-```
-用户会话 → Redis（TTL: 7 天）
-API Key 有效性 → 内存缓存 + 5分钟失效
-用量统计 → 缓存 + 定时同步
-组织成员列表 → Redis（TTL: 1 小时）
-```
-
-### 8.2 数据库优化
+### 8.1 快取策略（指引）
 
 ```
-索引：organization_id, user_id, created_at
-分页：默认 20 条，最大 100 条
-查询优化：避免 N+1，使用 JOIN 代替多次查询
+使用者工作階段 → Redis（TTL 依設定）
+API Key 有效性 → 記憶體／Redis 等短期快取
+用量統計 → 快取 + 排程同步
+組織成員列表 → Redis（TTL 依設定）
+```
+
+### 8.2 資料庫優化
+
+```
+索引：organization_id, user_id, created_at 等
+分頁：預設筆數與上限依產品約定
+查詢：避免 N+1；在單一租戶範圍內適度使用 JOIN
 ```
 
 ---
 
-## 九、前端开发决策
+## 九、前端開發決策
 
 ### 9.1 路由策略
 
 ```
-后端驱动路由（Inertia.js）
+後端驅動路由（Inertia.js）
   ↓
 Server-side Route Definition
   ↓
-前端组件按路由组织
+前端元件依路由組織
   ↓
-无需前端路由库（react-router）
+無需獨立前端路由函式庫（如 react-router）作為主軸
 ```
 
-### 9.2 数据流
+### 9.2 資料流
 
 ```
-Controller → Service 获取数据
+Controller → Service 取得資料
   ↓
-Inertia 响应（props）
+Inertia 回應（props）
   ↓
-React 组件渲染
+React 元件渲染
   ↓
-表单提交 → POST/PUT 返回新 props
+表單提交 → POST／PUT 回傳新 props
 ```
 
 ---
 
-## 十、部署与 CI/CD 决策
+## 十、部署與 CI／CD 決策
 
-### 10.1 CI/CD Pipeline
+### 10.1 CI Pipeline（GitHub Actions，摘述）
 
-```
-git push origin feature/*
-  ↓
-GitHub Actions Trigger
-  ↓
-步骤 1: Lint（biome lint）
-步骤 2: Type Check（tsc）
-步骤 3: Unit & Integration Tests（bun test）
-步骤 4: Build（bun build）
-步骤 5: E2E Tests（Playwright，可选）
-  ↓
-通过 → 自动 PR Review
-失败 → 阻止 Merge
-```
+於 `push`／`pull_request` 至 `main`、`develop` 時觸發，主要工作包括：
+
+1. **typecheck**：`bun run typecheck`
+2. **lint-format**：`bun run lint`、`bun run format:check`
+3. **unit-coverage**：`bun test --coverage`（門檻見 `bunfig.toml`）
+4. **migration-drift**：PostgreSQL 服務上執行 `migrate` 與 `migration:drift`
+5. **routes-check**：短啟服務並跑路由不變性相關測試
+6. **di-audit**：`bun run di:audit`
+7. **e2e-smoke**：遷移後執行 `bun run test:e2e:smoke`（Playwright）
+8. **commitlint**（僅 PR）：檢查提交訊息格式
+
+細節以 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) 為準。本機對應指令見 [`COMMANDS.md`](./COMMANDS.md)。
 
 ### 10.2 分支策略
 
 ```
-main                    → 生产分支（受保护，CI 必过）
-develop                 → 开发集成分支
-feature/xxx             → 功能分支
-bugfix/xxx              → 缺陷修复分支
+main       → 正式／穩定分支（受保護，CI 須通過）
+develop    → 開發整合分支
+feature/*  → 功能分支
+bugfix/*   → 修正分支
 ```
 
 ---
 
-## 关键文件映射
+## 關鍵文件對照
 
-| 决策类别 | 详细设计文件 |
-|----------|------------|
-| Phase 2 认证 | `specs/2026-04-08-phase2-identity-design.md` |
-| Phase 4 积分 | `specs/2026-04-08-p4-credit-system-design.md` |
-| API 测试设计 | `specs/2026-04-09-api-functional-testing-design.md` |
-| Impulse 验证 | `specs/2026-04-09-impulse-validation-design.md` |
-| v1 架构评审 | `specs/2026-04-09-v1-architecture-review.md` |
-| v1.1 改善总结 | `specs/2026-04-09-v1.1-improvements-summary.md` |
+| 決策類別 | 設計文件（`docs/draupnir/specs/`） |
+|----------|-----------------------------------|
+| Phase 2 認證 | [`1-authentication/identity-design.md`](./specs/1-authentication/identity-design.md) |
+| Phase 4 點數／計費 | [`4-credit-billing/credit-system-design.md`](./specs/4-credit-billing/credit-system-design.md) |
+| API 測試設計 | [`5-testing-validation/api-functional-testing.md`](./specs/5-testing-validation/api-functional-testing.md) |
+| Impulse 驗證 | [`5-testing-validation/impulse-validation.md`](./specs/5-testing-validation/impulse-validation.md) |
+| v1 架構審查 | [`6-architecture/v1-architecture-review.md`](./specs/6-architecture/v1-architecture-review.md) |
+| v1.1 改善摘要 | [`6-architecture/v1.1-improvements-summary.md`](./specs/6-architecture/v1.1-improvements-summary.md) |
+
+模組邊界與依賴矩陣：[`knowledge/module-boundaries.md`](./knowledge/module-boundaries.md)、[`knowledge/context-dependency-map.md`](./knowledge/context-dependency-map.md)。
 
 ---
 
-**如有问题或需要详细说明，请查阅相应的 specs 文件。**
+**若需更細的規格或實作細節，請以對應 `specs/` 文件與程式碼為準。**

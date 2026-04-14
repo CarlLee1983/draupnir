@@ -1,68 +1,82 @@
 # Development Guide
 
-All-in-one reference for local development, architecture decisions, and common operations.
+All-in-one reference for local development, architecture touchpoints, and common operations.  
+**Command cheat sheet**: [`COMMANDS.md`](./COMMANDS.md) · **Design decisions**: [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) · **Module boundaries**: [`knowledge/module-boundaries.md`](./knowledge/module-boundaries.md)
 
 ## Architecture
 
-### Module Structure
+### Layout overview
 
-Each module in `src/Modules/` follows strict DDD layering:
+- **`src/Foundation/`** — Cross-cutting infrastructure (Bifrost client, mail, webhooks, scheduler ports, etc.). Not a sibling “module” under `src/Modules`, but every feature module may depend on it via ports.
+- **`src/Modules/*`** — Bounded contexts (DDD modules); see list below.
+- **`src/Shared/`** — Framework-agnostic contracts, shared infra adapters, and utilities.
+
+### Module structure
+
+Each module under `src/Modules/` typically follows DDD layering (some read-only or gateway modules omit or slim down **Domain** — see [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) and [`knowledge/module-boundaries.md`](./knowledge/module-boundaries.md)):
 
 ```
 src/Modules/{ModuleName}/
   Domain/
-    Aggregates/       # Root entities with factory methods (createDefault, fromDatabase)
+    Aggregates/       # Aggregate roots (e.g. createDefault, fromDatabase)
     ValueObjects/     # Immutable domain concepts
-    Repositories/     # Interface contracts (I{Name}Repository)
+    Repositories/     # Ports (I{Name}Repository)
   Application/
     DTOs/             # Data transfer objects
-    Services/         # Business logic (one service per use case)
+    Services/         # Use-case / application services
   Infrastructure/
-    Repositories/     # Concrete implementations using IDatabaseAccess
-    Providers/        # ServiceProvider for DI registration
+    Repositories/     # IDatabaseAccess-backed implementations
+    Providers/        # *ServiceProvider for DI registration
   Presentation/
     Controllers/      # HTTP handlers
-    Routes/           # Route definitions with middleware
-    Validators/       # Zod schemas for input validation
-  index.ts            # Barrel export (public API surface)
+    Routes/           # Routes + middleware
+    Validators/       # Zod (or Impulse) input validation
+  index.ts            # Public barrel exports
 ```
 
-Active modules: Health, Auth, User, Organization, ApiKey, Dashboard, Credit.
+### Active modules (`src/Modules`)
 
-**Key points**: Framework-agnostic contracts in `src/Shared/`; ORM switchable via `ORM` env var; Repository pattern with `IDatabaseAccess`. Details: [`architecture/`](./architecture/)
+`Alerts`, `ApiKey`, `AppApiKey`, `AppModule`, `Auth`, `CliApi`, `Contract`, `Credit`, `Dashboard`, `DevPortal`, `Health`, `Organization`, `Profile`, `Reports`, `SdkApi`.
+
+**Key points**: Switch persistence with `ORM` (see below); repositories use `IDatabaseAccess` from the wiring layer. Layering diagrams: [`architecture/`](./architecture/) · dependency graph: [`architecture/module-dependency-map.md`](./architecture/module-dependency-map.md).
 
 ### Inertia pages (`src/Pages`)
 
-Server-driven Inertia routes, DI bindings per page class, and Vite asset wiring live under `src/Pages/`. When adding or changing a page, follow the checklist and JSDoc rules in **[`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md)** and [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md).
+Server-driven Inertia routes, per-page DI bindings, and Vite assets live under `src/Pages/`. When adding or changing a page, follow **[`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md)** and [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md).
 
 ## Testing
 
-- CI runs with `ORM=memory` — no database required
-- `bun test` excludes `tests/Feature/` and covers source, unit, and package tests
-- Feature tests (`tests/Feature/`) run through `bun run test:feature`, which auto-reuses `API_BASE_URL` when present
-- Use `bun run test:feature:server` to start one dedicated app server and set `API_BASE_URL`
-- Use `bun run test:feature:existing` to run against an already running server
-- Feature tests include OpenAPI spec validation
-- E2E tests (Playwright) auto-start the app with `ORM=memory` on port 3001
-- Test strategy: [`knowledge/`](./knowledge/)
+- **CI unit job** runs `bun test --coverage` with `ORM=memory` (no Postgres required for that job).
+- **CI** also runs Postgres-backed jobs (migration drift, E2E smoke) — see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
+- `bun test` excludes `tests/Feature/` and runs source, unit, and package tests.
+- Feature tests (`tests/Feature/`): `bun run test:feature` (reuses `API_BASE_URL` when set).
+- Dedicated server for features: `bun run test:feature:server`.
+- Against an already running API: `bun run test:feature:existing`.
+- Feature tests include OpenAPI contract checks where applicable.
+- **E2E (Playwright)**: `bun run test:e2e` (dev server on port **3001** with `ORM=memory` per script); smoke subset: `bun run test:e2e:smoke` (used in CI with Drizzle + migrations).
+- Deeper testing guidance: [`knowledge/`](./knowledge/) and [`VERIFICATION_CHECKLIST.md`](./VERIFICATION_CHECKLIST.md).
 
-## Key Environment Variables
+## Key environment variables
 
-| Variable | Purpose | Default |
-|----------|---------|---------|
-| `ORM` | Persistence backend (`memory`/`drizzle`/`atlas`) | `atlas` |
-| `ENABLE_DB` | Enable database (`false` disables Atlas) | `true` |
-| `DB_CONNECTION` | Database driver (`sqlite`/`postgres`/`mysql`) | `sqlite` |
-| `BIFROST_API_URL` | Bifrost gateway endpoint | — |
-| `BIFROST_MASTER_KEY` | Bifrost authentication key | — |
-| `JWT_SECRET` | JWT signing secret | — |
-| `PORT` | HTTP server port | `3000` |
+Defaults below match **runtime fallbacks** and [`.env.example`](../../.env.example). Adjust for staging/production (e.g. `ORM=drizzle`, `DATABASE_URL`, `ENABLE_DB=true`).
 
-## Adding a New Module
+| Variable | Purpose | Typical local / default |
+|----------|---------|-------------------------|
+| `ORM` | Persistence backend (`memory` / `drizzle` / `atlas` / `prisma`) | `memory` if unset (`getCurrentORM()`) |
+| `ENABLE_DB` | Atlas / DB-related toggles | `false` in `.env.example` |
+| `DATABASE_URL` | Postgres (or other) when using Drizzle-backed CI or prod | unset in example; set for real DB |
+| `DB_CONNECTION` | Driver hint for shared config (`config/database.ts`) | `sqlite` if unset |
+| `BIFROST_API_URL` | Bifrost gateway base URL | required for gateway sync paths |
+| `BIFROST_MASTER_KEY` | Bifrost auth | required outside trivial local mocks |
+| `JWT_SECRET` | JWT signing | required |
+| `PORT` | HTTP port | `3000` |
 
-1. Generate scaffold: `bun run generate:module MyModule [--db]`
-2. Follow the DDD layer structure (Domain → Application → Infrastructure → Presentation)
-3. Create ServiceProvider, register in `src/bootstrap.ts`
-4. Add `register*()` function in `src/wiring/index.ts`
-5. Call it from `src/routes.ts`
-6. Domain entities need: `createDefault()`, `fromDatabase()`, `toDTO()`, `toDatabaseRow()`
+## Adding a new module
+
+1. **Scaffold**: `bun run generate:module MyModule [--db]` (Gravito Pulse).
+2. **Layers**: Keep Domain → Application → Infrastructure → Presentation consistent with siblings; register repositories in the wiring/registry pattern used by existing modules.
+3. **DI**: Add `MyModuleServiceProvider` and append it to the `modules` array in [`src/bootstrap.ts`](../../src/bootstrap.ts) (order may matter for dependencies).
+4. **HTTP**: Add `registerMyModule(core)` in [`src/wiring/index.ts`](../../src/wiring/index.ts) (follow `registerProfile`, `registerApiKey`, …) and call it from [`src/routes.ts`](../../src/routes.ts).
+5. **Aggregates** (when you have a rich domain): prefer factory + persistence mapping helpers (`createDefault`, `fromDatabase`, `toDTO`, `toDatabaseRow` or equivalent) for consistency with existing aggregates.
+
+For **cross-module dependencies**, follow [`knowledge/context-dependency-map.md`](./knowledge/context-dependency-map.md) and avoid sharing ORM entities across modules.

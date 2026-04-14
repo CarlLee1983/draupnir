@@ -84,8 +84,8 @@ Phase 5 proves the milestone is complete: zero gateway-specific imports in the b
 - `src/Modules/` — All 13 modules must have zero `BifrostClient`/`bifrostClient` type references
 - `src/Foundation/Application/` — Zero gateway-specific imports
 - `packages/bifrost-sdk/` — Must build independently, smoke test must pass
-- `tests/Feature/routes-connectivity.test.ts` — Route-level smoke check (QUAL-04)
-- `tests/Feature/routes-existence.test.ts` — Route existence check (QUAL-04)
+- `tests/Feature/routes-connectivity.e2e.ts` — Route-level smoke check (QUAL-04)
+- `tests/Feature/routes-existence.e2e.ts` — Route existence check (QUAL-04)
 
 ### Known Exclusion Points
 - `src/Foundation/Infrastructure/Services/LLMGateway/implementations/BifrostGatewayAdapter.ts` — Legitimately imports from `@draupnir/bifrost-sdk`

@@ -49,3 +49,4 @@ dist/
 .claude/worktrees/
 .omx/
 .gstack/
+.worktrees/

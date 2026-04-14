@@ -9,13 +9,14 @@
 ```
 routes-verification-toolkit/
 ├── scripts/
-│   └── routes-analyzer.ts              # 路由掃描和分析工具
+│   ├── routes-analyzer.ts              # 路由掃描和分析工具
+│   └── test-feature.ts                 # （Draupnir）起服並跑 Feature e2e
 ├── tests/
-│   ├── lib/
-│   │   └── test-client.ts              # HTTP 客戶端（支持所有 HTTP 方法）
 │   └── Feature/
-│       ├── routes-existence.test.ts    # 快速驗證測試模板
-│       └── routes-connectivity.test.ts # 完整驗證測試模板
+│       ├── lib/
+│       │   └── test-client.ts          # HTTP 客戶端
+│       ├── routes-existence.e2e.ts     # 快速存在性驗證
+│       └── routes-connectivity.e2e.ts  # 連通性／認證行為
 ├── docs/
 │   ├── ROUTES_VERIFICATION_GUIDE.md    # 完整實施指南
 │   ├── ROUTES_VERIFICATION_QUICKSTART.md # 快速開始指南
@@ -30,14 +31,12 @@ routes-verification-toolkit/
 ```bash
 # 1. 複製工具到你的項目
 cp -r routes-verification-toolkit/scripts ./
-cp -r routes-verification-toolkit/tests/lib ./tests/
 cp -r routes-verification-toolkit/tests/Feature ./tests/
 
-# 2. 添加到 package.json
-npm install
+# 2. 配置 package.json（Bun / Node 依專案而定）
 
-# 3. 運行驗證
-npm run verify:routes
+# 3. 運行驗證（需 API 或自建 test-feature 編排）
+bun run verify:routes
 ```
 
 ### 多項目中復用
@@ -68,9 +67,9 @@ bun scripts/routes-analyzer.ts
 **輸出示例**:
 ```json
 {
-  "totalRoutes": 68,
-  "byMethod": { "GET": 25, "POST": 32, ... },
-  "byModule": { "Organization": 12, "Auth": 4, ... },
+  "totalRoutes": 43,
+  "byMethod": { "get": 14, "post": 17, "put": 4, "patch": 5, "delete": 3 },
+  "byModule": { "Organization": 12, "AppModule": 6, ... },
   "routes": [
     {
       "module": "Organization",
@@ -91,15 +90,11 @@ bun scripts/routes-analyzer.ts
 **耗時**: ~1.8 秒  
 
 ```bash
-bun test tests/Feature/routes-existence.test.ts
+API_BASE_URL=http://127.0.0.1:3000 bun test ./tests/Feature/routes-existence.e2e.ts
+# 或 Draupnir：bun run test:feature
 ```
 
-**預期結果**:
-```
- 72 pass
- 0 fail
-Ran 72 tests across 1 file. [1.81s]
-```
+**預期結果**：以控制台為準（2026-04-13：existence 檔約 49 個 `it`）。
 
 ### ✅ Routes Connectivity Test
 詳細驗證認證、授權、中間件
@@ -109,18 +104,15 @@ Ran 72 tests across 1 file. [1.81s]
 **耗時**: ~2.0 秒  
 
 ```bash
-bun test tests/Feature/routes-connectivity.test.ts
+API_BASE_URL=http://127.0.0.1:3000 bun test ./tests/Feature/routes-connectivity.e2e.ts
 ```
 
-### ✅ Report Generator
-生成詳細的驗證報告
+### ✅ 路由列表報告（人工／半自動）
 
 **格式**: Markdown  
-**內容**: 按模組分類的路由列表、統計數據、中間件映射  
+**內容**: 按模組分類的路由列表（範例：[tests/routes-validation.report.md](../tests/routes-validation.report.md)）  
 
-```bash
-npm run routes:report
-```
+Draupnir 未內建 `routes:report` 腳本；可搭配 `routes-analysis.json` 或手動維護上述檔案。
 
 ## 🔧 配置方式
 
@@ -130,12 +122,8 @@ npm run routes:report
 {
   "scripts": {
     "routes:analyze": "bun scripts/routes-analyzer.ts",
-    "routes:report": "bun scripts/routes-report-generator.ts",
-    "routes:generate-tests": "bun scripts/routes-test-generator.ts",
-    "test:routes": "bun test tests/Feature/routes-existence.test.ts",
-    "test:routes:full": "bun test tests/Feature/routes-*",
-    "test:routes:ci": "bun test tests/Feature/routes-*.test.ts --bail",
-    "verify:routes": "npm run routes:analyze && npm run test:routes"
+    "test:feature": "bun scripts/test-feature.ts",
+    "verify:routes": "bun scripts/routes-analyzer.ts && bun run test:feature"
   }
 }
 ```
@@ -149,8 +137,8 @@ ROUTES_DIR=src/routes bun scripts/routes-analyzer.ts
 # 指定輸出格式
 OUTPUT_FORMAT=json bun scripts/routes-analyzer.ts
 
-# CI 模式
-CI=true npm run test:routes:ci
+# CI 模式（示例：對照 .github/workflows/ci.yml 的 routes-check）
+bun scripts/routes-analyzer.ts
 ```
 
 ## 📊 支持的項目結構
@@ -195,29 +183,22 @@ src/
 ### 開發時使用
 
 ```bash
-# 修改路由後運行快速驗證
-npm run test:routes
-
-# 生成新的驗證報告
-npm run routes:report
+bun scripts/routes-analyzer.ts
+bun run test:feature
 ```
 
 ### 提交時使用
 
 ```bash
 # 完整驗證（在提交前）
-npm run verify:routes
+bun run verify:routes
 ```
 
 ### CI/CD 集成
 
 ```bash
-# GitHub Actions 集成
-npm run test:routes:ci
-
-# 生成報告上傳
-npm run routes:report
-artifact upload ROUTES_REPORT.md
+# 參考 Draupnir .github/workflows/ci.yml — routes-check job
+bun run test:feature
 ```
 
 ## 🔌 集成示例
@@ -263,7 +244,7 @@ jobs:
 # .husky/pre-commit
 
 echo "🔍 驗證 routes..."
-npm run verify:routes
+bun run verify:routes
 
 if [ $? -ne 0 ]; then
   echo "❌ Routes 驗證失敗"
@@ -277,18 +258,17 @@ echo "✅ Routes 驗證通過"
 
 ```bash
 npx husky install
-npx husky add .husky/pre-commit "npm run verify:routes"
+npx husky add .husky/pre-commit "bun run verify:routes"
 ```
 
 ## 📈 性能指標
 
 | 操作 | 耗時 | 說明 |
 |------|------|------|
-| 分析 (68 routes) | ~0.5s | 快速掃描 |
-| 快速驗證 (72 測試) | ~1.8s | 推薦用於開發 |
-| 完整驗證 (52 測試) | ~2.0s | 推薦用於 CI |
-| 報告生成 | ~0.2s | Markdown 報告 |
-| **總耗時** | **~2.5s** | 完整流程 |
+| 分析（約 40+ routes，regex） | ~0.5s | 快速掃描 |
+| existence e2e（約 49 `it`） | 數秒級 | 依啟服時間 |
+| connectivity e2e（約 52 `it`） | 數秒級 | 依啟服時間 |
+| 報告生成 | 視工具而定 | Markdown |
 
 ## 🛠️ 可擴展性
 
@@ -346,7 +326,7 @@ async function benchmarkRoute(method, path) {
 ✅ **詳細報告** - 生成易讀的 Markdown 報告  
 ✅ **CI/CD 友好** - 一鍵集成到任何 CI/CD 系統  
 ✅ **零依賴** - 僅使用標準庫，無第三方依賴  
-✅ **快速執行** - 完整驗證在 2.5 秒內完成  
+✅ **快速執行** - 靜態分析極快；HTTP e2e 視環境而定  
 ✅ **可擴展** - 支持自定義規則和驗證  
 
 ## 🐛 故障排除
@@ -368,7 +348,7 @@ const routes = { GET: { '/path': handler } }  // JSON 定義
 
 增加超時時間：
 ```bash
-bun test tests/Feature/routes-existence.test.ts --timeout 120000
+bun test ./tests/Feature/routes-existence.e2e.ts --timeout 120000
 ```
 
 ### 認證測試失敗
@@ -397,9 +377,9 @@ MIT License - 可自由復用和修改
 
 ---
 
-**版本**: v1.0  
-**最後更新**: 2026-04-10  
+**版本**: v1.1  
+**最後更新**: 2026-04-13  
 **已驗證於**: 
-- Draupnir (13 個模組, 68 個 routes)
+- Draupnir（分析器約 43 條匹配；Feature e2e 見 [README_ROUTES_VERIFICATION.md](./README_ROUTES_VERIFICATION.md)）
 - Bun 1.3.10+
 - Node.js 18.x+

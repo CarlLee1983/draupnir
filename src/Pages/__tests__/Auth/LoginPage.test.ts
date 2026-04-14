@@ -28,6 +28,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     getCookie: (_name: string) => undefined,
     setCookie: mock((_name: string, _value: string, _opts?: unknown) => {}),
     ...overrides,
+    getMethod: overrides.getMethod ?? (() => 'GET'),
   }
 }
 
@@ -49,7 +50,6 @@ describe('LoginPage', () => {
     const inertia = { render } as unknown as InertiaService
     const page = new LoginPage(inertia, mockLoginService as any)
     const ctx = createMockContext()
-    ctx.set('inertia:shared', { csrfToken: 'csrf-test' })
 
     await page.handle(ctx)
 
@@ -58,7 +58,7 @@ describe('LoginPage', () => {
       | [unknown, string, Record<string, unknown>]
       | undefined
     expect(call?.[1]).toBe('Auth/Login')
-    expect(call?.[2]?.csrfToken).toBe('csrf-test')
+    expect(call?.[2]?.lastEmail).toBeUndefined()
   })
 
   test('should process login form on POST', async () => {

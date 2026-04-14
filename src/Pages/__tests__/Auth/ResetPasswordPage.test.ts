@@ -28,6 +28,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     getCookie: (_name: string) => undefined,
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
+    getMethod: overrides.getMethod ?? (() => 'GET'),
   }
 }
 
@@ -42,7 +43,6 @@ describe('ResetPasswordPage', () => {
     const inertia = { render } as unknown as InertiaService
     const page = new ResetPasswordPage(inertia, mockResetPasswordService as any)
     const ctx = createMockContext()
-    ctx.set('inertia:shared', { csrfToken: 'c' })
 
     await page.handle(ctx)
 

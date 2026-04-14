@@ -13,18 +13,12 @@ export class LoginPage {
       return ctx.redirect('/member/dashboard')
     }
 
-    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
-    const csrfToken = (shared?.csrfToken as string) ?? ''
-
     return this.inertia.render(ctx, 'Auth/Login', {
-      csrfToken,
       lastEmail: undefined,
     })
   }
 
   async store(ctx: IHttpContext): Promise<Response> {
-    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
-    const csrfToken = (shared?.csrfToken as string) ?? ''
     const validated = ctx.get('validated') as { email?: string; password?: string } | undefined
     const email = validated?.email ?? ''
     const password = validated?.password ?? ''
@@ -33,7 +27,6 @@ export class LoginPage {
 
     if (!result.success || !result.data) {
       return this.inertia.render(ctx, 'Auth/Login', {
-        csrfToken,
         error: result.error ?? result.message,
         lastEmail: email,
       })

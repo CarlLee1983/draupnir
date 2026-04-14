@@ -26,7 +26,6 @@ describe('VerifyDevicePage integration', () => {
     } as unknown as AuthorizeDeviceService
 
     const store = new Map<string, unknown>()
-    store.set('inertia:shared', { csrfToken: 'test-csrf-token' })
     mockContext = {
       get: <T>(key: string) => store.get(key) as T | undefined,
     } as unknown as IHttpContext
@@ -75,13 +74,10 @@ describe('VerifyDevicePage integration', () => {
     const page = new VerifyDevicePage(mockInertia, mockAuthorizeDeviceService)
     await page.handle(mockContext)
     const render = mockInertia.render as ReturnType<typeof mock>
-    expect(render).toHaveBeenCalledWith(
-      mockContext,
-      'Auth/VerifyDevice',
-      expect.objectContaining({
-        csrfToken: 'test-csrf-token',
-      }),
-    )
+    expect(render).toHaveBeenCalledWith(mockContext, 'Auth/VerifyDevice', {
+      message: undefined,
+      error: undefined,
+    })
   })
 
   test('authorize without auth returns Authentication required error', async () => {

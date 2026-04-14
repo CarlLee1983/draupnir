@@ -17,6 +17,7 @@ describe('requireAdmin', () => {
       getBody: async <T>() => ({}) as T,
       getHeader: () => undefined,
       getParam: () => undefined,
+      getMethod: () => 'GET',
       getPathname: () => '/admin/dashboard',
       getQuery: () => undefined,
       params: {},

@@ -67,7 +67,7 @@ None - the code changes followed the plan exactly.
 
 ## Issues Encountered
 - Workspace-wide lint and typecheck still surface unrelated pre-existing warnings/errors outside the two touched files.
-- `routes-connectivity.test.ts` still reports the known 13-failure baseline, and `routes-existence.test.ts` still shows 1 unrelated failing assertion.
+- `routes-connectivity.e2e.ts` still reports the known 13-failure baseline, and `routes-existence.e2e.ts` still shows 1 unrelated failing assertion.
 
 ## User Setup Required
 

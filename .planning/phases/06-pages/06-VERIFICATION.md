@@ -7,7 +7,7 @@ score: 6/6 must-haves verified
 
 # Phase 6: Pages 頁面模組功能實作 — 驗證報告
 
-**Phase Goal:** All 19 page handler classes have unit tests; all 25 Inertia page routes (`/admin/*`, `/member/*`) are covered in `routes-existence.test.ts`; the full test suite passes.
+**Phase Goal:** All 19 page handler classes have unit tests; all 25 Inertia page routes (`/admin/*`, `/member/*`) are covered in `routes-existence.e2e.ts`; the full test suite passes.
 
 **Verified:** 2026-04-11T10:50:00Z  
 **Status:** ✓ PASSED  
@@ -116,7 +116,7 @@ Member routes tested:
 
 **Integration Test Results:**
 ```
-bun test tests/Feature/routes-existence.test.ts:
+bun test tests/Feature/routes-existence.e2e.ts:
 ✓ 96 pass (71 existing API routes + 25 page routes)
 ✗ 1 fail (GET /api/modules/:moduleId — pre-existing API issue, not in Phase 6 scope)
 Total: 97 tests across 1 file
@@ -158,7 +158,7 @@ Ran 94 tests across 24 files
 | PAGE-02 | 06-02 | Member authenticated requests to GET handlers render correct Inertia component names | ✓ SATISFIED | All 7 Member test files verify component names (Member/Dashboard/Index, Member/ApiKeys/Index, etc.) |
 | PAGE-03 | 06-01, 06-02, 06-03 | Unauthenticated requests return 302 redirect to /login | ✓ SATISFIED | All 19 page handler tests verify 302 status and /login redirect; 25 feature tests verify 302 is non-404 |
 | PAGE-04 | 06-01 | Authenticated non-admin requests to admin pages return 403 | ✓ SATISFIED | All 12 Admin test files verify 403 status for member-role contexts |
-| PAGE-05 | 06-03 | All 25 Inertia page routes appear in routes-existence.test.ts with describe blocks | ✓ SATISFIED | routes-existence.test.ts contains "Admin Pages Module" describe block with 16 routes and "Member Pages Module" describe block with 9 routes |
+| PAGE-05 | 06-03 | All 25 Inertia page routes appear in routes-existence.e2e.ts with describe blocks | ✓ SATISFIED | routes-existence.e2e.ts contains "Admin Pages Module" describe block with 16 routes and "Member Pages Module" describe block with 9 routes |
 | PAGE-06 | 06-01, 06-02 | POST handlers (postStatus, store, postAction, update) redirect on success and re-render with formError on validation failure | ✓ SATISFIED | AdminUserDetailPage, AdminContractCreatePage, AdminContractDetailPage, AdminModuleCreatePage, MemberApiKeyCreatePage, MemberApiKeyRevokeHandler, MemberSettingsPage all have POST handler tests verifying both success (302 redirect) and failure (formError re-render) paths |
 
 **All 6 required PAGE-* requirements satisfied.**
@@ -223,7 +223,7 @@ const page = new AdminDashboardPage(inertia, mockListUsersService, ...)
 
 ### Feature Tests → Route Registration
 
-`tests/Feature/routes-existence.test.ts` verifies HTTP routes to the test server:
+`tests/Feature/routes-existence.e2e.ts` verifies HTTP routes to the test server:
 
 ```typescript
 describe('Admin Pages Module', () => {
@@ -274,7 +274,7 @@ Page handlers use injected services (mocked in tests) to fetch data. Test mocks 
 
 - [x] **06-01 Plan:** 12 Admin page test files created with 50 tests — all passing
 - [x] **06-02 Plan:** 7 Member page test files created with 33 tests — all passing
-- [x] **06-03 Plan:** routes-existence.test.ts extended with 25 page route assertions — all passing
+- [x] **06-03 Plan:** routes-existence.e2e.ts extended with 25 page route assertions — all passing
 - [x] **Full Pages test suite:** 94 tests pass (50 Admin + 33 Member + 2 utilities + 9 other)
 - [x] **Routes existence:** 96 feature tests pass (25 page routes + 71 API routes)
 - [x] **All 6 PAGE-* requirements satisfied**
@@ -284,7 +284,7 @@ Page handlers use injected services (mocked in tests) to fetch data. Test mocks 
 
 ## Summary
 
-**Phase 6 goal achieved:** All 19 page handler classes have unit tests (83 tests, 100% pass rate); all 25 Inertia page routes are covered in routes-existence.test.ts (25 route tests, 100% pass rate); full test suite passes with no regressions.
+**Phase 6 goal achieved:** All 19 page handler classes have unit tests (83 tests, 100% pass rate); all 25 Inertia page routes are covered in routes-existence.e2e.ts (25 route tests, 100% pass rate); full test suite passes with no regressions.
 
 The implementation is complete, well-tested, and ready for production. All observable truths from PLAN frontmatter are verified in the codebase.
 

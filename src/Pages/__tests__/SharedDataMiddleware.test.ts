@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { injectSharedData } from '../SharedDataMiddleware'
+import { injectSharedData, resolveCsrfTokenForInertia } from '../SharedDataMiddleware'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -27,6 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     getCookie: (_name: string) => undefined,
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
+    getMethod: overrides.getMethod ?? (() => 'GET'),
   }
 }
 
@@ -46,5 +47,39 @@ describe('injectSharedData', () => {
     expect(shared.locale).toBe('en')
     expect(shared.messages).toBeDefined()
     expect(typeof shared.messages['member.dashboard.selectOrg']).toBe('string')
+  })
+
+  test('puts csrfToken on inertia:shared from ctx csrfToken', () => {
+    const ctx = createMockContext()
+    ctx.set('csrfToken', 'from-middleware')
+    injectSharedData(ctx)
+    const shared = ctx.get('inertia:shared') as { csrfToken: string }
+    expect(shared.csrfToken).toBe('from-middleware')
+  })
+
+  test('puts csrfToken on inertia:shared from XSRF-TOKEN cookie when ctx has no csrfToken', () => {
+    const ctx = createMockContext({
+      getCookie: (name: string) => (name === 'XSRF-TOKEN' ? encodeURIComponent('cookie-val') : undefined),
+    })
+    injectSharedData(ctx)
+    const shared = ctx.get('inertia:shared') as { csrfToken: string }
+    expect(shared.csrfToken).toBe('cookie-val')
+  })
+
+  test('defaults csrfToken to empty string when unavailable', () => {
+    const ctx = createMockContext()
+    injectSharedData(ctx)
+    const shared = ctx.get('inertia:shared') as { csrfToken: string }
+    expect(shared.csrfToken).toBe('')
+  })
+})
+
+describe('resolveCsrfTokenForInertia', () => {
+  test('prefers ctx csrfToken over cookies', () => {
+    const ctx = createMockContext({
+      getCookie: () => 'from-cookie',
+    })
+    ctx.set('csrfToken', 'from-ctx')
+    expect(resolveCsrfTokenForInertia(ctx)).toBe('from-ctx')
   })
 })

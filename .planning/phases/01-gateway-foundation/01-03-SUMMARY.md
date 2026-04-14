@@ -150,7 +150,7 @@ export { MockGatewayClient } from './implementations/MockGatewayClient'
 - **Issue:** 01-01 中建立的 MockGatewayClient 缺少 `reset()` 方法、`seedUsageStats()` 與 `seedUsageLogs()` 實例方法，且 `value` 格式使用 `mock-key-value-${id}` 而非規格的 `mock_raw_key_000001`
 - **Fix:** 更新 MockGatewayClient：新增 `reset()`、`seedUsageStats()`、`seedUsageLogs()` 方法；修正 value 格式
 - **Files modified:** src/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient.ts
-- **Verification:** 30/30 測試通過；typecheck 只剩預存在的 routes-connectivity.test.ts 錯誤（非本 plan 範疇）
+- **Verification:** 30/30 測試通過；typecheck 只剩預存在的 routes-connectivity.e2e.ts 錯誤（非本 plan 範疇）
 - **Committed in:** a41bfa4 (Task 1 commit)
 
 ---

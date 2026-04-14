@@ -93,9 +93,9 @@ No blockers or warnings found.
 
 ### Feature Test Failures (Pre-existing, Out of Scope)
 
-Running `bun test tests/Feature/` produces 14 failures in `routes-connectivity.test.ts` and `routes-existence.test.ts`. These failures are pre-existing and unrelated to Phase 4:
+Running `bun test tests/Feature/` produces 14 failures in `routes-connectivity.e2e.ts` and `routes-existence.e2e.ts`. These failures are pre-existing and unrelated to Phase 4:
 - The failures test HTTP status code expectations (e.g., expecting `[401, 403]` but receiving `422`) and route existence checks for `/api/modules/:moduleId`
-- Confirmed pre-existing: Phase 02 SUMMARY acknowledged "pre-existing typecheck errors in `routes-connectivity.test.ts` are unrelated to this plan and out of scope"
+- Confirmed pre-existing: Phase 02 SUMMARY acknowledged "pre-existing typecheck errors in `routes-connectivity.e2e.ts` are unrelated to this plan and out of scope"
 - Unit tests (`bun test tests/Unit/`) pass 102/102 with zero failures
 - SDK and module-level tests (`bun test src/ packages/`) pass 465/466 with zero failures
 

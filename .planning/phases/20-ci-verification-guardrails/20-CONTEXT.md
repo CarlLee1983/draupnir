@@ -12,7 +12,7 @@
 2. Lint + Format（Biome）
 3. Unit + Coverage（Bun test，強制 80% 全域門檻）
 4. Migration schema drift（Orbit migrations vs Drizzle schema）
-5. Routes invariance（`scripts/routes-analyzer.ts` + `tests/Feature/routes-existence.test.ts`）
+5. Routes invariance（CI：`routes-existence.e2e.ts`；分析器：`scripts/routes-analyzer.ts`，見 `docs/README_ROUTES_VERIFICATION.md`）
 6. DI binding 完整性（Prism container boot-and-resolve smoke）
 7. E2E smoke（Playwright：Admin portal、Member portal、CLI device flow）
 8. Commit message 驗證（commitlint，CI-05）
@@ -92,7 +92,7 @@
 
 ### 既有工具與腳本
 - `scripts/routes-analyzer.ts` — Routes 分析工具（CI-07 直接串接）
-- `tests/Feature/routes-existence.test.ts` — Routes invariance 既有測試
+- `tests/Feature/routes-existence.e2e.ts` — Routes invariance 既有測試
 - `scripts/verify-architecture.ts` — 既有架構驗證腳本（可作為 di-audit 設計參考）
 - `scripts/check-banned-imports.sh` — 現有守門工具慣用法參考
 - `.github/workflows/ci.yml` — 當前 CI workflow（本 phase 將擴充）
@@ -110,7 +110,7 @@
 
 ### Reusable Assets
 - **`bun run verify`**：已組合 typecheck + lint + test，CI 可直接沿用部分 job
-- **`scripts/routes-analyzer.ts` + `tests/Feature/routes-existence.test.ts`**：CI-07 只需在 CI 中 `bun test tests/Feature/routes-existence.test.ts` + 跑 analyzer
+- **`routes-existence.e2e.ts`**：CI-07 見 `routes-check` job（`bun test ./Feature/routes-existence.e2e.ts` + `API_BASE_URL`）；`routes-analyzer.ts` 可另加為獨立步驟
 - **`tests/Feature/lib/admin-seed.ts`**：E2E seed data 基礎
 - **Prism container**（`app/Foundation/Infrastructure/Prism/`）：di-audit 腳本的目標
 - **Orbit CLI**（`bun orbit migrate*`）：migration 執行器

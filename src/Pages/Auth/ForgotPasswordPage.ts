@@ -9,21 +9,16 @@ export class ForgotPasswordPage {
   ) {}
 
   async handle(ctx: IHttpContext): Promise<Response> {
-    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
-    const csrfToken = (shared?.csrfToken as string) ?? ''
-    return this.inertia.render(ctx, 'Auth/ForgotPassword', { csrfToken })
+    return this.inertia.render(ctx, 'Auth/ForgotPassword', {})
   }
 
   async store(ctx: IHttpContext): Promise<Response> {
-    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
-    const csrfToken = (shared?.csrfToken as string) ?? ''
     const validated = ctx.get('validated') as { email?: string } | undefined
     const email = validated?.email ?? ''
 
     await this.forgotPasswordService.execute(email)
 
     return this.inertia.render(ctx, 'Auth/ForgotPassword', {
-      csrfToken,
       message: '若此 email 存在，重設連結已寄出',
     })
   }

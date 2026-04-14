@@ -314,8 +314,8 @@ console.log(`✅ DI audit passed — ${results.length} bindings resolvable`)
 **Warning signs:** e2e-smoke job > 10min
 
 ### Pitfall 6: Routes test 檔名誤植
-**What goes wrong:** CONTEXT.md 與 REQUIREMENTS 多處寫 `tests/Feature/routes-existence.test.ts`，**實際檔名為 `tests/Feature/routes-existence.e2e.ts`**
-**How to avoid:** Plan 階段直接使用實際檔名；routes-check job 以 `bun test tests/Feature/routes-existence.e2e.ts` 或整合進 playwright 執行（檔案在 `tests/Feature/` 但命名 `.e2e.ts`，需確認 test runner 對應）
+**What goes wrong:** 舊文檔曾寫 `routes-existence.test.ts`；Bun 對不含 `.test.` 的檔名需 `bun test ./tests/Feature/routes-existence.e2e.ts` 並設定 `API_BASE_URL`（或透過 `test-feature.ts`）。
+**How to avoid:** 以 `docs/README_ROUTES_VERIFICATION.md` 與 `.github/workflows/ci.yml` `routes-check` 為準；plan 內只引用 `*.e2e.ts`。
 **Warning signs:** `file not found` in routes-check job
 
 ### Pitfall 7: Prism 命名混淆

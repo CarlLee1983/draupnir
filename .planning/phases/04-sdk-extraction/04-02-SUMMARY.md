@@ -108,7 +108,7 @@ None - plan executed exactly as written. All 5 src/ files and 5 test files were 
 
 ## Issues Encountered
 
-None - all imports resolved cleanly. Pre-existing typecheck errors in `IHttpContext.ts` and `routes-connectivity.test.ts` are unrelated to this plan and out of scope.
+None - all imports resolved cleanly. Pre-existing typecheck errors in `IHttpContext.ts` and `routes-connectivity.e2e.ts` are unrelated to this plan and out of scope.
 
 ## Known Stubs
 

@@ -113,7 +113,7 @@ bun test tests/Unit/
 # 72 pass, 0 fail (all Unit tests including BifrostClient and LLMGateway)
 ```
 
-TypeScript strict check: `tsc --noEmit` shows 4 pre-existing errors in `tests/Feature/routes-connectivity.test.ts` (Property 'data' does not exist on type 'TestResponse') — these existed before this plan and are not caused by any file modified here.
+TypeScript strict check: `tsc --noEmit` shows 4 pre-existing errors in `tests/Feature/routes-connectivity.e2e.ts` (Property 'data' does not exist on type 'TestResponse') — these existed before this plan and are not caused by any file modified here.
 
 ## Deviations from Plan
 

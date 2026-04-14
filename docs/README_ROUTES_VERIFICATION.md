@@ -1,6 +1,7 @@
 # Routes 驗證完整體系導航
 
-> 本項目已建立一套完整的、可復用的 API routes 驗證方法論和工具包。本文檔是導航索引。
+> 本項目已建立一套完整的、可復用的 API routes 驗證方法論和工具包。本文檔是導航索引。  
+> **與程式庫同步**：2026-04-13（檔名、路徑、`bun test` 用法、統計數字與 CI 對齊）。
 
 ## 📚 文檔導航
 
@@ -46,65 +47,84 @@ Draupnir Project/
 │
 ├── tests/
 │   ├── Feature/
-│   │   ├── routes-existence.test.ts
-│   │   │   └── 快速驗證測試（可復用）
-│   │   └── routes-connectivity.test.ts
-│   │       └── 完整驗證測試（可復用）
-│   ├── lib/
-│   │   └── test-client.ts
-│   │       └── HTTP 客戶端（可復用）
+│   │   ├── routes-existence.e2e.ts
+│   │   │   └── 快速存在性驗證（需執行中 API + `API_BASE_URL`）
+│   │   ├── routes-connectivity.e2e.ts
+│   │   │   └── 連通性／認證行為驗證
+│   │   └── lib/
+│   │       ├── test-client.ts    ← HTTP 客戶端
+│   │       └── test-server.ts    ← 與 `scripts/test-feature.ts` 搭配
 │   └── routes-validation.report.md
-│       └── 詳細路由列表報告
+│       └── 人工維護之路由列表（可能與分析器數字不同步，請以工具輸出為準）
 │
-└── .claude/projects/.../memory/
-    ├── routes-verification-methodology.md
-    │   └── 方法論完整記錄
-    └── MEMORY.md
-        └── 內存索引
+├── routes-analysis.json          ← `routes-analyzer.ts` 產出（執行後寫入 repo 根目錄）
+│
+└── .github/workflows/ci.yml
+    └── `routes-check` job（memory ORM 起服 + existence e2e）
 ```
 
 ---
 
 ## 🚀 快速開始 (5 分鐘)
 
-### 步驟 1: 複製工具
+### 在 Draupnir 倉庫內（推薦）
+
+靜態掃描與動態驗證分開執行：
 
 ```bash
-# 複製三個核心文件到你的項目
-cp scripts/routes-analyzer.ts your-project/scripts/
-cp tests/lib/test-client.ts your-project/tests/lib/
-cp tests/Feature/routes-existence.test.ts your-project/tests/Feature/
+# 1) 靜態：掃描 Presentation/Routes（輸出 routes-analysis.json）
+bun scripts/routes-analyzer.ts
+
+# 2) 動態：自動起 memory ORM 服務並跑完 tests/Feature/*.e2e.ts（含兩份 routes 測試）
+bun run test:feature
 ```
 
-### 步驟 2: 配置命令
+若已有本機服務在跑，可只跑 e2e（**必須**設定 `API_BASE_URL`；檔名須帶路徑前綴 `./`，否則 Bun 不會當成檔案）：
 
 ```bash
-# 添加到你的 package.json
+export API_BASE_URL=http://127.0.0.1:3000
+bun test ./tests/Feature/routes-existence.e2e.ts
+bun test ./tests/Feature/routes-connectivity.e2e.ts
+```
+
+對應腳本見根目錄 `package.json`：`test:feature`、`test:feature:server`、`test:feature:existing`。
+
+### 複製到其他專案時
+
+```bash
+cp scripts/routes-analyzer.ts your-project/scripts/
+cp tests/Feature/lib/test-client.ts your-project/tests/Feature/lib/
+cp tests/Feature/routes-existence.e2e.ts your-project/tests/Feature/
+# 依專案調整 import 路徑與啟服方式
+```
+
+### 可選：package.json 腳本示例（Bun）
+
+```json
 {
   "scripts": {
     "routes:analyze": "bun scripts/routes-analyzer.ts",
-    "test:routes": "bun test tests/Feature/routes-existence.test.ts",
-    "verify:routes": "npm run routes:analyze && npm run test:routes"
+    "test:feature": "bun scripts/test-feature.ts",
+    "verify:routes": "bun scripts/routes-analyzer.ts && bun run test:feature"
   }
 }
 ```
 
-### 步驟 3: 運行驗證
+（`verify:routes` 會跑**全部** Feature e2e；若只想跑 routes 兩檔，請用 `API_BASE_URL` + 兩條 `bun test ./tests/Feature/routes-*.e2e.ts`。）
 
-```bash
-npm run verify:routes
-```
-
-### 📊 預期結果
+### 📊 預期結果（靜態分析）
 
 ```
-🔍 正在分析路由: src/Modules
+🔍 正在分析路由: .../src/Modules
 
-✅ 72 pass
-Ran 72 tests across 1 file. [1.81s]
+╔════════════════════════════════════════╗
+║ 總 Routes 數:                       43 ║   ← regex 抽取，可能低於實際註冊數
+╚════════════════════════════════════════╝
 
 💾 詳細分析已保存至: routes-analysis.json
 ```
+
+動態測試通過與否以 `bun run test:feature`（或上述單檔命令）控制台為準。
 
 ---
 
@@ -160,39 +180,36 @@ Ran 72 tests across 1 file. [1.81s]
 
 ### 開發時使用
 ```bash
-# 修改路由後快速驗證
-npm run test:routes
+bun scripts/routes-analyzer.ts          # 改路由後先看靜態掃描
+bun run test:feature                    # 或對已起服環境 + API_BASE_URL 單跑 e2e
 ```
 
 ### 提交前驗證
 ```bash
-# 完整驗證（在 git commit 之前）
-npm run verify:routes
+bun scripts/routes-analyzer.ts && bun run test:feature
 ```
 
 ### CI/CD 集成
-```bash
-# 自動驗證（GitHub Actions / GitLab CI）
-npm run test:routes:ci
-```
+GitHub Actions 已內建 **`routes-check`**（`.github/workflows/ci.yml`）：以 `ORM=memory` 起 `src/index.ts`，再對 `routes-existence.e2e.ts` 執行 `bun test`。其他 CI 可仿照該 job 的環境變數與命令。
 
 ---
 
 ## 📊 驗證結果
 
-### Draupnir 項目驗證結果
+### Draupnir 項目（2026-04-13 與工具對齊）
 
-| 項目 | 數量 | 狀態 |
+| 項目 | 數量 | 說明 |
 |------|------|------|
-| **模組數** | 13 | ✅ |
-| **Routes 數** | 68 | ✅ |
-| **測試數** | 72 | ✅ 通過 |
-| **耗時** | 1.81s | ✅ |
+| **`src/Modules` 頂層模組** | 15 | 含無路由之模組 |
+| **分析器掃到之有路由模組** | 10 | 見 `routes-analysis.json` 的 `byModule` |
+| **Routes 數（`routes-analyzer` regex）** | 43 | 與 `router.get/post/...` 寫法強相關，漏掃時請擴充 `scripts/routes-analyzer.ts` |
+| **存在性 e2e 用例** | 49 | `routes-existence.e2e.ts` |
+| **連通性 e2e 用例** | 52 | `routes-connectivity.e2e.ts` |
 
 ### 驗證詳情
-- 📋 [完整驗證報告](../ROUTES_VERIFICATION.md)
+- 📋 [完整驗證報告](../ROUTES_VERIFICATION.md)（與本導航同步維護）
 - 📊 [詳細路由列表](../tests/routes-validation.report.md)
-- 📈 [分析結果](../routes-analysis.json)
+- 📈 [分析結果](../routes-analysis.json)（執行 `bun scripts/routes-analyzer.ts` 後生成）
 
 ---
 
@@ -205,16 +222,16 @@ npm run test:routes:ci
 **耗時**: ~0.5 秒  
 
 ### Routes Existence Test
-**用途**: 驗證所有 routes 都存在且能連接  
-**命令**: `bun test tests/Feature/routes-existence.test.ts`  
-**覆蓋**: 72 個測試用例  
-**耗時**: ~1.8 秒  
+**用途**: 以「非 404」粗驗路由是否存在  
+**命令**: `API_BASE_URL=... bun test ./tests/Feature/routes-existence.e2e.ts`（或 `bun run test:feature`）  
+**覆蓋**: 49 個 `it` 用例（2026-04-13）  
+**耗時**: 視啟服與網路而定（通常數秒級）  
 
 ### Routes Connectivity Test
-**用途**: 詳細驗證認證、授權、中間件  
-**命令**: `bun test tests/Feature/routes-connectivity.test.ts`  
-**覆蓋**: 52 個詳細驗證  
-**耗時**: ~2.0 秒  
+**用途**: 驗證認證、授權、公開／保護行為等  
+**命令**: `API_BASE_URL=... bun test ./tests/Feature/routes-connectivity.e2e.ts`（或 `bun run test:feature`）  
+**覆蓋**: 52 個 `it` 用例（2026-04-13）  
+**耗時**: 同上  
 
 ---
 
@@ -223,13 +240,13 @@ npm run test:routes:ci
 ### 1. 定期運行驗證
 ```bash
 # 開發時：每次修改路由後
-npm run test:routes
+bun scripts/routes-analyzer.ts
+bun run test:feature
 
-# 提交前：完整驗證
-npm run verify:routes
+# 提交前：靜態 + 全 Feature e2e
+bun scripts/routes-analyzer.ts && bun run test:feature
 
-# CI 中：自動驗證
-npm run test:routes:ci
+# CI：對照 .github/workflows/ci.yml 的 routes-check
 ```
 
 ### 2. 新增 Route 檢查清單
@@ -237,7 +254,7 @@ npm run test:routes:ci
 - [ ] Controller 方法已實現
 - [ ] 必要的中間件已應用
 - [ ] 輸入驗證 Schema 已定義
-- [ ] npm run verify:routes 通過
+- [ ] `bun scripts/routes-analyzer.ts` 與 `bun run test:feature`（或補齊之 e2e）通過
 
 ### 3. 文件組織
 ```
@@ -250,23 +267,23 @@ src/Modules/ModuleName/
 
 ## 🔄 集成到 CI/CD
 
-### GitHub Actions
-```yaml
-- name: Verify Routes
-  run: npm run test:routes:ci
-```
+### GitHub Actions（本倉庫現狀）
+**`.github/workflows/ci.yml`** 的 **`routes-check`**：複製 `tests/Feature` 至臨時目錄、以 `PORT=3001 ORM=memory` 背景啟動 `bun run src/index.ts`，再執行  
+`API_BASE_URL=http://127.0.0.1:3001 bun test ./Feature/routes-existence.e2e.ts`（工作目錄為該臨時目錄）。  
+目前 **未** 在 CI 內呼叫 `routes-analyzer.ts`；若要在流水線做靜態掃描，可另加一步 `bun scripts/routes-analyzer.ts`。
 
-### GitLab CI
+### GitLab CI / 其他
 ```yaml
 verify_routes:
   script:
-    - npm run verify:routes
+    - bun scripts/routes-analyzer.ts
+    - bun run test:feature
 ```
 
-### Pre-commit Hook
+### Pre-commit Hook（可選）
 ```bash
-# .husky/pre-commit
-npm run verify:routes
+# .husky/pre-commit（需本機可起服或使用現有 API_BASE_URL）
+bun scripts/routes-analyzer.ts && bun run test:feature
 ```
 
 ---
@@ -294,7 +311,7 @@ npm run verify:routes
 - [ ] 已閱讀本導航文檔
 - [ ] 已複製所有必要工具
 - [ ] 已配置 package.json 命令
-- [ ] 已成功運行 npm run verify:routes
+- [ ] 已成功運行 `bun scripts/routes-analyzer.ts` 與 `bun run test:feature`（或等效命令）
 - [ ] 已集成到 CI/CD（可選）
 - [ ] 已配置 pre-commit hook（可選）
 - [ ] 已更新項目文檔（可選）
@@ -324,9 +341,10 @@ npm run verify:routes
 
 ### 代碼
 - [路由分析工具](../scripts/routes-analyzer.ts)
-- [快速驗證測試](../tests/Feature/routes-existence.test.ts)
-- [完整驗證測試](../tests/Feature/routes-connectivity.test.ts)
-- [HTTP 客戶端](../tests/lib/test-client.ts)
+- [Feature 測試編排](../scripts/test-feature.ts)
+- [存在性 e2e](../tests/Feature/routes-existence.e2e.ts)
+- [連通性 e2e](../tests/Feature/routes-connectivity.e2e.ts)
+- [HTTP 客戶端](../tests/Feature/lib/test-client.ts)
 
 ### 報告
 - [驗證報告](../ROUTES_VERIFICATION.md)
@@ -363,10 +381,10 @@ npm run verify:routes
 
 ## 📄 版本信息
 
-- **體系版本**: v1.0
-- **最後更新**: 2026-04-10
+- **體系版本**: v1.1（與 Draupnir 檔名／Bun 行為對齊）
+- **最後更新**: 2026-04-13
 - **已驗證於**: Draupnir v0.1.0
-- **驗證結果**: 68 routes / 72 tests ✅
+- **快照**: 分析器 **43** 條路由匹配；e2e **49 + 52** 用例（見上文表格）
 
 ---
 
@@ -374,7 +392,7 @@ npm run verify:routes
 
 1. **選擇你的文檔**: 根據上面的需求選擇合適的文檔
 2. **開始應用**: 遵循相應的指南
-3. **運行驗證**: 執行 `npm run verify:routes`
+3. **運行驗證**: 執行 `bun scripts/routes-analyzer.ts` 與 `bun run test:feature`（或依專案自訂之 `verify:routes`）
 4. **查看結果**: 檢查控制台和生成的報告
 
 準備好了嗎？👉 [快速開始指南](./ROUTES_VERIFICATION_QUICKSTART.md)

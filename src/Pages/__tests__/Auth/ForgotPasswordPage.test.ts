@@ -28,6 +28,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     getCookie: (_name: string) => undefined,
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
+    getMethod: overrides.getMethod ?? (() => 'GET'),
   }
 }
 
@@ -41,14 +42,9 @@ describe('ForgotPasswordPage', () => {
     const inertia = { render } as unknown as InertiaService
     const page = new ForgotPasswordPage(inertia, mockForgotService as any)
     const ctx = createMockContext()
-    ctx.set('inertia:shared', { csrfToken: 'csrf' })
 
     await page.handle(ctx)
 
-    expect(render).toHaveBeenCalledWith(
-      ctx,
-      'Auth/ForgotPassword',
-      expect.objectContaining({ csrfToken: expect.any(String) }),
-    )
+    expect(render).toHaveBeenCalledWith(ctx, 'Auth/ForgotPassword', {})
   })
 })

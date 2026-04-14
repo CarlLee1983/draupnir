@@ -1,6 +1,6 @@
 # 架構文件撰寫標準
 
-本文件定義 Draupnir 專案中 **架構相關文件** 的撰寫原則，並對齊國際與業界常用標準，供新文件與改版時遵循。
+本文件定義 Draupnir 專案中 **架構相關文件** 的撰寫原則，並對齊國際與業界常用標準，供新文件與改版時遵循。自 v1.4 起，專案導入 GSD (Get Stuff Done) 自動化與半自動化文件流程。
 
 ---
 
@@ -12,104 +12,90 @@
 | **arc42** | 架構說明模板（Gernot Starke 等） | **章節化檢查清單**：確保常見主題（情境、限制、決策、品質）有落點，避免遺漏。 |
 | **C4 model** | 軟體架構圖層級模型（Simon Brown） | **圖示抽象層級**：由外而內（情境→容器→元件→程式碼），控制每一張圖的粒度。 |
 | **4+1 View Model** | Philippe Kruchten | **多視角補充**：邏輯、程序、開發、實體部署，並以情境／用例貫穿驗證。 |
-| **ADR** | Architecture Decision Records（常見實務） | **決策與脈絡**：單則決策可追溯、可否決、可取代。 |
+| **ADR** | Architecture Decision Records | **決策與脈絡**：單則決策可追溯，記錄於 `.planning/PROJECT.md` 與 `docs/draupnir/DESIGN_DECISIONS.md`。 |
 
-上述標準**彼此相容**：42010 說明「如何組織架構描述」；arc42 與 C4 提供具體章節與圖層慣例；ADR 承載「為何如此」而不塞爆概覽圖。
+上述標準**彼此相容**：42010 說明「如何組織架構描述」；arc42 與 C4 提供具體章節與圖層慣例；ADR 承載「為何如此」。
 
 ---
 
 ## 2. ISO/IEC/IEEE 42010 核心觀念（必備思維）
 
-撰寫或審閱架構文件時，應能對應以下要素（用語以標準為準，說明為中文）：
+撰寫或審閱架構文件時，應能對應以下要素：
 
 1. **利害關係人（Stakeholders）**  
-   明確預設讀者：例如新進開發者、維運、資安審查、產品／專案管理。同一張圖很難滿足所有人，應分視圖或分文件。
+   明確預設讀者：例如新進開發者、維運、資安審核、產品經理。
 
 2. **關注點（Concerns）**  
-   每份視圖應服務具體關注點，例如：模組邊界、資料一致性、驗證流程、部署拓撲。避免單一文件混雜所有關注點卻未標示優先順序。
+   每份視圖應服務具體關注點：例如模組邊界、資料一致性、驗證流程、部署拓撲。
 
 3. **觀點（Viewpoint）**  
-   定義「如何看」：符號、抽象層級、允許／禁止的資訊（例如 C4 某一層級即是一種觀點）。
+   定義「如何看」：符號、抽象層級、允許／禁止的資訊（例如 C4 層級即是一種觀點）。
 
 4. **視圖（View）**  
-   觀點的具體產物：一張圖、一節文字、一張表。應可指回其所服務的關注點與利害關係人。
+   觀點的具體產物：一張圖、一節文字、一張表。
 
 5. **一致性（Consistency）**  
-   多份視圖之間不得互相矛盾；若刻意採用不同抽象（例如邏輯模組名與部署容器名不同），須在文字中說明對應關係或已知簡化。
-
-**實務判斷句**：若讀者會因「不知道這件事」而**誤解系統邊界、責任或主要資料流**，則應在某個**對應關注點的視圖**中寫清楚；若僅屬實作細節，則以程式、測試或 ADR 補足即可。
+   多份視圖之間不得互相矛盾。**單一事實來源 (SSoT)**：
+   - **Data View**: 以 `src/Foundation/Infrastructure/Database/schema.ts` (Drizzle) 為準。
+   - **Structure View**: 以 `.planning/codebase/STRUCTURE.md` 為準。
 
 ---
 
-## 3. C4 模型：圖的層級（強烈建議）
+## 3. C4 模型：圖的層級（建議指南）
 
 | 層級 | 英文 | 應包含的內容 | 本專案常見落點 |
 |------|------|----------------|----------------|
-| 1 | System Context | 本系統與外部使用者／系統的關係 | `ARCHITECTURE_SUMMARY.md` 開頭、高階說明 |
-| 2 | Containers | 可部署／可執行的單元與其職責、主要技術 | 同上或部署相關小節 |
-| 3 | Components | 容器內主要結構（模組、子系統） | `architecture/module-dependency-map.md`、`ddd-layered-architecture.md` |
-| 4 | Code | 類別、介面、重要模式 | `knowledge/*.md`、原始碼；**概覽文件僅點到為止** |
+| 1 | System Context | 本系統與外部使用者／系統（如 Bifrost）的關係 | `ARCHITECTURE_SUMMARY.md` 開頭 |
+| 2 | Containers | 可部署單元（SdkApi, CliApi, WebApp, Redis, DB）的職責 | 同上、`.planning/codebase/ARCHITECTURE.md` |
+| 3 | Components | 容器內主要結構（Modules/Auth, Modules/Alerts 等） | `.planning/codebase/STRUCTURE.md` |
+| 4 | Code | 類別、介面、重要模式 | `knowledge/*.md`、原始碼 (JSDoc) |
 
-**原則**：單一圖表維持**一個 C4 層級**；需要跨層說明時，拆成多圖或多節並標示層級，避免同一張圖混雜「部署」與「每個類別方法」。
+**原則**：單一圖表維持**一個 C4 層級**。
 
 ---
 
-## 4. arc42 章節與本專案文件對照（參考映射）
+## 4. arc42 章節與本專案文件對照（文件導覽）
 
-arc42 提供完整架構說明書的章節結構。本專案將內容**分散在多個檔案**，改版時可用下表檢查是否仍有對應落點。
+arc42 提供完整架構說明書的章節結構。本專案將內容分散在多個檔案中。
 
 | arc42 章節（概要） | 建議對應（本倉庫） |
 |--------------------|---------------------|
-| 簡介與目標 | `ARCHITECTURE_SUMMARY.md`、`ROADMAP.md` |
-| 限制條件 | `DESIGN_DECISIONS.md`、相關 `specs/` |
-| 情境與範圍 | `ARCHITECTURE_SUMMARY.md`、`architecture/auth-flow-diagrams.md` |
-| 解決方案策略 | `DESIGN_DECISIONS.md`、`specs/6-architecture/` |
-| 建置區塊／模組視圖 | `architecture/ddd-layered-architecture.md`、`module-dependency-map.md` |
-| 執行時期視圖 | `auth-flow-diagrams.md`、流程相關 specs |
-| 部署視圖 | 部署說明（若獨立則放 `DEVELOPMENT.md` 或專章） |
-| 跨領域概念（領域模型） | `knowledge/ddd-*.md`、`entity-relationship-overview.md` |
-| 架構決策 | `DESIGN_DECISIONS.md`、個別 ADR 式條目 |
-| 品質屬性／風險 | 架構評審 `specs/`、`reviews/` |
-
-未來若合併為「單一架構說明書」，可直接以 arc42 為目錄骨架，再連結上述既有檔案。
+| 簡介與目標 | `ARCHITECTURE_SUMMARY.md`、`.planning/PROJECT.md` |
+| 限制條件 | `docs/draupnir/DESIGN_DECISIONS.md`、`.planning/codebase/STACK.md` |
+| 情境與範圍 | `ARCHITECTURE_SUMMARY.md`、`.planning/codebase/INTEGRATIONS.md` |
+| 解決方案策略 | `docs/draupnir/DESIGN_DECISIONS.md` |
+| 建置區塊／模組視圖 | `.planning/codebase/STRUCTURE.md`、`src/Modules/` |
+| 執行時期視圖 | `docs/draupnir/` 下的流程圖、Specs |
+| 部署視圖 | `DEVELOPMENT.md`、CI/CD 相關 Specs |
+| 跨領域概念（領域模型） | `knowledge/ddd-*.md`、`src/Foundation/Infrastructure/Database/schema.ts` |
+| 架構決策 (ADR) | `.planning/PROJECT.md` (Key Decisions 表) |
+| 品質屬性／風險 | `.planning/codebase/CONCERNS.md`、`reviews/` |
 
 ---
 
-## 5. 文件類型分工（避免重複與漂移）
+## 5. 文件類型分工
 
-| 類型 | 目的 | 應寫入的內容 | 不應過度承載的內容 |
-|------|------|----------------|-------------------|
-| **架構概覽**（`ARCHITECTURE_SUMMARY.md`） | 快速建立心智模型、模組與責任導覽 | 邊界、主要聚合／服務名稱、與程式對齊的**結構**（屬性、型別、VO） | 每個方法的預設參數、與程式不一致的臆測 API |
-| **架構圖表目錄**（`architecture/*.md`） | 固定關注點的深度圖與說明 | 依 C4／視圖目的的細節 | 一次性專案排程 |
-| **設計決策**（`DESIGN_DECISIONS.md`、ADR） | 脈絡、選項、後果、時效 | 為何選 A 不選 B、棄用決策 | 完整教學或重複貼上程式 |
-| **工程知識**（`knowledge/*.md`） | 可重用的模式與規則 | DDD 戰術、分層規則、測試策略 | 單一功能的臨時備忘 |
-| **原始碼註解**（JSDoc） | 與 TypeScript 一併維護的 API／意圖說明 | [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md)（規範與範例路徑） | 重複貼上大量實作碼；與架構概覽重複的長篇教學 |
-| **規格**（`specs/`） | 行為與介面約定 | 功能需求、API、測試設計 | 與規格無關的泛用教學 |
-
-**與程式碼對齊**：概覽中若列舉聚合欄位、公開方法或事件名稱，應與**現行程式**一致；無法維護時改為「見原始碼」或移除細節，改以連結指向模組。
+| 類型 | 目的 | 應寫入的內容 |
+|------|------|----------------|
+| **架構概覽** (`ARCHITECTURE_SUMMARY.md`) | 快速建立心智模型 | 邊界、主要聚合／服務名稱、模組職責 |
+| **Codebase 分析** (`.planning/codebase/*.md`) | 由 GSD 生成的現狀分析 | 當前技術棧、目錄結構、依賴關係、測試覆蓋率 |
+| **設計決策** (`DESIGN_DECISIONS.md`) | 記錄「為何如此」的脈絡 | 選項評估、權衡 (Trade-offs)、後果 |
+| **工程知識** (`knowledge/*.md`) | 可重用的模式與規則 | DDD 戰術規範、分層規則、前端開發慣例 |
+| **規格** (`specs/`) | 具體功能的行為約定 | API 定義、業務規則驗證、UAT 標準 |
 
 ---
 
 ## 6. 品質檢查清單（發 PR 或重大改版前）
 
-- [ ] 是否標示或暗示了**目標讀者**與**主要關注點**？
-- [ ] 圖表是否落在**單一抽象層級**（C4）或已註明層級切換？
-- [ ] 與其他視圖（模組圖、ER、流程圖）是否**無矛盾**，或已說明簡化假設？
-- [ ] **決策**是否有 `DESIGN_DECISIONS`／ADR 可追溯，而非只寫在聊天或 PR 描述？
-- [ ] 結構性敘述是否可對照**實際程式路徑**（目錄／型別名稱）？
+- [ ] 是否標示了**目標讀者**與**主要關注點**？
+- [ ] 圖表是否落在**單一抽象層級**（C4）？
+- [ ] 與其他視圖（如 Drizzle Schema）是否**無矛盾**？
+- [ ] 關鍵決策是否已記錄於 `.planning/PROJECT.md` 或 `DESIGN_DECISIONS.md`？
+- [ ] 結構性敘述是否與 **實際程式路徑**（Modules/Foundations）對齊？
 
 ---
 
-## 7. 參考資料（正式標準與公開說明）
+## 7. 維護原則
 
-- ISO/IEC/IEEE 42010:2022 — *Architecture description*（需透過標準組織或機構取得正式文本）。
-- arc42 模板與說明：<https://arc42.org/>
-- C4 model：<https://c4model.com/>
-- ADR 常見格式與討論：社群多採用「標題、狀態、脈絡、決策、後果」欄位之變體；本專案以 `DESIGN_DECISIONS.md` 為彙總載體。
-
----
-
-## 8. 本文件維護
-
-- **語言**：依倉庫規範，本文件以**繁體中文（台灣）**撰寫；標準名稱保留英文以利對照文獻。
-- **修訂**：當專案引入新的架構產物類型（例如獨立部署手冊、威脅模型）時，應更新第 5 節映射表與第 6 節清單。
+- **語言**：本文件以 **繁體中文（台灣）** 撰寫；標準名稱保留英文。
+- **時效性**：架構文檔應在每個 Milestone 完成後，對齊 `.planning/STATE.md` 的變更進行同步更新。

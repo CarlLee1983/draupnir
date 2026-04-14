@@ -22,11 +22,7 @@ export class VerifyDevicePage {
    * @returns Inertia response rendering Auth/VerifyDevice component
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const sharedData = ctx.get('inertia:shared') || {}
-    const csrfToken = (sharedData as Record<string, unknown>).csrfToken || ''
-
     return this.inertia.render(ctx, 'Auth/VerifyDevice', {
-      csrfToken: csrfToken as string,
       message: undefined,
       error: undefined,
     })
@@ -42,13 +38,9 @@ export class VerifyDevicePage {
    * @returns Inertia response with success/error message
    */
   async authorize(ctx: IHttpContext): Promise<Response> {
-    const sharedData = ctx.get('inertia:shared') || {}
-    const csrfToken = ((sharedData as Record<string, unknown>).csrfToken as string) || ''
-
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (!auth) {
       return this.inertia.render(ctx, 'Auth/VerifyDevice', {
-        csrfToken,
         message: undefined,
         error: 'Authentication required',
       })
@@ -58,7 +50,6 @@ export class VerifyDevicePage {
     const userCode = validated?.userCode?.trim() ?? ''
     if (!userCode) {
       return this.inertia.render(ctx, 'Auth/VerifyDevice', {
-        csrfToken,
         message: undefined,
         error: 'User code is required',
       })
@@ -72,7 +63,6 @@ export class VerifyDevicePage {
     })
 
     return this.inertia.render(ctx, 'Auth/VerifyDevice', {
-      csrfToken,
       message: result.success ? result.message : undefined,
       error: result.success ? undefined : (result.message ?? 'Authorization failed'),
     })

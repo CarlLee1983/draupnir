@@ -823,7 +823,7 @@ Step 2.6: SKIPPED (no external dependencies identified — this is a pure intern
 | MIGRATE-07 | `HandleBalanceDepletedService` uses `updateKey` + `GatewayError.retryable` | unit | `bun test src/Modules/Credit/__tests__/HandleBalanceDepletedService.test.ts` | Yes (needs rewrite) |
 | MIGRATE-08 | `HandleCreditToppedUpService` uses `updateKey` with camelCase | unit | `bun test src/Modules/Credit/__tests__/HandleCreditToppedUpService.test.ts` | Yes (needs rewrite) |
 | MIGRATE-09 | `ApiKeyBifrostSync.syncPermissions` uses `providerConfigs`, `rateLimit` | unit | `bun test src/Modules/ApiKey/__tests__/ApiKeyBifrostSync.test.ts` | Yes (needs rewrite) |
-| WIRE-02–06 | Service providers resolve `llmGatewayClient` | feature (route smoke) | `bun test tests/Feature/routes-connectivity.test.ts tests/Feature/routes-existence.test.ts` | Yes |
+| WIRE-02–06 | Service providers resolve `llmGatewayClient` | feature (route smoke) | `bun test tests/Feature/routes-connectivity.e2e.ts tests/Feature/routes-existence.e2e.ts` | Yes |
 | TEST-01 | Tests use `MockGatewayClient` | unit (all above) | `bun test src` | Yes (needs rewrite) |
 | TEST-03 | Full suite passes | full | `bun test src tests` | Yes |
 

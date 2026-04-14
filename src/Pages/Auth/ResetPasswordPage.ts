@@ -9,22 +9,17 @@ export class ResetPasswordPage {
   ) {}
 
   async handle(ctx: IHttpContext): Promise<Response> {
-    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
-    const csrfToken = (shared?.csrfToken as string) ?? ''
     const token = ctx.getParam('token') ?? ''
 
     const { valid } = await this.resetPasswordService.validateToken(token)
 
     return this.inertia.render(ctx, 'Auth/ResetPassword', {
-      csrfToken,
       token,
       tokenValid: valid,
     })
   }
 
   async store(ctx: IHttpContext): Promise<Response> {
-    const shared = ctx.get('inertia:shared') as Record<string, unknown> | undefined
-    const csrfToken = (shared?.csrfToken as string) ?? ''
     const token = ctx.getParam('token') ?? ''
     const validated = ctx.get('validated') as
       | {
@@ -38,7 +33,6 @@ export class ResetPasswordPage {
 
     if (!result.success) {
       return this.inertia.render(ctx, 'Auth/ResetPassword', {
-        csrfToken,
         token,
         tokenValid: true,
         error: result.error,

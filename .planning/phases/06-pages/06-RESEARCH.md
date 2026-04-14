@@ -8,11 +8,11 @@
 
 The `src/Pages` module already exists and is structurally complete. It implements a hand-rolled server-side Inertia protocol adapter that serves 12 admin pages and 7 member pages via DI-resolved page classes. The module is registered in `bootstrap.ts` and all routes are mounted in `routes.ts`. The infrastructure (InertiaService, ViteTagHelper, withInertiaPageHandler, requireAdmin/requireMember helpers) is tested.
 
-The "completion" work for Phase 6 falls into three distinct gaps: (1) **no unit tests for the 19 page handler classes** — only `InertiaService` and `ViteTagHelper` have tests; (2) **the Inertia page routes (`/admin/*`, `/member/*`) are absent from `routes-existence.test.ts`** — the feature test suite exercises zero page routes; (3) there is a known **placeholder page** (`AdminUsageSyncPage`) that returns static data with an explicit comment saying "Phase 4 UsageSync 待完成."
+The "completion" work for Phase 6 falls into three distinct gaps: (1) **no unit tests for the 19 page handler classes** — only `InertiaService` and `ViteTagHelper` have tests; (2) **the Inertia page routes (`/admin/*`, `/member/*`) are absent from `routes-existence.e2e.ts`** — the feature test suite exercises zero page routes; (3) there is a known **placeholder page** (`AdminUsageSyncPage`) that returns static data with an explicit comment saying "Phase 4 UsageSync 待完成."
 
 Phase 6's goal is therefore: add unit tests for page handler classes, add page routes to the routes-existence test, and assess whether any handler logic needs to be hardened (e.g., the UsageSync placeholder).
 
-**Primary recommendation:** Write unit tests for all page handler classes using the existing `IHttpContext` mock pattern from `InertiaService.test.ts`, then extend `routes-existence.test.ts` with `/admin/*` and `/member/*` coverage. Do not refactor InertiaService or change route registration — the architecture is correct and complete.
+**Primary recommendation:** Write unit tests for all page handler classes using the existing `IHttpContext` mock pattern from `InertiaService.test.ts`, then extend `routes-existence.e2e.ts` with `/admin/*` and `/member/*` coverage. Do not refactor InertiaService or change route registration — the architecture is correct and complete.
 
 ## Project Constraints (from CLAUDE.md)
 
@@ -210,9 +210,9 @@ Based on investigation, the following gaps exist:
 - `MemberContractsPage` — `handle`
 - `MemberSettingsPage` — `handle`, `update`
 
-### Gap 2: Page routes absent from routes-existence.test.ts
+### Gap 2: Page routes absent from routes-existence.e2e.ts
 
-`tests/Feature/routes-existence.test.ts` covers all API modules but has **zero coverage of Inertia page routes**. The following routes need existence assertions added:
+`tests/Feature/routes-existence.e2e.ts` covers all API modules but has **zero coverage of Inertia page routes**. The following routes need existence assertions added:
 
 **Admin routes (16 routes):**
 ```
@@ -385,7 +385,7 @@ Step 2.6: SKIPPED (no external dependencies — this phase is code and tests onl
 | PAGE-02 | Member page handlers return correct Inertia component | unit | `bun test src/Pages/__tests__/Member` | ❌ Wave 0 |
 | PAGE-03 | Unauthenticated requests redirect to /login | unit | `bun test src/Pages` | ❌ Wave 0 |
 | PAGE-04 | Non-admin requests to admin pages return 403 | unit | `bun test src/Pages` | ❌ Wave 0 |
-| PAGE-05 | All page routes exist (non-404) | integration | `bun test tests/Feature/routes-existence.test.ts` | ✅ (test file exists; needs new cases) |
+| PAGE-05 | All page routes exist (non-404) | integration | `bun test tests/Feature/routes-existence.e2e.ts` | ✅ (test file exists; needs new cases) |
 | PAGE-06 | POST handlers process body and redirect/re-render correctly | unit | `bun test src/Pages` | ❌ Wave 0 |
 
 ### Sampling Rate
@@ -415,7 +415,7 @@ Step 2.6: SKIPPED (no external dependencies — this phase is code and tests onl
 - [ ] `src/Pages/__tests__/Member/MemberUsagePage.test.ts`
 - [ ] `src/Pages/__tests__/Member/MemberContractsPage.test.ts`
 - [ ] `src/Pages/__tests__/Member/MemberSettingsPage.test.ts`
-- [ ] `tests/Feature/routes-existence.test.ts` — add admin/member route cases (file exists, needs additions)
+- [ ] `tests/Feature/routes-existence.e2e.ts` — add admin/member route cases (file exists, needs additions)
 
 ---
 
@@ -455,7 +455,7 @@ Step 2.6: SKIPPED (no external dependencies — this phase is code and tests onl
 ### Primary (HIGH confidence)
 
 - Direct code inspection of `src/Pages/**/*.ts` — all 40 files read.
-- `tests/Feature/routes-existence.test.ts` — confirmed no page routes tested.
+- `tests/Feature/routes-existence.e2e.ts` — confirmed no page routes tested.
 - `src/Pages/__tests__/` — confirmed only 2 test files exist (InertiaService, ViteTagHelper).
 - `docs/draupnir/knowledge/pages-inertia-architecture.md` — official architecture doc.
 - `docs/draupnir/knowledge/coding-conventions.md` — coding standards.

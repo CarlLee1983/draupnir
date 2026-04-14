@@ -20,7 +20,7 @@ bun test src tests                 # Run all tests
 bun test src tests --watch        # Watch mode
 bun test --coverage               # Coverage report
 bun test tests/Unit/              # Run only unit tests
-bun test tests/Feature/           # Run feature tests
+bun test tests/Feature/           # Run feature tests（若檔名為 *.e2e.ts，請用路徑前綴 ./ 單跑）
 bun test src --filter integration # Run integration tests (marked in file)
 bun test tests/ --filter User     # Run User-related tests
 playwright test                   # E2E tests
@@ -39,7 +39,7 @@ playwright test --debug           # E2E debugging
 **Naming:**
 - Domain tests: `[ClassName].test.ts` (e.g., `Organization.test.ts`)
 - Integration tests: `[ServiceName].integration.test.ts` (e.g., `CreditEventFlow.integration.test.ts`)
-- Feature tests: `[feature].test.ts` (e.g., `routes-existence.test.ts`, `api-flows.test.ts`)
+- Feature HTTP 測試：`[feature].e2e.ts`（例如 `routes-existence.e2e.ts`）；其他仍可用 `[feature].test.ts`
 
 **Structure:**
 ```
@@ -58,8 +58,8 @@ tests/
 │   │   ├── test-server.ts              # Test server setup
 │   │   ├── auth-helper.ts              # Auth utilities
 │   │   └── admin-seed.ts               # Test data seeding
-│   ├── routes-existence.test.ts        # API endpoint existence
-│   ├── routes-connectivity.test.ts     # Route connection verification
+│   ├── routes-existence.e2e.ts         # API endpoint existence（需 API_BASE_URL 或 test:feature）
+│   ├── routes-connectivity.e2e.ts      # Route connectivity / auth behavior
 │   ├── api-spec.test.ts                # API spec compliance
 │   └── api-flows.test.ts               # End-to-end flows
 ├── Unit/
@@ -283,7 +283,7 @@ bun test --coverage
 - **Location:** `tests/Feature/`
 - **Approach:** Start test server, use TestClient HTTP wrapper
 - **Speed:** Medium-slow (full server startup)
-- **Example:** `routes-existence.test.ts`, `api-flows.test.ts`
+- **Example:** `routes-existence.e2e.ts`, `api-flows.test.ts`
 
 **E2E Tests:**
 - **Framework:** Playwright v1.48.0

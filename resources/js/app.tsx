@@ -3,7 +3,10 @@ import { createInertiaApp } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 import type { ComponentType } from 'react'
 import { Toaster } from '@/components/ui/toaster'
+import { attachInertiaCsrfHeaders } from '@/inertiaCsrf'
 import '../css/app.css'
+
+attachInertiaCsrfHeaders()
 
 createInertiaApp({
   title: (title) => (title ? `${title} — Draupnir` : 'Draupnir'),

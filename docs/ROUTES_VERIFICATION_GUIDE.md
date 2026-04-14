@@ -596,7 +596,7 @@ bun test tests/Feature/other-tests.test.ts
 
 - [本項目的驗證報告](../ROUTES_VERIFICATION.md)
 - [詳細的 Routes 列表](../tests/routes-validation.report.md)
-- [測試用例](../tests/Feature/routes-existence.test.ts)
+- [測試用例](../tests/Feature/routes-existence.e2e.ts)
 
 ---
 

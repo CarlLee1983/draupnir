@@ -29,6 +29,7 @@ describe('MemberDashboardPage i18n', () => {
       getBody: async <T>() => ({}) as T,
       getHeader: () => undefined,
       getParam: () => undefined,
+      getMethod: () => 'GET',
       getPathname: () => '/member/dashboard',
       getQuery: () => undefined,
       params: {},

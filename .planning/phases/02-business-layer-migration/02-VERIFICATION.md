@@ -23,7 +23,7 @@ re_verification: false
 | 2 | No file under `src/Foundation/Application/` imports BifrostClient | VERIFIED | `grep -rn "BifrostClient\|bifrostClient" src/Foundation/Application/ --include="*.ts"` → NO MATCHES |
 | 3 | All 5 migrated modules use ILLMGatewayClient via DI (`c.make('llmGatewayClient')`) | VERIFIED | All service providers confirmed: AppApiKey, ApiKey, Credit, SdkApi, Dashboard each resolve `llmGatewayClient` from container |
 | 4 | All 188 tests in the 5 migrated modules pass | VERIFIED | `bun test src/Modules/AppApiKey src/Modules/ApiKey src/Modules/Credit src/Modules/SdkApi src/Modules/Dashboard` → 188 pass, 0 fail |
-| 5 | TypeScript errors are pre-existing and not caused by phase 2 | VERIFIED | Only 5 type errors found: 1 in `src/Shared/Presentation/IHttpContext.ts` (@gravito/core), 4 in `tests/Feature/routes-connectivity.test.ts` — all pre-existing, none in migrated modules |
+| 5 | TypeScript errors are pre-existing and not caused by phase 2 | VERIFIED | Only 5 type errors found: 1 in `src/Shared/Presentation/IHttpContext.ts` (@gravito/core), 4 in `tests/Feature/routes-connectivity.e2e.ts` — all pre-existing, none in migrated modules |
 
 **Score:** 5/5 truths verified
 
@@ -73,7 +73,7 @@ re_verification: false
 
 Pre-existing type errors (not introduced by phase 2):
 - `src/Shared/Presentation/IHttpContext.ts:9` — `@gravito/core` missing `Context` export (pre-existing framework issue)
-- `tests/Feature/routes-connectivity.test.ts:18,24,325,326` — `TestResponse` type shape mismatch (pre-existing, 16 infrastructure test failures noted before phase 2)
+- `tests/Feature/routes-connectivity.e2e.ts:18,24,325,326` — `TestResponse` type shape mismatch (pre-existing, 16 infrastructure test failures noted before phase 2)
 
 ### Behavioral Spot-Checks
 

@@ -4,7 +4,7 @@
 
 ## 核心成果
 
-在 2026-04-10，完成了對 Draupnir 項目的完整 routes 驗證，驗證了 13 個模組的 68 個 API routes，結果全部通過。
+在 Draupnir 中，routes 驗證由 **`scripts/routes-analyzer.ts`**（靜態 regex）與 **`tests/Feature/routes-*.e2e.ts`**（動態 HTTP）組成；快照數字見 [ROUTES_VERIFICATION.md](./ROUTES_VERIFICATION.md) 與 [docs/README_ROUTES_VERIFICATION.md](./docs/README_ROUTES_VERIFICATION.md)（2026-04-13 同步）。
 
 本文檔將此經驗整理為一套**完全可復用的方法論**，可應用於任何 Node.js/Bun API 項目。
 
@@ -15,9 +15,10 @@
 | 工具 | 位置 | 用途 | 復用難度 |
 |------|------|------|--------|
 | Routes Analyzer | `scripts/routes-analyzer.ts` | 掃描並分析所有路由 | ⭐ 易 |
-| TestClient 擴展 | `tests/lib/test-client.ts` | 支持所有 HTTP 方法的測試客戶端 | ⭐ 易 |
-| Routes Test Template | `tests/Feature/routes-existence.test.ts` | 快速路由驗證測試模板 | ⭐ 易 |
-| Connectivity Test | `tests/Feature/routes-connectivity.test.ts` | 完整認證和中間件驗證 | ⭐⭐ 中等 |
+| TestClient 擴展 | `tests/Feature/lib/test-client.ts` | 支持所有 HTTP 方法的測試客戶端 | ⭐ 易 |
+| Feature 測試編排 | `scripts/test-feature.ts` | 起服並設定 `API_BASE_URL`（Draupnir） | ⭐ 易 |
+| Routes Test Template | `tests/Feature/routes-existence.e2e.ts` | 快速路由存在性驗證 | ⭐ 易 |
+| Connectivity Test | `tests/Feature/routes-connectivity.e2e.ts` | 認證與授權行為驗證 | ⭐⭐ 中等 |
 
 ### 2. 文檔資源
 
@@ -40,7 +41,7 @@
 
 | 記錄 | 位置 | 內容 |
 |------|------|------|
-| 內存記錄 | `.claude/projects/.../memory/routes-verification-methodology.md` | 完整方法論、工具鏈、應用指南 |
+| 體系導航 | [docs/README_ROUTES_VERIFICATION.md](./docs/README_ROUTES_VERIFICATION.md) | 檔案樹、命令、CI、統計權威索引 |
 
 ## 🎯 應用步驟（新項目）
 
@@ -49,23 +50,26 @@
 ```bash
 # 1. 複製必要文件
 cp draupnir/scripts/routes-analyzer.ts your-project/scripts/
-cp draupnir/tests/lib/test-client.ts your-project/tests/lib/
-cp draupnir/tests/Feature/routes-existence.test.ts your-project/tests/Feature/
+cp draupnir/scripts/test-feature.ts your-project/scripts/
+cp draupnir/tests/Feature/lib/test-client.ts your-project/tests/Feature/lib/
+cp draupnir/tests/Feature/lib/test-server.ts your-project/tests/Feature/lib/
+cp draupnir/tests/Feature/routes-existence.e2e.ts your-project/tests/Feature/
+# （可選）連通性測試：cp draupnir/tests/Feature/routes-connectivity.e2e.ts ...
 
 # 2. 配置 package.json
 cat >> your-project/package.json << 'EOF'
 {
   "scripts": {
     "routes:analyze": "bun scripts/routes-analyzer.ts",
-    "test:routes": "bun test tests/Feature/routes-existence.test.ts",
-    "verify:routes": "npm run routes:analyze && npm run test:routes"
+    "test:feature": "bun scripts/test-feature.ts",
+    "verify:routes": "bun scripts/routes-analyzer.ts && bun run test:feature"
   }
 }
 EOF
 
 # 3. 運行驗證
 cd your-project
-npm run verify:routes
+bun run verify:routes
 
 # ✅ 完成！
 ```
@@ -75,7 +79,6 @@ npm run verify:routes
 1. **複製所有工具**
    ```bash
    cp -r draupnir/scripts your-project/
-   cp -r draupnir/tests/lib your-project/tests/
    cp -r draupnir/tests/Feature your-project/tests/
    ```
 
@@ -90,11 +93,8 @@ npm run verify:routes
    {
      "scripts": {
        "routes:analyze": "bun scripts/routes-analyzer.ts",
-       "routes:report": "bun scripts/routes-report-generator.ts",
-       "test:routes": "bun test tests/Feature/routes-existence.test.ts",
-       "test:routes:full": "bun test tests/Feature/routes-*.test.ts",
-       "test:routes:ci": "bun test tests/Feature/routes-*.test.ts --bail",
-       "verify:routes": "npm run routes:analyze && npm run test:routes"
+       "test:feature": "bun scripts/test-feature.ts",
+       "verify:routes": "bun scripts/routes-analyzer.ts && bun run test:feature"
      }
    }
    ```
@@ -105,7 +105,7 @@ npm run verify:routes
 
 5. **運行完整驗證**
    ```bash
-   npm run verify:routes
+   bun run verify:routes
    ```
 
 ## 🔧 項目特定調整
@@ -163,15 +163,13 @@ def test_routes():
 $ bun run routes:analyze
 🔍 正在分析路由: src/Modules
 
-總 Routes 數: 68
-按方法分類: GET 25, POST 32, PUT 3, ...
+總 Routes 數: （以你的 routes-analysis.json 為準，Draupnir 快照約 43）
 ```
 
 ✅ **快速驗證所有 routes 存在**
 ```bash
-$ bun run test:routes
-✅ 72 pass
-Ran 72 tests across 1 file. [1.81s]
+$ bun run test:feature
+✅ （以控制台為準；routes existence 約 49、connectivity 約 52 個 it）
 ```
 
 ✅ **生成詳細驗證報告**
@@ -182,8 +180,8 @@ $ bun run routes:report
 
 ✅ **集成到 CI/CD**
 ```bash
-$ npm run test:routes:ci
-✅ Routes 驗證通過 (all 72 tests passed)
+$ bun run test:feature
+✅ Feature e2e 通過（含 routes）
 ```
 
 ## 🚀 高級應用
@@ -217,7 +215,7 @@ bun scripts/routes-to-postman.ts
 - [ ] 配置了 package.json 腳本
 - [ ] TestClient 支持你的框架
 - [ ] 路由掃描能找到所有 routes
-- [ ] 運行 `npm run verify:routes` 通過
+- [ ] 運行 `bun run verify:routes`（或專案等效命令）通過
 - [ ] 集成到 CI/CD（推薦）
 - [ ] 配置了 pre-commit hook（推薦）
 - [ ] 文檔已更新（推薦）
@@ -228,13 +226,12 @@ bun scripts/routes-to-postman.ts
 
 ```bash
 # 開發時：每次修改 routes 後
-npm run test:routes
+bun run test:feature
 
 # 提交前：完整驗證
-npm run verify:routes
+bun run verify:routes
 
-# CI 中：自動驗證
-npm run test:routes:ci
+# CI 中：自動驗證（見專案 workflow）
 ```
 
 ### 2. 新增 Route 檢查清單
@@ -244,7 +241,7 @@ npm run test:routes:ci
 - [ ] Controller 方法已實現
 - [ ] 必要的中間件已應用
 - [ ] 輸入驗證 Schema 已定義
-- [ ] npm run verify:routes 通過
+- [ ] bun run verify:routes 通過
 - [ ] 代碼已提交
 ```
 
@@ -258,7 +255,9 @@ project/
 │   ├── routes-analyzer.ts
 │   └── routes-test-generator.ts
 ├── tests/Feature/
-│   └── routes-existence.test.ts
+│   ├── lib/test-client.ts
+│   ├── routes-existence.e2e.ts
+│   └── routes-connectivity.e2e.ts
 └── docs/
     └── ROUTES_VERIFICATION_GUIDE.md
 ```
@@ -304,8 +303,8 @@ project/
 - [路由列表](./tests/routes-validation.report.md) - 詳細的路由清單
 - [源碼](./scripts/routes-analyzer.ts) - 工具源代碼
 
-### 內存記錄
-- [方法論詳解](file:///Users/carl/.claude/projects/-Users-carl-Dev-CMG-Draupnir/memory/routes-verification-methodology.md) - 完整的方法論記錄
+### 體系導航
+- [README_ROUTES_VERIFICATION.md](./docs/README_ROUTES_VERIFICATION.md) — 命令、CI、檔案樹
 
 ## 🎓 學習路徑
 
@@ -335,13 +334,15 @@ REUSABLE_METHODOLOGY.md (本文檔)
     │   └── docs/ROUTES_VERIFICATION_TOOLKIT.md
     ├── 代碼工具
     │   ├── scripts/routes-analyzer.ts
-    │   ├── tests/lib/test-client.ts
-    │   └── tests/Feature/routes-*.test.ts
+    │   ├── scripts/test-feature.ts
+    │   ├── tests/Feature/lib/test-client.ts
+    │   └── tests/Feature/routes-*.e2e.ts
     ├── 驗證報告
     │   ├── ROUTES_VERIFICATION.md
-    │   └── tests/routes-validation.report.md
-    └── 方法論記錄
-        └── .claude/projects/.../memory/routes-verification-methodology.md
+    │   ├── tests/routes-validation.report.md
+    │   └── routes-analysis.json（執行分析器後）
+    └── 體系導航
+        └── docs/README_ROUTES_VERIFICATION.md
 ```
 
 ## ❓ 常見問題
@@ -367,11 +368,11 @@ A: 修改 `routes-analyzer.ts` 和測試文件。詳見 [完整指南](./docs/RO
 
 ## 📄 版本信息
 
-- **方法論版本**: v1.0
-- **工具版本**: v1.0
+- **方法論版本**: v1.1
+- **工具版本**: 與 Draupnir repo 同步
 - **驗證項目**: Draupnir v0.1.0
-- **驗證日期**: 2026-04-10
-- **驗證結果**: 68/68 routes 通過 ✅
+- **驗證日期**: 2026-04-13
+- **驗證結果**: 見 [ROUTES_VERIFICATION.md](./ROUTES_VERIFICATION.md) 快照（分析器 + e2e）
 
 ---
 
@@ -380,7 +381,7 @@ A: 修改 `routes-analyzer.ts` 和測試文件。詳見 [完整指南](./docs/RO
 此方法論提供了一套完整的、可復用的 API routes 驗證解決方案：
 
 ✅ **完全自動化** - 無需手動編寫測試  
-✅ **快速高效** - 2.5 秒完成完整驗證  
+✅ **快速高效** - 靜態掃描亞秒級；e2e 視啟服而定  
 ✅ **易於集成** - 支持任何 CI/CD 系統  
 ✅ **詳細報告** - 生成易讀的驗證報告  
 ✅ **框架無關** - 適用於任何 Node.js 框架  

@@ -25,7 +25,7 @@ expected: Run `bun test tests/Unit/` — all existing unit tests still pass. No 
 result: pass
 
 ### 3. TypeScript Strict Check Clean for src/
-expected: Run `bun run typecheck` — zero new TypeScript errors in `src/`. Pre-existing errors in `tests/Feature/routes-connectivity.test.ts` may still appear but no new errors.
+expected: Run `bun run typecheck` — zero new TypeScript errors in `src/`. Pre-existing errors in `tests/Feature/routes-connectivity.e2e.ts` may still appear but no new errors.
 result: pass
 
 ### 4. No MockGatewayClient in Runtime src
@@ -39,7 +39,7 @@ result: pass
 ### 6. bifrostClient Registration Preserved
 expected: Existing `bifrostClient` DI registration is unchanged. Full Feature test suite (`bun test tests/Feature/`) still passes — all existing HTTP routes respond correctly (Phase 1 touched only FoundationServiceProvider, not route logic).
 result: pass
-note: 208 pass / 14 fail — 14 failures are pre-existing in routes-connectivity.test.ts and routes-existence.test.ts (wrong HTTP status expectations, unrelated to Phase 1). All 14 modules boot successfully; bifrostClient unaffected.
+note: 208 pass / 14 fail — 14 failures are pre-existing in routes-connectivity.e2e.ts and routes-existence.e2e.ts (wrong HTTP status expectations, unrelated to Phase 1). All 14 modules boot successfully; bifrostClient unaffected.
 
 ## Summary
 

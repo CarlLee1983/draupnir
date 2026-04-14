@@ -6,7 +6,6 @@ import type { InertiaService } from '../../InertiaService'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
-  store.set('inertia:shared', { csrfToken: 'test-csrf-token-123' })
   return {
     getBodyText: async () => '',
     getJsonBody: async <T>() => ({}) as T,
@@ -30,12 +29,12 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     getCookie: (_name: string) => undefined,
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
+    getMethod: overrides.getMethod ?? (() => 'GET'),
   }
 }
 
 function createMockContextWithAuth(userCode?: string): IHttpContext {
   const store = new Map<string, unknown>()
-  store.set('inertia:shared', { csrfToken: 'test-csrf-token-123' })
   store.set('auth', {
     userId: 'user-1',
     email: 'user@example.com',
@@ -68,6 +67,7 @@ function createMockContextWithAuth(userCode?: string): IHttpContext {
     },
     getCookie: (_name: string) => undefined,
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
+    getMethod: () => 'GET',
   }
 }
 
@@ -90,29 +90,15 @@ describe('VerifyDevicePage', () => {
   })
 
   describe('handle()', () => {
-    test('renders Auth/VerifyDevice on GET with csrf and empty message/error', async () => {
+    test('renders Auth/VerifyDevice on GET with empty message/error', async () => {
       const ctx = createMockContext()
       const response = await page.handle(ctx)
 
       expect(render).toHaveBeenCalledWith(ctx, 'Auth/VerifyDevice', {
-        csrfToken: 'test-csrf-token-123',
         message: undefined,
         error: undefined,
       })
       expect(response).toBeDefined()
-    })
-
-    test('uses empty csrfToken when shared data omits it', async () => {
-      const store = new Map<string, unknown>()
-      store.set('inertia:shared', {})
-      const ctx = createMockContext({
-        get: <T>(key: string) => store.get(key) as T | undefined,
-      })
-
-      await page.handle(ctx)
-
-      const call = render.mock.calls[0] as unknown as [unknown, string, Record<string, unknown>]
-      expect(call[2].csrfToken).toBe('')
     })
   })
 
@@ -122,7 +108,6 @@ describe('VerifyDevicePage', () => {
       await page.authorize(ctx)
 
       expect(render).toHaveBeenCalledWith(ctx, 'Auth/VerifyDevice', {
-        csrfToken: 'test-csrf-token-123',
         message: undefined,
         error: 'Authentication required',
       })

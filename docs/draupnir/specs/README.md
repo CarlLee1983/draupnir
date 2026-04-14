@@ -65,6 +65,13 @@
   - 測試覆蓋率驗證：81-85%（符合 80%+ 要求）
   - 新增 5 個架構圖表
 
+### 呈現層與程式庫結構（日期規格）
+
+**Inertia／Web 殼層目錄與框架接線** — 與領域規格分開存放，便於對照實作遷移。
+
+- **[Website 資料夾架構設計](./2026-04-14-website-folder-architecture-design.md)** — `src/Pages/` → `src/Website/`：情境 slice、`Http/` runtime、`bootstrap/` 組合根與遷移對照表（已確認，待實作）
+- **[Gravito i18n 設計](./2026-04-11-gravito-i18n-design.md)** — 多語與頁面 locale 解析（與 Website 呈現層相關時可一併查閱）
+
 ---
 
 ## 🗂️ 模組對應表

@@ -1,5 +1,7 @@
 # Inertia 頁面層（`src/Pages`）架構說明
 
+> **目標目錄結構（待實作）：** 已確認之 `src/Pages/` → `src/Website/` 重組設計見 **[Website 資料夾架構設計](../specs/2026-04-14-website-folder-architecture-design.md)**。下文描述 **現行** `src/Pages/` 配置；遷移完成後應以該規格為準更新本頁路徑與檔名。
+
 本文件說明 **伺服端 Inertia + React** 的註冊方式、與 DDD 模組的邊界，以及應配合的 JSDoc 要求。程式內註解規範仍以 [`jsdoc-standards.md`](./jsdoc-standards.md) 為準（`src/` 內使用英文 JSDoc）。
 
 ## 角色定位
@@ -48,6 +50,7 @@
 
 ## 相關連結
 
+- [Website 資料夾架構設計](../specs/2026-04-14-website-folder-architecture-design.md)（`src/Website/` 目標結構與遷移表）
 - [JSDoc／註解規範](./jsdoc-standards.md)
 - [開發指南](../DEVELOPMENT.md)（命令與環境變數）
 - [架構概覽](../ARCHITECTURE_SUMMARY.md)
