@@ -3,7 +3,7 @@ import { applyPendingCookies } from '@/Shared/Presentation/cookieUtils'
 import type { IHttpContext, PendingCookie } from '@/Shared/Presentation/IHttpContext'
 import type { RouteHandler } from '@/Shared/Presentation/IModuleRouter'
 
-import { injectSharedData } from '../SharedDataMiddleware'
+import { injectSharedData } from './SharedPropsBuilder'
 
 /**
  * Wraps an Inertia page handler with JWT attachment and shared Inertia props.

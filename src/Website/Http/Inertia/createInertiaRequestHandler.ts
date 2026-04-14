@@ -1,10 +1,17 @@
 /**
  * Factory for `InertiaService`: chooses dev-server vs built asset tags and Inertia asset version.
  */
-import { InertiaService } from '../InertiaService'
-import { type ViteManifest, ViteTagHelper } from '../ViteTagHelper'
+import { InertiaService } from './InertiaRequestHandler'
+import { type ViteManifest, ViteTagHelper } from '../Assets/ViteTagHelper'
 
-import { joinPath } from './pathUtils'
+import { joinPath } from '../Routing/routePath'
+
+/**
+ * DI container keys for the Inertia presentation shell.
+ */
+export const PAGE_CONTAINER_KEYS = {
+  inertiaService: 'inertiaService',
+} as const
 
 let inertiaServiceSingleton: InertiaService | undefined
 
