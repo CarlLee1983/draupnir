@@ -70,9 +70,6 @@ export async function createInertiaService(): Promise<InertiaService> {
   let manifest: ViteManifest | undefined
   if (useBuild) {
     manifest = await loadViteManifest()
-    if (!manifest) {
-      console.warn('⚠️ Vite manifest not found — run "bun run build:frontend"')
-    }
   }
 
   const tagEnv = useBuild ? 'production' : nodeEnv

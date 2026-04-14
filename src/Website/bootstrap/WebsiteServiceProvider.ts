@@ -15,7 +15,5 @@ export class WebsiteServiceProvider extends ModuleServiceProvider {
     registerWebsiteBindings(container)
   }
 
-  override boot(_context: unknown): void {
-    console.log('📄 [Website] Inertia page bundles registered')
-  }
+  override boot(_context: unknown): void {}
 }

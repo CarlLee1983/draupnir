@@ -14,7 +14,6 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 
 type WebsiteRouteRegistration = {
-  label: string
   register: (router: IModuleRouter, container: IContainer) => void
 }
 
@@ -63,15 +62,10 @@ function registerStaticAssets(router: Pick<IModuleRouter, 'get'>): void {
 
 /** Order matters: auth → admin → member → static assets. */
 const WEBSITE_ROUTE_REGISTRATIONS: readonly WebsiteRouteRegistration[] = [
-  { label: 'Auth Inertia page', register: registerAuthRoutes },
-  { label: 'Admin Inertia page', register: registerAdminRoutes },
-  { label: 'Member Inertia page', register: registerMemberRoutes },
-  {
-    label: 'Static page assets',
-    register: (r) => {
-      registerStaticAssets(r)
-    },
-  },
+  { register: registerAuthRoutes },
+  { register: registerAdminRoutes },
+  { register: registerMemberRoutes },
+  { register: (r) => registerStaticAssets(r) },
 ]
 
 /**
@@ -81,15 +75,7 @@ const WEBSITE_ROUTE_REGISTRATIONS: readonly WebsiteRouteRegistration[] = [
  * @param container - DI container holding page bindings from `WebsiteServiceProvider`.
  */
 export function registerWebsiteRoutes(router: IModuleRouter, container: IContainer): void {
-  let currentLabel = ''
-  try {
-    for (const { label, register } of WEBSITE_ROUTE_REGISTRATIONS) {
-      currentLabel = label
-      register(router, container)
-      console.log(`✅ ${label} routes registered`)
-    }
-  } catch (error) {
-    console.error(`❌ Failed to register ${currentLabel} routes:`, error)
-    throw error
+  for (const { register } of WEBSITE_ROUTE_REGISTRATIONS) {
+    register(router, container)
   }
 }

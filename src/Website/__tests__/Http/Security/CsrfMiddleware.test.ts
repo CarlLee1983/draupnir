@@ -5,7 +5,7 @@ import {
   issueWebCsrfToken,
   validateWebCsrf,
   WEB_CSRF_COOKIE_NAME,
-} from '../Http/Security/CsrfMiddleware'
+} from '@/Website/Http/Security/CsrfMiddleware'
 
 function createCtx(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
