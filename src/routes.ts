@@ -1,7 +1,7 @@
 import type { PlanetCore } from '@gravito/core'
 import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import { registerPageRoutes } from './Pages/page-routes'
+import { registerWebsiteRoutes } from './Website/bootstrap/registerWebsiteRoutes'
 import {
   registerAlerts,
   registerApiKey,
@@ -51,6 +51,6 @@ export async function registerRoutes(core: PlanetCore) {
   registerSdkApi(core)
   registerCliApi(core)
   await registerDocs(core)
-  registerPageRoutes(web, core.container as IContainer)
+  registerWebsiteRoutes(web, core.container as IContainer)
   console.log('✅ Routes registered')
 }
