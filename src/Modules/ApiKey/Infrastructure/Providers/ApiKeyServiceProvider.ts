@@ -1,3 +1,8 @@
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { ApiKeyController } from '../../Presentation/Controllers/ApiKeyController'
+import { registerApiKeyRoutes } from '../../Presentation/Routes/apikey.routes'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
@@ -12,7 +17,7 @@ import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyReposit
 import { ApiKeyRepository } from '../Repositories/ApiKeyRepository'
 import { ApiKeyBifrostSync } from '../Services/ApiKeyBifrostSync'
 
-export class ApiKeyServiceProvider extends ModuleServiceProvider {
+export class ApiKeyServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
 
@@ -62,6 +67,18 @@ export class ApiKeyServiceProvider extends ModuleServiceProvider {
         c.make('apiKeyBifrostSync') as ApiKeyBifrostSync,
       )
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new ApiKeyController(
+      core.container.make('createApiKeyService') as any,
+      core.container.make('listApiKeysService') as any,
+      core.container.make('revokeApiKeyService') as any,
+      core.container.make('updateKeyLabelService') as any,
+      core.container.make('setKeyPermissionsService') as any,
+    )
+    registerApiKeyRoutes(router, controller)
   }
 
   override boot(_context: unknown): void {
