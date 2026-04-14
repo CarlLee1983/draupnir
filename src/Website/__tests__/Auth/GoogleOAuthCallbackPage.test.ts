@@ -33,6 +33,7 @@ function createOAuthContext(options: {
     get: <T>(key: string) => (key === 'oauthExpectedState' ? (expectedState as T) : undefined),
     set: () => {},
     getCookie: (_name: string) => undefined,
+    getMethod: () => 'GET',
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
   }
 }

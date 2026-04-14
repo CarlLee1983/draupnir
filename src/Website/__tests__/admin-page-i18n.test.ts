@@ -32,6 +32,7 @@ describe('requireAdmin', () => {
         store.set(key, value)
       },
       getCookie: (_name: string) => undefined,
+      getMethod: () => 'GET',
       setCookie: (_name: string, _value: string, _options?: unknown) => {},
     } as IHttpContext
 

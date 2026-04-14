@@ -1,5 +1,5 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { IReportRepository } from '../../Modules/Reports/Domain/Repositories/IReportRepository'
+import type { IReportRepository } from '@/Modules/Reports/Domain/Repositories/IReportRepository'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 export class AdminReportsPage {
