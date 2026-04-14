@@ -30,11 +30,11 @@ export default function Login({ lastEmail, error }: Props) {
 
   return (
     <AuthLayout>
-      <Head title="登入" />
+      <Head title={t('ui.auth.login.title')} />
       <Card>
         <CardHeader>
-          <CardTitle>登入</CardTitle>
-          <CardDescription>輸入您的帳號和密碼</CardDescription>
+          <CardTitle>{t('ui.auth.login.title')}</CardTitle>
+          <CardDescription>{t('ui.auth.login.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -44,7 +44,7 @@ export default function Login({ lastEmail, error }: Props) {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">電子郵件</Label>
+              <Label htmlFor="email">{t('ui.auth.login.emailLabel')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -56,7 +56,7 @@ export default function Login({ lastEmail, error }: Props) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">密碼</Label>
+              <Label htmlFor="password">{t('ui.auth.login.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -67,11 +67,11 @@ export default function Login({ lastEmail, error }: Props) {
             </div>
             <div className="text-right text-sm">
               <a href="/forgot-password" className="text-muted-foreground hover:underline">
-                忘記密碼？
+                {t('ui.auth.login.forgotPassword')}
               </a>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? '登入中…' : '登入'}
+              {loading ? t('ui.auth.login.submitLoading') : t('ui.auth.login.submitButton')}
             </Button>
             <Button
               type="button"
@@ -79,13 +79,13 @@ export default function Login({ lastEmail, error }: Props) {
               className="w-full"
               onClick={() => { window.location.href = '/oauth/google' }}
             >
-              使用 Google 登入
+              {t('ui.auth.login.googleButton')}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            還沒帳號？{' '}
+            {t('ui.auth.login.noAccount')}{' '}
             <a href="/register" className="underline hover:text-foreground">
-              註冊
+              {t('ui.auth.login.registerLink')}
             </a>
           </p>
         </CardContent>

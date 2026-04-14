@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   csrfToken: string
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function ForgotPassword({ message }: Props) {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -25,10 +27,10 @@ export default function ForgotPassword({ message }: Props) {
 
   return (
     <AuthLayout>
-      <Head title="忘記密碼" />
+      <Head title={t('ui.auth.forgotPassword.title')} />
       <Card>
         <CardHeader>
-          <CardTitle>忘記密碼</CardTitle>
+          <CardTitle>{t('ui.auth.forgotPassword.title')}</CardTitle>
           <CardDescription>輸入您的電子郵件，我們將寄送重設連結</CardDescription>
         </CardHeader>
         <CardContent>
@@ -39,7 +41,7 @@ export default function ForgotPassword({ message }: Props) {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">電子郵件</Label>
+                <Label htmlFor="email">{t('ui.auth.forgotPassword.emailLabel')}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -50,13 +52,13 @@ export default function ForgotPassword({ message }: Props) {
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? '寄送中…' : '寄送重設連結'}
+                {t('ui.auth.forgotPassword.submitButton')}
               </Button>
             </form>
           )}
           <p className="mt-4 text-center text-sm text-muted-foreground">
             <a href="/login" className="underline hover:text-foreground">
-              返回登入
+              {t('ui.auth.forgotPassword.backToLogin')}
             </a>
           </p>
         </CardContent>

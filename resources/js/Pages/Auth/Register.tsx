@@ -40,11 +40,11 @@ export default function Register({ passwordRequirements, error }: Props) {
 
   return (
     <AuthLayout>
-      <Head title="註冊" />
+      <Head title={t('ui.auth.register.title')} />
       <Card>
         <CardHeader>
-          <CardTitle>建立帳號</CardTitle>
-          <CardDescription>輸入您的資訊以建立帳號</CardDescription>
+          <CardTitle>{t('ui.auth.register.title')}</CardTitle>
+          <CardDescription>{t('ui.auth.register.description')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,7 +54,7 @@ export default function Register({ passwordRequirements, error }: Props) {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="email">電子郵件</Label>
+              <Label htmlFor="email">{t('ui.auth.register.emailLabel')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -65,7 +65,7 @@ export default function Register({ passwordRequirements, error }: Props) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">密碼</Label>
+              <Label htmlFor="password">{t('ui.auth.register.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -92,7 +92,7 @@ export default function Register({ passwordRequirements, error }: Props) {
               </ul>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="passwordConfirmation">確認密碼</Label>
+              <Label htmlFor="passwordConfirmation">{t('ui.auth.register.confirmPasswordLabel')}</Label>
               <Input
                 id="passwordConfirmation"
                 type="password"
@@ -110,17 +110,17 @@ export default function Register({ passwordRequirements, error }: Props) {
                 required
               />
               <Label htmlFor="agreedToTerms" className="text-sm font-normal cursor-pointer">
-                我同意服務條款
+                {t('ui.auth.register.termsCheckbox')}
               </Label>
             </div>
             <Button type="submit" className="w-full" disabled={loading || !agreedToTerms}>
-              {loading ? '建立中…' : '建立帳號'}
+              {loading ? t('ui.auth.register.submitLoading') : t('ui.auth.register.title')}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            已有帳號？{' '}
+            {t('ui.auth.register.hasAccount')}{' '}
             <a href="/login" className="underline hover:text-foreground">
-              登入
+              {t('ui.auth.register.loginLink')}
             </a>
           </p>
         </CardContent>

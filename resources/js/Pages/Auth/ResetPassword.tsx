@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   csrfToken: string
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export default function ResetPassword({ token, tokenValid, error }: Props) {
+  const { t } = useTranslation()
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [loading, setLoading] = useState(false)
@@ -30,10 +32,10 @@ export default function ResetPassword({ token, tokenValid, error }: Props) {
   if (!tokenValid) {
     return (
       <AuthLayout>
-        <Head title="重設密碼" />
+        <Head title={t('ui.auth.resetPassword.title')} />
         <Card>
           <CardHeader>
-            <CardTitle>連結已過期</CardTitle>
+            <CardTitle>{t('ui.auth.resetPassword.title')}</CardTitle>
             <CardDescription>此重設連結已失效或過期</CardDescription>
           </CardHeader>
           <CardContent>
@@ -51,10 +53,10 @@ export default function ResetPassword({ token, tokenValid, error }: Props) {
 
   return (
     <AuthLayout>
-      <Head title="重設密碼" />
+      <Head title={t('ui.auth.resetPassword.title')} />
       <Card>
         <CardHeader>
-          <CardTitle>設定新密碼</CardTitle>
+          <CardTitle>{t('ui.auth.resetPassword.title')}</CardTitle>
           <CardDescription>請輸入您的新密碼</CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,7 +67,7 @@ export default function ResetPassword({ token, tokenValid, error }: Props) {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="password">新密碼</Label>
+              <Label htmlFor="password">{t('ui.auth.resetPassword.passwordLabel')}</Label>
               <Input
                 id="password"
                 type="password"
@@ -77,7 +79,7 @@ export default function ResetPassword({ token, tokenValid, error }: Props) {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="passwordConfirmation">確認新密碼</Label>
+              <Label htmlFor="passwordConfirmation">{t('ui.auth.resetPassword.confirmLabel')}</Label>
               <Input
                 id="passwordConfirmation"
                 type="password"
@@ -87,7 +89,7 @@ export default function ResetPassword({ token, tokenValid, error }: Props) {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? '重設中…' : '重設密碼'}
+              {t('ui.auth.resetPassword.submitButton')}
             </Button>
           </form>
         </CardContent>

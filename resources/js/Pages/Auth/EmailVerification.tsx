@@ -26,11 +26,11 @@ export default function EmailVerification({ status, message, redirectUrl, redire
 
   return (
     <AuthLayout>
-      <Head title="電子郵件驗證" />
+      <Head title={t('ui.auth.emailVerification.title')} />
       <Card>
         <CardHeader>
           <CardTitle>
-            {status === 'success' ? '驗證成功' : '驗證失敗'}
+            {status === 'success' ? t('ui.auth.emailVerification.successTitle') : t('ui.auth.emailVerification.failTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent className="text-center space-y-4">
@@ -40,12 +40,12 @@ export default function EmailVerification({ status, message, redirectUrl, redire
           <p className="text-sm text-muted-foreground">{t(message.key, message.params)}</p>
           {status === 'success' && redirectUrl && (
             <p className="text-xs text-muted-foreground">
-              {redirectSeconds} 秒後自動跳轉…
+              {t('ui.auth.emailVerification.redirecting', { seconds: redirectSeconds })}
             </p>
           )}
           {status === 'error' && (
             <Button variant="outline" onClick={() => { window.location.href = '/login' }}>
-              返回登入
+              {t('ui.auth.emailVerification.backToLogin')}
             </Button>
           )}
         </CardContent>
