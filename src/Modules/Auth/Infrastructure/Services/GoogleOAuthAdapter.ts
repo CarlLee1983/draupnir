@@ -1,18 +1,40 @@
 /**
- * Google OAuth adapter: exchanges authorization codes for access tokens,
- * and fetches user info from Google's API.
+ * GoogleOAuthAdapter
+ *
+ * Infrastructure outbound HTTP adapter: concrete `IGoogleOAuthAdapter` using Google's OAuth 2.0
+ * token and userinfo endpoints (`fetch`, no extra SDK).
+ *
+ * Implementation notes:
+ * - `clientId`, `clientSecret`, and `redirectUri` must match the Google Cloud OAuth client;
+ *   `redirectUri` must exactly match an authorized redirect URI or the token exchange fails.
+ * - Failures from Google (HTTP or `error` in JSON) are thrown as `Error` with a short message;
+ *   callers should map to application-layer errors if needed.
  */
 
 export class GoogleOAuthAdapter {
   private readonly tokenEndpoint = 'https://oauth2.googleapis.com/token'
   private readonly userinfoEndpoint = 'https://www.googleapis.com/oauth2/v2/userinfo'
 
+  /**
+   * @param clientId - Google OAuth 2.0 client ID.
+   * @param clientSecret - Client secret (server-side only; never expose to browsers).
+   * @param redirectUri - Callback URL registered for this client; must match the value used in
+   *   the authorization request.
+   */
   constructor(
     private readonly clientId: string,
     private readonly clientSecret: string,
     private readonly redirectUri: string,
   ) {}
 
+  /**
+   * Exchanges an authorization `code` from the browser redirect for a short-lived access token.
+   *
+   * @param code - One-time authorization code from Google's redirect query string.
+   * @returns Bearer access token suitable for {@link GoogleOAuthAdapter.getUserInfo}.
+   * @throws {Error} If the token endpoint is not OK, returns OAuth `error` JSON, or omits
+   *   `access_token`.
+   */
   async exchangeCodeForToken(code: string): Promise<string> {
     const params = new URLSearchParams({
       code,
@@ -49,6 +71,13 @@ export class GoogleOAuthAdapter {
     return data.access_token
   }
 
+  /**
+   * Loads the authenticated Google account profile (minimal fields used for sign-in / linking).
+   *
+   * @param accessToken - OAuth access token from {@link GoogleOAuthAdapter.exchangeCodeForToken}.
+   * @returns Stable Google `id`, verified `email`, and optional display `name` / `picture` URL.
+   * @throws {Error} If the userinfo request is not OK or the JSON lacks `id` or `email`.
+   */
   async getUserInfo(accessToken: string): Promise<{
     id: string
     email: string
