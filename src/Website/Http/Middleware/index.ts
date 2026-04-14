@@ -7,12 +7,12 @@
  * 新增 route-level middleware 時，在這裡加一行 export。
  */
 
-// Auth rate limiting（用於 /login、/register、/forgot-password 路由）
-export {
-  createAuthRateLimit,
-  forgotPasswordRateLimit,
-  loginRateLimit,
-} from '../Security/AuthRateLimitMiddleware'
+// Rate limiting — in-memory（單機部署，Map 計數）
+export { createInMemoryRateLimit } from '@/Shared/Infrastructure/Middleware/InMemoryRateLimitMiddleware'
+export type { RateLimitConfig } from '@/Shared/Infrastructure/Middleware/InMemoryRateLimitMiddleware'
+
+// Rate limiting — Redis（多 instance 部署，原子計數）
+export { createRedisRateLimit } from '@/Shared/Infrastructure/Middleware/RedisRateLimitMiddleware'
 
 // Organization access control（用於需要 org manager 權限的路由）
 export {

@@ -20,10 +20,7 @@ import type {
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
-import {
-  forgotPasswordRateLimit,
-  loginRateLimit,
-} from '@/Website/Http/Security/AuthRateLimitMiddleware'
+import { createInMemoryRateLimit } from '@/Shared/Infrastructure/Middleware/InMemoryRateLimitMiddleware'
 
 import { AUTH_PAGE_KEYS } from '../keys'
 import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
@@ -46,6 +43,9 @@ type AuthRouteDef = {
   readonly middlewares?: Middleware[]
   readonly name?: string
 }
+
+const loginRateLimit = createInMemoryRateLimit({ scope: 'auth:login', max: 10, windowMs: 10 * 60 * 1000 })
+const forgotPasswordRateLimit = createInMemoryRateLimit({ scope: 'auth:forgot', max: 5, windowMs: 60 * 60 * 1000 })
 
 const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
   {
