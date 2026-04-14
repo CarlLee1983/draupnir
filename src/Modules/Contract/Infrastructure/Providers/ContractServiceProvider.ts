@@ -1,5 +1,10 @@
 // src/Modules/Contract/Infrastructure/Providers/ContractServiceProvider.ts
 
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { ContractController } from '../../Presentation/Controllers/ContractController'
+import { registerContractRoutes } from '../../Presentation/Routes/contract.routes'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
@@ -17,7 +22,7 @@ import { ContractEnforcementService } from '../../Domain/Services/ContractEnforc
 import { ContractRepository } from '../Repositories/ContractRepository'
 
 /** Registers contract repositories, domain helpers, and application services in the DI container. */
-export class ContractServiceProvider extends ModuleServiceProvider {
+export class ContractServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   /** Wires contract module singletons and scoped services. */
   override register(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
@@ -67,6 +72,22 @@ export class ContractServiceProvider extends ModuleServiceProvider {
     container.bind('listAdminContractsService', (c: IContainer) => {
       return new ListAdminContractsService(c.make('contractRepository') as ContractRepository)
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new ContractController(
+      core.container.make('createContractService') as any,
+      core.container.make('activateContractService') as any,
+      core.container.make('updateContractService') as any,
+      core.container.make('assignContractService') as any,
+      core.container.make('terminateContractService') as any,
+      core.container.make('renewContractService') as any,
+      core.container.make('listContractsService') as any,
+      core.container.make('getContractDetailService') as any,
+      core.container.make('handleContractExpiryService') as any,
+    )
+    registerContractRoutes(router, controller)
   }
 
   /** Logs module load during application bootstrap. */
