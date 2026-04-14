@@ -19,3 +19,8 @@ export {
   requireOrganizationContext,
   requireOrganizationManager,
 } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
+
+// Body size limit（用於需要覆寫預設大小的路由，例如未來的檔案上傳）
+export { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
+
+export const bodyLimit = (maxBytes: number) => createBodySizeLimitMiddleware(maxBytes)
