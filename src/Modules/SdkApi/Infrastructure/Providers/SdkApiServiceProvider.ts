@@ -1,3 +1,8 @@
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { SdkApiController } from '../../Presentation/Controllers/SdkApiController'
+import { registerSdkApiRoutes } from '../../Presentation/Routes/sdkApi.routes'
 import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositories/IAppApiKeyRepository'
@@ -10,7 +15,7 @@ import { QueryBalance } from '../../Application/UseCases/QueryBalance'
 import { QueryUsage } from '../../Application/UseCases/QueryUsage'
 import { AppAuthMiddleware } from '../Middleware/AppAuthMiddleware'
 
-export class SdkApiServiceProvider extends ModuleServiceProvider {
+export class SdkApiServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
     container.singleton('authenticateApp', (c: IContainer) => {
       return new AuthenticateApp(
@@ -35,6 +40,17 @@ export class SdkApiServiceProvider extends ModuleServiceProvider {
     container.bind('queryBalance', (c: IContainer) => {
       return new QueryBalance(c.make('creditAccountRepository') as ICreditAccountRepository)
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new SdkApiController(
+      core.container.make('proxyModelCall') as any,
+      core.container.make('queryUsage') as any,
+      core.container.make('queryBalance') as any,
+    )
+    const appAuthMiddleware = core.container.make('appAuthMiddleware') as AppAuthMiddleware
+    registerSdkApiRoutes(router, controller, appAuthMiddleware)
   }
 
   override boot(_context: unknown): void {
