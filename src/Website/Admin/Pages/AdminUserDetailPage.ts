@@ -3,7 +3,6 @@ import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/G
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
@@ -25,13 +24,11 @@ export class AdminUserDetailPage {
     const check = requireAdmin(ctx)
     if (!check.ok) return check.response!
 
-    const { messages } = getInertiaShared(ctx)
-
     const userId = ctx.getParam('id')
     if (!userId) {
       return this.inertia.render(ctx, 'Admin/Users/Show', {
         user: null,
-        error: messages['admin.users.missingId'],
+        error: { key: 'admin.users.missingId' },
       })
     }
 
@@ -43,7 +40,7 @@ export class AdminUserDetailPage {
     if (!userResult.success || !userResult.data) {
       return this.inertia.render(ctx, 'Admin/Users/Show', {
         user: null,
-        error: userResult.message,
+        error: { key: 'admin.users.loadFailed' },
       })
     }
 
@@ -63,7 +60,7 @@ export class AdminUserDetailPage {
         createdAt: userDetail.createdAt,
         updatedAt: userDetail.updatedAt,
       },
-      error: profileResult.success ? null : profileResult.message,
+      error: profileResult.success ? null : { key: 'admin.users.loadFailed' },
     })
   }
 

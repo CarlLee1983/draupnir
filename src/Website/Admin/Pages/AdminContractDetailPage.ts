@@ -3,7 +3,6 @@ import type { GetContractDetailService } from '@/Modules/Contract/Application/Se
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
@@ -27,13 +26,11 @@ export class AdminContractDetailPage {
 
     const auth = check.auth!
 
-    const { messages } = getInertiaShared(ctx)
-
     const contractId = ctx.getParam('id')
     if (!contractId) {
       return this.inertia.render(ctx, 'Admin/Contracts/Show', {
         contract: null,
-        error: messages['admin.contracts.missingId'],
+        error: { key: 'admin.contracts.missingId' },
       })
     }
 
@@ -41,7 +38,7 @@ export class AdminContractDetailPage {
 
     return this.inertia.render(ctx, 'Admin/Contracts/Show', {
       contract: result.success ? (result.data as Record<string, unknown>) : null,
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'admin.contracts.loadFailed' },
     })
   }
 

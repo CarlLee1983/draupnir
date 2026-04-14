@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft } from 'lucide-react'
 import { formatDate, formatDateTime } from '@/lib/format'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface ContractTerms {
   creditQuota: number
@@ -26,11 +28,12 @@ interface Contract {
 
 interface Props {
   contract: Contract | null
-  error: string | null
+  error: I18nMessage | null
 }
 
 export default function ContractShow({ contract, error }: Props) {
   const { toast } = useToast()
+  const { t } = useTranslation()
 
   const runAction = (action: 'activate' | 'terminate') => {
     if (!contract) return
@@ -60,7 +63,7 @@ export default function ContractShow({ contract, error }: Props) {
         </Button>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>
+          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
         )}
 
         {contract && (

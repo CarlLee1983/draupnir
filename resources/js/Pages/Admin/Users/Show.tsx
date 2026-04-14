@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { ArrowLeft } from 'lucide-react'
 import { formatDateTime } from '@/lib/format'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface UserProfile {
   id: string
@@ -20,11 +22,12 @@ interface UserProfile {
 
 interface Props {
   user: UserProfile | null
-  error: string | null
+  error: I18nMessage | null
 }
 
 export default function UserShow({ user, error }: Props) {
   const { toast } = useToast()
+  const { t } = useTranslation()
 
   const handleToggleStatus = () => {
     if (!user) return
@@ -57,7 +60,7 @@ export default function UserShow({ user, error }: Props) {
         </div>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>
+          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
         )}
 
         {user && (

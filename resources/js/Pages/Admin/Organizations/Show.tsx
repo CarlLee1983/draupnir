@@ -8,6 +8,8 @@ import { DataTable } from '@/components/tables/DataTable'
 import type { ColumnDef } from '@tanstack/react-table'
 import { ArrowLeft } from 'lucide-react'
 import { formatDateTime } from '@/lib/format'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface Organization {
   id: string
@@ -26,7 +28,7 @@ interface Member {
 interface Props {
   organization: Organization | null
   members: Member[]
-  error: string | null
+  error: I18nMessage | null
 }
 
 const memberColumns: ColumnDef<Member>[] = [
@@ -48,6 +50,7 @@ const memberColumns: ColumnDef<Member>[] = [
 ]
 
 export default function OrgShow({ organization, members, error }: Props) {
+  const { t } = useTranslation()
   return (
     <AdminLayout>
       <Head title="組織詳細" />
@@ -61,7 +64,7 @@ export default function OrgShow({ organization, members, error }: Props) {
         </Button>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>
+          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
         )}
 
         {organization && (

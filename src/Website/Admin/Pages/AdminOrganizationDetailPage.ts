@@ -2,7 +2,6 @@ import type { GetOrganizationService } from '@/Modules/Organization/Application/
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
@@ -24,14 +23,12 @@ export class AdminOrganizationDetailPage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const { messages } = getInertiaShared(ctx)
-
     const orgId = ctx.getParam('id')
     if (!orgId) {
       return this.inertia.render(ctx, 'Admin/Organizations/Show', {
         organization: null,
         members: [],
-        error: messages['admin.organizations.missingId'],
+        error: { key: 'admin.organizations.missingId' },
       })
     }
 
@@ -67,7 +64,7 @@ export class AdminOrganizationDetailPage {
     return this.inertia.render(ctx, 'Admin/Organizations/Show', {
       organization,
       members,
-      error: orgResult.success ? null : orgResult.message,
+      error: orgResult.success ? null : { key: 'admin.organizations.loadFailed' },
     })
   }
 }
