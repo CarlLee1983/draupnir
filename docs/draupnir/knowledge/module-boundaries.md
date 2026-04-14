@@ -183,6 +183,7 @@
 
 - 管理的是「何時、向誰、用什麼管道通知」
 - 不應成為 ApiKey / Credit 的權威來源；應讀取上游模組或埠
+- 跨模組／Foundation 依賴清單與審查規則：[alerts-cross-module-contract.md](./alerts-cross-module-contract.md)
 
 ### 14. DevPortal
 

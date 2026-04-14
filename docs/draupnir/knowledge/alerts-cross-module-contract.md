@@ -1,4 +1,6 @@
-# Alerts Module — 跨模組依賴契約
+# Alerts 模組 — 跨模組依賴契約
+
+實作目錄：`src/Modules/Alerts/`。
 
 ## 背景
 

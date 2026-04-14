@@ -12,6 +12,7 @@
 | [`ddd-application-domain-services.md`](./ddd-application-domain-services.md) | Application Service / Domain Service |
 | [`module-boundaries.md`](./module-boundaries.md) | bounded context 與模組切分 |
 | [`context-dependency-map.md`](./context-dependency-map.md) | 模組依賴矩陣 |
+| [`alerts-cross-module-contract.md`](./alerts-cross-module-contract.md) | Alerts 模組跨模組／Foundation 依賴契約（ALERTS-02） |
 | [`layer-decision-rules.md`](./layer-decision-rules.md) | 分層判斷規則 |
 | [`domain-events.md`](./domain-events.md) | Domain Events 實踐與使用指南 |
 | [`ddd-testing-anti-patterns.md`](./ddd-testing-anti-patterns.md) | 測試策略與常見反模式 |

@@ -157,6 +157,31 @@ const container = context as IContainer
 const container = core?.container ?? core
 ```
 
+### Boot 呼叫契約（強制）
+
+Framework 必須保證呼叫 `provider.boot()` 時，傳入的參數**一定是 `IContainer` 實例**。
+
+provider.boot(container: IContainer)
+
+### 禁止
+
+- 傳入 `{ container }` wrapper
+- 傳入 `core`
+- 傳入任意 framework context 物件
+
+### 原則
+
+- 解包責任只存在於 Framework Adapter
+- Module 層不得感知 wrapper 存在
+- Module 層不得自行解包（`context as IContainer` / `core?.container ?? core`）
+
+違反此規則將導致型別污染與架構邊界破壞
+
+### 驗證要求（建議）
+
+Adapter 應在呼叫 `provider.boot()` 前驗證參數為合法 `IContainer`，
+否則應拋出錯誤（fail-fast），不得 fallback。
+
 ---
 
 ## 遷移範例：AuthServiceProvider
