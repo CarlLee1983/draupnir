@@ -1,4 +1,7 @@
 import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { registerAlertRoutes } from '../../Presentation/Routes/alert.routes'
 import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
 import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
@@ -38,7 +41,7 @@ import { AlertRecipientResolverImpl } from '../Services/AlertRecipientResolverIm
 import { EmailAlertNotifier } from '../Services/EmailAlertNotifier'
 import { WebhookAlertNotifier } from '../Services/WebhookAlertNotifier'
 
-export class AlertsServiceProvider extends ModuleServiceProvider {
+export class AlertsServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
     const db = container.make('database') as IDatabaseAccess
 
@@ -202,6 +205,14 @@ export class AlertsServiceProvider extends ModuleServiceProvider {
         sendAlertService: c.make('sendAlertService') as SendAlertService,
       })
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = core.container.make('alertController') as AlertController
+    const webhookController = core.container.make('webhookEndpointController') as WebhookEndpointController
+    const historyController = core.container.make('alertHistoryController') as AlertHistoryController
+    registerAlertRoutes(router, controller, webhookController, historyController)
   }
 
   override boot(context: unknown): void {
