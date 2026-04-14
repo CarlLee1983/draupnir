@@ -6,6 +6,9 @@ import {
   parseCorsAllowedOrigins,
 } from '@/Shared/Infrastructure/Middleware/CorsGlobalMiddleware'
 import { createSecurityHeadersMiddleware } from '@/Shared/Infrastructure/Middleware/SecurityHeadersGlobalMiddleware'
+import { createGlobalErrorMiddleware } from '@/Shared/Infrastructure/Middleware/GlobalErrorMiddleware'
+import { createRequestIdMiddleware } from '@/Shared/Infrastructure/Middleware/RequestIdMiddleware'
+import { createRequestLoggerMiddleware } from '@/Shared/Infrastructure/Middleware/RequestLoggerMiddleware'
 import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
@@ -72,6 +75,9 @@ export const HttpKernel = {
   global: (): Middleware[] => {
     const corsOrigins = parseCorsAllowedOrigins()
     return [
+      createGlobalErrorMiddleware(),
+      createRequestIdMiddleware(),
+      createRequestLoggerMiddleware(),
       createSecurityHeadersMiddleware(),
       ...(corsOrigins.length > 0
         ? [createCorsMiddleware({ allowedOrigins: corsOrigins, allowCredentials: true })]
