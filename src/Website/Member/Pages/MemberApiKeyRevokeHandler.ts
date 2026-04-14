@@ -1,6 +1,6 @@
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { requireMember } from './helpers/requireMember'
+import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
  * POST handler for revoking a member API key (`/member/api-keys/:keyId/revoke`).

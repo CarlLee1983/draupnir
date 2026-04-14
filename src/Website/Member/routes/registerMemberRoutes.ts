@@ -14,10 +14,10 @@ import type {
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
 
-import { bindPageAction } from './bindPageAction'
-import type { MemberPageBindingKey } from './member/memberPageKeys'
-import { MEMBER_PAGE_KEYS } from './member/memberPageKeys'
-import { withInertiaPageHandler } from './withInertiaPage'
+import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
+import type { MemberPageBindingKey } from '../keys'
+import { MEMBER_PAGE_KEYS } from '../keys'
+import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -130,7 +130,7 @@ function registerMemberHttpRoute(
  * @param router - Router supporting GET, POST, and PUT.
  * @param container - DI container with member page bindings.
  */
-export function registerMemberPageRoutes(
+export function registerMemberRoutes(
   router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   container: IContainer,
 ): void {

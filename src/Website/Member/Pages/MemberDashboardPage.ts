@@ -1,7 +1,7 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireMember } from './helpers/requireMember'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
  * Member dashboard shell for the selected organization (`Member/Dashboard/Index`).

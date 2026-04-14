@@ -1,7 +1,7 @@
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireMember } from './helpers/requireMember'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
  * Member usage chart page (`Member/Usage/Index`).

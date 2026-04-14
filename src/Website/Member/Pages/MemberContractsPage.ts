@@ -1,7 +1,7 @@
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireMember } from './helpers/requireMember'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /** Maps a list-contract DTO row to the Inertia table shape. */
 function mapContractRow(dto: Record<string, unknown>) {

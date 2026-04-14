@@ -1,7 +1,7 @@
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireMember } from './helpers/requireMember'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
  * Member API key list for the selected organization (`Member/ApiKeys/Index`).

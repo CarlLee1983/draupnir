@@ -1,7 +1,7 @@
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
-import { requireMember } from './helpers/requireMember'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
  * Member flow to create an API key within an org (`Member/ApiKeys/Create`).

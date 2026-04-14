@@ -13,26 +13,26 @@ import type { GetBalanceService } from '@/Modules/Credit/Application/Services/Ge
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
-import type { InertiaService } from '@/Pages/InertiaService'
-import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-import { MemberAlertsPage } from '../../Member/MemberAlertsPage'
-import { MemberApiKeyCreatePage } from '../../Member/MemberApiKeyCreatePage'
-import { MemberApiKeyRevokeHandler } from '../../Member/MemberApiKeyRevokeHandler'
-import { MemberApiKeysPage } from '../../Member/MemberApiKeysPage'
-import { MemberContractsPage } from '../../Member/MemberContractsPage'
-import { MemberCostBreakdownPage } from '../../Member/MemberCostBreakdownPage'
-import { MemberDashboardPage } from '../../Member/MemberDashboardPage'
-import { MemberSettingsPage } from '../../Member/MemberSettingsPage'
-import { MemberUsagePage } from '../../Member/MemberUsagePage'
+import { MemberAlertsPage } from '../Pages/MemberAlertsPage'
+import { MemberApiKeyCreatePage } from '../Pages/MemberApiKeyCreatePage'
+import { MemberApiKeyRevokeHandler } from '../Pages/MemberApiKeyRevokeHandler'
+import { MemberApiKeysPage } from '../Pages/MemberApiKeysPage'
+import { MemberContractsPage } from '../Pages/MemberContractsPage'
+import { MemberCostBreakdownPage } from '../Pages/MemberCostBreakdownPage'
+import { MemberDashboardPage } from '../Pages/MemberDashboardPage'
+import { MemberSettingsPage } from '../Pages/MemberSettingsPage'
+import { MemberUsagePage } from '../Pages/MemberUsagePage'
 
-import { MEMBER_PAGE_KEYS } from './memberPageKeys'
+import { MEMBER_PAGE_KEYS } from '../keys'
 
 /**
  * @param container - Gravito DI container; `InertiaService` must already be bound under
  *   `PAGE_CONTAINER_KEYS.inertiaService`.
  */
-export function registerMemberPageBindings(container: IContainer): void {
+export function registerMemberBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MEMBER_PAGE_KEYS
 
