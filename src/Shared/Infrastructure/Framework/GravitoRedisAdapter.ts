@@ -26,4 +26,12 @@ export class GravitoRedisAdapter implements IRedisService {
   async exists(key: string): Promise<boolean> {
     return (await this.redis.exists(key)) > 0
   }
+
+  async incr(key: string, ttlSeconds: number): Promise<number> {
+    const count = await this.redis.incr(key)
+    if (count === 1) {
+      await this.redis.expire(key, ttlSeconds)
+    }
+    return count
+  }
 }
