@@ -58,6 +58,7 @@ interface LogEntry {
  */
 export function createRequestLoggerMiddleware(): Middleware {
   return async (ctx, next) => {
+    // Resolved per-request from process.env.LOG_LEVEL (not at middleware creation time)
     const configuredLevel = resolveLogLevel()
     const start = Date.now()
     const method = ctx.getMethod()
