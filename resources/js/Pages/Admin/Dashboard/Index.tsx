@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UsageLineChart, type UsageDataPoint } from '@/components/charts/UsageLineChart'
 import { Users, Building2, FileText, Key } from 'lucide-react'
 import { formatNumber } from '@/lib/format'
+import { useTranslation } from '@/lib/i18n'
 
 interface Totals {
   users: number
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function AdminDashboard({ totals }: Props) {
+  const { t } = useTranslation()
   const sampleUsageData: UsageDataPoint[] = [
     { date: '03/01', requests: 420, tokens: 145000 },
     { date: '03/02', requests: 650, tokens: 152000 },
@@ -27,39 +29,39 @@ export default function AdminDashboard({ totals }: Props) {
 
   return (
     <AdminLayout>
-      <Head title="系統總覽" />
+      <Head title={t('ui.admin.dashboard.title')} />
 
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">系統總覽</h1>
+        <h1 className="text-2xl font-bold">{t('ui.admin.dashboard.title')}</h1>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
-            title="使用者總數"
+            title={t('ui.admin.dashboard.metricUsers')}
             value={formatNumber(totals.users)}
             icon={<Users className="h-4 w-4 text-muted-foreground" />}
             href="/admin/users"
           />
           <StatCard
-            title="組織總數"
+            title={t('ui.admin.dashboard.metricOrgs')}
             value={formatNumber(totals.organizations)}
             icon={<Building2 className="h-4 w-4 text-muted-foreground" />}
             href="/admin/organizations"
           />
           <StatCard
-            title="合約總數"
+            title={t('ui.admin.dashboard.metricContracts')}
             value={formatNumber(totals.contracts)}
             icon={<FileText className="h-4 w-4 text-muted-foreground" />}
             href="/admin/contracts"
           />
           <StatCard
-            title="API Keys"
+            title={t('ui.admin.dashboard.metricApiKeys')}
             value="—"
             icon={<Key className="h-4 w-4 text-muted-foreground" />}
             href="/admin/api-keys"
           />
         </div>
 
-        <UsageLineChart data={sampleUsageData} title="全系統用量趨勢" />
+        <UsageLineChart data={sampleUsageData} title={t('ui.admin.dashboard.usageTrendTitle')} />
       </div>
     </AdminLayout>
   )

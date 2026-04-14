@@ -8,6 +8,7 @@ import { Plus, Mail, Calendar, Clock, Globe, Trash2, Edit, ExternalLink } from '
 import { useState } from 'react'
 import { ReportForm } from './Components/ReportForm'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { useTranslation } from '@/lib/i18n'
 
 interface ReportScheduleRow {
   id: string
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export default function ReportsIndex({ orgId, schedules }: Props) {
+  const { t } = useTranslation()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingSchedule, setEditingSchedule] = useState<ReportScheduleRow | null>(null)
 
@@ -41,32 +43,42 @@ export default function ReportsIndex({ orgId, schedules }: Props) {
 
   const getDayName = (type: string, day: number) => {
     if (type === 'weekly') {
-      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+      const days = [
+        t('ui.admin.reports.monday'),
+        t('ui.admin.reports.tuesday'),
+        t('ui.admin.reports.wednesday'),
+        t('ui.admin.reports.thursday'),
+        t('ui.admin.reports.friday'),
+        t('ui.admin.reports.saturday'),
+        t('ui.admin.reports.sunday'),
+      ]
       return days[day - 1] || day
     }
-    return `Day ${day}`
+    return t('ui.admin.reports.dayOfLabel', { day })
   }
 
   return (
     <AdminLayout>
-      <Head title="Automated Reports" />
+      <Head title={t('ui.admin.reports.title')} />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Automated Reports</h1>
+          <h1 className="text-2xl font-bold">{t('ui.admin.reports.title')}</h1>
           <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
             <SheetTrigger asChild>
               <Button onClick={handleCreate}>
                 <Plus className="mr-2 h-4 w-4" />
-                Schedule Report
+                {t('ui.admin.reports.scheduleButton')}
               </Button>
             </SheetTrigger>
             <SheetContent className="sm:max-w-[540px]">
               <SheetHeader>
-                <SheetTitle>{editingSchedule ? 'Edit Report Schedule' : 'Schedule New Report'}</SheetTitle>
-                <SheetDescription>
-                  Configure automated cost and usage reports for this organization.
-                </SheetDescription>
+                <SheetTitle>
+                  {editingSchedule
+                    ? t('ui.admin.reports.formTitleEdit')
+                    : t('ui.admin.reports.formTitleCreate')}
+                </SheetTitle>
+                <SheetDescription>{t('ui.admin.reports.formDescription')}</SheetDescription>
               </SheetHeader>
               <div className="mt-6">
                 <ReportForm 
@@ -81,31 +93,35 @@ export default function ReportsIndex({ orgId, schedules }: Props) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Active Schedules</CardTitle>
+            <CardTitle>{t('ui.admin.reports.activeSchedulesTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Frequency</TableHead>
-                  <TableHead>Schedule</TableHead>
-                  <TableHead>Timezone</TableHead>
-                  <TableHead>Recipients</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>{t('ui.admin.reports.tableFrequency')}</TableHead>
+                  <TableHead>{t('ui.admin.reports.tableSchedule')}</TableHead>
+                  <TableHead>{t('ui.admin.reports.tableTimezone')}</TableHead>
+                  <TableHead>{t('ui.admin.reports.tableRecipients')}</TableHead>
+                  <TableHead>{t('ui.admin.reports.tableStatus')}</TableHead>
+                  <TableHead className="text-right">{t('ui.admin.reports.tableActions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {schedules.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                      No reports scheduled yet.
+                      {t('ui.admin.reports.emptyState')}
                     </TableCell>
                   </TableRow>
                 ) : (
                   schedules.map((schedule) => (
                     <TableRow key={schedule.id}>
-                      <TableCell className="capitalize">{schedule.type}</TableCell>
+                      <TableCell className="capitalize">
+                        {schedule.type === 'weekly' 
+                          ? t('ui.admin.reports.freqWeekly') 
+                          : t('ui.admin.reports.freqMonthly')}
+                      </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="flex items-center">
@@ -136,10 +152,10 @@ export default function ReportsIndex({ orgId, schedules }: Props) {
                       <TableCell>
                         {schedule.enabled ? (
                           <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400">
-                            Enabled
+                            {t('ui.admin.reports.statusEnabled')}
                           </Badge>
                         ) : (
-                          <Badge variant="secondary">Disabled</Badge>
+                          <Badge variant="secondary">{t('ui.admin.reports.statusDisabled')}</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
