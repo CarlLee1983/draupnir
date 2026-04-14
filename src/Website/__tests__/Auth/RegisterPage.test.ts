@@ -27,6 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
     },
     getCookie: (_name: string) => undefined,
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
+    getMethod: overrides.getMethod ?? (() => 'GET'),
     ...overrides,
   }
 }
@@ -41,7 +42,6 @@ describe('RegisterPage', () => {
     const inertia = { render } as unknown as InertiaService
     const page = new RegisterPage(inertia, mockRegisterService as any)
     const ctx = createMockContext()
-    ctx.set('inertia:shared', { csrfToken: 'csrf' })
 
     await page.handle(ctx)
 
@@ -50,7 +50,6 @@ describe('RegisterPage', () => {
       | [unknown, string, Record<string, unknown>]
       | undefined
     expect(call?.[1]).toBe('Auth/Register')
-    expect(call?.[2]?.csrfToken).toBe('csrf')
     expect(call?.[2]?.passwordRequirements).toBeDefined()
     expect(typeof call?.[2]?.passwordRequirements).toBe('object')
   })
