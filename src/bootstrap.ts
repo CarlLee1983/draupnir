@@ -26,6 +26,8 @@ import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Provide
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
 import { WebsiteServiceProvider } from './Website/bootstrap/WebsiteServiceProvider'
 import { warmInertiaService } from './Website/Http/Inertia/createInertiaRequestHandler'
+import { HttpKernel } from './Website/Http/HttpKernel'
+import { registerGlobalMiddlewares } from './Website/Http/GravitoKernelAdapter'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
@@ -80,6 +82,13 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   }
 
   await core.bootstrap()
+
+  // ─── Global middleware ────────────────────────────────────────────────────
+  // 順序由 HttpKernel.global() 定義，在此一行掛載全部。
+  // 擴充 global middleware 請至 src/Website/Http/HttpKernel.ts。
+  registerGlobalMiddlewares(core, HttpKernel.global())
+  // ─────────────────────────────────────────────────────────────────────────
+
   await warmInertiaService()
   await (
     core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService
