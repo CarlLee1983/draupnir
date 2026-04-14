@@ -154,9 +154,7 @@ describe('AdminContractCreatePage', () => {
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Contracts/Create')
-    expect(captured.lastCall?.props.formError).toBe(
-      'Please fill in all required fields, including target and terms',
-    )
+    expect(captured.lastCall?.props.formError).toEqual({ key: 'admin.contracts.validationFailed' })
   })
 
   test('store with valid body and successful service call redirects', async () => {

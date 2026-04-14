@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
-  formError: string | null
+  formError: I18nMessage | null
 }
 
 export default function ModuleCreate({ formError }: Props) {
+  const { t } = useTranslation()
   const form = useForm({
     name: '',
     description: '',
@@ -35,7 +38,7 @@ export default function ModuleCreate({ formError }: Props) {
           <CardContent>
             {formError && (
               <div className="mb-4 rounded-md border border-destructive p-3 text-sm text-destructive">
-                {formError}
+                {t(formError.key, formError.params)}
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4">

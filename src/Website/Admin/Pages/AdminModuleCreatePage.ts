@@ -1,7 +1,6 @@
 import type { RegisterModuleService } from '@/Modules/AppModule/Application/Services/RegisterModuleService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 
 /**
@@ -41,15 +40,13 @@ export class AdminModuleCreatePage {
       type?: string
     }>()
 
-    const { messages } = getInertiaShared(ctx)
-
     const name = typeof body.name === 'string' ? body.name.trim() : ''
     const description = typeof body.description === 'string' ? body.description.trim() : ''
     const typeRaw = body.type === 'paid' ? 'paid' : 'free'
 
     if (!name) {
       return this.inertia.render(ctx, 'Admin/Modules/Create', {
-        formError: messages['admin.modules.nameRequired'],
+        formError: { key: 'admin.modules.nameRequired' },
       })
     }
 
@@ -65,7 +62,7 @@ export class AdminModuleCreatePage {
     }
 
     return this.inertia.render(ctx, 'Admin/Modules/Create', {
-      formError: result.message ?? 'Registration failed',
+      formError: result.success ? null : { key: 'admin.modules.createFailed' },
     })
   }
 }

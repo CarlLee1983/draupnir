@@ -154,7 +154,7 @@ describe('AdminModuleCreatePage', () => {
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Modules/Create')
-    expect(captured.lastCall?.props.formError).toBe('Module identifier is required')
+    expect(captured.lastCall?.props.formError).toEqual({ key: 'admin.modules.nameRequired' })
   })
 
   test('store with valid name and successful service call redirects', async () => {
