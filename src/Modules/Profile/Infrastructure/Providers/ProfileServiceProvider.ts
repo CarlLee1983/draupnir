@@ -1,3 +1,5 @@
+import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
+import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
@@ -27,8 +29,8 @@ export class ProfileServiceProvider extends ModuleServiceProvider implements IRo
     container.bind('profileController', (c: IContainer) => new ProfileController(
       c.make('getProfileService') as GetProfileService,
       c.make('updateProfileService') as UpdateProfileService,
-      c.make('listUsersService') as any,
-      c.make('changeUserStatusService') as any,
+      c.make('listUsersService') as ListUsersService,
+      c.make('changeUserStatusService') as ChangeUserStatusService,
     ))
   }
 
