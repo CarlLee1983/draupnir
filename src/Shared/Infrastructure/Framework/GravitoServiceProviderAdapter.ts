@@ -68,3 +68,22 @@ export function createGravitoServiceProvider(
 ): ServiceProvider {
   return new GravitoServiceProviderAdapter(moduleProvider)
 }
+
+/**
+ * 可選介面：模組實作此介面以自我管理路由。
+ * 刻意放在 Gravito 適配層而非 IServiceProvider.ts，保持 ModuleServiceProvider 框架無關。
+ */
+export interface IRouteRegistrar {
+  registerRoutes(core: PlanetCore): void | Promise<void>
+}
+
+/**
+ * 型別守衛：判斷 ModuleServiceProvider 是否實作了 IRouteRegistrar。
+ */
+export function isRouteRegistrar(value: unknown): value is IRouteRegistrar {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as IRouteRegistrar).registerRoutes === 'function'
+  )
+}
