@@ -36,11 +36,12 @@ export interface IRedisService {
   exists(key: string): Promise<boolean>
 
   /**
-   * 原子遞增 key 的值，若 key 不存在則設為 1，同時設定 TTL。
-   * 回傳遞增後的值。
+   * Atomically increments the value of a key. If the key does not exist,
+   * it is set to 1. Sets the TTL only when the key is first created (count === 1).
    *
-   * @param key - Redis key
-   * @param ttlSeconds - key 的存活時間（秒），僅在 key 首次建立（count = 1）時設定
+   * @param key - Redis key.
+   * @param ttlSeconds - Time-to-live in seconds, applied only on first creation. Must be a positive integer.
+   * @returns The value after increment.
    */
   incr(key: string, ttlSeconds: number): Promise<number>
 }

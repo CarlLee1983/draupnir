@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from 'vitest'
 import { GravitoRedisAdapter } from '../GravitoRedisAdapter'
 
-const createMockPlasmaRedis = (incrReturn = 1, expireReturn = true) => ({
+const createMockPlasmaRedis = (incrReturn = 1) => ({
   ping: vi.fn().mockResolvedValue('PONG'),
   get: vi.fn().mockResolvedValue(null),
   set: vi.fn().mockResolvedValue(undefined),
   del: vi.fn().mockResolvedValue(1),
   exists: vi.fn().mockResolvedValue(0),
   incr: vi.fn().mockResolvedValue(incrReturn),
-  expire: vi.fn().mockResolvedValue(expireReturn),
+  expire: vi.fn().mockResolvedValue(true),
 })
 
 describe('GravitoRedisAdapter.incr', () => {
