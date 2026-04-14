@@ -40,8 +40,8 @@ import { registerTestSeedRoutes } from '../../Presentation/Routes/test-seed.rout
 import { configureAuthMiddleware } from '../../Presentation/Middleware/RoleMiddleware'
 import { AuthRepository } from '../Repositories/AuthRepository'
 import { AuthTokenRepository } from '../Repositories/AuthTokenRepository'
-import { InMemoryEmailVerificationRepository } from '../Repositories/InMemoryEmailVerificationRepository'
-import { InMemoryPasswordResetRepository } from '../Repositories/InMemoryPasswordResetRepository'
+import { EmailVerificationRepository } from '../Repositories/EmailVerificationRepository'
+import { PasswordResetRepository } from '../Repositories/PasswordResetRepository'
 import { ConsoleEmailService } from '../Services/ConsoleEmailService'
 import { GoogleOAuthAdapter } from '../Services/GoogleOAuthAdapter'
 import { JwtTokenService } from '../Services/JwtTokenService'
@@ -168,12 +168,9 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
       return new ConsoleEmailService()
     })
 
-    container.singleton('passwordResetRepository', () => new InMemoryPasswordResetRepository())
+    container.singleton('passwordResetRepository', () => new PasswordResetRepository(db))
 
-    container.singleton(
-      'emailVerificationRepository',
-      () => new InMemoryEmailVerificationRepository(),
-    )
+    container.singleton('emailVerificationRepository', () => new EmailVerificationRepository(db))
 
     container.bind('forgotPasswordService', (c: IContainer) => {
       const baseUrl = process.env.APP_URL?.trim() || 'http://localhost:3000'

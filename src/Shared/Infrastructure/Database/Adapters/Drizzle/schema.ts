@@ -64,6 +64,34 @@ export const authTokens = sqliteTable(
 )
 
 /**
+ * Email verification tokens（信箱驗證連結）
+ */
+export const emailVerificationTokens = sqliteTable(
+  'email_verification_tokens',
+  {
+    id: text('id').primaryKey(),
+    email: text('email').notNull(),
+    expires_at: text('expires_at').notNull(),
+    used: integer('used', { mode: 'boolean' }).notNull().default(false),
+  },
+  (table) => [index('idx_email_verification_tokens_email').on(table.email)],
+)
+
+/**
+ * Password reset tokens（密碼重設連結）
+ */
+export const passwordResetTokens = sqliteTable(
+  'password_reset_tokens',
+  {
+    id: text('id').primaryKey(),
+    email: text('email').notNull(),
+    expires_at: text('expires_at').notNull(),
+    used: integer('used', { mode: 'boolean' }).notNull().default(false),
+  },
+  (table) => [index('idx_password_reset_tokens_email').on(table.email)],
+)
+
+/**
  * Health Checks 表
  *
  * 儲存系統健康檢查歷史
