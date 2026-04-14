@@ -25,8 +25,8 @@ export function createInMemoryRateLimit(config: RateLimitConfig): Middleware {
   const counts = new Map<string, { count: number; resetAt: number }>()
 
   return async (ctx, next) => {
-    const ip =
-      ctx.getHeader('x-forwarded-for') ?? ctx.getHeader('x-real-ip') ?? 'unknown'
+    const rawIp = ctx.getHeader('x-forwarded-for') ?? ctx.getHeader('x-real-ip') ?? 'unknown'
+    const ip = rawIp.split(',')[0].trim()
     const key = `${config.scope}:${ip}`
     const now = Date.now()
     const entry = counts.get(key)
@@ -46,7 +46,7 @@ export function createInMemoryRateLimit(config: RateLimitConfig): Middleware {
       })
     }
 
-    entry.count++
+    counts.set(key, { ...entry, count: entry.count + 1 })
     return next()
   }
 }
