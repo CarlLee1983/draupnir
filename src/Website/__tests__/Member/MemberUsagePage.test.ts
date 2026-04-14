@@ -74,17 +74,6 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 }
 
 describe('MemberUsagePage', () => {
-  test('unauthenticated request returns 302 redirect to /login', async () => {
-    const ctx = createMockContext()
-    const { inertia } = createMockInertia()
-    const page = new MemberUsagePage(inertia, {} as any)
-
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(302)
-    expect(response.headers.get('Location')).toBe('/login')
-  })
-
   test('authenticated member request renders correct Inertia component', async () => {
     const ctx = createMemberContext({
       getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),

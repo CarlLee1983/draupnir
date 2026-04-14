@@ -67,25 +67,6 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 }
 
 describe('AdminUsageSyncPage', () => {
-  test('unauthenticated request returns 302 redirect to /login (PAGE-03)', async () => {
-    const { inertia } = createMockInertia()
-    const page = new AdminUsageSyncPage(inertia)
-    const ctx = createMockContext()
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(302)
-    expect(response.headers.get('Location')).toContain('/login')
-  })
-
-  test('authenticated non-admin request returns 403 (PAGE-04)', async () => {
-    const { inertia } = createMockInertia()
-    const page = new AdminUsageSyncPage(inertia)
-    const ctx = createMemberContext()
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(403)
-  })
-
   test('authenticated admin request renders with correct component and status.enabled=false (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
     const page = new AdminUsageSyncPage(inertia)

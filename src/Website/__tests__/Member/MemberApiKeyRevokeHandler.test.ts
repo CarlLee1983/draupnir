@@ -47,16 +47,6 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
 }
 
 describe('MemberApiKeyRevokeHandler', () => {
-  test('unauthenticated request returns 302 redirect to /login', async () => {
-    const ctx = createMockContext()
-    const page = new MemberApiKeyRevokeHandler({} as any)
-
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(302)
-    expect(response.headers.get('Location')).toBe('/login')
-  })
-
   test('authenticated request without keyId redirects to /member/api-keys', async () => {
     const ctx = createMemberContext()
     const mockRevokeService = { execute: mock(() => Promise.resolve({ success: true })) }

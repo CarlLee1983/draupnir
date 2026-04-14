@@ -1,11 +1,6 @@
 import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { OrbitPrism } from '@gravito/prism'
-import {
-  createCorsMiddleware,
-  parseCorsAllowedOrigins,
-} from '@/Shared/Infrastructure/Middleware/CorsGlobalMiddleware'
-import { createSecurityHeadersMiddleware } from '@/Shared/Infrastructure/Middleware/SecurityHeadersGlobalMiddleware'
 import { adaptGravitoContainer, createGravitoServiceProvider, isRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
@@ -31,6 +26,8 @@ import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Provide
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
 import { WebsiteServiceProvider } from './Website/bootstrap/WebsiteServiceProvider'
 import { warmInertiaService } from './Website/Http/Inertia/createInertiaRequestHandler'
+import { HttpKernel } from './Website/Http/HttpKernel'
+import { registerGlobalMiddlewares } from './Website/Http/GravitoKernelAdapter'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
@@ -87,19 +84,9 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   await core.bootstrap()
 
   // ─── Global middleware ────────────────────────────────────────────────────
-  // Registered after bootstrap() (adapter is locked after that) but before
-  // route registration.  Order matters: security headers → CORS.
-  core.adapter.useGlobal(createSecurityHeadersMiddleware())
-
-  const corsAllowedOrigins = parseCorsAllowedOrigins()
-  if (corsAllowedOrigins.length > 0) {
-    core.adapter.useGlobal(
-      createCorsMiddleware({
-        allowedOrigins: corsAllowedOrigins,
-        allowCredentials: true,
-      }),
-    )
-  }
+  // 順序由 HttpKernel.global() 定義，在此一行掛載全部。
+  // 擴充 global middleware 請至 src/Website/Http/HttpKernel.ts。
+  registerGlobalMiddlewares(core, HttpKernel.global())
   // ─────────────────────────────────────────────────────────────────────────
 
   await warmInertiaService()

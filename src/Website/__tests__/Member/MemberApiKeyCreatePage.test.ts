@@ -103,17 +103,6 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 
 describe('MemberApiKeyCreatePage', () => {
   describe('handle (GET)', () => {
-    test('unauthenticated request returns 302 redirect to /login', async () => {
-      const ctx = createMockContext()
-      const { inertia } = createMockInertia()
-      const page = new MemberApiKeyCreatePage(inertia, {} as any)
-
-      const response = await page.handle(ctx)
-
-      expect(response.status).toBe(302)
-      expect(response.headers.get('Location')).toBe('/login')
-    })
-
     test('authenticated member request renders create form', async () => {
       const ctx = createMemberContext()
       const { inertia, captured } = createMockInertia()
@@ -142,17 +131,6 @@ describe('MemberApiKeyCreatePage', () => {
   })
 
   describe('store (POST)', () => {
-    test('unauthenticated request returns 302 redirect to /login', async () => {
-      const ctx = createMockContext()
-      const { inertia } = createMockInertia()
-      const page = new MemberApiKeyCreatePage(inertia, {} as any)
-
-      const response = await page.store(ctx)
-
-      expect(response.status).toBe(302)
-      expect(response.headers.get('Location')).toBe('/login')
-    })
-
     test('missing orgId in body renders with error message', async () => {
       const body = {
         label: 'My Key',

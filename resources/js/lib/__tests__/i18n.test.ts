@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'bun:test'
 import { createTranslator } from '../i18n'
 import type { MessageKey, Messages } from '../i18n'
 
@@ -28,16 +28,18 @@ describe('createTranslator', () => {
 
   describe('key missing', () => {
     let warnSpy: ReturnType<typeof vi.spyOn>
+    let originalNodeEnv: string | undefined
 
     beforeEach(() => {
       warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
       // Ensure NODE_ENV is 'test' (not 'production') so warnings fire
-      vi.stubEnv('NODE_ENV', 'test')
+      originalNodeEnv = process.env.NODE_ENV
+      process.env.NODE_ENV = 'test'
     })
 
     afterEach(() => {
       warnSpy.mockRestore()
-      vi.unstubAllEnvs()
+      process.env.NODE_ENV = originalNodeEnv
     })
 
     it('returns the key as fallback', () => {
@@ -57,7 +59,7 @@ describe('createTranslator', () => {
     })
 
     it('does not warn in production environment', () => {
-      vi.stubEnv('NODE_ENV', 'production')
+      process.env.NODE_ENV = 'production'
       const t = createTranslator({})
       t('admin.contracts.missingId')
       expect(warnSpy).not.toHaveBeenCalled()

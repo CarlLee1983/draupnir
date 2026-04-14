@@ -1,87 +1,52 @@
-import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
-import { applyPendingCookies } from '@/Shared/Presentation/cookieUtils'
-import type { IHttpContext, PendingCookie } from '@/Shared/Presentation/IHttpContext'
-import type { RouteHandler } from '@/Shared/Presentation/IModuleRouter'
-import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
-import { requireMember } from '@/Website/Member/middleware/requireMember'
-
-import { attachWebCsrf } from '../Security/CsrfMiddleware'
-import { injectSharedData } from './SharedPropsBuilder'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { Middleware, RouteHandler } from '@/Shared/Presentation/IModuleRouter'
+import { HttpKernel } from '../HttpKernel'
 
 /**
- * Wraps an Inertia page handler with JWT attachment and shared Inertia props.
+ * 將 middleware 陣列 + handler 組合成 RouteHandler（onion model）。
  *
- * Matches the module route pattern (`registerXxxRoutes(router, controller)`) but for functional handlers.
+ * 執行順序：middlewares[0] → middlewares[1] → ... → handler
+ * 每個 middleware 可在 next() 前後執行代碼（before/after hook）。
  *
- * @param handler - Inner handler after auth, CSRF, and `inertia:shared` are populated.
- * @returns A `RouteHandler` safe to pass to `IModuleRouter.get` / `post` / `put`.
+ * Exported for testing.
+ */
+export function composePageHandler(
+  middlewares: Middleware[],
+  handler: (ctx: IHttpContext) => Promise<Response>,
+): RouteHandler {
+  return (ctx) => {
+    const run = (i: number): Promise<Response> =>
+      i >= middlewares.length ? handler(ctx) : middlewares[i]!(ctx, () => run(i + 1))
+    return run(0)
+  }
+}
+
+/**
+ * 公開頁面 wrapper（login、register 等）。
+ * Chain：attachJwt → attachWebCsrf → injectSharedData → applyPendingCookies → handler
  */
 export function withInertiaPageHandler(
   handler: (ctx: IHttpContext) => Promise<Response>,
 ): RouteHandler {
-  const jwtMw = attachJwt()
-  const csrfMw = attachWebCsrf()
-  return (ctx) =>
-    jwtMw(ctx, async () =>
-      csrfMw(ctx, async () => {
-        injectSharedData(ctx)
-        const response = await handler(ctx)
-        const pending = ctx.get<PendingCookie[]>('__pending_cookies__') ?? []
-        return applyPendingCookies(response, pending)
-      }),
-    )
+  return composePageHandler(HttpKernel.groups.web(), handler)
 }
 
 /**
- * Variant of {@link withInertiaPageHandler} for admin-only pages.
- *
- * Runs the admin role check (after JWT + CSRF + shared props) so individual
- * admin page handlers do not need to call `requireAdmin(ctx)` themselves.
- *
- * @param handler - Inner admin page handler.
- * @returns A `RouteHandler` that enforces admin access before invoking the handler.
+ * Admin 區域 wrapper。
+ * Chain：attachJwt → attachWebCsrf → injectSharedData → requireAdmin → applyPendingCookies → handler
  */
 export function withAdminInertiaPageHandler(
   handler: (ctx: IHttpContext) => Promise<Response>,
 ): RouteHandler {
-  const jwtMw = attachJwt()
-  const csrfMw = attachWebCsrf()
-  return (ctx) =>
-    jwtMw(ctx, async () =>
-      csrfMw(ctx, async () => {
-        injectSharedData(ctx)
-        const check = requireAdmin(ctx)
-        if (!check.ok) return check.response!
-        const response = await handler(ctx)
-        const pending = ctx.get<PendingCookie[]>('__pending_cookies__') ?? []
-        return applyPendingCookies(response, pending)
-      }),
-    )
+  return composePageHandler(HttpKernel.groups.admin(), handler)
 }
 
 /**
- * Variant of {@link withInertiaPageHandler} for member-only pages.
- *
- * Redirects unauthenticated users to `/login` so individual member page
- * handlers do not need to call `requireMember(ctx)` themselves.
- *
- * @param handler - Inner member page handler.
- * @returns A `RouteHandler` that enforces authentication before invoking the handler.
+ * Member 區域 wrapper。
+ * Chain：attachJwt → attachWebCsrf → injectSharedData → requireMember → applyPendingCookies → handler
  */
 export function withMemberInertiaPageHandler(
   handler: (ctx: IHttpContext) => Promise<Response>,
 ): RouteHandler {
-  const jwtMw = attachJwt()
-  const csrfMw = attachWebCsrf()
-  return (ctx) =>
-    jwtMw(ctx, async () =>
-      csrfMw(ctx, async () => {
-        injectSharedData(ctx)
-        const check = requireMember(ctx)
-        if (!check.ok) return check.response!
-        const response = await handler(ctx)
-        const pending = ctx.get<PendingCookie[]>('__pending_cookies__') ?? []
-        return applyPendingCookies(response, pending)
-      }),
-    )
+  return composePageHandler(HttpKernel.groups.member(), handler)
 }

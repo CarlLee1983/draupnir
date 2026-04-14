@@ -103,17 +103,6 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 
 describe('MemberSettingsPage', () => {
   describe('handle (GET)', () => {
-    test('unauthenticated request returns 302 redirect to /login', async () => {
-      const ctx = createMockContext()
-      const { inertia } = createMockInertia()
-      const page = new MemberSettingsPage(inertia, {} as any, {} as any)
-
-      const response = await page.handle(ctx)
-
-      expect(response.status).toBe(302)
-      expect(response.headers.get('Location')).toBe('/login')
-    })
-
     test('authenticated member request renders settings page with profile', async () => {
       const ctx = createMemberContext()
       const { inertia, captured } = createMockInertia()
@@ -159,17 +148,6 @@ describe('MemberSettingsPage', () => {
   })
 
   describe('update (PUT)', () => {
-    test('unauthenticated request returns 302 redirect to /login', async () => {
-      const ctx = createMockContext()
-      const { inertia } = createMockInertia()
-      const page = new MemberSettingsPage(inertia, {} as any, {} as any)
-
-      const response = await page.update(ctx)
-
-      expect(response.status).toBe(302)
-      expect(response.headers.get('Location')).toBe('/login')
-    })
-
     test('update success renders with no formError', async () => {
       const body = { displayName: 'New Name' }
       const ctx = createMemberContextWithBody(body)

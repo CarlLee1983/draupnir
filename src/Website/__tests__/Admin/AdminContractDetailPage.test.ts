@@ -110,43 +110,6 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 }
 
 describe('AdminContractDetailPage', () => {
-  test('unauthenticated request returns 302 redirect to /login (PAGE-03)', async () => {
-    const { inertia } = createMockInertia()
-    const mockGetDetailService = { execute: mock(() => Promise.resolve({ success: true })) }
-    const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
-    const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
-
-    const page = new AdminContractDetailPage(
-      inertia,
-      mockGetDetailService as any,
-      mockActivateService as any,
-      mockTerminateService as any,
-    )
-    const ctx = createMockContext()
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(302)
-    expect(response.headers.get('Location')).toContain('/login')
-  })
-
-  test('authenticated non-admin request returns 403 (PAGE-04)', async () => {
-    const { inertia } = createMockInertia()
-    const mockGetDetailService = { execute: mock(() => Promise.resolve({ success: true })) }
-    const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
-    const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
-
-    const page = new AdminContractDetailPage(
-      inertia,
-      mockGetDetailService as any,
-      mockActivateService as any,
-      mockTerminateService as any,
-    )
-    const ctx = createMemberContext()
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(403)
-  })
-
   test('authenticated admin request renders with correct component (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
     const mockGetDetailService = {

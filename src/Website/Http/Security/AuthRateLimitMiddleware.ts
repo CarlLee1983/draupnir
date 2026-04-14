@@ -1,76 +1,45 @@
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 
-interface RateLimitEntry {
-  count: number
-  resetAt: number
-}
-
-function getClientIp(ctx: Parameters<Middleware>[0]): string {
-  const forwarded = ctx.getHeader('x-forwarded-for') ?? ctx.getHeader('X-Forwarded-For') ?? ''
-  const firstIp = forwarded.split(',')[0]?.trim()
-  if (firstIp) return firstIp
-  return ctx.getHeader('x-real-ip') ?? ctx.getHeader('X-Real-IP') ?? 'unknown'
-}
-
 /**
- * In-memory sliding-window rate limiter for auth endpoints.
+ * 可設定的 auth rate limit middleware factory。
  *
- * @param maxRequests - Maximum allowed requests in the window.
- * @param windowMs    - Window size in milliseconds.
- *
- * @example
- * ```ts
- * // Allow 10 login attempts per 15 minutes per IP
- * const loginRateLimit = createAuthRateLimit(10, 15 * 60 * 1000)
- * router.post('/login', [loginRateLimit], LoginRequest, handler)
- * ```
+ * @param windowMs - 時間窗口（毫秒）
+ * @param maxRequests - 窗口內最大請求數
  */
-export function createAuthRateLimit(maxRequests: number, windowMs: number): Middleware {
-  const store = new Map<string, RateLimitEntry>()
-
-  // Evict expired entries to prevent unbounded growth.
-  // Runs probabilistically (1-in-100 requests) to avoid per-request overhead.
-  function maybeEvict(): void {
-    if (Math.random() > 0.01) return
-    const now = Date.now()
-    for (const [key, entry] of store) {
-      if (now > entry.resetAt) store.delete(key)
-    }
-  }
+export function createAuthRateLimit(windowMs: number, maxRequests: number): Middleware {
+  const counts = new Map<string, { count: number; resetAt: number }>()
 
   return async (ctx, next) => {
-    const ip = getClientIp(ctx)
+    const ip =
+      ctx.getHeader('x-forwarded-for') ?? ctx.getHeader('x-real-ip') ?? 'unknown'
     const now = Date.now()
+    const entry = counts.get(ip)
 
-    maybeEvict()
-
-    const entry = store.get(ip)
     if (!entry || now > entry.resetAt) {
-      store.set(ip, { count: 1, resetAt: now + windowMs })
+      counts.set(ip, { count: 1, resetAt: now + windowMs })
       return next()
     }
 
-    entry.count++
-    if (entry.count > maxRequests) {
-      const retryAfterSecs = Math.ceil((entry.resetAt - now) / 1000)
+    if (entry.count >= maxRequests) {
       return new Response(
-        JSON.stringify({ success: false, message: 'Too many requests', error: 'RATE_LIMIT_EXCEEDED' }),
+        JSON.stringify({ success: false, message: 'Too many requests', error: 'RATE_LIMITED' }),
         {
           status: 429,
           headers: {
             'Content-Type': 'application/json',
-            'Retry-After': String(retryAfterSecs),
+            'Retry-After': String(Math.ceil((entry.resetAt - now) / 1000)),
           },
         },
       )
     }
 
+    entry.count++
     return next()
   }
 }
 
-/** 10 attempts per 15 minutes — for `/login` and `/register`. */
-export const loginRateLimit = createAuthRateLimit(10, 15 * 60 * 1000)
+/** 登入頁：10 分鐘內最多 10 次 */
+export const loginRateLimit: Middleware = createAuthRateLimit(10 * 60 * 1000, 10)
 
-/** 5 attempts per 60 minutes — for `/forgot-password`. */
-export const forgotPasswordRateLimit = createAuthRateLimit(5, 60 * 60 * 1000)
+/** 忘記密碼頁：1 小時內最多 5 次 */
+export const forgotPasswordRateLimit: Middleware = createAuthRateLimit(60 * 60 * 1000, 5)

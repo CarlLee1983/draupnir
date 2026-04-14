@@ -79,43 +79,6 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 }
 
 describe('AdminUsersPage', () => {
-  test('unauthenticated request returns 302 redirect to /login (PAGE-03)', async () => {
-    const { inertia } = createMockInertia()
-    const mockListService = {
-      execute: mock(() =>
-        Promise.resolve({
-          success: true,
-          data: { users: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
-        }),
-      ),
-    }
-
-    const page = new AdminUsersPage(inertia, mockListService as any)
-    const ctx = createMockContext()
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(302)
-    expect(response.headers.get('Location')).toContain('/login')
-  })
-
-  test('authenticated non-admin request returns 403 (PAGE-04)', async () => {
-    const { inertia } = createMockInertia()
-    const mockListService = {
-      execute: mock(() =>
-        Promise.resolve({
-          success: true,
-          data: { users: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
-        }),
-      ),
-    }
-
-    const page = new AdminUsersPage(inertia, mockListService as any)
-    const ctx = createMemberContext()
-    const response = await page.handle(ctx)
-
-    expect(response.status).toBe(403)
-  })
-
   test('authenticated admin request renders with correct component (PAGE-01)', async () => {
     const { inertia, captured } = createMockInertia()
     const mockListService = {
