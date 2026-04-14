@@ -1,5 +1,11 @@
 // src/Modules/AppModule/Infrastructure/Providers/AppModuleServiceProvider.ts
 
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { AppModuleController } from '../../Presentation/Controllers/AppModuleController'
+import { registerAppModuleRoutes } from '../../Presentation/Routes/appModule.routes'
+import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
 import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
@@ -17,7 +23,7 @@ import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IM
 import { AppModuleRepository } from '../Repositories/AppModuleRepository'
 import { ModuleSubscriptionRepository } from '../Repositories/ModuleSubscriptionRepository'
 
-export class AppModuleServiceProvider extends ModuleServiceProvider {
+export class AppModuleServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
 
@@ -74,6 +80,22 @@ export class AppModuleServiceProvider extends ModuleServiceProvider {
         c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
       )
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new AppModuleController(
+      core.container.make('registerModuleService') as any,
+      core.container.make('subscribeModuleService') as any,
+      core.container.make('unsubscribeModuleService') as any,
+      core.container.make('listModulesService') as any,
+      core.container.make('getModuleDetailService') as any,
+      core.container.make('listOrgSubscriptionsService') as any,
+    )
+    registerAppModuleRoutes(router, controller)
+
+    const checkAccessService = core.container.make('checkModuleAccessService') as CheckModuleAccessService
+    setCheckModuleAccessService(checkAccessService)
   }
 
   override boot(): void {
