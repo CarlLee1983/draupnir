@@ -6,10 +6,10 @@ import { FormRequest, z } from '@gravito/impulse'
  */
 export class ListUsersRequest extends FormRequest {
   /** Source of the data is the query string. */
-  source = 'query' as const
+  override source = 'query' as const
 
   /** Validation schema. */
-  schema = z.object({
+  override schema = z.object({
     role: z.string().optional(),
     status: z.enum(['active', 'suspended']).optional(),
     keyword: z.string().optional(),

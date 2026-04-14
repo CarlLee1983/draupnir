@@ -14,7 +14,7 @@ export { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequest
  * Route registration happens later in `registerWebsiteRoutes`.
  */
 export class WebsiteServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  override register(container: IContainer): void {
+  protected override registerInfraServices(container: IContainer): void {
     registerWebsiteBindings(container)
   }
 
@@ -22,5 +22,5 @@ export class WebsiteServiceProvider extends ModuleServiceProvider implements IRo
     registerWebsiteRoutes(context.router, context.container)
   }
 
-  override boot(_context: unknown): void {}
+  override boot(_container: IContainer): void {}
 }
