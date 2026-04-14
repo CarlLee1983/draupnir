@@ -17,10 +17,12 @@
  *
  * @example
  * ```typescript
- * // Registering services in a Module
+ * // Registering services in a Module (use four-hook pattern via ModuleServiceProvider)
  * export class UserServiceProvider extends ModuleServiceProvider {
- *   register(container: IContainer) {
+ *   protected override registerRepositories(container: IContainer) {
  *     container.singleton('UserRepository', (c) => new UserRepository(c.make('db')))
+ *   }
+ *   protected override registerApplicationServices(container: IContainer) {
  *     container.singleton('UserService', (c) => new UserService(c.make('UserRepository')))
  *   }
  * }
