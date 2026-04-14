@@ -56,13 +56,23 @@ export interface I18nMessage {
   key: MessageKey
   params?: Record<string, string | number>
 }
+
+export type Messages = Record<MessageKey, string>
 ```
 
 ### `createTranslator`
 
 ```typescript
-export function createTranslator(messages: Record<string, string>) {
-  return function t(key: MessageKey, params?: Record<string, string | number>): string {
+type Translator = (
+  key: MessageKey,
+  params?: Record<string, string | number>
+) => string
+
+export function createTranslator(messages: Partial<Messages>): Translator {
+  return function t(
+    key: MessageKey,
+    params?: Record<string, string | number>
+  ): string {
     const raw = messages[key]
     const value = raw !== undefined ? raw : key
 
@@ -72,7 +82,10 @@ export function createTranslator(messages: Record<string, string>) {
 
     if (!params) return value
 
-    return value.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? `{${k}}`))
+    // 僅支援簡單 {param} 插值（不支援 ICU / plural / format）
+    return value.replace(/\{(\w+)\}/g, (_, k) =>
+      String(params[k] ?? `{${k}}`)
+    )
   }
 }
 ```
@@ -82,12 +95,19 @@ export function createTranslator(messages: Record<string, string>) {
 - key 不存在，production → 靜默回傳 key
 - 無 fallback 參數（禁止傳 fallback 文案）
 
+> 注意：production 環境回傳 key 僅為容錯行為，不視為正常 fallback 機制。  
+> 缺失的 translation key 必須在開發與測試階段修正。
+
 ### `useTranslation`
 
 ```typescript
+import { useMemo } from 'react'
+
 export function useTranslation() {
   const { messages, locale } = usePage<InertiaSharedData>().props
-  const t = createTranslator(messages)
+
+  const t = useMemo(() => createTranslator(messages), [messages])
+
   return { t, locale }
 }
 ```
@@ -123,7 +143,24 @@ ui.member.dashboard.balance
 
 `ui.*` 命名空間讓開發者一眼分辨 UI copy 與業務邏輯訊息。
 
+### Key 結構規範（強制）
+
+`ui.*` key 必須對齊 page / component 結構，避免平面化擴張：
+
+```
+ui.admin.contracts.index.title
+ui.admin.contracts.index.createButton
+ui.member.dashboard.index.balance
+```
+
+原則：
+
+- key 應能對應到實際檔案或 component
+- 避免過度抽象或無語意命名（如 `ui.common.text1`）
+
 ### zh-TW 為 canonical
+
+`MessageKey` 的型別推導必須來自前後端皆可引用的共享 catalog 型別來源；若現有 `loadMessages.ts` 僅供後端 runtime 使用，需額外抽出 shared catalog type module 或 shared catalog definition。
 
 `MessageKey` 從 `catalogs['zh-TW']` 推導。TypeScript 滿足性檢查確保 `en` catalog 的 key 集合與 zh-TW 完全一致：
 
@@ -133,6 +170,23 @@ const catalogs = {
   en: { ... } satisfies Record<keyof (typeof catalogs)['zh-TW'], string>,
 }
 ```
+
+### 插值限制
+
+目前僅支援 `{param}` 形式的簡單字串插值：
+
+```
+"ui.welcome": "Hello, {name}"
+```
+
+
+不支援：
+
+- ICU message syntax（plural / select）
+- 日期 / 數字格式化
+- 巢狀結構
+
+若未來需要上述能力，需重新設計 formatter 層。
 
 ---
 
@@ -144,7 +198,7 @@ export interface InertiaSharedData {
   auth: { user: { id: string; email: string; role: string } | null }
   currentOrgId: string | null
   locale: LocaleCode
-  messages: Record<string, string>
+  messages: Partial<Messages>   // ← 改為 Partial<Messages>，見下方說明
   flash: {
     success?: I18nMessage
     error?: I18nMessage
@@ -159,6 +213,19 @@ const { t } = useTranslation()
 const { flash } = usePage<InertiaSharedData>().props
 if (flash.error) toast.error(t(flash.error.key, flash.error.params))
 ```
+
+### 為何使用 `Partial<Messages>` 而非 `Messages`
+
+`InertiaSharedData` 是傳輸邊界 DTO，而非 catalog 完整性合約：
+
+- `getInertiaShared()` 的 safe default 回傳 `messages: {}`，
+  若使用 total type `Messages`，測試與非 Inertia 呼叫者需要 unsafe cast。
+- Catalog 完整性（所有 key 都必須存在）由 `loadMessages()` 在後端載入階段保證，
+  並透過 `en satisfies Record<keyof ..., string>` 在編譯期驗證。
+- 前端 `createTranslator(messages)` 已有容錯行為（key 不存在 → dev warn + 回傳 key），
+  因此 partial type 在 runtime 安全。
+
+**結論**：在 DTO 邊界使用 `Partial<Messages>`，在 `loadMessages()` 出口保證完整性。
 
 ---
 
@@ -188,20 +255,144 @@ t('some.key', '預設文字')  // createTranslator 不支援此 signature
 error: { key: 'member.dashboard.selectOrg' }
 ```
 
+### 型別約束（強制）
+
+所有 固定文案型 user-visible props（例如 title、description、emptyState、actionLabel、error、flash）不得使用 string；僅允許 `MessageKey` 或 `I18nMessage`。
+使用者資料、資料庫內容、API 回傳內容等動態值不在此限制內。
+
+---
+
+## Flash 與訊息遷移
+
+### 現況
+
+現有後端 flash 機制以原始字串寫入 cookie：
+
+```typescript
+// 現況：原始字串 cookie
+ctx.setCookie('flash:success', '操作成功', { path: '/', sameSite: 'Lax' })
+ctx.setCookie('flash:error', messages['member.dashboard.selectOrg'], ...)
+```
+
+`getInertiaShared()` 透過 `readFlash()` 讀取這些 cookie 並以 `string | undefined` 回傳。
+現有 Page handler 也直接使用 `result.message`（原始字串）作為 prop。
+
+### 目標 wire format
+
+最終 flash prop 型別為：
+
+```typescript
+flash: {
+  success?: I18nMessage   // { key: MessageKey; params?: Record<string, string | number> }
+  error?: I18nMessage
+}
+```
+
+### 遷移路徑（分三步）
+
+#### Step A — 定義結構化 flash cookie 格式
+
+以 JSON 序列化 `I18nMessage`，保留向下相容解析：
+
+```typescript
+// 寫入（後端）
+function setFlash(ctx: IHttpContext, type: 'success' | 'error', msg: I18nMessage): void {
+  ctx.setCookie(`flash:${type}`, encodeURIComponent(JSON.stringify(msg)), {
+    path: '/', maxAge: 60, sameSite: 'Lax',
+  })
+}
+
+// 讀取（SharedPropsBuilder readFlash 擴充）
+function parseFlash(raw: string): I18nMessage | string {
+  try {
+    const decoded = decodeURIComponent(raw)
+    const parsed = JSON.parse(decoded)
+    if (parsed?.key) return parsed as I18nMessage
+  } catch {}
+  return raw  // 向下相容：舊格式仍回傳原始字串（過渡期）
+}
+```
+
+過渡期間，`InertiaSharedData.flash` 暫時接受 `I18nMessage | string`；
+待全部呼叫端遷移後，收斂為純 `I18nMessage`。
+
+#### Step B — 建立 error-code → MessageKey 映射層
+
+現有 page handler 常見模式：
+
+```typescript
+// 現況：直接使用業務錯誤訊息字串
+const result = await someService.execute(...)
+if (!result.ok) {
+  return render({ error: result.message })  // ← 原始字串
+}
+```
+
+引入 `toI18nMessage` 轉換函式：
+
+```typescript
+// 新增：src/Shared/Presentation/toI18nMessage.ts
+const ERROR_CODE_MAP: Record<string, MessageKey> = {
+  'MEMBER_SELECT_ORG': 'member.dashboard.selectOrg',
+  'ADMIN_CONTRACT_NOT_FOUND': 'admin.contracts.missingId',
+  // ... 逐步補全
+}
+
+export function toI18nMessage(
+  codeOrMessage: string,
+  params?: Record<string, string | number>,
+): I18nMessage {
+  const key = ERROR_CODE_MAP[codeOrMessage] ?? codeOrMessage as MessageKey
+  return { key, params }
+}
+```
+
+Page handler 遷移：
+
+```typescript
+// 遷移後
+if (!result.ok) {
+  return render({ error: toI18nMessage(result.errorCode) })
+}
+```
+
+#### Step C — 型別約束收斂
+
+當所有 page handler 與 flash 呼叫端遷移完成後：
+
+1. `InertiaSharedData.flash` 確認為純 `I18nMessage`（移除過渡期 `| string`）
+2. `InertiaSharedData.messages` 保持 `Partial<Messages>`（transport 邊界不變）
+3. 移除 `toI18nMessage` 中的 `ERROR_CODE_MAP` 向下相容路徑，改為編譯期強型別
+
+### 遷移優先順序
+
+| 階段 | 範圍 | 標準 |
+|------|------|------|
+| Step A | `SharedPropsBuilder.ts` + 高頻 flash 設定點 | Flash cookie 改 JSON |
+| Step B | 現有 page handler（逐檔） | `error: result.message` → `toI18nMessage` |
+| Step C | 型別收斂 | 確認無 `string` 殘留於 flash / error props |
+
 ---
 
 ## 遷移計畫
+
+### Phase 0 — Flash Wire Format 遷移（前置）
+
+詳見 [Flash 與訊息遷移](#flash-與訊息遷移) Step A。  
+**必須先於 Phase 1 完成**，以確保 `InertiaSharedData.flash` 的結構化格式就位。
 
 ### Phase 1 — 基礎設施
 
 - 新增 `resources/js/lib/i18n.ts`（`createTranslator`、`useTranslation`、型別）
 - 調整 `loadMessages.ts`：`as const` 確保型別推導，`en` 加上 `satisfies` 對齊 zh-TW
 - `InertiaSharedData.flash` 改為 `I18nMessage` shape
-- 匯出 `I18nMessage`、`MessageKey` 型別供全專案使用
+- 匯出 `MessageKey`、`Messages`、`I18nMessage` 型別供全專案使用
 
 ### Phase 2 — 後端遷移
 
 - 現有 page handler 的 `error: messages['key']` 全部改為 `error: { key: '...' }`
+- 現有 page handler 的 `error: result.message` 透過 `toI18nMessage()` 轉換
+  （詳見 [Flash 與訊息遷移](#flash-與訊息遷移) Step B）
 - 後端提交後驗證改回傳 `{ errors: Record<string, MessageKey> }`
 - 進入 code review checklist：禁止預翻字串、禁止混用
 
