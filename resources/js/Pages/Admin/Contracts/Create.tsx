@@ -40,14 +40,14 @@ export default function ContractCreate({ formError }: Props) {
 
   return (
     <AdminLayout>
-      <Head title="建立合約" />
+      <Head title={t('ui.admin.contracts.create.title')} />
 
       <div className="max-w-2xl space-y-6">
-        <h1 className="text-2xl font-bold">建立合約</h1>
+        <h1 className="text-2xl font-bold">{t('ui.admin.contracts.create.title')}</h1>
 
         <Card>
           <CardHeader>
-            <CardTitle>合約標的與條款</CardTitle>
+            <CardTitle>{t('ui.admin.contracts.create.cardTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             {formError && (
@@ -60,7 +60,7 @@ export default function ContractCreate({ formError }: Props) {
             )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="targetType">對象類型</Label>
+                <Label htmlFor="targetType">{t('ui.admin.contracts.create.targetTypeLabel')}</Label>
                 <select
                   id="targetType"
                   value={form.data.targetType}
@@ -69,24 +69,24 @@ export default function ContractCreate({ formError }: Props) {
                   }
                   className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
                 >
-                  <option value="organization">組織</option>
-                  <option value="user">使用者</option>
+                  <option value="organization">{t('ui.admin.contracts.create.targetOrg')}</option>
+                  <option value="user">{t('ui.admin.contracts.create.targetUser')}</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="targetId">目標 ID（組織或使用者 UUID）</Label>
+                <Label htmlFor="targetId">{t('ui.admin.contracts.create.targetIdLabel')}</Label>
                 <Input
                   id="targetId"
                   value={form.data.targetId}
                   onChange={(e) => form.setData('targetId', e.target.value)}
                   required
-                  placeholder="例如組織 id"
+                  placeholder={t('ui.admin.contracts.create.targetIdPlaceholder')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="creditQuota">Credit 配額</Label>
+                <Label htmlFor="creditQuota">{t('ui.admin.contracts.create.creditQuotaLabel')}</Label>
                 <Input
                   id="creditQuota"
                   type="number"
@@ -105,7 +105,7 @@ export default function ContractCreate({ formError }: Props) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="rpm">RPM</Label>
+                  <Label htmlFor="rpm">{t('ui.admin.contracts.create.rpmLabel')}</Label>
                   <Input
                     id="rpm"
                     type="number"
@@ -124,7 +124,7 @@ export default function ContractCreate({ formError }: Props) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tpm">TPM</Label>
+                  <Label htmlFor="tpm">{t('ui.admin.contracts.create.tpmLabel')}</Label>
                   <Input
                     id="tpm"
                     type="number"
@@ -146,7 +146,7 @@ export default function ContractCreate({ formError }: Props) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startDate">生效日</Label>
+                  <Label htmlFor="startDate">{t('ui.admin.contracts.create.startDateLabel')}</Label>
                   <Input
                     id="startDate"
                     type="date"
@@ -164,7 +164,7 @@ export default function ContractCreate({ formError }: Props) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="endDate">到期日</Label>
+                  <Label htmlFor="endDate">{t('ui.admin.contracts.create.endDateLabel')}</Label>
                   <Input
                     id="endDate"
                     type="date"
@@ -184,7 +184,7 @@ export default function ContractCreate({ formError }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="allowedModules">允許模組（逗號分隔）</Label>
+                <Label htmlFor="allowedModules">{t('ui.admin.contracts.create.modulesLabel')}</Label>
                 <Input
                   id="allowedModules"
                   defaultValue="dashboard,credit,api_keys"
@@ -194,10 +194,10 @@ export default function ContractCreate({ formError }: Props) {
 
               <div className="flex gap-2">
                 <Button type="submit" disabled={form.processing}>
-                  {form.processing ? '建立中...' : '建立'}
+                  {form.processing ? t('ui.admin.contracts.create.submitLoading') : t('ui.admin.contracts.create.title')}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => router.visit('/admin/contracts')}>
-                  取消
+                  {t('ui.admin.contracts.create.cancelButton')}
                 </Button>
               </div>
             </form>

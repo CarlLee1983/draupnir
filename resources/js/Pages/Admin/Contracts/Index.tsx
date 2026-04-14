@@ -17,15 +17,15 @@ export default function ContractsIndex({ contracts, error }: Props) {
   const { t } = useTranslation()
   return (
     <AdminLayout>
-      <Head title="合約管理" />
+      <Head title={t('ui.admin.contracts.title')} />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">合約管理</h1>
+          <h1 className="text-2xl font-bold">{t('ui.admin.contracts.title')}</h1>
           <Button asChild>
             <Link href="/admin/contracts/create">
               <Plus className="mr-2 h-4 w-4" />
-              建立合約
+              {t('ui.admin.contracts.createButton')}
             </Link>
           </Button>
         </div>
@@ -37,7 +37,7 @@ export default function ContractsIndex({ contracts, error }: Props) {
         <DataTable
           columns={adminContractColumns}
           data={contracts}
-          searchPlaceholder="搜尋合約..."
+          searchPlaceholder={t('ui.admin.contracts.searchPlaceholder')}
           searchColumn="name"
         />
       </div>

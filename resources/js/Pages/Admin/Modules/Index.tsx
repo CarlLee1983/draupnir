@@ -16,15 +16,15 @@ export default function ModulesIndex({ modules, error }: Props) {
   const { t } = useTranslation()
   return (
     <AdminLayout>
-      <Head title="模組管理" />
+      <Head title={t('ui.admin.modules.title')} />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">模組管理</h1>
+          <h1 className="text-2xl font-bold">{t('ui.admin.modules.title')}</h1>
           <Button asChild>
             <Link href="/admin/modules/create">
               <Plus className="mr-2 h-4 w-4" />
-              註冊模組
+              {t('ui.admin.modules.createButton')}
             </Link>
           </Button>
         </div>
@@ -36,7 +36,7 @@ export default function ModulesIndex({ modules, error }: Props) {
         <DataTable
           columns={moduleColumns}
           data={modules}
-          searchPlaceholder="搜尋模組..."
+          searchPlaceholder={t('ui.admin.modules.searchPlaceholder')}
           searchColumn="name"
         />
       </div>
