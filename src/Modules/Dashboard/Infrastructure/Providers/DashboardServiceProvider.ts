@@ -1,3 +1,8 @@
+import type { PlanetCore } from '@gravito/core'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { DashboardController } from '../../Presentation/Controllers/DashboardController'
+import { registerDashboardRoutes } from '../../Presentation/Routes/dashboard.routes'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
@@ -21,7 +26,7 @@ import { BifrostSyncService } from '../Services/BifrostSyncService'
 import { DatabaseUsageAggregator } from '../Services/DatabaseUsageAggregator'
 import { UsageAggregator } from '../Services/UsageAggregator'
 
-export class DashboardServiceProvider extends ModuleServiceProvider implements IJobRegistrar {
+export class DashboardServiceProvider extends ModuleServiceProvider implements IJobRegistrar, IRouteRegistrar {
   private container!: IContainer
 
   override register(container: IContainer): void {
@@ -100,6 +105,19 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
         c.make('drizzleUsageRepository') as IUsageRepository,
       )
     })
+  }
+
+  registerRoutes(core: PlanetCore): void {
+    const router = createGravitoModuleRouter(core)
+    const controller = new DashboardController(
+      core.container.make('getDashboardSummaryService') as any,
+      core.container.make('getUsageChartService') as any,
+      core.container.make('getKpiSummaryService') as any,
+      core.container.make('getCostTrendsService') as any,
+      core.container.make('getModelComparisonService') as any,
+      core.container.make('getPerKeyCostService') as any,
+    )
+    registerDashboardRoutes(router, controller)
   }
 
   registerJobs(scheduler: IScheduler): void {
