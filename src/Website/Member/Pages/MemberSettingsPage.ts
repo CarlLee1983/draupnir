@@ -31,7 +31,7 @@ export class MemberSettingsPage {
 
     return this.inertia.render(ctx, 'Member/Settings/Index', {
       profile: result.success ? result.data : null,
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'member.settings.loadFailed' },
       formError: null,
     })
   }
@@ -58,8 +58,8 @@ export class MemberSettingsPage {
 
     return this.inertia.render(ctx, 'Member/Settings/Index', {
       profile: profileResult.success ? profileResult.data : null,
-      error: profileResult.success ? null : profileResult.message,
-      formError: updateResult.success ? null : updateResult.message,
+      error: profileResult.success ? null : { key: 'member.settings.loadFailed' },
+      formError: updateResult.success ? null : { key: 'member.settings.loadFailed' },
     })
   }
 }

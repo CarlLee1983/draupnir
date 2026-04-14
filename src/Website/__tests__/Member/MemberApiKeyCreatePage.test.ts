@@ -166,7 +166,7 @@ describe('MemberApiKeyCreatePage', () => {
       await page.store(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/ApiKeys/Create')
-      expect(captured.lastCall?.props.formError).toBe('Missing orgId')
+      expect(captured.lastCall?.props.formError).toEqual({ key: 'member.apiKeys.missingOrgId' })
     })
 
     test('valid body with service success renders with createdKey', async () => {
@@ -219,7 +219,7 @@ describe('MemberApiKeyCreatePage', () => {
       await page.store(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/ApiKeys/Create')
-      expect(captured.lastCall?.props.formError).toBe('Create failed')
+      expect(captured.lastCall?.props.formError).toEqual({ key: 'member.apiKeys.createFailed' })
       expect(captured.lastCall?.props.createdKey).toBe(null)
     })
   })

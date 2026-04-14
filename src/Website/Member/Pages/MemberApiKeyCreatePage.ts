@@ -1,7 +1,6 @@
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 
 /**
@@ -46,8 +45,6 @@ export class MemberApiKeyCreatePage {
     if (!check.ok) return check.response!
     const auth = check.auth!
 
-    const { messages } = getInertiaShared(ctx)
-
     const body = await ctx.getJsonBody<{
       orgId?: string
       label?: string
@@ -64,7 +61,7 @@ export class MemberApiKeyCreatePage {
       return this.inertia.render(ctx, 'Member/ApiKeys/Create', {
         orgId: null,
         createdKey: null,
-        formError: messages['member.apiKeys.missingOrgId'],
+        formError: { key: 'member.apiKeys.missingOrgId' },
       })
     }
 
@@ -88,7 +85,7 @@ export class MemberApiKeyCreatePage {
     return this.inertia.render(ctx, 'Member/ApiKeys/Create', {
       orgId,
       createdKey: null,
-      formError: result.message ?? messages['member.apiKeys.createFailed'],
+      formError: { key: 'member.apiKeys.createFailed' },
     })
   }
 }

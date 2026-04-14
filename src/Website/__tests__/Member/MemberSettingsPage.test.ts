@@ -154,7 +154,7 @@ describe('MemberSettingsPage', () => {
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
       expect(captured.lastCall?.props.profile).toBe(null)
-      expect(captured.lastCall?.props.error).toBe('Failed to load profile')
+      expect(captured.lastCall?.props.error).toEqual({ key: 'member.settings.loadFailed' })
     })
   })
 
@@ -229,7 +229,7 @@ describe('MemberSettingsPage', () => {
       await page.update(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
-      expect(captured.lastCall?.props.formError).toBe('Name is too short')
+      expect(captured.lastCall?.props.formError).toEqual({ key: 'member.settings.loadFailed' })
     })
   })
 })

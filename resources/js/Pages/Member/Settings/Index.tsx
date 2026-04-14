@@ -1,5 +1,7 @@
 import { Head, useForm, usePage } from '@inertiajs/react'
 import { useEffect } from 'react'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 import { MemberLayout } from '@/layouts/MemberLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -22,11 +24,12 @@ interface UserProfile {
 
 interface Props {
   profile: UserProfile | null
-  error: string | null
-  formError: string | null
+  error: I18nMessage | null
+  formError: I18nMessage | null
 }
 
 export default function Settings({ profile, error, formError }: Props) {
+  const { t } = useTranslation()
   const { toast } = useToast()
   const page = usePage<{ auth: { user: { id: string; email: string; role: string } | null } }>()
   const email = page.props.auth?.user?.email ?? ''
@@ -41,7 +44,7 @@ export default function Settings({ profile, error, formError }: Props) {
 
   useEffect(() => {
     if (formError) {
-      toast({ title: '失敗', description: formError, variant: 'destructive' })
+      toast({ title: '失敗', description: t(formError.key, formError.params), variant: 'destructive' })
     }
   }, [formError, toast])
 
@@ -62,7 +65,7 @@ export default function Settings({ profile, error, formError }: Props) {
       <div className="max-w-2xl space-y-6">
         <h1 className="text-2xl font-bold">個人設定</h1>
 
-        {error && <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>}
+        {error && <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>}
 
         <Card>
           <CardHeader>

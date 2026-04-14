@@ -1,5 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react'
 import { useEffect } from 'react'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 import { MemberLayout } from '@/layouts/MemberLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,10 +11,11 @@ import { Label } from '@/components/ui/label'
 interface Props {
   orgId: string | null
   createdKey: string | null
-  formError: string | null
+  formError: I18nMessage | null
 }
 
 export default function ApiKeyCreate({ orgId, createdKey, formError }: Props) {
+  const { t } = useTranslation()
   const form = useForm({
     orgId: orgId ?? '',
     label: '',
@@ -56,7 +59,7 @@ export default function ApiKeyCreate({ orgId, createdKey, formError }: Props) {
         ) : (
           <Card>
             <CardContent className="pt-6">
-              {formError && <div className="mb-4 rounded-md border border-destructive p-3 text-sm text-destructive">{formError}</div>}
+              {formError && <div className="mb-4 rounded-md border border-destructive p-3 text-sm text-destructive">{t(formError.key, formError.params)}</div>}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="label">名稱</Label>
