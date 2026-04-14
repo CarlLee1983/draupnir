@@ -44,10 +44,10 @@ export default function Usage({ usageLogs, usageStats, error }: Props) {
 
   return (
     <MemberLayout>
-      <Head title="用量" />
+      <Head title={t('ui.member.usage.title')} />
 
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">用量分析</h1>
+        <h1 className="text-2xl font-bold">{t('ui.member.usage.heading')}</h1>
 
         {error && (
           <Card className="border-destructive">
@@ -57,7 +57,7 @@ export default function Usage({ usageLogs, usageStats, error }: Props) {
 
         {chartData.length === 0 ? (
           <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">尚無用量資料</CardContent>
+            <CardContent className="py-12 text-center text-muted-foreground">{t('ui.member.usage.empty')}</CardContent>
           </Card>
         ) : (
           <UsageLineChart data={chartData} title="用量趨勢" />

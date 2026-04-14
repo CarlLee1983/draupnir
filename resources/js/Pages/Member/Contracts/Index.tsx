@@ -15,14 +15,14 @@ export default function ContractsIndex({ contracts, error }: Props) {
   const { t } = useTranslation()
   return (
     <MemberLayout>
-      <Head title="合約" />
+      <Head title={t('ui.member.contracts.title')} />
 
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">合約</h1>
+        <h1 className="text-2xl font-bold">{t('ui.member.contracts.title')}</h1>
 
         {error && <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>}
 
-        <DataTable columns={contractColumns} data={contracts} searchPlaceholder="搜尋合約..." searchColumn="name" />
+        <DataTable columns={contractColumns} data={contracts} searchPlaceholder={t('ui.member.contracts.searchPlaceholder')} searchColumn="name" />
       </div>
     </MemberLayout>
   )

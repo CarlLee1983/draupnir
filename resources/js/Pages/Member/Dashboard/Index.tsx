@@ -127,18 +127,18 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
 
   return (
     <MemberLayout>
-      <Head title="總覽" />
+      <Head title={t('ui.member.dashboard.title')} />
 
       <div className="space-y-8">
         <header className="space-y-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div className="space-y-2">
               <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-                Member Dashboard
+                {t('ui.member.dashboard.subtitle')}
               </p>
-              <h1 className="text-3xl font-semibold tracking-tight">總覽</h1>
+              <h1 className="text-3xl font-semibold tracking-tight">{t('ui.member.dashboard.title')}</h1>
               <p className="max-w-2xl text-sm text-muted-foreground">
-                以 7 / 30 / 90 天時間窗檢視 cached usage_records 的成本、請求量、Token 與模型分布。
+                {t('ui.member.dashboard.description')}
               </p>
             </div>
             <div className="flex flex-col items-end gap-1">
@@ -146,7 +146,7 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
               <div className="flex items-center gap-2">
                 <StalenessLabel lastSyncedAt={bundle?.kpi.lastSyncedAt ?? null} isLoading={loading} />
                 <Button variant="outline" size="sm" className="print:hidden" onClick={() => window.print()}>
-                  Download Report
+                  {t('ui.member.dashboard.downloadReport')}
                 </Button>
               </div>
             </div>
@@ -167,7 +167,7 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
           <>
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <MetricCard
-                title="成本"
+                title={t('ui.member.dashboard.metricCost')}
                 value={bundle ? formatCredit(bundle.kpi.usage.totalCost) : '—'}
                 suffix="USD"
                 icon={<CreditCard className="h-4 w-4" />}
@@ -179,7 +179,7 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
                 }
               />
               <MetricCard
-                title="請求數"
+                title={t('ui.member.dashboard.metricRequests')}
                 value={bundle ? formatNumber(bundle.kpi.usage.totalRequests) : '—'}
                 icon={<Sparkles className="h-4 w-4" />}
                 accentClassName="from-sky-400 to-cyan-500"
@@ -190,7 +190,7 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
                 }
               />
               <MetricCard
-                title="總 Tokens"
+                title={t('ui.member.dashboard.metricTokens')}
                 value={bundle ? formatNumber(bundle.kpi.usage.totalTokens) : '—'}
                 icon={<BarChart3 className="h-4 w-4" />}
                 accentClassName="from-orange-400 to-amber-500"
@@ -201,7 +201,7 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
                 }
               />
               <MetricCard
-                title="平均延遲"
+                title={t('ui.member.dashboard.metricLatency')}
                 value={bundle ? `${formatNumber(bundle.kpi.usage.avgLatency)} ms` : '—'}
                 icon={<Clock3 className="h-4 w-4" />}
                 accentClassName="from-violet-400 to-fuchsia-500"
@@ -297,6 +297,7 @@ function MetricCard({
 }
 
 function BalanceCard({ balance }: { balance: Balance | null }) {
+  const { t } = useTranslation()
   const isLow = balance
     ? Number.parseFloat(balance.balance) < Number.parseFloat(balance.lowBalanceThreshold)
     : false
@@ -305,8 +306,8 @@ function BalanceCard({ balance }: { balance: Balance | null }) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div>
-          <CardTitle className="text-base">Credit 餘額</CardTitle>
-          <CardDescription>目前組織可用額度</CardDescription>
+          <CardTitle className="text-base">{t('ui.member.dashboard.balanceTitle')}</CardTitle>
+          <CardDescription>{t('ui.member.dashboard.balanceDescription')}</CardDescription>
         </div>
         <Wallet className="h-5 w-5 text-muted-foreground" />
       </CardHeader>
@@ -314,21 +315,22 @@ function BalanceCard({ balance }: { balance: Balance | null }) {
         <div className="text-2xl font-semibold">
           {balance ? formatCredit(balance.balance) : '—'}
         </div>
-        {balance && isLow ? <Badge variant="destructive">低額度</Badge> : null}
+        {balance && isLow ? <Badge variant="destructive">{t('ui.member.dashboard.lowBalance')}</Badge> : null}
       </CardContent>
     </Card>
   )
 }
 
 function QuickActionsCard({ orgId }: { orgId?: string | null }) {
+  const { t } = useTranslation()
   const keysQuery = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
 
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <div>
-          <CardTitle className="text-base">快速操作</CardTitle>
-          <CardDescription>常用 member 工作流</CardDescription>
+          <CardTitle className="text-base">{t('ui.member.dashboard.quickActionsTitle')}</CardTitle>
+          <CardDescription>{t('ui.member.dashboard.quickActionsDescription')}</CardDescription>
         </div>
         <RefreshCcw className="h-5 w-5 text-muted-foreground" />
       </CardHeader>
@@ -337,13 +339,13 @@ function QuickActionsCard({ orgId }: { orgId?: string | null }) {
           href={`/member/api-keys/create${keysQuery}`}
           className="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          建立 API Key
+          {t('ui.member.dashboard.createApiKey')}
         </a>
         <a
           href={`/member/usage${keysQuery}`}
           className="inline-flex h-9 items-center rounded-md border border-input bg-background px-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
         >
-          查看用量
+          {t('ui.member.dashboard.viewUsage')}
         </a>
       </CardContent>
     </Card>
@@ -391,17 +393,18 @@ function ChartSkeleton({ title, className }: { title: string; className?: string
 }
 
 function EmptyStateCard() {
+  const { t } = useTranslation()
   return (
     <Card className="border-dashed">
       <CardHeader>
-        <CardTitle className="text-base">No usage data yet</CardTitle>
+        <CardTitle className="text-base">{t('ui.member.dashboard.emptyTitle')}</CardTitle>
         <CardDescription>
-          Data syncs every 5 minutes from Bifrost. Check back after your first API call.
+          {t('ui.member.dashboard.emptyDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <p className="max-w-2xl text-sm text-muted-foreground">
-          The selected time window does not contain any cached `usage_records` rows yet.
+          {t('ui.member.dashboard.emptyDescription')}
         </p>
       </CardContent>
     </Card>
