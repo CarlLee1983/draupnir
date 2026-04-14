@@ -22,5 +22,8 @@ describe('ProfileServiceProvider', () => {
 
     expect(registered['profileController']).toBeDefined()
     expect(typeof registered['profileController']).toBe('function')
+    expect(registered['profileRepository']).toBeDefined()
+    expect(registered['getProfileService']).toBeDefined()
+    expect(registered['updateProfileService']).toBeDefined()
   })
 })

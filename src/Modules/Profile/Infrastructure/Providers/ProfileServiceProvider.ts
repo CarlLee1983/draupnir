@@ -10,6 +10,8 @@ import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProf
 import { UserProfileRepository } from '../Repositories/UserProfileRepository'
 import { ProfileController } from '../../Presentation/Controllers/ProfileController'
 import { registerProfileRoutes } from '../../Presentation/Routes/profile.routes'
+import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
+import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
 
 export class ProfileServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   protected override registerRepositories(container: IContainer): void {
