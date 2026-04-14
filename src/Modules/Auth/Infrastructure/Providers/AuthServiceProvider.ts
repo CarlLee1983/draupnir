@@ -1,12 +1,3 @@
-/**
- * AuthServiceProvider
- * Dependency injection wiring for the Auth module.
- *
- * Design:
- * - Resolve `IDatabaseAccess` inside `register()` via `getCurrentDatabaseAccess()` (no ctor injection).
- * - Single `AuthRepository` factory; concrete DB adapter is chosen by Shared wiring.
- */
-
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
@@ -47,186 +38,116 @@ import { GoogleOAuthAdapter } from '../Services/GoogleOAuthAdapter'
 import { JwtTokenService } from '../Services/JwtTokenService'
 import { ScryptPasswordHasher } from '../Services/PasswordHasher'
 
-/**
- * Service provider for the Auth module.
- * Handles registration of repositories and application services into the DI container.
- */
 export class AuthServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  /**
-   * Registers repository factories and Auth services on the container.
-   * Database access comes from `getCurrentDatabaseAccess()`.
-   *
-   * @param container The dependency injection container.
-   */
-  override register(container: IContainer): void {
+  protected override registerRepositories(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
     const registry = getRegistry()
+    registry.register('auth', (_orm: string, _db: IDatabaseAccess | undefined) => new AuthRepository(db))
+    container.singleton('authRepository', () => getRegistry().create('auth', getCurrentORM(), undefined))
+    container.singleton('authTokenRepository', () => new AuthTokenRepository(db))
+    container.singleton('passwordResetRepository', () => new PasswordResetRepository(db))
+    container.singleton('emailVerificationRepository', () => new EmailVerificationRepository(db))
+  }
 
-    // Register AuthRepository factory
-    registry.register('auth', (_orm: string, _db: IDatabaseAccess | undefined) => {
-      return new AuthRepository(db)
-    })
-
-    // Register AuthRepository as a singleton in the container
-    container.singleton('authRepository', () => {
-      return getRegistry().create('auth', getCurrentORM(), undefined)
-    })
-
-    // Register AuthTokenRepository as a singleton
-    container.singleton('authTokenRepository', () => {
-      return new AuthTokenRepository(db)
-    })
-
-    // Register PasswordHasher as a singleton
-    container.singleton('passwordHasher', () => {
-      return new ScryptPasswordHasher()
-    })
-
-    // 2. Register Application Services as singletons or bindings
-
-    container.singleton('jwtTokenService', () => {
-      return new JwtTokenService()
-    })
-
-    container.bind('registerUserService', (c: IContainer) => {
-      const repository = c.make('authRepository') as IAuthRepository
-      const passwordHasher = c.make('passwordHasher') as ScryptPasswordHasher
-      return new RegisterUserService(repository, passwordHasher)
-    })
-
-    container.bind('loginUserService', (c: IContainer) => {
-      const authRepository = c.make('authRepository') as IAuthRepository
-      const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
-      const jwtTokenService = c.make('jwtTokenService')
-      const passwordHasher = c.make('passwordHasher') as ScryptPasswordHasher
-      return new LoginUserService(
-        authRepository,
-        authTokenRepository,
-        jwtTokenService,
-        passwordHasher,
-      )
-    })
-
-    container.bind('refreshTokenService', (c: IContainer) => {
-      const authRepository = c.make('authRepository') as IAuthRepository
-      const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
-      const jwtTokenService = c.make('jwtTokenService')
-      return new RefreshTokenService(authRepository, authTokenRepository, jwtTokenService)
-    })
-
-    container.bind('logoutUserService', (c: IContainer) => {
-      const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
-      return new LogoutUserService(authTokenRepository)
-    })
-
-    container.bind('changeUserStatusService', (c: IContainer) => {
-      const authRepository = c.make('authRepository') as IAuthRepository
-      const authTokenRepository = c.make('authTokenRepository') as IAuthTokenRepository
-      return new ChangeUserStatusService(authRepository, authTokenRepository)
-    })
-
-    container.bind('listUsersService', (c: IContainer) => {
-      const authRepository = c.make('authRepository') as IAuthRepository
-      const profileRepo = c.make('profileRepository') as IUserProfileRepository
-      return new ListUsersService(authRepository, profileRepo)
-    })
-
-    container.bind('getUserDetailService', (c: IContainer) => {
-      const authRepository = c.make('authRepository') as IAuthRepository
-      return new GetUserDetailService(authRepository)
-    })
-
-    container.singleton('googleOAuthAdapter', () => {
-      const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID ?? ''
-      const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? ''
-      const redirectUri =
-        process.env.GOOGLE_OAUTH_REDIRECT_URI ?? 'http://localhost:3000/oauth/google/callback'
-      return new GoogleOAuthAdapter(clientId, clientSecret, redirectUri)
-    })
-
-    container.bind('googleOAuthService', (c: IContainer) => {
-      return new GoogleOAuthService(
-        c.make('authRepository') as IAuthRepository,
-        c.make('jwtTokenService') as JwtTokenService,
-        c.make('googleOAuthAdapter') as IGoogleOAuthAdapter,
-        c.make('profileRepository') as IUserProfileRepository,
-        c.make('passwordHasher') as ScryptPasswordHasher,
-      )
-    })
-
+  protected override registerInfraServices(container: IContainer): void {
+    container.singleton('passwordHasher', () => new ScryptPasswordHasher())
+    container.singleton('jwtTokenService', () => new JwtTokenService())
+    container.singleton('googleOAuthAdapter', () => new GoogleOAuthAdapter(
+      process.env.GOOGLE_OAUTH_CLIENT_ID ?? '',
+      process.env.GOOGLE_OAUTH_CLIENT_SECRET ?? '',
+      process.env.GOOGLE_OAUTH_REDIRECT_URI ?? 'http://localhost:3000/oauth/google/callback',
+    ))
     container.singleton('emailService', (): IEmailService => {
-      if (
-        process.env.NODE_ENV === 'production' &&
-        process.env.EMAIL_TRANSPORT_CONFIGURED !== 'true'
-      ) {
+      if (process.env.NODE_ENV === 'production' && process.env.EMAIL_TRANSPORT_CONFIGURED !== 'true') {
         throw new Error(
           '[Auth] Production email transport not configured. ' +
-            'Set EMAIL_TRANSPORT_CONFIGURED=true and wire a real IEmailService binding, ' +
-            'or replace ConsoleEmailService in AuthServiceProvider.',
+          'Set EMAIL_TRANSPORT_CONFIGURED=true and wire a real IEmailService binding, ' +
+          'or replace ConsoleEmailService in AuthServiceProvider.',
         )
       }
       return new ConsoleEmailService()
     })
+  }
 
-    container.singleton('passwordResetRepository', () => new PasswordResetRepository(db))
+  protected override registerApplicationServices(container: IContainer): void {
+    container.bind('registerUserService', (c: IContainer) => new RegisterUserService(
+      c.make('authRepository') as IAuthRepository,
+      c.make('passwordHasher') as ScryptPasswordHasher,
+    ))
+    container.bind('loginUserService', (c: IContainer) => new LoginUserService(
+      c.make('authRepository') as IAuthRepository,
+      c.make('authTokenRepository') as IAuthTokenRepository,
+      c.make('jwtTokenService') as JwtTokenService,
+      c.make('passwordHasher') as ScryptPasswordHasher,
+    ))
+    container.bind('refreshTokenService', (c: IContainer) => new RefreshTokenService(
+      c.make('authRepository') as IAuthRepository,
+      c.make('authTokenRepository') as IAuthTokenRepository,
+      c.make('jwtTokenService') as JwtTokenService,
+    ))
+    container.bind('logoutUserService', (c: IContainer) =>
+      new LogoutUserService(c.make('authTokenRepository') as IAuthTokenRepository)
+    )
+    container.bind('changeUserStatusService', (c: IContainer) => new ChangeUserStatusService(
+      c.make('authRepository') as IAuthRepository,
+      c.make('authTokenRepository') as IAuthTokenRepository,
+    ))
+    container.bind('listUsersService', (c: IContainer) => new ListUsersService(
+      c.make('authRepository') as IAuthRepository,
+      c.make('profileRepository') as IUserProfileRepository,
+    ))
+    container.bind('getUserDetailService', (c: IContainer) =>
+      new GetUserDetailService(c.make('authRepository') as IAuthRepository)
+    )
+    container.bind('googleOAuthService', (c: IContainer) => new GoogleOAuthService(
+      c.make('authRepository') as IAuthRepository,
+      c.make('jwtTokenService') as JwtTokenService,
+      c.make('googleOAuthAdapter') as IGoogleOAuthAdapter,
+      c.make('profileRepository') as IUserProfileRepository,
+      c.make('passwordHasher') as ScryptPasswordHasher,
+    ))
+    container.bind('forgotPasswordService', (c: IContainer) => new ForgotPasswordService(
+      c.make('authRepository') as IAuthRepository,
+      c.make('passwordResetRepository') as IPasswordResetRepository,
+      c.make('emailService') as IEmailService,
+      process.env.APP_URL?.trim() || 'http://localhost:3000',
+    ))
+    container.bind('resetPasswordService', (c: IContainer) => new ResetPasswordService(
+      c.make('passwordResetRepository') as IPasswordResetRepository,
+      c.make('authRepository') as IAuthRepository,
+      c.make('passwordHasher') as ScryptPasswordHasher,
+      c.make('authTokenRepository') as IAuthTokenRepository,
+    ))
+    container.bind('emailVerificationService', (c: IContainer) => new EmailVerificationService(
+      c.make('emailVerificationRepository') as IEmailVerificationRepository,
+    ))
+  }
 
-    container.singleton('emailVerificationRepository', () => new EmailVerificationRepository(db))
-
-    container.bind('forgotPasswordService', (c: IContainer) => {
-      const baseUrl = process.env.APP_URL?.trim() || 'http://localhost:3000'
-      return new ForgotPasswordService(
-        c.make('authRepository') as IAuthRepository,
-        c.make('passwordResetRepository') as IPasswordResetRepository,
-        c.make('emailService') as IEmailService,
-        baseUrl,
-      )
-    })
-
-    container.bind('resetPasswordService', (c: IContainer) => {
-      return new ResetPasswordService(
-        c.make('passwordResetRepository') as IPasswordResetRepository,
-        c.make('authRepository') as IAuthRepository,
-        c.make('passwordHasher') as ScryptPasswordHasher,
-        c.make('authTokenRepository') as IAuthTokenRepository,
-      )
-    })
-
-    container.bind('emailVerificationService', (c: IContainer) => {
-      return new EmailVerificationService(
-        c.make('emailVerificationRepository') as IEmailVerificationRepository,
-      )
-    })
-
-    // Configure middleware with the registered token repository
-    configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
+  protected override registerControllers(container: IContainer): void {
+    container.bind('authController', (c: IContainer) => new AuthController(
+      c.make('registerUserService') as RegisterUserService,
+      c.make('loginUserService') as LoginUserService,
+      c.make('refreshTokenService') as RefreshTokenService,
+      c.make('logoutUserService') as LogoutUserService,
+    ))
   }
 
   registerRoutes(context: IRouteContext): void {
-    const controller = new AuthController(
-      context.container.make('registerUserService') as any,
-      context.container.make('loginUserService') as any,
-      context.container.make('refreshTokenService') as any,
-      context.container.make('logoutUserService') as any,
-    )
+    const controller = context.container.make('authController') as AuthController
     void registerAuthRoutes(context.router, controller)
-
     if (getCurrentORM() === 'memory') {
       registerTestSeedRoutes(context.router, getCurrentDatabaseAccess())
     }
   }
 
-  /**
-   * Module boot hook. Executed after all providers are registered.
-   * Wires the UserRegisteredHandler to the DomainEventDispatcher so the Profile
-   * module creates a default profile when a user successfully registers.
-   */
-  override boot(context: any): void {
-    const container: IContainer = context
+  override boot(container: IContainer): void {
+    // Middleware 初始化
+    configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
+
+    // Event 訂閱
     const profileRepo = container.make('profileRepository') as IUserProfileRepository
-    const handler = new UserRegisteredHandler(profileRepo)
-    const dispatcher = DomainEventDispatcher.getInstance()
-    dispatcher.on('auth.user_registered', async (event) => {
-      await handler.execute(
+    DomainEventDispatcher.getInstance().on('auth.user_registered', async (event) => {
+      await new UserRegisteredHandler(profileRepo).execute(
         event.data.userId as string,
         event.data.email as string,
       )
