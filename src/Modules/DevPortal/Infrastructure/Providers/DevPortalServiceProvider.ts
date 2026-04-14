@@ -2,7 +2,6 @@ import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoS
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
 import type { IssueAppKeyService } from '@/Modules/AppApiKey/Application/Services/IssueAppKeyService'
 import type { ListAppKeysService } from '@/Modules/AppApiKey/Application/Services/ListAppKeysService'
 import type { RevokeAppKeyService } from '@/Modules/AppApiKey/Application/Services/RevokeAppKeyService'
@@ -22,12 +21,6 @@ export class DevPortalServiceProvider extends ModuleServiceProvider implements I
     const db = getCurrentDatabaseAccess()
     container.singleton('devPortalApplicationRepository', () => new ApplicationRepository(db))
     container.singleton('devPortalWebhookConfigRepository', () => new WebhookConfigRepository(db))
-  }
-
-  protected override registerInfraServices(container: IContainer): void {
-    container.singleton('devPortalWebhookDispatcher', (c: IContainer) =>
-      c.make('webhookDispatcher') as IWebhookDispatcher
-    )
   }
 
   protected override registerApplicationServices(container: IContainer): void {
