@@ -28,10 +28,11 @@ export function createBodySizeLimitMiddleware(maxBytes: number): Middleware {
 
     if (contentLength !== undefined) {
       const size = parseInt(contentLength, 10)
-      if (!isNaN(size) && size > maxBytes) {
-        return tooLargeResponse()
+      if (!isNaN(size)) {
+        if (size > maxBytes) return tooLargeResponse()
+        return next()
       }
-      return next()
+      // NaN: Content-Length 無法解析，fall-through 到 body-read 路徑
     }
 
     // No Content-Length: read body and check actual byte size

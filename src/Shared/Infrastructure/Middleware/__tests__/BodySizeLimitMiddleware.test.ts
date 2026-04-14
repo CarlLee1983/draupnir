@@ -74,7 +74,7 @@ describe('BodySizeLimitMiddleware', () => {
       expect(response.status).toBe(200)
     })
 
-    it('Content-Length 為 NaN → 當作有效值，允許執行 next()', async () => {
+    it('Content-Length 無法解析（NaN）→ 改用 body-read 路徑，空 body 允許通過', async () => {
       const mw = createBodySizeLimitMiddleware(512 * 1024)
       const ctx = createMockContext({ headers: { 'content-length': 'invalid' } })
       const response = await mw(ctx, async () => new Response('ok', { status: 200 }))

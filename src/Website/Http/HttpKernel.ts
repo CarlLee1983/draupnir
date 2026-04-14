@@ -72,6 +72,9 @@ export const HttpKernel = {
   /**
    * 層一：Global middleware — 每個請求都經過。
    * 掛載順序：BodySizeLimit → GlobalError → RequestId → RequestLogger → SecurityHeaders → CORS（有設定時）
+   *
+   * BodySizeLimit 必須排第一：413 拒絕不需要進入 error wrapper，
+   * 且避免讀取超大 body 對後續 middleware 造成記憶體壓力。
    */
   global: (): Middleware[] => {
     const corsOrigins = parseCorsAllowedOrigins()
