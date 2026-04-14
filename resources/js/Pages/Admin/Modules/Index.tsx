@@ -4,13 +4,16 @@ import { DataTable } from '@/components/tables/DataTable'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { moduleColumns, type ModuleRow } from './columns'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   modules: ModuleRow[]
-  error: string | null
+  error: I18nMessage | null
 }
 
 export default function ModulesIndex({ modules, error }: Props) {
+  const { t } = useTranslation()
   return (
     <AdminLayout>
       <Head title="模組管理" />
@@ -27,7 +30,7 @@ export default function ModulesIndex({ modules, error }: Props) {
         </div>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>
+          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
         )}
 
         <DataTable

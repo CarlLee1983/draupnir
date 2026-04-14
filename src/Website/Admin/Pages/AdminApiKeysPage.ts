@@ -65,7 +65,7 @@ export class AdminApiKeysPage {
       organizations,
       selectedOrgId: orgId,
       keys,
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'admin.apiKeys.loadFailed' },
     })
   }
 }

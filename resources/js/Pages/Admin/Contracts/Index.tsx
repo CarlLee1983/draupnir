@@ -4,14 +4,17 @@ import { DataTable } from '@/components/tables/DataTable'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { adminContractColumns, type AdminContractRow } from './columns'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   contracts: AdminContractRow[]
   meta: { total: number; page: number; limit: number; totalPages: number }
-  error: string | null
+  error: I18nMessage | null
 }
 
 export default function ContractsIndex({ contracts, error }: Props) {
+  const { t } = useTranslation()
   return (
     <AdminLayout>
       <Head title="合約管理" />
@@ -28,7 +31,7 @@ export default function ContractsIndex({ contracts, error }: Props) {
         </div>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>
+          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
         )}
 
         <DataTable

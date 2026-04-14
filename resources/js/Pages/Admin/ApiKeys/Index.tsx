@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/tables/DataTable'
 import { Label } from '@/components/ui/label'
 import { adminApiKeyColumns, type AdminApiKeyRow } from './columns'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface OrgOption {
   id: string
@@ -14,10 +16,11 @@ interface Props {
   organizations: OrgOption[]
   selectedOrgId: string | null
   keys: AdminApiKeyRow[]
-  error: string | null
+  error: I18nMessage | null
 }
 
 export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error }: Props) {
+  const { t } = useTranslation()
   const handleOrgChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const orgId = e.target.value
     router.visit(`/admin/api-keys${orgId ? `?orgId=${orgId}` : ''}`)
@@ -53,7 +56,7 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
         </Card>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{error}</div>
+          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
         )}
 
         {selectedOrgId ? (

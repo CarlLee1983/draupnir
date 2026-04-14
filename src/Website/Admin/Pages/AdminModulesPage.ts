@@ -38,7 +38,7 @@ export class AdminModulesPage {
 
     return this.inertia.render(ctx, 'Admin/Modules/Index', {
       modules,
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'admin.modules.loadFailed' },
     })
   }
 }

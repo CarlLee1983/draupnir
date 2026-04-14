@@ -59,7 +59,7 @@ export class AdminContractsPage {
     return this.inertia.render(ctx, 'Admin/Contracts/Index', {
       contracts,
       meta: result.success ? result.data?.meta : { total: 0, page: 1, limit: 20, totalPages: 0 },
-      error: result.success ? null : result.message,
+      error: result.success ? null : { key: 'admin.contracts.loadFailed' },
     })
   }
 }
