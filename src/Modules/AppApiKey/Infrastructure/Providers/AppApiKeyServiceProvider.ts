@@ -1,6 +1,5 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { AppApiKeyController } from '../../Presentation/Controllers/AppApiKeyController'
 import { registerAppApiKeyRoutes } from '../../Presentation/Routes/appApiKey.routes'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
@@ -79,17 +78,16 @@ export class AppApiKeyServiceProvider extends ModuleServiceProvider implements I
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new AppApiKeyController(
-      core.container.make('issueAppKeyService') as any,
-      core.container.make('listAppKeysService') as any,
-      core.container.make('rotateAppKeyService') as any,
-      core.container.make('revokeAppKeyService') as any,
-      core.container.make('setAppKeyScopeService') as any,
-      core.container.make('getAppKeyUsageService') as any,
+      context.container.make('issueAppKeyService') as any,
+      context.container.make('listAppKeysService') as any,
+      context.container.make('rotateAppKeyService') as any,
+      context.container.make('revokeAppKeyService') as any,
+      context.container.make('setAppKeyScopeService') as any,
+      context.container.make('getAppKeyUsageService') as any,
     )
-    registerAppApiKeyRoutes(router, controller)
+    registerAppApiKeyRoutes(context.router, controller)
   }
 
   override boot(_context: unknown): void {

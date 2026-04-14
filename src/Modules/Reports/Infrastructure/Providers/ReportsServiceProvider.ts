@@ -1,6 +1,5 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { registerReportRoutes } from '../../Presentation/Routes/report.routes'
 import type { IMailer } from '../../../../Foundation/Infrastructure/Ports/IMailer'
 import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
@@ -51,10 +50,9 @@ export class ReportsServiceProvider extends ModuleServiceProvider implements IJo
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
-    const controller = core.container.make('reportController') as ReportController
-    registerReportRoutes(router, controller)
+  registerRoutes(context: IRouteContext): void {
+    const controller = context.container.make('reportController') as ReportController
+    registerReportRoutes(context.router, controller)
   }
 
   async registerJobs(_scheduler: IScheduler): Promise<void> {

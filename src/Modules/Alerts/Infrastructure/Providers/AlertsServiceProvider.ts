@@ -1,5 +1,5 @@
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { registerAlertRoutes } from '../../Presentation/Routes/alert.routes'
 import type { IMailer } from '@/Foundation/Infrastructure/Ports/IMailer'
 import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
@@ -164,12 +164,11 @@ export class AlertsServiceProvider extends ModuleServiceProvider implements IRou
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
-    const controller = core.container.make('alertController') as AlertController
-    const webhookController = core.container.make('webhookEndpointController') as WebhookEndpointController
-    const historyController = core.container.make('alertHistoryController') as AlertHistoryController
-    registerAlertRoutes(router, controller, webhookController, historyController)
+  registerRoutes(context: IRouteContext): void {
+    const controller = context.container.make('alertController') as AlertController
+    const webhookController = context.container.make('webhookEndpointController') as WebhookEndpointController
+    const historyController = context.container.make('alertHistoryController') as AlertHistoryController
+    registerAlertRoutes(context.router, controller, webhookController, historyController)
   }
 
   override boot(context: unknown): void {

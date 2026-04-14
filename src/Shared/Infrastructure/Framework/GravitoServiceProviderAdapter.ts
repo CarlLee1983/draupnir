@@ -7,6 +7,7 @@
 
 import { type Container as GravitoContainer, type PlanetCore, ServiceProvider } from '@gravito/core'
 import type { IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 
 /**
  * 將 Gravito 的 Container 適配為框架無關的 IContainer
@@ -30,6 +31,14 @@ class GravitoContainerAdapter implements IContainer {
   make(name: string): any {
     return this.gravitoContainer.make(name)
   }
+}
+
+/**
+ * Factory: wraps a Gravito Container in the framework-agnostic IContainer adapter.
+ * Kept as a factory so GravitoContainerAdapter stays private.
+ */
+export function adaptGravitoContainer(gravitoContainer: GravitoContainer): IContainer {
+  return new GravitoContainerAdapter(gravitoContainer)
 }
 
 /**
@@ -75,7 +84,7 @@ export function createGravitoServiceProvider(
  * 刻意放在 Gravito 適配層而非 IServiceProvider.ts，保持 ModuleServiceProvider 框架無關。
  */
 export interface IRouteRegistrar {
-  registerRoutes(core: PlanetCore): void | Promise<void>
+  registerRoutes(context: IRouteContext): void | Promise<void>
 }
 
 /**

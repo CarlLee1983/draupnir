@@ -1,6 +1,5 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { SdkApiController } from '../../Presentation/Controllers/SdkApiController'
 import { registerSdkApiRoutes } from '../../Presentation/Routes/sdkApi.routes'
 import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
@@ -42,15 +41,14 @@ export class SdkApiServiceProvider extends ModuleServiceProvider implements IRou
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new SdkApiController(
-      core.container.make('proxyModelCall') as any,
-      core.container.make('queryUsage') as any,
-      core.container.make('queryBalance') as any,
+      context.container.make('proxyModelCall') as any,
+      context.container.make('queryUsage') as any,
+      context.container.make('queryBalance') as any,
     )
-    const appAuthMiddleware = core.container.make('appAuthMiddleware') as AppAuthMiddleware
-    registerSdkApiRoutes(router, controller, appAuthMiddleware)
+    const appAuthMiddleware = context.container.make('appAuthMiddleware') as AppAuthMiddleware
+    registerSdkApiRoutes(context.router, controller, appAuthMiddleware)
   }
 
   override boot(_context: unknown): void {

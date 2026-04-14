@@ -1,7 +1,6 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { GetProfileService } from '../../Application/Services/GetProfileService'
 import { UpdateProfileService } from '../../Application/Services/UpdateProfileService'
@@ -37,15 +36,14 @@ export class ProfileServiceProvider extends ModuleServiceProvider implements IRo
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new ProfileController(
-      core.container.make('getProfileService') as any,
-      core.container.make('updateProfileService') as any,
-      core.container.make('listUsersService') as any,
-      core.container.make('changeUserStatusService') as any,
+      context.container.make('getProfileService') as any,
+      context.container.make('updateProfileService') as any,
+      context.container.make('listUsersService') as any,
+      context.container.make('changeUserStatusService') as any,
     )
-    registerProfileRoutes(router, controller)
+    registerProfileRoutes(context.router, controller)
   }
 
   /**

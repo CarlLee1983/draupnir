@@ -1,8 +1,7 @@
 // src/Modules/Credit/Infrastructure/Providers/CreditServiceProvider.ts
 
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { CreditController } from '../../Presentation/Controllers/CreditController'
 import { registerCreditRoutes } from '../../Presentation/Routes/credit.routes'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
@@ -83,15 +82,14 @@ export class CreditServiceProvider extends ModuleServiceProvider implements IRou
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new CreditController(
-      core.container.make('topUpCreditService') as any,
-      core.container.make('getBalanceService') as any,
-      core.container.make('getTransactionHistoryService') as any,
-      core.container.make('refundCreditService') as any,
+      context.container.make('topUpCreditService') as any,
+      context.container.make('getBalanceService') as any,
+      context.container.make('getTransactionHistoryService') as any,
+      context.container.make('refundCreditService') as any,
     )
-    registerCreditRoutes(router, controller)
+    registerCreditRoutes(context.router, controller)
   }
 
   override boot(core: any): void {

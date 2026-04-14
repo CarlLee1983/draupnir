@@ -7,9 +7,8 @@
  * - Single `AuthRepository` factory; concrete DB adapter is chosen by Shared wiring.
  */
 
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
 import { UserRegisteredHandler } from '@/Modules/Profile/Application/EventHandlers/UserRegisteredHandler'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
@@ -205,18 +204,17 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
     configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new AuthController(
-      core.container.make('registerUserService') as any,
-      core.container.make('loginUserService') as any,
-      core.container.make('refreshTokenService') as any,
-      core.container.make('logoutUserService') as any,
+      context.container.make('registerUserService') as any,
+      context.container.make('loginUserService') as any,
+      context.container.make('refreshTokenService') as any,
+      context.container.make('logoutUserService') as any,
     )
-    void registerAuthRoutes(router, controller)
+    void registerAuthRoutes(context.router, controller)
 
     if (getCurrentORM() === 'memory') {
-      registerTestSeedRoutes(router, getCurrentDatabaseAccess())
+      registerTestSeedRoutes(context.router, getCurrentDatabaseAccess())
     }
   }
 

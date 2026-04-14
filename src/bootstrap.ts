@@ -1,7 +1,9 @@
 import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { OrbitPrism } from '@gravito/prism'
-import { createGravitoServiceProvider, isRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { adaptGravitoContainer, createGravitoServiceProvider, isRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { buildConfig } from '../config/index'
 import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
@@ -82,9 +84,13 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   await (
     core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService
   ).execute()
+  const routeContext: IRouteContext = {
+    container: adaptGravitoContainer(core.container),
+    router: createGravitoModuleRouter(core),
+  }
   for (const module of modules) {
     if (isRouteRegistrar(module)) {
-      await module.registerRoutes(core)
+      await module.registerRoutes(routeContext)
     }
   }
   console.log('✅ Routes registered')

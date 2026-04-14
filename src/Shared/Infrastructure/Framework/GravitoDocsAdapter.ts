@@ -7,11 +7,11 @@
  * 3. Parse OpenAPI specifications from YAML files.
  *
  * Architecture Highlights:
- * - Framework Agnostic: Depends only on PlanetCore and standard Node.js APIs.
+ * - Framework Agnostic: Depends only on IRouteContext and standard Node.js APIs.
  * - Simplified: Doesn't use external Swagger UI packages; uses CDN instead.
  */
 
-import type { PlanetCore } from '@gravito/core'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 
 /**
  * Builds Swagger UI HTML.
@@ -71,27 +71,29 @@ function buildSwaggerUI(): string {
  * 1. GET /api/docs - Swagger UI (HTML).
  * 2. GET /api/openapi.json - OpenAPI JSON Specification.
  *
- * @param core - Gravito core instance.
+ * @param context - Framework-agnostic route context.
  */
-export async function registerDocsWithGravito(core: PlanetCore): Promise<void> {
+export async function registerDocsWithGravito(context: IRouteContext): Promise<void> {
   // Cache the parsed OpenAPI YAML result to avoid redundant reads
   let cachedOpenAPIJSON: Record<string, unknown> | null = null
 
   // GET /api/docs - Return Swagger UI HTML
-  core.router.get('/api/docs', (ctx) => {
-    ctx.header('Content-Type', 'text/html; charset=utf-8')
-    return ctx.html(buildSwaggerUI())
+  context.router.get('/api/docs', async (_ctx) => {
+    const html = buildSwaggerUI()
+    return new Response(html, {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    })
   })
 
   // GET /api/openapi.json - Return OpenAPI specification (JSON)
-  core.router.get('/api/openapi.json', async (ctx) => {
+  context.router.get('/api/openapi.json', async (_ctx) => {
     if (cachedOpenAPIJSON === null) {
       const yamlText = await Bun.file('docs/openapi.yaml').text()
       const { parse } = await import('yaml')
       cachedOpenAPIJSON = parse(yamlText)
     }
 
-    return ctx.json(cachedOpenAPIJSON)
+    return Response.json(cachedOpenAPIJSON)
   })
 
   console.log('✅ Docs routes registered: /api/docs, /api/openapi.json')

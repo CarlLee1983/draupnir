@@ -1,8 +1,7 @@
 // src/Modules/CliApi/Infrastructure/Providers/CliApiServiceProvider.ts
 
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { CliApiController } from '../../Presentation/Controllers/CliApiController'
 import { registerCliApiRoutes } from '../../Presentation/Routes/cliApi.routes'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
@@ -55,16 +54,15 @@ export class CliApiServiceProvider extends ModuleServiceProvider implements IRou
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new CliApiController(
-      core.container.make('initiateDeviceFlowService') as any,
-      core.container.make('authorizeDeviceService') as any,
-      core.container.make('exchangeDeviceCodeService') as any,
-      core.container.make('proxyCliRequestService') as any,
-      core.container.make('revokeCliSessionService') as any,
+      context.container.make('initiateDeviceFlowService') as any,
+      context.container.make('authorizeDeviceService') as any,
+      context.container.make('exchangeDeviceCodeService') as any,
+      context.container.make('proxyCliRequestService') as any,
+      context.container.make('revokeCliSessionService') as any,
     )
-    registerCliApiRoutes(router, controller)
+    registerCliApiRoutes(context.router, controller)
   }
 
   override boot(_context: unknown): void {

@@ -1,8 +1,7 @@
 // src/Modules/AppModule/Infrastructure/Providers/AppModuleServiceProvider.ts
 
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { AppModuleController } from '../../Presentation/Controllers/AppModuleController'
 import { registerAppModuleRoutes } from '../../Presentation/Routes/appModule.routes'
 import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
@@ -82,19 +81,18 @@ export class AppModuleServiceProvider extends ModuleServiceProvider implements I
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new AppModuleController(
-      core.container.make('registerModuleService') as any,
-      core.container.make('subscribeModuleService') as any,
-      core.container.make('unsubscribeModuleService') as any,
-      core.container.make('listModulesService') as any,
-      core.container.make('getModuleDetailService') as any,
-      core.container.make('listOrgSubscriptionsService') as any,
+      context.container.make('registerModuleService') as any,
+      context.container.make('subscribeModuleService') as any,
+      context.container.make('unsubscribeModuleService') as any,
+      context.container.make('listModulesService') as any,
+      context.container.make('getModuleDetailService') as any,
+      context.container.make('listOrgSubscriptionsService') as any,
     )
-    registerAppModuleRoutes(router, controller)
+    registerAppModuleRoutes(context.router, controller)
 
-    const checkAccessService = core.container.make('checkModuleAccessService') as CheckModuleAccessService
+    const checkAccessService = context.container.make('checkModuleAccessService') as CheckModuleAccessService
     setCheckModuleAccessService(checkAccessService)
   }
 

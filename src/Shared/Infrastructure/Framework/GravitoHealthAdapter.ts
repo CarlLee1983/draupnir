@@ -1,20 +1,20 @@
-import type { PlanetCore } from '@gravito/core'
 import type { RedisClientContract } from '@gravito/plasma'
 import type { CacheManager } from '@gravito/stasis'
 import { PerformHealthCheckService } from '@/Modules/Health/Application/Services/PerformHealthCheckService'
 import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Repositories/MemoryHealthCheckRepository'
 import { SystemHealthChecker } from '@/Modules/Health/Infrastructure/Services/SystemHealthChecker'
 import { HealthController } from '@/Modules/Health/Presentation/Controllers/HealthController'
+import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { createGravitoDatabaseConnectivityCheck } from '../Database/Adapters/Atlas'
 import { GravitoCacheAdapter } from './GravitoCacheAdapter'
-import { createGravitoModuleRouter } from './GravitoModuleRouter'
 import { GravitoRedisAdapter } from './GravitoRedisAdapter'
 
 /**
  * Gravito Health Module Adapter
  *
  * Responsibilities:
- * 1. Retrieve Redis/Cache from PlanetCore (may be undefined).
+ * 1. Retrieve Redis/Cache from IContainer (may be undefined).
  * 2. Adapt to IRedisService/ICacheService.
  * 3. Assemble SystemHealthChecker + PerformHealthCheckService + HealthController.
  * 4. Register routes via IModuleRouter.
@@ -23,20 +23,20 @@ import { GravitoRedisAdapter } from './GravitoRedisAdapter'
  * All underlying modules are completely decoupled from the framework.
  *
  * @example
- * registerHealthWithGravito(core)
+ * registerHealthWithGravito(context)
  */
-function tryMake<T>(core: PlanetCore, key: string): T | undefined {
+function tryMake<T>(container: IContainer, key: string): T | undefined {
   try {
-    return core.container.make<T>(key as never)
+    return container.make(key) as T
   } catch {
     return undefined
   }
 }
 
-export function registerHealthWithGravito(core: PlanetCore): void {
-  // Retrieve raw services from PlanetCore (might not be registered, e.g., lightweight startup with ORM=memory)
-  const rawRedis = tryMake<RedisClientContract>(core, 'redis')
-  const rawCache = tryMake<CacheManager>(core, 'cache')
+export function registerHealthWithGravito(context: IRouteContext): void {
+  // Retrieve raw services from container (might not be registered, e.g., lightweight startup with ORM=memory)
+  const rawRedis = tryMake<RedisClientContract>(context.container, 'redis')
+  const rawCache = tryMake<CacheManager>(context.container, 'cache')
 
   // Adapt to framework-agnostic interfaces (null indicates NOT set)
   const redis = rawRedis ? new GravitoRedisAdapter(rawRedis) : null
@@ -51,10 +51,7 @@ export function registerHealthWithGravito(core: PlanetCore): void {
   const performHealthCheckService = new PerformHealthCheckService(repository, healthChecker)
   const controller = new HealthController(performHealthCheckService)
 
-  // Establish framework-agnostic routing interface
-  const router = createGravitoModuleRouter(core)
-
   // Register routes via IModuleRouter
-  router.get('/health', (ctx) => controller.check(ctx), { name: 'health.check' })
-  router.get('/health/history', (ctx) => controller.history(ctx), { name: 'health.history' })
+  context.router.get('/health', (ctx) => controller.check(ctx), { name: 'health.check' })
+  context.router.get('/health/history', (ctx) => controller.history(ctx), { name: 'health.history' })
 }

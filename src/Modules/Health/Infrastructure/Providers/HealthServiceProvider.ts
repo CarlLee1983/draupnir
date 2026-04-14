@@ -1,7 +1,7 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { registerHealthWithGravito } from '@/Shared/Infrastructure/Framework/GravitoHealthAdapter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { PerformHealthCheckService } from '../../Application/Services/PerformHealthCheckService'
 import type { ISystemHealthChecker } from '../../Domain/Ports/ISystemHealthChecker'
 import type { IHealthCheckRepository } from '../../Domain/Repositories/IHealthCheckRepository'
@@ -25,8 +25,8 @@ export class HealthServiceProvider extends ModuleServiceProvider implements IRou
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    registerHealthWithGravito(core)
+  registerRoutes(context: IRouteContext): void {
+    registerHealthWithGravito(context)
   }
 
   override boot(_context: unknown): void {}

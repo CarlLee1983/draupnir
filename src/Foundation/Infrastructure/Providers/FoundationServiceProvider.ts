@@ -3,11 +3,10 @@ import {
   type BifrostClientConfig,
   createBifrostClientConfig,
 } from '@draupnir/bifrost-sdk'
-import type { PlanetCore } from '@gravito/core'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import { registerDocsWithGravito } from '@/Shared/Infrastructure/Framework/GravitoDocsAdapter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import type { IScheduler } from '../Ports/Scheduler/IScheduler'
 import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/BifrostGatewayAdapter'
 import { ConsoleMailer } from '../Services/Mail/ConsoleMailer'
@@ -48,14 +47,13 @@ export class FoundationServiceProvider extends ModuleServiceProvider implements 
     })
   }
 
-  async registerRoutes(core: PlanetCore): Promise<void> {
-    const router = createGravitoModuleRouter(core)
-    router.get(
+  async registerRoutes(context: IRouteContext): Promise<void> {
+    context.router.get(
       '/api',
       async (ctx) => ctx.json({ success: true, message: 'Draupnir API', version: '0.1.0' }),
       { name: 'api.root' },
     )
-    await registerDocsWithGravito(core)
+    await registerDocsWithGravito(context)
   }
 
   override boot(_context: any): void {

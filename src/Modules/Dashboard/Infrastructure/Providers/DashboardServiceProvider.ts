@@ -1,6 +1,5 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { DashboardController } from '../../Presentation/Controllers/DashboardController'
 import { registerDashboardRoutes } from '../../Presentation/Routes/dashboard.routes'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
@@ -107,17 +106,16 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new DashboardController(
-      core.container.make('getDashboardSummaryService') as any,
-      core.container.make('getUsageChartService') as any,
-      core.container.make('getKpiSummaryService') as any,
-      core.container.make('getCostTrendsService') as any,
-      core.container.make('getModelComparisonService') as any,
-      core.container.make('getPerKeyCostService') as any,
+      context.container.make('getDashboardSummaryService') as any,
+      context.container.make('getUsageChartService') as any,
+      context.container.make('getKpiSummaryService') as any,
+      context.container.make('getCostTrendsService') as any,
+      context.container.make('getModelComparisonService') as any,
+      context.container.make('getPerKeyCostService') as any,
     )
-    registerDashboardRoutes(router, controller)
+    registerDashboardRoutes(context.router, controller)
   }
 
   registerJobs(scheduler: IScheduler): void {

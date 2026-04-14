@@ -1,6 +1,5 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { DevPortalController } from '../../Presentation/Controllers/DevPortalController'
 import { registerDevPortalRoutes } from '../../Presentation/Routes/devPortal.routes'
 import type { IWebhookDispatcher } from '@/Foundation/Infrastructure/Ports/IWebhookDispatcher'
@@ -65,16 +64,15 @@ export class DevPortalServiceProvider extends ModuleServiceProvider implements I
     })
   }
 
-  registerRoutes(core: PlanetCore): void {
-    const router = createGravitoModuleRouter(core)
+  registerRoutes(context: IRouteContext): void {
     const controller = new DevPortalController(
-      core.container.make('registerAppService') as any,
-      core.container.make('listAppsService') as any,
-      core.container.make('manageAppKeysService') as any,
-      core.container.make('configureWebhookService') as any,
-      core.container.make('getApiDocsService') as any,
+      context.container.make('registerAppService') as any,
+      context.container.make('listAppsService') as any,
+      context.container.make('manageAppKeysService') as any,
+      context.container.make('configureWebhookService') as any,
+      context.container.make('getApiDocsService') as any,
     )
-    registerDevPortalRoutes(router, controller)
+    registerDevPortalRoutes(context.router, controller)
   }
 
   override boot(_context: unknown): void {
