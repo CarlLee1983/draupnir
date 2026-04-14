@@ -36,7 +36,7 @@ import { MEMBER_PAGE_KEYS } from '../keys'
  * layer with core business logic.
  */
 
-import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
+export function registerMemberBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MEMBER_PAGE_KEYS
 
