@@ -1,7 +1,7 @@
 import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { OrbitPrism } from '@gravito/prism'
-import { createGravitoServiceProvider } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoServiceProvider, isRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { buildConfig } from '../config/index'
 import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
@@ -24,7 +24,6 @@ import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Provide
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
 import { WebsiteServiceProvider } from './Website/bootstrap/WebsiteServiceProvider'
 import { warmInertiaService } from './Website/Http/Inertia/createInertiaRequestHandler'
-import { registerRoutes } from './routes'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
@@ -83,7 +82,12 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   await (
     core.container.make('ensureCoreAppModulesService') as EnsureCoreAppModulesService
   ).execute()
-  await registerRoutes(core)
+  for (const module of modules) {
+    if (isRouteRegistrar(module)) {
+      await module.registerRoutes(core)
+    }
+  }
+  console.log('✅ Routes registered')
 
   const scheduler = core.container.make('scheduler') as IScheduler
   for (const module of modules) {
