@@ -9,8 +9,9 @@ import type { IUsageRepository } from '@/Modules/Dashboard/Application/Ports/IUs
 import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import { wireBind, wireSingleton } from '@/Shared/Infrastructure/wire'
+
 import { DeleteWebhookEndpointService } from '../../Application/Services/DeleteWebhookEndpointService'
 import { EvaluateThresholdsService } from '../../Application/Services/EvaluateThresholdsService'
 import { GetAlertHistoryService } from '../../Application/Services/GetAlertHistoryService'
@@ -42,23 +43,10 @@ import { WebhookAlertNotifier } from '../Services/WebhookAlertNotifier'
 
 export class AlertsServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
-    const db = container.make('database') as IDatabaseAccess
-
-    container.singleton('alertConfigRepository', () => {
-      return new AlertConfigRepository(db)
-    })
-
-    container.singleton('alertEventRepository', () => {
-      return new AlertEventRepository(db)
-    })
-
-    container.singleton('webhookEndpointRepository', () => {
-      return new WebhookEndpointRepository(db)
-    })
-
-    container.singleton('alertDeliveryRepository', () => {
-      return new AlertDeliveryRepository(db)
-    })
+    wireSingleton(container, 'alertConfigRepository', AlertConfigRepository, ['database'])
+    wireSingleton(container, 'alertEventRepository', AlertEventRepository, ['database'])
+    wireSingleton(container, 'webhookEndpointRepository', WebhookEndpointRepository, ['database'])
+    wireSingleton(container, 'alertDeliveryRepository', AlertDeliveryRepository, ['database'])
 
     container.bind('alertRecipientResolver', (c: IContainer) => {
       return new AlertRecipientResolverImpl({
@@ -83,20 +71,9 @@ export class AlertsServiceProvider extends ModuleServiceProvider implements IRou
       })
     })
 
-    container.bind('setBudgetService', (c: IContainer) => {
-      return new SetBudgetService(c.make('alertConfigRepository') as IAlertConfigRepository)
-    })
-
-    container.bind('getBudgetService', (c: IContainer) => {
-      return new GetBudgetService(c.make('alertConfigRepository') as IAlertConfigRepository)
-    })
-
-    container.bind('alertController', (c: IContainer) => {
-      return new AlertController(
-        c.make('setBudgetService') as SetBudgetService,
-        c.make('getBudgetService') as GetBudgetService,
-      )
-    })
+    wireBind(container, 'setBudgetService', SetBudgetService, ['alertConfigRepository'])
+    wireBind(container, 'getBudgetService', GetBudgetService, ['alertConfigRepository'])
+    wireBind(container, 'alertController', AlertController, ['setBudgetService', 'getBudgetService'])
 
     container.bind('registerWebhookEndpointService', (c: IContainer) => {
       return new RegisterWebhookEndpointService({
@@ -105,29 +82,10 @@ export class AlertsServiceProvider extends ModuleServiceProvider implements IRou
       })
     })
 
-    container.bind('listWebhookEndpointsService', (c: IContainer) => {
-      return new ListWebhookEndpointsService(
-        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
-      )
-    })
-
-    container.bind('updateWebhookEndpointService', (c: IContainer) => {
-      return new UpdateWebhookEndpointService(
-        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
-      )
-    })
-
-    container.bind('rotateWebhookSecretService', (c: IContainer) => {
-      return new RotateWebhookSecretService(
-        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
-      )
-    })
-
-    container.bind('deleteWebhookEndpointService', (c: IContainer) => {
-      return new DeleteWebhookEndpointService(
-        c.make('webhookEndpointRepository') as IWebhookEndpointRepository,
-      )
-    })
+    wireBind(container, 'listWebhookEndpointsService', ListWebhookEndpointsService, ['webhookEndpointRepository'])
+    wireBind(container, 'updateWebhookEndpointService', UpdateWebhookEndpointService, ['webhookEndpointRepository'])
+    wireBind(container, 'rotateWebhookSecretService', RotateWebhookSecretService, ['webhookEndpointRepository'])
+    wireBind(container, 'deleteWebhookEndpointService', DeleteWebhookEndpointService, ['webhookEndpointRepository'])
 
     container.bind('testWebhookEndpointService', (c: IContainer) => {
       return new TestWebhookEndpointService({
