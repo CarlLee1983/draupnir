@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface PasswordRequirements {
   minLength: number
@@ -17,10 +19,11 @@ interface PasswordRequirements {
 interface Props {
   csrfToken: string
   passwordRequirements: PasswordRequirements
-  error?: string
+  error?: I18nMessage
 }
 
 export default function Register({ passwordRequirements, error }: Props) {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
@@ -47,7 +50,7 @@ export default function Register({ passwordRequirements, error }: Props) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {error}
+                {t(error.key, error.params)}
               </div>
             )}
             <div className="space-y-2">

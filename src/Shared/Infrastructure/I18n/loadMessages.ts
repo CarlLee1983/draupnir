@@ -33,6 +33,8 @@ const zhTW = {
   'member.usage.selectOrg': '請先選擇組織',
   'auth.login.failed': '登入失敗，請確認帳號與密碼',
   'auth.register.success': '帳號建立成功，請登入',
+  'auth.emailVerification.success': '電子郵件驗證成功',
+  'auth.emailVerification.failed': '驗證連結無效或已過期',
   'sdkApi.unauthorized': '未經授權',
 } as const
 
@@ -72,6 +74,8 @@ const catalogs = {
     'member.usage.selectOrg': 'Please select an organization first',
     'auth.login.failed': 'Login failed, please check your credentials',
     'auth.register.success': 'Account created successfully, please log in',
+    'auth.emailVerification.success': 'Email verified successfully',
+    'auth.emailVerification.failed': 'Verification link is invalid or has expired',
     'sdkApi.unauthorized': 'Unauthorized',
   } satisfies Record<keyof typeof zhTW, string>,
 }

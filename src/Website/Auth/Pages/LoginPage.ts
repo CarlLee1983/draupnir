@@ -40,7 +40,7 @@ export class LoginPage {
 
     if (!result.success || !result.data) {
       return this.inertia.render(ctx, 'Auth/Login', {
-        error: result.error ?? result.message,
+        error: { key: 'auth.login.failed' },
         lastEmail: email,
       })
     }

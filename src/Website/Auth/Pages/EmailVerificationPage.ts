@@ -26,7 +26,7 @@ export class EmailVerificationPage {
     if (result.success) {
       return this.inertia.render(ctx, 'Auth/EmailVerification', {
         status: 'success',
-        message: result.message,
+        message: { key: 'auth.emailVerification.success' },
         redirectUrl: result.redirectUrl ?? '/member/dashboard',
         redirectSeconds: 5,
       })
@@ -34,7 +34,7 @@ export class EmailVerificationPage {
 
     return this.inertia.render(ctx, 'Auth/EmailVerification', {
       status: 'error',
-      message: result.message,
+      message: { key: 'auth.emailVerification.failed' },
     })
   }
 }

@@ -52,7 +52,7 @@ describe('EmailVerificationPage', () => {
       'Auth/EmailVerification',
       expect.objectContaining({
         status: 'success',
-        message: expect.any(String),
+        message: { key: 'auth.emailVerification.success' },
       }),
     )
   })

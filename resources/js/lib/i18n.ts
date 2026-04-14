@@ -12,6 +12,8 @@ const frontendCatalog = {
   'auth.logout.unauthorized': true,
   'auth.forbidden.adminOnly': true,
   'auth.register.success': true,
+  'auth.emailVerification.success': true,
+  'auth.emailVerification.failed': true,
   'admin.apiKeys.loadFailed': true,
   'admin.contracts.createFailed': true,
   'admin.contracts.loadFailed': true,

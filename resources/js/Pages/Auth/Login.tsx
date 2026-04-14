@@ -5,14 +5,17 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import type { I18nMessage } from '@/lib/i18n'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   csrfToken: string
   lastEmail?: string
-  error?: string
+  error?: I18nMessage | null
 }
 
 export default function Login({ lastEmail, error }: Props) {
+  const { t } = useTranslation()
   const [email, setEmail] = useState(lastEmail ?? '')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -37,7 +40,7 @@ export default function Login({ lastEmail, error }: Props) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {error}
+                {t(error.key, error.params)}
               </div>
             )}
             <div className="space-y-2">

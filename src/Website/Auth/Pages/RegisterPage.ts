@@ -2,6 +2,7 @@ import type { RegisterParams } from '@/Modules/Auth/Presentation/Requests/Regist
 import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 
 // Central password policy — shared across all render paths
 const PASSWORD_REQUIREMENTS = {
@@ -43,7 +44,7 @@ export class RegisterPage {
     if (!validated) {
       return this.inertia.render(ctx, 'Auth/Register', {
         passwordRequirements: PASSWORD_REQUIREMENTS,
-        error: 'Validation failed. Please check your input.',
+        error: { key: 'auth.login.failed' },
       })
     }
 
@@ -53,17 +54,12 @@ export class RegisterPage {
     if (!result.success) {
       return this.inertia.render(ctx, 'Auth/Register', {
         passwordRequirements: PASSWORD_REQUIREMENTS,
-        error: result.error ?? result.message,
+        error: { key: 'auth.login.failed' },
         lastEmail: validated.email,
       })
     }
 
-    ctx.setCookie('flash:success', encodeURIComponent('帳號建立成功，請登入'), {
-      httpOnly: true,
-      sameSite: 'Lax',
-      path: '/',
-      maxAge: 60,
-    })
+    setFlash(ctx, 'success', { key: 'auth.register.success' })
     return ctx.redirect('/login')
   }
 }
