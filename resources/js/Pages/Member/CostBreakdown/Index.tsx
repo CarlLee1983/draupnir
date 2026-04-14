@@ -148,7 +148,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
 
   return (
     <MemberLayout>
-      <Head title="成本分析" />
+      <Head title={t('ui.member.costBreakdown.title')} />
       <style>{`
         @media print {
           body {

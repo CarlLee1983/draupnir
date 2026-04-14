@@ -38,22 +38,22 @@ export default function ApiKeyCreate({ orgId, createdKey, formError }: Props) {
 
   return (
     <MemberLayout>
-      <Head title="建立 API Key" />
+      <Head title={t('ui.member.apiKeys.create.title')} />
 
       <div className="max-w-2xl space-y-6">
-        <h1 className="text-2xl font-bold">建立 API Key</h1>
+        <h1 className="text-2xl font-bold">{t('ui.member.apiKeys.create.title')}</h1>
 
         {createdKey ? (
           <Card className="border-green-500">
             <CardHeader>
-              <CardTitle>Key 建立成功</CardTitle>
+              <CardTitle>{t('ui.member.apiKeys.create.successTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                請立即複製此 Key 並妥善保管，離開此頁面後將無法再次查看完整 Key。
+                {t('ui.member.apiKeys.create.copyWarning')}
               </p>
               <code className="block break-all rounded-md bg-muted p-3 text-sm">{createdKey}</code>
-              <Button onClick={handleDone}>我已保存，返回列表</Button>
+              <Button onClick={handleDone}>{t('ui.member.apiKeys.create.savedButton')}</Button>
             </CardContent>
           </Card>
         ) : (
@@ -62,19 +62,19 @@ export default function ApiKeyCreate({ orgId, createdKey, formError }: Props) {
               {formError && <div className="mb-4 rounded-md border border-destructive p-3 text-sm text-destructive">{t(formError.key, formError.params)}</div>}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="label">名稱</Label>
+                  <Label htmlFor="label">{t('ui.member.apiKeys.create.nameLabel')}</Label>
                   <Input
                     id="label"
                     value={form.data.label}
                     onChange={(e) => form.setData('label', e.target.value)}
-                    placeholder="例如：開發測試用"
+                    placeholder={t('ui.member.apiKeys.create.namePlaceholder')}
                     required
                     maxLength={100}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="rpm">每分鐘請求數上限（RPM）</Label>
+                  <Label htmlFor="rpm">{t('ui.member.apiKeys.create.rpmLabel')}</Label>
                   <Input
                     id="rpm"
                     type="number"
@@ -86,7 +86,7 @@ export default function ApiKeyCreate({ orgId, createdKey, formError }: Props) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="tpm">每分鐘 Token 上限（TPM）</Label>
+                  <Label htmlFor="tpm">{t('ui.member.apiKeys.create.tpmLabel')}</Label>
                   <Input
                     id="tpm"
                     type="number"
@@ -99,7 +99,7 @@ export default function ApiKeyCreate({ orgId, createdKey, formError }: Props) {
 
                 <div className="flex gap-2">
                   <Button type="submit" disabled={form.processing || !orgId}>
-                    {form.processing ? '建立中...' : '建立'}
+                    {form.processing ? t('ui.member.apiKeys.create.submitLoading') : '建立'}
                   </Button>
                   <Button type="button" variant="outline" onClick={handleDone}>
                     取消

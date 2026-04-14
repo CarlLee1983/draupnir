@@ -20,7 +20,7 @@ export default function AlertsIndex(props: AlertsPageProps) {
 
   return (
     <MemberLayout>
-      <Head title="Alerts" />
+      <Head title={t('ui.member.alerts.title')} />
 
       <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.12),_transparent_32%),linear-gradient(180deg,_rgba(255,255,255,1),_rgba(248,250,252,1))] p-6">
         <div className="mx-auto max-w-6xl space-y-6">
@@ -28,7 +28,7 @@ export default function AlertsIndex(props: AlertsPageProps) {
             <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Member alerts</p>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight">Alerts</h1>
+                <h1 className="text-3xl font-semibold tracking-tight">{t('ui.member.alerts.heading')}</h1>
                 <p className="max-w-2xl text-sm text-muted-foreground">
                   Manage budgets, webhook endpoints, and alert delivery history from one place.
                 </p>

@@ -60,26 +60,26 @@ export default function Settings({ profile, error, formError }: Props) {
 
   return (
     <MemberLayout>
-      <Head title="設定" />
+      <Head title={t('ui.member.settings.title')} />
 
       <div className="max-w-2xl space-y-6">
-        <h1 className="text-2xl font-bold">個人設定</h1>
+        <h1 className="text-2xl font-bold">{t('ui.member.settings.heading')}</h1>
 
         {error && <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>}
 
         <Card>
           <CardHeader>
-            <CardTitle>個人資料</CardTitle>
+            <CardTitle>{t('ui.member.settings.profileCard')}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t('ui.member.settings.emailLabel')}</Label>
                 <Input id="email" value={email} disabled className="bg-muted" readOnly />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="displayName">顯示名稱</Label>
+                <Label htmlFor="displayName">{t('ui.member.settings.nameLabel')}</Label>
                 <Input
                   id="displayName"
                   name="displayName"
@@ -91,7 +91,7 @@ export default function Settings({ profile, error, formError }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="role">角色</Label>
+                <Label htmlFor="role">{t('ui.member.settings.roleLabel')}</Label>
                 <Input
                   id="role"
                   value={page.props.auth?.user?.role ?? ''}
@@ -102,7 +102,7 @@ export default function Settings({ profile, error, formError }: Props) {
               </div>
 
               <Button type="submit" disabled={form.processing}>
-                {form.processing ? '儲存中...' : '儲存變更'}
+                {form.processing ? t('ui.member.settings.submitLoading') : t('ui.member.settings.submitButton')}
               </Button>
             </form>
           </CardContent>

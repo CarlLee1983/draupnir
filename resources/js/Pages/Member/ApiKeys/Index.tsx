@@ -22,22 +22,22 @@ export default function ApiKeysIndex({ orgId, keys, error }: Props) {
 
   return (
     <MemberLayout>
-      <Head title="API Keys" />
+      <Head title={t('ui.member.apiKeys.title')} />
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">API Keys</h1>
+          <h1 className="text-2xl font-bold">{t('ui.member.apiKeys.title')}</h1>
           <Button asChild>
             <Link href={`/member/api-keys/create${createQuery}`}>
               <Plus className="mr-2 h-4 w-4" />
-              建立 Key
+              {t('ui.member.apiKeys.createButton')}
             </Link>
           </Button>
         </div>
 
         {error && <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>}
 
-        <DataTable columns={columns} data={keys} searchPlaceholder="搜尋 Key 名稱..." searchColumn="label" />
+        <DataTable columns={columns} data={keys} searchPlaceholder={t('ui.member.apiKeys.searchPlaceholder')} searchColumn="label" />
       </div>
     </MemberLayout>
   )
