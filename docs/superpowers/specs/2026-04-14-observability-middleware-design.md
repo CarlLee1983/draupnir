@@ -89,15 +89,25 @@ src/Shared/Infrastructure/Middleware/
 
 ```json
 {
-  "requestId": "uuid",
+  "timestamp": "2026-04-14T15:04:05.999Z",
+  "level": "error",
+  "env": "production",
+  "requestId": "550e8400-e29b-41d4-a716-446655440000",
   "method": "POST",
   "path": "/admin/users",
-  "status": 422,
-  "durationMs": 42,
+  "status": 500,
+  "durationMs": 156,
   "ip": "1.2.3.4",
-  "userAgent": "Mozilla/..."
+  "userAgent": "Mozilla/...",
+  "msg": "Database connection timeout",
+  "error": "ConnectionError"
 }
 ```
+
+- `timestamp`：ISO 8601 格式，方便 Loki / Datadog 時間索引
+- `level`：與 LOG_LEVEL 對應，方便 log aggregator 篩選
+- `env`：`NODE_ENV` 值，多環境 log 集中時可區分來源
+- `msg` / `error`：僅在 5xx 時填入（從 GlobalErrorMiddleware 傳遞），正常請求留空或省略
 
 **注意：** `userId` 無法在 global 層取得（`attachJwt` 在 group 層），留 TODO 供未來擴充。
 
@@ -177,3 +187,15 @@ global: (): Middleware[] => {
 - Log 持久化 / log rotation（由 infra 層處理）
 - Distributed tracing / OpenTelemetry 整合
 - 通用 API rate limiting（非 auth 端點）
+
+---
+
+## 未來擴充方向（預留介面）
+
+實作時可預留以下擴充點，不需立即實作：
+
+| 方向 | 說明 |
+|---|---|
+| **Correlation ID** | 區分 Request ID（單次請求）與 Correlation ID（跨服務追蹤），微服務架構時可透傳 `x-correlation-id` |
+| **Sensitive Data Masking** | RequestLogger 若未來記錄 request body，應過濾 `password`、`token`、`credit_card` 等敏感欄位 |
+| **Error Fingerprinting** | GlobalErrorMiddleware 記錄 log 時對 error message/stack 做 hash，方便 log 系統聚合相同錯誤 |
