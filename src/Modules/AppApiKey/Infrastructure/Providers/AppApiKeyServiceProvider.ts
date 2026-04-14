@@ -1,12 +1,10 @@
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
-import { AppApiKeyController } from '../../Presentation/Controllers/AppApiKeyController'
-import { registerAppApiKeyRoutes } from '../../Presentation/Routes/appApiKey.routes'
-import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
-import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { GetAppKeyUsageService } from '../../Application/Services/GetAppKeyUsageService'
 import { IssueAppKeyService } from '../../Application/Services/IssueAppKeyService'
 import { ListAppKeysService } from '../../Application/Services/ListAppKeysService'
@@ -16,81 +14,71 @@ import { SetAppKeyScopeService } from '../../Application/Services/SetAppKeyScope
 import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import { AppApiKeyRepository } from '../Repositories/AppApiKeyRepository'
 import { AppKeyBifrostSync } from '../Services/AppKeyBifrostSync'
+import { AppApiKeyController } from '../../Presentation/Controllers/AppApiKeyController'
+import { registerAppApiKeyRoutes } from '../../Presentation/Routes/appApiKey.routes'
 
 export class AppApiKeyServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  override register(container: IContainer): void {
-    const db = getCurrentDatabaseAccess()
+  protected override registerRepositories(container: IContainer): void {
+    container.singleton('appApiKeyRepository', () => new AppApiKeyRepository(getCurrentDatabaseAccess()))
+  }
 
-    container.singleton('appApiKeyRepository', () => new AppApiKeyRepository(db))
-
-    container.singleton('appKeyBifrostSync', (c: IContainer) => {
-      return new AppKeyBifrostSync(c.make('llmGatewayClient') as ILLMGatewayClient)
-    })
-
+  protected override registerInfraServices(container: IContainer): void {
+    container.singleton('appKeyBifrostSync', (c: IContainer) =>
+      new AppKeyBifrostSync(c.make('llmGatewayClient') as ILLMGatewayClient)
+    )
     container.singleton('keyHashingService', () => new KeyHashingService())
+  }
 
-    container.bind('issueAppKeyService', (c: IContainer) => {
-      return new IssueAppKeyService(
-        c.make('appApiKeyRepository') as IAppApiKeyRepository,
-        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-        c.make('appKeyBifrostSync') as AppKeyBifrostSync,
-        c.make('keyHashingService') as KeyHashingService,
-      )
-    })
+  protected override registerApplicationServices(container: IContainer): void {
+    container.bind('issueAppKeyService', (c: IContainer) => new IssueAppKeyService(
+      c.make('appApiKeyRepository') as IAppApiKeyRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      c.make('appKeyBifrostSync') as AppKeyBifrostSync,
+      c.make('keyHashingService') as KeyHashingService,
+    ))
+    container.bind('listAppKeysService', (c: IContainer) => new ListAppKeysService(
+      c.make('appApiKeyRepository') as IAppApiKeyRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+    ))
+    container.bind('rotateAppKeyService', (c: IContainer) => new RotateAppKeyService(
+      c.make('appApiKeyRepository') as IAppApiKeyRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      c.make('appKeyBifrostSync') as AppKeyBifrostSync,
+      c.make('keyHashingService') as KeyHashingService,
+    ))
+    container.bind('revokeAppKeyService', (c: IContainer) => new RevokeAppKeyService(
+      c.make('appApiKeyRepository') as IAppApiKeyRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      c.make('appKeyBifrostSync') as AppKeyBifrostSync,
+    ))
+    container.bind('setAppKeyScopeService', (c: IContainer) => new SetAppKeyScopeService(
+      c.make('appApiKeyRepository') as IAppApiKeyRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+    ))
+    container.bind('getAppKeyUsageService', (c: IContainer) => new GetAppKeyUsageService(
+      c.make('appApiKeyRepository') as IAppApiKeyRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      c.make('llmGatewayClient') as ILLMGatewayClient,
+    ))
+  }
 
-    container.bind('listAppKeysService', (c: IContainer) => {
-      return new ListAppKeysService(
-        c.make('appApiKeyRepository') as IAppApiKeyRepository,
-        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      )
-    })
-
-    container.bind('rotateAppKeyService', (c: IContainer) => {
-      return new RotateAppKeyService(
-        c.make('appApiKeyRepository') as IAppApiKeyRepository,
-        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-        c.make('appKeyBifrostSync') as AppKeyBifrostSync,
-        c.make('keyHashingService') as KeyHashingService,
-      )
-    })
-
-    container.bind('revokeAppKeyService', (c: IContainer) => {
-      return new RevokeAppKeyService(
-        c.make('appApiKeyRepository') as IAppApiKeyRepository,
-        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-        c.make('appKeyBifrostSync') as AppKeyBifrostSync,
-      )
-    })
-
-    container.bind('setAppKeyScopeService', (c: IContainer) => {
-      return new SetAppKeyScopeService(
-        c.make('appApiKeyRepository') as IAppApiKeyRepository,
-        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      )
-    })
-
-    container.bind('getAppKeyUsageService', (c: IContainer) => {
-      return new GetAppKeyUsageService(
-        c.make('appApiKeyRepository') as IAppApiKeyRepository,
-        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-        c.make('llmGatewayClient') as ILLMGatewayClient,
-      )
-    })
+  protected override registerControllers(container: IContainer): void {
+    container.bind('appApiKeyController', (c: IContainer) => new AppApiKeyController(
+      c.make('issueAppKeyService') as IssueAppKeyService,
+      c.make('listAppKeysService') as ListAppKeysService,
+      c.make('rotateAppKeyService') as RotateAppKeyService,
+      c.make('revokeAppKeyService') as RevokeAppKeyService,
+      c.make('setAppKeyScopeService') as SetAppKeyScopeService,
+      c.make('getAppKeyUsageService') as GetAppKeyUsageService,
+    ))
   }
 
   registerRoutes(context: IRouteContext): void {
-    const controller = new AppApiKeyController(
-      context.container.make('issueAppKeyService') as any,
-      context.container.make('listAppKeysService') as any,
-      context.container.make('rotateAppKeyService') as any,
-      context.container.make('revokeAppKeyService') as any,
-      context.container.make('setAppKeyScopeService') as any,
-      context.container.make('getAppKeyUsageService') as any,
-    )
+    const controller = context.container.make('appApiKeyController') as AppApiKeyController
     registerAppApiKeyRoutes(context.router, controller)
   }
 
-  override boot(_context: unknown): void {
+  override boot(_container: IContainer): void {
     console.log('🔐 [AppApiKey] Module loaded')
   }
 }
