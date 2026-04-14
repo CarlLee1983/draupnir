@@ -1,12 +1,8 @@
-// src/Modules/Contract/Infrastructure/Providers/ContractServiceProvider.ts
-
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
-import { ContractController } from '../../Presentation/Controllers/ContractController'
-import { registerContractRoutes } from '../../Presentation/Routes/contract.routes'
-import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { ActivateContractService } from '../../Application/Services/ActivateContractService'
 import { AssignContractService } from '../../Application/Services/AssignContractService'
 import { CreateContractService } from '../../Application/Services/CreateContractService'
@@ -19,77 +15,70 @@ import { TerminateContractService } from '../../Application/Services/TerminateCo
 import { UpdateContractService } from '../../Application/Services/UpdateContractService'
 import { ContractEnforcementService } from '../../Domain/Services/ContractEnforcementService'
 import { ContractRepository } from '../Repositories/ContractRepository'
+import { ContractController } from '../../Presentation/Controllers/ContractController'
+import { registerContractRoutes } from '../../Presentation/Routes/contract.routes'
 
-/** Registers contract repositories, domain helpers, and application services in the DI container. */
 export class ContractServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  /** Wires contract module singletons and scoped services. */
-  override register(container: IContainer): void {
-    const db = getCurrentDatabaseAccess()
+  protected override registerRepositories(container: IContainer): void {
+    container.singleton('contractRepository', () => new ContractRepository(getCurrentDatabaseAccess()))
+  }
 
-    container.singleton('contractRepository', () => new ContractRepository(db))
+  protected override registerApplicationServices(container: IContainer): void {
+    // ContractEnforcementService は Domain Service — app layer に登記
     container.singleton('contractEnforcementService', () => new ContractEnforcementService())
+    container.bind('createContractService', (c: IContainer) =>
+      new CreateContractService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('activateContractService', (c: IContainer) =>
+      new ActivateContractService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('updateContractService', (c: IContainer) =>
+      new UpdateContractService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('assignContractService', (c: IContainer) =>
+      new AssignContractService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('terminateContractService', (c: IContainer) =>
+      new TerminateContractService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('renewContractService', (c: IContainer) =>
+      new RenewContractService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('handleContractExpiryService', (c: IContainer) =>
+      new HandleContractExpiryService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('listContractsService', (c: IContainer) => new ListContractsService(
+      c.make('contractRepository') as ContractRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+    ))
+    container.bind('getContractDetailService', (c: IContainer) =>
+      new GetContractDetailService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('listAdminContractsService', (c: IContainer) =>
+      new ListAdminContractsService(c.make('contractRepository') as ContractRepository)
+    )
+  }
 
-    container.bind('createContractService', (c: IContainer) => {
-      return new CreateContractService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('activateContractService', (c: IContainer) => {
-      return new ActivateContractService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('updateContractService', (c: IContainer) => {
-      return new UpdateContractService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('assignContractService', (c: IContainer) => {
-      return new AssignContractService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('terminateContractService', (c: IContainer) => {
-      return new TerminateContractService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('renewContractService', (c: IContainer) => {
-      return new RenewContractService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('handleContractExpiryService', (c: IContainer) => {
-      return new HandleContractExpiryService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('listContractsService', (c: IContainer) => {
-      return new ListContractsService(
-        c.make('contractRepository') as ContractRepository,
-        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      )
-    })
-
-    container.bind('getContractDetailService', (c: IContainer) => {
-      return new GetContractDetailService(c.make('contractRepository') as ContractRepository)
-    })
-
-    container.bind('listAdminContractsService', (c: IContainer) => {
-      return new ListAdminContractsService(c.make('contractRepository') as ContractRepository)
-    })
+  protected override registerControllers(container: IContainer): void {
+    container.bind('contractController', (c: IContainer) => new ContractController(
+      c.make('createContractService') as CreateContractService,
+      c.make('activateContractService') as ActivateContractService,
+      c.make('updateContractService') as UpdateContractService,
+      c.make('assignContractService') as AssignContractService,
+      c.make('terminateContractService') as TerminateContractService,
+      c.make('renewContractService') as RenewContractService,
+      c.make('listContractsService') as ListContractsService,
+      c.make('getContractDetailService') as GetContractDetailService,
+      c.make('handleContractExpiryService') as HandleContractExpiryService,
+    ))
   }
 
   registerRoutes(context: IRouteContext): void {
-    const controller = new ContractController(
-      context.container.make('createContractService') as any,
-      context.container.make('activateContractService') as any,
-      context.container.make('updateContractService') as any,
-      context.container.make('assignContractService') as any,
-      context.container.make('terminateContractService') as any,
-      context.container.make('renewContractService') as any,
-      context.container.make('listContractsService') as any,
-      context.container.make('getContractDetailService') as any,
-      context.container.make('handleContractExpiryService') as any,
-    )
+    const controller = context.container.make('contractController') as ContractController
     registerContractRoutes(context.router, controller)
   }
 
-  /** Logs module load during application bootstrap. */
-  override boot(): void {
+  override boot(_container: IContainer): void {
     console.log('📋 [Contract] Module loaded')
   }
 }

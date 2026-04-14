@@ -1,13 +1,9 @@
-// src/Modules/AppModule/Infrastructure/Providers/AppModuleServiceProvider.ts
-
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
-import { AppModuleController } from '../../Presentation/Controllers/AppModuleController'
-import { registerAppModuleRoutes } from '../../Presentation/Routes/appModule.routes'
-import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
-import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
+import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
 import { CheckModuleAccessService } from '../../Application/Services/CheckModuleAccessService'
 import { EnsureCoreAppModulesService } from '../../Application/Services/EnsureCoreAppModulesService'
 import { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
@@ -21,82 +17,73 @@ import type { IAppModuleRepository } from '../../Domain/Repositories/IAppModuleR
 import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IModuleSubscriptionRepository'
 import { AppModuleRepository } from '../Repositories/AppModuleRepository'
 import { ModuleSubscriptionRepository } from '../Repositories/ModuleSubscriptionRepository'
+import { AppModuleController } from '../../Presentation/Controllers/AppModuleController'
+import { registerAppModuleRoutes } from '../../Presentation/Routes/appModule.routes'
 
 export class AppModuleServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  override register(container: IContainer): void {
+  protected override registerRepositories(container: IContainer): void {
     const db = getCurrentDatabaseAccess()
-
     container.singleton('appModuleRepository', () => new AppModuleRepository(db))
     container.singleton('moduleSubscriptionRepository', () => new ModuleSubscriptionRepository(db))
+  }
 
-    container.singleton('ensureCoreAppModulesService', (c: IContainer) => {
-      return new EnsureCoreAppModulesService(c.make('appModuleRepository') as IAppModuleRepository)
-    })
-
-    container.singleton('provisionOrganizationDefaultsService', (c: IContainer) => {
-      return new ProvisionOrganizationDefaultsService(
+  protected override registerApplicationServices(container: IContainer): void {
+    container.singleton('ensureCoreAppModulesService', (c: IContainer) =>
+      new EnsureCoreAppModulesService(c.make('appModuleRepository') as IAppModuleRepository)
+    )
+    container.singleton('provisionOrganizationDefaultsService', (c: IContainer) =>
+      new ProvisionOrganizationDefaultsService(
         c.make('appModuleRepository') as IAppModuleRepository,
         c.make('contractRepository') as IContractRepository,
         c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
       )
-    })
+    )
+    container.bind('registerModuleService', (c: IContainer) =>
+      new RegisterModuleService(c.make('appModuleRepository') as IAppModuleRepository)
+    )
+    container.bind('subscribeModuleService', (c: IContainer) => new SubscribeModuleService(
+      c.make('appModuleRepository') as IAppModuleRepository,
+      c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
+    ))
+    container.bind('unsubscribeModuleService', (c: IContainer) =>
+      new UnsubscribeModuleService(c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository)
+    )
+    container.bind('checkModuleAccessService', (c: IContainer) => new CheckModuleAccessService(
+      c.make('contractRepository') as IContractRepository,
+      c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
+      c.make('appModuleRepository') as IAppModuleRepository,
+    ))
+    container.bind('listModulesService', (c: IContainer) =>
+      new ListModulesService(c.make('appModuleRepository') as IAppModuleRepository)
+    )
+    container.bind('getModuleDetailService', (c: IContainer) =>
+      new GetModuleDetailService(c.make('appModuleRepository') as IAppModuleRepository)
+    )
+    container.bind('listOrgSubscriptionsService', (c: IContainer) =>
+      new ListOrgSubscriptionsService(c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository)
+    )
+  }
 
-    container.bind('registerModuleService', (c: IContainer) => {
-      return new RegisterModuleService(c.make('appModuleRepository') as IAppModuleRepository)
-    })
-
-    container.bind('subscribeModuleService', (c: IContainer) => {
-      return new SubscribeModuleService(
-        c.make('appModuleRepository') as IAppModuleRepository,
-        c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
-      )
-    })
-
-    container.bind('unsubscribeModuleService', () => {
-      return new UnsubscribeModuleService(
-        container.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
-      )
-    })
-
-    container.bind('checkModuleAccessService', (c: IContainer) => {
-      return new CheckModuleAccessService(
-        c.make('contractRepository') as IContractRepository,
-        c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
-        c.make('appModuleRepository') as IAppModuleRepository,
-      )
-    })
-
-    container.bind('listModulesService', (c: IContainer) => {
-      return new ListModulesService(c.make('appModuleRepository') as IAppModuleRepository)
-    })
-
-    container.bind('getModuleDetailService', (c: IContainer) => {
-      return new GetModuleDetailService(c.make('appModuleRepository') as IAppModuleRepository)
-    })
-
-    container.bind('listOrgSubscriptionsService', (c: IContainer) => {
-      return new ListOrgSubscriptionsService(
-        c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
-      )
-    })
+  protected override registerControllers(container: IContainer): void {
+    container.bind('appModuleController', (c: IContainer) => new AppModuleController(
+      c.make('registerModuleService') as RegisterModuleService,
+      c.make('subscribeModuleService') as SubscribeModuleService,
+      c.make('unsubscribeModuleService') as UnsubscribeModuleService,
+      c.make('listModulesService') as ListModulesService,
+      c.make('getModuleDetailService') as GetModuleDetailService,
+      c.make('listOrgSubscriptionsService') as ListOrgSubscriptionsService,
+    ))
   }
 
   registerRoutes(context: IRouteContext): void {
-    const controller = new AppModuleController(
-      context.container.make('registerModuleService') as any,
-      context.container.make('subscribeModuleService') as any,
-      context.container.make('unsubscribeModuleService') as any,
-      context.container.make('listModulesService') as any,
-      context.container.make('getModuleDetailService') as any,
-      context.container.make('listOrgSubscriptionsService') as any,
-    )
+    const controller = context.container.make('appModuleController') as AppModuleController
     registerAppModuleRoutes(context.router, controller)
-
-    const checkAccessService = context.container.make('checkModuleAccessService') as CheckModuleAccessService
-    setCheckModuleAccessService(checkAccessService)
   }
 
-  override boot(): void {
+  override boot(container: IContainer): void {
+    // Middleware 初始化（不是 DI 註冊）
+    const checkAccessService = container.make('checkModuleAccessService') as CheckModuleAccessService
+    setCheckModuleAccessService(checkAccessService)
     console.log('🧩 [AppModule] Module loaded')
   }
 }

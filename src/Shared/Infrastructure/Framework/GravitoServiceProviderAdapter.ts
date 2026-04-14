@@ -49,7 +49,7 @@ export class GravitoServiceProviderAdapter extends ServiceProvider {
     super()
   }
 
-  register(container: GravitoContainer): void {
+  override register(container: GravitoContainer): void {
     // Adapt Gravito's Container to framework-agnostic IContainer
     const adaptedContainer = new GravitoContainerAdapter(container)
 
@@ -57,7 +57,7 @@ export class GravitoServiceProviderAdapter extends ServiceProvider {
     this.moduleProvider.register(adaptedContainer)
   }
 
-  boot(core: PlanetCore): void {
+  override boot(core: PlanetCore): void {
     // Wrap core.container in our adapter so moduleProvider.boot receives an IContainer
     const adaptedContainer = new GravitoContainerAdapter(core.container)
     this.moduleProvider.boot(adaptedContainer)

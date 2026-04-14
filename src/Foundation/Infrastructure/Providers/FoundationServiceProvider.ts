@@ -15,7 +15,7 @@ import { CronerScheduler } from '../Services/Scheduler/CronerScheduler'
 import { WebhookDispatcher } from '../Services/Webhook/WebhookDispatcher'
 
 export class FoundationServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  override register(container: IContainer): void {
+  protected override registerInfraServices(container: IContainer): void {
     container.singleton('bifrostConfig', () => {
       return createBifrostClientConfig()
     })
@@ -56,7 +56,7 @@ export class FoundationServiceProvider extends ModuleServiceProvider implements 
     await registerDocsWithGravito(context)
   }
 
-  override boot(_context: any): void {
+  override boot(_container: IContainer): void {
     console.log('🏗️  [Foundation] Module loaded')
   }
 }

@@ -1,33 +1,30 @@
-import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import { registerHealthWithGravito } from '@/Shared/Infrastructure/Framework/GravitoHealthAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
-import { PerformHealthCheckService } from '../../Application/Services/PerformHealthCheckService'
+import { registerHealthWithGravito } from '@/Shared/Infrastructure/Framework/GravitoHealthAdapter'
 import type { ISystemHealthChecker } from '../../Domain/Ports/ISystemHealthChecker'
 import type { IHealthCheckRepository } from '../../Domain/Repositories/IHealthCheckRepository'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import { PerformHealthCheckService } from '../../Application/Services/PerformHealthCheckService'
 import { MemoryHealthCheckRepository } from '../Repositories/MemoryHealthCheckRepository'
 import { SystemHealthChecker } from '../Services/SystemHealthChecker'
 
 export class HealthServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
-  override register(container: IContainer): void {
-    container.singleton('healthRepository', () => {
-      return new MemoryHealthCheckRepository()
-    })
+  protected override registerRepositories(container: IContainer): void {
+    container.singleton('healthRepository', () => new MemoryHealthCheckRepository())
+  }
 
-    container.singleton('systemHealthChecker', () => {
-      return new SystemHealthChecker(null, null, null)
-    })
+  protected override registerInfraServices(container: IContainer): void {
+    container.singleton('systemHealthChecker', () => new SystemHealthChecker(null, null, null))
+  }
 
-    container.bind('healthCheckService', (c: IContainer) => {
-      const repository = c.make('healthRepository') as IHealthCheckRepository
-      const healthChecker = c.make('systemHealthChecker') as ISystemHealthChecker
-      return new PerformHealthCheckService(repository, healthChecker)
-    })
+  protected override registerApplicationServices(container: IContainer): void {
+    container.bind('healthCheckService', (c: IContainer) => new PerformHealthCheckService(
+      c.make('healthRepository') as IHealthCheckRepository,
+      c.make('systemHealthChecker') as ISystemHealthChecker,
+    ))
   }
 
   registerRoutes(context: IRouteContext): void {
     registerHealthWithGravito(context)
   }
-
-  override boot(_context: unknown): void {}
 }
