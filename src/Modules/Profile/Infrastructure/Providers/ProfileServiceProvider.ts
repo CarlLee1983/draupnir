@@ -8,6 +8,8 @@ import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProf
 import { UserProfileRepository } from '../Repositories/UserProfileRepository'
 import { ProfileController } from '../../Presentation/Controllers/ProfileController'
 import { registerProfileRoutes } from '../../Presentation/Routes/profile.routes'
+import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
+import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
 
 export class ProfileServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   protected override registerRepositories(container: IContainer): void {
@@ -27,8 +29,8 @@ export class ProfileServiceProvider extends ModuleServiceProvider implements IRo
     container.bind('profileController', (c: IContainer) => new ProfileController(
       c.make('getProfileService') as GetProfileService,
       c.make('updateProfileService') as UpdateProfileService,
-      c.make('listUsersService') as any,
-      c.make('changeUserStatusService') as any,
+      c.make('listUsersService') as ListUsersService,
+      c.make('changeUserStatusService') as ChangeUserStatusService,
     ))
   }
 
