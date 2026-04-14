@@ -9,6 +9,7 @@ import { createSecurityHeadersMiddleware } from '@/Shared/Infrastructure/Middlew
 import { createGlobalErrorMiddleware } from '@/Shared/Infrastructure/Middleware/GlobalErrorMiddleware'
 import { createRequestIdMiddleware } from '@/Shared/Infrastructure/Middleware/RequestIdMiddleware'
 import { createRequestLoggerMiddleware } from '@/Shared/Infrastructure/Middleware/RequestLoggerMiddleware'
+import { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
 import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
@@ -75,6 +76,7 @@ export const HttpKernel = {
   global: (): Middleware[] => {
     const corsOrigins = parseCorsAllowedOrigins()
     return [
+      createBodySizeLimitMiddleware(512 * 1024),
       createGlobalErrorMiddleware(),
       createRequestIdMiddleware(),
       createRequestLoggerMiddleware(),
