@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, mock } from 'bun:test'
 import { CancelInvitationService } from '../Application/Services/CancelInvitationService'
 import type { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
 import { OrganizationInvitation } from '../Domain/Entities/OrganizationInvitation'
@@ -8,20 +8,20 @@ import { OrgMemberRole } from '../Domain/ValueObjects/OrgMemberRole'
 
 function makeMockInvitationRepo(): IOrganizationInvitationRepository {
   return {
-    save: vi.fn(),
-    update: vi.fn(),
-    findById: vi.fn(),
-    findByTokenHash: vi.fn(),
-    findByOrgId: vi.fn(),
-    deleteExpired: vi.fn(),
-    withTransaction: vi.fn().mockReturnThis(),
+    save: mock(),
+    update: mock(),
+    findById: mock(),
+    findByTokenHash: mock(),
+    findByOrgId: mock(),
+    deleteExpired: mock(),
+    withTransaction: mock().mockReturnThis(),
   }
 }
 
 function makeMockOrgAuth(authorized = true): OrgAuthorizationHelper {
   return {
-    requireOrgMembership: vi.fn().mockResolvedValue({ authorized }),
-    requireOrgManager: vi.fn().mockResolvedValue(
+    requireOrgMembership: mock().mockResolvedValue({ authorized }),
+    requireOrgManager: mock().mockResolvedValue(
       authorized
         ? { authorized: true }
         : { authorized: false, error: 'NOT_ORG_MANAGER' },
@@ -57,19 +57,19 @@ describe('CancelInvitationService', () => {
 
   it('應成功取消 pending 邀請', async () => {
     const invitation = makePendingInvitation()
-    vi.mocked(invitationRepo.findById).mockResolvedValue(invitation)
-    vi.mocked(invitationRepo.update).mockResolvedValue()
+    ;(invitationRepo.findById as any).mockResolvedValue(invitation)
+    ;(invitationRepo.update as any).mockResolvedValue()
 
     const result = await service.execute('org-1', 'inv-1', 'user-manager', 'user')
     expect(result.success).toBe(true)
     // 驗證 update() 被呼叫且傳入 cancelled invitation
-    expect(vi.mocked(invitationRepo.update)).toHaveBeenCalledOnce()
-    const updatedArg = vi.mocked(invitationRepo.update).mock.calls[0][0]
+    expect(invitationRepo.update as any).toHaveBeenCalledOnce()
+    const updatedArg = (invitationRepo.update as any).mock.calls[0][0]
     expect(updatedArg.status.getValue()).toBe('cancelled')
   })
 
   it('邀請不存在應回傳 INVITATION_NOT_FOUND', async () => {
-    vi.mocked(invitationRepo.findById).mockResolvedValue(null)
+    ;(invitationRepo.findById as any).mockResolvedValue(null)
 
     const result = await service.execute('org-1', 'unknown-inv', 'user-manager', 'user')
     expect(result.success).toBe(false)
@@ -78,7 +78,7 @@ describe('CancelInvitationService', () => {
 
   it('邀請屬於不同組織應回傳 INVITATION_NOT_FOUND', async () => {
     const invitation = makePendingInvitation('other-org')
-    vi.mocked(invitationRepo.findById).mockResolvedValue(invitation)
+    ;(invitationRepo.findById as any).mockResolvedValue(invitation)
 
     const result = await service.execute('org-1', 'inv-1', 'user-manager', 'user')
     expect(result.success).toBe(false)

@@ -1,4 +1,3 @@
-import type { PlanetCore } from '@gravito/core'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import { registerAlertRoutes } from '../../Presentation/Routes/alert.routes'
@@ -216,8 +215,8 @@ export class AlertsServiceProvider extends ModuleServiceProvider implements IRou
   }
 
   override boot(context: unknown): void {
-    const core = context as PlanetCore
-    const evaluateThresholdsService = core.container.make(
+    const container = context as IContainer
+    const evaluateThresholdsService = container.make(
       'evaluateThresholdsService',
     ) as EvaluateThresholdsService
 

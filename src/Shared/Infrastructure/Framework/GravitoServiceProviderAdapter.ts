@@ -49,8 +49,9 @@ export class GravitoServiceProviderAdapter extends ServiceProvider {
   }
 
   boot(core: PlanetCore): void {
-    // Call module's boot method
-    this.moduleProvider.boot(core)
+    // Wrap core.container in our adapter so moduleProvider.boot receives an IContainer
+    const adaptedContainer = new GravitoContainerAdapter(core.container)
+    this.moduleProvider.boot(adaptedContainer)
   }
 }
 

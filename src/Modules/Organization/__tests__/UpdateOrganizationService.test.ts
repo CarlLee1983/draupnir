@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, mock } from 'bun:test'
 import type { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
 import { UpdateOrganizationService } from '../Application/Services/UpdateOrganizationService'
 import { Organization } from '../Domain/Aggregates/Organization'
@@ -6,20 +6,20 @@ import type { IOrganizationRepository } from '../Domain/Repositories/IOrganizati
 
 function makeMockOrgRepo(): IOrganizationRepository {
   return {
-    findById: vi.fn(),
-    findBySlug: vi.fn(),
-    save: vi.fn(),
-    update: vi.fn(),
-    findAll: vi.fn(),
-    count: vi.fn(),
-    withTransaction: vi.fn().mockReturnThis(),
+    findById: mock(),
+    findBySlug: mock(),
+    save: mock(),
+    update: mock(),
+    findAll: mock(),
+    count: mock(),
+    withTransaction: mock().mockReturnThis(),
   }
 }
 
 function makeMockOrgAuth(authorized = true): OrgAuthorizationHelper {
   return {
-    requireOrgMembership: vi.fn().mockResolvedValue({ authorized }),
-    requireOrgManager: vi.fn().mockResolvedValue(
+    requireOrgMembership: mock().mockResolvedValue({ authorized }),
+    requireOrgManager: mock().mockResolvedValue(
       authorized
         ? { authorized: true }
         : { authorized: false, error: 'NOT_ORG_MANAGER' },
@@ -43,8 +43,8 @@ describe('UpdateOrganizationService', () => {
   })
 
   it('應成功更新名稱和描述', async () => {
-    vi.mocked(orgRepo.findById).mockResolvedValue(makeOrg())
-    vi.mocked(orgRepo.update).mockResolvedValue()
+    ;(orgRepo.findById as any).mockResolvedValue(makeOrg())
+    ;(orgRepo.update as any).mockResolvedValue()
 
     const result = await service.execute(
       'org-1',
@@ -58,7 +58,7 @@ describe('UpdateOrganizationService', () => {
   })
 
   it('組織不存在應回傳 ORG_NOT_FOUND', async () => {
-    vi.mocked(orgRepo.findById).mockResolvedValue(null)
+    ;(orgRepo.findById as any).mockResolvedValue(null)
 
     const result = await service.execute('org-1', { name: '新名稱' }, 'user-1', 'user')
     expect(result.success).toBe(false)

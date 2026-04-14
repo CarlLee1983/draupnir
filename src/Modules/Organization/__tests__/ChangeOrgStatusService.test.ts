@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, mock } from 'bun:test'
 import { ChangeOrgStatusService } from '../Application/Services/ChangeOrgStatusService'
 import type { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
 import { Organization } from '../Domain/Aggregates/Organization'
@@ -6,20 +6,20 @@ import type { IOrganizationRepository } from '../Domain/Repositories/IOrganizati
 
 function makeMockOrgRepo(): IOrganizationRepository {
   return {
-    findById: vi.fn(),
-    findBySlug: vi.fn(),
-    save: vi.fn(),
-    update: vi.fn(),
-    findAll: vi.fn(),
-    count: vi.fn(),
-    withTransaction: vi.fn().mockReturnThis(),
+    findById: mock(),
+    findBySlug: mock(),
+    save: mock(),
+    update: mock(),
+    findAll: mock(),
+    count: mock(),
+    withTransaction: mock().mockReturnThis(),
   }
 }
 
 function makeMockOrgAuth(authorized = true): OrgAuthorizationHelper {
   return {
-    requireOrgMembership: vi.fn().mockResolvedValue({ authorized }),
-    requireOrgManager: vi.fn().mockResolvedValue(
+    requireOrgMembership: mock().mockResolvedValue({ authorized }),
+    requireOrgManager: mock().mockResolvedValue(
       authorized
         ? { authorized: true }
         : { authorized: false, error: 'NOT_ORG_MANAGER' },
@@ -43,8 +43,8 @@ describe('ChangeOrgStatusService', () => {
   })
 
   it('應成功暫停組織', async () => {
-    vi.mocked(orgRepo.findById).mockResolvedValue(makeOrg())
-    vi.mocked(orgRepo.update).mockResolvedValue()
+    ;(orgRepo.findById as any).mockResolvedValue(makeOrg())
+    ;(orgRepo.update as any).mockResolvedValue()
 
     const result = await service.execute('org-1', 'suspended', 'user-1', 'user')
     expect(result.success).toBe(true)
@@ -53,8 +53,8 @@ describe('ChangeOrgStatusService', () => {
 
   it('應成功啟用組織', async () => {
     const suspendedOrg = makeOrg().suspend()
-    vi.mocked(orgRepo.findById).mockResolvedValue(suspendedOrg)
-    vi.mocked(orgRepo.update).mockResolvedValue()
+    ;(orgRepo.findById as any).mockResolvedValue(suspendedOrg)
+    ;(orgRepo.update as any).mockResolvedValue()
 
     const result = await service.execute('org-1', 'active', 'user-1', 'user')
     expect(result.success).toBe(true)
@@ -68,7 +68,7 @@ describe('ChangeOrgStatusService', () => {
   })
 
   it('組織不存在應回傳 ORG_NOT_FOUND', async () => {
-    vi.mocked(orgRepo.findById).mockResolvedValue(null)
+    ;(orgRepo.findById as any).mockResolvedValue(null)
 
     const result = await service.execute('org-1', 'suspended', 'user-1', 'user')
     expect(result.success).toBe(false)
