@@ -71,7 +71,7 @@ const webBase = (): Middleware[] => [
 export const HttpKernel = {
   /**
    * 層一：Global middleware — 每個請求都經過。
-   * 掛載順序：SecurityHeaders → CORS（有設定時）
+   * 掛載順序：BodySizeLimit → GlobalError → RequestId → RequestLogger → SecurityHeaders → CORS（有設定時）
    */
   global: (): Middleware[] => {
     const corsOrigins = parseCorsAllowedOrigins()
