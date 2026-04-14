@@ -3,7 +3,11 @@ import {
   type BifrostClientConfig,
   createBifrostClientConfig,
 } from '@draupnir/bifrost-sdk'
+import type { PlanetCore } from '@gravito/core'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import { registerDocsWithGravito } from '@/Shared/Infrastructure/Framework/GravitoDocsAdapter'
 import type { IScheduler } from '../Ports/Scheduler/IScheduler'
 import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/BifrostGatewayAdapter'
 import { ConsoleMailer } from '../Services/Mail/ConsoleMailer'
@@ -11,7 +15,7 @@ import { UpyoMailer } from '../Services/Mail/UpyoMailer'
 import { CronerScheduler } from '../Services/Scheduler/CronerScheduler'
 import { WebhookDispatcher } from '../Services/Webhook/WebhookDispatcher'
 
-export class FoundationServiceProvider extends ModuleServiceProvider {
+export class FoundationServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   override register(container: IContainer): void {
     container.singleton('bifrostConfig', () => {
       return createBifrostClientConfig()
@@ -42,6 +46,16 @@ export class FoundationServiceProvider extends ModuleServiceProvider {
     container.singleton('scheduler', (): IScheduler => {
       return new CronerScheduler()
     })
+  }
+
+  async registerRoutes(core: PlanetCore): Promise<void> {
+    const router = createGravitoModuleRouter(core)
+    router.get(
+      '/api',
+      async (ctx) => ctx.json({ success: true, message: 'Draupnir API', version: '0.1.0' }),
+      { name: 'api.root' },
+    )
+    await registerDocsWithGravito(core)
   }
 
   override boot(_context: any): void {
