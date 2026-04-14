@@ -8,23 +8,23 @@ import type { LoginUserService } from '@/Modules/Auth/Application/Services/Login
 import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import type { ResetPasswordService } from '@/Modules/Auth/Application/Services/ResetPasswordService'
 import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
-import { EmailVerificationPage } from '@/Pages/Auth/EmailVerificationPage'
-import { ForgotPasswordPage } from '@/Pages/Auth/ForgotPasswordPage'
-import { GoogleOAuthCallbackPage } from '@/Pages/Auth/GoogleOAuthCallbackPage'
-import { LoginPage } from '@/Pages/Auth/LoginPage'
-import { RegisterPage } from '@/Pages/Auth/RegisterPage'
-import { ResetPasswordPage } from '@/Pages/Auth/ResetPasswordPage'
-import { VerifyDevicePage } from '@/Pages/Auth/VerifyDevicePage'
-import type { InertiaService } from '@/Pages/InertiaService'
-import { PAGE_CONTAINER_KEYS } from '@/Pages/pageContainerKeys'
+import { EmailVerificationPage } from '../Pages/EmailVerificationPage'
+import { ForgotPasswordPage } from '../Pages/ForgotPasswordPage'
+import { GoogleOAuthCallbackPage } from '../Pages/GoogleOAuthCallbackPage'
+import { LoginPage } from '../Pages/LoginPage'
+import { RegisterPage } from '../Pages/RegisterPage'
+import { ResetPasswordPage } from '../Pages/ResetPasswordPage'
+import { VerifyDevicePage } from '../Pages/VerifyDevicePage'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 
-import { AUTH_PAGE_KEYS } from './authPageKeys'
+import { AUTH_PAGE_KEYS } from '../keys'
 
 /**
  * @param container - DI container; `InertiaService` must already be bound.
  */
-export function registerAuthPageBindings(container: IContainer): void {
+export function registerAuthBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = AUTH_PAGE_KEYS
 

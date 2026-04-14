@@ -16,9 +16,9 @@ import type {
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
 
-import { AUTH_PAGE_KEYS } from './auth/authPageKeys'
-import { bindPageAction } from './bindPageAction'
-import { withInertiaPageHandler } from './withInertiaPage'
+import { AUTH_PAGE_KEYS } from '../keys'
+import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
+import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -149,7 +149,7 @@ function registerAuthHttpRoute(
 /**
  * Registers auth area Inertia routes on the module router.
  */
-export function registerAuthPageRoutes(
+export function registerAuthRoutes(
   router: Pick<IModuleRouter, 'get' | 'post'>,
   container: IContainer,
 ): void {

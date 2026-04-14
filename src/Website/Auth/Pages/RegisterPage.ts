@@ -1,7 +1,7 @@
 import type { RegisterParams } from '@/Modules/Auth/Presentation/Requests/RegisterRequest'
 import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 // Central password policy — shared across all render paths
 const PASSWORD_REQUIREMENTS = {

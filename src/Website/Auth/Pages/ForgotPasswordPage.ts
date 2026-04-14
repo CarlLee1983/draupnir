@@ -1,6 +1,6 @@
 import type { ForgotPasswordService } from '@/Modules/Auth/Application/Services/ForgotPasswordService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 export class ForgotPasswordPage {
   constructor(

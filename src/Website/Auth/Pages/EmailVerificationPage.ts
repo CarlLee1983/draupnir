@@ -1,6 +1,6 @@
 import type { EmailVerificationService } from '@/Modules/Auth/Application/Services/EmailVerificationService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 export class EmailVerificationPage {
   constructor(

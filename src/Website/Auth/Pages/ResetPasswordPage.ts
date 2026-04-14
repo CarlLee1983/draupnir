@@ -1,6 +1,6 @@
 import type { ResetPasswordService } from '@/Modules/Auth/Application/Services/ResetPasswordService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 export class ResetPasswordPage {
   constructor(

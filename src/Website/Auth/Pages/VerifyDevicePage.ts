@@ -1,7 +1,7 @@
 import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 /**
  * Inertia page: Device Flow authorization form.

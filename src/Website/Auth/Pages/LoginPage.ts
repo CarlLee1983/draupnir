@@ -1,6 +1,6 @@
 import type { LoginUserService } from '@/Modules/Auth/Application/Services/LoginUserService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../InertiaService'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 export class LoginPage {
   constructor(
