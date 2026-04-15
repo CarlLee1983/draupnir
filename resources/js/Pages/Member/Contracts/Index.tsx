@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react'
 import { MemberLayout } from '@/layouts/MemberLayout'
+import { Banner } from '@/components/ui/banner'
 import { DataTable } from '@/components/tables/DataTable'
 import { createContractColumns, type ContractRow } from './columns'
 import type { I18nMessage } from '@/lib/i18n'
@@ -23,9 +24,10 @@ export default function ContractsIndex({ contracts, error }: Props) {
         <h1 className="text-2xl font-bold">{t('ui.member.contracts.title')}</h1>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">
-            {t(error.key, error.params)}
-          </div>
+          <Banner
+            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
+            message={t(error.key, error.params)}
+          />
         )}
 
         <DataTable

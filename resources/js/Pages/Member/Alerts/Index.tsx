@@ -6,6 +6,7 @@ import type { AlertsPageProps, AlertsTab } from './types'
 import BudgetsTab from './tabs/BudgetsTab'
 import WebhooksTab from './tabs/WebhooksTab'
 import HistoryTab from './tabs/HistoryTab'
+import { Banner } from '@/components/ui/banner'
 import { useTranslation } from '@/lib/i18n'
 
 const TAB_LABELS: Record<AlertsTab, string> = {
@@ -43,11 +44,12 @@ export default function AlertsIndex(props: AlertsPageProps) {
               </div>
             </div>
 
-            {props.error ? (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {t(props.error.key, props.error.params)}
-              </div>
-            ) : null}
+            {props.error && (
+              <Banner
+                tone={props.error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
+                message={t(props.error.key, props.error.params)}
+              />
+            )}
           </div>
 
           <Card className="border-muted/60">
