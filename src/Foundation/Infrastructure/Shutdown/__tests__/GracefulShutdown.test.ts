@@ -61,4 +61,23 @@ describe('GracefulShutdown', () => {
     const result = shutdown.register(makeHook('A'))
     expect(result).toBe(shutdown)
   })
+
+  it('listen() 重複呼叫只註冊一次信號處理器（idempotent）', () => {
+    const onceSpy = vi.spyOn(process, 'once')
+    const shutdown = new GracefulShutdown(1000)
+    shutdown.listen()
+    shutdown.listen() // second call should be a no-op
+    const sigTermCalls = onceSpy.mock.calls.filter(([sig]) => sig === 'SIGTERM')
+    expect(sigTermCalls).toHaveLength(1)
+    onceSpy.mockRestore()
+  })
+
+  it('listen() 預設綁定 SIGTERM 和 SIGINT', () => {
+    const onceSpy = vi.spyOn(process, 'once')
+    const shutdown = new GracefulShutdown(1000)
+    shutdown.listen()
+    expect(onceSpy).toHaveBeenCalledWith('SIGTERM', expect.any(Function))
+    expect(onceSpy).toHaveBeenCalledWith('SIGINT', expect.any(Function))
+    onceSpy.mockRestore()
+  })
 })

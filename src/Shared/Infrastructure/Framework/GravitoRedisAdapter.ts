@@ -36,7 +36,8 @@ export class GravitoRedisAdapter implements IRedisService {
   }
 
   async disconnect(): Promise<void> {
-    // RedisClientContract 底層為 ioredis-compatible client，提供 quit()
-    await (this.redis as any).quit?.()
+    // RedisClientContract 底層為 ioredis-compatible client，提供 quit()。
+    // 因 @gravito/plasma 型別未宣告 quit()，使用窄型別轉換代替 as any。
+    await (this.redis as { quit?: () => Promise<void> }).quit?.()
   }
 }

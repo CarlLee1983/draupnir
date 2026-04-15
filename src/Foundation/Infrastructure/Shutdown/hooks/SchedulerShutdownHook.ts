@@ -6,7 +6,8 @@ export class SchedulerShutdownHook implements IShutdownHook {
 
   constructor(private readonly scheduler: IScheduler) {}
 
-  async shutdown(): Promise<void> {
+  shutdown(): Promise<void> {
     this.scheduler.stopAll()
+    return Promise.resolve()
   }
 }

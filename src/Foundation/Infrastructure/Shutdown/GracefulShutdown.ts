@@ -2,6 +2,7 @@ import type { IShutdownHook } from './IShutdownHook'
 
 export class GracefulShutdown {
   private readonly hooks: IShutdownHook[] = []
+  private listening = false
 
   constructor(private readonly drainTimeoutMs: number) {}
 
@@ -11,6 +12,8 @@ export class GracefulShutdown {
   }
 
   listen(signals: NodeJS.Signals[] = ['SIGTERM', 'SIGINT']): void {
+    if (this.listening) return
+    this.listening = true
     for (const signal of signals) {
       process.once(signal, () => {
         void this.execute(signal)
