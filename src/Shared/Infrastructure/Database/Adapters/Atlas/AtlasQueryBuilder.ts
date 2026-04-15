@@ -265,17 +265,51 @@ export class AtlasQueryBuilder implements IQueryBuilder {
       return `${this.compileExpr(expr)} AS "${alias}"`
     })
 
+    // Detect database driver to select the correct parameter placeholder style.
+    // PostgreSQL (via pg library) requires $1, $2, … style.
+    // SQLite (via bun:sqlite / better-sqlite3) uses ? style.
+    // When Atlas is not configured (e.g. unit tests with mock connections) we
+    // default to PostgreSQL style because that is the production target.
+    const StaticDB = await getDB()
+    let isPostgres = true
+    try {
+      const config: any = StaticDB.getConnectionConfig?.()
+      const driver: string = config?.driver ?? config?.write?.driver ?? ''
+      if (driver) {
+        isPostgres = driver === 'postgres' || driver === 'postgresql'
+      }
+    } catch {
+      // Atlas not configured — keep PostgreSQL default
+    }
+
+    let bindingIndex = 0
+    const nextPlaceholder = (): string => {
+      bindingIndex++
+      return isPostgres ? `$${bindingIndex}` : '?'
+    }
+
     const whereParts: string[] = []
     const bindings: unknown[] = []
     for (const cond of this.whereConditions) {
       if (cond.operator === '=') {
-        whereParts.push(`"${cond.column}" = ?`)
+        whereParts.push(`"${cond.column}" = ${nextPlaceholder()}`)
         bindings.push(cond.value)
       } else if (cond.operator === 'between' && Array.isArray(cond.value)) {
-        whereParts.push(`"${cond.column}" BETWEEN ? AND ?`)
+        const min = nextPlaceholder()
+        const max = nextPlaceholder()
+        whereParts.push(`"${cond.column}" BETWEEN ${min} AND ${max}`)
         bindings.push(cond.value[0], cond.value[1])
+      } else if (cond.operator.toLowerCase() === 'in' && Array.isArray(cond.value)) {
+        const values = cond.value as unknown[]
+        if (values.length === 0) {
+          whereParts.push('1 = 0')
+        } else {
+          const placeholders = values.map(() => nextPlaceholder()).join(', ')
+          whereParts.push(`"${cond.column}" IN (${placeholders})`)
+          bindings.push(...values)
+        }
       } else {
-        whereParts.push(`"${cond.column}" ${cond.operator} ?`)
+        whereParts.push(`"${cond.column}" ${cond.operator} ${nextPlaceholder()}`)
         bindings.push(cond.value)
       }
     }
@@ -294,7 +328,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
       sql += ` LIMIT ${spec.limit}`
     }
 
-    const DB = this.connection ?? (await getDB())
+    const DB = this.connection ?? StaticDB
     const result = await DB.raw(sql, bindings)
     return Array.isArray(result)
       ? (result as T[])
@@ -318,8 +352,8 @@ export class AtlasQueryBuilder implements IQueryBuilder {
       case 'max':
         return `MAX(${typeof expr.column === 'string' ? `"${expr.column}"` : this.compileExpr(expr.column)})`
       case 'dateTrunc':
-        // SQLite: strftime for date truncation
-        return `strftime('%Y-%m-%d', "${expr.column}")`
+        // PostgreSQL: TO_CHAR for date truncation to YYYY-MM-DD format
+        return `TO_CHAR("${expr.column}", 'YYYY-MM-DD')`
       case 'coalesce': {
         const operand =
           typeof expr.operands[0] === 'string'

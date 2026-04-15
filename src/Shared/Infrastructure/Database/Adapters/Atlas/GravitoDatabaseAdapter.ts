@@ -2,13 +2,17 @@ import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDa
 import type { IDatabaseConnectivityCheck } from '@/Shared/Infrastructure/IDatabaseConnectivityCheck'
 import { AtlasQueryBuilder } from './AtlasQueryBuilder'
 
-/**
- * Lazy load Atlas DB instance.
- * @internal
- */
-function getDB(): any {
-  // biome-ignore lint/complexity/noCommaOperator: Required for dynamic import
-  return (require('@gravito/atlas'), require('@gravito/atlas')).DB
+/** Converts camelCase / PascalCase table names to snake_case for PostgreSQL. */
+const toSnakeCase = (name: string): string =>
+  name.replace(/([A-Z])/g, (_, c: string) => `_${c.toLowerCase()}`)
+
+/** ESM: `require('@gravito/atlas')` fails under Bun + `"type": "module"`; align with AtlasQueryBuilder. */
+let atlasDbSingleton: any = null
+async function getAtlasDB(): Promise<any> {
+  if (!atlasDbSingleton) {
+    atlasDbSingleton = (await import('@gravito/atlas')).DB
+  }
+  return atlasDbSingleton
 }
 
 /**
@@ -32,11 +36,12 @@ class AtlasDatabaseAccess implements IDatabaseAccess {
    * const user = await db.table('users').where('id', '=', userId).first()
    */
   table(name: string): IQueryBuilder {
-    return new AtlasQueryBuilder(name)
+    return new AtlasQueryBuilder(toSnakeCase(name))
   }
 
   async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
-    return getDB().transaction(async (connection: any) => {
+    const db = await getAtlasDB()
+    return db.transaction(async (connection: any) => {
       const txAccess = new AtlasTransactionAccess(connection)
       return fn(txAccess)
     })
@@ -55,7 +60,7 @@ class AtlasTransactionAccess implements IDatabaseAccess {
   constructor(private readonly connection: any) {}
 
   table(name: string): IQueryBuilder {
-    return new AtlasQueryBuilder(name, this.connection)
+    return new AtlasQueryBuilder(toSnakeCase(name), this.connection)
   }
 
   async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
@@ -98,7 +103,8 @@ export function createGravitoDatabaseConnectivityCheck(): IDatabaseConnectivityC
   return {
     async ping(): Promise<boolean> {
       try {
-        await getDB().raw('SELECT 1')
+        const db = await getAtlasDB()
+        await db.raw('SELECT 1')
         return true
       } catch {
         return false
