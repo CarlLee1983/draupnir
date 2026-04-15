@@ -1,6 +1,6 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { RefreshCcw } from 'lucide-react'
+import { RefreshCcw, Plus, BarChart, BookOpen, Wallet } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 
 interface Props {
@@ -20,17 +20,35 @@ export const QuickActionsCard = React.memo(({ orgId }: Props) => {
         </div>
         <RefreshCcw className="h-5 w-5 text-white/20" />
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
+      <CardContent className="flex flex-wrap gap-3">
         <a
           href={`/member/api-keys/create${keysQuery}`}
-          className="inline-flex h-9 items-center rounded-md bg-indigo-500 px-4 text-sm font-medium text-white transition-colors hover:bg-indigo-600 shadow-[0_0_20px_rgba(99,102,241,0.3)]"
+          className="inline-flex h-9 items-center gap-2 rounded-md bg-indigo-500 px-4 text-sm font-medium text-white transition-colors hover:bg-indigo-600 shadow-[0_0_20px_rgba(99,102,241,0.3)]"
         >
+          <Plus className="h-4 w-4" />
           {t('ui.member.dashboard.createApiKey')}
         </a>
         <a
-          href={`/member/usage${keysQuery}`}
-          className="inline-flex h-9 items-center rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10"
+          href="/docs"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10"
         >
+          <BookOpen className="h-4 w-4" />
+          {t('ui.member.dashboard.viewDocs')}
+        </a>
+        <a
+          href={`/member/billing${keysQuery}`}
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10"
+        >
+          <Wallet className="h-4 w-4" />
+          {t('ui.member.dashboard.addFunds')}
+        </a>
+        <a
+          href={`/member/usage${keysQuery}`}
+          className="inline-flex h-9 items-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 text-sm font-medium text-white transition-colors hover:bg-white/10"
+        >
+          <BarChart className="h-4 w-4" />
           {t('ui.member.dashboard.viewUsage')}
         </a>
       </CardContent>
