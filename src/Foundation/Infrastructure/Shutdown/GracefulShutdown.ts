@@ -31,9 +31,10 @@ export class GracefulShutdown {
     console.log(`[shutdown] ${hook.name} closing...`)
     const start = Date.now()
 
-    const timeout = new Promise<'timeout'>((resolve) =>
-      setTimeout(() => resolve('timeout'), this.drainTimeoutMs),
-    )
+    let timeoutId: ReturnType<typeof setTimeout>
+    const timeout = new Promise<'timeout'>((resolve) => {
+      timeoutId = setTimeout(() => resolve('timeout'), this.drainTimeoutMs)
+    })
     const task = hook
       .shutdown()
       .then(() => 'done' as const)
@@ -44,6 +45,7 @@ export class GracefulShutdown {
       })
 
     const result = await Promise.race([task, timeout])
+    clearTimeout(timeoutId!)
     const elapsed = Date.now() - start
 
     if (result === 'timeout') {
