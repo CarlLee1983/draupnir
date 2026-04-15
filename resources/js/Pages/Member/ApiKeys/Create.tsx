@@ -24,6 +24,8 @@ export default function CreateApiKey({ orgId, createdKey, formError }: Props) {
     rateLimitRpm: 60,
     rateLimitTpm: 100000,
     orgId: orgId ?? '',
+    budgetMaxLimit: '',
+    budgetResetPeriod: '30d' as '7d' | '30d',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -140,6 +142,39 @@ export default function CreateApiKey({ orgId, createdKey, formError }: Props) {
                     onChange={(e) => setData('rateLimitTpm', parseInt(e.target.value, 10))}
                   />
                   {errors.rateLimitTpm && <p className="text-xs text-destructive">{errors.rateLimitTpm}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-2 rounded-lg border border-border/80 bg-muted/30 p-4">
+                <p className="text-sm font-medium">{t('ui.member.apiKeys.create.budgetSectionTitle')}</p>
+                <p className="text-xs text-muted-foreground">{t('ui.member.apiKeys.create.budgetSectionHint')}</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="budgetMaxLimit">{t('ui.member.apiKeys.create.budgetCapLabel')}</Label>
+                    <Input
+                      id="budgetMaxLimit"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      placeholder={t('ui.member.apiKeys.create.budgetCapPlaceholder')}
+                      value={data.budgetMaxLimit}
+                      onChange={(e) => setData('budgetMaxLimit', e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="budgetResetPeriod">{t('ui.member.apiKeys.create.budgetPeriodLabel')}</Label>
+                    <select
+                      id="budgetResetPeriod"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      value={data.budgetResetPeriod}
+                      onChange={(e) =>
+                        setData('budgetResetPeriod', e.target.value as '7d' | '30d')
+                      }
+                    >
+                      <option value="7d">{t('ui.member.apiKeys.create.budgetPeriod7d')}</option>
+                      <option value="30d">{t('ui.member.apiKeys.create.budgetPeriod30d')}</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

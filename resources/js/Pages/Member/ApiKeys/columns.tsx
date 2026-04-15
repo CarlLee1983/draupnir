@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal } from 'lucide-react'
-import { router } from '@inertiajs/react'
+import { Link, router } from '@inertiajs/react'
 import { formatDateTime, maskApiKey } from '@/lib/format'
 import type { Translator } from '@/lib/i18n'
 
@@ -77,14 +77,21 @@ export function createApiKeyColumns(orgId: string | null, t: Translator): Column
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {(key.status === 'active' || key.status === 'suspended_no_credit') && (
+                <DropdownMenuItem asChild>
+                  <Link
+                    href={`/member/api-keys/${key.id}/budget${orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''}`}
+                  >
+                    {t('ui.member.apiKeys.budgetMenuItem')}
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onClick={() => handleRevoke(key.id)}
                 disabled={key.status !== 'active'}
                 className="text-destructive"
               >
-                {t('ui.auth.verifyDevice.submitButton').split(',')[1]?.trim() || 'Revoke'} {/* Workaround if key missing */}
-                {/* Actually ui.common.delete or adding ui.common.revoke would be better. */}
-                {/* I added ui.member.apiKeys.revokeConfirm, maybe I should add ui.common.revoke. */}
+                {t('ui.member.apiKeys.revokeAction')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

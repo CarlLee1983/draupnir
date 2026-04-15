@@ -65,6 +65,20 @@ const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
     name: 'pages.member.apiKeys.store',
   },
   {
+    method: 'get',
+    path: '/member/api-keys/:keyId/budget',
+    page: MEMBER_PAGE_KEYS.apiKeyBudget,
+    action: 'handle',
+    name: 'pages.member.apiKeys.budget',
+  },
+  {
+    method: 'post',
+    path: '/member/api-keys/:keyId/budget',
+    page: MEMBER_PAGE_KEYS.apiKeyBudget,
+    action: 'store',
+    name: 'pages.member.apiKeys.budget.update',
+  },
+  {
     method: 'post',
     path: '/member/api-keys/:keyId/revoke',
     page: MEMBER_PAGE_KEYS.apiKeyRevoke,

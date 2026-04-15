@@ -8,6 +8,9 @@ import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/S
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
+import type { UpdateApiKeyBudgetService } from '@/Modules/ApiKey/Application/Services/UpdateApiKeyBudgetService'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
 import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
@@ -18,6 +21,7 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { MemberAlertsPage } from '../Pages/MemberAlertsPage'
+import { MemberApiKeyBudgetPage } from '../Pages/MemberApiKeyBudgetPage'
 import { MemberApiKeyCreatePage } from '../Pages/MemberApiKeyCreatePage'
 import { MemberApiKeyRevokeHandler } from '../Pages/MemberApiKeyRevokeHandler'
 import { MemberApiKeysPage } from '../Pages/MemberApiKeysPage'
@@ -55,6 +59,7 @@ export function registerMemberBindings(container: IContainer): void {
       new MemberApiKeysPage(
         c.make(i) as InertiaService,
         c.make('listApiKeysService') as ListApiKeysService,
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
       ),
   )
 
@@ -64,6 +69,17 @@ export function registerMemberBindings(container: IContainer): void {
       new MemberApiKeyCreatePage(
         c.make(i) as InertiaService,
         c.make('createApiKeyService') as CreateApiKeyService,
+      ),
+  )
+
+  container.singleton(
+    k.apiKeyBudget,
+    (c) =>
+      new MemberApiKeyBudgetPage(
+        c.make(i) as InertiaService,
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+        c.make('updateApiKeyBudgetService') as UpdateApiKeyBudgetService,
       ),
   )
 
@@ -78,11 +94,15 @@ export function registerMemberBindings(container: IContainer): void {
       new MemberUsagePage(
         c.make(i) as InertiaService,
         c.make('getUsageChartService') as GetUsageChartService,
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
       ),
   )
 
   container.singleton(k.costBreakdown, (c) => {
-    return new MemberCostBreakdownPage(c.make(i) as InertiaService)
+    return new MemberCostBreakdownPage(
+      c.make(i) as InertiaService,
+      c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+    )
   })
 
   container.singleton(
@@ -91,6 +111,7 @@ export function registerMemberBindings(container: IContainer): void {
       new MemberContractsPage(
         c.make(i) as InertiaService,
         c.make('listContractsService') as ListContractsService,
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
       ),
   )
 
@@ -112,6 +133,7 @@ export function registerMemberBindings(container: IContainer): void {
         c.make('getBudgetService') as GetBudgetService,
         c.make('listWebhookEndpointsService') as ListWebhookEndpointsService,
         c.make('getAlertHistoryService') as GetAlertHistoryService,
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
       ),
   )
 }

@@ -44,12 +44,35 @@ export class MemberApiKeyCreatePage {
       label?: string
       rateLimitRpm?: number | string
       rateLimitTpm?: number | string
+      budgetMaxLimit?: number | string
+      budgetResetPeriod?: string
     }>()
 
     const orgId = typeof body.orgId === 'string' ? body.orgId : undefined
     const label = typeof body.label === 'string' ? body.label : ''
     const rateLimitRpm = Number(body.rateLimitRpm ?? 60)
     const rateLimitTpm = Number(body.rateLimitTpm ?? 10_000)
+
+    let budgetMaxLimit: number | undefined
+    let budgetResetPeriod: '7d' | '30d' | undefined
+    const capRaw = body.budgetMaxLimit
+    if (capRaw !== undefined && capRaw !== '' && capRaw !== null) {
+      const n = Number(capRaw)
+      if (Number.isFinite(n) && n > 0) {
+        budgetMaxLimit = n
+        const p = body.budgetResetPeriod
+        if (p === '7d' || p === '30d') {
+          budgetResetPeriod = p
+        }
+      }
+    }
+    if (budgetMaxLimit != null && budgetResetPeriod === undefined) {
+      return this.inertia.render(ctx, 'Member/ApiKeys/Create', {
+        orgId,
+        createdKey: null,
+        formError: { key: 'member.apiKeys.budgetIncomplete' },
+      })
+    }
 
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/ApiKeys/Create', {
@@ -66,6 +89,11 @@ export class MemberApiKeyCreatePage {
       label,
       rateLimitRpm: Number.isFinite(rateLimitRpm) ? rateLimitRpm : 60,
       rateLimitTpm: Number.isFinite(rateLimitTpm) ? rateLimitTpm : 10_000,
+      ...(budgetMaxLimit != null &&
+        budgetResetPeriod != null && {
+          budgetMaxLimit,
+          budgetResetPeriod,
+        }),
     })
 
     if (result.success && result.data && typeof result.data.rawKey === 'string') {
