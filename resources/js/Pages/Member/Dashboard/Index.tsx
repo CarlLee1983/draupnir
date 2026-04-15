@@ -172,7 +172,7 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, error
           <LoadingState />
         ) : (
           <>
-            <MetricSection kpi={bundle?.kpi ?? null} />
+            {!showEmptyState && <MetricSection kpi={bundle?.kpi ?? null} />}
 
             <section className="space-y-4">
               {showEmptyState ? (
@@ -245,11 +245,6 @@ function EmptyStateCard() {
           {t('ui.member.dashboard.emptyDescription')}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <p className="max-w-2xl text-sm text-white/30">
-          {t('ui.member.dashboard.emptyDescription')}
-        </p>
-      </CardContent>
     </Card>
   )
 }
