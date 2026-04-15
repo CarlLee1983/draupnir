@@ -1,3 +1,5 @@
+import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrgMembershipRules } from '../../Domain/Services/OrgMembershipRules'
@@ -8,6 +10,7 @@ export class ChangeOrgMemberRoleService {
   constructor(
     private memberRepository: IOrganizationMemberRepository,
     private db: IDatabaseAccess,
+    private authRepository: IAuthRepository,
   ) {}
 
   async execute(
@@ -33,6 +36,15 @@ export class ChangeOrgMemberRoleService {
         }
         await txMemberRepo.update(updated)
       })
+
+      // 降級後的系統角色同步：只對非 admin 使用者執行。
+      const targetUser = await this.authRepository.findById(targetUserId)
+      if (targetUser && !targetUser.role.isAdmin()) {
+        const stillManager = await this.memberRepository.isOrgManagerInAnyOrg(targetUserId)
+        if (!stillManager) {
+          await this.authRepository.updateRole(targetUserId, RoleType.MEMBER)
+        }
+      }
 
       return {
         success: true,

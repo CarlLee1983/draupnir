@@ -1,3 +1,5 @@
+import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrgMembershipRules } from '../../Domain/Services/OrgMembershipRules'
@@ -9,6 +11,7 @@ export class RemoveMemberService {
     private memberRepository: IOrganizationMemberRepository,
     private orgAuth: OrgAuthorizationHelper,
     private db: IDatabaseAccess,
+    private authRepository: IAuthRepository,
   ) {}
 
   async execute(
@@ -44,6 +47,15 @@ export class RemoveMemberService {
         }
         await txMemberRepo.remove(member.id)
       })
+
+      // 移除後的系統角色降級：只對非 admin 使用者執行。
+      const targetUser = await this.authRepository.findById(targetUserId)
+      if (targetUser && !targetUser.role.isAdmin()) {
+        const stillManager = await this.memberRepository.isOrgManagerInAnyOrg(targetUserId)
+        if (!stillManager) {
+          await this.authRepository.updateRole(targetUserId, RoleType.MEMBER)
+        }
+      }
 
       return { success: true, message: 'Member removed successfully' }
     } catch (error: unknown) {

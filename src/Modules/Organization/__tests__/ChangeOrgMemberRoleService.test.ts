@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test'
+import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import { ChangeOrgMemberRoleService } from '../Application/Services/ChangeOrgMemberRoleService'
 import { OrganizationMember } from '../Domain/Entities/OrganizationMember'
 import type { IOrganizationMemberRepository } from '../Domain/Repositories/IOrganizationMemberRepository'
@@ -14,6 +15,23 @@ function makeMockMemberRepo(): IOrganizationMemberRepository {
     countByOrgId: mock(),
     countManagersByOrgId: mock(),
     update: mock(),
+    isOrgManagerInAnyOrg: mock().mockResolvedValue(true),
+    findOrgManagerMembershipByUserId: mock().mockResolvedValue(null),
+    withTransaction: mock().mockReturnThis(),
+  }
+}
+
+function makeMockAuthRepo() {
+  return {
+    findById: mock(),
+    findByEmail: mock(),
+    findByGoogleId: mock(),
+    emailExists: mock(),
+    save: mock(),
+    delete: mock(),
+    findAll: mock(),
+    countAll: mock(),
+    updateRole: mock().mockResolvedValue(undefined),
     withTransaction: mock().mockReturnThis(),
   }
 }
@@ -38,7 +56,8 @@ describe('ChangeOrgMemberRoleService', () => {
   beforeEach(() => {
     memberRepo = makeMockMemberRepo()
     db = makeMockDb()
-    service = new ChangeOrgMemberRoleService(memberRepo, db as never)
+    const authRepo = makeMockAuthRepo()
+    service = new ChangeOrgMemberRoleService(memberRepo, db as never, authRepo as never)
   })
 
   it('應成功將 member 升級為 manager', async () => {
@@ -73,5 +92,62 @@ describe('ChangeOrgMemberRoleService', () => {
   it('無效 role 字串應回傳錯誤', async () => {
     const result = await service.execute('org-1', 'user-mem-1', 'owner')
     expect(result.success).toBe(false)
+  })
+})
+
+describe('ChangeOrgMemberRoleService — 降級邏輯', () => {
+  let service: ChangeOrgMemberRoleService
+  let memberRepo: IOrganizationMemberRepository
+  let authRepo: ReturnType<typeof makeMockAuthRepo>
+  let db: ReturnType<typeof makeMockDb>
+
+  beforeEach(() => {
+    memberRepo = makeMockMemberRepo()
+    authRepo = makeMockAuthRepo()
+    db = makeMockDb()
+    service = new ChangeOrgMemberRoleService(memberRepo, db as never, authRepo as never)
+  })
+
+  it('將 manager 降為 member 後應呼叫 authRepository.updateRole', async () => {
+    const manager = makeMember('manager')
+    ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(manager)
+    ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(2)
+    ;(memberRepo.update as any).mockResolvedValue(undefined)
+    ;(memberRepo.isOrgManagerInAnyOrg as any).mockResolvedValue(false)
+
+    // 模擬 target 是一般 non-admin 使用者
+    const normalUser = { role: { isAdmin: () => false } }
+    ;(authRepo.findById as any).mockResolvedValue(normalUser)
+
+    await service.execute('org-1', 'user-mem-1', 'member')
+
+    expect(authRepo.updateRole).toHaveBeenCalledWith('user-mem-1', RoleType.MEMBER)
+  })
+
+  it('仍為 manager 時不應呼叫 authRepository.updateRole', async () => {
+    const member = makeMember('member')
+    ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(member)
+    ;(memberRepo.update as any).mockResolvedValue(undefined)
+    ;(memberRepo.isOrgManagerInAnyOrg as any).mockResolvedValue(true)
+
+    await service.execute('org-1', 'user-mem-1', 'manager')
+
+    expect(authRepo.updateRole).not.toHaveBeenCalled()
+  })
+
+  it('target 為 global admin 時不應呼叫 authRepository.updateRole', async () => {
+    const member = makeMember('manager')
+    ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(member)
+    ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(2)
+    ;(memberRepo.update as any).mockResolvedValue(undefined)
+    ;(memberRepo.isOrgManagerInAnyOrg as any).mockResolvedValue(false)
+
+    // 模擬 target 是 admin
+    const adminUser = { role: { isAdmin: () => true } }
+    ;(authRepo.findById as any).mockResolvedValue(adminUser)
+
+    await service.execute('org-1', 'user-mem-1', 'member')
+
+    expect(authRepo.updateRole).not.toHaveBeenCalled()
   })
 })

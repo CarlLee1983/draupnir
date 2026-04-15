@@ -1,4 +1,5 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
@@ -13,6 +14,7 @@ export class MemberDashboardPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly balanceService: GetBalanceService,
+    private readonly memberRepository: IOrganizationMemberRepository,
   ) {}
 
   /**
@@ -24,20 +26,24 @@ export class MemberDashboardPage {
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
-    const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
-    if (!orgId) {
+    const membership = await this.memberRepository.findByUserId(auth.userId)
+
+    if (!membership) {
       return this.inertia.render(ctx, 'Member/Dashboard/Index', {
         orgId: null,
         balance: null,
-        error: { key: 'member.dashboard.selectOrg' },
+        hasOrganization: false,
+        error: null,
       })
     }
 
+    const orgId = membership.organizationId
     const balanceResult = await this.balanceService.execute(orgId, auth.userId, auth.role)
 
     return this.inertia.render(ctx, 'Member/Dashboard/Index', {
       orgId,
       balance: balanceResult.success ? (balanceResult.data ?? null) : null,
+      hasOrganization: true,
       error: balanceResult.success ? null : { key: 'member.dashboard.loadFailed' },
     })
   }

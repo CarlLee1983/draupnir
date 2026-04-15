@@ -4,7 +4,7 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { MemberDashboardPage } from '../Member/Pages/MemberDashboardPage'
 
 describe('MemberDashboardPage i18n', () => {
-  test('returns localized message when orgId is missing', async () => {
+  test('returns no-org dashboard props when user has no manager membership', async () => {
     // 建立一個帶有 auth 的 mock context（模擬已登入的 member）
     const store = new Map<string, unknown>()
     store.set('inertia:shared', {
@@ -59,9 +59,14 @@ describe('MemberDashboardPage i18n', () => {
       },
     } as any
 
-    const page = new MemberDashboardPage(mockInertia, {} as any)
+    const mockMemberRepo = {
+      findByUserId: async () => null,
+    }
+
+    const page = new MemberDashboardPage(mockInertia, {} as any, mockMemberRepo as any)
     await page.handle(ctx)
 
-    expect(capturedProps.error).toEqual({ key: 'member.dashboard.selectOrg' })
+    expect(capturedProps.hasOrganization).toBe(false)
+    expect(capturedProps.error).toBe(null)
   })
 })

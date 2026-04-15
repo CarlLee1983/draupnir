@@ -75,25 +75,28 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 
 describe('MemberDashboardPage', () => {
   test('authenticated member request renders correct Inertia component', async () => {
-    const ctx = createMemberContext({
-      getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),
-    })
+    const ctx = createMemberContext()
     const { inertia, captured } = createMockInertia()
 
     const mockBalanceService = {
       execute: mock(() => Promise.resolve({ success: true, data: { balance: 50 } })),
     }
 
-    const page = new MemberDashboardPage(inertia, mockBalanceService as any)
+    const mockMemberRepo = {
+      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-123' })),
+    }
+
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
     await page.handle(ctx)
 
     expect(captured.lastCall).not.toBe(null)
     expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
     expect(captured.lastCall?.props.orgId).toBe('org-123')
     expect(captured.lastCall?.props.balance).not.toBe(null)
+    expect(captured.lastCall?.props.hasOrganization).toBe(true)
   })
 
-  test('without orgId renders with null balance', async () => {
+  test('without manager membership renders no-org dashboard props', async () => {
     const ctx = createMemberContext()
     const { inertia, captured } = createMockInertia()
 
@@ -101,28 +104,54 @@ describe('MemberDashboardPage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: null })),
     }
 
-    const page = new MemberDashboardPage(inertia, mockBalanceService as any)
+    const mockMemberRepo = {
+      findByUserId: mock(() => Promise.resolve(null)),
+    }
+
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
     expect(captured.lastCall?.props.balance).toBe(null)
-    expect(captured.lastCall?.props.error).toEqual({ key: 'member.dashboard.selectOrg' })
+    expect(captured.lastCall?.props.hasOrganization).toBe(false)
+    expect(captured.lastCall?.props.error).toBe(null)
   })
 
   test('service failure passes error message to Inertia', async () => {
-    const ctx = createMemberContext({
-      getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),
-    })
+    const ctx = createMemberContext()
     const { inertia, captured } = createMockInertia()
 
     const mockBalanceService = {
       execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })),
     }
 
-    const page = new MemberDashboardPage(inertia, mockBalanceService as any)
+    const mockMemberRepo = {
+      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-123' })),
+    }
+
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.dashboard.loadFailed' })
+  })
+
+  test('plain member（非 manager）也能看到所屬組織', async () => {
+    const ctx = createMemberContext()
+    const { inertia, captured } = createMockInertia()
+
+    const mockBalanceService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { balance: 0 } })),
+    }
+
+    const mockMemberRepo = {
+      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-456' })),
+    }
+
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
+    await page.handle(ctx)
+
+    expect(captured.lastCall?.props.hasOrganization).toBe(true)
+    expect(captured.lastCall?.props.orgId).toBe('org-456')
   })
 })

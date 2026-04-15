@@ -12,6 +12,7 @@
 
 import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { Organization } from '../../Domain/Aggregates/Organization'
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
@@ -54,6 +55,23 @@ export class CreateOrganizationService {
         }
       }
 
+      if (manager.role.isAdmin()) {
+        return {
+          success: false,
+          message: 'Admin accounts cannot create organizations',
+          error: 'ADMIN_CANNOT_CREATE_ORG',
+        }
+      }
+
+      const alreadyManager = await this.memberRepository.isOrgManagerInAnyOrg(request.managerUserId)
+      if (alreadyManager) {
+        return {
+          success: false,
+          message: 'User already has an organization',
+          error: 'ALREADY_HAS_ORGANIZATION',
+        }
+      }
+
       const orgId = crypto.randomUUID()
       const org = Organization.create(orgId, request.name, request.description || '', request.slug)
 
@@ -65,6 +83,7 @@ export class CreateOrganizationService {
       await this.db.transaction(async (tx) => {
         const txOrgRepo = this.orgRepository.withTransaction(tx)
         const txMemberRepo = this.memberRepository.withTransaction(tx)
+        const txAuthRepo = this.authRepository.withTransaction(tx)
         await txOrgRepo.save(org)
         const member = OrganizationMember.create(
           crypto.randomUUID(),
@@ -73,8 +92,13 @@ export class CreateOrganizationService {
           new OrgMemberRole('manager'),
         )
         await txMemberRepo.save(member)
-        await this.provisionOrganizationDefaults.execute(orgId, request.managerUserId)
+        await txAuthRepo.updateRole(request.managerUserId, RoleType.MANAGER)
+        // ProvisionOrganizationDefaultsService 不在此處執行，
+        // 因為它持有原始 db 連線，不在 tx 範圍內。
       })
+
+      // 移至 transaction 外：provisioning 是冪等的，失敗不影響 org 一致性。
+      await this.provisionOrganizationDefaults.execute(orgId, request.managerUserId)
 
       return {
         success: true,
