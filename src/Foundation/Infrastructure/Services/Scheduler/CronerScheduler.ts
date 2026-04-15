@@ -53,6 +53,12 @@ export class CronerScheduler implements IScheduler {
     return this.registry.has(name)
   }
 
+  stopAll(): void {
+    for (const name of [...this.registry.keys()]) {
+      this.unschedule(name)
+    }
+  }
+
   private async execute(spec: JobSpec, handler: () => Promise<void>): Promise<void> {
     const name = spec.name
     const maxRetries = Math.max(0, spec.maxRetries ?? 0)

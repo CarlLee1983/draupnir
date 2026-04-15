@@ -36,3 +36,21 @@ describe('GravitoRedisAdapter.incr', () => {
     expect(plasma.incr).toHaveBeenCalledWith('rate:login:127.0.0.1:100')
   })
 })
+
+describe('GravitoRedisAdapter.disconnect()', () => {
+  it('呼叫底層 redis 的 quit()', async () => {
+    const mockRedis = {
+      ping: vi.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
+      del: vi.fn(),
+      exists: vi.fn(),
+      incr: vi.fn(),
+      expire: vi.fn(),
+      quit: vi.fn().mockResolvedValue(undefined),
+    }
+    const adapter = new GravitoRedisAdapter(mockRedis as any)
+    await adapter.disconnect()
+    expect(mockRedis.quit).toHaveBeenCalledOnce()
+  })
+})

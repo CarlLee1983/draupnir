@@ -20,4 +20,6 @@ export interface IScheduler {
   schedule(spec: JobSpec, handler: () => Promise<void>): void
   unschedule(name: string): void
   has(name: string): boolean
+  /** 停止所有已排程的 job（用於 graceful shutdown）。 */
+  stopAll(): void
 }
