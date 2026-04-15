@@ -1,5 +1,8 @@
 import type { ApiKey } from '../../Domain/Aggregates/ApiKey'
 
+/** Bifrost budget reset window for member-facing spend caps (maps to `reset_duration`). */
+export type KeyBudgetResetPeriod = '7d' | '30d'
+
 export class ApiKeyPresenter {
   static fromEntity(entity: ApiKey): Record<string, unknown> {
     return {
@@ -30,6 +33,9 @@ export interface CreateApiKeyRequest {
   rateLimitRpm?: number
   rateLimitTpm?: number
   expiresAt?: string
+  /** Optional gateway spend cap; requires `budgetResetPeriod` when set. */
+  budgetMaxLimit?: number
+  budgetResetPeriod?: KeyBudgetResetPeriod
 }
 
 export interface UpdateKeyLabelRequest {
@@ -52,6 +58,15 @@ export interface RevokeApiKeyRequest {
   keyId: string
   callerUserId: string
   callerSystemRole: string
+}
+
+export interface UpdateApiKeyBudgetRequest {
+  keyId: string
+  orgId: string
+  callerUserId: string
+  callerSystemRole: string
+  budgetMaxLimit: number
+  budgetResetPeriod: KeyBudgetResetPeriod
 }
 
 export interface ApiKeyResponse {

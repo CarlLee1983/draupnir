@@ -85,6 +85,34 @@ describe('CreateApiKeyService', () => {
     expect(result.data?.scope).toEqual(expect.objectContaining({ allowed_models: ['gpt-4'] }))
   })
 
+  it('建立時可附帶 budget（上限與週期須成對）', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      createdByUserId: 'user-1',
+      callerSystemRole: 'user',
+      label: 'Budgeted Key',
+      budgetMaxLimit: 25,
+      budgetResetPeriod: '30d',
+    })
+    expect(result.success).toBe(true)
+    expect(gatewayMock.calls.createKey[0].budget).toEqual({
+      maxLimit: 25,
+      resetDuration: '30d',
+    })
+  })
+
+  it('僅填上限未選週期應回傳 BUDGET_INCOMPLETE', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      createdByUserId: 'user-1',
+      callerSystemRole: 'user',
+      label: 'Bad Budget',
+      budgetMaxLimit: 10,
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('BUDGET_INCOMPLETE')
+  })
+
   it('Gateway 失敗時應清理本地 pending 記錄', async () => {
     const failMock = new MockGatewayClient()
     failMock.failNext(new GatewayError('連線失敗', 'NETWORK', 503, true))

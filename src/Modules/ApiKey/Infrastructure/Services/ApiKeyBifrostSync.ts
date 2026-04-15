@@ -1,5 +1,7 @@
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import type { KeyBudgetResetPeriod } from '../../Application/DTOs/ApiKeyDTO'
 import type {
+  CreateVirtualKeyOptions,
   CreateVirtualKeyResult,
   IBifrostKeySync,
 } from '../../Application/Ports/IBifrostKeySync'
@@ -8,8 +10,21 @@ import type { KeyScope } from '../../Domain/ValueObjects/KeyScope'
 export class ApiKeyBifrostSync implements IBifrostKeySync {
   constructor(private readonly gatewayClient: ILLMGatewayClient) {}
 
-  async createVirtualKey(label: string, orgId: string): Promise<CreateVirtualKeyResult> {
-    const vk = await this.gatewayClient.createKey({ name: label, customerId: orgId })
+  async createVirtualKey(
+    label: string,
+    orgId: string,
+    options?: CreateVirtualKeyOptions,
+  ): Promise<CreateVirtualKeyResult> {
+    const vk = await this.gatewayClient.createKey({
+      name: label,
+      customerId: orgId,
+      ...(options?.budget != null && {
+        budget: {
+          maxLimit: options.budget.maxLimit,
+          resetDuration: options.budget.resetDuration,
+        },
+      }),
+    })
     return {
       gatewayKeyId: vk.id,
       gatewayKeyValue: vk.value ?? '',
@@ -37,6 +52,18 @@ export class ApiKeyBifrostSync implements IBifrostKeySync {
     await this.gatewayClient.updateKey(gatewayKeyId, {
       providerConfigs,
       rateLimit,
+    })
+  }
+
+  async updateVirtualKeyBudget(
+    gatewayKeyId: string,
+    budget: { maxLimit: number; resetDuration: KeyBudgetResetPeriod },
+  ): Promise<void> {
+    await this.gatewayClient.updateKey(gatewayKeyId, {
+      budget: {
+        maxLimit: budget.maxLimit,
+        resetDuration: budget.resetDuration,
+      },
     })
   }
 

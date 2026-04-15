@@ -9,6 +9,7 @@ import { CreateApiKeyService } from '../../Application/Services/CreateApiKeyServ
 import { ListApiKeysService } from '../../Application/Services/ListApiKeysService'
 import { RevokeApiKeyService } from '../../Application/Services/RevokeApiKeyService'
 import { SetKeyPermissionsService } from '../../Application/Services/SetKeyPermissionsService'
+import { UpdateApiKeyBudgetService } from '../../Application/Services/UpdateApiKeyBudgetService'
 import { UpdateKeyLabelService } from '../../Application/Services/UpdateKeyLabelService'
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import { ApiKeyRepository } from '../Repositories/ApiKeyRepository'
@@ -49,6 +50,11 @@ export class ApiKeyServiceProvider extends ModuleServiceProvider implements IRou
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
     ))
     container.bind('setKeyPermissionsService', (c: IContainer) => new SetKeyPermissionsService(
+      c.make('apiKeyRepository') as IApiKeyRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      c.make('apiKeyBifrostSync') as ApiKeyBifrostSync,
+    ))
+    container.bind('updateApiKeyBudgetService', (c: IContainer) => new UpdateApiKeyBudgetService(
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
       c.make('apiKeyBifrostSync') as ApiKeyBifrostSync,

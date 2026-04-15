@@ -24,6 +24,26 @@ describe('ApiKeyBifrostSync', () => {
     expect(mock.calls.createKey[0].customerId).toBe('org-1')
   })
 
+  it('createVirtualKey 可附帶 budget（7d／30d）', async () => {
+    await sync.createVirtualKey('Cap Key', 'org-1', {
+      budget: { maxLimit: 50, resetDuration: '7d' },
+    })
+    expect(mock.calls.createKey[0].budget).toEqual({
+      maxLimit: 50,
+      resetDuration: '7d',
+    })
+  })
+
+  it('updateVirtualKeyBudget 應只更新 gateway budget', async () => {
+    const created = await mock.createKey({ name: 'k', isActive: true })
+    await sync.updateVirtualKeyBudget(created.id, { maxLimit: 99, resetDuration: '30d' })
+    expect(mock.calls.updateKey[0].keyId).toBe(created.id)
+    expect(mock.calls.updateKey[0].request.budget).toEqual({
+      maxLimit: 99,
+      resetDuration: '30d',
+    })
+  })
+
   it('syncPermissions 應將 scope 以 camelCase 欄位同步至 gateway', async () => {
     const created = await mock.createKey({ name: 'test-key', isActive: true })
     const scope = KeyScope.create({

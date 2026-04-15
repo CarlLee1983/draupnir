@@ -19,8 +19,38 @@ import {
   type ApiKeyCreatedResponse,
   ApiKeyPresenter,
   type CreateApiKeyRequest,
+  type KeyBudgetResetPeriod,
 } from '../DTOs/ApiKeyDTO'
-import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
+import type { CreateVirtualKeyOptions, IBifrostKeySync } from '../Ports/IBifrostKeySync'
+
+function parseBudgetForCreate(request: CreateApiKeyRequest):
+  | { ok: true; options?: CreateVirtualKeyOptions }
+  | { ok: false; error: string; message: string } {
+  const hasLimit = request.budgetMaxLimit != null
+  const hasPeriod = request.budgetResetPeriod != null
+  if (!hasLimit && !hasPeriod) {
+    return { ok: true, options: undefined }
+  }
+  if (hasLimit !== hasPeriod) {
+    return {
+      ok: false,
+      error: 'BUDGET_INCOMPLETE',
+      message: 'Budget cap and reset period must both be set, or both omitted',
+    }
+  }
+  const max = request.budgetMaxLimit!
+  if (!Number.isFinite(max) || max <= 0) {
+    return { ok: false, error: 'BUDGET_INVALID', message: 'Budget cap must be a positive number' }
+  }
+  const period = request.budgetResetPeriod as KeyBudgetResetPeriod
+  if (period !== '7d' && period !== '30d') {
+    return { ok: false, error: 'BUDGET_PERIOD_INVALID', message: 'Invalid budget reset period' }
+  }
+  return {
+    ok: true,
+    options: { budget: { maxLimit: max, resetDuration: period } },
+  }
+}
 
 /**
  * Service responsible for creating new API keys and syncing them with the gateway.
@@ -55,6 +85,15 @@ export class CreateApiKeyService {
         }
       }
 
+      const budgetParsed = parseBudgetForCreate(request)
+      if (!budgetParsed.ok) {
+        return {
+          success: false,
+          message: budgetParsed.message,
+          error: budgetParsed.error,
+        }
+      }
+
       const scope = KeyScope.create({
         allowedModels: request.allowedModels,
         rateLimitRpm: request.rateLimitRpm,
@@ -81,6 +120,7 @@ export class CreateApiKeyService {
         const { gatewayKeyId } = await this.bifrostSync.createVirtualKey(
           request.label,
           request.orgId,
+          budgetParsed.options,
         )
 
         const activatedKey = ApiKey.create({
