@@ -9,6 +9,7 @@ import { drizzle } from 'drizzle-orm/libsql'
 import * as schema from './schema'
 
 let db: ReturnType<typeof drizzle> | null = null
+let libsqlClient: ReturnType<typeof createClient> | null = null
 
 /**
  * 初始化 Drizzle 資料庫連接
@@ -21,12 +22,8 @@ export function initializeDrizzle() {
   }
 
   const databaseUrl = process.env.DATABASE_URL || 'file:local.db'
-
-  const client = createClient({
-    url: databaseUrl,
-  })
-
-  db = drizzle(client, { schema })
+  libsqlClient = createClient({ url: databaseUrl })
+  db = drizzle(libsqlClient, { schema })
 
   return db
 }
@@ -43,9 +40,19 @@ export function getDrizzleInstance() {
 }
 
 /**
+ * 關閉 libsql 連線（用於 graceful shutdown）。
+ */
+export async function closeDrizzleConnection(): Promise<void> {
+  libsqlClient?.close()
+  libsqlClient = null
+  db = null
+}
+
+/**
  * 僅供測試使用的資料庫重置
  * @internal
  */
 export function resetDrizzleForTest() {
   db = null
+  libsqlClient = null
 }
