@@ -6,9 +6,20 @@
  * 2. 啟動 HTTP 伺服器
  * 3. 顯示啟動成功訊息和可用端點
  * 4. 處理啟動失敗
+ * 5. 註冊 SIGTERM / SIGINT graceful shutdown
  */
 
 import { createApp } from './app'
+import { GracefulShutdown } from './Foundation/Infrastructure/Shutdown/GracefulShutdown'
+import { BunServerShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/BunServerShutdownHook'
+import { SchedulerShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/SchedulerShutdownHook'
+import { RedisShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/RedisShutdownHook'
+import { DatabaseShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/DatabaseShutdownHook'
+import { MessageQueueShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/MessageQueueShutdownHook'
+import { WebhookShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/WebhookShutdownHook'
+import { closeDrizzleConnection } from './Shared/Infrastructure/Database/Adapters/Drizzle/config'
+import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
+import type { IRedisService } from './Shared/Infrastructure/IRedisService'
 
 /**
  * 應用啟動並顯示歡迎訊息
@@ -19,9 +30,34 @@ async function start() {
 
   // 產生 Bun.serve 設定並手動啟動 HTTP 伺服器
   const port = Number(core.config.get('PORT') ?? 3000)
+  const drainTimeoutMs = Number(process.env.DRAIN_TIMEOUT_MS ?? 25_000)
   const baseUrl = `http://localhost:${port}`
   const { core: _liftoffCore, ...serveConfig } = core.liftoff(port)
   const server = Bun.serve(serveConfig as any)
+
+  // ─── Graceful Shutdown ────────────────────────────────────────────────────
+  const scheduler = core.container.make('scheduler') as IScheduler
+  const redis = (() => {
+    try {
+      return core.container.make('redis') as IRedisService
+    } catch {
+      return undefined
+    }
+  })()
+
+  const shutdown = new GracefulShutdown(drainTimeoutMs)
+    .register(new BunServerShutdownHook(server))
+    .register(new MessageQueueShutdownHook())
+    .register(new SchedulerShutdownHook(scheduler))
+    .register(new WebhookShutdownHook())
+
+  if (redis) {
+    shutdown.register(new RedisShutdownHook(redis))
+  }
+
+  shutdown.register(new DatabaseShutdownHook(closeDrizzleConnection))
+  shutdown.listen()
+  // ─────────────────────────────────────────────────────────────────────────
 
   // 顯示啟動成功訊息
   console.log(`
