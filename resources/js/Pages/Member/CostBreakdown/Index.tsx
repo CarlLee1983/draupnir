@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MemberLayout } from '@/layouts/MemberLayout'
+import { Banner } from '@/components/ui/banner'
 import { cn } from '@/lib/utils'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
@@ -198,8 +199,14 @@ export default function CostBreakdown({ orgId, error }: Props) {
           </p>
         </div>
 
-        {error ? <InfoBanner title="Organization" message={t(error.key, error.params)} /> : null}
-        {fetchError ? <InfoBanner title="Analytics" message={fetchError} /> : null}
+        {error && (
+          <Banner
+            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
+            title="Organization"
+            message={t(error.key, error.params)}
+          />
+        )}
+        {fetchError && <Banner tone="destructive" title="Analytics" message={fetchError} />}
 
         {!orgId ? (
           <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
@@ -269,17 +276,6 @@ function WindowSelector({
         )
       })}
     </div>
-  )
-}
-
-function InfoBanner({ title, message }: { title: string; message: string }) {
-  return (
-    <Card className="border-destructive/40 bg-destructive/5">
-      <CardHeader>
-        <CardTitle className="text-base text-destructive">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="text-sm text-destructive">{message}</CardContent>
-    </Card>
   )
 }
 
