@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UsageLineChart, type UsageDataPoint } from '@/components/charts/UsageLineChart'
 import { formatNumber } from '@/lib/format'
 import { Activity, Zap } from 'lucide-react'
+import { Banner } from '@/components/ui/banner'
+import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
 interface UsageTotals {
@@ -15,9 +17,10 @@ interface Props {
   orgId: string | null
   totals: UsageTotals
   chartData: UsageDataPoint[]
+  error: I18nMessage | null
 }
 
-export default function MemberUsage({ totals, chartData }: Props) {
+export default function MemberUsage({ totals, chartData, error }: Props) {
   const { t } = useTranslation()
   return (
     <MemberLayout>
@@ -25,6 +28,14 @@ export default function MemberUsage({ totals, chartData }: Props) {
 
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">{t('ui.member.usage.heading')}</h1>
+
+        {error && (
+          <Banner
+            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
+            message={t(error.key, error.params)}
+            className="mb-6"
+          />
+        )}
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card>
