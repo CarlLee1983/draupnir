@@ -20,7 +20,7 @@ export async function registerOrganizationRoutes(
 ): Promise<void> {
   router.post(
     '/api/organizations',
-    [createRoleMiddleware('admin')],
+    [requireAuth()],
     CreateOrganizationRequest,
     (ctx) => controller.create(ctx),
   )

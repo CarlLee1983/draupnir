@@ -64,7 +64,7 @@ async function runSetup(op: Operation): Promise<Record<string, unknown>> {
 
   if (!op.testSetup) return context
 
-  const auth = context.adminToken as string
+  const adminAuth = context.adminToken as string
 
   for (const step of op.testSetup) {
     const { method, path: rawPath } = parseOperationId(step.operation)
@@ -85,11 +85,16 @@ async function runSetup(op: Operation): Promise<Record<string, unknown>> {
       }
     }
 
+    const stepAuth =
+      step.operation === 'post-/api/organizations'
+        ? (context.authToken as string)
+        : adminAuth
+
     const res = await client.request(
       { method, path },
       {
         body: Object.keys(body).length > 0 ? body : undefined,
-        auth,
+        auth: stepAuth,
       },
     )
 
@@ -136,8 +141,6 @@ function buildRequestBody(op: Operation, setupCtx: Record<string, unknown>): unk
   let body = buildValidRequest(op.requestSchema, { onlyRequired: true }) as Record<string, unknown>
   if (op.method === 'post' && op.path === '/api/organizations') {
     body = {
-      ...body,
-      managerUserId: setupCtx.adminUserId,
       name: (body.name as string) || `Org ${crypto.randomUUID().slice(0, 8)}`,
     }
   }

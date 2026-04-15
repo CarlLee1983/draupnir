@@ -55,6 +55,9 @@ for (const [flowName, flow] of Object.entries(spec.flows)) {
 
       if (flowName === 'org-flow') {
         context.orgFlowName = `Test Org ${crypto.randomUUID().slice(0, 8)}`
+        const user = await ensureAuth(client, 'user')
+        context.authToken = user.token
+        context.authUserId = user.userId
       }
       if (flowName === 'auth-flow') {
         context.authFlowEmail = `flow-auth-${crypto.randomUUID().slice(0, 8)}@feature.test`

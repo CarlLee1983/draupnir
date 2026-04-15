@@ -5,6 +5,7 @@ import { ModuleSubscriptionRepository } from '@/Modules/AppModule/Infrastructure
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
+import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
@@ -86,5 +87,35 @@ describe('CreateOrganizationService', () => {
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('SLUG_EXISTS')
+  })
+
+  it('admin 呼叫時應回傳 ADMIN_CANNOT_CREATE_ORG', async () => {
+    const authRepo = new AuthRepository(db)
+    const registerResult = await new RegisterUserService(authRepo, new ScryptPasswordHasher()).execute({
+      email: 'admin@example.com',
+      password: 'StrongPass123',
+    })
+    const adminId = registerResult.data!.id
+    await authRepo.updateRole(adminId, RoleType.ADMIN)
+
+    const result = await service.execute({ name: 'Test Org', managerUserId: adminId })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('ADMIN_CANNOT_CREATE_ORG')
+  })
+
+  it('已有組織的 manager 再次建立應回傳 ALREADY_HAS_ORGANIZATION', async () => {
+    await service.execute({ name: 'First Org', managerUserId: managerId })
+
+    const result = await service.execute({ name: 'Second Org', managerUserId: managerId })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('ALREADY_HAS_ORGANIZATION')
+  })
+
+  it('建立成功後 users.role 應為 manager', async () => {
+    const authRepo = new AuthRepository(db)
+    await service.execute({ name: 'Promo Org', managerUserId: managerId })
+
+    const user = await authRepo.findById(managerId)
+    expect(user!.role.getValue()).toBe(RoleType.MANAGER)
   })
 })

@@ -11,7 +11,6 @@ export class CreateOrganizationRequest extends FormRequest {
       .max(50)
       .regex(/^[a-z0-9-]+$/)
       .optional(),
-    managerUserId: z.string().uuid('Invalid user ID'),
   })
 }
 

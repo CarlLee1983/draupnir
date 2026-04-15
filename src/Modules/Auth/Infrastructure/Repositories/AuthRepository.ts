@@ -11,7 +11,7 @@ import { User, UserStatus } from '../../Domain/Aggregates/User'
 import type { IAuthRepository, UserListFilters } from '../../Domain/Repositories/IAuthRepository'
 import { Email } from '../../Domain/ValueObjects/Email'
 import { Password } from '../../Domain/ValueObjects/Password'
-import { Role } from '../../Domain/ValueObjects/Role'
+import { Role, type RoleType } from '../../Domain/ValueObjects/Role'
 
 /**
  * Concrete implementation of IAuthRepository using an ORM-agnostic database access layer.
@@ -97,6 +97,20 @@ export class AuthRepository implements IAuthRepository {
     if (filters?.role) query = query.where('role', '=', filters.role)
     if (filters?.status) query = query.where('status', '=', filters.status)
     return query.count()
+  }
+
+  /**
+   * Updates a user's system role.
+   */
+  async updateRole(userId: string, role: RoleType): Promise<void> {
+    await this.db.table('users').where('id', '=', userId).update({ role })
+  }
+
+  /**
+   * Returns a repository scoped to the given transaction context.
+   */
+  withTransaction(tx: IDatabaseAccess): AuthRepository {
+    return new AuthRepository(tx)
   }
 
   /**

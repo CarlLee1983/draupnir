@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Head } from '@inertiajs/react'
+import { CreateOrganizationModal } from './components/CreateOrganizationModal'
 import { MemberLayout } from '@/layouts/MemberLayout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -50,6 +51,7 @@ interface DashboardBundle {
 interface Props {
   orgId?: string | null
   balance: Balance | null
+  hasOrganization: boolean
   error: I18nMessage | null
 }
 
@@ -61,12 +63,13 @@ const WINDOW_OPTIONS: readonly { value: WindowOption; label: string }[] = [
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-export default function MemberDashboard({ orgId, balance, error }: Props) {
+export default function MemberDashboard({ orgId, balance, hasOrganization, error }: Props) {
   const { t } = useTranslation()
   const [selectedWindow, setSelectedWindow] = useState<WindowOption>(30)
   const [bundle, setBundle] = useState<DashboardBundle | null>(null)
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
+  const [createOrgOpen, setCreateOrgOpen] = useState(false)
 
   useEffect(() => {
     if (!orgId) {
@@ -130,6 +133,25 @@ export default function MemberDashboard({ orgId, balance, error }: Props) {
       <Head title={t('ui.member.dashboard.title')} />
 
       <div className="space-y-8">
+        {!hasOrganization ? (
+          <>
+            <CreateOrganizationModal open={createOrgOpen} onOpenChange={setCreateOrgOpen} />
+            <Card className="border-dashed">
+              <CardHeader>
+                <CardTitle className="text-base">尚無組織</CardTitle>
+                <CardDescription>
+                  建立組織以開始使用 API Key、帳單與儀表板功能
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button type="button" onClick={() => setCreateOrgOpen(true)}>
+                  建立我的組織
+                </Button>
+              </CardContent>
+            </Card>
+          </>
+        ) : null}
+
         <header className="space-y-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div className="space-y-2">

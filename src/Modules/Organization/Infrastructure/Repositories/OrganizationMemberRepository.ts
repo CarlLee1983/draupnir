@@ -61,6 +61,24 @@ export class OrganizationMemberRepository implements IOrganizationMemberReposito
       .update(OrganizationMemberMapper.toDatabaseRow(member))
   }
 
+  async isOrgManagerInAnyOrg(userId: string): Promise<boolean> {
+    const count = await this.db
+      .table('organization_members')
+      .where('user_id', '=', userId)
+      .where('role', '=', 'manager')
+      .count()
+    return count > 0
+  }
+
+  async findOrgManagerMembershipByUserId(userId: string): Promise<OrganizationMember | null> {
+    const row = await this.db
+      .table('organization_members')
+      .where('user_id', '=', userId)
+      .where('role', '=', 'manager')
+      .first()
+    return row ? OrganizationMemberMapper.toEntity(row) : null
+  }
+
   withTransaction(tx: IDatabaseAccess): OrganizationMemberRepository {
     return new OrganizationMemberRepository(tx)
   }

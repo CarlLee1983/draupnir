@@ -117,8 +117,15 @@ export class OrganizationController {
   ) {}
 
   async create(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) {
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    }
     const body = ctx.get('validated') as CreateOrganizationParams
-    const result = await this.createOrgService.execute(body)
+    const result = await this.createOrgService.execute({
+      ...body,
+      managerUserId: auth.userId,
+    })
     return ctx.json(result, result.success ? 201 : 400)
   }
 

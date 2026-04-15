@@ -31,6 +31,19 @@ export interface IOrganizationMemberRepository {
   /** Updates membership details (e.g., role). */
   update(member: OrganizationMember): Promise<void>
 
+  /**
+   * Returns true if the user holds an org-level 'manager' role in ANY organization.
+   * Used for system-role promotion/demotion logic.
+   */
+  isOrgManagerInAnyOrg(userId: string): Promise<boolean>
+
+  /**
+   * Returns the OrganizationMember record where the user is the org-level 'manager'.
+   * Returns null if the user has no manager membership.
+   * Used by MemberDashboardPage to auto-discover the user's managed org.
+   */
+  findOrgManagerMembershipByUserId(userId: string): Promise<OrganizationMember | null>
+
   /** Returns a repository instance scoped to a transaction. */
   withTransaction(tx: IDatabaseAccess): IOrganizationMemberRepository
 }

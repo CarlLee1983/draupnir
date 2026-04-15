@@ -44,4 +44,17 @@ describe('AuthRepository', () => {
     const restored = await repo.findById('legacy-1')
     expect(restored?.role.getValue()).toBe(RoleType.MEMBER)
   })
+
+  it('updateRole 應更新 users.role 欄位', async () => {
+    const db = new MemoryDatabaseAccess()
+    const repo = new AuthRepository(db)
+    const hasher = new ScryptPasswordHasher()
+    const password = Password.fromHashed(await hasher.hash('StrongPass123'))
+    const user = User.create('u-role', new Email('role@example.com'), password, Role.member())
+    await repo.save(user)
+
+    await repo.updateRole('u-role', RoleType.MANAGER)
+    const updated = await repo.findById('u-role')
+    expect(updated?.role.getValue()).toBe(RoleType.MANAGER)
+  })
 })

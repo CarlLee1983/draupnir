@@ -5,8 +5,10 @@
  * Defined in domain; implemented in infrastructure.
  */
 
+import type { IDatabaseAccess } from '@/Shared/Domain/IDatabaseAccess'
 import type { User } from '../Aggregates/User'
 import type { Email } from '../ValueObjects/Email'
+import type { RoleType } from '../ValueObjects/Role'
 
 /**
  * Filters for narrowing down the user list query at the persistence layer.
@@ -64,4 +66,15 @@ export interface IAuthRepository {
    * Used for server-side pagination metadata.
    */
   countAll(filters?: UserListFilters): Promise<number>
+
+  /**
+   * Updates the system role of a user.
+   * Must be called within a transaction when combined with org operations.
+   */
+  updateRole(userId: string, role: RoleType): Promise<void>
+
+  /**
+   * Returns a repository instance scoped to the given transaction.
+   */
+  withTransaction(tx: IDatabaseAccess): IAuthRepository
 }

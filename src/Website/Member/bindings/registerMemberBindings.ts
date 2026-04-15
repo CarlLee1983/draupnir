@@ -10,6 +10,7 @@ import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/L
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
@@ -44,6 +45,7 @@ export function registerMemberBindings(container: IContainer): void {
     return new MemberDashboardPage(
       c.make(i) as InertiaService,
       c.make('getBalanceService') as GetBalanceService,
+      c.make('organizationMemberRepository') as IOrganizationMemberRepository,
     )
   })
 

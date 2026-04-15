@@ -202,7 +202,7 @@ paths:
       summary: 建立組織
       security:
         - bearerAuth: []
-      x-test-role: admin
+      x-test-role: user
       requestBody:
         required: true
         content:
@@ -240,7 +240,7 @@ paths:
             format: uuid
       x-test-setup:
         - operation: post-/api/organizations
-          body: { name: "Setup Org", managerUserId: "$.adminUserId" }
+          body: { name: "Setup Org" }
           extract:
             id: "$.data.id"
       responses:
@@ -745,7 +745,7 @@ paths:
       x-test-role: admin
       x-test-setup:
         - operation: post-/api/organizations
-          body: { name: "DevPortal Setup Org", managerUserId: "$.adminUserId" }
+          body: { name: "DevPortal Setup Org" }
           extract:
             orgId: "$.data.id"
       security:
@@ -783,7 +783,7 @@ paths:
       x-test-role: admin
       x-test-setup:
         - operation: post-/api/organizations
-          body: { name: "DevPortal List Org", managerUserId: "$.adminUserId" }
+          body: { name: "DevPortal List Org" }
           extract:
             orgId: "$.data.id"
       security:
@@ -1684,7 +1684,7 @@ components:
 
     CreateOrgRequest:
       type: object
-      required: [name, managerUserId]
+      required: [name]
       properties:
         name:
           type: string
@@ -1692,9 +1692,6 @@ components:
           type: string
         slug:
           type: string
-        managerUserId:
-          type: string
-          format: uuid
 
     ChangeStatusRequest:
       type: object
@@ -1962,14 +1959,13 @@ x-test-flows:
           status: 200
 
   org-flow:
-    description: 組織建立與列表（需要 admin 權限）
+    description: 組織建立（authenticated member）與列表（admin）
     setup: admin
     steps:
       - operation: post-/api/organizations
-        auth: "$.adminToken"
+        auth: "$.authToken"
         body:
           name: "Test Organization"
-          managerUserId: "$.adminUserId"
         expect:
           status: 201
 
