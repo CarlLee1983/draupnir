@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
-import { router } from '@inertiajs/react'
+import { router, usePage } from '@inertiajs/react'
+import { resolveCsrfTokenForFetch } from '@/lib/csrf'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,21 +13,22 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-function readCsrfToken(): string {
-  return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? ''
-}
-
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
 const ERROR_MESSAGES: Record<string, string> = {
-  ALREADY_HAS_ORGANIZATION: '您已擁有一個組織',
   ADMIN_CANNOT_CREATE_ORG: '管理員帳號無法建立組織',
+  SLUG_EXISTS: '此識別名稱已被使用，請換一個組織名稱後再試',
+  NAME_REQUIRED: '請輸入組織名稱',
+  MANAGER_NOT_FOUND: '無法驗證帳號，請重新登入後再試',
+  CSRF_MISMATCH: '安全驗證失敗，請重新整理頁面後再試',
+  PROVISION_FAILED: '建立組織時發生錯誤，請稍後再試或聯絡管理員',
 }
 
 export function CreateOrganizationModal({ open, onOpenChange }: Props) {
+  const { csrfToken: inertiaCsrf } = usePage().props
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -55,10 +57,15 @@ export function CreateOrganizationModal({ open, onOpenChange }: Props) {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'X-CSRF-Token': readCsrfToken(),
+          'X-CSRF-Token': resolveCsrfTokenForFetch(inertiaCsrf),
         },
         body: JSON.stringify({ name: name.trim() }),
       })
+      if (response.status === 419) {
+        setError(ERROR_MESSAGES.CSRF_MISMATCH)
+        return
+      }
+
       const payload = (await response.json()) as {
         success: boolean
         error?: string
@@ -66,6 +73,9 @@ export function CreateOrganizationModal({ open, onOpenChange }: Props) {
       }
 
       if (payload.success) {
+        router.visit('/member/dashboard', { replace: true })
+      } else if (payload.error === 'ALREADY_HAS_ORGANIZATION') {
+        // Stale UI (e.g. another tab already created org); reload props from server
         router.visit('/member/dashboard', { replace: true })
       } else {
         setError(

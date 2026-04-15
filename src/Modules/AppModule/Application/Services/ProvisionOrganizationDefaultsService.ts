@@ -7,7 +7,7 @@ import type { IModuleSubscriptionRepository } from '../../Domain/Repositories/IM
 import { EnsureCoreAppModulesService } from './EnsureCoreAppModulesService'
 
 const DEFAULT_CONTRACT_TERMS = {
-  creditQuota: 1_000_000,
+  creditQuota: 0,
   allowedModules: [...CORE_APP_MODULE_SPECS.map((s) => s.name)],
   rateLimit: { rpm: 10_000, tpm: 10_000_000 },
   validityPeriod: { startDate: '2020-01-01', endDate: '2099-12-31' },

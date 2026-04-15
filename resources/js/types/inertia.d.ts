@@ -7,6 +7,8 @@ export interface AuthUser {
 }
 
 export interface SharedProps {
+  /** Set by web middleware; use for `X-CSRF-Token` on same-origin mutating fetches. */
+  csrfToken: string
   auth: {
     user: AuthUser | null
   }

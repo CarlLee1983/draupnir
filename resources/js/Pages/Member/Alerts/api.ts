@@ -5,15 +5,12 @@ import type {
   WebhookEndpointListDTO,
 } from './types'
 
+import { getXsrfCookieToken } from '@/lib/csrf'
+
 type ApiEnvelope<T> = {
   success?: boolean
   message?: string
   data?: T
-}
-
-function readCsrfToken(): string {
-  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
-  return token ?? ''
 }
 
 async function requestJson<T>(url: string, init: RequestInit = {}): Promise<T> {
@@ -23,7 +20,7 @@ async function requestJson<T>(url: string, init: RequestInit = {}): Promise<T> {
   const method = (init.method ?? 'GET').toUpperCase()
   if (method !== 'GET' && method !== 'HEAD') {
     headers.set('Content-Type', 'application/json')
-    const csrfToken = readCsrfToken()
+    const csrfToken = getXsrfCookieToken()
     if (csrfToken) {
       headers.set('X-CSRF-Token', csrfToken)
     }
@@ -110,7 +107,7 @@ export async function testWebhook(
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        'X-CSRF-Token': readCsrfToken(),
+        'X-CSRF-Token': getXsrfCookieToken(),
       },
     },
   )
