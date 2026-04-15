@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/tables/DataTable'
 import { createApiKeyColumns, type ApiKeyRow } from './columns'
 import { Plus } from 'lucide-react'
+import { Banner } from '@/components/ui/banner'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -35,7 +36,12 @@ export default function ApiKeysIndex({ orgId, keys, error }: Props) {
           </Button>
         </div>
 
-        {error && <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>}
+        {error && (
+          <Banner
+            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
+            message={t(error.key, error.params)}
+          />
+        )}
 
         <DataTable columns={columns} data={keys} searchPlaceholder={t('ui.member.apiKeys.searchPlaceholder')} searchColumn="label" />
       </div>
