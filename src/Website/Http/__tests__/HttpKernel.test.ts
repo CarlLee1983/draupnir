@@ -15,16 +15,16 @@ describe('HttpKernel', () => {
   })
 
   describe('groups', () => {
-    it('web group 包含 4 個 middleware（jwt + csrf + sharedData + pendingCookies）', () => {
-      expect(HttpKernel.groups.web()).toHaveLength(4)
+    it('web group 包含 5 個 middleware（jwt + tokenRefresh + csrf + sharedData + pendingCookies）', () => {
+      expect(HttpKernel.groups.web()).toHaveLength(5)
     })
 
-    it('admin group 包含 5 個 middleware（web 基底 + requireAdmin + pendingCookies）', () => {
-      expect(HttpKernel.groups.admin()).toHaveLength(5)
+    it('admin group 包含 6 個 middleware（web 基底 + requireAdmin + pendingCookies）', () => {
+      expect(HttpKernel.groups.admin()).toHaveLength(6)
     })
 
-    it('member group 包含 5 個 middleware（web 基底 + requireMember + pendingCookies）', () => {
-      expect(HttpKernel.groups.member()).toHaveLength(5)
+    it('member group 包含 6 個 middleware（web 基底 + requireMember + pendingCookies）', () => {
+      expect(HttpKernel.groups.member()).toHaveLength(6)
     })
 
     it('所有 group middleware 都是函式', () => {

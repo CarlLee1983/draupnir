@@ -1,8 +1,21 @@
-import { describe, expect, it, beforeEach } from 'bun:test'
+import { describe, expect, it, beforeEach, afterEach } from 'bun:test'
 import { initializeDrizzle, getDrizzleInstance, resetDrizzleForTest, closeDrizzleConnection } from '../config'
 
 describe('Drizzle Config', () => {
+  let originalDatabaseUrl: string | undefined
+
   beforeEach(() => {
+    originalDatabaseUrl = process.env.DATABASE_URL
+    process.env.DATABASE_URL = 'file::memory:'
+    resetDrizzleForTest()
+  })
+
+  afterEach(() => {
+    if (originalDatabaseUrl === undefined) {
+      delete process.env.DATABASE_URL
+    } else {
+      process.env.DATABASE_URL = originalDatabaseUrl
+    }
     resetDrizzleForTest()
   })
 
@@ -18,6 +31,23 @@ describe('Drizzle Config', () => {
 })
 
 describe('closeDrizzleConnection()', () => {
+  let originalDatabaseUrl: string | undefined
+
+  beforeEach(() => {
+    originalDatabaseUrl = process.env.DATABASE_URL
+    process.env.DATABASE_URL = 'file::memory:'
+    resetDrizzleForTest()
+  })
+
+  afterEach(() => {
+    if (originalDatabaseUrl === undefined) {
+      delete process.env.DATABASE_URL
+    } else {
+      process.env.DATABASE_URL = originalDatabaseUrl
+    }
+    resetDrizzleForTest()
+  })
+
   it('呼叫後再次取得 instance 會重新初始化', async () => {
     // 先初始化
     const before = getDrizzleInstance()
