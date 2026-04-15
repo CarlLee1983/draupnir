@@ -2,7 +2,7 @@ import type { Config } from 'tailwindcss'
 
 const config: Config = {
   darkMode: 'class',
-  content: ['./resources/js/**/*.{ts,tsx}'],
+  content: ['./resources/js/**/*.{ts,tsx}', './resources/views/**/*.html'],
   theme: {
     container: {
       center: true,
@@ -12,6 +12,10 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['var(--font-geist-sans)', 'sans-serif'],
+        mono: ['var(--font-geist-mono)', 'monospace'],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
@@ -46,6 +50,11 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        surface: 'var(--surface)',
+        violet: 'hsl(var(--violet))',
+        blue: 'hsl(var(--blue))',
+        cyan: 'hsl(var(--cyan))',
+        emerald: 'hsl(var(--emerald))',
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
           foreground: 'hsl(var(--sidebar-foreground))',
@@ -55,13 +64,13 @@ const config: Config = {
         },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        lg: '8px',
+        md: '4px',
+        sm: '2px',
       },
     },
   },
-  plugins: [],
+  plugins: [require('tailwindcss-animate')],
 }
 
 export default config

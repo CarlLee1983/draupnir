@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import {
   TableCaption,
 } from '@/components/ui/table'
 import { formatCredit, formatNumber } from '@/lib/format'
+import { cn } from '@/lib/utils'
 
 export interface ModelComparisonRow {
   model: string
@@ -30,7 +31,7 @@ interface Props {
   className?: string
 }
 
-export function ModelComparisonTable({ data, title = '模型比較', className }: Props) {
+export const ModelComparisonTable = React.memo(({ data, title = '模型比較', className }: Props) => {
   const [sortKey, setSortKey] = useState<SortKey>('cost')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
@@ -40,62 +41,66 @@ export function ModelComparisonTable({ data, title = '模型比較', className }
   })
 
   return (
-    <Card className={className}>
+    <Card className={cn("overflow-hidden border-border rounded-lg shadow-indigo-500/5 shadow-sm", className)}>
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
         <CardDescription>Client-side sortable model comparison</CardDescription>
       </CardHeader>
       <CardContent>
         {sortedRows.length === 0 ? (
-          <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+          <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
             No model comparison data for this window.
           </div>
         ) : (
-          <Table>
-            <TableCaption>Top 10 models ordered by cached usage cost.</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Model</TableHead>
-                <TableHead>Provider</TableHead>
-                <SortableHead
-                  label="Cost"
-                  active={sortKey === 'cost'}
-                  direction={sortDirection}
-                  onClick={() => toggleSort('cost', sortKey, sortDirection, setSortKey, setSortDirection)}
-                />
-                <SortableHead
-                  label="Requests"
-                  active={sortKey === 'requests'}
-                  direction={sortDirection}
-                  onClick={() => toggleSort('requests', sortKey, sortDirection, setSortKey, setSortDirection)}
-                />
-                <SortableHead
-                  label="Avg Latency"
-                  active={sortKey === 'latency'}
-                  direction={sortDirection}
-                  onClick={() => toggleSort('latency', sortKey, sortDirection, setSortKey, setSortDirection)}
-                />
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedRows.map((row) => (
-                <TableRow key={`${row.model}:${row.provider ?? 'none'}`}>
-                  <TableCell className="font-medium">{row.model}</TableCell>
-                  <TableCell>{row.provider ?? '—'}</TableCell>
-                  <TableCell>{formatCredit(row.totalCost)}</TableCell>
-                  <TableCell>{formatNumber(row.totalRequests)}</TableCell>
-                  <TableCell>{`${formatNumber(row.avgLatencyMs)} ms`}</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableCaption className="font-mono text-[10px] uppercase tracking-wider">Top 10 models ordered by cached usage cost.</TableCaption>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent border-border">
+                  <TableHead className="font-mono text-[10px] uppercase tracking-wider">Model</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-wider">Provider</TableHead>
+                  <SortableHead
+                    label="Cost"
+                    active={sortKey === 'cost'}
+                    direction={sortDirection}
+                    onClick={() => toggleSort('cost', sortKey, sortDirection, setSortKey, setSortDirection)}
+                  />
+                  <SortableHead
+                    label="Requests"
+                    active={sortKey === 'requests'}
+                    direction={sortDirection}
+                    onClick={() => toggleSort('requests', sortKey, sortDirection, setSortKey, setSortDirection)}
+                  />
+                  <SortableHead
+                    label="Avg Latency"
+                    active={sortKey === 'latency'}
+                    direction={sortDirection}
+                    onClick={() => toggleSort('latency', sortKey, sortDirection, setSortKey, setSortDirection)}
+                  />
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {sortedRows.map((row) => (
+                  <TableRow key={`${row.model}:${row.provider ?? 'none'}`} className="border-border hover:bg-white/[0.02] transition-colors">
+                    <TableCell className="font-medium text-white">{row.model}</TableCell>
+                    <TableCell className="text-muted-foreground">{row.provider ?? '—'}</TableCell>
+                    <TableCell className="font-mono text-xs">{formatCredit(row.totalCost)}</TableCell>
+                    <TableCell className="font-mono text-xs">{formatNumber(row.totalRequests)}</TableCell>
+                    <TableCell className="font-mono text-xs">{`${formatNumber(row.avgLatencyMs)} ms`}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
   )
-}
+})
 
-function SortableHead({
+ModelComparisonTable.displayName = 'ModelComparisonTable'
+
+const SortableHead = React.memo(({
   label,
   active,
   direction,
@@ -105,30 +110,36 @@ function SortableHead({
   active: boolean
   direction: SortDirection
   onClick: () => void
-}) {
+}) => {
   return (
     <TableHead>
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="h-8 -translate-x-2 px-2 text-left font-medium text-muted-foreground hover:text-foreground"
+        className={cn(
+          "h-8 -translate-x-2 px-2 text-left font-mono text-[10px] uppercase tracking-wider hover:bg-white/5",
+          active ? "text-indigo-400" : "text-muted-foreground hover:text-white"
+        )}
         onClick={onClick}
       >
         <span>{label}</span>
         {active ? (
           direction === 'asc' ? (
-            <ArrowUp className="h-3.5 w-3.5" />
+            <ArrowUp className="ml-1 h-3 w-3" />
           ) : (
-            <ArrowDown className="h-3.5 w-3.5" />
+            <ArrowDown className="ml-1 h-3 w-3" />
           )
         ) : (
-          <ArrowUpDown className="h-3.5 w-3.5" />
+          <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />
         )}
       </Button>
     </TableHead>
   )
-}
+})
+
+SortableHead.displayName = 'SortableHead'
+
 
 function compareRows(left: ModelComparisonRow, right: ModelComparisonRow, key: SortKey): number {
   if (key === 'cost') return left.totalCost - right.totalCost

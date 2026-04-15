@@ -25,7 +25,7 @@ export function requireAdmin(ctx: IHttpContext): AdminAuthResult {
 
   if (auth.role !== 'admin') {
     const { messages } = getInertiaShared(ctx)
-    const t = (key: string) => messages[key] ?? key
+    const t = (key: string) => (messages as any)[key] ?? key
     return {
       ok: false,
       response: new Response(

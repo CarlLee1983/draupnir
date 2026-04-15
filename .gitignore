@@ -57,3 +57,6 @@ dist/
 draupnir_ci
 draupnir_ci-wal
 draupnir_ci-shm
+
+# Superpowers
+.superpowers/

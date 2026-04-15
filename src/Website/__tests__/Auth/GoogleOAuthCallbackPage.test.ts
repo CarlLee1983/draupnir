@@ -15,7 +15,7 @@ function createOAuthContext(options: {
     getBody: async <T>() => ({}) as T,
     getHeader: () => undefined,
     getParam: () => undefined,
-    getMethod: () => 'GET',
+    
     getPathname: () => '/oauth/google/callback',
     getQuery: (name: string) => {
       if (name === 'code') return code

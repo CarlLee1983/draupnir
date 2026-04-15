@@ -150,7 +150,7 @@ describe('BodySizeLimitMiddleware', () => {
 
   describe('邊界情況與錯誤路徑', () => {
     it('Context 狀態隔離 → 多個請求不共享 state', async () => {
-      const mw = createBodySizeLimitMiddleware(512 * 1024)
+      createBodySizeLimitMiddleware(512 * 1024)
       const ctx1 = createMockContext()
       const ctx2 = createMockContext()
 

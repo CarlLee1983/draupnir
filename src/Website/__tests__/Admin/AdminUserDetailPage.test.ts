@@ -27,7 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    getMethod: () => 'GET',
+    
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),
@@ -50,15 +50,6 @@ function createAdminContext(): IHttpContext {
     get: <T>(key: string) => store.get(key) as T | undefined,
     set: (key: string, value: unknown) => {
       store.set(key, value)
-    },
-  })
-}
-
-function createMemberContext(): IHttpContext {
-  return createMockContext({
-    get: <T>(key: string) => {
-      if (key === 'auth') return { userId: 'user-1', email: 'user@test.com', role: 'member' } as T
-      return undefined
     },
   })
 }

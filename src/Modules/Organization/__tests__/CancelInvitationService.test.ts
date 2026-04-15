@@ -63,7 +63,7 @@ describe('CancelInvitationService', () => {
     const result = await service.execute('org-1', 'inv-1', 'user-manager', 'user')
     expect(result.success).toBe(true)
     // 驗證 update() 被呼叫且傳入 cancelled invitation
-    expect(invitationRepo.update as any).toHaveBeenCalledOnce()
+    expect(invitationRepo.update as any).toHaveBeenCalledTimes(1)
     const updatedArg = (invitationRepo.update as any).mock.calls[0][0]
     expect(updatedArg.status.getValue()).toBe('cancelled')
   })

@@ -38,6 +38,9 @@ export const user_profiles = sqliteTable('user_profiles', {
   avatar_url: text('avatar_url'),
   bio: text('bio'),
   timezone: text('timezone').default('UTC'),
+  phone: text('phone'),
+  locale: text('locale').default('zh-TW'),
+  notification_preferences: text('notification_preferences').default('{}'),
   created_at: text('created_at').default(sql`CURRENT_TIMESTAMP`),
   updated_at: text('updated_at').default(sql`CURRENT_TIMESTAMP`),
 })

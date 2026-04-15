@@ -1,6 +1,8 @@
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
+import type { RefreshTokenService } from '@/Modules/Auth/Application/Services/RefreshTokenService'
+import { configureTokenRefresh } from '@/Website/Http/Middleware/TokenRefreshMiddleware'
 import { registerWebsiteBindings } from './registerWebsiteBindings'
 import { registerWebsiteRoutes } from './registerWebsiteRoutes'
 
@@ -22,5 +24,7 @@ export class WebsiteServiceProvider extends ModuleServiceProvider implements IRo
     registerWebsiteRoutes(context.router, context.container)
   }
 
-  override boot(_container: IContainer): void {}
+  override boot(container: IContainer): void {
+    configureTokenRefresh(container.make('refreshTokenService') as RefreshTokenService)
+  }
 }

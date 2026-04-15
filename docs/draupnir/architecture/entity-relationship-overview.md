@@ -1,6 +1,8 @@
 # Entity-Relationship 概覽
 
-本頁以目前程式碼中的 **Drizzle schema**（[`schema.ts`](../../../src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts)）與 **`database/migrations/`** 為主，描述持久化後的實體關係。登入／JWT／撤銷流程的步驟說明見 [`auth-flow-diagrams.md`](./auth-flow-diagrams.md)。
+本頁以 **`database/migrations/`** 套用後的實際表結構為準，並以 **Drizzle schema**（[`schema.ts`](../../../src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts)）為程式碼側對照；兩者應保持一致。型別在 SQLite（開發）與 PostgreSQL（CI／部署）之間可能不同（例如時間戳、數值），欄位語意以 migration 為準。登入／JWT／撤銷流程見 [`auth-flow-diagrams.md`](./auth-flow-diagrams.md)。
+
+**未持久化／缺口：**`module_subscriptions` 表尚未建立（無對應 migration，`schema.ts` 亦無），`ModuleSubscriptionRepository` 仍指向該表名—實作前勿視為已上線。可選用專案內 **dbcli**（`.dbcli/config.json`）對連線資料庫執行 `dbcli schema` 與本頁交叉驗證。
 
 ---
 
@@ -29,10 +31,12 @@
                             │ - avatarUrl          │
                             │ - bio                │
                             │ - timezone           │
+                            │ - phone (nullable)   │
+                            │ - locale (預設 zh-TW)│
+                            │ - notificationPrefs  │
+                            │   (JSON 字串, 預設 {})│
                             │ - createdAt, updatedAt│
                             └──────────────────────┘
-   (Domain 另有 phone / locale / notificationPreferences 等欄位語意；
-    持久化欄位以 schema／migration 為準，可隨遷移擴充。)
 
 
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -61,6 +65,15 @@
 
 
 ┌────────────────────────────────────────────────────────────────────────┐
+│     一次性連結（無 user FK，以 email 對應使用者流程）                     │
+├────────────────────────────────────────────────────────────────────────┤
+│  email_verification_tokens：id, email, expires_at, used (bool)         │
+│  password_reset_tokens：    同上                                       │
+│  （索引：email；見 migration 2026_04_14_*）                              │
+└────────────────────────────────────────────────────────────────────────┘
+
+
+┌────────────────────────────────────────────────────────────────────────┐
 │                        Organization 聚合                               │
 ├────────────────────────────────────────────────────────────────────────┤
 │                                                                        │
@@ -84,9 +97,11 @@
 │  │ - role (例: manager/     │   │ - tokenHash (unique)     │          │
 │  │         member)          │   │ - role                   │          │
 │  │ - joinedAt, createdAt    │   │ - invitedByUserId        │          │
-│  └──────────────────────────┘   │ - status (例: pending) │          │
-│                                  │ - expiresAt, createdAt  │          │
-│                                  └──────────────────────────┘          │
+│  │ ※ partial unique：        │   │ - status (例: pending) │          │
+│  │   role='manager' 時      │   │ - expiresAt, createdAt  │          │
+│  │   user_id 全表唯一        │   └──────────────────────────┘          │
+│  │   (uniq_org_manager…)    │                                        │
+│  └──────────────────────────┘                                         │
 │                                                                        │
 └────────────────────────────────────────────────────────────────────────┘
 
@@ -135,8 +150,8 @@
 │  │ - status: active | suspended | cancelled                        │ │
 │  │ - subscribedAt, updatedAt                                       │ │
 │  └──────────────────────────────────────────────────────────────────┘ │
-│  持久化表名預期為 `module_subscriptions`（見 ModuleSubscriptionRepository）；│
-│  若環境缺少對應 migration，需補齊後與本圖一致。                        │
+│  **缺口：**`module_subscriptions` 尚無 migration／未在 `schema.ts` 註冊；   │
+│  `ModuleSubscriptionRepository` 仍使用該表名—補齊前訂閱持久化視為未實作。   │
 │                                                                        │
 │  ┌──────────────────────────────────────────────────────────────────┐ │
 │  │      AppApiKey (Aggregate Root)                                 │ │
@@ -220,6 +235,7 @@
 │   Alerts（預算告警）— 與 org 關聯                                       │
 ├────────────────────────────────────────────────────────────────────────┤
 │  AlertConfig (1:1 org) → AlertEvent (1:N) → AlertDelivery (1:N)        │
+│  AlertDelivery 冗餘欄位：org_id, month, tier（避免與 alert_events JOIN）  │
 │  WebhookEndpoint (N: org)                                             │
 └────────────────────────────────────────────────────────────────────────┘
 
@@ -227,8 +243,12 @@
 ┌────────────────────────────────────────────────────────────────────────┐
 │   用量與計價（支援性實體，非單一 Aggregate 根）                          │
 ├────────────────────────────────────────────────────────────────────────┤
-│  UsageRecord：apiKeyId, orgId, model, tokens, creditCost, bifrost…    │
-│  PricingRule：model 價格規則 | SyncCursor：同步游標                     │
+│  UsageRecord：bifrost_log_id (unique), api_key_id, org_id, model,      │
+│  input_tokens, output_tokens, credit_cost (REAL／浮點額度成本),         │
+│  provider, latency_ms, status, occurred_at, created_at；               │
+│  複合索引 (org_id, occurred_at)。                                       │
+│  PricingRule：model_pattern、價格欄位、priority、is_active              │
+│  SyncCursor：cursor_type (unique)、last_synced_at、last_bifrost_log_id  │
 │  QuarantinedLog：無法對應的 Bifrost log                                │
 └────────────────────────────────────────────────────────────────────────┘
 ```
@@ -250,6 +270,8 @@ User 1 ←─── 1 UserProfile     (顯示名稱、頭像等)
      │
      ├─→ N auth_tokens 紀錄   (每次登入／刷新可寫入 access/refresh 雜湊)
      │
+     ├─→ (流程) email_verification_tokens / password_reset_tokens（以 email 對應，無 user FK）
+     │
      ├─→ N ApiKey             (僅在「建立者」語意上；金鑰隸屬 org)
      │
      └─ 可連結 google_id（OAuth）
@@ -259,6 +281,7 @@ User 1 ←─── 1 UserProfile     (顯示名稱、頭像等)
 
 ```
 Organization 1 ←─── N OrganizationMember
+              │      （每位使用者至多一筆 org-level manager：partial unique index）
               │
               ├─→ N OrganizationInvitation
               │
@@ -276,7 +299,9 @@ Organization 1 ←─── N OrganizationMember
 ### AppModule 與訂閱
 
 ```
-AppModule 1 ←─── N ModuleSubscription（多組織訂閱同一模組）
+AppModule 1 ←─── N ModuleSubscription（多組織訂閱同一模組）— 預期表 module_subscriptions
+
+`app_modules` 表已存在（全站模組目錄）。`module_subscriptions` 尚無 migration，關係僅存在領域／Repository 設計中。
 
 AppApiKey 為「應用／整合場景」用的 org 級金鑰，與 ApiKey（一般 API 金鑰）並列，
 皆透過 org 關聯，而非 AppModule 的子集合表結構。
@@ -335,6 +360,9 @@ UserProfile (Domain)       →  user_profiles (Database)
 ├─ avatarUrl               →  avatar_url
 ├─ bio                     →  bio
 ├─ timezone                →  timezone
+├─ phone                   →  phone (nullable)
+├─ locale                  →  locale (default zh-TW)
+├─ notificationPreferences →  notification_preferences (JSON 字串, default '{}')
 ├─ createdAt               →  created_at
 └─ updatedAt               →  updated_at
 ```
@@ -350,6 +378,16 @@ TokenRecord / 登入流程     →  auth_tokens (Database)
 ├─ expiresAt               →  expires_at
 ├─ revokedAt               →  revoked_at (nullable)
 └─ createdAt               →  created_at
+```
+
+### 信箱驗證／密碼重設（無 user FK）
+
+```typescript
+// email_verification_tokens、password_reset_tokens
+├─ id         →  id
+├─ email      →  email（對應 users.email 流程，非 FK）
+├─ expiresAt  →  expires_at
+└─ used       →  used (boolean)
 ```
 
 ### ApiKey → api_keys 表
@@ -428,6 +466,19 @@ CREATE INDEX idx_app_api_keys_key_hash ON app_api_keys(key_hash);
 
 -- Report schedules
 CREATE INDEX idx_report_schedules_org_id ON report_schedules(org_id);
+
+-- Organization members（每位使用者至多一個 org-level manager）
+CREATE UNIQUE INDEX uniq_org_manager_per_user ON organization_members (user_id) WHERE role = 'manager';
+
+-- Usage records（儀表板區間查詢）
+-- CREATE INDEX ... ON usage_records (org_id, occurred_at);
+
+-- Alert deliveries（依 org／月／層級查詢，與 dedup 索引見 schema.ts）
+-- idx_alert_deliveries_org_month_tier, idx_alert_deliveries_dedup, …
+
+-- 信箱／重設連結
+CREATE INDEX idx_email_verification_tokens_email ON email_verification_tokens(email);
+CREATE INDEX idx_password_reset_tokens_email ON password_reset_tokens(email);
 ```
 
 ---

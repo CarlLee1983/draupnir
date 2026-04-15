@@ -14,7 +14,8 @@ const createMockRedis = (incrReturn: number | Error = 1): IRedisService => ({
       ? Promise.reject(incrReturn)
       : Promise.resolve(incrReturn),
   ),
-})
+  disconnect: vi.fn(),
+}) as unknown as IRedisService
 
 const createMockContext = (ip = '1.2.3.4'): IHttpContext => {
   const state: Record<string, unknown> = {}

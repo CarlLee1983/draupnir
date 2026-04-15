@@ -21,36 +21,48 @@ export function Sidebar({ title, items, open, onClose }: SidebarProps) {
   return (
     <>
       {open && (
-        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={onClose} />
+        <button
+          type="button"
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={onClose}
+          aria-label="關閉側邊欄"
+        />
       )}
 
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r bg-sidebar transition-transform lg:static lg:translate-x-0',
+          'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background transition-transform lg:static lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
+        aria-label="主要導覽選單"
       >
-        <div className="flex h-14 items-center border-b px-4">
-          <Link href="/" className="text-lg font-semibold text-sidebar-foreground">
+        <div className="flex h-14 items-center border-b border-border px-4">
+          <Link href="/" className="font-mono text-sm font-bold uppercase tracking-widest text-foreground">
             {title}
           </Link>
         </div>
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav aria-label="主要導覽選單" className="flex-1 space-y-0.5 py-4">
           {items.map((item) => {
-            const isActive = url.startsWith(item.href)
+            const isActive = item.href === '/member/dashboard' 
+              ? url === '/member/dashboard' 
+              : url.startsWith(item.href)
+              
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? 'page' : undefined}
                 className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                  'flex items-center gap-3 px-4 py-2 font-mono text-[11px] uppercase tracking-widest transition-colors',
                   isActive
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent/50',
+                    ? 'border-l-2 border-primary bg-primary/5 text-primary'
+                    : 'border-l-2 border-transparent text-muted-foreground hover:bg-muted/30 hover:text-foreground',
                 )}
               >
-                {item.icon}
+                <span className={cn('h-4 w-4 shrink-0', isActive ? 'text-primary' : 'text-muted-foreground/70')}>
+                  {item.icon}
+                </span>
                 {item.label}
               </Link>
             )

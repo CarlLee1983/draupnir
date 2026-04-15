@@ -15,13 +15,18 @@ export class LogoutPage {
    * `POST /logout`
    */
   async store(ctx: IHttpContext): Promise<Response> {
-    const token = ctx.getCookie('auth_token')
+    const accessToken = ctx.getCookie('auth_token')
+    if (accessToken) {
+      await this.logoutService.execute({ token: accessToken })
+    }
 
-    if (token) {
-      await this.logoutService.execute({ token })
+    const refreshToken = ctx.getCookie('refresh_token')
+    if (refreshToken) {
+      await this.logoutService.execute({ token: refreshToken })
     }
 
     ctx.setCookie('auth_token', '', { path: '/', maxAge: 0, sameSite: 'Lax' })
+    ctx.setCookie('refresh_token', '', { path: '/', maxAge: 0, sameSite: 'Lax' })
 
     return ctx.redirect('/login')
   }

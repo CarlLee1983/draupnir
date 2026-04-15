@@ -51,7 +51,15 @@ export class LoginPage {
       httpOnly: true,
       sameSite: 'Lax',
       path: '/',
-      maxAge: 3600,
+      maxAge: 900,
+      secure: isSecureRequest(ctx),
+    })
+
+    ctx.setCookie('refresh_token', result.data.refreshToken, {
+      httpOnly: true,
+      sameSite: 'Lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60,
       secure: isSecureRequest(ctx),
     })
 

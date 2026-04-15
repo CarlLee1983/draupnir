@@ -30,4 +30,8 @@ export class FakeScheduler implements IScheduler {
     }
     await job.handler()
   }
+
+  stopAll(): void {
+    this.scheduled.clear()
+  }
 }

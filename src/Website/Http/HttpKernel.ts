@@ -15,6 +15,7 @@ import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 import { attachWebCsrf } from './Security/CsrfMiddleware'
 import { injectSharedData } from './Inertia/SharedPropsBuilder'
+import { createTokenRefreshMiddleware } from './Middleware/TokenRefreshMiddleware'
 
 // ─── 內部 middleware 包裝 ──────────────────────────────────────────────────────
 
@@ -52,6 +53,7 @@ function pendingCookiesMiddleware(): Middleware {
 /** 所有 page group 共用的基底 middleware 鏈 */
 const webBase = (): Middleware[] => [
   attachJwt(),
+  createTokenRefreshMiddleware(),
   attachWebCsrf(),
   injectSharedDataMiddleware(),
 ]
