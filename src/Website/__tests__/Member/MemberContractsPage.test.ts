@@ -98,7 +98,8 @@ describe('MemberContractsPage', () => {
       ),
     }
 
-    const page = new MemberContractsPage(inertia, mockListService as any)
+    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
+    const page = new MemberContractsPage(inertia, mockListService as any, mockMemberRepository as any)
     await page.handle(ctx)
 
     expect(captured.lastCall).not.toBe(null)
@@ -115,7 +116,8 @@ describe('MemberContractsPage', () => {
 
     const mockListService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
 
-    const page = new MemberContractsPage(inertia, mockListService as any)
+    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
+    const page = new MemberContractsPage(inertia, mockListService as any, mockMemberRepository as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.component).toBe('Member/Contracts/Index')
@@ -139,7 +141,8 @@ describe('MemberContractsPage', () => {
       ),
     }
 
-    const page = new MemberContractsPage(inertia, mockListService as any)
+    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
+    const page = new MemberContractsPage(inertia, mockListService as any, mockMemberRepository as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.contracts.loadFailed' })

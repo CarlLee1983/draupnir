@@ -1,4 +1,5 @@
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
@@ -32,6 +33,7 @@ export class MemberContractsPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listService: ListContractsService,
+    private readonly memberRepository: IOrganizationMemberRepository,
   ) {}
 
   /**
@@ -43,7 +45,11 @@ export class MemberContractsPage {
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
-    const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
+    let orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
+    if (!orgId) {
+      const membership = await this.memberRepository.findByUserId(auth.userId)
+      orgId = membership?.organizationId ?? null
+    }
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Contracts/Index', {
         orgId: null,

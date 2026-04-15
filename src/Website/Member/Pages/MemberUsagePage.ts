@@ -1,4 +1,5 @@
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
@@ -13,6 +14,7 @@ export class MemberUsagePage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly usageChartService: GetUsageChartService,
+    private readonly memberRepository: IOrganizationMemberRepository,
   ) {}
 
   /**
@@ -24,7 +26,11 @@ export class MemberUsagePage {
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
-    const orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
+    let orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
+    if (!orgId) {
+      const membership = await this.memberRepository.findByUserId(auth.userId)
+      orgId = membership?.organizationId ?? null
+    }
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Usage/Index', {
         orgId: null,

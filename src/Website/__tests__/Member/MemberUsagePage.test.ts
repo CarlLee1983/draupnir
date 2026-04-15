@@ -92,7 +92,8 @@ describe('MemberUsagePage', () => {
       ),
     }
 
-    const page = new MemberUsagePage(inertia, mockUsageChartService as any)
+    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
+    const page = new MemberUsagePage(inertia, mockUsageChartService as any, mockMemberRepository as any)
     await page.handle(ctx)
 
     expect(captured.lastCall).not.toBe(null)
@@ -112,7 +113,8 @@ describe('MemberUsagePage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: null })),
     }
 
-    const page = new MemberUsagePage(inertia, mockUsageChartService as any)
+    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
+    const page = new MemberUsagePage(inertia, mockUsageChartService as any, mockMemberRepository as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.component).toBe('Member/Usage/Index')
@@ -137,7 +139,8 @@ describe('MemberUsagePage', () => {
       ),
     }
 
-    const page = new MemberUsagePage(inertia, mockUsageChartService as any)
+    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
+    const page = new MemberUsagePage(inertia, mockUsageChartService as any, mockMemberRepository as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.usage.loadFailed' })

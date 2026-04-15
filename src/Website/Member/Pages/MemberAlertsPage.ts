@@ -3,7 +3,9 @@ import { toListDTO } from '@/Modules/Alerts/Application/DTOs/WebhookEndpointDTO'
 import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
 import type { GetBudgetService } from '@/Modules/Alerts/Application/Services/GetBudgetService'
 import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/Services/ListWebhookEndpointsService'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 /**
@@ -18,6 +20,7 @@ export class MemberAlertsPage {
     private readonly getBudgetService: GetBudgetService,
     private readonly listWebhookEndpointsService: ListWebhookEndpointsService,
     private readonly getAlertHistoryService: GetAlertHistoryService,
+    private readonly memberRepository: IOrganizationMemberRepository,
   ) {}
 
   /**
@@ -27,9 +30,14 @@ export class MemberAlertsPage {
    * @returns Inertia render response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)!
     const currentOrg = ctx.get<CurrentOrganizationContext>('currentOrg')
-    const orgId =
-      currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id')
+    let orgId =
+      currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
+    if (!orgId) {
+      const membership = await this.memberRepository.findByUserId(auth.userId)
+      orgId = membership?.organizationId ?? null
+    }
 
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Alerts/Index', {
