@@ -13,6 +13,7 @@ export { GatewayError } from './errors'
 export type { ILLMGatewayClient } from './ILLMGatewayClient'
 export { MockGatewayClient } from './implementations/MockGatewayClient'
 export type {
+  BudgetUpdate,
   CreateKeyRequest,
   KeyResponse,
   LogEntry,

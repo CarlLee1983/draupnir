@@ -32,6 +32,15 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
         name: request.name,
         ...(request.customerId !== undefined && { customer_id: request.customerId }),
         ...(request.isActive !== undefined && { is_active: request.isActive }),
+        ...(request.budget !== undefined && {
+          budget: {
+            max_limit: request.budget.maxLimit,
+            reset_duration: request.budget.resetDuration,
+            ...(request.budget.calendarAligned !== undefined && {
+              calendar_aligned: request.budget.calendarAligned,
+            }),
+          },
+        }),
         ...(request.rateLimit !== undefined && {
           rate_limit: {
             token_max_limit: request.rateLimit.tokenMaxLimit ?? 0,
@@ -65,6 +74,15 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
     try {
       const bifrostRequest = {
         ...(request.isActive !== undefined && { is_active: request.isActive }),
+        ...(request.budget !== undefined && {
+          budget: {
+            max_limit: request.budget.maxLimit,
+            reset_duration: request.budget.resetDuration,
+            ...(request.budget.calendarAligned !== undefined && {
+              calendar_aligned: request.budget.calendarAligned,
+            }),
+          },
+        }),
         ...(request.rateLimit !== undefined && {
           rate_limit: {
             token_max_limit: request.rateLimit.tokenMaxLimit ?? 0,

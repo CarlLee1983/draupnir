@@ -4,16 +4,26 @@
  * exclusively inside BifrostGatewayAdapter.
  */
 
+/** Matches Bifrost `CreateVirtualKeyRequest.budget` / `UpdateVirtualKeyRequest.budget` (camelCase). */
+export interface BudgetUpdate {
+  readonly maxLimit: number
+  readonly resetDuration: string
+  readonly calendarAligned?: boolean
+}
+
 export interface CreateKeyRequest {
   readonly name: string
   readonly customerId?: string
   readonly isActive?: boolean
+  /** Virtual-key spend cap for one reset window (forwarded to Bifrost `budget`). */
+  readonly budget?: BudgetUpdate
   readonly rateLimit?: RateLimitUpdate
   readonly providerConfigs?: readonly ProviderConfigUpdate[]
 }
 
 export interface UpdateKeyRequest {
   readonly isActive?: boolean
+  readonly budget?: BudgetUpdate
   readonly rateLimit?: RateLimitUpdate
   readonly providerConfigs?: readonly ProviderConfigUpdate[]
 }

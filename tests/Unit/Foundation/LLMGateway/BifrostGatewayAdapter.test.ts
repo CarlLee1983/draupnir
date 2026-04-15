@@ -62,6 +62,7 @@ describe('BifrostGatewayAdapter', () => {
         name: 'test',
         customerId: 'c1',
         isActive: true,
+        budget: { maxLimit: 100, resetDuration: '30d', calendarAligned: true },
         rateLimit: { tokenMaxLimit: 1000, tokenResetDuration: '1m' },
         providerConfigs: [{ provider: '*', allowedModels: ['gpt-4'] }],
       })
@@ -71,6 +72,11 @@ describe('BifrostGatewayAdapter', () => {
       expect(body.name).toBe('test')
       expect(body.customer_id).toBe('c1')
       expect(body.is_active).toBe(true)
+      expect(body.budget).toEqual({
+        max_limit: 100,
+        reset_duration: '30d',
+        calendar_aligned: true,
+      })
       expect(body.rate_limit).toEqual({ token_max_limit: 1000, token_reset_duration: '1m' })
       expect(body.provider_configs).toEqual([{ provider: '*', allowed_models: ['gpt-4'] }])
     })
@@ -110,6 +116,7 @@ describe('BifrostGatewayAdapter', () => {
       expect(body.name).toBe('test')
       expect('customer_id' in body).toBe(false)
       expect('is_active' in body).toBe(false)
+      expect('budget' in body).toBe(false)
       expect('rate_limit' in body).toBe(false)
       expect('provider_configs' in body).toBe(false)
     })
@@ -132,6 +139,27 @@ describe('BifrostGatewayAdapter', () => {
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.is_active).toBe(true)
+      expect('budget' in body).toBe(false)
+      expect('rate_limit' in body).toBe(false)
+      expect('provider_configs' in body).toBe(false)
+    })
+
+    it('should only include budget when only budget is provided', async () => {
+      const mockResponse: VirtualKeyResponse = {
+        message: 'updated',
+        virtual_key: { id: 'vk-1', name: 'test', is_active: true, provider_configs: [] },
+      }
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
+
+      await adapter.updateKey('vk-1', {
+        budget: { maxLimit: 50, resetDuration: '720h' },
+      })
+
+      const fetchCall = (globalThis.fetch as any).mock.calls[0]
+      const body = JSON.parse(fetchCall[1].body)
+      expect(body.budget).toEqual({ max_limit: 50, reset_duration: '720h' })
+      expect('calendar_aligned' in body.budget).toBe(false)
+      expect('is_active' in body).toBe(false)
       expect('rate_limit' in body).toBe(false)
       expect('provider_configs' in body).toBe(false)
     })
@@ -149,6 +177,7 @@ describe('BifrostGatewayAdapter', () => {
       const body = JSON.parse(fetchCall[1].body)
       expect(body.rate_limit).toBeDefined()
       expect(body.rate_limit.token_max_limit).toBe(500)
+      expect('budget' in body).toBe(false)
       expect('is_active' in body).toBe(false)
       expect('provider_configs' in body).toBe(false)
     })
