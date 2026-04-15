@@ -44,4 +44,7 @@ export interface IRedisService {
    * @returns The value after increment.
    */
   incr(key: string, ttlSeconds: number): Promise<number>
+
+  /** 關閉 Redis 連線（用於 graceful shutdown）。 */
+  disconnect(): Promise<void>
 }
