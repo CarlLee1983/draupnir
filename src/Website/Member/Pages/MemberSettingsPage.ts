@@ -24,12 +24,17 @@ export class MemberSettingsPage {
    * @returns Current user profile in Inertia response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    const result = await this.getProfileService.execute(AuthMiddleware.getAuthContext(ctx)!.userId)
+    const auth = AuthMiddleware.getAuthContext(ctx)!
+    const result = await this.getProfileService.execute(auth.userId)
 
     return this.inertia.render(ctx, 'Member/Settings/Index', {
-      profile: result.success ? result.data : null,
-      error: result.success ? null : { key: 'member.settings.loadFailed' },
-      formError: null,
+      user: {
+        id: auth.userId,
+        email: auth.email,
+        name: result.success ? (result.data?.displayName ?? '') : '',
+        role: auth.role,
+      },
+      formError: result.success ? null : { key: 'member.settings.loadFailed' },
     })
   }
 
@@ -42,8 +47,8 @@ export class MemberSettingsPage {
   async update(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
-    const body = await ctx.getJsonBody<{ displayName?: string }>()
-    const displayName = typeof body.displayName === 'string' ? body.displayName : ''
+    const body = await ctx.getJsonBody<{ name?: string }>()
+    const displayName = typeof body.name === 'string' ? body.name : ''
 
     const updateResult = await this.updateProfileService.execute(auth.userId, {
       displayName,
@@ -52,8 +57,12 @@ export class MemberSettingsPage {
     const profileResult = await this.getProfileService.execute(auth.userId)
 
     return this.inertia.render(ctx, 'Member/Settings/Index', {
-      profile: profileResult.success ? profileResult.data : null,
-      error: profileResult.success ? null : { key: 'member.settings.loadFailed' },
+      user: {
+        id: auth.userId,
+        email: auth.email,
+        name: profileResult.success ? (profileResult.data?.displayName ?? '') : '',
+        role: auth.role,
+      },
       formError: updateResult.success ? null : { key: 'member.settings.loadFailed' },
     })
   }

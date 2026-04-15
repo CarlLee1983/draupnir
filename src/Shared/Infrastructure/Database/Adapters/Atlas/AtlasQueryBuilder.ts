@@ -70,12 +70,10 @@ export class AtlasQueryBuilder implements IQueryBuilder {
         query = query.orderBy(this.orderByConfig.column, dir)
       }
 
-      // 限制為 1 筆記錄
-      query = query.limit(1)
+      // Atlas QueryBuilder is not thenable; must call .first() to execute.
+      const row = await query.first()
 
-      const results = await query
-
-      return results[0] || null
+      return (row as Record<string, unknown>) ?? null
     } catch (error) {
       console.error(`Error in first(): ${error}`)
       return null
@@ -112,7 +110,8 @@ export class AtlasQueryBuilder implements IQueryBuilder {
         query = query.limit(this.limitValue)
       }
 
-      return await query
+      // Atlas QueryBuilder is not thenable; must call .get() to execute SELECT.
+      return (await query.get()) as Record<string, unknown>[]
     } catch (error) {
       console.error(`Error in select(): ${error}`)
       return []

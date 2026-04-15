@@ -199,6 +199,13 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
     if (error instanceof TypeError) {
       throw new GatewayError('Network error', 'NETWORK', 0, true, error)
     }
+    // Bun 的連線拒絕錯誤不繼承 TypeError，透過 code/errno 識別
+    if (error instanceof Error) {
+      const e = error as Error & { code?: string; errno?: number }
+      if (e.code === 'ConnectionRefused' || e.code === 'ECONNREFUSED' || e.errno === 0) {
+        throw new GatewayError('Gateway unavailable', 'NETWORK', 0, true, error)
+      }
+    }
     const cause = error instanceof Error ? error : new Error(String(error))
     throw new GatewayError('Unknown gateway error', 'UNKNOWN', 0, false, cause)
   }

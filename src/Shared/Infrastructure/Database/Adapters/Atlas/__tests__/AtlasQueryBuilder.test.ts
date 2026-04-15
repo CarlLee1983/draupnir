@@ -3,7 +3,9 @@ import { AtlasQueryBuilder } from '../AtlasQueryBuilder';
 
 describe('AtlasQueryBuilder (Mocked)', () => {
   const createMockQuery = () => {
-    const query: any = Promise.resolve([]);
+    const query: any = {};
+    query.get = mock(() => Promise.resolve([]));
+    query.first = mock(() => Promise.resolve(null));
     query.where = mock(() => query);
     query.whereIn = mock(() => query);
     query.whereBetween = mock(() => query);
@@ -32,6 +34,7 @@ describe('AtlasQueryBuilder (Mocked)', () => {
     expect(conn.table).toHaveBeenCalledWith('test_table');
     expect(mockQuery.where).toHaveBeenCalledWith('id', '=', 1);
     expect(mockQuery.whereIn).toHaveBeenCalledWith('status', ['active']);
+    expect(mockQuery.get).toHaveBeenCalled();
   });
 
   it('should support first() with orderBy and limit', async () => {
@@ -42,7 +45,7 @@ describe('AtlasQueryBuilder (Mocked)', () => {
     await qb.orderBy('created_at', 'DESC').first();
 
     expect(mockQuery.orderBy).toHaveBeenCalledWith('created_at', 'desc');
-    expect(mockQuery.limit).toHaveBeenCalledWith(1);
+    expect(mockQuery.first).toHaveBeenCalled();
   });
 
   it('should support CRUD operations', async () => {

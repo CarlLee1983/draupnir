@@ -51,3 +51,9 @@ dist/
 .gstack/
 .worktrees/
 .worktree/
+
+# DB
+.dbcli/
+draupnir_ci
+draupnir_ci-wal
+draupnir_ci-shm

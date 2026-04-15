@@ -98,7 +98,8 @@ describe('MemberUsagePage', () => {
     expect(captured.lastCall).not.toBe(null)
     expect(captured.lastCall?.component).toBe('Member/Usage/Index')
     expect(captured.lastCall?.props.orgId).toBe('org-123')
-    expect(captured.lastCall?.props.usageLogs).not.toBe(null)
+    expect(captured.lastCall?.props.totals).toEqual({ requests: 100, tokens: 0 })
+    expect(captured.lastCall?.props.chartData).toBeArray()
   })
 
   test('without orgId renders with empty logs and error message', async () => {
@@ -116,8 +117,8 @@ describe('MemberUsagePage', () => {
 
     expect(captured.lastCall?.component).toBe('Member/Usage/Index')
     expect(captured.lastCall?.props.orgId).toBe(null)
-    expect(captured.lastCall?.props.usageLogs).toEqual([])
-    expect(captured.lastCall?.props.usageStats).toBe(null)
+    expect(captured.lastCall?.props.totals).toEqual({ requests: 0, tokens: 0 })
+    expect(captured.lastCall?.props.chartData).toEqual([])
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.usage.selectOrg' })
   })
 

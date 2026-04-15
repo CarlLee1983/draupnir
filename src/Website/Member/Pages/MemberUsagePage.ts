@@ -28,8 +28,8 @@ export class MemberUsagePage {
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/Usage/Index', {
         orgId: null,
-        usageLogs: [],
-        usageStats: null,
+        totals: { requests: 0, tokens: 0 },
+        chartData: [],
         error: { key: 'member.usage.selectOrg' },
       })
     }
@@ -42,10 +42,14 @@ export class MemberUsagePage {
       endTime: ctx.getQuery('end_time') ?? undefined,
     })
 
+    const stats = result.success ? result.data?.stats : null
     return this.inertia.render(ctx, 'Member/Usage/Index', {
       orgId,
-      usageLogs: result.success ? (result.data?.logs ?? []) : [],
-      usageStats: result.success ? (result.data?.stats ?? null) : null,
+      totals: {
+        requests: stats?.totalRequests ?? 0,
+        tokens: stats?.totalTokens ?? 0,
+      },
+      chartData: result.success ? (result.data?.logs ?? []) : [],
       error: result.success ? null : { key: 'member.usage.loadFailed' },
     })
   }

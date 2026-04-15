@@ -127,8 +127,8 @@ export class AuthRepository implements IAuthRepository {
       role: user.role.getValue(),
       status: user.status,
       google_id: user.googleId,
-      created_at: user.createdAt.toISOString(),
-      updated_at: user.updatedAt.toISOString(),
+      created_at: user.createdAt,
+      updated_at: user.updatedAt,
     }
   }
 

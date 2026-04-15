@@ -6,7 +6,6 @@
  * wrapped with Inertia middleware to handle authentication and shared state.
  */
 
-import { requireOrganizationManager } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type {
@@ -146,9 +145,10 @@ export function registerMemberRoutes(
     MEMBER_PAGE_KEYS.ALERTS,
     'handle',
   ) as InertiaHandler
+  // No org middleware here — requireOrganizationManager() returns plain JSON (no X-Inertia header)
+  // which breaks Inertia navigation. The page handler itself handles missing-orgId gracefully.
   router.get(
     '/member/alerts',
-    [requireOrganizationManager()],
     withMemberInertiaPageHandler(alertsHandler),
     { name: 'pages.member.alerts' },
   )

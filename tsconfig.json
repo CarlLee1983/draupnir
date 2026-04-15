@@ -31,6 +31,6 @@
       "@gravito/stasis": ["./node_modules/@gravito/stasis/dist/index.js"]
     }
   },
-  "include": ["src", "tests", "config", "types", "database", "packages"],
+  "include": ["src", "tests", "config", "types", "database", "packages", "scripts/seed-admin.ts"],
   "exclude": ["node_modules", "dist"]
 }

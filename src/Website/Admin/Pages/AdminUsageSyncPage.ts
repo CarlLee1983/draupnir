@@ -3,10 +3,9 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 /** Placeholder sync metrics until UsageSync is fully implemented. */
 interface SyncStatus {
   enabled: boolean
-  lastSyncAt: string | null
+  lastSyncedAt: string | null
   nextSyncAt: string | null
-  lastCursor: string | null
-  totalRecordsProcessed: number
+  processedCount: number
   lastError: string | null
 }
 
@@ -22,16 +21,15 @@ export class AdminUsageSyncPage {
   async handle(ctx: IHttpContext): Promise<Response> {
     const status: SyncStatus = {
       enabled: false,
-      lastSyncAt: null,
+      lastSyncedAt: null,
       nextSyncAt: null,
-      lastCursor: null,
-      totalRecordsProcessed: 0,
+      processedCount: 0,
       lastError: null,
     }
 
     return this.inertia.render(ctx, 'Admin/UsageSync/Index', {
       status,
-      message: 'UsageSync module is not enabled yet (Phase 4 pending completion)',
+      error: null,
     })
   }
 }

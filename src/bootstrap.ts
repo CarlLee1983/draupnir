@@ -1,10 +1,12 @@
+import { DB } from '@gravito/atlas'
 import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { OrbitPrism } from '@gravito/prism'
 import { adaptGravitoContainer, createGravitoServiceProvider, isRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
-import { buildConfig } from '../config/index'
+import databaseConfig from '../config/database'
+import { buildConfig, useDatabase } from '../config/index'
 import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import { FoundationServiceProvider } from './Foundation/Infrastructure/Providers/FoundationServiceProvider'
@@ -46,8 +48,12 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   SchemaCache.registerValidators([new ZodValidator()])
 
   const configObj = buildConfig(port)
+  const orm = getCurrentORM()
+  if (orm === 'atlas' && useDatabase) {
+    DB.configure(databaseConfig)
+  }
   initializeRegistry()
-  const db = new DatabaseAccessBuilder(getCurrentORM()).getDatabaseAccess()
+  const db = new DatabaseAccessBuilder(orm).getDatabaseAccess()
   setCurrentDatabaseAccess(db)
   const config = defineConfig({ config: configObj })
   const core = new PlanetCore(config)

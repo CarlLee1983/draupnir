@@ -1,3 +1,4 @@
+import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway/errors'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/ILLMGatewayClient'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
@@ -33,7 +34,9 @@ export class BifrostSyncService {
     try {
       return await Promise.race([this.syncInternal(), timeoutPromise])
     } catch (error: unknown) {
-      console.error('[BifrostSyncService] Sync failed:', error)
+      if (!(error instanceof GatewayError && error.code === 'NETWORK')) {
+        console.error('[BifrostSyncService] Sync failed:', error)
+      }
       return { synced: 0, quarantined: 0, affectedOrgIds: [] }
     } finally {
       if (timeoutId) {

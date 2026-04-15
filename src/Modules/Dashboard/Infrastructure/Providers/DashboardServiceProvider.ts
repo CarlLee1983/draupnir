@@ -117,7 +117,9 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
       },
       async () => {
         const result = await syncService.sync()
-        console.error(`[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`)
+        if (result.synced > 0 || result.quarantined > 0) {
+          console.log(`[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`)
+        }
       },
     )
   }

@@ -14,7 +14,7 @@ export class DrizzleReportRepository implements IReportRepository {
       time: schedule.time,
       timezone: schedule.timezone,
       recipients: JSON.stringify(schedule.recipients),
-      enabled: schedule.enabled ? 1 : 0,
+      enabled: schedule.enabled,
       updated_at: new Date().toISOString(),
     }
 
@@ -46,7 +46,7 @@ export class DrizzleReportRepository implements IReportRepository {
   }
 
   async findAllEnabled(): Promise<ReportSchedule[]> {
-    const rows = await this.db.table('report_schedules').where('enabled', '=', 1).select()
+    const rows = await this.db.table('report_schedules').where('enabled', '=', true).select()
 
     return rows.map(this.mapToAggregate)
   }

@@ -13,8 +13,11 @@ export default class AddGoogleIdToUsers implements Migration {
   }
 
   async down(): Promise<void> {
+    // Drop index before column — SQLite validates indexes after each column drop.
     await Schema.table('users', (table) => {
       table.dropIndex('users_google_id_unique')
+    })
+    await Schema.table('users', (table) => {
       table.dropColumn('google_id')
     })
   }

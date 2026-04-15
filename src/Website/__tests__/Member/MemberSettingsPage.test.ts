@@ -120,8 +120,7 @@ describe('MemberSettingsPage', () => {
       await page.handle(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
-      expect(captured.lastCall?.props.profile).not.toBe(null)
-      expect(captured.lastCall?.props.error).toBe(null)
+      expect(captured.lastCall?.props.user).toMatchObject({ name: 'Test User', role: 'member' })
       expect(captured.lastCall?.props.formError).toBe(null)
     })
 
@@ -142,8 +141,8 @@ describe('MemberSettingsPage', () => {
       await page.handle(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
-      expect(captured.lastCall?.props.profile).toBe(null)
-      expect(captured.lastCall?.props.error).toEqual({ key: 'member.settings.loadFailed' })
+      expect(captured.lastCall?.props.user).toMatchObject({ name: '', role: 'member' })
+      expect(captured.lastCall?.props.formError).toEqual({ key: 'member.settings.loadFailed' })
     })
   })
 
@@ -174,7 +173,7 @@ describe('MemberSettingsPage', () => {
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
       expect(captured.lastCall?.props.formError).toBe(null)
-      expect(captured.lastCall?.props.profile).not.toBe(null)
+      expect(captured.lastCall?.props.user).toMatchObject({ name: 'New Name', role: 'member' })
     })
 
     test('update failure renders with formError', async () => {

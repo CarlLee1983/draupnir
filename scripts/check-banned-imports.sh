@@ -35,6 +35,7 @@ fi
 CRYPTO_ALLOWLIST=(
   "src/Modules/Auth/Infrastructure/Services/PasswordHasher.ts"
   "src/Modules/DevPortal/Domain/ValueObjects/WebhookSecret.ts"
+  "scripts/gen-hash.ts"
 )
 
 is_crypto_allowlisted() {

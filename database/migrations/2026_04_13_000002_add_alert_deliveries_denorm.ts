@@ -23,12 +23,18 @@ import { type Migration, Schema, DB } from '@gravito/atlas'
 
 export default class AddAlertDeliveriesDenorm implements Migration {
   async up(): Promise<void> {
-    // Step 1: add columns with default '' (SQLite requires DEFAULT for ADD COLUMN)
-    await Schema.table('alert_deliveries', (table) => {
-      table.string('org_id').default('')
-      table.string('month').default('')
-      table.string('tier').default('')
-    })
+    // Step 1: add columns with default '' (SQLite requires DEFAULT for ADD COLUMN).
+    // Use IF NOT EXISTS so re-runs / DBs that already have org_id (e.g. partial migration or
+    // merged create-table history) do not fail.
+    await DB.raw(
+      `ALTER TABLE alert_deliveries ADD COLUMN IF NOT EXISTS org_id TEXT DEFAULT ''`,
+    )
+    await DB.raw(
+      `ALTER TABLE alert_deliveries ADD COLUMN IF NOT EXISTS month TEXT DEFAULT ''`,
+    )
+    await DB.raw(
+      `ALTER TABLE alert_deliveries ADD COLUMN IF NOT EXISTS tier TEXT DEFAULT ''`,
+    )
 
     // Step 2: backfill from alert_events (COALESCE preserves '' for orphans so
     // verification in Step 3 surfaces them instead of failing here)
@@ -58,14 +64,18 @@ export default class AddAlertDeliveriesDenorm implements Migration {
     }
 
     // Step 4: composite index for existsSent query shape
-    await Schema.table('alert_deliveries', (table) => {
-      table.index(['org_id', 'month', 'tier'], 'idx_alert_deliveries_org_month_tier')
-    })
+    await DB.raw(
+      `CREATE INDEX IF NOT EXISTS idx_alert_deliveries_org_month_tier ON alert_deliveries (org_id, month, tier)`,
+    )
   }
 
   async down(): Promise<void> {
+    // Drop index first — SQLite validates indexes after each column drop,
+    // so the index referencing org_id must be removed before the column is.
     await Schema.table('alert_deliveries', (table) => {
       table.dropIndex('idx_alert_deliveries_org_month_tier')
+    })
+    await Schema.table('alert_deliveries', (table) => {
       table.dropColumn('org_id')
       table.dropColumn('month')
       table.dropColumn('tier')
