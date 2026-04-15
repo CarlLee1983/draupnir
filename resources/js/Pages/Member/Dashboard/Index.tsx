@@ -17,6 +17,7 @@ import {
   type ModelComparisonRow,
 } from '@/components/charts/ModelComparisonTable'
 import { cn } from '@/lib/utils'
+import { Banner } from '@/components/ui/banner'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 import { fetchJson } from '@/lib/api'
@@ -153,8 +154,14 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, error
           loading={loading} 
         />
 
-        {error && <InfoCard tone="destructive" title="Organization" message={t(error.key, error.params)} />}
-        {fetchError && <InfoCard tone="destructive" title="Analytics" message={fetchError} />}
+        {error && (
+          <Banner
+            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
+            title="Organization"
+            message={t(error.key, error.params)}
+          />
+        )}
+        {fetchError && <Banner tone="destructive" title="Analytics" message={fetchError} />}
 
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] print:hidden">
           <BalanceCard balance={balance} />
@@ -242,30 +249,6 @@ function EmptyStateCard() {
         <p className="max-w-2xl text-sm text-white/30">
           {t('ui.member.dashboard.emptyDescription')}
         </p>
-      </CardContent>
-    </Card>
-  )
-}
-
-function InfoCard({
-  title,
-  message,
-  tone,
-}: {
-  title: string
-  message: string
-  tone: 'default' | 'destructive'
-}) {
-  return (
-    <Card className={cn(
-      "bg-white/[0.02] rounded-lg shadow-sm",
-      tone === 'destructive' ? 'border-destructive/50' : 'border-border'
-    )}>
-      <CardHeader>
-        <CardTitle className={tone === 'destructive' ? 'text-destructive' : 'text-white'}>{title}</CardTitle>
-      </CardHeader>
-      <CardContent className={tone === 'destructive' ? 'text-destructive' : 'text-white/60'}>
-        {message}
       </CardContent>
     </Card>
   )
