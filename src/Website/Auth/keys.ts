@@ -12,6 +12,7 @@ export const AUTH_PAGE_KEYS = {
   emailVerification: 'page:auth:emailVerification',
   googleOAuthCallback: 'page:auth:googleOAuthCallback',
   verifyDevice: 'page:auth:verifyDevice',
+  logout: 'page:auth:logout',
 } as const
 
 export type AuthPageBindingKey = (typeof AUTH_PAGE_KEYS)[keyof typeof AUTH_PAGE_KEYS]

@@ -140,6 +140,13 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
     formRequest: VerifyDeviceRequest,
     name: 'pages.auth.device.authorize',
   },
+  {
+    method: 'post',
+    path: '/logout',
+    page: AUTH_PAGE_KEYS.logout,
+    action: 'store',
+    name: 'pages.auth.logout',
+  },
 ]
 
 function registerAuthHttpRoute(

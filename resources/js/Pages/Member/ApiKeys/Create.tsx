@@ -7,32 +7,28 @@ import { Label } from '@/components/ui/label'
 import { Key, Copy, Check, AlertTriangle } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from '@/lib/i18n'
+import type { I18nMessage } from '@/lib/i18n'
 
 interface Props {
   orgId: string | null
+  createdKey: string | null
+  formError: I18nMessage | null
 }
 
-export default function CreateApiKey({ orgId }: Props) {
+export default function CreateApiKey({ orgId, createdKey, formError }: Props) {
   const { t } = useTranslation()
-  const [createdKey, setCreatedKey] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
   const { data, setData, post, processing, errors } = useForm({
     label: '',
-    rpm: 60,
-    tpm: 100000,
+    rateLimitRpm: 60,
+    rateLimitTpm: 100000,
     orgId: orgId ?? '',
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    post('/member/api-keys', {
-      onSuccess: (page) => {
-        // @ts-ignore - flash.newApiKey is injected by backend
-        const key = page.props.flash?.newApiKey
-        if (key) setCreatedKey(key)
-      },
-    })
+    post('/member/api-keys')
   }
 
   const copyToClipboard = () => {
@@ -107,6 +103,11 @@ export default function CreateApiKey({ orgId }: Props) {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {formError && (
+              <div className="mb-4 rounded-md border border-destructive p-3 text-sm text-destructive">
+                {t(formError.key, formError.params)}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="label">{t('ui.member.apiKeys.create.nameLabel')}</Label>
@@ -121,24 +122,24 @@ export default function CreateApiKey({ orgId }: Props) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="rpm">{t('ui.member.apiKeys.create.rpmLabel')}</Label>
+                  <Label htmlFor="rateLimitRpm">{t('ui.member.apiKeys.create.rpmLabel')}</Label>
                   <Input
-                    id="rpm"
+                    id="rateLimitRpm"
                     type="number"
-                    value={data.rpm}
-                    onChange={(e) => setData('rpm', parseInt(e.target.value, 10))}
+                    value={data.rateLimitRpm}
+                    onChange={(e) => setData('rateLimitRpm', parseInt(e.target.value, 10))}
                   />
-                  {errors.rpm && <p className="text-xs text-destructive">{errors.rpm}</p>}
+                  {errors.rateLimitRpm && <p className="text-xs text-destructive">{errors.rateLimitRpm}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="tpm">{t('ui.member.apiKeys.create.tpmLabel')}</Label>
+                  <Label htmlFor="rateLimitTpm">{t('ui.member.apiKeys.create.tpmLabel')}</Label>
                   <Input
-                    id="tpm"
+                    id="rateLimitTpm"
                     type="number"
-                    value={data.tpm}
-                    onChange={(e) => setData('tpm', parseInt(e.target.value, 10))}
+                    value={data.rateLimitTpm}
+                    onChange={(e) => setData('rateLimitTpm', parseInt(e.target.value, 10))}
                   />
-                  {errors.tpm && <p className="text-xs text-destructive">{errors.tpm}</p>}
+                  {errors.rateLimitTpm && <p className="text-xs text-destructive">{errors.rateLimitTpm}</p>}
                 </div>
               </div>
 

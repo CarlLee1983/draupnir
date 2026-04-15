@@ -37,11 +37,19 @@ const mockRegisterService = {
   execute: mock(async () => ({ success: true, message: '帳號建立成功' })),
 }
 
+const mockLoginService = {
+  execute: mock(async () => ({
+    success: true,
+    message: '登入成功',
+    data: { accessToken: 'mock-token', refreshToken: 'mock-refresh' },
+  })),
+}
+
 describe('RegisterPage', () => {
   test('should render registration form on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new RegisterPage(inertia, mockRegisterService as any)
+    const page = new RegisterPage(inertia, mockRegisterService as any, mockLoginService as any)
     const ctx = createMockContext()
 
     await page.handle(ctx)
@@ -55,10 +63,10 @@ describe('RegisterPage', () => {
     expect(typeof call?.[2]?.passwordRequirements).toBe('object')
   })
 
-  test('should process registration on POST', async () => {
+  test('should auto-login and redirect to dashboard after successful registration', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
-    const page = new RegisterPage(inertia, mockRegisterService as any)
+    const page = new RegisterPage(inertia, mockRegisterService as any, mockLoginService as any)
     const ctx = createMockContext()
     ctx.set('validated', {
       email: 'newuser@example.com',
@@ -70,5 +78,6 @@ describe('RegisterPage', () => {
     const response = await page.store(ctx)
     expect(response).toBeInstanceOf(Response)
     expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toBe('/member/dashboard')
   })
 })

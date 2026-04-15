@@ -12,7 +12,9 @@ import type { LoginUserService } from '@/Modules/Auth/Application/Services/Login
 import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import type { ResetPasswordService } from '@/Modules/Auth/Application/Services/ResetPasswordService'
 import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
+import type { LogoutUserService } from '@/Modules/Auth/Application/Services/LogoutUserService'
 import { EmailVerificationPage } from '../Pages/EmailVerificationPage'
+import { LogoutPage } from '../Pages/LogoutPage'
 import { ForgotPasswordPage } from '../Pages/ForgotPasswordPage'
 import { GoogleOAuthCallbackPage } from '../Pages/GoogleOAuthCallbackPage'
 import { LoginPage } from '../Pages/LoginPage'
@@ -44,6 +46,7 @@ export function registerAuthBindings(container: IContainer): void {
       new RegisterPage(
         c.make(i) as InertiaService,
         c.make('registerUserService') as RegisterUserService,
+        c.make('loginUserService') as LoginUserService,
       ),
   )
 
@@ -86,5 +89,10 @@ export function registerAuthBindings(container: IContainer): void {
         c.make(i) as InertiaService,
         c.make('authorizeDeviceService') as AuthorizeDeviceService,
       ),
+  )
+
+  container.singleton(
+    k.logout,
+    (c) => new LogoutPage(c.make('logoutUserService') as LogoutUserService),
   )
 }

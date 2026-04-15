@@ -1,8 +1,9 @@
 import type { RegisterParams } from '@/Modules/Auth/Presentation/Requests/RegisterRequest'
 import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
+import type { LoginUserService } from '@/Modules/Auth/Application/Services/LoginUserService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
+import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 
 // Central password policy — shared across all render paths
 const PASSWORD_REQUIREMENTS = {
@@ -21,6 +22,7 @@ export class RegisterPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly registerService: RegisterUserService,
+    private readonly loginService: LoginUserService,
   ) {}
 
   /**
@@ -59,7 +61,24 @@ export class RegisterPage {
       })
     }
 
-    setFlash(ctx, 'success', { key: 'auth.register.success' })
+    // 自動登入：注冊成功後直接建立 session，避免用戶誤以為注冊失敗
+    const loginResult = await this.loginService.execute({
+      email: validated.email,
+      password: validated.password,
+    })
+
+    if (loginResult.success && loginResult.data) {
+      ctx.setCookie('auth_token', loginResult.data.accessToken, {
+        httpOnly: true,
+        sameSite: 'Lax',
+        path: '/',
+        maxAge: 3600,
+        secure: isSecureRequest(ctx),
+      })
+      return ctx.redirect('/member/dashboard')
+    }
+
+    // 自動登入失敗（罕見情況）→ 退回登入頁，flash 訊息提示已注冊成功
     return ctx.redirect('/login')
   }
 }
