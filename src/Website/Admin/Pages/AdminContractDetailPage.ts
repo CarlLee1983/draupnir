@@ -38,6 +38,7 @@ export class AdminContractDetailPage {
     return this.inertia.render(ctx, 'Admin/Contracts/Show', {
       contract: result.success ? (result.data as Record<string, unknown>) : null,
       error: result.success ? null : { key: 'admin.contracts.loadFailed' },
+      quotaKeys: [],  // placeholder；未來可換成真實資料
     })
   }
 

@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Head, Link, router } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,6 +9,7 @@ import { formatDateTime, formatDate } from '@/lib/format'
 import { useToast } from '@/hooks/use-toast'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
+import { QuotaAdjustModal, type QuotaKeyRow } from './QuotaAdjustModal'
 
 interface ContractDetail {
   id: string
@@ -30,11 +32,13 @@ interface ContractDetail {
 interface Props {
   contract: ContractDetail | null
   error: I18nMessage | null
+  quotaKeys: QuotaKeyRow[]
 }
 
-export default function ContractShow({ contract, error }: Props) {
+export default function ContractShow({ contract, error, quotaKeys }: Props) {
   const { toast } = useToast()
   const { t } = useTranslation()
+  const [quotaModalOpen, setQuotaModalOpen] = useState(false)
 
   if (error || !contract) {
     return (
@@ -83,6 +87,9 @@ export default function ContractShow({ contract, error }: Props) {
           </div>
 
           <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setQuotaModalOpen(true)}>
+              {t('ui.admin.contracts.quota.adjustButton')}
+            </Button>
             {contract.status === 'draft' && (
               <Button onClick={() => runAction('activate')}>{t('ui.common.status.active')}</Button>
             )}
@@ -136,6 +143,17 @@ export default function ContractShow({ contract, error }: Props) {
           </Card>
         </div>
       </div>
+
+      {contract && (
+        <QuotaAdjustModal
+          open={quotaModalOpen}
+          onOpenChange={setQuotaModalOpen}
+          contractId={contract.id}
+          contractCap={contract.terms.creditQuota}
+          sumAllocated={quotaKeys.reduce((s, k) => s + k.allocated, 0)}
+          keys={quotaKeys}
+        />
+      )}
     </AdminLayout>
   )
 }
