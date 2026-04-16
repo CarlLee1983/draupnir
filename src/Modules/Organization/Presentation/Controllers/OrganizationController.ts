@@ -1,7 +1,9 @@
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { AcceptInvitationByIdService } from '../../Application/Services/AcceptInvitationByIdService'
 import type { AcceptInvitationService } from '../../Application/Services/AcceptInvitationService'
 import type { CancelInvitationService } from '../../Application/Services/CancelInvitationService'
+import type { DeclineInvitationService } from '../../Application/Services/DeclineInvitationService'
 import type { ChangeOrgMemberRoleService } from '../../Application/Services/ChangeOrgMemberRoleService'
 import type { ChangeOrgStatusService } from '../../Application/Services/ChangeOrgStatusService'
 import type { CreateOrganizationService } from '../../Application/Services/CreateOrganizationService'
@@ -114,6 +116,8 @@ export class OrganizationController {
     private changeOrgStatusService: ChangeOrgStatusService,
     private listInvitationsService: ListInvitationsService,
     private cancelInvitationService: CancelInvitationService,
+  private acceptInvitationByIdService: AcceptInvitationByIdService,
+  private declineInvitationService: DeclineInvitationService,
   ) {}
 
   async create(ctx: IHttpContext): Promise<Response> {
@@ -236,6 +240,28 @@ export class OrganizationController {
     const orgId = validated.orgId
     const invId = validated.invId
     const result = await this.cancelInvitationService.execute(orgId, invId, auth.userId, auth.role)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
+
+  async acceptInvitationById(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    const invitationId = ctx.getParam('id')
+    if (!invitationId) {
+      return ctx.json({ success: false, message: 'Missing invitation ID', error: 'ID_REQUIRED' }, 400)
+    }
+    const result = await this.acceptInvitationByIdService.execute(invitationId, auth.userId)
+    return ctx.json(result, result.success ? 200 : 400)
+  }
+
+  async declineInvitation(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    const invitationId = ctx.getParam('id')
+    if (!invitationId) {
+      return ctx.json({ success: false, message: 'Missing invitation ID', error: 'ID_REQUIRED' }, 400)
+    }
+    const result = await this.declineInvitationService.execute(invitationId, auth.userId)
     return ctx.json(result, result.success ? 200 : 400)
   }
 }

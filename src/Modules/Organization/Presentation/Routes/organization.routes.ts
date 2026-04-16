@@ -60,6 +60,12 @@ export async function registerOrganizationRoutes(
   router.post('/api/invitations/:token/accept', [requireAuth()], AcceptInvitationRequest, (ctx) =>
     controller.acceptInvitation(ctx),
   )
+  router.post('/api/invitations/:id/accept-by-id', [requireAuth()], (ctx) =>
+    controller.acceptInvitationById(ctx),
+  )
+  router.post('/api/invitations/:id/decline', [requireAuth()], (ctx) =>
+    controller.declineInvitation(ctx),
+  )
 
   router.delete('/api/organizations/:id/members/:userId', [requireOrganizationContext()], (ctx) =>
     controller.removeMember(ctx),

@@ -6,8 +6,11 @@ import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/A
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { AcceptInvitationByIdService } from '../../Application/Services/AcceptInvitationByIdService'
 import { AcceptInvitationService } from '../../Application/Services/AcceptInvitationService'
 import { CancelInvitationService } from '../../Application/Services/CancelInvitationService'
+import { DeclineInvitationService } from '../../Application/Services/DeclineInvitationService'
+import { GetPendingInvitationsService } from '../../Application/Services/GetPendingInvitationsService'
 import { ChangeOrgMemberRoleService } from '../../Application/Services/ChangeOrgMemberRoleService'
 import { ChangeOrgStatusService } from '../../Application/Services/ChangeOrgStatusService'
 import { CreateOrganizationService } from '../../Application/Services/CreateOrganizationService'
@@ -103,6 +106,27 @@ export class OrganizationServiceProvider extends ModuleServiceProvider implement
     container.bind('getUserMembershipService', (c: IContainer) =>
       new GetUserMembershipService(c.make('organizationMemberRepository') as IOrganizationMemberRepository)
     )
+    container.bind('acceptInvitationByIdService', (c: IContainer) =>
+      new AcceptInvitationByIdService(
+        c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
+        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('authRepository') as IAuthRepository,
+        db as IDatabaseAccess,
+      ),
+    )
+    container.bind('declineInvitationService', (c: IContainer) =>
+      new DeclineInvitationService(
+        c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
+        c.make('authRepository') as IAuthRepository,
+      ),
+    )
+    container.bind('getPendingInvitationsService', (c: IContainer) =>
+      new GetPendingInvitationsService(
+        c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
+        c.make('authRepository') as IAuthRepository,
+        c.make('organizationRepository') as IOrganizationRepository,
+      ),
+    )
   }
 
   protected override registerControllers(container: IContainer): void {
@@ -119,6 +143,8 @@ export class OrganizationServiceProvider extends ModuleServiceProvider implement
       c.make('changeOrgStatusService') as ChangeOrgStatusService,
       c.make('listInvitationsService') as ListInvitationsService,
       c.make('cancelInvitationService') as CancelInvitationService,
+      c.make('acceptInvitationByIdService') as AcceptInvitationByIdService,
+      c.make('declineInvitationService') as DeclineInvitationService,
     ))
   }
 
