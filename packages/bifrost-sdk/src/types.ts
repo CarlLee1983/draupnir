@@ -108,6 +108,11 @@ export interface CreateVirtualKeyRequest {
   readonly team_id?: string
   /** Customer ID. */
   readonly customer_id?: string
+  /**
+   * Provider API key IDs to associate with this virtual key.
+   * Use `["*"]` to allow all available provider keys.
+   */
+  readonly key_ids?: readonly string[]
   /** Budget configuration. */
   readonly budget?: Pick<BifrostBudget, 'max_limit' | 'reset_duration' | 'calendar_aligned'>
   /** Rate limit configuration. */

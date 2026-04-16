@@ -102,7 +102,7 @@ describe('BifrostGatewayAdapter', () => {
       expect(result.isActive).toBe(true)
     })
 
-    it('should omit undefined optional fields from Bifrost request', async () => {
+    it('should omit provider_configs and other optional fields when not provided', async () => {
       const mockResponse: VirtualKeyResponse = {
         message: 'created',
         virtual_key: { id: 'vk-1', name: 'test', is_active: true, provider_configs: [] },
@@ -114,11 +114,12 @@ describe('BifrostGatewayAdapter', () => {
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.name).toBe('test')
+      expect('provider_configs' in body).toBe(false)
+      expect('key_ids' in body).toBe(false)
       expect('customer_id' in body).toBe(false)
       expect('is_active' in body).toBe(false)
       expect('budget' in body).toBe(false)
       expect('rate_limit' in body).toBe(false)
-      expect('provider_configs' in body).toBe(false)
     })
   })
 

@@ -30,6 +30,7 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
     try {
       const vk = await this.bifrostClient.createVirtualKey({
         name: request.name,
+        ...(request.keyIds !== undefined && { key_ids: [...request.keyIds] }),
         ...(request.customerId !== undefined && { customer_id: request.customerId }),
         ...(request.isActive !== undefined && { is_active: request.isActive }),
         ...(request.budget !== undefined && {
@@ -212,6 +213,13 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
     if (isBifrostApiError(error)) {
       const code = this.mapStatusToCode(error.status)
       const retryable = this.isRetryable(error.status)
+      // TODO: remove after diagnosing 500 errors
+      console.error('[BifrostGatewayAdapter] API error', {
+        status: error.status,
+        endpoint: error.endpoint,
+        message: error.message,
+        responseBody: error.responseBody,
+      })
       throw new GatewayError(error.message, code, error.status, retryable, error)
     }
     if (error instanceof TypeError) {

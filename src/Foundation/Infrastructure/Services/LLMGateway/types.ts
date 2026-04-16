@@ -15,6 +15,8 @@ export interface CreateKeyRequest {
   readonly name: string
   readonly customerId?: string
   readonly isActive?: boolean
+  /** Provider API key IDs to associate. Use `["*"]` to allow all available provider keys. */
+  readonly keyIds?: readonly string[]
   /** Virtual-key spend cap for one reset window (forwarded to Bifrost `budget`). */
   readonly budget?: BudgetUpdate
   readonly rateLimit?: RateLimitUpdate
