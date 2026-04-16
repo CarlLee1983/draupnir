@@ -79,6 +79,27 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     action: 'remove',
     name: 'pages.manager.members.remove',
   },
+  {
+    method: 'get',
+    path: '/manager/api-keys',
+    page: MANAGER_PAGE_KEYS.apiKeys,
+    action: 'handle',
+    name: 'pages.manager.apiKeys.index',
+  },
+  {
+    method: 'post',
+    path: '/manager/api-keys/:keyId/assign',
+    page: MANAGER_PAGE_KEYS.apiKeys,
+    action: 'assign',
+    name: 'pages.manager.apiKeys.assign',
+  },
+  {
+    method: 'post',
+    path: '/manager/api-keys/:keyId/revoke',
+    page: MANAGER_PAGE_KEYS.apiKeys,
+    action: 'revoke',
+    name: 'pages.manager.apiKeys.revoke',
+  },
 ]
 
 function registerManagerHttpRoute(
