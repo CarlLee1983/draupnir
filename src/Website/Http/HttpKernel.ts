@@ -12,6 +12,7 @@ import { createRequestLoggerMiddleware } from '@/Shared/Infrastructure/Middlewar
 import { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
 import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
+import { requireManager } from '@/Website/Manager/middleware/requireManager'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
 import { attachWebCsrf } from './Security/CsrfMiddleware'
 import { injectSharedData } from './Inertia/SharedPropsBuilder'
@@ -36,6 +37,13 @@ function requireAdminMiddleware(): Middleware {
 function requireMemberMiddleware(): Middleware {
   return async (ctx, next) => {
     const r = requireMember(ctx)
+    return r.ok ? next() : r.response!
+  }
+}
+
+function requireManagerMiddleware(): Middleware {
+  return async (ctx, next) => {
+    const r = requireManager(ctx)
     return r.ok ? next() : r.response!
   }
 }
@@ -100,6 +108,12 @@ export const HttpKernel = {
     web: (): Middleware[] => [...webBase(), pendingCookiesMiddleware()],
     /** Admin 區域：web 基底 + admin role 驗證 */
     admin: (): Middleware[] => [...webBase(), requireAdminMiddleware(), pendingCookiesMiddleware()],
+    /** Manager 區域：web 基底 + manager role 驗證 */
+    manager: (): Middleware[] => [
+      ...webBase(),
+      requireManagerMiddleware(),
+      pendingCookiesMiddleware(),
+    ],
     /** Member 區域：web 基底 + 登入驗證 */
     member: (): Middleware[] => [
       ...webBase(),
