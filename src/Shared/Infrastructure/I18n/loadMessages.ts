@@ -303,6 +303,7 @@ const zhTW = {
   'ui.admin.apiKeys.ownerLabel': '擁有者',
   'ui.admin.apiKeys.searchPlaceholder': '搜尋 Key 名稱…',
   'ui.admin.apiKeys.emptyState': '請先選擇組織以查看 API Keys',
+  'ui.admin.apiKeys.columns.quotaAllocated': '配發額度',
   // Admin — Dashboard
   'ui.admin.dashboard.title': '系統總覽',
   'ui.admin.dashboard.metricUsers': '使用者總數',
@@ -645,6 +646,7 @@ const catalogs = {
     'ui.admin.apiKeys.ownerLabel': 'Owner',
     'ui.admin.apiKeys.searchPlaceholder': 'Search key name…',
     'ui.admin.apiKeys.emptyState': 'Please select an organization to view API Keys',
+    'ui.admin.apiKeys.columns.quotaAllocated': 'Quota Allocated',
     'ui.admin.dashboard.title': 'System Overview',
     'ui.admin.dashboard.metricUsers': 'Total Users',
     'ui.admin.dashboard.metricOrgs': 'Total Organizations',
