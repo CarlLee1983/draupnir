@@ -26,15 +26,13 @@ export default class AddAlertDeliveriesDenorm implements Migration {
     // Step 1: add columns with default '' (SQLite requires DEFAULT for ADD COLUMN).
     // Use IF NOT EXISTS so re-runs / DBs that already have org_id (e.g. partial migration or
     // merged create-table history) do not fail.
-    await DB.raw(
-      `ALTER TABLE alert_deliveries ADD COLUMN IF NOT EXISTS org_id TEXT DEFAULT ''`,
-    )
-    await DB.raw(
-      `ALTER TABLE alert_deliveries ADD COLUMN IF NOT EXISTS month TEXT DEFAULT ''`,
-    )
-    await DB.raw(
-      `ALTER TABLE alert_deliveries ADD COLUMN IF NOT EXISTS tier TEXT DEFAULT ''`,
-    )
+    // SQLite does not support IF NOT EXISTS in ALTER TABLE ADD COLUMN.
+    // Use Schema.table which handles SQLite ALTER TABLE correctly.
+    await Schema.table('alert_deliveries', (table) => {
+      table.string('org_id').default('')
+      table.string('month').default('')
+      table.string('tier').default('')
+    })
 
     // Step 2: backfill from alert_events (COALESCE preserves '' for orphans so
     // verification in Step 3 surfaces them instead of failing here)
