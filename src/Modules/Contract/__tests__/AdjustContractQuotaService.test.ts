@@ -153,4 +153,15 @@ describe('AdjustContractQuotaService', () => {
     expect(result.success).toBe(false)
     expect(result.error).toBe('NOT_FOUND')
   })
+
+  it('QUOTA-05: newCap 為負數應回傳 INVALID_INPUT', async () => {
+    const contractRepo = { findById: mock(() => Promise.resolve(null)), update: mock() }
+    const keyRepo = { findActiveByOrgId: mock(() => Promise.resolve([])), update: mock() }
+    const svc = new AdjustContractQuotaService(contractRepo as any, keyRepo as any)
+
+    const result = await svc.execute({ contractId: 'contract-1', newCap: -1, callerRole: 'admin' })
+
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('INVALID_INPUT')
+  })
 })
