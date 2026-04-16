@@ -40,9 +40,9 @@ function createOAuthContext(options: {
 }
 
 describe('GoogleOAuthCallbackPage', () => {
-  test('should exchange code and redirect on success', async () => {
+  test('should exchange code and redirect to member dashboard on success (member role)', async () => {
     const exchange = mock(() =>
-      Promise.resolve({ success: true, jwt: 'jwt-token', userId: 'user-123' }),
+      Promise.resolve({ success: true, jwt: 'jwt-token', userId: 'user-123', role: 'member' }),
     )
     const oauthService = { exchange } as unknown as GoogleOAuthService
     const page = new GoogleOAuthCallbackPage(oauthService)
@@ -52,6 +52,20 @@ describe('GoogleOAuthCallbackPage', () => {
 
     expect(exchange).toHaveBeenCalledWith('test-code')
     expect(ctx.redirect).toHaveBeenCalledWith('/member/dashboard', 302)
+  })
+
+  test('should redirect to admin dashboard when role is admin', async () => {
+    const exchange = mock(() =>
+      Promise.resolve({ success: true, jwt: 'jwt-token', userId: 'admin-456', role: 'admin' }),
+    )
+    const oauthService = { exchange } as unknown as GoogleOAuthService
+    const page = new GoogleOAuthCallbackPage(oauthService)
+    const ctx = createOAuthContext({})
+
+    await page.handle(ctx)
+
+    expect(exchange).toHaveBeenCalledWith('test-code')
+    expect(ctx.redirect).toHaveBeenCalledWith('/admin/dashboard', 302)
   })
 
   test('should return error on CSRF validation failure', async () => {

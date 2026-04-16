@@ -111,11 +111,13 @@ describe('AdminContractDetailPage', () => {
     const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
       mockGetDetailService as any,
       mockActivateService as any,
       mockTerminateService as any,
+      mockAdjustQuotaService as any,
     )
     const ctx = createAdminContext()
     const ctxWithId = {
@@ -134,11 +136,13 @@ describe('AdminContractDetailPage', () => {
     const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
       mockGetDetailService as any,
       mockActivateService as any,
       mockTerminateService as any,
+      mockAdjustQuotaService as any,
     )
     const ctx = createAdminContext()
     await page.handle(ctx)
@@ -152,11 +156,13 @@ describe('AdminContractDetailPage', () => {
     const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
       mockGetDetailService as any,
       mockActivateService as any,
       mockTerminateService as any,
+      mockAdjustQuotaService as any,
     )
     const ctx = createAdminContextWithBody(
       { action: 'activate' },
@@ -177,11 +183,13 @@ describe('AdminContractDetailPage', () => {
     const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
       mockGetDetailService as any,
       mockActivateService as any,
       mockTerminateService as any,
+      mockAdjustQuotaService as any,
     )
     const ctx = createAdminContextWithBody(
       { action: 'terminate' },
@@ -202,11 +210,13 @@ describe('AdminContractDetailPage', () => {
     const mockActivateService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockTerminateService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
       mockGetDetailService as any,
       mockActivateService as any,
       mockTerminateService as any,
+      mockAdjustQuotaService as any,
     )
     const ctx = createAdminContextWithBody(
       { action: 'unknown' },

@@ -26,6 +26,7 @@ export class GoogleOAuthService {
     success: boolean
     jwt?: string
     userId?: string
+    role?: string
     error?: string
   }> {
     try {
@@ -84,7 +85,7 @@ export class GoogleOAuthService {
     }
   }
 
-  private issueSuccess(user: User): { success: true; jwt: string; userId: string } {
+  private issueSuccess(user: User): { success: true; jwt: string; userId: string; role: string } {
     const access = this.jwtTokenService.signAccessToken({
       userId: user.id,
       email: user.emailValue,
@@ -95,6 +96,7 @@ export class GoogleOAuthService {
       success: true,
       jwt: access.getValue(),
       userId: user.id,
+      role: user.role.getValue(),
     }
   }
 }

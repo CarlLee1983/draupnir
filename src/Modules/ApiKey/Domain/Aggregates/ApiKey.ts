@@ -24,6 +24,7 @@ interface ApiKeyProps {
   readonly gatewayKeyId: string
   readonly status: KeyStatus
   readonly scope: KeyScope
+  readonly quotaAllocated: number
   readonly suspensionReason: string | null
   readonly preFreezeRateLimit: string | null // JSON string
   readonly suspendedAt: Date | null
@@ -70,6 +71,7 @@ export class ApiKey {
       gatewayKeyId: params.gatewayKeyId,
       status: KeyStatus.pending(),
       scope: params.scope ?? KeyScope.unrestricted(),
+      quotaAllocated: 0,
       suspensionReason: null,
       preFreezeRateLimit: null,
       suspendedAt: null,
@@ -96,6 +98,7 @@ export class ApiKey {
       gatewayKeyId: row.bifrost_virtual_key_id as string,
       status: KeyStatus.from(row.status as string),
       scope: KeyScope.fromJSON(scopeJson),
+      quotaAllocated: typeof row.quota_allocated === 'number' ? row.quota_allocated : 0,
       suspensionReason: (row.suspension_reason as string) ?? null,
       preFreezeRateLimit: (row.pre_freeze_rate_limit as string) ?? null,
       suspendedAt: row.suspended_at ? new Date(row.suspended_at as string) : null,
@@ -179,6 +182,23 @@ export class ApiKey {
       scope: newScope,
       updatedAt: new Date(),
     })
+  }
+
+  /** Returns a copy with adjusted quota allocation (admin only). */
+  adjustQuotaAllocated(newAllocation: number): ApiKey {
+    if (newAllocation < 0) {
+      throw new Error('Quota allocation cannot be negative')
+    }
+    return new ApiKey({
+      ...this.props,
+      quotaAllocated: newAllocation,
+      updatedAt: new Date(),
+    })
+  }
+
+  /** Current quota allocated to this key (in contract credit units). */
+  get quotaAllocated(): number {
+    return this.props.quotaAllocated
   }
 
   /** Unique identifier. */

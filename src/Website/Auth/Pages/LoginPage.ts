@@ -63,6 +63,7 @@ export class LoginPage {
       secure: isSecureRequest(ctx),
     })
 
-    return ctx.redirect('/member/dashboard')
+    const destination = result.data.user.role === 'admin' ? '/admin/dashboard' : '/member/dashboard'
+    return ctx.redirect(destination)
   }
 }

@@ -20,6 +20,7 @@ export class ApiKeyPresenter {
       revokedAt: entity.revokedAt?.toISOString() ?? null,
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
+      quotaAllocated: entity.quotaAllocated,
     }
   }
 }

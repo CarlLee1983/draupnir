@@ -1,3 +1,5 @@
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -12,6 +14,8 @@ export class AdminOrganizationDetailPage {
     private readonly inertia: InertiaService,
     private readonly getOrgService: GetOrganizationService,
     private readonly listMembersService: ListMembersService,
+    private readonly contractRepo: IContractRepository,
+    private readonly keyRepo: IApiKeyRepository,
   ) {}
 
   /**
@@ -30,9 +34,11 @@ export class AdminOrganizationDetailPage {
       })
     }
 
-    const [orgResult, membersResult] = await Promise.all([
+    const [orgResult, membersResult, activeContract, activeKeys] = await Promise.all([
       this.getOrgService.execute(orgId, auth.userId, auth.role),
       this.listMembersService.execute(orgId, auth.userId, auth.role),
+      this.contractRepo.findActiveByTargetId(orgId),
+      this.keyRepo.findActiveByOrgId(orgId),
     ])
 
     const orgData = orgResult.success
@@ -59,10 +65,22 @@ export class AdminOrganizationDetailPage {
       joinedAt: m.joinedAt as string,
     }))
 
+    const contractCap = activeContract?.terms.creditQuota ?? null
+    const sumAllocated = activeKeys.reduce((sum, k) => sum + k.quotaAllocated, 0)
+    const unallocated = contractCap !== null ? contractCap - sumAllocated : null
+
     return this.inertia.render(ctx, 'Admin/Organizations/Show', {
       organization,
       members,
       error: orgResult.success ? null : { key: 'admin.organizations.loadFailed' },
+      contractSummary: contractCap !== null
+        ? {
+            contractId: activeContract!.id,
+            contractCap,
+            sumAllocated,
+            unallocated,
+          }
+        : null,
     })
   }
 }

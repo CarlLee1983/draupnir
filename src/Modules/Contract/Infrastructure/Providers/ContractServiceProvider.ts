@@ -4,6 +4,7 @@ import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { ActivateContractService } from '../../Application/Services/ActivateContractService'
+import { AdjustContractQuotaService } from '../../Application/Services/AdjustContractQuotaService'
 import { AssignContractService } from '../../Application/Services/AssignContractService'
 import { CreateContractService } from '../../Application/Services/CreateContractService'
 import { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
@@ -15,6 +16,7 @@ import { TerminateContractService } from '../../Application/Services/TerminateCo
 import { UpdateContractService } from '../../Application/Services/UpdateContractService'
 import { ContractEnforcementService } from '../../Domain/Services/ContractEnforcementService'
 import { ContractRepository } from '../Repositories/ContractRepository'
+import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { ContractController } from '../../Presentation/Controllers/ContractController'
 import { registerContractRoutes } from '../../Presentation/Routes/contract.routes'
 
@@ -56,6 +58,14 @@ export class ContractServiceProvider extends ModuleServiceProvider implements IR
     )
     container.bind('listAdminContractsService', (c: IContainer) =>
       new ListAdminContractsService(c.make('contractRepository') as ContractRepository)
+    )
+    container.singleton(
+      'adjustContractQuotaService',
+      (c) =>
+        new AdjustContractQuotaService(
+          c.make('contractRepository') as ContractRepository,
+          c.make('apiKeyRepository') as ApiKeyRepository,
+        ),
     )
   }
 

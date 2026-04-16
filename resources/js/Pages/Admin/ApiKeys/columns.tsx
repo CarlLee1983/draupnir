@@ -12,6 +12,7 @@ export interface AdminApiKeyRow {
   userId: string
   createdAt: string
   lastUsedAt: string | null
+  quotaAllocated: number
 }
 
 function statusBadge(status: AdminApiKeyRow['status'], t: Translator) {
@@ -52,5 +53,13 @@ export const createAdminApiKeyColumns = (t: Translator): ColumnDef<AdminApiKeyRo
     accessorKey: 'lastUsedAt',
     header: t('ui.member.apiKeys.create.savedButton').split(',')[1]?.trim() || 'Last Used', // Fallback
     cell: ({ row }) => formatDateTime(row.original.lastUsedAt),
+  },
+  {
+    accessorKey: 'quotaAllocated',
+    header: () => t('ui.admin.apiKeys.columns.quotaAllocated'),
+    cell: ({ row }) => {
+      const allocated = row.original.quotaAllocated
+      return <span>{allocated.toLocaleString()}</span>
+    },
   },
 ]

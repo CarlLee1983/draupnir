@@ -1,4 +1,5 @@
 import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
+import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -14,6 +15,7 @@ export class AdminContractDetailPage {
     private readonly getDetailService: GetContractDetailService,
     private readonly activateContractService: ActivateContractService,
     private readonly terminateContractService: TerminateContractService,
+    private readonly adjustQuotaService: AdjustContractQuotaService,
   ) {}
 
   /**
@@ -36,6 +38,7 @@ export class AdminContractDetailPage {
     return this.inertia.render(ctx, 'Admin/Contracts/Show', {
       contract: result.success ? (result.data as Record<string, unknown>) : null,
       error: result.success ? null : { key: 'admin.contracts.loadFailed' },
+      quotaKeys: [],  // placeholder；未來可換成真實資料
     })
   }
 
@@ -58,6 +61,31 @@ export class AdminContractDetailPage {
     } else if (body.action === 'terminate') {
       await this.terminateContractService.execute(contractId, auth.role)
     }
+
+    return ctx.redirect(`/admin/contracts/${contractId}`)
+  }
+
+  /**
+   * POST `/admin/contracts/:id/quota`: body `{ newCap: number }`.
+   *
+   * @param ctx - Route param `id`; JSON body contains `newCap`.
+   * @returns Redirect to the same contract detail path.
+   */
+  async postQuota(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)!
+    const contractId = ctx.getParam('id')
+    if (!contractId) {
+      return ctx.redirect('/admin/contracts')
+    }
+
+    const body = await ctx.getJsonBody<{ newCap?: unknown }>()
+
+    if (typeof body.newCap !== 'number') {
+      return ctx.redirect(`/admin/contracts/${contractId}`)
+    }
+    const newCap = body.newCap
+
+    await this.adjustQuotaService.execute({ contractId, newCap, callerRole: auth.role })
 
     return ctx.redirect(`/admin/contracts/${contractId}`)
   }

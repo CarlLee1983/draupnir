@@ -24,13 +24,21 @@ interface OrganizationDetail {
   updatedAt: string
 }
 
+interface ContractSummary {
+  contractId: string
+  contractCap: number
+  sumAllocated: number
+  unallocated: number
+}
+
 interface Props {
   organization: OrganizationDetail | null
   members: MemberRow[]
   error: I18nMessage | null
+  contractSummary: ContractSummary | null
 }
 
-export default function OrganizationShow({ organization, members, error }: Props) {
+export default function OrganizationShow({ organization, members, error, contractSummary }: Props) {
   const { t } = useTranslation()
 
   if (error || !organization) {
@@ -108,6 +116,50 @@ export default function OrganizationShow({ organization, members, error }: Props
             </CardContent>
           </Card>
         </div>
+
+        {contractSummary && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t('ui.admin.organizations.quotaSummary.title')}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{t('ui.admin.organizations.quotaSummary.cap')}</span>
+                <span className="font-medium">{contractSummary.contractCap.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{t('ui.admin.organizations.quotaSummary.allocated')}</span>
+                <span className="font-medium">{contractSummary.sumAllocated.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">{t('ui.admin.organizations.quotaSummary.unallocated')}</span>
+                <span className="font-medium">{contractSummary.unallocated.toLocaleString()}</span>
+              </div>
+              {contractSummary.contractCap > 0 && (
+                <div className="space-y-1">
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full bg-primary transition-all"
+                      style={{ width: `${Math.min(100, (contractSummary.sumAllocated / contractSummary.contractCap) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-right text-xs text-muted-foreground">
+                    {Math.round((contractSummary.sumAllocated / contractSummary.contractCap) * 100)}% {t('ui.admin.organizations.quotaSummary.allocated')}
+                  </p>
+                </div>
+              )}
+              <div className="flex gap-2 pt-2">
+                <Link href={`/admin/contracts/${contractSummary.contractId}`} className="text-sm text-primary hover:underline">
+                  {t('ui.admin.organizations.quotaSummary.viewContract')}
+                </Link>
+                <span className="text-muted-foreground">·</span>
+                <Link href={`/admin/api-keys?orgId=${organization.id}`} className="text-sm text-primary hover:underline">
+                  {t('ui.admin.organizations.quotaSummary.viewApiKeys')}
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </AdminLayout>
   )

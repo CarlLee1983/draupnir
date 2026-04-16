@@ -55,6 +55,7 @@ export class AdminApiKeysPage {
               userId: (row.createdByUserId as string) ?? '',
               createdAt: row.createdAt as string,
               lastUsedAt: (row.updatedAt as string | null | undefined) ?? null,
+              quotaAllocated: typeof row.quotaAllocated === 'number' ? row.quotaAllocated : 0,
             }
           })
         : []
