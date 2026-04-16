@@ -42,6 +42,16 @@ export function withAdminInertiaPageHandler(
 }
 
 /**
+ * Manager 區域 wrapper。
+ * Chain：attachJwt → attachWebCsrf → injectSharedData → requireManager → applyPendingCookies → handler
+ */
+export function withManagerInertiaPageHandler(
+  handler: (ctx: IHttpContext) => Promise<Response>,
+): RouteHandler {
+  return composePageHandler(HttpKernel.groups.manager(), handler)
+}
+
+/**
  * Member 區域 wrapper。
  * Chain：attachJwt → attachWebCsrf → injectSharedData → requireMember → applyPendingCookies → handler
  */
