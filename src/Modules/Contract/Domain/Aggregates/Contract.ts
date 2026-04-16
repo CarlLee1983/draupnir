@@ -88,6 +88,23 @@ export class Contract {
     })
   }
 
+  /**
+   * Returns a copy with the creditQuota adjusted by admin.
+   * Unlike updateTerms(), this is allowed on both DRAFT and ACTIVE contracts.
+   * @throws {Error} If newCreditQuota is negative.
+   */
+  adjustCreditQuota(newCreditQuota: number): Contract {
+    if (newCreditQuota < 0) {
+      throw new Error('Credit quota cannot be negative')
+    }
+    const newTerms = this.props.terms.toJSON()
+    return new Contract({
+      ...this.props,
+      terms: ContractTerm.create({ ...newTerms, creditQuota: newCreditQuota }),
+      updatedAt: new Date(),
+    })
+  }
+
   /** Returns a copy with replaced terms; only allowed while the contract is DRAFT. */
   updateTerms(terms: ContractTermProps): Contract {
     if (!this.props.status.isDraft()) {
