@@ -82,6 +82,39 @@ export class ApiKeyRepository implements IApiKeyRepository {
     return row ? ApiKey.fromDatabase(row) : null
   }
 
+  async findByOrgAndAssignedMember(
+    orgId: string,
+    assignedMemberId: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<ApiKey[]> {
+    let query = this.db
+      .table('api_keys')
+      .where('org_id', '=', orgId)
+      .where('assigned_member_id', '=', assignedMemberId)
+      .orderBy('created_at', 'DESC')
+    if (offset != null && offset > 0) query = query.offset(offset)
+    if (limit != null) query = query.limit(limit)
+    const rows = await query.select()
+    return rows.map((row) => ApiKey.fromDatabase(row))
+  }
+
+  async countByOrgAndAssignedMember(orgId: string, assignedMemberId: string): Promise<number> {
+    return this.db
+      .table('api_keys')
+      .where('org_id', '=', orgId)
+      .where('assigned_member_id', '=', assignedMemberId)
+      .count()
+  }
+
+  async clearAssignmentsForMember(orgId: string, memberUserId: string): Promise<void> {
+    await this.db
+      .table('api_keys')
+      .where('org_id', '=', orgId)
+      .where('assigned_member_id', '=', memberUserId)
+      .update({ assigned_member_id: null, updated_at: new Date().toISOString() })
+  }
+
   withTransaction(tx: IDatabaseAccess): ApiKeyRepository {
     return new ApiKeyRepository(tx)
   }
