@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
-import { usePage } from '@inertiajs/react'
 import { AppShell } from '@/components/layout/AppShell'
 import type { NavItem } from '@/components/layout/Sidebar'
-import { LayoutDashboard, Key, BarChart3, FileText, Settings, PieChart, Bell } from 'lucide-react'
+import { LayoutDashboard, Key, BarChart3, FileText, Settings, PieChart } from 'lucide-react'
 
 const memberNavItems: NavItem[] = [
   { label: '總覽', href: '/member/dashboard', icon: <LayoutDashboard className="h-4 w-4" /> },
@@ -14,15 +13,8 @@ const memberNavItems: NavItem[] = [
 ]
 
 export function MemberLayout({ children }: { children: ReactNode }) {
-  const page = usePage<{ auth: { user: { role: string } | null } }>()
-  const role = page.props.auth.user?.role
-  const showAlerts = role === 'manager' || role === 'admin'
-  const navItems = showAlerts
-    ? [...memberNavItems.slice(0, 4), { label: 'Alerts', href: '/member/alerts', icon: <Bell className="h-4 w-4" /> }, ...memberNavItems.slice(4)]
-    : memberNavItems
-
   return (
-    <AppShell sidebarTitle="Draupnir" navItems={navItems}>
+    <AppShell sidebarTitle="Draupnir" navItems={memberNavItems}>
       {children}
     </AppShell>
   )
