@@ -63,8 +63,9 @@ export class CreateOrganizationService {
         }
       }
 
-      const alreadyManager = await this.memberRepository.isOrgManagerInAnyOrg(request.managerUserId)
-      if (alreadyManager) {
+      // v1 單組織：已具任何 membership（manager 或 member）者禁止建立新組織。
+      const existingMembership = await this.memberRepository.findByUserId(request.managerUserId)
+      if (existingMembership) {
         return {
           success: false,
           message: 'User already has an organization',

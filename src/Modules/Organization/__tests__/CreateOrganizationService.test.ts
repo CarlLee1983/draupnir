@@ -12,6 +12,8 @@ import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/
 import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
 import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
 import { OrganizationRepository } from '../Infrastructure/Repositories/OrganizationRepository'
+import { OrganizationMember } from '../Domain/Entities/OrganizationMember'
+import { OrgMemberRole } from '../Domain/ValueObjects/OrgMemberRole'
 
 describe('CreateOrganizationService', () => {
   let service: CreateOrganizationService
@@ -117,5 +119,30 @@ describe('CreateOrganizationService', () => {
 
     const user = await authRepo.findById(managerId)
     expect(user!.role.getValue()).toBe(RoleType.MANAGER)
+  })
+
+  describe('spec §2：已具 membership 的使用者禁止建立新組織', () => {
+    it('已為純 MEMBER（非 manager）的使用者應回傳 ALREADY_HAS_ORGANIZATION，且不呼叫 save / updateRole', async () => {
+      // 先建立另一個 org，再把 managerId 以 member 身份加入
+      const memberRepo = new OrganizationMemberRepository(db)
+      const plainMember = OrganizationMember.create(
+        crypto.randomUUID(),
+        'org-existing',
+        managerId,
+        new OrgMemberRole('member'),
+      )
+      await memberRepo.save(plainMember)
+
+      // 此時 isOrgManagerInAnyOrg 會回傳 false（角色是 member），
+      // 但 findByUserId 會回傳該 membership — 建立應被拒絕。
+      const result = await service.execute({ name: 'Should Fail Org', managerUserId: managerId })
+
+      expect(result.success).toBe(false)
+      expect(result.error).toBe('ALREADY_HAS_ORGANIZATION')
+
+      // 確認沒有新的 org member 被寫入（只有原本那筆 plain member）
+      const members = await memberRepo.findByOrgId('org-existing')
+      expect(members).toHaveLength(1)
+    })
   })
 })
