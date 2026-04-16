@@ -9,22 +9,23 @@ interface KeyRow {
   usageCurrent?: number
   assignedMemberId: string | null
 }
-interface Balance {
-  balance: string
-  lowBalanceThreshold: string
-  status: string
-}
-
 interface Props {
   orgId: string | null
-  balance: Balance | null
+  /** Active contract `creditQuota` (org pool cap). */
+  contractQuota: number | null
+  /** Sum of `quota_allocated` on active keys (full org, not paginated list). */
+  totalAllocated: number | null
   keys: KeyRow[]
   error: { key: string } | null
 }
 
-export default function ManagerDashboardIndex({ orgId, balance, keys, error }: Props) {
-  const allocated = keys.reduce((s, k) => s + (k.quotaAllocated || 0), 0)
-
+export default function ManagerDashboardIndex({
+  orgId,
+  contractQuota,
+  totalAllocated,
+  keys,
+  error,
+}: Props) {
   return (
     <ManagerLayout>
       <Head title="Manager Dashboard" />
@@ -32,14 +33,20 @@ export default function ManagerDashboardIndex({ orgId, balance, keys, error }: P
         <Card>
           <CardHeader>
             <CardTitle>組織餘額</CardTitle>
+            <CardDescription>作用中合約配額上限</CardDescription>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold">{balance?.balance ?? '-'}</CardContent>
+          <CardContent className="text-2xl font-semibold">
+            {contractQuota == null ? '-' : contractQuota}
+          </CardContent>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>已配發配額</CardTitle>
+            <CardDescription>作用中 API keys 配發加總</CardDescription>
           </CardHeader>
-          <CardContent className="text-2xl font-semibold">{allocated}</CardContent>
+          <CardContent className="text-2xl font-semibold">
+            {totalAllocated == null ? '-' : totalAllocated}
+          </CardContent>
         </Card>
         <Card>
           <CardHeader>
