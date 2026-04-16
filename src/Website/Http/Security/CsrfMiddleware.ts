@@ -77,14 +77,38 @@ export function issueWebCsrfToken(ctx: IHttpContext): void {
   })
 }
 
+function isInertiaRequest(ctx: IHttpContext): boolean {
+  const h = ctx.getHeader('x-inertia') ?? ctx.getHeader('X-Inertia')
+  return h === 'true' || h === '1'
+}
+
 /**
  * Web / Inertia CSRF: validates mutating requests, then always rotates the cookie + context token.
+ *
+ * When validation fails on an Inertia XHR request the middleware returns a 302 redirect
+ * (with `X-Inertia-Location` header) to the current page pathname.  This causes the
+ * Inertia client to perform a full-page reload which re-issues a fresh CSRF token and
+ * avoids the raw "plain JSON response" dialog that would otherwise appear.
+ *
+ * For non-Inertia requests the classic 419 JSON response is returned unchanged.
  */
 export function attachWebCsrf(): Middleware {
   return async (ctx, next) => {
     const method = ctx.getMethod().toUpperCase()
     if (UNSAFE_METHODS.has(method)) {
       if (!validateWebCsrf(ctx)) {
+        if (isInertiaRequest(ctx)) {
+          // Inertia v3 only handles X-Inertia-Location on 409 responses (not 302).
+          // Returning 409 + X-Inertia-Location triggers a full-page reload which
+          // re-issues a fresh CSRF cookie without causing a redirect loop.
+          const location = ctx.getPathname() || '/'
+          return new Response(null, {
+            status: 409,
+            headers: {
+              'X-Inertia-Location': location,
+            },
+          })
+        }
         return ctx.json(
           { success: false, message: 'CSRF token mismatch or missing', error: 'CSRF_MISMATCH' },
           419,

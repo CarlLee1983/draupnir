@@ -99,3 +99,29 @@ describe('issueWebCsrfToken', () => {
     expect(ctx.get('csrfToken')).toBeDefined()
   })
 })
+
+describe('attachWebCsrf — Inertia CSRF failure behaviour', () => {
+  test('PUT without CSRF + X-Inertia header returns 409 with X-Inertia-Location', async () => {
+    const mw = attachWebCsrf()
+    const ctx = createCtx({
+      getMethod: () => 'PUT',
+      getPathname: () => '/manager/organization',
+      getHeader: (n: string) => {
+        if (n === 'x-inertia' || n === 'X-Inertia') return 'true'
+        return undefined
+      },
+    })
+    const res = await mw(ctx, async () => new Response('should-not-run'))
+    expect(res.status).toBe(409)
+    expect(res.headers.get('X-Inertia-Location')).toBe('/manager/organization')
+  })
+
+  test('POST without CSRF (no Inertia header) still returns 419 JSON', async () => {
+    const mw = attachWebCsrf()
+    const ctx = createCtx({ getMethod: () => 'POST' })
+    const res = await mw(ctx, async () => new Response('should-not-run'))
+    expect(res.status).toBe(419)
+    const body = await res.json()
+    expect(body.error).toBe('CSRF_MISMATCH')
+  })
+})
