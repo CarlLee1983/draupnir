@@ -64,18 +64,45 @@ describe('ManagerSettingsPage', () => {
         }),
       ),
     }
-    const page = new ManagerSettingsPage(inertia, get as any, { execute: mock() } as any)
+    const page = new ManagerSettingsPage(inertia, get as any, { execute: mock() } as any, {
+      execute: mock(),
+    } as any)
     await page.handle(makeCtx())
     expect(captured.c).toBe('Manager/Settings/Index')
     expect((captured.p as any).profile.displayName).toBe('Mgr')
+    expect((captured.p as any).passwordRequirements.minLength).toBe(8)
   })
 
   test('update: 呼叫 UpdateProfileService 並導回 /manager/settings', async () => {
     const inertia = { render: mock() } as any
     const update = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
-    const page = new ManagerSettingsPage(inertia, { execute: mock() } as any, update as any)
+    const page = new ManagerSettingsPage(inertia, { execute: mock() } as any, update as any, {
+      execute: mock(),
+    } as any)
     const res = await page.update(makeCtx({ displayName: 'N' }))
     expect(res.headers.get('location')).toBe('/manager/settings')
-    expect(update.execute).toHaveBeenCalled()
+    expect(update.execute).toHaveBeenCalledWith('mgr-1', { displayName: 'N' })
+  })
+
+  test('changePassword: 成功後導向 /login', async () => {
+    const inertia = { render: mock() } as any
+    const changePw = {
+      execute: mock(() => Promise.resolve({ success: true, message: 'OK' })),
+    }
+    const page = new ManagerSettingsPage(
+      inertia,
+      { execute: mock() } as any,
+      { execute: mock() } as any,
+      changePw as any,
+    )
+    const res = await page.changePassword(
+      makeCtx({
+        currentPassword: 'old',
+        password: 'NewPassword1',
+        passwordConfirmation: 'NewPassword1',
+      }),
+    )
+    expect(res.headers.get('location')).toBe('/login')
+    expect(changePw.execute).toHaveBeenCalledWith('mgr-1', 'old', 'NewPassword1')
   })
 })

@@ -2,6 +2,8 @@
  * Manager Area Routes — 每個路由對應 DI container 中的 page singleton。
  * 個別路由於 Phase F–K 填入。
  */
+import type { FormRequestClass } from '@gravito/core'
+import { ChangePasswordRequest } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type {
@@ -21,6 +23,7 @@ type ManagerPageInstance = {
   handle(ctx: IHttpContext): Promise<Response>
   store?(ctx: IHttpContext): Promise<Response>
   update?(ctx: IHttpContext): Promise<Response>
+  changePassword?(ctx: IHttpContext): Promise<Response>
   invite?(ctx: IHttpContext): Promise<Response>
   remove?(ctx: IHttpContext): Promise<Response>
   assign?(ctx: IHttpContext): Promise<Response>
@@ -33,6 +36,7 @@ export type ManagerRouteDef = {
   readonly page: ManagerPageBindingKey
   readonly action: keyof ManagerPageInstance & string
   readonly name?: string
+  readonly formRequest?: FormRequestClass
 }
 
 /** 路由定義由各 Phase（F–K）填入。 */
@@ -128,6 +132,14 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     action: 'update',
     name: 'pages.manager.settings.update',
   },
+  {
+    method: 'post',
+    path: '/manager/settings/password',
+    page: MANAGER_PAGE_KEYS.settings,
+    action: 'changePassword',
+    formRequest: ChangePasswordRequest,
+    name: 'pages.manager.settings.password',
+  },
 ]
 
 function registerManagerHttpRoute(
@@ -136,11 +148,18 @@ function registerManagerHttpRoute(
   path: string,
   handler: RouteHandler,
   routeOptions?: ModuleRouteOptions,
+  formRequest?: FormRequestClass,
 ): void {
   if (method === 'get') {
     router.get(path, handler, routeOptions)
   } else if (method === 'post') {
-    router.post(path, handler, routeOptions)
+    if (formRequest) {
+      router.post(path, formRequest, handler, routeOptions)
+    } else {
+      router.post(path, handler, routeOptions)
+    }
+  } else if (formRequest) {
+    router.put(path, formRequest, handler, routeOptions)
   } else {
     router.put(path, handler, routeOptions)
   }
@@ -156,9 +175,9 @@ export function registerManagerRoutes(
   router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   container: IContainer,
 ): void {
-  for (const { method, path, page, action, name } of MANAGER_PAGE_ROUTES) {
+  for (const { method, path, page, action, name, formRequest } of MANAGER_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerManagerHttpRoute(router, method, path, withManagerInertiaPageHandler(inner), opts)
+    registerManagerHttpRoute(router, method, path, withManagerInertiaPageHandler(inner), opts, formRequest)
   }
 }

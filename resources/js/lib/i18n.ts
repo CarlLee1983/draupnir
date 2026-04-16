@@ -97,6 +97,7 @@ const frontendCatalog = {
   'ui.auth.login.googleButton': true,
   'ui.auth.login.noAccount': true,
   'ui.auth.login.registerLink': true,
+  'ui.manager.settings.passwordChangedReauth': true,
   // Auth — Register
   'ui.auth.register.title': true,
   'ui.auth.register.description': true,

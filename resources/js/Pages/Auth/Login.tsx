@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react'
+import { Head, router, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { AuthLayout } from '@/layouts/AuthLayout'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ interface Props {
 
 export default function Login({ lastEmail, error }: Props) {
   const { t } = useTranslation()
+  const { flash } = usePage().props
   const [email, setEmail] = useState(lastEmail ?? '')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,6 +39,11 @@ export default function Login({ lastEmail, error }: Props) {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {flash?.success && (
+              <div className="rounded-md bg-emerald-600/10 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-200">
+                {t(flash.success.key, flash.success.params)}
+              </div>
+            )}
             {error && (
               <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {t(error.key, error.params)}

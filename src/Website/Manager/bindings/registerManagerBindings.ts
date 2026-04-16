@@ -15,6 +15,7 @@ import type { InviteMemberService } from '@/Modules/Organization/Application/Ser
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { RemoveMemberService } from '@/Modules/Organization/Application/Services/RemoveMemberService'
 import type { UpdateOrganizationService } from '@/Modules/Organization/Application/Services/UpdateOrganizationService'
+import type { ChangePasswordService } from '@/Modules/Auth/Application/Services/ChangePasswordService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
@@ -89,6 +90,7 @@ export function registerManagerBindings(container: IContainer): void {
       c.make(i) as InertiaService,
       c.make('getProfileService') as GetProfileService,
       c.make('updateProfileService') as UpdateProfileService,
+      c.make('changePasswordService') as ChangePasswordService,
     )
   })
 }

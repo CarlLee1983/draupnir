@@ -1,17 +1,10 @@
 import type { RegisterParams } from '@/Modules/Auth/Presentation/Requests/RegisterRequest'
 import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import type { LoginUserService } from '@/Modules/Auth/Application/Services/LoginUserService'
+import { PASSWORD_REQUIREMENTS } from '@/Modules/Auth/Presentation/passwordRequirements'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
-
-// Central password policy — shared across all render paths
-const PASSWORD_REQUIREMENTS = {
-  minLength: 8,
-  requiresUppercase: true,
-  requiresLowercase: true,
-  requiresNumbers: true,
-} as const
 
 /**
  * Inertia page controller for the registration view.

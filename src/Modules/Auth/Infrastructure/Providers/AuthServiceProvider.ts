@@ -33,6 +33,7 @@ import { LoginUserService } from '../../Application/Services/LoginUserService'
 import { LogoutUserService } from '../../Application/Services/LogoutUserService'
 import { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
 import { RegisterUserService } from '../../Application/Services/RegisterUserService'
+import { ChangePasswordService } from '../../Application/Services/ChangePasswordService'
 import { ResetPasswordService } from '../../Application/Services/ResetPasswordService'
 import type { IAuthRepository } from '../../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
@@ -131,6 +132,11 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
     ))
     container.bind('resetPasswordService', (c: IContainer) => new ResetPasswordService(
       c.make('passwordResetRepository') as IPasswordResetRepository,
+      c.make('authRepository') as IAuthRepository,
+      c.make('passwordHasher') as ScryptPasswordHasher,
+      c.make('authTokenRepository') as IAuthTokenRepository,
+    ))
+    container.bind('changePasswordService', (c: IContainer) => new ChangePasswordService(
       c.make('authRepository') as IAuthRepository,
       c.make('passwordHasher') as ScryptPasswordHasher,
       c.make('authTokenRepository') as IAuthTokenRepository,

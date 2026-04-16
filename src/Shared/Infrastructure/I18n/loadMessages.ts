@@ -93,6 +93,7 @@ const zhTW = {
   'ui.auth.login.googleButton': '使用 Google 登入',
   'ui.auth.login.noAccount': '還沒帳號？',
   'ui.auth.login.registerLink': '註冊',
+  'ui.manager.settings.passwordChangedReauth': '密碼已變更，請使用新密碼登入。',
   // Auth — Register
   'ui.auth.register.title': '建立帳號',
   'ui.auth.register.description': '輸入您的資訊以建立帳號',
@@ -454,6 +455,8 @@ const catalogs = {
     'ui.auth.login.googleButton': 'Sign in with Google',
     'ui.auth.login.noAccount': 'No account yet?',
     'ui.auth.login.registerLink': 'Register',
+    'ui.manager.settings.passwordChangedReauth':
+      'Your password was changed. Sign in with your new password.',
     'ui.auth.register.title': 'Create Account',
     'ui.auth.register.description': 'Enter your information to create an account',
     'ui.auth.register.emailLabel': 'Email',
