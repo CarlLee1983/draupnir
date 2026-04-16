@@ -44,6 +44,20 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     action: 'handle',
     name: 'pages.manager.dashboard',
   },
+  {
+    method: 'get',
+    path: '/manager/organization',
+    page: MANAGER_PAGE_KEYS.organization,
+    action: 'handle',
+    name: 'pages.manager.organization',
+  },
+  {
+    method: 'put',
+    path: '/manager/organization',
+    page: MANAGER_PAGE_KEYS.organization,
+    action: 'update',
+    name: 'pages.manager.organization.update',
+  },
 ]
 
 function registerManagerHttpRoute(
