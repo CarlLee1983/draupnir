@@ -158,7 +158,7 @@ export class BifrostClient {
   }
 
   /**
-   * Core HTTP request method, integrating Bearer authentication, timeout control, and automatic retries.
+   * Core HTTP request method, integrating optional Bearer authentication, timeout control, and automatic retries.
    *
    * @typeParam T - Expected response JSON type
    * @param method - HTTP method
@@ -172,12 +172,17 @@ export class BifrostClient {
 
     return withRetry(
       async () => {
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+        }
+        const bearer = this.config.masterKey?.trim()
+        if (bearer) {
+          headers.Authorization = `Bearer ${bearer}`
+        }
+
         const response = await fetch(url, {
           method,
-          headers: {
-            Authorization: `Bearer ${this.config.masterKey}`,
-            'Content-Type': 'application/json',
-          },
+          headers,
           body: body ? JSON.stringify(body) : undefined,
           signal: AbortSignal.timeout(this.config.timeoutMs),
         })

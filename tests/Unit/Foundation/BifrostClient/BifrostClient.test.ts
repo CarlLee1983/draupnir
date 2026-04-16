@@ -218,5 +218,24 @@ describe('BifrostClient', () => {
       expect(fetchCall[1].headers['Authorization']).toBe('Bearer test-master-key')
       expect(fetchCall[1].headers['Content-Type']).toBe('application/json')
     })
+
+    it('should omit Authorization when masterKey is unset', async () => {
+      const noAuthClient = new BifrostClient({
+        baseUrl: 'https://bifrost.test',
+        timeoutMs: 5000,
+        maxRetries: 0,
+        retryBaseDelayMs: 1,
+        proxyBaseUrl: 'https://bifrost.test',
+      })
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(200, { virtual_keys: [] })),
+      ) as any
+
+      await noAuthClient.listVirtualKeys()
+
+      const fetchCall = (globalThis.fetch as any).mock.calls[0]
+      expect(fetchCall[1].headers['Authorization']).toBeUndefined()
+      expect(fetchCall[1].headers['Content-Type']).toBe('application/json')
+    })
   })
 })

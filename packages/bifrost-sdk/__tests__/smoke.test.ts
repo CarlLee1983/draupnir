@@ -76,16 +76,16 @@ describe('@draupnir/bifrost-sdk smoke', () => {
     }
   })
 
-  it('createBifrostClientConfig throws without masterKey', () => {
+  it('createBifrostClientConfig omits masterKey when unset', () => {
     const originalBaseUrl = process.env.BIFROST_API_URL
     const originalMasterKey = process.env.BIFROST_MASTER_KEY
     delete process.env.BIFROST_API_URL
     delete process.env.BIFROST_MASTER_KEY
 
     try {
-      expect(() => createBifrostClientConfig({ baseUrl: 'https://test.example.com' })).toThrow(
-        'BIFROST_MASTER_KEY is required',
-      )
+      const config = createBifrostClientConfig({ baseUrl: 'https://test.example.com' })
+      expect(config.masterKey).toBeUndefined()
+      expect('masterKey' in config).toBe(false)
     } finally {
       if (originalBaseUrl !== undefined) {
         process.env.BIFROST_API_URL = originalBaseUrl
@@ -118,10 +118,9 @@ describe('@draupnir/bifrost-sdk smoke', () => {
     expect(typeof withRetry).toBe('function')
   })
 
-  it('BifrostClientConfig type is usable', () => {
+  it('BifrostClientConfig type is usable with optional masterKey', () => {
     const config: BifrostClientConfig = {
       baseUrl: 'https://test.example.com',
-      masterKey: 'test-key',
       timeoutMs: 5000,
       maxRetries: 1,
       retryBaseDelayMs: 100,
@@ -129,5 +128,6 @@ describe('@draupnir/bifrost-sdk smoke', () => {
     }
     expect(config.baseUrl).toBe('https://test.example.com')
     expect(config.proxyBaseUrl).toBe('https://test.example.com')
+    expect(config.masterKey).toBeUndefined()
   })
 })
