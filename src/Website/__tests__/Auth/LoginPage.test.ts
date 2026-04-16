@@ -74,4 +74,114 @@ describe('LoginPage', () => {
     expect(response).toBeInstanceOf(Response)
     expect(response.status).toBe(302)
   })
+
+  test('should redirect admin to /admin/dashboard', async () => {
+    const adminLoginService = {
+      execute: mock(async () => ({
+        success: true,
+        message: 'OK',
+        data: {
+          accessToken: 'tok',
+          refreshToken: 'ref',
+          user: { id: '1', email: 'a@b.com', role: 'admin' },
+        },
+      })),
+    }
+    const render = mock(() => new Response())
+    const inertia = { render } as unknown as InertiaService
+    const page = new LoginPage(inertia, adminLoginService as any)
+    const ctx = createMockContext()
+    ctx.set('validated', { email: 'admin@example.com', password: 'password123' })
+
+    const response = await page.store(ctx)
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toBe('/admin/dashboard')
+  })
+
+  test('should redirect manager to /manager/dashboard', async () => {
+    const managerLoginService = {
+      execute: mock(async () => ({
+        success: true,
+        message: 'OK',
+        data: {
+          accessToken: 'tok',
+          refreshToken: 'ref',
+          user: { id: '2', email: 'm@b.com', role: 'manager' },
+        },
+      })),
+    }
+    const render = mock(() => new Response())
+    const inertia = { render } as unknown as InertiaService
+    const page = new LoginPage(inertia, managerLoginService as any)
+    const ctx = createMockContext()
+    ctx.set('validated', { email: 'manager@example.com', password: 'password123' })
+
+    const response = await page.store(ctx)
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toBe('/manager/dashboard')
+  })
+
+  test('should redirect member to /member/dashboard', async () => {
+    const memberLoginService = {
+      execute: mock(async () => ({
+        success: true,
+        message: 'OK',
+        data: {
+          accessToken: 'tok',
+          refreshToken: 'ref',
+          user: { id: '3', email: 'u@b.com', role: 'member' },
+        },
+      })),
+    }
+    const render = mock(() => new Response())
+    const inertia = { render } as unknown as InertiaService
+    const page = new LoginPage(inertia, memberLoginService as any)
+    const ctx = createMockContext()
+    ctx.set('validated', { email: 'user@example.com', password: 'password123' })
+
+    const response = await page.store(ctx)
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toBe('/member/dashboard')
+  })
+
+  test('GET /login with manager auth redirects to /manager/dashboard', async () => {
+    const render = mock(() => new Response())
+    const inertia = { render } as unknown as InertiaService
+    const page = new LoginPage(inertia, mockLoginService as any)
+    const ctx = createMockContext()
+    ctx.set('auth', {
+      userId: '2',
+      email: 'm@b.com',
+      role: 'manager',
+      permissions: [],
+      tokenType: 'access',
+    })
+
+    const response = await page.handle(ctx)
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toBe('/manager/dashboard')
+  })
+
+  test('GET /login with admin auth redirects to /admin/dashboard', async () => {
+    const render = mock(() => new Response())
+    const inertia = { render } as unknown as InertiaService
+    const page = new LoginPage(inertia, mockLoginService as any)
+    const ctx = createMockContext()
+    ctx.set('auth', {
+      userId: '1',
+      email: 'a@b.com',
+      role: 'admin',
+      permissions: [],
+      tokenType: 'access',
+    })
+
+    const response = await page.handle(ctx)
+
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toBe('/admin/dashboard')
+  })
 })
