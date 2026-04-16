@@ -46,6 +46,7 @@ const frontendCatalog = {
   'member.usage.loadFailed': true,
   'member.usage.selectOrg': true,
   'manager.members.cannotRemoveSelf': true,
+  'manager.apiKeys.createFailed': true,
   'sdkApi.unauthorized': true,
   // Common UI
   'ui.common.email': true,
