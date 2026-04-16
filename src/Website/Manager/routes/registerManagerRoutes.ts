@@ -1,0 +1,73 @@
+/**
+ * Manager Area Routes — 每個路由對應 DI container 中的 page singleton。
+ * 個別路由於 Phase F–K 填入。
+ */
+import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type {
+  IModuleRouter,
+  ModuleRouteOptions,
+  RouteHandler,
+} from '@/Shared/Presentation/IModuleRouter'
+
+import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
+import { withManagerInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
+import type { ManagerPageBindingKey } from '../keys'
+
+type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
+
+type ManagerPageInstance = {
+  handle(ctx: IHttpContext): Promise<Response>
+  store?(ctx: IHttpContext): Promise<Response>
+  update?(ctx: IHttpContext): Promise<Response>
+  invite?(ctx: IHttpContext): Promise<Response>
+  remove?(ctx: IHttpContext): Promise<Response>
+  assign?(ctx: IHttpContext): Promise<Response>
+  revoke?(ctx: IHttpContext): Promise<Response>
+}
+
+export type ManagerRouteDef = {
+  readonly method: 'get' | 'post' | 'put'
+  readonly path: string
+  readonly page: ManagerPageBindingKey
+  readonly action: keyof ManagerPageInstance & string
+  readonly name?: string
+}
+
+/** 路由定義由各 Phase（F–K）填入。 */
+const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
+  // 填入順序：dashboard, organization, members, apiKeys, apiKeyCreate, apiKeyRevoke, settings
+]
+
+function registerManagerHttpRoute(
+  router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
+  method: 'get' | 'post' | 'put',
+  path: string,
+  handler: RouteHandler,
+  routeOptions?: ModuleRouteOptions,
+): void {
+  if (method === 'get') {
+    router.get(path, handler, routeOptions)
+  } else if (method === 'post') {
+    router.post(path, handler, routeOptions)
+  } else {
+    router.put(path, handler, routeOptions)
+  }
+}
+
+/**
+ * Registers manager-area Inertia routes (GET/POST/PUT).
+ *
+ * @param router - Router supporting GET, POST, and PUT.
+ * @param container - DI container with manager page bindings.
+ */
+export function registerManagerRoutes(
+  router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
+  container: IContainer,
+): void {
+  for (const { method, path, page, action, name } of MANAGER_PAGE_ROUTES) {
+    const inner = bindPageAction(container, page, action) as InertiaHandler
+    const opts = name !== undefined ? { name } : undefined
+    registerManagerHttpRoute(router, method, path, withManagerInertiaPageHandler(inner), opts)
+  }
+}
