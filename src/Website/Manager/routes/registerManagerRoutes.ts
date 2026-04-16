@@ -58,6 +58,27 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     action: 'update',
     name: 'pages.manager.organization.update',
   },
+  {
+    method: 'get',
+    path: '/manager/members',
+    page: MANAGER_PAGE_KEYS.members,
+    action: 'handle',
+    name: 'pages.manager.members.index',
+  },
+  {
+    method: 'post',
+    path: '/manager/members/invite',
+    page: MANAGER_PAGE_KEYS.members,
+    action: 'invite',
+    name: 'pages.manager.members.invite',
+  },
+  {
+    method: 'post',
+    path: '/manager/members/:userId/remove',
+    page: MANAGER_PAGE_KEYS.members,
+    action: 'remove',
+    name: 'pages.manager.members.remove',
+  },
 ]
 
 function registerManagerHttpRoute(
