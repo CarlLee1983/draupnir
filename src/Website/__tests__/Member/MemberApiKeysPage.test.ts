@@ -150,4 +150,27 @@ describe('MemberApiKeysPage', () => {
 
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.apiKeys.loadFailed' })
   })
+
+  test('Member 列表呼叫 ListApiKeysService 並附帶 assignedMemberId filter', async () => {
+    const ctx = createMemberContext({ getQuery: () => undefined })
+    const { inertia } = createMockInertia()
+    const mockListService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: { keys: [], meta: { total: 0, page: 1, limit: 20, totalPages: 0 } },
+        }),
+      ),
+    }
+    const mockMemberRepository = {
+      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+    }
+    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMemberRepository as any)
+    await page.handle(ctx)
+
+    const args = (mockListService.execute as any).mock.calls[0]
+    expect(args[0]).toBe('org-A') // orgId
+    expect(args[1]).toBe('member-1') // callerUserId
+    expect(args[5]).toEqual({ assignedMemberId: 'member-1' })
+  })
 })

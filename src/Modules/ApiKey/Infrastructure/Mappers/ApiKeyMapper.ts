@@ -11,6 +11,8 @@ export class ApiKeyMapper {
       bifrost_virtual_key_id: entity.gatewayKeyId,
       status: entity.status,
       scope: JSON.stringify(entity.scope.toJSON()),
+      quota_allocated: entity.quotaAllocated,
+      assigned_member_id: entity.assignedMemberId,
       suspension_reason: entity.suspensionReason,
       pre_freeze_rate_limit: entity.preFreezeRateLimitRaw,
       suspended_at: entity.suspendedAt?.toISOString() ?? null,

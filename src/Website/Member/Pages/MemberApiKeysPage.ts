@@ -43,7 +43,9 @@ export class MemberApiKeysPage {
     const page = parseInt(ctx.getQuery('page') ?? '1', 10)
     const limit = parseInt(ctx.getQuery('limit') ?? '20', 10)
 
-    const result = await this.listService.execute(orgId, auth.userId, auth.role, page, limit)
+    const result = await this.listService.execute(orgId, auth.userId, auth.role, page, limit, {
+      assignedMemberId: auth.userId,
+    })
 
     const keys =
       result.success && result.data?.keys

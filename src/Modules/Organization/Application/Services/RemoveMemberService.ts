@@ -1,5 +1,6 @@
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
 import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrgMembershipRules } from '../../Domain/Services/OrgMembershipRules'
@@ -12,6 +13,7 @@ export class RemoveMemberService {
     private orgAuth: OrgAuthorizationHelper,
     private db: IDatabaseAccess,
     private authRepository: IAuthRepository,
+    private apiKeyRepository: IApiKeyRepository,
   ) {}
 
   async execute(
@@ -45,6 +47,9 @@ export class RemoveMemberService {
           const managerCount = await txMemberRepo.countManagersByOrgId(orgId)
           OrgMembershipRules.assertNotLastManager(member, managerCount)
         }
+        const txApiKeyRepo = this.apiKeyRepository.withTransaction(tx)
+        // 先清除指派（key 本身保留）
+        await txApiKeyRepo.clearAssignmentsForMember(orgId, targetUserId)
         await txMemberRepo.remove(member.id)
       })
 

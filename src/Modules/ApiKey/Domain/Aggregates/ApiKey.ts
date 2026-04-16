@@ -25,6 +25,7 @@ interface ApiKeyProps {
   readonly status: KeyStatus
   readonly scope: KeyScope
   readonly quotaAllocated: number
+  readonly assignedMemberId: string | null
   readonly suspensionReason: string | null
   readonly preFreezeRateLimit: string | null // JSON string
   readonly suspendedAt: Date | null
@@ -72,6 +73,7 @@ export class ApiKey {
       status: KeyStatus.pending(),
       scope: params.scope ?? KeyScope.unrestricted(),
       quotaAllocated: 0,
+      assignedMemberId: null,
       suspensionReason: null,
       preFreezeRateLimit: null,
       suspendedAt: null,
@@ -99,6 +101,7 @@ export class ApiKey {
       status: KeyStatus.from(row.status as string),
       scope: KeyScope.fromJSON(scopeJson),
       quotaAllocated: typeof row.quota_allocated === 'number' ? row.quota_allocated : 0,
+      assignedMemberId: (row.assigned_member_id as string | null) ?? null,
       suspensionReason: (row.suspension_reason as string) ?? null,
       preFreezeRateLimit: (row.pre_freeze_rate_limit as string) ?? null,
       suspendedAt: row.suspended_at ? new Date(row.suspended_at as string) : null,
@@ -194,6 +197,35 @@ export class ApiKey {
       quotaAllocated: newAllocation,
       updatedAt: new Date(),
     })
+  }
+
+  /** 將 key 指派給某位組織成員（僅 Manager 呼叫；跨組織驗證由 Application layer 負責）。 */
+  assignTo(memberUserId: string): ApiKey {
+    if (!memberUserId || memberUserId.trim() === '') {
+      throw new Error('assignTo: memberUserId cannot be empty')
+    }
+    if (this.props.status.isRevoked()) {
+      throw new Error('Cannot assign a revoked key')
+    }
+    return new ApiKey({
+      ...this.props,
+      assignedMemberId: memberUserId,
+      updatedAt: new Date(),
+    })
+  }
+
+  /** 取消指派。 */
+  unassign(): ApiKey {
+    return new ApiKey({
+      ...this.props,
+      assignedMemberId: null,
+      updatedAt: new Date(),
+    })
+  }
+
+  /** 目前被指派的 member user_id；NULL 代表未指派。 */
+  get assignedMemberId(): string | null {
+    return this.props.assignedMemberId
   }
 
   /** Current quota allocated to this key (in contract credit units). */

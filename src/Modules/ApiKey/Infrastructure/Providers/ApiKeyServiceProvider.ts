@@ -5,6 +5,8 @@ import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingSe
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import { AssignApiKeyService } from '../../Application/Services/AssignApiKeyService'
 import { CreateApiKeyService } from '../../Application/Services/CreateApiKeyService'
 import { ListApiKeysService } from '../../Application/Services/ListApiKeysService'
 import { RevokeApiKeyService } from '../../Application/Services/RevokeApiKeyService'
@@ -30,6 +32,11 @@ export class ApiKeyServiceProvider extends ModuleServiceProvider implements IRou
   }
 
   protected override registerApplicationServices(container: IContainer): void {
+    container.bind('assignApiKeyService', (c: IContainer) => new AssignApiKeyService(
+      c.make('apiKeyRepository') as IApiKeyRepository,
+      c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+    ))
     container.bind('createApiKeyService', (c: IContainer) => new CreateApiKeyService(
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,

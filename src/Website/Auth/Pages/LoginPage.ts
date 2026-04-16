@@ -20,8 +20,15 @@ export class LoginPage {
    * `GET /login`
    */
   async handle(ctx: IHttpContext): Promise<Response> {
-    if (AuthMiddleware.getAuthContext(ctx)) {
-      return ctx.redirect('/member/dashboard')
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (auth) {
+      const destination =
+        auth.role === 'admin'
+          ? '/admin/dashboard'
+          : auth.role === 'manager'
+            ? '/manager/dashboard'
+            : '/member/dashboard'
+      return ctx.redirect(destination)
     }
 
     return this.inertia.render(ctx, 'Auth/Login', {
@@ -63,7 +70,13 @@ export class LoginPage {
       secure: isSecureRequest(ctx),
     })
 
-    const destination = result.data.user.role === 'admin' ? '/admin/dashboard' : '/member/dashboard'
+    const role = result.data.user.role
+    const destination =
+      role === 'admin'
+        ? '/admin/dashboard'
+        : role === 'manager'
+          ? '/manager/dashboard'
+          : '/member/dashboard'
     return ctx.redirect(destination)
   }
 }

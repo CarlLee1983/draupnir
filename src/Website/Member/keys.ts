@@ -7,9 +7,6 @@
 export const MEMBER_PAGE_KEYS = {
   dashboard: 'page.member.dashboard',
   apiKeys: 'page.member.apiKeys',
-  apiKeyCreate: 'page.member.apiKeyCreate',
-  apiKeyBudget: 'page.member.apiKeyBudget',
-  apiKeyRevoke: 'page.member.apiKeyRevoke',
   usage: 'page.member.usage',
   costBreakdown: 'page.member.costBreakdown',
   contracts: 'page.member.contracts',
