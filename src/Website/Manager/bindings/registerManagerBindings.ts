@@ -15,6 +15,8 @@ import type { ListMembersService } from '@/Modules/Organization/Application/Serv
 import type { RemoveMemberService } from '@/Modules/Organization/Application/Services/RemoveMemberService'
 import type { UpdateOrganizationService } from '@/Modules/Organization/Application/Services/UpdateOrganizationService'
 import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
+import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -23,6 +25,7 @@ import { ManagerApiKeysPage } from '../Pages/ManagerApiKeysPage'
 import { ManagerDashboardPage } from '../Pages/ManagerDashboardPage'
 import { ManagerMembersPage } from '../Pages/ManagerMembersPage'
 import { ManagerOrganizationPage } from '../Pages/ManagerOrganizationPage'
+import { ManagerSettingsPage } from '../Pages/ManagerSettingsPage'
 import { MANAGER_PAGE_KEYS } from '../keys'
 
 export function registerManagerBindings(container: IContainer): void {
@@ -80,5 +83,11 @@ export function registerManagerBindings(container: IContainer): void {
     )
   })
 
-  // Phase K 會補齊 Settings page 的 binding
+  container.singleton(k.settings, (c) => {
+    return new ManagerSettingsPage(
+      c.make(i) as InertiaService,
+      c.make('getProfileService') as GetProfileService,
+      c.make('updateProfileService') as UpdateProfileService,
+    )
+  })
 }

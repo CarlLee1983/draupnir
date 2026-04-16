@@ -114,6 +114,20 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     action: 'store',
     name: 'pages.manager.apiKeys.store',
   },
+  {
+    method: 'get',
+    path: '/manager/settings',
+    page: MANAGER_PAGE_KEYS.settings,
+    action: 'handle',
+    name: 'pages.manager.settings',
+  },
+  {
+    method: 'put',
+    path: '/manager/settings',
+    page: MANAGER_PAGE_KEYS.settings,
+    action: 'update',
+    name: 'pages.manager.settings.update',
+  },
 ]
 
 function registerManagerHttpRoute(
