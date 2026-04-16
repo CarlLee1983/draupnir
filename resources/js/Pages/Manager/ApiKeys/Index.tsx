@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 interface KeyRow {
   id: string
   label: string
+  /** Bifrost API secret（DB: `bifrost_key_value`）；供 Gateway LLM 請求 Authorization 使用 */
+  gatewayKeyValue: string | null
   quotaAllocated: number
   status: string
   assignedMemberId: string | null
@@ -48,6 +50,12 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-2">名稱</th>
+                  <th className="text-left py-2 align-top">
+                    <span className="block font-mono text-xs font-normal">bifrost_key_value</span>
+                    <span className="block text-xs font-normal text-muted-foreground font-sans mt-0.5">
+                      Gateway LLM 請求用 API key
+                    </span>
+                  </th>
                   <th className="text-right">配額</th>
                   <th className="text-left">狀態</th>
                   <th className="text-left">指派對象</th>
@@ -58,6 +66,12 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                 {keys.map((k) => (
                   <tr key={k.id} className="border-b">
                     <td>{k.label}</td>
+                    <td
+                      className="font-mono text-xs break-all max-w-[18rem]"
+                      title={k.gatewayKeyValue ?? undefined}
+                    >
+                      {k.gatewayKeyValue ?? '—'}
+                    </td>
                     <td className="text-right">{k.quotaAllocated}</td>
                     <td>{k.status}</td>
                     <td>

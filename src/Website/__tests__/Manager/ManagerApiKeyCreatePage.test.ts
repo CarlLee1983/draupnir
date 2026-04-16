@@ -81,14 +81,21 @@ describe('ManagerApiKeyCreatePage', () => {
     expect((captured.lastCall?.props as any).assignees.length).toBe(1)
   })
 
-  test('store: create 成功 + assignee 非空 → 呼叫 assign', async () => {
+  test('store: create 成功 + assignee 非空 → 呼叫 assign 並 render 頁面含 newKeyValue', async () => {
     const createSvc = {
       execute: mock(() =>
-        Promise.resolve({ success: true, message: 'OK', data: { id: 'k-1', rawKey: 'drp_sk_x' } }),
+        Promise.resolve({ success: true, message: 'OK', data: { id: 'k-1', rawKey: 'sk-bf-test' } }),
       ),
     }
     const assignSvc = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
-    const inertia = { render: mock() } as any
+    const captured: { component?: string; props?: Record<string, unknown> } = {}
+    const inertia = {
+      render: mock((_c: IHttpContext, component: string, props: Record<string, unknown>) => {
+        captured.component = component
+        captured.props = props
+        return new Response(JSON.stringify({}))
+      }),
+    } as any
     const body = {
       label: 'Prod',
       quotaAllocated: 100,
@@ -108,20 +115,98 @@ describe('ManagerApiKeyCreatePage', () => {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
-    const res = await page.store(makeCtx(body))
-    expect(res.headers.get('location')).toBe('/manager/api-keys')
+    await page.store(makeCtx(body))
     expect(createSvc.execute).toHaveBeenCalled()
     expect(assignSvc.execute).toHaveBeenCalled()
+    expect(captured.component).toBe('Manager/ApiKeys/Create')
+    expect(captured.props?.newKeyValue).toBe('sk-bf-test')
+  })
+
+  test('store: quota 未設定時即使 period 有預設值也能成功建立', async () => {
+    const createSvc = {
+      execute: mock(() =>
+        Promise.resolve({ success: true, message: 'OK', data: { id: 'k-2', rawKey: 'sk-bf-y' } }),
+      ),
+    }
+    const assignSvc = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
+    const inertia = {
+      render: mock(() => new Response(JSON.stringify({}))),
+    } as any
+    // 模擬表單預設：period='30d' 但 quota 未填（undefined）
+    const body = { label: 'No-Budget Key', budgetResetPeriod: '30d', assigneeUserId: null }
+    const page = new ManagerApiKeyCreatePage(
+      inertia,
+      createSvc as any,
+      assignSvc as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({ success: true, message: 'OK', data: { members: [] } }),
+        ),
+      } as any,
+      {
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      } as any,
+    )
+    await page.store(makeCtx(body))
+    expect(inertia.render).toHaveBeenCalled()
+    const call = (createSvc.execute as ReturnType<typeof mock>).mock.calls[0]?.[0] as any
+    expect(call.budgetResetPeriod).toBeUndefined()
+    expect(call.budgetMaxLimit).toBeUndefined()
+  })
+
+  test('store: create 失敗時寫入 flash 並導回建立頁', async () => {
+    const setCookieCalls: Array<{ name: string; value: string }> = []
+    const createSvc = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: false,
+          message: 'Gateway unavailable',
+          error: 'NETWORK',
+        }),
+      ),
+    }
+    const assignSvc = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
+    const inertia = { render: mock() } as any
+    const body = { label: 'Prod', quotaAllocated: 100, budgetResetPeriod: '30d' }
+    const page = new ManagerApiKeyCreatePage(
+      inertia,
+      createSvc as any,
+      assignSvc as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({ success: true, message: 'OK', data: { members: [] } }),
+        ),
+      } as any,
+      {
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      } as any,
+    )
+    const res = await page.store(
+      makeCtx(body, {
+        setCookie: (name: string, value: string) => {
+          setCookieCalls.push({ name, value })
+        },
+      }),
+    )
+    expect(res.headers.get('location')).toBe('/manager/api-keys/create')
+    const flashCookie = setCookieCalls.find((c) => c.name === 'flash:error')
+    expect(flashCookie).toBeDefined()
+    const parsed = JSON.parse(decodeURIComponent(flashCookie!.value)) as {
+      key: string
+      params?: { message?: string }
+    }
+    expect(parsed.key).toBe('manager.apiKeys.createFailed')
+    expect(parsed.params?.message).toBe('Gateway unavailable')
   })
 
   test('store: assigneeUserId 為空時不呼叫 assign', async () => {
     const createSvc = {
       execute: mock(() =>
-        Promise.resolve({ success: true, message: 'OK', data: { id: 'k-1', rawKey: 'drp_sk_x' } }),
+        Promise.resolve({ success: true, message: 'OK', data: { id: 'k-1', rawKey: 'sk-bf-x' } }),
       ),
     }
     const assignSvc = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
-    const inertia = { render: mock() } as any
+    const inertia = { render: mock(() => new Response(JSON.stringify({}))) } as any
     const body = { label: 'Prod', quotaAllocated: 100, budgetResetPeriod: '30d' }
     const page = new ManagerApiKeyCreatePage(
       inertia,

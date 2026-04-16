@@ -73,6 +73,8 @@ describe('ManagerApiKeysPage', () => {
               {
                 id: 'k-1',
                 label: 'Prod',
+                gatewayKeyId: 'bfr-vk-abc',
+                gatewayKeyValue: 'sk-bf-test',
                 quotaAllocated: 100,
                 status: 'active',
                 assignedMemberId: 'u-2',

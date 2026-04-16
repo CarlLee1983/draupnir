@@ -4,6 +4,7 @@ import type { ListMembersService } from '@/Modules/Organization/Application/Serv
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
 interface CreateForm {
@@ -67,15 +68,27 @@ export class ManagerApiKeyCreatePage {
       callerSystemRole: auth.role,
       label: body.label,
       budgetMaxLimit: body.quotaAllocated,
-      budgetResetPeriod: body.budgetResetPeriod,
+      budgetResetPeriod: body.quotaAllocated != null ? body.budgetResetPeriod : undefined,
     })
 
     const createdKeyId =
       created.success && created.data && typeof created.data.id === 'string'
         ? (created.data.id as string)
         : null
+    const newKeyValue =
+      created.success && created.data && typeof created.data.rawKey === 'string'
+        ? (created.data.rawKey as string)
+        : null
 
-    if (!createdKeyId) {
+    if (!createdKeyId || !newKeyValue) {
+      const detail =
+        typeof created.message === 'string' && created.message.trim().length > 0
+          ? created.message.trim()
+          : (created.error ?? 'Unknown error')
+      setFlash(ctx, 'error', {
+        key: 'manager.apiKeys.createFailed',
+        params: { message: detail },
+      })
       return ctx.redirect('/manager/api-keys/create')
     }
 
@@ -89,6 +102,19 @@ export class ManagerApiKeyCreatePage {
       })
     }
 
-    return ctx.redirect('/manager/api-keys')
+    const members = await this.listMembersService.execute(r.orgId, auth.userId, auth.role)
+    const assignees = members.success
+      ? ((members.data?.members ?? []) as Array<{ userId: string; role: string; email?: string }>)
+          .filter((m) => m.role === 'member')
+          .map((m) => ({
+            userId: m.userId,
+            email: typeof m.email === 'string' ? m.email : '',
+          }))
+      : []
+    return this.inertia.render(ctx, 'Manager/ApiKeys/Create', {
+      orgId: r.orgId,
+      assignees,
+      newKeyValue,
+    })
   }
 }
