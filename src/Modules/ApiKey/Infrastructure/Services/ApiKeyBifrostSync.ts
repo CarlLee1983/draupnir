@@ -12,12 +12,12 @@ export class ApiKeyBifrostSync implements IBifrostKeySync {
 
   async createVirtualKey(
     label: string,
-    orgId: string,
+    _orgId: string,
     options?: CreateVirtualKeyOptions,
   ): Promise<CreateVirtualKeyResult> {
     const vk = await this.gatewayClient.createKey({
       name: label,
-      customerId: orgId,
+      keyIds: ['*'],
       ...(options?.budget != null && {
         budget: {
           maxLimit: options.budget.maxLimit,

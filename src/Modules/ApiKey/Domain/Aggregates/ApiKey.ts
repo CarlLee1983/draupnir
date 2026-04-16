@@ -22,6 +22,7 @@ interface ApiKeyProps {
   readonly label: KeyLabel
   readonly keyHash: KeyHash
   readonly gatewayKeyId: string
+  readonly gatewayKeyValue: string | null
   readonly status: KeyStatus
   readonly scope: KeyScope
   readonly quotaAllocated: number
@@ -42,6 +43,7 @@ interface CreateApiKeyParams {
   createdByUserId: string
   label: string
   gatewayKeyId: string
+  gatewayKeyValue?: string | null
   keyHash: string
   scope?: KeyScope
   expiresAt?: Date | null
@@ -70,6 +72,7 @@ export class ApiKey {
       label: new KeyLabel(params.label),
       keyHash: KeyHash.fromExisting(params.keyHash),
       gatewayKeyId: params.gatewayKeyId,
+      gatewayKeyValue: params.gatewayKeyValue ?? null,
       status: KeyStatus.pending(),
       scope: params.scope ?? KeyScope.unrestricted(),
       quotaAllocated: 0,
@@ -98,6 +101,7 @@ export class ApiKey {
       label: new KeyLabel(row.label as string),
       keyHash: KeyHash.fromExisting(row.key_hash as string),
       gatewayKeyId: row.bifrost_virtual_key_id as string,
+      gatewayKeyValue: (row.bifrost_key_value as string | null) ?? null,
       status: KeyStatus.from(row.status as string),
       scope: KeyScope.fromJSON(scopeJson),
       quotaAllocated: typeof row.quota_allocated === 'number' ? row.quota_allocated : 0,
@@ -256,6 +260,10 @@ export class ApiKey {
   /** Gateway-specific key identifier. */
   get gatewayKeyId(): string {
     return this.props.gatewayKeyId
+  }
+  /** Gateway key value (sk-bf-... string, stored once at creation). */
+  get gatewayKeyValue(): string | null {
+    return this.props.gatewayKeyValue
   }
   /** Current status (active, pending, etc). */
   get status(): string {

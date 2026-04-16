@@ -9,6 +9,7 @@ export class ApiKeyMapper {
       label: entity.label,
       key_hash: entity.keyHashValue,
       bifrost_virtual_key_id: entity.gatewayKeyId,
+      bifrost_key_value: entity.gatewayKeyValue,
       status: entity.status,
       scope: JSON.stringify(entity.scope.toJSON()),
       quota_allocated: entity.quotaAllocated,

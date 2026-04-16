@@ -29,4 +29,24 @@ describe('ApiKeyMapper.toDatabaseRow', () => {
     const adjusted = makeKey().adjustQuotaAllocated(100)
     expect(ApiKeyMapper.toDatabaseRow(adjusted).quota_allocated).toBe(100)
   })
+
+  test('未傳入 gatewayKeyValue 時 bifrost_key_value 為 null', () => {
+    const row = ApiKeyMapper.toDatabaseRow(makeKey())
+    expect(row.bifrost_key_value).toBe(null)
+  })
+
+  test('傳入 gatewayKeyValue 時寫入 bifrost_key_value', () => {
+    const key = ApiKey.create({
+      id: 'k-2',
+      orgId: 'org-1',
+      createdByUserId: 'mgr-1',
+      label: 'test',
+      gatewayKeyId: 'gw-uuid-123',
+      gatewayKeyValue: 'sk-bf-04b9f808-6d4f-44dc-a247-1d73ecf4cbcb',
+      keyHash: 'h'.repeat(64),
+    })
+    const row = ApiKeyMapper.toDatabaseRow(key)
+    expect(row.bifrost_key_value).toBe('sk-bf-04b9f808-6d4f-44dc-a247-1d73ecf4cbcb')
+    expect(row.bifrost_virtual_key_id).toBe('gw-uuid-123')
+  })
 })

@@ -21,7 +21,8 @@ describe('ApiKeyBifrostSync', () => {
     expect(result.gatewayKeyId).toBe('mock_vk_000001')
     expect(result.gatewayKeyValue).toBe('mock_raw_key_000001')
     expect(mock.calls.createKey[0].name).toBe('My Key')
-    expect(mock.calls.createKey[0].customerId).toBe('org-1')
+    expect(mock.calls.createKey[0].customerId).toBeUndefined()
+    expect(mock.calls.createKey[0].keyIds).toEqual(['*'])
   })
 
   it('createVirtualKey 可附帶 budget（7d／30d）', async () => {
