@@ -13,6 +13,7 @@ import type {
 import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
 import { withManagerInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 import type { ManagerPageBindingKey } from '../keys'
+import { MANAGER_PAGE_KEYS } from '../keys'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -36,7 +37,13 @@ export type ManagerRouteDef = {
 
 /** 路由定義由各 Phase（F–K）填入。 */
 const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
-  // 填入順序：dashboard, organization, members, apiKeys, apiKeyCreate, apiKeyRevoke, settings
+  {
+    method: 'get',
+    path: '/manager/dashboard',
+    page: MANAGER_PAGE_KEYS.dashboard,
+    action: 'handle',
+    name: 'pages.manager.dashboard',
+  },
 ]
 
 function registerManagerHttpRoute(
