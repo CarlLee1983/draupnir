@@ -34,7 +34,7 @@ export class GoogleOAuthCallbackPage {
       return ctx.json({ error: 'OAuth authentication failed' }, 401)
     }
 
-    const destination = (result as any).user?.role === 'admin' ? '/admin/dashboard' : '/member/dashboard'
+    const destination = result.role === 'admin' ? '/admin/dashboard' : '/member/dashboard'
     return ctx.redirect(destination, 302)
   }
 }
