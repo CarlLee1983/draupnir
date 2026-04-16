@@ -4,6 +4,7 @@
  */
 import type { FormRequestClass } from '@gravito/core'
 import { ChangePasswordRequest } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
+import { ManagerCreateApiKeyRequest } from '@/Modules/ApiKey/Presentation/Requests/ManagerCreateApiKeyRequest'
 import { InviteMemberRequest } from '@/Modules/Organization/Presentation/Requests/InviteMemberRequest'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -118,6 +119,7 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     path: '/manager/api-keys',
     page: MANAGER_PAGE_KEYS.apiKeyCreate,
     action: 'store',
+    formRequest: ManagerCreateApiKeyRequest,
     name: 'pages.manager.apiKeys.store',
   },
   {

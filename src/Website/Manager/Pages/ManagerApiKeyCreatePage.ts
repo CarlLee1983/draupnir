@@ -16,7 +16,7 @@ interface CreateForm {
 /**
  * Paths:
  *  - GET  `/manager/api-keys/create` → 顯示建立表單
- *  - POST `/manager/api-keys`       → 建立 key（+ optional 指派）
+ *  - POST `/manager/api-keys`       → 建立 key（+ optional 指派）；路由須掛 `ManagerCreateApiKeyRequest`，否則 `validated` 不會填入
  */
 export class ManagerApiKeyCreatePage {
   constructor(
