@@ -7,6 +7,8 @@ import type { RegisterModuleService } from '@/Modules/AppModule/Application/Serv
 import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
 import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/GetUserDetailService'
 import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
 import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
 import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
@@ -93,6 +95,8 @@ export function registerAdminBindings(container: IContainer): void {
         c.make(i) as InertiaService,
         c.make('getOrganizationService') as GetOrganizationService,
         c.make('listMembersService') as ListMembersService,
+        c.make('contractRepository') as IContractRepository,
+        c.make('apiKeyRepository') as IApiKeyRepository,
       ),
   )
 

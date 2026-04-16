@@ -90,10 +90,19 @@ describe('AdminOrganizationDetailPage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: { members: [] } })),
     }
 
+    const mockContractRepo = {
+      findActiveByTargetId: mock(() => Promise.resolve(null)),
+    }
+    const mockKeyRepo = {
+      findActiveByOrgId: mock(() => Promise.resolve([])),
+    }
+
     const page = new AdminOrganizationDetailPage(
       inertia,
       mockGetOrgService as any,
       mockListMembersService as any,
+      mockContractRepo as any,
+      mockKeyRepo as any,
     )
     const ctx = createAdminContext()
     const ctxWithId = {
@@ -111,11 +120,19 @@ describe('AdminOrganizationDetailPage', () => {
     const { inertia, captured } = createMockInertia()
     const mockGetOrgService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockListMembersService = { execute: mock(() => Promise.resolve({ success: true })) }
+    const mockContractRepo = {
+      findActiveByTargetId: mock(() => Promise.resolve(null)),
+    }
+    const mockKeyRepo = {
+      findActiveByOrgId: mock(() => Promise.resolve([])),
+    }
 
     const page = new AdminOrganizationDetailPage(
       inertia,
       mockGetOrgService as any,
       mockListMembersService as any,
+      mockContractRepo as any,
+      mockKeyRepo as any,
     )
     const ctx = createAdminContext()
     await page.handle(ctx)
