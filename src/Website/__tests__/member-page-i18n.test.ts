@@ -63,7 +63,10 @@ describe('MemberDashboardPage i18n', () => {
       execute: async () => null,
     }
 
-    const page = new MemberDashboardPage(mockInertia, {} as any, mockMembershipService as any)
+    const mockPendingInvitationsService = {
+      execute: async () => [],
+    }
+    const page = new MemberDashboardPage(mockInertia, {} as any, mockMembershipService as any, mockPendingInvitationsService as any)
     await page.handle(ctx)
 
     expect(capturedProps.hasOrganization).toBe(false)

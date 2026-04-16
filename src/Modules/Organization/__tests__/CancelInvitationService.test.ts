@@ -13,6 +13,7 @@ function makeMockInvitationRepo(): IOrganizationInvitationRepository {
     findById: mock(),
     findByTokenHash: mock(),
     findByOrgId: mock(),
+    findPendingByEmail: mock(),
     deleteExpired: mock(),
     withTransaction: mock().mockReturnThis(),
   }

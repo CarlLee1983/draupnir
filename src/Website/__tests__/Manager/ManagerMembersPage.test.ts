@@ -126,6 +126,7 @@ describe('ManagerMembersPage', () => {
     expect(captured.lastCall?.component).toBe('Manager/Members/Index')
     const members = (captured.lastCall?.props as any).members as Array<{
       userId: string
+      email: string
       assignedKeys: string[]
     }>
     expect(members[0].assignedKeys).toEqual(['Prod'])
