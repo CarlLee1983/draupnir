@@ -78,11 +78,11 @@ export class AdminContractDetailPage {
     }
 
     const body = await ctx.getJsonBody<{ newCap?: unknown }>()
-    const newCap = typeof body.newCap === 'number' ? body.newCap : NaN
 
-    if (isNaN(newCap)) {
+    if (typeof body.newCap !== 'number') {
       return ctx.redirect(`/admin/contracts/${contractId}`)
     }
+    const newCap = body.newCap
 
     await this.adjustQuotaService.execute({ contractId, newCap, callerRole: auth.role })
 

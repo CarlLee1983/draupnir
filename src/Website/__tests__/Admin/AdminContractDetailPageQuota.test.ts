@@ -114,4 +114,24 @@ describe('AdminContractDetailPage.postQuota', () => {
     expect(response.status).toBe(302)
     expect(response.headers.get('location')).toContain('/admin/contracts')
   })
+
+  test('QUOTA-PAGE-03: newCap 不是 number 時重導向至 /admin/contracts/contract-1，且不呼叫 adjustQuotaService', async () => {
+    const store = makeStore()
+    const ctx = makeCtx(store, { newCap: 'not-a-number' }, 'contract-1')
+    const inertia = makeMockInertia()
+    const adjustQuotaService = makeMockAdjustQuotaService()
+    const page = new AdminContractDetailPage(
+      inertia,
+      { execute: mock(async () => ({ success: true, data: null })) } as any,
+      { execute: mock(async () => {}) } as any,
+      { execute: mock(async () => {}) } as any,
+      adjustQuotaService,
+    )
+
+    const response = await page.postQuota(ctx)
+
+    expect(adjustQuotaService.execute).not.toHaveBeenCalled()
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toContain('/admin/contracts/contract-1')
+  })
 })
