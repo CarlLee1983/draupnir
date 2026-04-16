@@ -3,6 +3,7 @@
  * Application-layer dependencies.
  */
 import type { AssignApiKeyService } from '@/Modules/ApiKey/Application/Services/AssignApiKeyService'
+import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { RevokeApiKeyService } from '@/Modules/ApiKey/Application/Services/RevokeApiKeyService'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
@@ -17,6 +18,7 @@ import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domai
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { ManagerApiKeyCreatePage } from '../Pages/ManagerApiKeyCreatePage'
 import { ManagerApiKeysPage } from '../Pages/ManagerApiKeysPage'
 import { ManagerDashboardPage } from '../Pages/ManagerDashboardPage'
 import { ManagerMembersPage } from '../Pages/ManagerMembersPage'
@@ -68,5 +70,15 @@ export function registerManagerBindings(container: IContainer): void {
     )
   })
 
-  // Phase J–K 會補齊其他 page 的 binding
+  container.singleton(k.apiKeyCreate, (c) => {
+    return new ManagerApiKeyCreatePage(
+      c.make(i) as InertiaService,
+      c.make('createApiKeyService') as CreateApiKeyService,
+      c.make('assignApiKeyService') as AssignApiKeyService,
+      c.make('listMembersService') as ListMembersService,
+      c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+    )
+  })
+
+  // Phase K 會補齊 Settings page 的 binding
 }

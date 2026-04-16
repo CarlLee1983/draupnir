@@ -100,6 +100,20 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     action: 'revoke',
     name: 'pages.manager.apiKeys.revoke',
   },
+  {
+    method: 'get',
+    path: '/manager/api-keys/create',
+    page: MANAGER_PAGE_KEYS.apiKeyCreate,
+    action: 'handle',
+    name: 'pages.manager.apiKeys.create',
+  },
+  {
+    method: 'post',
+    path: '/manager/api-keys',
+    page: MANAGER_PAGE_KEYS.apiKeyCreate,
+    action: 'store',
+    name: 'pages.manager.apiKeys.store',
+  },
 ]
 
 function registerManagerHttpRoute(
