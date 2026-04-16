@@ -64,6 +64,7 @@ describe('AdjustContractQuotaService', () => {
       update: mock(() => Promise.resolve()),
       delete: mock(() => Promise.resolve()),
       countByOrgId: mock(() => Promise.resolve(0)),
+      sumQuotaAllocatedActiveByOrgId: mock(() => Promise.resolve(0)),
       countActiveByOrgId: mock(() => Promise.resolve(0)),
       findByBifrostVirtualKeyId: mock(() => Promise.resolve(null)),
       findByOrgAndAssignedMember: mock(() => Promise.resolve([])),

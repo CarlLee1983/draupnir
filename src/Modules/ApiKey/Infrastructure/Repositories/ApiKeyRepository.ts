@@ -1,3 +1,4 @@
+import { coalesce, sum } from '@/Shared/Infrastructure/Database/AggregateSpec'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { ApiKey } from '../../Domain/Aggregates/ApiKey'
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
@@ -60,6 +61,20 @@ export class ApiKeyRepository implements IApiKeyRepository {
 
   async countByOrgId(orgId: string): Promise<number> {
     return this.db.table('api_keys').where('org_id', '=', orgId).count()
+  }
+
+  async sumQuotaAllocatedActiveByOrgId(orgId: string): Promise<number> {
+    const rows = await this.db
+      .table('api_keys')
+      .where('org_id', '=', orgId)
+      .where('status', '=', 'active')
+      .aggregate<{ total: unknown }>({
+        select: { total: coalesce(sum('quota_allocated'), 0) },
+      })
+    const v = rows[0]?.total
+    if (typeof v === 'number') return v
+    if (typeof v === 'string') return Number.parseInt(v, 10) || 0
+    return 0
   }
 
   async delete(id: string): Promise<void> {

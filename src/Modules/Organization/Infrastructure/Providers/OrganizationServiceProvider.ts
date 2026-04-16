@@ -18,6 +18,7 @@ import { ListMembersService } from '../../Application/Services/ListMembersServic
 import { ListOrganizationsService } from '../../Application/Services/ListOrganizationsService'
 import { OrgAuthorizationHelper } from '../../Application/Services/OrgAuthorizationHelper'
 import { RemoveMemberService } from '../../Application/Services/RemoveMemberService'
+import { GetUserMembershipService } from '../../Application/Services/GetUserMembershipService'
 import { UpdateOrganizationService } from '../../Application/Services/UpdateOrganizationService'
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
@@ -98,6 +99,9 @@ export class OrganizationServiceProvider extends ModuleServiceProvider implement
       c.make('organizationInvitationRepository') as IOrganizationInvitationRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
     ))
+    container.bind('getUserMembershipService', (c: IContainer) =>
+      new GetUserMembershipService(c.make('organizationMemberRepository') as IOrganizationMemberRepository)
+    )
   }
 
   protected override registerControllers(container: IContainer): void {

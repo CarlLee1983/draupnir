@@ -7,6 +7,7 @@ import { ActivateContractService } from '../../Application/Services/ActivateCont
 import { AdjustContractQuotaService } from '../../Application/Services/AdjustContractQuotaService'
 import { AssignContractService } from '../../Application/Services/AssignContractService'
 import { CreateContractService } from '../../Application/Services/CreateContractService'
+import { GetActiveOrgContractQuotaService } from '../../Application/Services/GetActiveOrgContractQuotaService'
 import { GetContractDetailService } from '../../Application/Services/GetContractDetailService'
 import { HandleContractExpiryService } from '../../Application/Services/HandleContractExpiryService'
 import { ListAdminContractsService } from '../../Application/Services/ListAdminContractsService'
@@ -55,6 +56,12 @@ export class ContractServiceProvider extends ModuleServiceProvider implements IR
     ))
     container.bind('getContractDetailService', (c: IContainer) =>
       new GetContractDetailService(c.make('contractRepository') as ContractRepository)
+    )
+    container.bind('getActiveOrgContractQuotaService', (c: IContainer) =>
+      new GetActiveOrgContractQuotaService(
+        c.make('contractRepository') as ContractRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      ),
     )
     container.bind('listAdminContractsService', (c: IContainer) =>
       new ListAdminContractsService(c.make('contractRepository') as ContractRepository)

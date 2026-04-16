@@ -9,6 +9,7 @@ import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domai
 import { AssignApiKeyService } from '../../Application/Services/AssignApiKeyService'
 import { CreateApiKeyService } from '../../Application/Services/CreateApiKeyService'
 import { ListApiKeysService } from '../../Application/Services/ListApiKeysService'
+import { SumQuotaAllocatedForOrgService } from '../../Application/Services/SumQuotaAllocatedForOrgService'
 import { RevokeApiKeyService } from '../../Application/Services/RevokeApiKeyService'
 import { SetKeyPermissionsService } from '../../Application/Services/SetKeyPermissionsService'
 import { UpdateApiKeyBudgetService } from '../../Application/Services/UpdateApiKeyBudgetService'
@@ -47,6 +48,12 @@ export class ApiKeyServiceProvider extends ModuleServiceProvider implements IRou
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
     ))
+    container.bind('sumQuotaAllocatedForOrgService', (c: IContainer) =>
+      new SumQuotaAllocatedForOrgService(
+        c.make('apiKeyRepository') as IApiKeyRepository,
+        c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      ),
+    )
     container.bind('revokeApiKeyService', (c: IContainer) => new RevokeApiKeyService(
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,

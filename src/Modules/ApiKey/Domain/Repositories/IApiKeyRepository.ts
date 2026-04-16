@@ -34,6 +34,12 @@ export interface IApiKeyRepository {
   /** Returns the total count of keys for an organization. */
   countByOrgId(orgId: string): Promise<number>
 
+  /**
+   * Sum of `quota_allocated` for **active** keys in the org (aligns with
+   * `AdjustContractQuotaService` contract-cap vs allocated checks).
+   */
+  sumQuotaAllocatedActiveByOrgId(orgId: string): Promise<number>
+
   /** Returns the count of active keys for an organization. */
   countActiveByOrgId(orgId: string): Promise<number>
 
