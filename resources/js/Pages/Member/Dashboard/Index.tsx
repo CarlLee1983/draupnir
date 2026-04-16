@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Head } from '@inertiajs/react'
 import { CreateOrganizationModal } from './components/CreateOrganizationModal'
+import { InvitationCard, type PendingInvitation } from './components/InvitationCard'
 import { DashboardHeader, type WindowOption } from './components/DashboardHeader'
 import { MetricSection } from './components/MetricSection'
 import { BalanceCard } from './components/BalanceCard'
@@ -53,18 +54,20 @@ interface Props {
   orgId?: string | null
   balance: Balance | null
   hasOrganization: boolean
+  pendingInvitations: PendingInvitation[]
   error: I18nMessage | null
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000
 
-export default function MemberDashboard({ orgId, balance, hasOrganization, error }: Props) {
+export default function MemberDashboard({ orgId, balance, hasOrganization, pendingInvitations, error }: Props) {
   const { t } = useTranslation()
   const [selectedWindow, setSelectedWindow] = useState<WindowOption>(30)
   const [bundle, setBundle] = useState<DashboardBundle | null>(null)
   const [loading, setLoading] = useState(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [createOrgOpen, setCreateOrgOpen] = useState(false)
+  const [invitations, setInvitations] = useState<PendingInvitation[]>(pendingInvitations)
 
   useEffect(() => {
     if (!orgId) {
@@ -131,19 +134,39 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, error
         {!hasOrganization ? (
           <>
             <CreateOrganizationModal open={createOrgOpen} onOpenChange={setCreateOrgOpen} />
-            <Card className="border-border rounded-lg bg-white/[0.02] shadow-indigo-500/5 shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-base text-white">尚無組織</CardTitle>
-                <CardDescription className="text-white/40">
-                  建立組織以開始使用 API Key、帳單與儀表板功能
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button type="button" onClick={() => setCreateOrgOpen(true)} className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">
-                  建立我的組織
-                </Button>
-              </CardContent>
-            </Card>
+
+            {invitations.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm text-white/60">你有待處理的組織邀請：</p>
+                {invitations.map((inv) => (
+                  <InvitationCard
+                    key={inv.id}
+                    invitation={inv}
+                    onDeclined={(id) => setInvitations((prev) => prev.filter((i) => i.id !== id))}
+                  />
+                ))}
+              </div>
+            )}
+
+            {invitations.length === 0 && (
+              <Card className="border-border rounded-lg bg-white/[0.02] shadow-indigo-500/5 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-base text-white">尚無組織</CardTitle>
+                  <CardDescription className="text-white/40">
+                    建立組織以開始使用 API Key、帳單與儀表板功能
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    type="button"
+                    onClick={() => setCreateOrgOpen(true)}
+                    className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                  >
+                    建立我的組織
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </>
         ) : null}
 
