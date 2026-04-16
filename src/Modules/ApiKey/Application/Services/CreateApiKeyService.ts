@@ -117,7 +117,7 @@ export class CreateApiKeyService {
       await this.apiKeyRepository.save(pendingKey)
 
       try {
-        const { gatewayKeyId } = await this.bifrostSync.createVirtualKey(
+        const { gatewayKeyId, gatewayKeyValue } = await this.bifrostSync.createVirtualKey(
           request.label,
           request.orgId,
           budgetParsed.options,
@@ -129,11 +129,16 @@ export class CreateApiKeyService {
           createdByUserId: request.createdByUserId,
           label: request.label,
           gatewayKeyId,
+          gatewayKeyValue,
           keyHash: hashedKey,
           scope,
           expiresAt: request.expiresAt ? new Date(request.expiresAt) : null,
         })
-        const finalKey = activatedKey.activate()
+        let finalKey = activatedKey.activate()
+        const budgetCap = request.budgetMaxLimit
+        if (typeof budgetCap === 'number' && Number.isFinite(budgetCap) && budgetCap > 0) {
+          finalKey = finalKey.adjustQuotaAllocated(Math.floor(budgetCap))
+        }
         await this.apiKeyRepository.update(finalKey)
 
         if (
@@ -147,8 +152,8 @@ export class CreateApiKeyService {
         return {
           success: true,
           message:
-            'API Key established successfully (Please record the rawKey now, it cannot be retrieved again)',
-          data: { ...ApiKeyPresenter.fromEntity(finalKey), rawKey },
+            'API Key established successfully (Please record the key now, it cannot be retrieved again)',
+          data: { ...ApiKeyPresenter.fromEntity(finalKey), rawKey: gatewayKeyValue },
         }
       } catch (bifrostError: unknown) {
         const activatedEntry = await this.apiKeyRepository.findById(keyId)

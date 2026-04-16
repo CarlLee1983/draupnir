@@ -99,6 +99,9 @@ describe('CreateApiKeyService', () => {
       maxLimit: 25,
       resetDuration: '30d',
     })
+    const id = result.data?.id as string
+    const saved = await apiKeyRepo.findById(id)
+    expect(saved?.quotaAllocated).toBe(25)
   })
 
   it('僅填上限未選週期應回傳 BUDGET_INCOMPLETE', async () => {

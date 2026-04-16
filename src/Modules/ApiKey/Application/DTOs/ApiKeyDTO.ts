@@ -12,6 +12,8 @@ export class ApiKeyPresenter {
       label: entity.label,
       keyPrefix: `drp_sk_...${entity.keyHashValue.slice(-8)}`,
       gatewayKeyId: entity.gatewayKeyId,
+      /** Bifrost secret (`bifrost_key_value`); use as Bearer for gateway LLM calls. */
+      gatewayKeyValue: entity.gatewayKeyValue,
       status: entity.status,
       scope: entity.scope.toJSON(),
       suspensionReason: entity.suspensionReason,
