@@ -5,29 +5,19 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
- * Maps a list-contract DTO row to the Inertia table shape.
- *
- * @param dto - Contract data row containing status, terms, and ID.
- * @returns Standardized contract object for frontend rendering.
+ * Maps a list-contract DTO row to the member quota view (credit only; no period or lifecycle in the UI).
  */
 function mapContractRow(dto: Record<string, unknown>) {
-  const terms = dto.terms as {
-    creditQuota: number
-    validityPeriod: { startDate: string; endDate: string }
-  }
+  const terms = dto.terms as { creditQuota: number }
   const id = dto.id as string
   return {
     id,
-    name: `Contract ${id.slice(0, 8)}`,
-    status: dto.status as 'draft' | 'active' | 'expired' | 'terminated',
-    startDate: terms.validityPeriod.startDate,
-    endDate: terms.validityPeriod.endDate,
     creditQuota: String(terms.creditQuota),
   }
 }
 
 /**
- * Member-facing contract list for the selected organization (`Member/Contracts/Index`).
+ * Member-facing organization credit quota list (`Member/Contracts/Index`); route `/member/contracts` unchanged.
  */
 export class MemberContractsPage {
   constructor(

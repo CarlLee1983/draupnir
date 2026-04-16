@@ -27,6 +27,8 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchPlaceholder?: string
   searchColumn?: string
+  /** When false, all rows render and the footer (count + prev/next) is hidden. Default true. */
+  paginated?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -34,6 +36,7 @@ export function DataTable<TData, TValue>({
   data,
   searchPlaceholder,
   searchColumn,
+  paginated = true,
 }: DataTableProps<TData, TValue>) {
   const { t } = useTranslation()
   const [sorting, setSorting] = useState<SortingState>([])
@@ -45,7 +48,7 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(paginated ? { getPaginationRowModel: getPaginationRowModel() } : {}),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     state: { sorting, columnFilters },
@@ -99,29 +102,31 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {t('ui.common.totalCount', { total: table.getFilteredRowModel().rows.length })}
-        </p>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            {t('ui.common.prevPage')}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            {t('ui.common.nextPage')}
-          </Button>
+      {paginated && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">
+            {t('ui.common.totalCount', { total: table.getFilteredRowModel().rows.length })}
+          </p>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              {t('ui.common.prevPage')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              {t('ui.common.nextPage')}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

@@ -72,6 +72,10 @@
 - **[Website 資料夾架構設計](./2026-04-14-website-folder-architecture-design.md)** — `src/Pages/` → `src/Website/`：情境 slice、`Http/` runtime、`bootstrap/` 組合根與遷移對照表（已確認，待實作）
 - **[Gravito i18n 設計](./2026-04-11-gravito-i18n-design.md)** — 多語與頁面 locale 解析（與 Website 呈現層相關時可一併查閱）
 
+### 合約與組織配額（日期規格）
+
+- **[合約額度與 API Key 配發](./2026-04-16-contract-quota-allocation-spec.md)** — 組織合約上限、未分配池、各 Key 重置週期（7d／30d）、Admin 調降（先吸收未分配再比例縮減）、Manager 依 `slack` 重配、硬擋；與 [2-user-organization](./2-user-organization/README.md)、[3-api-keys](./3-api-keys/README.md) 對齊。
+
 ---
 
 ## 🗂️ 模組對應表
@@ -93,6 +97,7 @@
 - **快速開始？** → 見 [0-planning](./0-planning/)
 - **做認證相關的工作？** → 見 [1-authentication](./1-authentication/)
 - **管理用戶或組織？** → 見 [2-user-organization](./2-user-organization/)
+- **合約上限與 Key 配發／調降規則？** → 見 [2026-04-16-contract-quota-allocation-spec](./2026-04-16-contract-quota-allocation-spec.md)
 - **實現 API Key 功能？** → 見 [3-api-keys](./3-api-keys/)
 - **開發計費或額度系統？** → 見 [4-credit-billing](./4-credit-billing/)
 - **寫測試或驗證？** → 見 [5-testing-validation](./5-testing-validation/)

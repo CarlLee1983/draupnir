@@ -30,6 +30,10 @@
 | **Services** | CreateOrgService、ListMembersService、InviteMemberService、UpdateMemberRoleService、RemoveMemberService |
 | **API** | `POST /api/orgs`、`GET /api/orgs`、`GET /api/orgs/{id}/members`、`POST /api/orgs/{id}/invites` |
 
+#### 組織合約與 API Key 配額 — [合約額度與配發規格](../2026-04-16-contract-quota-allocation-spec.md)
+
+**職責摘要**：組織合約上限（可配發至各 API Key 之總池）、未分配池、Admin 調降（先吸收未分配再比例縮減已配發）、Manager 依 `slack` 重配、硬擋與通知。各 Key 用量重置週期（7d／30d 等）與 Credit／計費模組之銜接見該規格 §2.5、關聯 [3-api-keys](../3-api-keys/README.md)。
+
 ---
 
 ## 🏗️ 實現狀態

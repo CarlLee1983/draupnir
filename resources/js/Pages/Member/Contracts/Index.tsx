@@ -30,12 +30,7 @@ export default function ContractsIndex({ contracts, error }: Props) {
           />
         )}
 
-        <DataTable
-          columns={columns}
-          data={contracts}
-          searchPlaceholder={t('ui.member.contracts.searchPlaceholder')}
-          searchColumn="name"
-        />
+        <DataTable columns={columns} data={contracts} paginated={false} />
       </div>
     </MemberLayout>
   )

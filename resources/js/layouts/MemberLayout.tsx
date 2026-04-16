@@ -9,7 +9,7 @@ const memberNavItems: NavItem[] = [
   { label: 'API Keys', href: '/member/api-keys', icon: <Key className="h-4 w-4" /> },
   { label: '用量', href: '/member/usage', icon: <BarChart3 className="h-4 w-4" /> },
   { label: '成本分析', href: '/member/cost-breakdown', icon: <PieChart className="h-4 w-4" /> },
-  { label: '合約', href: '/member/contracts', icon: <FileText className="h-4 w-4" /> },
+  { label: '配額', href: '/member/contracts', icon: <FileText className="h-4 w-4" /> },
   { label: '設定', href: '/member/settings', icon: <Settings className="h-4 w-4" /> },
 ]
 

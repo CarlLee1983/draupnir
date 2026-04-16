@@ -91,7 +91,7 @@ test.describe('Member Portal', { tag: '@smoke' }, () => {
     await page.setExtraHTTPHeaders({ Authorization: `Bearer ${token}` })
     await page.goto('/member/contracts', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByRole('heading', { name: '合約' })).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: '配額' })).toBeVisible({ timeout: 15_000 })
   })
 
   test('Settings page shows profile form', async ({ page, request }) => {

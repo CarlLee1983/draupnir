@@ -48,6 +48,7 @@
 | 架構評審 | [`v1-architecture-review.md`](./specs/6-architecture/v1-architecture-review.md)、[`v1.1-improvements-summary.md`](./specs/6-architecture/v1.1-improvements-summary.md) |
 | i18n（Gravito） | [`specs/2026-04-11-gravito-i18n-design.md`](./specs/2026-04-11-gravito-i18n-design.md) |
 | Website 目錄（`src/Pages` → `src/Website`） | [`specs/2026-04-14-website-folder-architecture-design.md`](./specs/2026-04-14-website-folder-architecture-design.md) |
+| 合約額度與 API Key 配發 | [`specs/2026-04-16-contract-quota-allocation-spec.md`](./specs/2026-04-16-contract-quota-allocation-spec.md) |
 
 ## 關於實作計畫
 

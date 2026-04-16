@@ -147,7 +147,6 @@ export default function CreateApiKey({ orgId, createdKey, formError }: Props) {
 
               <div className="space-y-2 rounded-lg border border-border/80 bg-muted/30 p-4">
                 <p className="text-sm font-medium">{t('ui.member.apiKeys.create.budgetSectionTitle')}</p>
-                <p className="text-xs text-muted-foreground">{t('ui.member.apiKeys.create.budgetSectionHint')}</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="budgetMaxLimit">{t('ui.member.apiKeys.create.budgetCapLabel')}</Label>
