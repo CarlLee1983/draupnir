@@ -1,10 +1,8 @@
 import { useMemo } from 'react'
-import { Head, Link } from '@inertiajs/react'
+import { Head } from '@inertiajs/react'
 import { MemberLayout } from '@/layouts/MemberLayout'
-import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/tables/DataTable'
 import { createApiKeyColumns, type ApiKeyRow } from './columns'
-import { Plus } from 'lucide-react'
 import { Banner } from '@/components/ui/banner'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
@@ -16,10 +14,9 @@ interface Props {
   error: I18nMessage | null
 }
 
-export default function ApiKeysIndex({ orgId, keys, error }: Props) {
+export default function ApiKeysIndex({ keys, error }: Props) {
   const { t } = useTranslation()
-  const columns = useMemo(() => createApiKeyColumns(orgId, t), [orgId, t])
-  const createQuery = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
+  const columns = useMemo(() => createApiKeyColumns(t), [t])
 
   return (
     <MemberLayout>
@@ -28,12 +25,6 @@ export default function ApiKeysIndex({ orgId, keys, error }: Props) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">{t('ui.member.apiKeys.title')}</h1>
-          <Button asChild>
-            <Link href={`/member/api-keys/create${createQuery}`}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t('ui.member.apiKeys.createButton')}
-            </Link>
-          </Button>
         </div>
 
         {error && (

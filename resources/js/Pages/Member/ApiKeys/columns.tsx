@@ -1,14 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { MoreHorizontal } from 'lucide-react'
-import { Link, router } from '@inertiajs/react'
 import { formatDateTime, maskApiKey } from '@/lib/format'
 import type { Translator } from '@/lib/i18n'
 
@@ -32,13 +23,7 @@ function statusBadge(status: ApiKeyRow['status'], t: Translator) {
   }
 }
 
-export function createApiKeyColumns(orgId: string | null, t: Translator): ColumnDef<ApiKeyRow>[] {
-  function handleRevoke(keyId: string) {
-    if (!confirm(t('ui.member.apiKeys.revokeConfirm'))) return
-    const q = orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''
-    router.post(`/member/api-keys/${keyId}/revoke${q}`, {})
-  }
-
+export function createApiKeyColumns(t: Translator): ColumnDef<ApiKeyRow>[] {
   return [
     {
       accessorKey: 'label',
@@ -63,40 +48,6 @@ export function createApiKeyColumns(orgId: string | null, t: Translator): Column
       accessorKey: 'lastUsedAt',
       header: t('ui.common.lastUsed'),
       cell: ({ row }) => formatDateTime(row.original.lastUsedAt),
-    },
-    {
-      id: 'actions',
-      header: '',
-      cell: ({ row }) => {
-        const key = row.original
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {(key.status === 'active' || key.status === 'suspended_no_credit') && (
-                <DropdownMenuItem asChild>
-                  <Link
-                    href={`/member/api-keys/${key.id}/budget${orgId ? `?orgId=${encodeURIComponent(orgId)}` : ''}`}
-                  >
-                    {t('ui.member.apiKeys.budgetMenuItem')}
-                  </Link>
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem
-                onClick={() => handleRevoke(key.id)}
-                disabled={key.status !== 'active'}
-                className="text-destructive"
-              >
-                {t('ui.member.apiKeys.revokeAction')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
     },
   ]
 }
