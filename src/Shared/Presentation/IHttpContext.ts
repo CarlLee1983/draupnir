@@ -102,6 +102,8 @@ function fallbackPathParam(pathname: string, name: string): string | undefined {
     if (m?.[1] && m[1] !== 'me') return decodeURIComponent(m[1])
     m = /^\/api\/organizations\/([^/]+)(?:\/|$)/.exec(pathname)
     if (m?.[1]) return decodeURIComponent(m[1])
+    m = /^\/api\/invitations\/([^/]+)(?:\/|$)/.exec(pathname)
+    if (m?.[1]) return decodeURIComponent(m[1])
     return undefined
   }
   if (name === 'orgId') {
