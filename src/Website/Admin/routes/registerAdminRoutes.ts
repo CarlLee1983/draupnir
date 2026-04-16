@@ -36,6 +36,7 @@ type AdminPageInstance = {
   store?(ctx: IHttpContext): Promise<Response>
   postStatus?(ctx: IHttpContext): Promise<Response>
   postAction?(ctx: IHttpContext): Promise<Response>
+  postQuota?(ctx: IHttpContext): Promise<Response>
 }
 
 /**
@@ -119,6 +120,13 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
     page: ADMIN_PAGE_KEYS.contractDetail,
     action: 'postAction',
     name: 'pages.admin.contracts.action',
+  },
+  {
+    method: 'post',
+    path: '/admin/contracts/:id/quota',
+    page: ADMIN_PAGE_KEYS.contractDetail,
+    action: 'postQuota',
+    name: 'pages.admin.contracts.quota',
   },
   {
     method: 'get',

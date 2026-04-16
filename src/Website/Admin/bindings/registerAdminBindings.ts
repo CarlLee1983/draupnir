@@ -8,6 +8,7 @@ import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Service
 import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/GetUserDetailService'
 import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
 import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
+import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
 import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
@@ -121,6 +122,7 @@ export function registerAdminBindings(container: IContainer): void {
         c.make('getContractDetailService') as GetContractDetailService,
         c.make('activateContractService') as ActivateContractService,
         c.make('terminateContractService') as TerminateContractService,
+        c.make('adjustContractQuotaService') as AdjustContractQuotaService,
       ),
   )
 
