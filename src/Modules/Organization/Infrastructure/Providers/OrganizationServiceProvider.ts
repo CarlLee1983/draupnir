@@ -4,6 +4,7 @@ import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { AcceptInvitationService } from '../../Application/Services/AcceptInvitationService'
 import { CancelInvitationService } from '../../Application/Services/CancelInvitationService'
@@ -78,6 +79,7 @@ export class OrganizationServiceProvider extends ModuleServiceProvider implement
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
       db as IDatabaseAccess,
       c.make('authRepository') as IAuthRepository,
+      c.make('apiKeyRepository') as IApiKeyRepository,
     ))
     container.bind('listMembersService', (c: IContainer) => new ListMembersService(
       c.make('organizationMemberRepository') as IOrganizationMemberRepository,

@@ -7,6 +7,7 @@ import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthR
 import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
 import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
+import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { AcceptInvitationService } from '../Application/Services/AcceptInvitationService'
@@ -38,6 +39,7 @@ describe('RemoveMemberService', () => {
     memberRepo = new OrganizationMemberRepository(db)
     invitationRepo = new OrganizationInvitationRepository(db)
     orgAuth = new OrgAuthorizationHelper(memberRepo)
+    const apiKeyRepo = new ApiKeyRepository(db)
 
     const registerService = new RegisterUserService(authRepo, new ScryptPasswordHasher())
     const createOrgService = new CreateOrganizationService(
@@ -53,7 +55,7 @@ describe('RemoveMemberService', () => {
     )
     const inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
     const acceptService = new AcceptInvitationService(invitationRepo, memberRepo, authRepo, db)
-    removeService = new RemoveMemberService(memberRepo, orgAuth, db, authRepo)
+    removeService = new RemoveMemberService(memberRepo, orgAuth, db, authRepo, apiKeyRepo)
 
     const managerResult = await registerService.execute({
       email: 'manager@example.com',
@@ -112,6 +114,31 @@ describe('RemoveMemberService', () => {
     await removeService.execute(orgId, memberId, managerId, 'user')
     const after = await authRepo.findById(memberId)
     expect(after!.role.getValue()).toBe(before!.role.getValue())
+  })
+
+  it('移除成員時會清除該組織下被指派給該成員的 key', async () => {
+    const apiKeyRepo = new ApiKeyRepository(db)
+
+    // 建立一個 API key 並指派給 memberId
+    const { ApiKey } = await import('@/Modules/ApiKey/Domain/Aggregates/ApiKey')
+    const key = ApiKey.create({
+      id: 'key-001',
+      orgId,
+      createdByUserId: managerId,
+      label: 'Test Key',
+      gatewayKeyId: 'gw-001',
+      keyHash: 'hash-abc',
+    }).assignTo(memberId)
+    await apiKeyRepo.save(key)
+
+    // 移除成員
+    const result = await removeService.execute(orgId, memberId, managerId, 'user')
+    expect(result.success).toBe(true)
+
+    // 確認 key 的 assigned_member_id 已被清除
+    const updatedKey = await apiKeyRepo.findById(key.id)
+    expect(updatedKey).not.toBeNull()
+    expect(updatedKey!.assignedMemberId).toBeNull()
   })
 
   it('移除 global admin 成員時不應降低其系統角色', async () => {
