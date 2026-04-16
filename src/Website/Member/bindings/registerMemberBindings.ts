@@ -8,6 +8,7 @@ import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/S
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
+import type { GetPendingInvitationsService } from '@/Modules/Organization/Application/Services/GetPendingInvitationsService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
@@ -42,6 +43,7 @@ export function registerMemberBindings(container: IContainer): void {
       c.make(i) as InertiaService,
       c.make('getBalanceService') as GetBalanceService,
       c.make('getUserMembershipService') as GetUserMembershipService,
+      c.make('getPendingInvitationsService') as GetPendingInvitationsService,
     )
   })
 

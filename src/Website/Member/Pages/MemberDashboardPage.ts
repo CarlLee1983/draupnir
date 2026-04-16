@@ -1,4 +1,5 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
+import type { GetPendingInvitationsService } from '@/Modules/Organization/Application/Services/GetPendingInvitationsService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -15,24 +16,27 @@ export class MemberDashboardPage {
     private readonly inertia: InertiaService,
     private readonly balanceService: GetBalanceService,
     private readonly membershipService: GetUserMembershipService,
+    private readonly pendingInvitationsService: GetPendingInvitationsService,
   ) {}
 
-  /**
-   * Renders the member dashboard with organization balance data.
-   *
-   * @param ctx - Context providing organization and user session info.
-   * @returns Inertia render response or missing-org message.
-   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const membership = await this.membershipService.execute(auth.userId)
 
     if (!membership) {
+      let pendingInvitations: Awaited<ReturnType<GetPendingInvitationsService['execute']>> = []
+      try {
+        pendingInvitations = await this.pendingInvitationsService.execute(auth.userId)
+      } catch {
+        // 查詢失敗不影響頁面渲染，回傳空陣列
+      }
+
       return this.inertia.render(ctx, 'Member/Dashboard/Index', {
         orgId: null,
         balance: null,
         hasOrganization: false,
+        pendingInvitations,
         error: null,
       })
     }
@@ -44,6 +48,7 @@ export class MemberDashboardPage {
       orgId,
       balance: balanceResult.success ? (balanceResult.data ?? null) : null,
       hasOrganization: true,
+      pendingInvitations: [],
       error: balanceResult.success ? null : { key: 'member.dashboard.loadFailed' },
     })
   }
