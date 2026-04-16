@@ -41,6 +41,17 @@ export class OrganizationInvitationRepository implements IOrganizationInvitation
     return rows.map((row) => OrganizationInvitationMapper.toEntity(row))
   }
 
+  async findPendingByEmail(email: string): Promise<OrganizationInvitation[]> {
+    const rows = await this.db
+      .table('organization_invitations')
+      .where('email', '=', email.toLowerCase())
+      .where('status', '=', 'pending')
+      .where('expires_at', '>', new Date().toISOString())
+      .orderBy('created_at', 'DESC')
+      .select()
+    return rows.map((row) => OrganizationInvitationMapper.toEntity(row))
+  }
+
   async deleteExpired(): Promise<void> {
     await this.db
       .table('organization_invitations')

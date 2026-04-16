@@ -8,5 +8,6 @@ export interface IOrganizationInvitationRepository {
   findByTokenHash(tokenHash: string): Promise<OrganizationInvitation | null>
   findByOrgId(orgId: string): Promise<OrganizationInvitation[]>
   deleteExpired(): Promise<void>
+  findPendingByEmail(email: string): Promise<OrganizationInvitation[]>
   withTransaction(tx: IDatabaseAccess): IOrganizationInvitationRepository
 }
