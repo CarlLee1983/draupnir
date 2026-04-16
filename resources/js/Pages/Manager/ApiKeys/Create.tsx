@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 
 interface Assignee {
   userId: string
+  email: string
 }
 interface Props {
   assignees: Assignee[]
@@ -72,7 +73,7 @@ export default function ManagerApiKeyCreate({ assignees }: Props) {
                   <option value="">未指派</option>
                   {assignees.map((a) => (
                     <option key={a.userId} value={a.userId}>
-                      {a.userId}
+                      {a.email || a.userId}
                     </option>
                   ))}
                 </select>

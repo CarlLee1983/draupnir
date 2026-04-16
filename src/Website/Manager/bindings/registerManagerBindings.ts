@@ -12,6 +12,7 @@ import type { ListContractsService } from '@/Modules/Contract/Application/Servic
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { InviteMemberService } from '@/Modules/Organization/Application/Services/InviteMemberService'
+import type { ListInvitationsService } from '@/Modules/Organization/Application/Services/ListInvitationsService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { RemoveMemberService } from '@/Modules/Organization/Application/Services/RemoveMemberService'
 import type { UpdateOrganizationService } from '@/Modules/Organization/Application/Services/UpdateOrganizationService'
@@ -61,6 +62,7 @@ export function registerManagerBindings(container: IContainer): void {
       c.make('removeMemberService') as RemoveMemberService,
       c.make('listApiKeysService') as ListApiKeysService,
       c.make('getUserMembershipService') as GetUserMembershipService,
+      c.make('listInvitationsService') as ListInvitationsService,
     )
   })
 

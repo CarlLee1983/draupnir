@@ -42,9 +42,12 @@ export class ManagerApiKeyCreatePage {
     if ('redirect' in r) return r.redirect
     const members = await this.listMembersService.execute(r.orgId, auth.userId, auth.role)
     const assignees = members.success
-      ? ((members.data?.members ?? []) as Array<{ userId: string; role: string }>)
+      ? ((members.data?.members ?? []) as Array<{ userId: string; role: string; email?: string }>)
           .filter((m) => m.role === 'member')
-          .map((m) => ({ userId: m.userId }))
+          .map((m) => ({
+            userId: m.userId,
+            email: typeof m.email === 'string' ? m.email : '',
+          }))
       : []
     return this.inertia.render(ctx, 'Manager/ApiKeys/Create', {
       orgId: r.orgId,

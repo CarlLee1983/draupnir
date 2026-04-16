@@ -17,6 +17,7 @@ import { OrganizationRepository } from '../Infrastructure/Repositories/Organizat
 
 describe('InviteMemberService', () => {
   let inviteService: InviteMemberService
+  let invitationRepo: OrganizationInvitationRepository
   let orgId: string
   let managerId: string
 
@@ -26,7 +27,7 @@ describe('InviteMemberService', () => {
     const authRepo = new AuthRepository(db)
     const orgRepo = new OrganizationRepository(db)
     const memberRepo = new OrganizationMemberRepository(db)
-    const invitationRepo = new OrganizationInvitationRepository(db)
+    invitationRepo = new OrganizationInvitationRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
 
     const createOrgService = new CreateOrganizationService(
@@ -75,5 +76,20 @@ describe('InviteMemberService', () => {
   it('空的 email 應回傳錯誤', async () => {
     const result = await inviteService.execute(orgId, managerId, 'user', { email: '' })
     expect(result.success).toBe(false)
+  })
+
+  it('同一 email 再次邀請時，舊的 pending 邀請應被取消，僅保留一筆有效 pending', async () => {
+    const email = 'repeat@example.com'
+    const first = await inviteService.execute(orgId, managerId, 'user', { email })
+    expect(first.success).toBe(true)
+    const second = await inviteService.execute(orgId, managerId, 'user', { email: `  ${email.toUpperCase()}  ` })
+    expect(second.success).toBe(true)
+
+    const all = await invitationRepo.findByOrgId(orgId)
+    const forEmail = all.filter((i) => i.email === email.toLowerCase())
+    const pending = forEmail.filter((i) => i.status.isPending())
+    expect(pending).toHaveLength(1)
+    const cancelled = forEmail.filter((i) => i.status.getValue() === 'cancelled')
+    expect(cancelled.length).toBeGreaterThanOrEqual(1)
   })
 })

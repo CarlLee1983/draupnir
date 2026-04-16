@@ -85,6 +85,7 @@ export class OrganizationServiceProvider extends ModuleServiceProvider implement
     container.bind('listMembersService', (c: IContainer) => new ListMembersService(
       c.make('organizationMemberRepository') as IOrganizationMemberRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+      c.make('authRepository') as IAuthRepository,
     ))
     container.bind('changeOrgMemberRoleService', (c: IContainer) => new ChangeOrgMemberRoleService(
       c.make('organizationMemberRepository') as IOrganizationMemberRepository,

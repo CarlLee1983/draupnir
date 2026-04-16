@@ -90,8 +90,8 @@ describe('ManagerApiKeysPage', () => {
           message: 'OK',
           data: {
             members: [
-              { userId: 'u-2', role: 'member', joinedAt: '2026-01-01' },
-              { userId: 'mgr-1', role: 'manager', joinedAt: '2026-01-01' },
+              { userId: 'u-2', role: 'member', email: 'member@example.com', joinedAt: '2026-01-01' },
+              { userId: 'mgr-1', role: 'manager', email: 'mgr@example.com', joinedAt: '2026-01-01' },
             ],
           },
         }),
@@ -110,8 +110,9 @@ describe('ManagerApiKeysPage', () => {
     await page.handle(makeCtx())
     expect(captured.lastCall?.component).toBe('Manager/ApiKeys/Index')
     expect((captured.lastCall?.props as any).keys.length).toBe(1)
-    const assignees = (captured.lastCall?.props as any).assignees as Array<{ userId: string }>
+    const assignees = (captured.lastCall?.props as any).assignees as Array<{ userId: string; email: string }>
     expect(assignees.map((a) => a.userId)).toEqual(['u-2'])
+    expect(assignees[0].email).toBe('member@example.com')
   })
 
   test('assign: POST 呼叫 AssignApiKeyService，null 代表取消指派', async () => {

@@ -45,10 +45,18 @@ export class InviteMemberService {
         return { success: false, message: 'Organization is suspended', error: 'ORG_SUSPENDED' }
       }
 
+      const emailNorm = request.email.trim().toLowerCase()
+      const existingInvites = await this.invitationRepository.findByOrgId(orgId)
+      for (const inv of existingInvites) {
+        if (inv.email.trim().toLowerCase() !== emailNorm) continue
+        if (!inv.status.isPending()) continue
+        await this.invitationRepository.update(inv.cancel())
+      }
+
       const role = new OrgMemberRole(request.role ?? 'member')
       const invitation = await OrganizationInvitation.create(
         orgId,
-        request.email,
+        emailNorm,
         role,
         invitedByUserId,
       )

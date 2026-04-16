@@ -61,6 +61,7 @@ export class AdminOrganizationDetailPage {
 
     const members = rawMembers.map((m) => ({
       userId: m.userId as string,
+      email: typeof m.email === 'string' ? m.email : '',
       role: String(m.role ?? ''),
       joinedAt: m.joinedAt as string,
     }))

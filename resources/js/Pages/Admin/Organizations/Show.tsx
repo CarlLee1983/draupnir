@@ -11,6 +11,7 @@ import { useTranslation } from '@/lib/i18n'
 
 interface MemberRow {
   userId: string
+  email: string
   role: string
   joinedAt: string
 }
@@ -98,7 +99,7 @@ export default function OrganizationShow({ organization, members, error, contrac
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>User ID</TableHead>
+                    <TableHead>{t('ui.common.email')}</TableHead>
                     <TableHead>{t('ui.common.role')}</TableHead>
                     <TableHead>{t('ui.common.joinedAt')}</TableHead>
                   </TableRow>
@@ -106,7 +107,9 @@ export default function OrganizationShow({ organization, members, error, contrac
                 <TableBody>
                   {members.map((m) => (
                     <TableRow key={m.userId}>
-                      <TableCell><code className="text-xs">{m.userId}</code></TableCell>
+                      <TableCell>
+                        <span className="text-sm">{m.email || m.userId}</span>
+                      </TableCell>
                       <TableCell><Badge variant="outline">{m.role}</Badge></TableCell>
                       <TableCell className="text-sm text-muted-foreground">{formatDateTime(m.joinedAt)}</TableCell>
                     </TableRow>

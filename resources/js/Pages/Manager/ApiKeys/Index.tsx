@@ -12,6 +12,7 @@ interface KeyRow {
 }
 interface Assignee {
   userId: string
+  email: string
 }
 interface Props {
   keys: KeyRow[]
@@ -69,7 +70,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                         <option value="">未指派</option>
                         {assignees.map((a) => (
                           <option key={a.userId} value={a.userId}>
-                            {a.userId}
+                            {a.email || a.userId}
                           </option>
                         ))}
                       </select>

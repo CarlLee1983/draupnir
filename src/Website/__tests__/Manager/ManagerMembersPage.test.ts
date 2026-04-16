@@ -72,8 +72,20 @@ describe('ManagerMembersPage', () => {
             message: 'OK',
             data: {
               members: [
-                { id: 'm1', userId: 'u-1', role: 'member', joinedAt: '2026-01-01T00:00:00Z' },
-                { id: 'm2', userId: 'u-2', role: 'member', joinedAt: '2026-01-02T00:00:00Z' },
+                {
+                  id: 'm1',
+                  userId: 'u-1',
+                  email: 'one@example.com',
+                  role: 'member',
+                  joinedAt: '2026-01-01T00:00:00Z',
+                },
+                {
+                  id: 'm2',
+                  userId: 'u-2',
+                  email: 'two@example.com',
+                  role: 'member',
+                  joinedAt: '2026-01-02T00:00:00Z',
+                },
               ],
             },
           }),
@@ -89,6 +101,26 @@ describe('ManagerMembersPage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({
+            success: true,
+            data: {
+              invitations: [
+                {
+                  id: 'inv-1',
+                  organizationId: 'org-A',
+                  email: 'pending@example.com',
+                  role: 'member',
+                  status: 'pending',
+                  expiresAt: new Date(Date.now() + 86400000).toISOString(),
+                  createdAt: '2026-01-01T00:00:00.000Z',
+                },
+              ],
+            },
+          }),
+        ),
+      } as any,
     )
     await page.handle(makeCtx())
     expect(captured.lastCall?.component).toBe('Manager/Members/Index')
@@ -98,6 +130,11 @@ describe('ManagerMembersPage', () => {
     }>
     expect(members[0].assignedKeys).toEqual(['Prod'])
     expect(members[1].assignedKeys).toEqual([])
+    expect(members[0].email).toBe('one@example.com')
+    const pending = (captured.lastCall?.props as { pendingInvitations: { email: string }[] })
+      .pendingInvitations
+    expect(pending).toHaveLength(1)
+    expect(pending[0].email).toBe('pending@example.com')
   })
 
   test('invite: 成功後 redirect /manager/members', async () => {
@@ -130,10 +167,32 @@ describe('ManagerMembersPage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      { execute: mock(() => Promise.resolve({ success: true, data: { invitations: [] } })) } as any,
     )
     const res = await page.invite(ctx)
     expect(res.headers.get('location')).toBe('/manager/members')
     expect(inviteSvc.execute).toHaveBeenCalled()
+  })
+
+  test('remove: 不可移除自己時不呼叫 RemoveMemberService', async () => {
+    const { inertia } = mkInertia()
+    const removeSvc = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
+    const ctx = makeCtx({
+      getParam: (k: string) => (k === 'userId' ? 'mgr-1' : undefined),
+    })
+    const page = new ManagerMembersPage(
+      inertia,
+      { execute: mock() } as any,
+      { execute: mock() } as any,
+      removeSvc as any,
+      { execute: mock(() => Promise.resolve({ success: true, data: { keys: [], meta: { total: 0, page: 1, limit: 1000, totalPages: 0 } } })) } as any,
+      {
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      } as any,
+      { execute: mock(() => Promise.resolve({ success: true, data: { invitations: [] } })) } as any,
+    )
+    await page.remove(ctx)
+    expect((removeSvc.execute as any).mock.calls.length).toBe(0)
   })
 
   test('remove: 取 userId 參數並呼叫 RemoveMemberService', async () => {
@@ -151,6 +210,7 @@ describe('ManagerMembersPage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      { execute: mock(() => Promise.resolve({ success: true, data: { invitations: [] } })) } as any,
     )
     const res = await page.remove(ctx)
     expect(res.headers.get('location')).toBe('/manager/members')

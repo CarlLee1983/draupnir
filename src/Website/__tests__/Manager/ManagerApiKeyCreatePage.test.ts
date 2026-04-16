@@ -67,7 +67,7 @@ describe('ManagerApiKeyCreatePage', () => {
             success: true,
             message: 'OK',
             data: {
-              members: [{ userId: 'u-1', role: 'member', joinedAt: '2026-01-01' }],
+              members: [{ userId: 'u-1', role: 'member', email: 'm@example.com', joinedAt: '2026-01-01' }],
             },
           }),
         ),
