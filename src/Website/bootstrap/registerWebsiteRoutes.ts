@@ -8,6 +8,7 @@ import { registerAdminRoutes } from '@/Website/Admin/routes/registerAdminRoutes'
 import { registerAuthRoutes } from '@/Website/Auth/routes/registerAuthRoutes'
 import { useBuiltFrontendAssets } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import { joinPath, normalizePath } from '@/Website/Http/Routing/routePath'
+import { registerManagerRoutes } from '@/Website/Manager/routes/registerManagerRoutes'
 import { registerMemberRoutes } from '@/Website/Member/routes/registerMemberRoutes'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -60,10 +61,11 @@ function registerStaticAssets(router: Pick<IModuleRouter, 'get'>): void {
   )
 }
 
-/** Order matters: auth → admin → member → static assets. */
+/** Order matters: auth → admin → manager → member → static assets. */
 const WEBSITE_ROUTE_REGISTRATIONS: readonly WebsiteRouteRegistration[] = [
   { register: registerAuthRoutes },
   { register: registerAdminRoutes },
+  { register: registerManagerRoutes },
   { register: registerMemberRoutes },
   { register: (r) => registerStaticAssets(r) },
 ]

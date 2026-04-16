@@ -4,6 +4,7 @@ import {
   PAGE_CONTAINER_KEYS,
   getInertiaServiceSingleton,
 } from '@/Website/Http/Inertia/createInertiaRequestHandler'
+import { registerManagerBindings } from '@/Website/Manager/bindings/registerManagerBindings'
 import { registerMemberBindings } from '@/Website/Member/bindings/registerMemberBindings'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 
@@ -20,5 +21,6 @@ export function registerWebsiteBindings(container: IContainer): void {
   container.singleton(inertiaService, () => getInertiaServiceSingleton())
   registerAuthBindings(container)
   registerAdminBindings(container)
+  registerManagerBindings(container)
   registerMemberBindings(container)
 }
