@@ -1,5 +1,5 @@
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
@@ -14,7 +14,7 @@ export class MemberApiKeysPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly listService: ListApiKeysService,
-    private readonly memberRepository: IOrganizationMemberRepository,
+    private readonly membershipService: GetUserMembershipService,
   ) {}
 
   /**
@@ -28,8 +28,8 @@ export class MemberApiKeysPage {
 
     let orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
     if (!orgId) {
-      const membership = await this.memberRepository.findByUserId(auth.userId)
-      orgId = membership?.organizationId ?? null
+      const membership = await this.membershipService.execute(auth.userId)
+      orgId = membership?.orgId ?? null
     }
     if (!orgId) {
       return this.inertia.render(ctx, 'Member/ApiKeys/Index', {

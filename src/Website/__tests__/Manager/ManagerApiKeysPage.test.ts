@@ -104,7 +104,7 @@ describe('ManagerApiKeysPage', () => {
       { execute: mock() } as any,
       { execute: mock() } as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     await page.handle(makeCtx())
@@ -139,7 +139,7 @@ describe('ManagerApiKeysPage', () => {
       assign as any,
       { execute: mock() } as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     const res = await page.assign(ctx)
@@ -161,7 +161,7 @@ describe('ManagerApiKeysPage', () => {
       { execute: mock() } as any,
       revoke as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     const res = await page.revoke(ctx)

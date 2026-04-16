@@ -1,8 +1,8 @@
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { InviteMemberService } from '@/Modules/Organization/Application/Services/InviteMemberService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { RemoveMemberService } from '@/Modules/Organization/Application/Services/RemoveMemberService'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -26,17 +26,17 @@ export class ManagerMembersPage {
     private readonly listMembersService: ListMembersService,
     private readonly inviteMemberService: InviteMemberService,
     private readonly removeMemberService: RemoveMemberService,
-    private readonly apiKeyRepository: IApiKeyRepository,
-    private readonly memberRepository: IOrganizationMemberRepository,
+    private readonly listApiKeysService: ListApiKeysService,
+    private readonly membershipService: GetUserMembershipService,
   ) {}
 
   private async resolveOrgId(
     ctx: IHttpContext,
   ): Promise<{ orgId: string } | { redirect: Response }> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
-    const membership = await this.memberRepository.findByUserId(auth.userId)
+    const membership = await this.membershipService.execute(auth.userId)
     if (!membership) return { redirect: ctx.redirect('/member/dashboard') }
-    return { orgId: membership.organizationId }
+    return { orgId: membership.orgId }
   }
 
   async handle(ctx: IHttpContext): Promise<Response> {
@@ -45,17 +45,20 @@ export class ManagerMembersPage {
     if ('redirect' in resolve) return resolve.redirect
     const { orgId } = resolve
 
-    const [listResult, keys] = await Promise.all([
+    const [listResult, keysResult] = await Promise.all([
       this.listMembersService.execute(orgId, auth.userId, auth.role),
-      this.apiKeyRepository.findByOrgId(orgId),
+      this.listApiKeysService.execute(orgId, auth.userId, auth.role, 1, 1000),
     ])
 
     const assignedByUser = new Map<string, string[]>()
-    for (const k of keys) {
-      if (k.assignedMemberId) {
-        const arr = assignedByUser.get(k.assignedMemberId) ?? []
-        arr.push(k.label)
-        assignedByUser.set(k.assignedMemberId, arr)
+    if (keysResult.success && keysResult.data?.keys) {
+      for (const k of keysResult.data.keys as Array<Record<string, unknown>>) {
+        const assignedMemberId = k.assignedMemberId as string | null | undefined
+        if (assignedMemberId) {
+          const arr = assignedByUser.get(assignedMemberId) ?? []
+          arr.push(k.label as string)
+          assignedByUser.set(assignedMemberId, arr)
+        }
       }
     }
 

@@ -101,8 +101,8 @@ describe('MemberApiKeysPage', () => {
       ),
     }
 
-    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
-    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMemberRepository as any)
+    const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
+    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall).not.toBe(null)
@@ -119,8 +119,8 @@ describe('MemberApiKeysPage', () => {
 
     const mockListService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
 
-    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
-    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMemberRepository as any)
+    const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
+    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.component).toBe('Member/ApiKeys/Index')
@@ -144,8 +144,8 @@ describe('MemberApiKeysPage', () => {
       ),
     }
 
-    const mockMemberRepository = { findByUserId: mock(() => Promise.resolve(null)) }
-    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMemberRepository as any)
+    const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
+    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.apiKeys.loadFailed' })
@@ -162,10 +162,10 @@ describe('MemberApiKeysPage', () => {
         }),
       ),
     }
-    const mockMemberRepository = {
-      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+    const mockMembershipService = {
+      execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
     }
-    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMemberRepository as any)
+    const page = new MemberApiKeysPage(inertia, mockListService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     const args = (mockListService.execute as any).mock.calls[0]

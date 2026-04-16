@@ -68,7 +68,7 @@ describe('ManagerOrganizationPage', () => {
       { execute: mock() } as any,
       { execute: mock() } as any,
       { execute: mock() } as any,
-      { findByUserId: mock(() => Promise.resolve(null)) } as any,
+      { execute: mock(() => Promise.resolve(null)) } as any,
     )
     const res = await page.handle(makeCtx())
     expect(res.status).toBe(302)
@@ -99,7 +99,7 @@ describe('ManagerOrganizationPage', () => {
       } as any,
       { execute: mock() } as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     await page.handle(makeCtx())
@@ -116,18 +116,7 @@ describe('ManagerOrganizationPage', () => {
       ),
     }
     const ctx = makeCtx({
-      get: <T>(k: string) => {
-        if (k === 'validated') return { name: 'NewName', description: 'nd' } as T
-        if (k === 'auth')
-          return {
-            userId: 'mgr-1',
-            email: 'm',
-            role: 'manager',
-            permissions: [],
-            tokenType: 'access',
-          } as T
-        return undefined
-      },
+      getJsonBody: async <T>() => ({ name: 'NewName', description: 'nd' }) as T,
     })
     const page = new ManagerOrganizationPage(
       inertia,
@@ -135,7 +124,7 @@ describe('ManagerOrganizationPage', () => {
       { execute: mock() } as any,
       updateSvc as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     const res = await page.update(ctx)

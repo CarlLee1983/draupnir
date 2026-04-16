@@ -90,19 +90,19 @@ describe('AdminOrganizationDetailPage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: { members: [] } })),
     }
 
-    const mockContractRepo = {
-      findActiveByTargetId: mock(() => Promise.resolve(null)),
+    const mockContractQuotaService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { contractQuota: 0, contractId: null } })),
     }
-    const mockKeyRepo = {
-      findActiveByOrgId: mock(() => Promise.resolve([])),
+    const mockSumAllocatedService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { totalAllocated: 0 } })),
     }
 
     const page = new AdminOrganizationDetailPage(
       inertia,
       mockGetOrgService as any,
       mockListMembersService as any,
-      mockContractRepo as any,
-      mockKeyRepo as any,
+      mockContractQuotaService as any,
+      mockSumAllocatedService as any,
     )
     const ctx = createAdminContext()
     const ctxWithId = {
@@ -120,19 +120,19 @@ describe('AdminOrganizationDetailPage', () => {
     const { inertia, captured } = createMockInertia()
     const mockGetOrgService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockListMembersService = { execute: mock(() => Promise.resolve({ success: true })) }
-    const mockContractRepo = {
-      findActiveByTargetId: mock(() => Promise.resolve(null)),
+    const mockContractQuotaService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { contractQuota: 0, contractId: null } })),
     }
-    const mockKeyRepo = {
-      findActiveByOrgId: mock(() => Promise.resolve([])),
+    const mockSumAllocatedService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { totalAllocated: 0 } })),
     }
 
     const page = new AdminOrganizationDetailPage(
       inertia,
       mockGetOrgService as any,
       mockListMembersService as any,
-      mockContractRepo as any,
-      mockKeyRepo as any,
+      mockContractQuotaService as any,
+      mockSumAllocatedService as any,
     )
     const ctx = createAdminContext()
     await page.handle(ctx)

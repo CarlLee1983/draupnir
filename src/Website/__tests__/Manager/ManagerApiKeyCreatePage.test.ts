@@ -73,7 +73,7 @@ describe('ManagerApiKeyCreatePage', () => {
         ),
       } as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     await page.handle(makeCtx())
@@ -105,7 +105,7 @@ describe('ManagerApiKeyCreatePage', () => {
         ),
       } as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     const res = await page.store(makeCtx(body))
@@ -133,7 +133,7 @@ describe('ManagerApiKeyCreatePage', () => {
         ),
       } as any,
       {
-        findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A' })),
+        execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
     )
     await page.store(makeCtx(body))

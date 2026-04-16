@@ -63,30 +63,40 @@ describe('ManagerDashboardPage', () => {
   test('無 membership → 導向 /member/dashboard', async () => {
     const ctx = makeCtx()
     const { inertia } = mkInertia()
-    const memberRepo = { findByUserId: mock(() => Promise.resolve(null)) }
+    const membershipService = { execute: mock(() => Promise.resolve(null)) }
     const page = new ManagerDashboardPage(
       inertia,
       { execute: mock() } as any,
       { execute: mock() } as any,
-      memberRepo as any,
+      { execute: mock() } as any,
+      membershipService as any,
     )
     const res = await page.handle(ctx)
     expect(res.status).toBe(302)
     expect(res.headers.get('location')).toBe('/member/dashboard')
   })
 
-  test('有 membership → 渲染 Manager/Dashboard/Index 並注入 orgId + balance + keys', async () => {
+  test('有 membership → 渲染 Manager/Dashboard/Index 並注入 orgId + 合約配額 + 已配發 + keys', async () => {
     const ctx = makeCtx()
     const { inertia, captured } = mkInertia()
-    const memberRepo = {
-      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-A', userId: 'mgr-1' })),
+    const membershipService = {
+      execute: mock(() => Promise.resolve({ orgId: 'org-A', userId: 'mgr-1' })),
     }
-    const balance = {
+    const orgQuota = {
       execute: mock(() =>
         Promise.resolve({
           success: true,
           message: 'Success',
-          data: { balance: '100', lowBalanceThreshold: '10', status: 'ok' },
+          data: { contractQuota: 500, contractId: 'ctr-1' },
+        }),
+      ),
+    }
+    const sumAllocated = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          message: 'OK',
+          data: { totalAllocated: 120 },
         }),
       ),
     }
@@ -110,11 +120,18 @@ describe('ManagerDashboardPage', () => {
         }),
       ),
     }
-    const page = new ManagerDashboardPage(inertia, balance as any, listKeys as any, memberRepo as any)
+    const page = new ManagerDashboardPage(
+      inertia,
+      orgQuota as any,
+      sumAllocated as any,
+      listKeys as any,
+      membershipService as any,
+    )
     await page.handle(ctx)
     expect(captured.lastCall?.component).toBe('Manager/Dashboard/Index')
     expect((captured.lastCall?.props as any).orgId).toBe('org-A')
-    expect((captured.lastCall?.props as any).balance?.balance).toBe('100')
+    expect((captured.lastCall?.props as any).contractQuota).toBe(500)
+    expect((captured.lastCall?.props as any).totalAllocated).toBe(120)
     expect((captured.lastCall?.props as any).keys?.length).toBe(1)
   })
 })

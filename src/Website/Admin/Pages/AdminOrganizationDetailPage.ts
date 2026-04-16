@@ -1,5 +1,5 @@
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
+import type { SumQuotaAllocatedForOrgService } from '@/Modules/ApiKey/Application/Services/SumQuotaAllocatedForOrgService'
+import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -14,8 +14,8 @@ export class AdminOrganizationDetailPage {
     private readonly inertia: InertiaService,
     private readonly getOrgService: GetOrganizationService,
     private readonly listMembersService: ListMembersService,
-    private readonly contractRepo: IContractRepository,
-    private readonly keyRepo: IApiKeyRepository,
+    private readonly contractQuotaService: GetActiveOrgContractQuotaService,
+    private readonly sumAllocatedService: SumQuotaAllocatedForOrgService,
   ) {}
 
   /**
@@ -34,11 +34,11 @@ export class AdminOrganizationDetailPage {
       })
     }
 
-    const [orgResult, membersResult, activeContract, activeKeys] = await Promise.all([
+    const [orgResult, membersResult, quotaResult, allocatedResult] = await Promise.all([
       this.getOrgService.execute(orgId, auth.userId, auth.role),
       this.listMembersService.execute(orgId, auth.userId, auth.role),
-      this.contractRepo.findActiveByTargetId(orgId),
-      this.keyRepo.findActiveByOrgId(orgId),
+      this.contractQuotaService.execute(orgId, auth.userId, auth.role),
+      this.sumAllocatedService.execute(orgId, auth.userId, auth.role),
     ])
 
     const orgData = orgResult.success
@@ -65,8 +65,9 @@ export class AdminOrganizationDetailPage {
       joinedAt: m.joinedAt as string,
     }))
 
-    const contractCap = activeContract?.terms.creditQuota ?? null
-    const sumAllocated = activeKeys.reduce((sum, k) => sum + k.quotaAllocated, 0)
+    const contractCap = quotaResult.success ? (quotaResult.data?.contractQuota ?? null) : null
+    const contractId = quotaResult.success ? (quotaResult.data?.contractId ?? null) : null
+    const sumAllocated = allocatedResult.success ? (allocatedResult.data?.totalAllocated ?? 0) : 0
     const unallocated = contractCap !== null ? contractCap - sumAllocated : null
 
     return this.inertia.render(ctx, 'Admin/Organizations/Show', {
@@ -75,7 +76,7 @@ export class AdminOrganizationDetailPage {
       error: orgResult.success ? null : { key: 'admin.organizations.loadFailed' },
       contractSummary: contractCap !== null
         ? {
-            contractId: activeContract!.id,
+            contractId,
             contractCap,
             sumAllocated,
             unallocated,

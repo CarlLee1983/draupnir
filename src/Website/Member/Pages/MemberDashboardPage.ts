@@ -1,5 +1,5 @@
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
@@ -14,7 +14,7 @@ export class MemberDashboardPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly balanceService: GetBalanceService,
-    private readonly memberRepository: IOrganizationMemberRepository,
+    private readonly membershipService: GetUserMembershipService,
   ) {}
 
   /**
@@ -26,7 +26,7 @@ export class MemberDashboardPage {
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
-    const membership = await this.memberRepository.findByUserId(auth.userId)
+    const membership = await this.membershipService.execute(auth.userId)
 
     if (!membership) {
       return this.inertia.render(ctx, 'Member/Dashboard/Index', {
@@ -37,7 +37,7 @@ export class MemberDashboardPage {
       })
     }
 
-    const orgId = membership.organizationId
+    const orgId = membership.orgId
     const balanceResult = await this.balanceService.execute(orgId, auth.userId, auth.role)
 
     return this.inertia.render(ctx, 'Member/Dashboard/Index', {

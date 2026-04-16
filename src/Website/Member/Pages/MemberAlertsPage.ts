@@ -3,11 +3,12 @@ import { toListDTO } from '@/Modules/Alerts/Application/DTOs/WebhookEndpointDTO'
 import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
 import type { GetBudgetService } from '@/Modules/Alerts/Application/Services/GetBudgetService'
 import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/Services/ListWebhookEndpointsService'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+
 /**
  * Page handler for member-area alerts.
  *
@@ -20,7 +21,7 @@ export class MemberAlertsPage {
     private readonly getBudgetService: GetBudgetService,
     private readonly listWebhookEndpointsService: ListWebhookEndpointsService,
     private readonly getAlertHistoryService: GetAlertHistoryService,
-    private readonly memberRepository: IOrganizationMemberRepository,
+    private readonly membershipService: GetUserMembershipService,
   ) {}
 
   /**
@@ -35,8 +36,8 @@ export class MemberAlertsPage {
     let orgId =
       currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
     if (!orgId) {
-      const membership = await this.memberRepository.findByUserId(auth.userId)
-      orgId = membership?.organizationId ?? null
+      const membership = await this.membershipService.execute(auth.userId)
+      orgId = membership?.orgId ?? null
     }
 
     if (!orgId) {

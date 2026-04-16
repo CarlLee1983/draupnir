@@ -82,11 +82,11 @@ describe('MemberDashboardPage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: { balance: 50 } })),
     }
 
-    const mockMemberRepo = {
-      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-123' })),
+    const mockMembershipService = {
+      execute: mock(() => Promise.resolve({ orgId: 'org-123' })),
     }
 
-    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall).not.toBe(null)
@@ -104,11 +104,11 @@ describe('MemberDashboardPage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: null })),
     }
 
-    const mockMemberRepo = {
-      findByUserId: mock(() => Promise.resolve(null)),
+    const mockMembershipService = {
+      execute: mock(() => Promise.resolve(null)),
     }
 
-    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
@@ -126,11 +126,11 @@ describe('MemberDashboardPage', () => {
       execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })),
     }
 
-    const mockMemberRepo = {
-      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-123' })),
+    const mockMembershipService = {
+      execute: mock(() => Promise.resolve({ orgId: 'org-123' })),
     }
 
-    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.dashboard.loadFailed' })
@@ -144,11 +144,11 @@ describe('MemberDashboardPage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: { balance: 0 } })),
     }
 
-    const mockMemberRepo = {
-      findByUserId: mock(() => Promise.resolve({ organizationId: 'org-456' })),
+    const mockMembershipService = {
+      execute: mock(() => Promise.resolve({ orgId: 'org-456' })),
     }
 
-    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMemberRepo as any)
+    const page = new MemberDashboardPage(inertia, mockBalanceService as any, mockMembershipService as any)
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.hasOrganization).toBe(true)

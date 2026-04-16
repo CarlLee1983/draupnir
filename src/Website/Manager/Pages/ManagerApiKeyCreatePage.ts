@@ -1,7 +1,7 @@
 import type { AssignApiKeyService } from '@/Modules/ApiKey/Application/Services/AssignApiKeyService'
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -24,16 +24,16 @@ export class ManagerApiKeyCreatePage {
     private readonly createApiKeyService: CreateApiKeyService,
     private readonly assignApiKeyService: AssignApiKeyService,
     private readonly listMembersService: ListMembersService,
-    private readonly memberRepository: IOrganizationMemberRepository,
+    private readonly membershipService: GetUserMembershipService,
   ) {}
 
   private async resolveOrgId(
     ctx: IHttpContext,
   ): Promise<{ orgId: string } | { redirect: Response }> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
-    const m = await this.memberRepository.findByUserId(auth.userId)
-    if (!m) return { redirect: ctx.redirect('/member/dashboard') }
-    return { orgId: m.organizationId }
+    const membership = await this.membershipService.execute(auth.userId)
+    if (!membership) return { redirect: ctx.redirect('/member/dashboard') }
+    return { orgId: membership.orgId }
   }
 
   async handle(ctx: IHttpContext): Promise<Response> {

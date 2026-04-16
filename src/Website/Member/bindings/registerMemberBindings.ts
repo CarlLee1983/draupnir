@@ -8,7 +8,7 @@ import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/S
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
-import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
@@ -41,7 +41,7 @@ export function registerMemberBindings(container: IContainer): void {
     return new MemberDashboardPage(
       c.make(i) as InertiaService,
       c.make('getBalanceService') as GetBalanceService,
-      c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+      c.make('getUserMembershipService') as GetUserMembershipService,
     )
   })
 
@@ -51,7 +51,7 @@ export function registerMemberBindings(container: IContainer): void {
       new MemberApiKeysPage(
         c.make(i) as InertiaService,
         c.make('listApiKeysService') as ListApiKeysService,
-        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('getUserMembershipService') as GetUserMembershipService,
       ),
   )
 
@@ -61,14 +61,14 @@ export function registerMemberBindings(container: IContainer): void {
       new MemberUsagePage(
         c.make(i) as InertiaService,
         c.make('getUsageChartService') as GetUsageChartService,
-        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('getUserMembershipService') as GetUserMembershipService,
       ),
   )
 
   container.singleton(k.costBreakdown, (c) => {
     return new MemberCostBreakdownPage(
       c.make(i) as InertiaService,
-      c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+      c.make('getUserMembershipService') as GetUserMembershipService,
     )
   })
 
@@ -78,7 +78,7 @@ export function registerMemberBindings(container: IContainer): void {
       new MemberContractsPage(
         c.make(i) as InertiaService,
         c.make('listContractsService') as ListContractsService,
-        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('getUserMembershipService') as GetUserMembershipService,
       ),
   )
 
@@ -100,7 +100,7 @@ export function registerMemberBindings(container: IContainer): void {
         c.make('getBudgetService') as GetBudgetService,
         c.make('listWebhookEndpointsService') as ListWebhookEndpointsService,
         c.make('getAlertHistoryService') as GetAlertHistoryService,
-        c.make('organizationMemberRepository') as IOrganizationMemberRepository,
+        c.make('getUserMembershipService') as GetUserMembershipService,
       ),
   )
 }
