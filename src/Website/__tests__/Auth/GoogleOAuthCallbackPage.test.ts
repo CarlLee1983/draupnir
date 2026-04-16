@@ -68,6 +68,20 @@ describe('GoogleOAuthCallbackPage', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/admin/dashboard', 302)
   })
 
+  test('should redirect to manager dashboard when role is manager', async () => {
+    const exchange = mock(() =>
+      Promise.resolve({ success: true, jwt: 'jwt-token', userId: 'manager-789', role: 'manager' }),
+    )
+    const oauthService = { exchange } as unknown as GoogleOAuthService
+    const page = new GoogleOAuthCallbackPage(oauthService)
+    const ctx = createOAuthContext({})
+
+    await page.handle(ctx)
+
+    expect(exchange).toHaveBeenCalledWith('test-code')
+    expect(ctx.redirect).toHaveBeenCalledWith('/manager/dashboard', 302)
+  })
+
   test('should return error on CSRF validation failure', async () => {
     const exchange = mock(() => Promise.resolve({ success: true }))
     const oauthService = { exchange } as unknown as GoogleOAuthService
