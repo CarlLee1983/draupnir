@@ -21,6 +21,7 @@ export class ApiKeyPresenter {
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
       quotaAllocated: entity.quotaAllocated,
+      assignedMemberId: entity.assignedMemberId,
     }
   }
 }
