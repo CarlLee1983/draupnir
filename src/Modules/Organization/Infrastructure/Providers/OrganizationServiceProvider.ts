@@ -4,6 +4,7 @@ import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -147,6 +148,7 @@ export class OrganizationServiceProvider extends ModuleServiceProvider implement
       c.make('acceptInvitationByIdService') as AcceptInvitationByIdService,
       c.make('declineInvitationService') as DeclineInvitationService,
       c.make('jwtTokenService') as IJwtTokenService,
+      c.make('authTokenRepository') as IAuthTokenRepository,
     ))
   }
 

@@ -1,4 +1,6 @@
 import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
+import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -122,6 +124,7 @@ export class OrganizationController {
   private acceptInvitationByIdService: AcceptInvitationByIdService,
   private declineInvitationService: DeclineInvitationService,
   private jwtTokenService: IJwtTokenService,
+  private authTokenRepository: IAuthTokenRepository,
   ) {}
 
   async create(ctx: IHttpContext): Promise<Response> {
@@ -145,7 +148,19 @@ export class OrganizationController {
         role: 'manager',
         permissions: [],
       })
-      ctx.setCookie('auth_token', accessToken.getValue(), {
+      const tokenStr = accessToken.getValue()
+      // AuthMiddleware.isRevoked fails closed：token hash 必須存在 auth_tokens 才不會被視為 revoked。
+      // 與 LoginUserService.execute 保持一致（只 rotate access，不 rotate refresh）。
+      const tokenHash = await sha256(tokenStr)
+      await this.authTokenRepository.save({
+        id: crypto.randomUUID(),
+        userId: auth.userId,
+        tokenHash,
+        type: 'access',
+        expiresAt: accessToken.getExpiresAt(),
+        createdAt: new Date(),
+      })
+      ctx.setCookie('auth_token', tokenStr, {
         httpOnly: true,
         sameSite: 'Lax',
         path: '/',

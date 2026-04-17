@@ -4,6 +4,10 @@ import type {
   IJwtTokenService,
   TokenSignPayload,
 } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
+import type {
+  IAuthTokenRepository,
+  TokenRecord,
+} from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import { AuthToken, TokenType } from '@/Modules/Auth/Domain/ValueObjects/AuthToken'
 import { OrganizationController } from '../../Presentation/Controllers/OrganizationController'
 
@@ -89,14 +93,32 @@ function makeJwtMock(tokenValue = 'new-access-token-abc') {
   return { jwt, signAccessToken, signRefreshToken }
 }
 
+function makeAuthTokenRepoMock() {
+  const save = mock(async (_record: TokenRecord) => {})
+  const repo: IAuthTokenRepository = {
+    save,
+    findByHash: mock(async () => null),
+    findByUserId: mock(async () => []),
+    findRevokedByUserId: mock(async () => []),
+    revoke: mock(async () => {}),
+    isRevoked: mock(async () => false),
+    revokeAllByUserId: mock(async () => {}),
+    cleanupExpired: mock(async () => {}),
+    delete: mock(async () => {}),
+  }
+  return { repo, save }
+}
+
 function makeController(overrides: {
   createOrgExecute?: ReturnType<typeof mock>
   jwt?: IJwtTokenService
+  authTokenRepo?: IAuthTokenRepository
 } = {}): {
   controller: OrganizationController
   createOrgExecute: ReturnType<typeof mock>
   signAccessToken: ReturnType<typeof mock>
   signRefreshToken: ReturnType<typeof mock>
+  saveTokenRecord: ReturnType<typeof mock>
 } {
   const createOrgExecute =
     overrides.createOrgExecute ??
@@ -106,6 +128,7 @@ function makeController(overrides: {
       data: { id: 'org-1', name: 'Acme', slug: 'acme' },
     }))
   const { jwt, signAccessToken, signRefreshToken } = makeJwtMock()
+  const { repo: authTokenRepo, save: saveTokenRecord } = makeAuthTokenRepoMock()
   const passThrough = new Proxy(
     {},
     {
@@ -130,8 +153,9 @@ function makeController(overrides: {
     passThrough as any,
     passThrough as any,
     overrides.jwt ?? jwt,
+    overrides.authTokenRepo ?? authTokenRepo,
   )
-  return { controller, createOrgExecute, signAccessToken, signRefreshToken }
+  return { controller, createOrgExecute, signAccessToken, signRefreshToken, saveTokenRecord }
 }
 
 describe('OrganizationController.create', () => {
@@ -140,7 +164,13 @@ describe('OrganizationController.create', () => {
   })
 
   test('success: signs new access token with role=manager, sets auth_token cookie, returns redirectTo', async () => {
-    const { controller, createOrgExecute, signAccessToken, signRefreshToken } = makeController()
+    const {
+      controller,
+      createOrgExecute,
+      signAccessToken,
+      signRefreshToken,
+      saveTokenRecord,
+    } = makeController()
     const { ctx, cookies, jsonCalls } = createMockContext({
       userId: 'u-1',
       email: 'member@example.com',
@@ -165,6 +195,15 @@ describe('OrganizationController.create', () => {
 
     // refresh_token NOT rotated
     expect(signRefreshToken).not.toHaveBeenCalled()
+
+    // Token hash persisted so AuthMiddleware.isRevoked (fails closed) returns false on next request
+    expect(saveTokenRecord).toHaveBeenCalledTimes(1)
+    const savedRecord = saveTokenRecord.mock.calls[0]?.[0] as TokenRecord | undefined
+    expect(savedRecord?.userId).toBe('u-1')
+    expect(savedRecord?.type).toBe('access')
+    // tokenHash must be a 64-char hex digest of the raw token (SHA-256)
+    expect(savedRecord?.tokenHash).toMatch(/^[0-9a-f]{64}$/)
+    expect(savedRecord?.expiresAt).toBeInstanceOf(Date)
 
     // Cookie: auth_token only, with correct options
     expect(cookies.length).toBe(1)
@@ -194,7 +233,9 @@ describe('OrganizationController.create', () => {
       message: 'Organization name is required',
       error: 'NAME_REQUIRED',
     }))
-    const { controller, signAccessToken, signRefreshToken } = makeController({ createOrgExecute })
+    const { controller, signAccessToken, signRefreshToken, saveTokenRecord } = makeController({
+      createOrgExecute,
+    })
     const { ctx, cookies, jsonCalls } = createMockContext({
       userId: 'u-1',
       email: 'member@example.com',
@@ -208,6 +249,7 @@ describe('OrganizationController.create', () => {
 
     expect(signAccessToken).not.toHaveBeenCalled()
     expect(signRefreshToken).not.toHaveBeenCalled()
+    expect(saveTokenRecord).not.toHaveBeenCalled()
     expect(cookies.length).toBe(0)
     expect(response.status).toBe(400)
     const body = jsonCalls[0]!.body as { success: boolean; error?: string; data?: unknown }
@@ -225,7 +267,7 @@ describe('OrganizationController.create', () => {
       message: 'User already has an organization',
       error: 'ALREADY_HAS_ORGANIZATION',
     }))
-    const { controller, signAccessToken } = makeController({ createOrgExecute })
+    const { controller, signAccessToken, saveTokenRecord } = makeController({ createOrgExecute })
     const { ctx, cookies, jsonCalls } = createMockContext({
       userId: 'u-1',
       email: 'member@example.com',
@@ -238,6 +280,7 @@ describe('OrganizationController.create', () => {
     const response = await controller.create(ctx)
 
     expect(signAccessToken).not.toHaveBeenCalled()
+    expect(saveTokenRecord).not.toHaveBeenCalled()
     expect(cookies.length).toBe(0)
     expect(response.status).toBe(400)
     const body = jsonCalls[0]!.body as { error?: string }
@@ -245,13 +288,14 @@ describe('OrganizationController.create', () => {
   })
 
   test('unauthorized: no auth context → 401, no service call, no token, no cookie', async () => {
-    const { controller, createOrgExecute, signAccessToken } = makeController()
+    const { controller, createOrgExecute, signAccessToken, saveTokenRecord } = makeController()
     const { ctx, cookies, jsonCalls } = createMockContext(/* no auth */)
 
     const response = await controller.create(ctx)
 
     expect(createOrgExecute).not.toHaveBeenCalled()
     expect(signAccessToken).not.toHaveBeenCalled()
+    expect(saveTokenRecord).not.toHaveBeenCalled()
     expect(cookies.length).toBe(0)
     expect(response.status).toBe(401)
     const body = jsonCalls[0]!.body as { success: boolean; error?: string }
