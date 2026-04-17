@@ -37,34 +37,34 @@ Project-specific guidance in [`skills/`](./skills/):
 | `gravito-signal` | Mail flows and email rendering |
 | `gravito-stasis` | Cache management and distributed locks |
 
-## Git Worktree 實作規範
+## Git worktree conventions
 
-本專案使用 `.worktree/` 資料夾存放所有 git worktree：
+This project keeps all Git worktrees under the `.worktree/` directory:
 
 ```
-.worktree/<branch-name>/   ← 每個 worktree 對應一個獨立分支
+.worktree/<branch-name>/   ← each worktree maps to its own branch
 ```
 
-**建立 worktree：**
+**Create a worktree:**
 ```bash
 git worktree add .worktree/<branch-name> -b <branch-name>
 ```
 
-**列出現有 worktree：**
+**List worktrees:**
 ```bash
 git worktree list
 ```
 
-**移除 worktree：**
+**Remove a worktree:**
 ```bash
 git worktree remove .worktree/<branch-name>
 ```
 
-**注意事項：**
-- `.worktree/` 已列入 `.gitignore`，不會提交至版本庫
-- 每個 worktree 共用同一個 `.git` 物件庫，切換零成本
-- 平行開發時，每個任務使用獨立 worktree，避免分支切換衝突
-- Agent 工具（`isolation: "worktree"`）預設使用此資料夾
+**Notes:**
+- `.worktree/` is in `.gitignore` and is not committed to the repository
+- Worktrees share the same `.git` object store; switching between them is cheap
+- For parallel work, use one worktree per task to avoid branch-switching conflicts
+- Agent tooling with `isolation: "worktree"` defaults to this directory
 
 <!-- GSD:workflow-start source:GSD defaults -->
 ## GSD Workflow Enforcement
