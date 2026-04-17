@@ -6,6 +6,7 @@ import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
 import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
 import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { CheckModuleAccessService } from '../../Application/Services/CheckModuleAccessService'
 import { EnsureCoreAppModulesService } from '../../Application/Services/EnsureCoreAppModulesService'
 import { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
@@ -40,6 +41,7 @@ export class AppModuleServiceProvider extends ModuleServiceProvider implements I
         c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
         c.make('llmGatewayClient') as ILLMGatewayClient,
         c.make('organizationRepository') as IOrganizationRepository,
+        getCurrentDatabaseAccess() as IDatabaseAccess,
       )
     )
     container.bind('registerModuleService', (c: IContainer) =>

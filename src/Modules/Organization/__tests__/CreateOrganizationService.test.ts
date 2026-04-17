@@ -38,6 +38,7 @@ describe('CreateOrganizationService', () => {
         new ModuleSubscriptionRepository(db),
         new MockGatewayClient(),
         orgRepo,
+        db,
       ),
     )
 
