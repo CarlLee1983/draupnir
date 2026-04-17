@@ -3,6 +3,7 @@ import {
   requireAuth,
 } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
+import { pendingCookiesMiddleware } from '@/Website/Http/HttpKernel'
 import type { OrganizationController } from '../Controllers/OrganizationController'
 import { requireOrganizationContext } from '../Middleware/OrganizationMiddleware'
 import {
@@ -20,7 +21,7 @@ export async function registerOrganizationRoutes(
 ): Promise<void> {
   router.post(
     '/api/organizations',
-    [requireAuth()],
+    [requireAuth(), pendingCookiesMiddleware()],
     CreateOrganizationRequest,
     (ctx) => controller.create(ctx),
   )

@@ -48,7 +48,7 @@ function requireManagerMiddleware(): Middleware {
   }
 }
 
-function pendingCookiesMiddleware(): Middleware {
+export function pendingCookiesMiddleware(): Middleware {
   return async (ctx, next) => {
     const response = await next()
     const pending = ctx.get<PendingCookie[]>('__pending_cookies__') ?? []
