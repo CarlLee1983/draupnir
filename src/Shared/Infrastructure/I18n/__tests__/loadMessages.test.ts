@@ -5,6 +5,9 @@ describe('loadMessages', () => {
   test('returns the locale catalog as flat key/value pairs', () => {
     const messages = loadMessages('zh-TW')
     expect(messages['member.dashboard.selectOrg']).toBe('請先選擇組織')
+    expect(messages['ui.auth.login.googleButton']).toBe('使用 Google 登入')
+    expect(messages['ui.auth.login.noAccount']).toBe('還沒帳號？')
+    expect(messages['ui.auth.login.registerLink']).toBe('註冊')
   })
 
   test('falls back to the key when missing', () => {
