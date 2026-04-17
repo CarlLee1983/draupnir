@@ -457,7 +457,7 @@ Step 2.6: SKIPPED (no external dependencies — this phase is code and tests onl
 - Direct code inspection of `src/Pages/**/*.ts` — all 40 files read.
 - `tests/Feature/routes-existence.e2e.ts` — confirmed no page routes tested.
 - `src/Pages/__tests__/` — confirmed only 2 test files exist (InertiaService, ViteTagHelper).
-- `docs/draupnir/knowledge/pages-inertia-architecture.md` — official architecture doc.
+- `docs/draupnir/architecture/website-inertia-layer.md` — official Website/Inertia architecture doc (`src/Website`).
 - `docs/draupnir/knowledge/coding-conventions.md` — coding standards.
 - `.planning/REQUIREMENTS.md` — v1 requirements (confirmed no Pages-specific requirements).
 - `.planning/ROADMAP.md` — Phase 6 entry confirmed.

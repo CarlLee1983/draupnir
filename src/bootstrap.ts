@@ -1,3 +1,22 @@
+/**
+ * bootstrap
+ *
+ * Application entry: constructs Gravito `PlanetCore`, registers all module service providers,
+ * mounts global HTTP middleware, warms the Inertia presentation layer, registers HTTP routes,
+ * wires scheduled jobs, and attaches global error handlers.
+ *
+ * Responsibilities:
+ * - Configure Impulse validators, ORM (when enabled), repository registry, and shared DB access
+ * - Register providers in a fixed order, then `core.bootstrap()` for DI and lifecycle hooks
+ * - Apply `HttpKernel.global()` middleware and await `warmInertiaService()` before any Inertia page
+ *   resolves from the container
+ * - Run `ensureCoreAppModulesService` after bootstrap, then `registerRoutes` / `registerJobs`
+ *
+ * Implementation note: route registration runs after Inertia warming because `WebsiteServiceProvider`
+ * resolves page singletons that depend on `inertiaService`. Job registration requires `scheduler`
+ * from `FoundationServiceProvider`.
+ */
+
 import { DB } from '@gravito/atlas'
 import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
@@ -35,6 +54,12 @@ import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
 import { initializeRegistry } from './wiring/RepositoryRegistry'
 
+/**
+ * Narrows an unknown module instance to {@link IJobRegistrar} when it exposes `registerJobs`.
+ *
+ * @param value - Provider instance after `core.bootstrap()` (typically a service provider).
+ * @returns True when `value` is a non-null object with a callable `registerJobs` method.
+ */
 function isJobRegistrar(value: unknown): value is IJobRegistrar {
   return (
     typeof value === 'object' &&
@@ -43,8 +68,13 @@ function isJobRegistrar(value: unknown): value is IJobRegistrar {
   )
 }
 
+/**
+ * Boots the HTTP application: DI container, middleware, Inertia, routes, and scheduler jobs.
+ *
+ * @param port - HTTP listen port forwarded into `buildConfig` (default **3000**).
+ * @returns A fully configured `PlanetCore` ready to listen; does not call `listen()` itself.
+ */
 export async function bootstrap(port = 3000): Promise<PlanetCore> {
-  // 註冊表單驗證器
   SchemaCache.registerValidators([new ZodValidator()])
 
   const configObj = buildConfig(port)
@@ -58,7 +88,6 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   const config = defineConfig({ config: configObj })
   const core = new PlanetCore(config)
 
-  // Register database service early
   core.container.singleton('database', () => db)
 
   await core.orbit(new OrbitPrism())
@@ -89,11 +118,8 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
 
   await core.bootstrap()
 
-  // ─── Global middleware ────────────────────────────────────────────────────
-  // 順序由 HttpKernel.global() 定義，在此一行掛載全部。
-  // 擴充 global middleware 請至 src/Website/Http/HttpKernel.ts。
+  // Order is defined by HttpKernel.global(); add new global middleware in HttpKernel.ts.
   registerGlobalMiddlewares(core, HttpKernel.global())
-  // ─────────────────────────────────────────────────────────────────────────
 
   await warmInertiaService()
   await (
@@ -121,4 +147,5 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   return core
 }
 
+/** Default export; same callable as {@link bootstrap}. */
 export default bootstrap

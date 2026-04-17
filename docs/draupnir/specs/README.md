@@ -69,7 +69,7 @@
 
 **Inertia／Web 殼層目錄與框架接線** — 與領域規格分開存放，便於對照實作遷移。
 
-- **[Website 資料夾架構設計](./2026-04-14-website-folder-architecture-design.md)** — `src/Pages/` → `src/Website/`：情境 slice、`Http/` runtime、`bootstrap/` 組合根與遷移對照表（已確認，待實作）
+- **[Website 資料夾架構設計](./2026-04-14-website-folder-architecture-design.md)** — `src/Pages/` → `src/Website/`：情境 slice、`Http/` runtime、`bootstrap/` 組合根與遷移對照表（已確認；**現行實作說明**見 [`../architecture/website-inertia-layer.md`](../architecture/website-inertia-layer.md)）
 - **[Gravito i18n 設計](./2026-04-11-gravito-i18n-design.md)** — 多語與頁面 locale 解析（與 Website 呈現層相關時可一併查閱）
 
 ### 合約與組織配額（日期規格）

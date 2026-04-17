@@ -1,26 +1,25 @@
 /**
- * 應用建立函式 (createApp)
+ * createApp
  *
- * 包裝 bootstrap 函式，提供給 src/index.ts 使用
- * 負責：
- * 1. 從配置取得連接埠號
- * 2. 調用 bootstrap 初始化應用
- * 3. 返回已初始化的 PlanetCore 實例
+ * Thin wrapper around the default `bootstrap` export from `./bootstrap` for `src/index.ts` (and
+ * similar entrypoints).
+ *
+ * Responsibilities:
+ * - Resolve listen **port** from `process.env.PORT` (fallback **3000**)
+ * - Run the full async bootstrap sequence
+ * - Return the initialized Gravito `PlanetCore` instance
  */
 
+import type { PlanetCore } from '@gravito/core'
 import bootstrap from './bootstrap'
 
 /**
- * 建立並初始化應用
+ * Creates and initializes the HTTP application core.
  *
- * @returns {Promise<PlanetCore>} 初始化完成的 Gravito 核心實例
+ * @returns Configured `PlanetCore` after providers, routes, jobs, and global handlers are wired.
  */
-export async function createApp() {
-  // 從環境變數或預設值取得連接埠
+export async function createApp(): Promise<PlanetCore> {
   const port = Number(process.env.PORT ?? 3000)
-
-  // 執行完整的啟動流程
   const core = await bootstrap(port)
-
   return core
 }

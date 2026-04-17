@@ -1,8 +1,22 @@
 /**
  * TokenRefreshMiddleware
  *
- * 若 access token 不存在或已過期，自動以 refresh_token cookie 換發新 access token。
- * 成功後更新 auth_token cookie 並注入 auth context，使後續 middleware（requireMember 等）可正常通過。
+ * Web middleware: when the access JWT is missing or not yet accepted as an authenticated session,
+ * attempts a **refresh_token** cookie exchange via {@link RefreshTokenService}, then sets a new
+ * **auth_token** cookie and injects `auth` / `user` on the request context so downstream guards
+ * (`requireMember`, `requireAdmin`, etc.) succeed without re-running the full JWT attach path.
+ *
+ * Responsibilities:
+ * - Skip immediately if `AuthMiddleware.isAuthenticated(ctx)` is already true
+ * - Call `RefreshTokenService.execute` when a refresh cookie is present and the service was configured
+ * - On success: set short-lived `auth_token`, verify JWT payload, populate `ctx` auth state
+ *
+ * Implementation note: `configureTokenRefresh` is invoked from `WebsiteServiceProvider.boot` after
+ * the container can resolve `refreshTokenService`. Middleware order: this factory must run **after**
+ * `attachJwt()` and **before** role-specific `require*` middleware (see `HttpKernel` `webBase()`).
+ *
+ * Further reading (decision tree, cookies vs API refresh): `docs/draupnir/architecture/http-middleware-stack.md`
+ * (section: web access token silent refresh / `TokenRefreshMiddleware`).
  */
 
 import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
@@ -15,22 +29,26 @@ let refreshService: RefreshTokenService | null = null
 const jwtService = new JwtTokenService()
 
 /**
- * 由 AuthServiceProvider.boot() 呼叫，注入 RefreshTokenService。
+ * Injects the application {@link RefreshTokenService} used by {@link createTokenRefreshMiddleware}.
+ *
+ * Call once at application boot (e.g. `WebsiteServiceProvider.boot`) after the container can
+ * `make('refreshTokenService')`. If never called, the middleware no-ops when refresh would be needed.
+ *
+ * @param service - Bound `RefreshTokenService` instance from the DI container.
  */
 export function configureTokenRefresh(service: RefreshTokenService): void {
   refreshService = service
 }
 
 /**
- * 建立 token 自動刷新 middleware。
- * 必須放在 attachJwt() 之後、requireMember/requireAdmin 之前。
+ * Builds middleware that silently refreshes the session access token from the refresh cookie.
+ *
+ * @returns Middleware compatible with `HttpKernel` / `withInertiaPage` composition.
  */
 export function createTokenRefreshMiddleware(): Middleware {
   return async (ctx, next) => {
-    // 已有有效 auth context，不需要刷新
     if (AuthMiddleware.isAuthenticated(ctx)) return next()
 
-    // 尚未注入 refreshService（測試或早期啟動時），直接跳過
     if (!refreshService) return next()
 
     const refreshToken = ctx.getCookie('refresh_token')
@@ -41,7 +59,6 @@ export function createTokenRefreshMiddleware(): Middleware {
 
     const newAccessToken = result.data.accessToken
 
-    // 設定新的 access token cookie（15 分鐘）
     ctx.setCookie('auth_token', newAccessToken, {
       httpOnly: true,
       sameSite: 'Lax',
@@ -50,7 +67,6 @@ export function createTokenRefreshMiddleware(): Middleware {
       secure: isSecureRequest(ctx),
     })
 
-    // 直接解析 JWT payload 並注入 auth context（避免重跑 AuthMiddleware）
     const payload = jwtService.verify(newAccessToken)
     if (payload) {
       ctx.set('auth', {

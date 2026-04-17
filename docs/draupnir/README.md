@@ -2,13 +2,14 @@
 
 本資料夾集中存放 **Draupnir 產品與工程規劃**（規格、計畫、審查、路線圖）。
 
-**索引更新**：2026-04-14
+**索引更新**：2026-04-17
 
 ## 快速參考（核心文件）
 
 | 內容 | 位置 |
 |------|------|
 | **架構概覽與模組指南** | [`ARCHITECTURE_SUMMARY.md`](./ARCHITECTURE_SUMMARY.md) |
+| **Website（Inertia，`src/Website`）** | [`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md) |
 | **設計決策彙總** | [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) |
 | **開發指南**（目錄、環境、新增模組） | [`DEVELOPMENT.md`](./DEVELOPMENT.md) |
 | **指令一覽** | [`COMMANDS.md`](./COMMANDS.md) |
@@ -26,6 +27,8 @@
 | [`architecture/module-dependency-map.md`](./architecture/module-dependency-map.md) | 模組依賴圖、耦合與協調環說明 |
 | [`architecture/entity-relationship-overview.md`](./architecture/entity-relationship-overview.md) | ER／schema 映射概覽 |
 | [`architecture/auth-flow-diagrams.md`](./architecture/auth-flow-diagrams.md) | 認證流程（JWT、API Key、OAuth、SDK 閘道） |
+| [`architecture/http-middleware-stack.md`](./architecture/http-middleware-stack.md) | HTTP middleware 三層、Inertia 鏈、**網頁靜默 token refresh** |
+| [`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md) | Website／Inertia 層（`src/Website`：路由、middleware、DI、Vite） |
 
 ## 路線圖
 
@@ -47,7 +50,7 @@
 | 測試與驗證 | [`api-functional-testing.md`](./specs/5-testing-validation/api-functional-testing.md)、[`impulse-validation.md`](./specs/5-testing-validation/impulse-validation.md) |
 | 架構評審 | [`v1-architecture-review.md`](./specs/6-architecture/v1-architecture-review.md)、[`v1.1-improvements-summary.md`](./specs/6-architecture/v1.1-improvements-summary.md) |
 | i18n（Gravito） | [`specs/2026-04-11-gravito-i18n-design.md`](./specs/2026-04-11-gravito-i18n-design.md) |
-| Website 目錄（`src/Pages` → `src/Website`） | [`specs/2026-04-14-website-folder-architecture-design.md`](./specs/2026-04-14-website-folder-architecture-design.md) |
+| Website 目錄（`src/Pages` → `src/Website`） | 實作說明 [`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md) · 遷移對照 [`specs/2026-04-14-website-folder-architecture-design.md`](./specs/2026-04-14-website-folder-architecture-design.md) |
 | 合約額度與 API Key 配發 | [`specs/2026-04-16-contract-quota-allocation-spec.md`](./specs/2026-04-16-contract-quota-allocation-spec.md) |
 
 ## 關於實作計畫
@@ -66,7 +69,7 @@
 | [`knowledge/coding-conventions.md`](./knowledge/coding-conventions.md) | 命名、Biome、TypeScript strict、錯誤處理、Function Design |
 | [`knowledge/tech-stack.md`](./knowledge/tech-stack.md) | 技術棧版本、設定與環境變數 |
 | [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md) | JSDoc／註解規範 |
-| [`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md) | `src/Pages` Inertia 架構與擴充檢查 |
+| [`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md) | Website（`src/Website`）Inertia 架構與擴充檢查；舊連結 [`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md) 仍指向此主題 |
 
 ## 審查紀錄（`reviews/`）
 

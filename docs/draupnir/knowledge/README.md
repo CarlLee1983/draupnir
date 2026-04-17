@@ -20,4 +20,5 @@
 | [`coding-conventions.md`](./coding-conventions.md) | 命名慣例、Biome 風格、TypeScript strict、Error 處理、Validation、Function Design、Immutability |
 | [`tech-stack.md`](./tech-stack.md) | 完整技術棧列表、依賴版本、配置檔、環境變數、build 輸出、平台需求 |
 | [`jsdoc-standards.md`](./jsdoc-standards.md) | 原始碼 JSDoc／註解規範（與 Biome 格式化對齊） |
-| [`pages-inertia-architecture.md`](./pages-inertia-architecture.md) | `src/Pages` Inertia 路由、DI 綁定與檔案導覽；目標 `src/Website/` 見 [`specs/2026-04-14-website-folder-architecture-design.md`](../specs/2026-04-14-website-folder-architecture-design.md) |
+| [`../architecture/website-inertia-layer.md`](../architecture/website-inertia-layer.md) | Website（`src/Website`）Inertia 路由、middleware、DI 與擴充檢查（主文件） |
+| [`pages-inertia-architecture.md`](./pages-inertia-architecture.md) | 短索引（舊書籤相容）→ 同上主文件 |

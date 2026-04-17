@@ -40,9 +40,9 @@ src/Modules/{ModuleName}/
 
 **Key points**: Switch persistence with `ORM` (see below); repositories use `IDatabaseAccess` from the wiring layer. Layering diagrams: [`architecture/`](./architecture/) · dependency graph: [`architecture/module-dependency-map.md`](./architecture/module-dependency-map.md).
 
-### Inertia pages (`src/Pages`)
+### Inertia pages (`src/Website`)
 
-Server-driven Inertia routes, per-page DI bindings, and Vite assets live under `src/Pages/`. When adding or changing a page, follow **[`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md)** and [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md).
+Server-driven Inertia routes, per-page DI bindings, and Vite assets live under `src/Website/`. When adding or changing a page, follow **[`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md)** and [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md).
 
 ## Testing
 
