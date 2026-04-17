@@ -55,8 +55,9 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 | 260413-wj2 | 補充 skills/ddd-module domain events 說明並修正 Profile 模組 4 個 P3/P4 問題 | 2026-04-13 | 0b5b697 | [260413-wj2-skills-ddd-module-domain-events-profile-](.planning/quick/260413-wj2-skills-ddd-module-domain-events-profile-/) |
 | 260413-x8a | Fix RegisterPage: restore passwordRequirements on error rerenders and fix flash persistence across redirects | 2026-04-13 | 9f12713 | [260413-x8a-fix-registerpage-restore-passwordrequire](.planning/quick/260413-x8a-fix-registerpage-restore-passwordrequire/) |
 | 260413-wo3 | 修正 Organization 模組 9 個 DDD 戰術設計問題（fromDatabase 移除、VO 型別、DTO 拆分、Domain Service、授權、測試） | 2026-04-13 | 50b8d53 | [260413-wo3-organization-ddd-9-priority](.planning/quick/260413-wo3-organization-ddd-9-priority/) |
+| 260418-0ep | 建立組織成功後 rotate access JWT：POST /api/organizations 加 pendingCookies flush、Controller 簽新 token + 回 redirectTo、modal 改讀 redirectTo（方案 1A） | 2026-04-17 | 5a11507 | [260418-0ep-rotate-access-jwt-post-api-organizations](.planning/quick/260418-0ep-rotate-access-jwt-post-api-organizations/) |
 
 ## Session continuity
 
-Last activity: 2026-04-13 - Completed quick task 260413-wo3: Organization 模組 9 個 DDD 問題修正（3 tasks, 39 new tests）
+Last activity: 2026-04-17 - Completed quick task 260418-0ep: 建立組織成功後 rotate access JWT（4 commits, 含 Rule 2 token-hash fix）
 Next step: `/gsd-new-milestone` when ready to plan v1.5+.
