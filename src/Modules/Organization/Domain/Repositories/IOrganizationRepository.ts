@@ -10,6 +10,16 @@ export interface IOrganizationRepository {
   /** Finds an organization by its unique identifier. */
   findById(id: string): Promise<Organization | null>
 
+  /**
+   * Finds an organization by id with a row-level lock (SELECT ... FOR UPDATE).
+   *
+   * MUST be called inside an open transaction — the lock is bound to the current
+   * transaction and released on commit/rollback. Used by
+   * ProvisionOrganizationDefaultsService to serialize concurrent Bifrost Team
+   * provisioning attempts for the same organization.
+   */
+  findByIdForUpdate(id: string): Promise<Organization | null>
+
   /** Finds an organization by its unique URL slug. */
   findBySlug(slug: string): Promise<Organization | null>
 
