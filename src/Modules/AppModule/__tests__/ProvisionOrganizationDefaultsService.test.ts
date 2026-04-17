@@ -25,8 +25,9 @@ describe('ProvisionOrganizationDefaultsService', () => {
       subRepo,
       gateway,
       orgRepo,
+      db,
     )
-    return { service, moduleRepo, contractRepo, subRepo, orgRepo, gateway }
+    return { service, moduleRepo, contractRepo, subRepo, orgRepo, gateway, db }
   }
 
   test('為組織建立啟用中合約、內建模組訂閱與 Bifrost Team，並寫回 gatewayTeamId', async () => {
@@ -57,7 +58,19 @@ describe('ProvisionOrganizationDefaultsService', () => {
     await service.execute('org-retry', 'user-1')
     await service.execute('org-retry', 'user-1')
 
-    expect(gateway.calls.ensureTeam).toHaveLength(2)
+    // 第二次 execute 在 FOR UPDATE 鎖下 re-read 到既有 gatewayTeamId，短路不再呼叫 ensureTeam。
+    expect(gateway.calls.ensureTeam).toHaveLength(1)
+    expect(gateway.calls.createTeam).toHaveLength(1)
+  })
+
+  test('第二次 execute 在 lock 下 re-read 到既有 gatewayTeamId，短路不再呼叫 ensureTeam', async () => {
+    const { service, gateway } = await setup('org-short')
+    await service.execute('org-short', 'user-1')
+    const ensureCountAfterFirst = gateway.calls.ensureTeam.length
+    expect(ensureCountAfterFirst).toBe(1)
+
+    await service.execute('org-short', 'user-1')
+    expect(gateway.calls.ensureTeam).toHaveLength(ensureCountAfterFirst)
     expect(gateway.calls.createTeam).toHaveLength(1)
   })
 
