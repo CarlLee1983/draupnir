@@ -70,10 +70,11 @@ export function CreateOrganizationModal({ open, onOpenChange }: Props) {
         success: boolean
         error?: string
         message?: string
+        data?: { redirectTo?: string }
       }
 
       if (payload.success) {
-        router.visit('/member/dashboard', { replace: true })
+        router.visit(payload.data?.redirectTo ?? '/member/dashboard', { replace: true })
       } else if (payload.error === 'ALREADY_HAS_ORGANIZATION') {
         // Stale UI (e.g. another tab already created org); reload props from server
         router.visit('/member/dashboard', { replace: true })

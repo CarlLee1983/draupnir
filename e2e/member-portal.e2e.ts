@@ -115,4 +115,59 @@ test.describe('Member Portal', { tag: '@smoke' }, () => {
     await expect(page.locator('input#email')).toBeDisabled()
     await expect(page.locator('input#displayName')).toBeEnabled()
   })
+
+  test('creating organization rotates JWT and lands on manager dashboard', async ({
+    page,
+    request,
+  }) => {
+    const email = `member-create-org-${Date.now()}@test.com`
+    const password = 'Test1234!'
+
+    await request.post('/api/auth/register', { data: { email, password } })
+    const loginRes = await request.post('/api/auth/login', { data: { email, password } })
+    const loginJson = (await loginRes.json()) as { data?: { accessToken: string } }
+    const oldToken = loginJson.data?.accessToken
+    expect(oldToken).toBeTruthy()
+
+    const createRes = await request.post('/api/organizations', {
+      data: { name: `E2E Org ${Date.now()}` },
+      headers: { Authorization: `Bearer ${oldToken}` },
+    })
+    expect(createRes.ok()).toBeTruthy()
+    const createJson = (await createRes.json()) as {
+      success: boolean
+      data?: { redirectTo?: string }
+    }
+    expect(createJson.success).toBe(true)
+    expect(createJson.data?.redirectTo).toBe('/manager/dashboard')
+
+    const setCookieHeaders = createRes
+      .headersArray()
+      .filter((h) => h.name.toLowerCase() === 'set-cookie')
+    const authCookie = setCookieHeaders.find((h) => h.value.startsWith('auth_token='))
+    expect(authCookie).toBeTruthy()
+    // Set-Cookie value shape: `auth_token=<JWT>; Path=/; HttpOnly; ...`
+    // JWT is base64url (no '=') so splitting on the first '=' is safe.
+    const firstSegment = authCookie!.value.split(';')[0]!
+    const eqIdx = firstSegment.indexOf('=')
+    const newToken = firstSegment.slice(eqIdx + 1)
+    expect(newToken).toBeTruthy()
+    expect(newToken).not.toBe(oldToken)
+
+    // 確認新 token 能通過 AuthMiddleware（isRevoked 需要 tokenHash 已持久化於 auth_tokens）
+    const meRes = await request.get('/api/users/me', {
+      headers: { Authorization: `Bearer ${newToken}` },
+    })
+    expect(meRes.status()).toBe(200)
+
+    // 因為 role 已經是 manager，直接使用新 access token 呼叫 /manager/dashboard
+    // 應該能通過 requireManager middleware 並載入 Inertia 頁面。
+    await page.setExtraHTTPHeaders({ Authorization: `Bearer ${newToken}` })
+    const dashboardRes = await page.goto('/manager/dashboard', {
+      waitUntil: 'domcontentloaded',
+    })
+    // 不允許被 middleware 重導到 /login 或 /member/dashboard
+    expect(dashboardRes?.status() ?? 0).toBeLessThan(400)
+    await expect(page).toHaveURL(/\/manager\/dashboard/)
+  })
 })
