@@ -12,8 +12,10 @@ import { GatewayError } from '../errors'
 import type { ILLMGatewayClient } from '../ILLMGatewayClient'
 import type {
   CreateKeyRequest,
+  CreateTeamRequest,
   KeyResponse,
   LogEntry,
+  TeamResponse,
   UpdateKeyRequest,
   UsageQuery,
   UsageStats,
@@ -21,6 +23,59 @@ import type {
 
 export class BifrostGatewayAdapter implements ILLMGatewayClient {
   constructor(private readonly bifrostClient: BifrostClient) {}
+
+  /**
+   * Idempotent Team create: returns the existing Team matching `name` (Bifrost
+   * rejects arbitrary customer_id values). Used during org provisioning so a
+   * partial failure on first attempt can be healed by re-running provisioning.
+   */
+  async ensureTeam(request: CreateTeamRequest): Promise<TeamResponse> {
+    try {
+      const existing = await this.bifrostClient.listTeams()
+      const match = existing.find((t) => t.name === request.name)
+      if (match) {
+        return {
+          id: match.id,
+          name: match.name,
+          ...(match.customer_id !== undefined && { customerId: match.customer_id }),
+          ...(match.budget_id !== undefined && { budgetId: match.budget_id }),
+        }
+      }
+      return await this.createTeam(request)
+    } catch (error) {
+      this.translateError(error)
+    }
+  }
+
+  /**
+   * Create a new Team in Bifrost.
+   * Maps camelCase CreateTeamRequest to Bifrost's snake_case CreateTeamRequest.
+   */
+  async createTeam(request: CreateTeamRequest): Promise<TeamResponse> {
+    try {
+      const team = await this.bifrostClient.createTeam({
+        name: request.name,
+        ...(request.customerId !== undefined && { customer_id: request.customerId }),
+        ...(request.budget !== undefined && {
+          budget: {
+            max_limit: request.budget.maxLimit,
+            reset_duration: request.budget.resetDuration,
+            ...(request.budget.calendarAligned !== undefined && {
+              calendar_aligned: request.budget.calendarAligned,
+            }),
+          },
+        }),
+      })
+      return {
+        id: team.id,
+        name: team.name,
+        ...(team.customer_id !== undefined && { customerId: team.customer_id }),
+        ...(team.budget_id !== undefined && { budgetId: team.budget_id }),
+      }
+    } catch (error) {
+      this.translateError(error)
+    }
+  }
 
   /**
    * Create a new virtual key in Bifrost.
@@ -32,6 +87,7 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
         name: request.name,
         ...(request.keyIds !== undefined && { key_ids: [...request.keyIds] }),
         ...(request.customerId !== undefined && { customer_id: request.customerId }),
+        ...(request.teamId !== undefined && { team_id: request.teamId }),
         ...(request.isActive !== undefined && { is_active: request.isActive }),
         ...(request.budget !== undefined && {
           budget: {

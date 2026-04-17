@@ -18,8 +18,10 @@ import type { GatewayError } from '../errors'
 import type { ILLMGatewayClient } from '../ILLMGatewayClient'
 import type {
   CreateKeyRequest,
+  CreateTeamRequest,
   KeyResponse,
   LogEntry,
+  TeamResponse,
   UpdateKeyRequest,
   UsageQuery,
   UsageStats,
@@ -34,6 +36,8 @@ interface StoredKey {
 }
 
 interface CallLog {
+  readonly createTeam: readonly CreateTeamRequest[]
+  readonly ensureTeam: readonly CreateTeamRequest[]
   readonly createKey: readonly CreateKeyRequest[]
   readonly updateKey: readonly { readonly keyId: string; readonly request: UpdateKeyRequest }[]
   readonly deleteKey: readonly string[]
@@ -61,13 +65,20 @@ export class MockGatewayClient implements ILLMGatewayClient {
 
   private seededLogs: readonly LogEntry[] = []
 
+  private readonly teams: Map<string, TeamResponse> = new Map()
+  private teamCounter = 0
+
   private readonly _calls: {
+    createTeam: CreateTeamRequest[]
+    ensureTeam: CreateTeamRequest[]
     createKey: CreateKeyRequest[]
     updateKey: { keyId: string; request: UpdateKeyRequest }[]
     deleteKey: string[]
     getUsageStats: { keyIds: readonly string[]; query?: UsageQuery }[]
     getUsageLogs: { keyIds: readonly string[]; query?: UsageQuery }[]
   } = {
+    createTeam: [],
+    ensureTeam: [],
     createKey: [],
     updateKey: [],
     deleteKey: [],
@@ -78,6 +89,8 @@ export class MockGatewayClient implements ILLMGatewayClient {
   /** Read-only snapshot of all received calls per method. */
   get calls(): CallLog {
     return {
+      createTeam: [...this._calls.createTeam],
+      ensureTeam: [...this._calls.ensureTeam],
       createKey: [...this._calls.createKey],
       updateKey: [...this._calls.updateKey],
       deleteKey: [...this._calls.deleteKey],
@@ -116,10 +129,14 @@ export class MockGatewayClient implements ILLMGatewayClient {
    */
   reset(): void {
     this.keys.clear()
+    this.teams.clear()
     this.idCounter = 0
+    this.teamCounter = 0
     this.failQueue.length = 0
     this.seededStats = { totalRequests: 0, totalCost: 0, totalTokens: 0, avgLatency: 0 }
     this.seededLogs = []
+    this._calls.createTeam.length = 0
+    this._calls.ensureTeam.length = 0
     this._calls.createKey.length = 0
     this._calls.updateKey.length = 0
     this._calls.deleteKey.length = 0
@@ -136,6 +153,30 @@ export class MockGatewayClient implements ILLMGatewayClient {
     if (this.failQueue.length > 0) {
       throw this.failQueue.shift()
     }
+  }
+
+  async createTeam(request: CreateTeamRequest): Promise<TeamResponse> {
+    this.maybeThrow()
+    this._calls.createTeam.push(request)
+    this.teamCounter++
+    const id = `mock_team_${String(this.teamCounter).padStart(6, '0')}`
+    const team: TeamResponse = {
+      id,
+      name: request.name,
+      ...(request.customerId !== undefined && { customerId: request.customerId }),
+      ...(request.budget !== undefined && { budgetId: `mock_budget_${id}` }),
+    }
+    this.teams.set(id, team)
+    return team
+  }
+
+  async ensureTeam(request: CreateTeamRequest): Promise<TeamResponse> {
+    this.maybeThrow()
+    this._calls.ensureTeam.push(request)
+    for (const team of this.teams.values()) {
+      if (team.name === request.name) return team
+    }
+    return this.createTeam(request)
   }
 
   async createKey(request: CreateKeyRequest): Promise<KeyResponse> {

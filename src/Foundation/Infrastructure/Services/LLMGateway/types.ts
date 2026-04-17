@@ -14,6 +14,8 @@ export interface BudgetUpdate {
 export interface CreateKeyRequest {
   readonly name: string
   readonly customerId?: string
+  /** Bifrost Team ID to attach this key to, enabling per-team spend aggregation. */
+  readonly teamId?: string
   readonly isActive?: boolean
   /** Provider API key IDs to associate. Use `["*"]` to allow all available provider keys. */
   readonly keyIds?: readonly string[]
@@ -62,6 +64,26 @@ export interface UsageStats {
   readonly totalCost: number
   readonly totalTokens: number
   readonly avgLatency: number
+}
+
+/**
+ * Team creation request (camelCase).
+ *
+ * Draupnir convention: `name` and `customerId` are both set to the organization ID
+ * when a Team is provisioned alongside a new organization. `budget` is omitted
+ * because Virtual Keys attached to the Team carry their own budgets.
+ */
+export interface CreateTeamRequest {
+  readonly name: string
+  readonly customerId?: string
+  readonly budget?: BudgetUpdate
+}
+
+export interface TeamResponse {
+  readonly id: string
+  readonly name: string
+  readonly customerId?: string
+  readonly budgetId?: string
 }
 
 export interface LogEntry {

@@ -17,6 +17,12 @@ interface OrganizationProps {
   slug: string
   description: string
   status: 'active' | 'suspended'
+  /**
+   * Bifrost Team ID linked to this organization. Populated lazily by
+   * ProvisionOrganizationDefaultsService after the Bifrost Team is created.
+   * Virtual keys minted for this org are attached to this Team so spend aggregates.
+   */
+  gatewayTeamId: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -47,9 +53,15 @@ export class Organization {
       slug: orgSlug.getValue(),
       description,
       status: 'active',
+      gatewayTeamId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     })
+  }
+
+  /** Attaches a Bifrost Team ID to this organization (post-provisioning). */
+  attachGatewayTeam(teamId: string): Organization {
+    return new Organization({ ...this.props, gatewayTeamId: teamId, updatedAt: new Date() })
   }
 
   /** 從持久層重建 Organization（不含業務邏輯）。 */
@@ -96,6 +108,10 @@ export class Organization {
   /** Current status (active/suspended). */
   get status(): string {
     return this.props.status
+  }
+  /** Bifrost Team ID linked to this organization, or null before provisioning completes. */
+  get gatewayTeamId(): string | null {
+    return this.props.gatewayTeamId
   }
   /** Creation timestamp. */
   get createdAt(): Date {

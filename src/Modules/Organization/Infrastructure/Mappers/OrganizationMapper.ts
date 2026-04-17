@@ -18,6 +18,7 @@ export class OrganizationMapper {
       slug: String(row.slug),
       description: String(row.description ?? ''),
       status: row.status as 'active' | 'suspended',
+      gatewayTeamId: row.gateway_team_id == null ? null : String(row.gateway_team_id),
       createdAt: toDate(row.created_at),
       updatedAt: toDate(row.updated_at),
     })
@@ -30,6 +31,7 @@ export class OrganizationMapper {
       slug: entity.slug,
       description: entity.description,
       status: entity.status,
+      gateway_team_id: entity.gatewayTeamId,
       created_at: entity.createdAt.toISOString(),
       updated_at: entity.updatedAt.toISOString(),
     }

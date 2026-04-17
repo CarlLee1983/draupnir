@@ -8,8 +8,14 @@ import type {
   BifrostModel,
   BifrostModelsQuery,
   BifrostModelsResponse,
+  BifrostTeam,
+  BifrostTeamsQuery,
   BifrostVirtualKey,
+  CreateTeamRequest,
   CreateVirtualKeyRequest,
+  TeamListResponse,
+  TeamResponse,
+  UpdateTeamRequest,
   UpdateVirtualKeyRequest,
   VirtualKeyListResponse,
   VirtualKeyResponse,
@@ -123,6 +129,62 @@ export class BifrostClient {
     const params = query ? this.toQueryString(query) : ''
     const path = params ? `/api/logs/stats?${params}` : '/api/logs/stats'
     return this.get<BifrostLogsStats>(path)
+  }
+
+  /**
+   * Creates a new Team.
+   * @param request - Creation parameters
+   * @returns The created Team
+   */
+  async createTeam(request: CreateTeamRequest): Promise<BifrostTeam> {
+    const response = await this.post<TeamResponse>('/api/governance/teams', request)
+    return response.team
+  }
+
+  /**
+   * Lists Teams, optionally filtered by customer ID.
+   * @param query - Optional filtering parameters
+   * @returns A list of Teams
+   */
+  async listTeams(query?: BifrostTeamsQuery): Promise<readonly BifrostTeam[]> {
+    const params = query ? this.toQueryString(query) : ''
+    const path = params ? `/api/governance/teams?${params}` : '/api/governance/teams'
+    const response = await this.get<TeamListResponse>(path)
+    return response.teams
+  }
+
+  /**
+   * Retrieves details for a single Team.
+   * @param teamId - Team ID
+   * @returns Team data
+   */
+  async getTeam(teamId: string): Promise<BifrostTeam> {
+    const response = await this.get<TeamResponse>(
+      `/api/governance/teams/${encodeURIComponent(teamId)}`,
+    )
+    return response.team
+  }
+
+  /**
+   * Updates a Team.
+   * @param teamId - Team ID
+   * @param request - Fields to update
+   * @returns Updated Team data
+   */
+  async updateTeam(teamId: string, request: UpdateTeamRequest): Promise<BifrostTeam> {
+    const response = await this.put<TeamResponse>(
+      `/api/governance/teams/${encodeURIComponent(teamId)}`,
+      request,
+    )
+    return response.team
+  }
+
+  /**
+   * Deletes a Team.
+   * @param teamId - Team ID
+   */
+  async deleteTeam(teamId: string): Promise<void> {
+    await this.delete(`/api/governance/teams/${encodeURIComponent(teamId)}`)
   }
 
   /**

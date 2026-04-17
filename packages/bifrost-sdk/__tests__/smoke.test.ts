@@ -118,6 +118,21 @@ describe('@draupnir/bifrost-sdk smoke', () => {
     expect(typeof withRetry).toBe('function')
   })
 
+  it('BifrostClient exposes Team CRUD methods', () => {
+    const client = new BifrostClient({
+      baseUrl: 'https://test.example.com',
+      timeoutMs: 5000,
+      maxRetries: 1,
+      retryBaseDelayMs: 100,
+      proxyBaseUrl: 'https://test.example.com',
+    })
+    expect(typeof client.createTeam).toBe('function')
+    expect(typeof client.listTeams).toBe('function')
+    expect(typeof client.getTeam).toBe('function')
+    expect(typeof client.updateTeam).toBe('function')
+    expect(typeof client.deleteTeam).toBe('function')
+  })
+
   it('BifrostClientConfig type is usable with optional masterKey', () => {
     const config: BifrostClientConfig = {
       baseUrl: 'https://test.example.com',

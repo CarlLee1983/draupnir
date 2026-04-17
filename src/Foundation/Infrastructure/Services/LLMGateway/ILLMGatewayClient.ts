@@ -7,14 +7,35 @@
  */
 import type {
   CreateKeyRequest,
+  CreateTeamRequest,
   KeyResponse,
   LogEntry,
+  TeamResponse,
   UpdateKeyRequest,
   UsageQuery,
   UsageStats,
 } from './types'
 
 export interface ILLMGatewayClient {
+  /**
+   * Create a new team in the gateway.
+   *
+   * Draupnir provisions one Team per organization; later-issued virtual keys are
+   * attached to the Team so per-org spend and usage can be aggregated.
+   */
+  createTeam(request: CreateTeamRequest): Promise<TeamResponse>
+
+  /**
+   * Idempotent Team creation keyed by `name`.
+   *
+   * Bifrost rejects arbitrary `customer_id` values (must point at an existing
+   * Customer entity), so we key idempotency on `name` — which Draupnir sets to
+   * `org_id` during provisioning. Returns the existing Team matching `name`
+   * when one exists; otherwise creates a new Team. Lets transient gateway
+   * failures on first attempt be recovered on retry without producing duplicate Teams.
+   */
+  ensureTeam(request: CreateTeamRequest): Promise<TeamResponse>
+
   /**
    * Create a new virtual key in the gateway.
    * @returns Created key metadata including the raw key value (only available on creation).

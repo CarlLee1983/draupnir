@@ -286,3 +286,80 @@ export interface BifrostModelsResponse {
   /** List of models. */
   readonly data: readonly BifrostModel[]
 }
+
+/** Bifrost customer reference embedded in Team responses. */
+export interface BifrostTeamCustomer {
+  /** Customer ID. */
+  readonly id: string
+  /** Customer display name. */
+  readonly name?: string
+  /** Associated budget ID. */
+  readonly budget_id?: string
+  /** Embedded budget configuration (populated on read). */
+  readonly budget?: BifrostBudget
+}
+
+/** Full Team information returned by the Bifrost Governance API. */
+export interface BifrostTeam {
+  /** Unique Team identifier. */
+  readonly id: string
+  /** Display name for the Team (Draupnir uses `org_id`). */
+  readonly name: string
+  /** Customer ID associated with the Team. */
+  readonly customer_id?: string
+  /** Associated budget ID. */
+  readonly budget_id?: string
+  /** Embedded customer configuration (populated on read). */
+  readonly customer?: BifrostTeamCustomer
+  /** Embedded budget configuration (populated on read). */
+  readonly budget?: BifrostBudget
+  /** Creation time (ISO 8601). */
+  readonly created_at?: string
+  /** Update time (ISO 8601). */
+  readonly updated_at?: string
+}
+
+/** Parameters for creating a Team. */
+export interface CreateTeamRequest {
+  /** Display name for the Team. */
+  readonly name: string
+  /** Customer ID; Draupnir sets this to the organization ID. */
+  readonly customer_id?: string
+  /**
+   * Budget configuration; omit when the Team itself carries no budget
+   * (e.g. when Virtual Keys attached to the Team hold the budget instead).
+   */
+  readonly budget?: Pick<BifrostBudget, 'max_limit' | 'reset_duration' | 'calendar_aligned'>
+}
+
+/** Parameters for updating a Team; all fields are optional. */
+export interface UpdateTeamRequest {
+  /** Display name for the Team. */
+  readonly name?: string
+  /** Customer ID. */
+  readonly customer_id?: string
+  /** Budget configuration. */
+  readonly budget?: Pick<BifrostBudget, 'max_limit' | 'reset_duration' | 'calendar_aligned'>
+}
+
+/** API response for a single Team operation. */
+export interface TeamResponse {
+  /** Operation result message. */
+  readonly message: string
+  /** Team data. */
+  readonly team: BifrostTeam
+}
+
+/** API response for a list of Teams. */
+export interface TeamListResponse {
+  /** A list of Teams. */
+  readonly teams: readonly BifrostTeam[]
+}
+
+/** Query parameters for listing Teams. */
+export interface BifrostTeamsQuery {
+  /** Filter Teams by customer ID. */
+  readonly customer_id?: string
+  /** If true, returns Teams from in-memory cache instead of database. */
+  readonly from_memory?: boolean
+}

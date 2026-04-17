@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
+import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import { AppModuleRepository } from '@/Modules/AppModule/Infrastructure/Repositories/AppModuleRepository'
 import { ModuleSubscriptionRepository } from '@/Modules/AppModule/Infrastructure/Repositories/ModuleSubscriptionRepository'
@@ -39,6 +40,8 @@ describe('InviteMemberService', () => {
         new AppModuleRepository(db),
         new ContractRepository(db),
         new ModuleSubscriptionRepository(db),
+        new MockGatewayClient(),
+        orgRepo,
       ),
     )
     inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)

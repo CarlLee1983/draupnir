@@ -6,6 +6,7 @@ import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
 import { AssignApiKeyService } from '../../Application/Services/AssignApiKeyService'
 import { CreateApiKeyService } from '../../Application/Services/CreateApiKeyService'
 import { ListApiKeysService } from '../../Application/Services/ListApiKeysService'
@@ -27,7 +28,10 @@ export class ApiKeyServiceProvider extends ModuleServiceProvider implements IRou
 
   protected override registerInfraServices(container: IContainer): void {
     container.singleton('apiKeyBifrostSync', (c: IContainer) =>
-      new ApiKeyBifrostSync(c.make('llmGatewayClient') as ILLMGatewayClient)
+      new ApiKeyBifrostSync(
+        c.make('llmGatewayClient') as ILLMGatewayClient,
+        c.make('organizationRepository') as IOrganizationRepository,
+      )
     )
     container.singleton('keyHashingService', () => new KeyHashingService())
   }

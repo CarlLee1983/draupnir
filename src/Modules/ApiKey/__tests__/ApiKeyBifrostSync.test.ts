@@ -1,28 +1,46 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { Organization } from '@/Modules/Organization/Domain/Aggregates/Organization'
+import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationRepository'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyScope } from '../Domain/ValueObjects/KeyScope'
 import { ApiKeyBifrostSync } from '../Infrastructure/Services/ApiKeyBifrostSync'
 
 describe('ApiKeyBifrostSync', () => {
   let mock: MockGatewayClient
   let sync: ApiKeyBifrostSync
+  let orgRepo: OrganizationRepository
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mock = new MockGatewayClient()
-    sync = new ApiKeyBifrostSync(mock)
+    orgRepo = new OrganizationRepository(new MemoryDatabaseAccess())
+    // 預置一個已完成 provisioning 的 org（gatewayTeamId 已寫回）。
+    const provisioned = Organization.create('org-1', 'org-1', '').attachGatewayTeam(
+      'gateway-team-org-1',
+    )
+    await orgRepo.save(provisioned)
+    sync = new ApiKeyBifrostSync(mock, orgRepo)
   })
 
   afterEach(() => {
     mock.reset()
   })
 
-  it('createVirtualKey 應呼叫 gateway 並回傳 ID 及 key value', async () => {
+  it('createVirtualKey 應呼叫 gateway 並以 org 的 gatewayTeamId 作為 teamId', async () => {
     const result = await sync.createVirtualKey('My Key', 'org-1')
     expect(result.gatewayKeyId).toBe('mock_vk_000001')
     expect(result.gatewayKeyValue).toBe('mock_raw_key_000001')
     expect(mock.calls.createKey[0].name).toBe('My Key')
+    expect(mock.calls.createKey[0].teamId).toBe('gateway-team-org-1')
     expect(mock.calls.createKey[0].customerId).toBeUndefined()
     expect(mock.calls.createKey[0].keyIds).toEqual(['*'])
+  })
+
+  it('org 尚未 provision 完 gatewayTeamId 時，createVirtualKey 仍會建立 key 但不帶 teamId', async () => {
+    const naked = Organization.create('org-naked', 'org-naked', '')
+    await orgRepo.save(naked)
+    await sync.createVirtualKey('Unscoped', 'org-naked')
+    expect(mock.calls.createKey[0].teamId).toBeUndefined()
   })
 
   it('createVirtualKey 可附帶 budget（7d／30d）', async () => {

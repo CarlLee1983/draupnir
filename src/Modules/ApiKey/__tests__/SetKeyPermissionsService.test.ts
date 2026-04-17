@@ -4,6 +4,7 @@ import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Servi
 import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
+import { OrganizationRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { SetKeyPermissionsService } from '../Application/Services/SetKeyPermissionsService'
@@ -25,7 +26,7 @@ describe('SetKeyPermissionsService', () => {
     const memberRepo = new OrganizationMemberRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     gatewayMock = new MockGatewayClient()
-    const sync = new ApiKeyBifrostSync(gatewayMock)
+    const sync = new ApiKeyBifrostSync(gatewayMock, new OrganizationRepository(db))
     service = new SetKeyPermissionsService(apiKeyRepo, orgAuth, sync)
 
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))

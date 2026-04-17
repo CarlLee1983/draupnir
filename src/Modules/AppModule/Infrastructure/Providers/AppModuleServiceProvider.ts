@@ -1,9 +1,11 @@
+import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { setCheckModuleAccessService } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
 import type { IContractRepository } from '@/Modules/Contract/Domain/Repositories/IContractRepository'
+import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
 import { CheckModuleAccessService } from '../../Application/Services/CheckModuleAccessService'
 import { EnsureCoreAppModulesService } from '../../Application/Services/EnsureCoreAppModulesService'
 import { GetModuleDetailService } from '../../Application/Services/GetModuleDetailService'
@@ -36,6 +38,8 @@ export class AppModuleServiceProvider extends ModuleServiceProvider implements I
         c.make('appModuleRepository') as IAppModuleRepository,
         c.make('contractRepository') as IContractRepository,
         c.make('moduleSubscriptionRepository') as IModuleSubscriptionRepository,
+        c.make('llmGatewayClient') as ILLMGatewayClient,
+        c.make('organizationRepository') as IOrganizationRepository,
       )
     )
     container.bind('registerModuleService', (c: IContainer) =>

@@ -28,10 +28,10 @@ describe('CreateApiKeyService', () => {
     const memberRepo = new OrganizationMemberRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     gatewayMock = new MockGatewayClient()
-    const sync = new ApiKeyBifrostSync(gatewayMock)
+    const sync = new ApiKeyBifrostSync(gatewayMock, orgRepo)
     service = new CreateApiKeyService(apiKeyRepo, orgAuth, sync, hashingService)
 
-    const org = Organization.create('org-1', 'Test Org', 'test')
+    const org = Organization.create('org-1', 'Test Org', 'test').attachGatewayTeam('gwt-org-1')
     await orgRepo.save(org)
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
     await memberRepo.save(member)
@@ -120,7 +120,7 @@ describe('CreateApiKeyService', () => {
   it('Gateway 失敗時應清理本地 pending 記錄', async () => {
     const failMock = new MockGatewayClient()
     failMock.failNext(new GatewayError('連線失敗', 'NETWORK', 503, true))
-    const failSync = new ApiKeyBifrostSync(failMock)
+    const failSync = new ApiKeyBifrostSync(failMock, new OrganizationRepository(db))
     const memberRepo = new OrganizationMemberRepository(db)
     const orgAuth = new OrgAuthorizationHelper(memberRepo)
     const failService = new CreateApiKeyService(apiKeyRepo, orgAuth, failSync, hashingService)

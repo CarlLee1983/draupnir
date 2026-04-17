@@ -6,6 +6,7 @@
   "types": "src/index.ts",
   "scripts": {
     "test": "bun test __tests__/",
+    "test:integration": "bun test __tests__/teams.integration.test.ts",
     "typecheck": "tsc --noEmit",
     "build": "bun build src/index.ts --outdir dist --format esm --target bun"
   },

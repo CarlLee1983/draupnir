@@ -15,10 +15,12 @@ export { MockGatewayClient } from './implementations/MockGatewayClient'
 export type {
   BudgetUpdate,
   CreateKeyRequest,
+  CreateTeamRequest,
   KeyResponse,
   LogEntry,
   ProviderConfigUpdate,
   RateLimitUpdate,
+  TeamResponse,
   UpdateKeyRequest,
   UsageQuery,
   UsageStats,
