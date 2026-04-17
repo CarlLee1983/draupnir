@@ -1,13 +1,18 @@
 /**
- * CreateApiKeyService
- * Application service: handles the secure generation and registration of API keys.
+ * @file Application service for creating org-scoped API keys and registering them in Bifrost.
  *
- * Responsibilities:
- * - Verify user's organization membership
- * - Generate the unique API key string and its secure hash
- * - Register the key in the gateway (Bifrost)
- * - Persist the API key aggregate
- * - Handle rollback of gateway registration if persistence fails
+ * @remarks
+ * Flow (happy path):
+ * 1. Validate non-empty label and org membership for the creator.
+ * 2. Validate optional budget: `budgetMaxLimit` and `budgetResetPeriod` must both be set or both omitted.
+ * 3. Build {@link KeyScope} from optional model allow-list and rate limits.
+ * 4. Generate a local id, a `drp_sk_…` material for hashing only, and persist a **pending** aggregate (empty gateway id).
+ * 5. Call Bifrost `createVirtualKey` with the aggregate id as the gateway key `name` (user label stays on the domain entity only); on success, activate, optionally set `quotaAllocated`, `update` the row.
+ * 6. If the scope carries limits, sync permissions to the gateway key.
+ *
+ * On failure after step 5: best-effort delete the virtual key (if any id was stored), delete the DB row, then rethrow so the outer catch can surface the error.
+ *
+ * Successful responses expose `data.rawKey` as the **gateway** secret (`gatewayKeyValue`) suitable for Bearer use, not the local `drp_sk_` prefix string.
  */
 
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
@@ -23,6 +28,12 @@ import {
 } from '../DTOs/ApiKeyDTO'
 import type { CreateVirtualKeyOptions, IBifrostKeySync } from '../Ports/IBifrostKeySync'
 
+/**
+ * Normalizes optional Bifrost budget options from a create request.
+ *
+ * @param request - Incoming create payload; reads `budgetMaxLimit` / `budgetResetPeriod`
+ * @returns Either gateway-ready `CreateVirtualKeyOptions`, or structured validation errors (`BUDGET_*` codes)
+ */
 function parseBudgetForCreate(request: CreateApiKeyRequest):
   | { ok: true; options?: CreateVirtualKeyOptions }
   | { ok: false; error: string; message: string } {
@@ -53,9 +64,17 @@ function parseBudgetForCreate(request: CreateApiKeyRequest):
 }
 
 /**
- * Service responsible for creating new API keys and syncing them with the gateway.
+ * Creates a persisted {@link ApiKey} and a matching Bifrost virtual key, returning a one-time secret to the caller.
+ *
+ * @see {@link CreateApiKeyRequest} for input fields
  */
 export class CreateApiKeyService {
+  /**
+   * @param apiKeyRepository - Persistence for API key aggregates
+   * @param orgAuth - Ensures the creator belongs to `request.orgId` (or holds a privileged system role)
+   * @param bifrostSync - Gateway: create virtual key, optional permission sync, rollback delete
+   * @param keyHashingService - Produces the stored hash for the locally generated `drp_sk_…` material
+   */
   constructor(
     private readonly apiKeyRepository: IApiKeyRepository,
     private readonly orgAuth: OrgAuthorizationHelper,
@@ -64,7 +83,10 @@ export class CreateApiKeyService {
   ) {}
 
   /**
-   * Executes the API key creation workflow.
+   * Runs the full create workflow end-to-end.
+   *
+   * @param request - Org, acting user, label, optional scope, expiry, and optional paired budget fields
+   * @returns On success, `data` merges {@link ApiKeyPresenter.fromEntity} with `rawKey` (Bifrost secret). On failure, `error` carries a machine-oriented code when validation failed, or the exception message for unexpected errors.
    */
   async execute(request: CreateApiKeyRequest): Promise<ApiKeyCreatedResponse> {
     try {
@@ -118,7 +140,7 @@ export class CreateApiKeyService {
 
       try {
         const { gatewayKeyId, gatewayKeyValue } = await this.bifrostSync.createVirtualKey(
-          request.label,
+          keyId,
           request.orgId,
           budgetParsed.options,
         )

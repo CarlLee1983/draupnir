@@ -9,19 +9,44 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 
+/**
+ * Shape of the validated POST body for creating an API key, set on `ctx` by `ManagerCreateApiKeyRequest`.
+ * If the route does not use that request, `validated` is unset and callers only see `{ label: '' }`.
+ */
 interface CreateForm {
+  /** Human-readable label */
   label: string
+  /** Optional per-key quota cap; with `budgetResetPeriod`, persisted as budget fields */
   quotaAllocated?: number
+  /** Budget reset cadence; meaningful only when `quotaAllocated` is set */
   budgetResetPeriod?: '7d' | '30d'
+  /** Optional org `member` user id to assign the key to after creation */
   assigneeUserId?: string | null
 }
 
 /**
+ * Manager UI for creating an API key (Inertia).
+ *
  * Paths:
- *  - GET  `/manager/api-keys/create` → 顯示建立表單
- *  - POST `/manager/api-keys`       → 建立 key（+ optional 指派）；路由須掛 `ManagerCreateApiKeyRequest`，否則 `validated` 不會填入
+ * - GET `/manager/api-keys/create` — render create form
+ * - POST `/manager/api-keys` — create key with optional quota and assignee; route must use `ManagerCreateApiKeyRequest` or `validated` stays empty
+ *
+ * React page: `Manager/ApiKeys/Create`
+ *
+ * Resolves the signed-in user’s org membership, loads assignees (`role === 'member'` only), active contract quota,
+ * and total allocated quota. When `quotaAllocated` is sent, it is checked against remaining pool before create.
+ * On success, optionally assigns the key and re-renders the same page with a one-time `newKeyValue` (plaintext key).
  */
 export class ManagerApiKeyCreatePage {
+  /**
+   * @param inertia - Inertia render service
+   * @param createApiKeyService - Creates API keys
+   * @param assignApiKeyService - Optional post-create assignee
+   * @param listMembersService - Lists org members for the assignee picker
+   * @param membershipService - Resolves org for the signed-in user
+   * @param contractQuotaService - Active contract quota for the org
+   * @param sumAllocatedService - Sum of allocated quota (for availability checks)
+   */
   constructor(
     private readonly inertia: InertiaService,
     private readonly createApiKeyService: CreateApiKeyService,
@@ -32,6 +57,12 @@ export class ManagerApiKeyCreatePage {
     private readonly sumAllocatedService: SumQuotaAllocatedForOrgService,
   ) {}
 
+  /**
+   * Resolves org id from session-backed membership; redirects to the member dashboard if none.
+   *
+   * @param ctx - HTTP context (auth middleware must have run)
+   * @returns Org id or a redirect `Response`
+   */
   private async resolveOrgId(
     ctx: IHttpContext,
   ): Promise<{ orgId: string } | { redirect: Response }> {
@@ -41,6 +72,12 @@ export class ManagerApiKeyCreatePage {
     return { orgId: membership.orgId }
   }
 
+  /**
+   * GET: render create-form props (assignees, contract quota, total allocated).
+   *
+   * @param ctx - HTTP context
+   * @returns Inertia HTML, or redirect when membership is missing
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const r = await this.resolveOrgId(ctx)
@@ -66,6 +103,13 @@ export class ManagerApiKeyCreatePage {
     })
   }
 
+  /**
+   * POST: create an API key from the validated body; optional quota check and assignee; on success re-renders
+   * the same page with `newKeyValue`. Flashes an error and redirects back when quota exceeds availability or create fails.
+   *
+   * @param ctx - HTTP context (`validated` should be injected by `ManagerCreateApiKeyRequest`)
+   * @returns Inertia HTML including a one-time `newKeyValue`, or a redirect
+   */
   async store(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const r = await this.resolveOrgId(ctx)

@@ -47,6 +47,7 @@ describe('CreateApiKeyService', () => {
     expect(result.success).toBe(true)
     expect(result.data?.rawKey).toBeTruthy()
     expect(result.data?.id).toBeTruthy()
+    expect(gatewayMock.calls.createKey[0].name).toBe(result.data?.id)
     expect(result.data?.label).toBe('My Production Key')
     expect(result.data?.status).toBe('active')
   })
