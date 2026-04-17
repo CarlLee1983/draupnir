@@ -1,4 +1,5 @@
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
+import { GatewayError } from '@/Foundation/Infrastructure/Services/LLMGateway/errors'
 import type { IOrganizationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationRepository'
 import type { KeyBudgetResetPeriod } from '../../Application/DTOs/ApiKeyDTO'
 import type {
@@ -19,20 +20,23 @@ export class ApiKeyBifrostSync implements IBifrostKeySync {
     orgId: string,
     options?: CreateVirtualKeyOptions,
   ): Promise<CreateVirtualKeyResult> {
-    // 解析該組織的 Bifrost Team ID：由 provisioning 寫入 org.gatewayTeamId。
-    // 若尚未寫入（provisioning 失敗留下的空缺）則 log 警告並以無 team_id 方式建立，
-    // 讓 key 仍可使用；spend 聚合會暫時落在無 team scope，待 ops 補 provision 後才會關聯。
+    // Fail closed: without a Bifrost Team binding, any issued key would be
+    // unscoped — spend/usage wouldn't aggregate to the org and later
+    // reconciliation cannot reattach it. Upstream must re-run provisioning.
     const org = await this.orgRepo.findById(orgId)
-    const teamId = org?.gatewayTeamId ?? undefined
+    const teamId = org?.gatewayTeamId
     if (!teamId) {
-      console.warn('[ApiKeyBifrostSync] organization has no gatewayTeamId; key will be unscoped', {
-        orgId,
-      })
+      throw new GatewayError(
+        `Organization ${orgId} has no Bifrost Team binding; re-run provisioning before issuing keys.`,
+        'VALIDATION',
+        0,
+        false,
+      )
     }
     const vk = await this.gatewayClient.createKey({
       name: label,
       keyIds: ['*'],
-      ...(teamId !== undefined && { teamId }),
+      teamId,
       ...(options?.budget != null && {
         budget: {
           maxLimit: options.budget.maxLimit,
