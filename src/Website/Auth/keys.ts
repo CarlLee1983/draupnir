@@ -5,6 +5,7 @@
  * controllers from the dependency injection container.
  */
 export const AUTH_PAGE_KEYS = {
+  home: 'page:auth:home',
   login: 'page:auth:login',
   register: 'page:auth:register',
   forgotPassword: 'page:auth:forgotPassword',

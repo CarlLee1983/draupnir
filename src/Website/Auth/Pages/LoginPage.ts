@@ -3,6 +3,7 @@ import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddlewar
 import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { dashboardPathForWebRole } from '../dashboardPathForWebRole'
 
 /**
  * Inertia page controller for the login view.
@@ -22,13 +23,7 @@ export class LoginPage {
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)
     if (auth) {
-      const destination =
-        auth.role === 'admin'
-          ? '/admin/dashboard'
-          : auth.role === 'manager'
-            ? '/manager/dashboard'
-            : '/member/dashboard'
-      return ctx.redirect(destination)
+      return ctx.redirect(dashboardPathForWebRole(auth.role))
     }
 
     return this.inertia.render(ctx, 'Auth/Login', {
@@ -71,12 +66,6 @@ export class LoginPage {
     })
 
     const role = result.data.user.role
-    const destination =
-      role === 'admin'
-        ? '/admin/dashboard'
-        : role === 'manager'
-          ? '/manager/dashboard'
-          : '/member/dashboard'
-    return ctx.redirect(destination)
+    return ctx.redirect(dashboardPathForWebRole(role))
   }
 }

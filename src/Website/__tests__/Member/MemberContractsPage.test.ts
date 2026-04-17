@@ -1,8 +1,8 @@
-import { describe, expect, mock, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../../Http/Inertia/InertiaRequestHandler'
 import { MemberContractsPage } from '../../Member/Pages/MemberContractsPage'
+import { MemberCostBreakdownPage } from '../../Member/Pages/MemberCostBreakdownPage'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
   const store = new Map<string, unknown>()
@@ -27,7 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),
@@ -58,93 +58,28 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
   })
 }
 
-type InertiaCapture = { component: string; props: Record<string, unknown> } | null
-
-function createMockInertia(): { inertia: InertiaService; captured: { lastCall: InertiaCapture } } {
-  const captured = { lastCall: null as InertiaCapture }
-  const inertia = {
-    render: (_ctx: IHttpContext, component: string, props: Record<string, unknown>) => {
-      captured.lastCall = { component, props }
-      return new Response(JSON.stringify({ component, props }), {
-        headers: { 'Content-Type': 'application/json' },
-      })
-    },
-  } as unknown as InertiaService
-  return { inertia, captured }
-}
-
 describe('MemberContractsPage', () => {
-  test('authenticated member request renders correct Inertia component', async () => {
+  test('redirects generic members away from contract quota UI', async () => {
     const ctx = createMemberContext({
       getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),
     })
-    const { inertia, captured } = createMockInertia()
+    const page = new MemberContractsPage()
+    const res = await page.handle(ctx)
 
-    const mockListService = {
-      execute: mock(() =>
-        Promise.resolve({
-          success: true,
-          data: [
-            {
-              id: 'contract-1',
-              status: 'active',
-              terms: {
-                creditQuota: 1000,
-                validityPeriod: { startDate: '2026-01-01', endDate: '2026-12-31' },
-              },
-            },
-          ],
-        }),
-      ),
-    }
-
-    const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
-    const page = new MemberContractsPage(inertia, mockListService as any, mockMembershipService as any)
-    await page.handle(ctx)
-
-    expect(captured.lastCall).not.toBe(null)
-    expect(captured.lastCall?.component).toBe('Member/Contracts/Index')
-    expect(captured.lastCall?.props.orgId).toBe('org-123')
-    expect(captured.lastCall?.props.contracts).not.toBe(null)
+    expect(res.status).toBe(302)
+    expect(res.headers.get('Location')).toBe('/member/dashboard')
   })
+})
 
-  test('without orgId renders with empty contracts and error message', async () => {
+describe('MemberCostBreakdownPage', () => {
+  test('redirects generic members away from cost breakdown UI', async () => {
     const ctx = createMemberContext({
-      getQuery: () => undefined,
+      getPathname: () => '/member/cost-breakdown',
     })
-    const { inertia, captured } = createMockInertia()
+    const page = new MemberCostBreakdownPage()
+    const res = await page.handle(ctx)
 
-    const mockListService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
-
-    const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
-    const page = new MemberContractsPage(inertia, mockListService as any, mockMembershipService as any)
-    await page.handle(ctx)
-
-    expect(captured.lastCall?.component).toBe('Member/Contracts/Index')
-    expect(captured.lastCall?.props.orgId).toBe(null)
-    expect(captured.lastCall?.props.contracts).toEqual([])
-    expect(captured.lastCall?.props.error).toEqual({ key: 'member.contracts.selectOrg' })
-  })
-
-  test('service failure passes error message to Inertia', async () => {
-    const ctx = createMemberContext({
-      getQuery: (key: string) => (key === 'orgId' ? 'org-123' : undefined),
-    })
-    const { inertia, captured } = createMockInertia()
-
-    const mockListService = {
-      execute: mock(() =>
-        Promise.resolve({
-          success: false,
-          message: 'Failed to load contracts',
-        }),
-      ),
-    }
-
-    const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
-    const page = new MemberContractsPage(inertia, mockListService as any, mockMembershipService as any)
-    await page.handle(ctx)
-
-    expect(captured.lastCall?.props.error).toEqual({ key: 'member.contracts.loadFailed' })
+    expect(res.status).toBe(302)
+    expect(res.headers.get('Location')).toBe('/member/dashboard')
   })
 })

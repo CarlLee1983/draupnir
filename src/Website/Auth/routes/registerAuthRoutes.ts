@@ -50,6 +50,13 @@ const forgotPasswordRateLimit = createInMemoryRateLimit({ scope: 'auth:forgot', 
 const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
   {
     method: 'get',
+    path: '/',
+    page: AUTH_PAGE_KEYS.home,
+    action: 'handle',
+    name: 'pages.home',
+  },
+  {
+    method: 'get',
     path: '/login',
     page: AUTH_PAGE_KEYS.login,
     action: 'handle',

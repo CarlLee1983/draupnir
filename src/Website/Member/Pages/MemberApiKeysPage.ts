@@ -1,4 +1,6 @@
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
+import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
+import type { GetPendingInvitationsService } from '@/Modules/Organization/Application/Services/GetPendingInvitationsService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -15,6 +17,8 @@ export class MemberApiKeysPage {
     private readonly inertia: InertiaService,
     private readonly listService: ListApiKeysService,
     private readonly membershipService: GetUserMembershipService,
+    private readonly balanceService: GetBalanceService,
+    private readonly pendingInvitationsService: GetPendingInvitationsService,
   ) {}
 
   /**
@@ -26,19 +30,29 @@ export class MemberApiKeysPage {
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
-    let orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
-    if (!orgId) {
-      const membership = await this.membershipService.execute(auth.userId)
-      orgId = membership?.orgId ?? null
-    }
-    if (!orgId) {
+    const membership = await this.membershipService.execute(auth.userId)
+
+    if (!membership) {
+      let pendingInvitations: Awaited<ReturnType<GetPendingInvitationsService['execute']>> = []
+      try {
+        pendingInvitations = await this.pendingInvitationsService.execute(auth.userId)
+      } catch {
+        // 查詢失敗不影響頁面渲染
+      }
+
       return this.inertia.render(ctx, 'Member/ApiKeys/Index', {
         orgId: null,
+        balance: null,
+        hasOrganization: false,
+        pendingInvitations,
         keys: [],
         meta: { total: 0, page: 1, limit: 20, totalPages: 0 },
-        error: { key: 'member.apiKeys.selectOrg' },
+        error: null,
       })
     }
+
+    const orgId = membership.orgId
+    const balanceResult = await this.balanceService.execute(orgId, auth.userId, auth.role)
 
     const page = parseInt(ctx.getQuery('page') ?? '1', 10)
     const limit = parseInt(ctx.getQuery('limit') ?? '20', 10)
@@ -64,11 +78,14 @@ export class MemberApiKeysPage {
 
     return this.inertia.render(ctx, 'Member/ApiKeys/Index', {
       orgId,
+      balance: balanceResult.success ? (balanceResult.data ?? null) : null,
+      hasOrganization: true,
+      pendingInvitations: [],
       keys,
       meta: result.success
         ? (result.data?.meta ?? { total: 0, page: 1, limit: 20, totalPages: 0 })
         : { total: 0, page: 1, limit: 20, totalPages: 0 },
-      error: result.success ? null : { key: 'member.apiKeys.loadFailed' },
+      error: (balanceResult.success && result.success) ? null : { key: 'member.dashboard.loadFailed' },
     })
   }
 }

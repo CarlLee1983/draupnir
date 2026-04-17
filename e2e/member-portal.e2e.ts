@@ -78,7 +78,10 @@ test.describe('Member Portal', { tag: '@smoke' }, () => {
     await expect(page.getByRole('heading', { name: '用量分析' })).toBeVisible({ timeout: 15_000 })
   })
 
-  test('Contracts page loads', async ({ page, request }) => {
+  test('Contracts URL redirects members to dashboard (quota UI is manager-only)', async ({
+    page,
+    request,
+  }) => {
     const email = `member-contracts-${Date.now()}@test.com`
     const password = 'Test1234!'
 
@@ -91,7 +94,8 @@ test.describe('Member Portal', { tag: '@smoke' }, () => {
     await page.setExtraHTTPHeaders({ Authorization: `Bearer ${token}` })
     await page.goto('/member/contracts', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByRole('heading', { name: '配額' })).toBeVisible({ timeout: 15_000 })
+    await expect(page).toHaveURL(/\/member\/dashboard/)
+    await expect(page.getByRole('heading', { name: '總覽' })).toBeVisible({ timeout: 15_000 })
   })
 
   test('Settings page shows profile form', async ({ page, request }) => {

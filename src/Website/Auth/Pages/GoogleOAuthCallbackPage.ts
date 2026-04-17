@@ -1,5 +1,6 @@
 import type { GoogleOAuthService } from '@/Modules/Auth/Application/Services/GoogleOAuthService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { dashboardPathForWebRole } from '../dashboardPathForWebRole'
 
 /**
  * Handles Google OAuth redirect callback (`/oauth/google/callback`).
@@ -34,12 +35,6 @@ export class GoogleOAuthCallbackPage {
       return ctx.json({ error: 'OAuth authentication failed' }, 401)
     }
 
-    const destination =
-      result.role === 'admin'
-        ? '/admin/dashboard'
-        : result.role === 'manager'
-          ? '/manager/dashboard'
-          : '/member/dashboard'
-    return ctx.redirect(destination, 302)
+    return ctx.redirect(dashboardPathForWebRole(result.role ?? 'member'), 302)
   }
 }

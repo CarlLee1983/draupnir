@@ -2,7 +2,7 @@
  * Member 頁面擴充白箱 E2E 測試
  *
  * 補充 member-portal.e2e.ts 未涵蓋的頁面：
- * - /member/cost-breakdown
+ * - /member/cost-breakdown（一般 member 會重導向 dashboard）
  * - /member/alerts
  */
 
@@ -19,24 +19,17 @@ async function createMemberAndGetToken(request: Parameters<Parameters<typeof tes
 }
 
 test.describe('Member 擴充頁面白箱測試', () => {
-  test('成本分析頁面 /member/cost-breakdown 正確渲染', async ({ page, request }) => {
+  test('/member/cost-breakdown 對一般 member 重導向至總覽', async ({ page, request }) => {
     const { token } = await createMemberAndGetToken(request)
 
     await page.setExtraHTTPHeaders({ Authorization: `Bearer ${token}` })
     await page.goto('/member/cost-breakdown', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByRole('heading', { name: '成本分析' })).toBeVisible({ timeout: 15_000 })
+    await expect(page).toHaveURL(/\/member\/dashboard/)
+    await expect(page.getByRole('heading', { name: '總覽' })).toBeVisible({ timeout: 15_000 })
 
-    // 時間窗切換按鈕存在
-    await expect(page.getByRole('button', { name: '7d' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '30d' })).toBeVisible()
-    await expect(page.getByRole('button', { name: '90d' })).toBeVisible()
-
-    // 沒有組織時顯示提示訊息
-    await expect(page.getByText('請選擇一個組織以查看成本分析')).toBeVisible({ timeout: 10_000 })
-
-    await page.screenshot({ path: '/tmp/cost-breakdown.png', fullPage: true })
-    console.log('✅ 成本分析頁面渲染正常')
+    await page.screenshot({ path: '/tmp/cost-breakdown-redirect.png', fullPage: true })
+    console.log('✅ 成本分析舊網址已正確重導向 dashboard')
   })
 
   test('Alerts 頁面 /member/alerts 正確渲染（需 org manager）', async ({ page, request }) => {

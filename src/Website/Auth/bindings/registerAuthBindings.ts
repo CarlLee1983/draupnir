@@ -14,6 +14,7 @@ import type { ResetPasswordService } from '@/Modules/Auth/Application/Services/R
 import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
 import type { LogoutUserService } from '@/Modules/Auth/Application/Services/LogoutUserService'
 import { EmailVerificationPage } from '../Pages/EmailVerificationPage'
+import { HomePage } from '../Pages/HomePage'
 import { LogoutPage } from '../Pages/LogoutPage'
 import { ForgotPasswordPage } from '../Pages/ForgotPasswordPage'
 import { GoogleOAuthCallbackPage } from '../Pages/GoogleOAuthCallbackPage'
@@ -33,6 +34,8 @@ import { AUTH_PAGE_KEYS } from '../keys'
 export function registerAuthBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = AUTH_PAGE_KEYS
+
+  container.singleton(k.home, () => new HomePage())
 
   container.singleton(
     k.login,

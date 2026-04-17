@@ -1,41 +1,11 @@
-import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
- * Member cost breakdown page shell (`Member/CostBreakdown/Index`).
+ * Cost breakdown is not exposed to the generic member web role; keep the route
+ * stable for bookmarks and redirect to the member dashboard.
  */
 export class MemberCostBreakdownPage {
-  constructor(
-    private readonly inertia: InertiaService,
-    private readonly membershipService: GetUserMembershipService,
-  ) {}
-
-  /**
-   * Renders the cost breakdown page.
-   *
-   * @param ctx - HTTP context to retrieve `orgId` from query or header.
-   * @returns Inertia render response with organization data.
-   */
-  async handle(ctx: IHttpContext): Promise<Response> {
-    const auth = AuthMiddleware.getAuthContext(ctx)!
-
-    let orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
-    if (!orgId) {
-      const membership = await this.membershipService.execute(auth.userId)
-      orgId = membership?.orgId ?? null
-    }
-    if (!orgId) {
-      return this.inertia.render(ctx, 'Member/CostBreakdown/Index', {
-        orgId: null,
-        error: { key: 'member.costBreakdown.selectOrg' },
-      })
-    }
-
-    return this.inertia.render(ctx, 'Member/CostBreakdown/Index', {
-      orgId,
-      error: null,
-    })
+  handle(ctx: IHttpContext): Promise<Response> {
+    return Promise.resolve(ctx.redirect('/member/dashboard'))
   }
 }
