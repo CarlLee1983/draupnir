@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Head, router } from '@inertiajs/react'
+import { cn } from '@/lib/utils'
 import { ManagerLayout } from '@/layouts/ManagerLayout'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -26,6 +27,8 @@ interface Props {
   passwordChangeError?: string | null
 }
 
+type SettingsTab = 'account' | 'security'
+
 export default function ManagerSettingsIndex({
   profile,
   error,
@@ -38,6 +41,7 @@ export default function ManagerSettingsIndex({
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
   const [passwordSaving, setPasswordSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<SettingsTab>('account')
 
   const submitProfile = (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,17 +93,43 @@ export default function ManagerSettingsIndex({
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <aside className="lg:col-span-1">
-              <nav className="flex flex-row space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1">
-                <Button 
-                  variant="ghost" 
-                  className="justify-start rounded-none border-l-2 border-indigo-500 bg-zinc-900/50 font-mono text-[11px] uppercase tracking-widest text-zinc-100 hover:bg-zinc-900"
+              <nav
+                className="flex flex-row space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1"
+                role="tablist"
+                aria-label="設定分類"
+              >
+                <Button
+                  type="button"
+                  variant="ghost"
+                  role="tab"
+                  aria-selected={activeTab === 'account'}
+                  id="settings-tab-account"
+                  aria-controls="settings-panel-account"
+                  onClick={() => setActiveTab('account')}
+                  className={cn(
+                    'justify-start rounded-none border-l-2 font-mono text-[11px] uppercase tracking-widest hover:bg-zinc-900',
+                    activeTab === 'account'
+                      ? 'border-indigo-500 bg-zinc-900/50 text-zinc-100'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-300',
+                  )}
                 >
                   <User className="mr-2 h-4 w-4" />
                   帳號資訊
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  className="justify-start rounded-none border-l-2 border-transparent font-mono text-[11px] uppercase tracking-widest text-zinc-500 hover:bg-zinc-900 hover:text-zinc-300"
+                <Button
+                  type="button"
+                  variant="ghost"
+                  role="tab"
+                  aria-selected={activeTab === 'security'}
+                  id="settings-tab-security"
+                  aria-controls="settings-panel-security"
+                  onClick={() => setActiveTab('security')}
+                  className={cn(
+                    'justify-start rounded-none border-l-2 font-mono text-[11px] uppercase tracking-widest hover:bg-zinc-900',
+                    activeTab === 'security'
+                      ? 'border-indigo-500 bg-zinc-900/50 text-zinc-100'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-300',
+                  )}
                 >
                   <Shield className="mr-2 h-4 w-4" />
                   安全性
@@ -109,7 +139,13 @@ export default function ManagerSettingsIndex({
 
             <div className="lg:col-span-2 space-y-8">
               {/* Profile Section */}
-              <Card className="rounded-none border-zinc-800 bg-zinc-900 shadow-none">
+              {activeTab === 'account' && (
+              <Card
+                id="settings-panel-account"
+                role="tabpanel"
+                aria-labelledby="settings-tab-account"
+                className="rounded-none border-zinc-800 bg-zinc-900 shadow-none"
+              >
                 <CardHeader className="border-b border-zinc-800 px-6 py-4">
                   <div className="flex items-center gap-2 text-zinc-100">
                     <User className="h-4 w-4 text-indigo-400" />
@@ -155,9 +191,16 @@ export default function ManagerSettingsIndex({
                   </form>
                 </CardContent>
               </Card>
+              )}
 
               {/* Password Section */}
-              <Card className="rounded-none border-zinc-800 bg-zinc-900 shadow-none">
+              {activeTab === 'security' && (
+              <Card
+                id="settings-panel-security"
+                role="tabpanel"
+                aria-labelledby="settings-tab-security"
+                className="rounded-none border-zinc-800 bg-zinc-900 shadow-none"
+              >
                 <CardHeader className="border-b border-zinc-800 px-6 py-4">
                   <div className="flex items-center gap-2 text-zinc-100">
                     <Shield className="h-4 w-4 text-zinc-400" />
@@ -250,6 +293,7 @@ export default function ManagerSettingsIndex({
                   </form>
                 </CardContent>
               </Card>
+              )}
             </div>
           </div>
         </div>
