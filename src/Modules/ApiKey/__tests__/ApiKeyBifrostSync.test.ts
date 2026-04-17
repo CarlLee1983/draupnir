@@ -36,11 +36,25 @@ describe('ApiKeyBifrostSync', () => {
     expect(mock.calls.createKey[0].keyIds).toEqual(['*'])
   })
 
-  it('org 尚未 provision 完 gatewayTeamId 時，createVirtualKey 仍會建立 key 但不帶 teamId', async () => {
+  it('createVirtualKey 在 org 不存在時拋 GatewayError(VALIDATION)', async () => {
+    const { GatewayError } = await import(
+      '@/Foundation/Infrastructure/Services/LLMGateway/errors'
+    )
+    await expect(sync.createVirtualKey('k', 'org-missing')).rejects.toBeInstanceOf(GatewayError)
+    await expect(sync.createVirtualKey('k', 'org-missing')).rejects.toMatchObject({
+      code: 'VALIDATION',
+    })
+    expect(mock.calls.createKey).toHaveLength(0)
+  })
+
+  it('createVirtualKey 在 org.gatewayTeamId 為 null 時拋 GatewayError(VALIDATION)', async () => {
+    const { GatewayError } = await import(
+      '@/Foundation/Infrastructure/Services/LLMGateway/errors'
+    )
     const naked = Organization.create('org-naked', 'org-naked', '')
     await orgRepo.save(naked)
-    await sync.createVirtualKey('Unscoped', 'org-naked')
-    expect(mock.calls.createKey[0].teamId).toBeUndefined()
+    await expect(sync.createVirtualKey('k', 'org-naked')).rejects.toBeInstanceOf(GatewayError)
+    expect(mock.calls.createKey).toHaveLength(0)
   })
 
   it('createVirtualKey 可附帶 budget（7d／30d）', async () => {

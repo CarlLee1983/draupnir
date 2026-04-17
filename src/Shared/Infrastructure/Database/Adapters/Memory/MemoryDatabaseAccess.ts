@@ -51,6 +51,11 @@ class MemoryQueryBuilder implements IQueryBuilder {
     return this
   }
 
+  forUpdate(): IQueryBuilder {
+    // Memory adapter is single-threaded; no-op.
+    return this
+  }
+
   private getTableRows(): Record<string, unknown>[] {
     if (!this.store.has(this.tableName)) {
       this.store.set(this.tableName, [])

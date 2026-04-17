@@ -54,6 +54,7 @@ describe('RemoveMemberService', () => {
         new ModuleSubscriptionRepository(db),
         new MockGatewayClient(),
         orgRepo,
+        db,
       ),
     )
     const inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)

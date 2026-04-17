@@ -11,6 +11,11 @@ export class OrganizationRepository implements IOrganizationRepository {
     return row ? OrganizationMapper.toEntity(row) : null
   }
 
+  async findByIdForUpdate(id: string): Promise<Organization | null> {
+    const row = await this.db.table('organizations').where('id', '=', id).forUpdate().first()
+    return row ? OrganizationMapper.toEntity(row) : null
+  }
+
   async findBySlug(slug: string): Promise<Organization | null> {
     const row = await this.db.table('organizations').where('slug', '=', slug).first()
     return row ? OrganizationMapper.toEntity(row) : null

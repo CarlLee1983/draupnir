@@ -42,6 +42,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
   private orderByConfig: { column: string; direction: 'ASC' | 'DESC' } | null = null
   private limitValue: number | null = null
   private offsetValue: number | null = null
+  private forUpdateFlag = false
 
   constructor(
     private db: ReturnType<typeof getDrizzleInstance>,
@@ -112,6 +113,10 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
 
       query = query.limit(1)
 
+      if (this.forUpdateFlag && typeof query.for === 'function') {
+        query = query.for('update')
+      }
+
       const results = await query
 
       return results[0] || null
@@ -145,6 +150,10 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
 
       if (this.limitValue) {
         query = query.limit(this.limitValue)
+      }
+
+      if (this.forUpdateFlag && typeof query.for === 'function') {
+        query = query.for('update')
       }
 
       return await query
@@ -302,6 +311,15 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
     const end = range[1] instanceof Date ? range[1].toISOString() : range[1]
 
     this.whereConditions.push(between(col, start, end))
+    return this
+  }
+
+  /**
+   * Row-level lock (SELECT ... FOR UPDATE). Must be invoked inside a transaction.
+   * Applied only on SELECT (first/select); silently dropped on INSERT/UPDATE/DELETE.
+   */
+  forUpdate(): IQueryBuilder {
+    this.forUpdateFlag = true
     return this
   }
 

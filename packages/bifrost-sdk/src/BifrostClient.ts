@@ -137,7 +137,12 @@ export class BifrostClient {
    * @returns The created Team
    */
   async createTeam(request: CreateTeamRequest): Promise<BifrostTeam> {
-    const response = await this.post<TeamResponse>('/api/governance/teams', request)
+    // retry: false — a 5xx from a retried POST could double-create upstream.
+    const response = await this.post<TeamResponse>(
+      '/api/governance/teams',
+      request,
+      { retry: false },
+    )
     return response.team
   }
 
@@ -205,8 +210,8 @@ export class BifrostClient {
   }
 
   /** Sends a POST request. */
-  private async post<T>(path: string, body: unknown): Promise<T> {
-    return this.request<T>('POST', path, body)
+  private async post<T>(path: string, body: unknown, opts?: { retry?: boolean }): Promise<T> {
+    return this.request<T>('POST', path, body, opts)
   }
 
   /** Sends a PUT request. */
@@ -229,40 +234,48 @@ export class BifrostClient {
    * @returns Parsed response data
    * @throws {@link BifrostApiError} when the API returns a non-2xx status code
    */
-  private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+  private async request<T>(
+    method: string,
+    path: string,
+    body?: unknown,
+    opts?: { retry?: boolean },
+  ): Promise<T> {
     const url = `${this.config.baseUrl}${path}`
 
-    return withRetry(
-      async () => {
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        }
-        const bearer = this.config.masterKey?.trim()
-        if (bearer) {
-          headers.Authorization = `Bearer ${bearer}`
-        }
+    const run = async (): Promise<T> => {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      }
+      const bearer = this.config.masterKey?.trim()
+      if (bearer) {
+        headers.Authorization = `Bearer ${bearer}`
+      }
 
-        const response = await fetch(url, {
-          method,
-          headers,
-          body: body ? JSON.stringify(body) : undefined,
-          signal: AbortSignal.timeout(this.config.timeoutMs),
-        })
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: AbortSignal.timeout(this.config.timeoutMs),
+      })
 
-        if (!response.ok) {
-          let responseBody: unknown
-          try {
-            responseBody = await response.json()
-          } catch {
-            responseBody = await response.text().catch(() => null)
-          }
-          throw new BifrostApiError(response.status, path, `${method} request failed`, responseBody)
+      if (!response.ok) {
+        let responseBody: unknown
+        try {
+          responseBody = await response.json()
+        } catch {
+          responseBody = await response.text().catch(() => null)
         }
+        throw new BifrostApiError(response.status, path, `${method} request failed`, responseBody)
+      }
 
-        return response.json() as Promise<T>
-      },
-      { maxRetries: this.config.maxRetries, baseDelayMs: this.config.retryBaseDelayMs },
-    )
+      return response.json() as Promise<T>
+    }
+
+    if (opts?.retry === false) return run()
+    return withRetry(run, {
+      maxRetries: this.config.maxRetries,
+      baseDelayMs: this.config.retryBaseDelayMs,
+    })
   }
 
   /**

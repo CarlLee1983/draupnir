@@ -46,6 +46,7 @@ describe('AcceptInvitationService', () => {
         new ModuleSubscriptionRepository(db),
         new MockGatewayClient(),
         orgRepo,
+        db,
       ),
     )
     inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
