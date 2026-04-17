@@ -1,5 +1,7 @@
 import type { AssignApiKeyService } from '@/Modules/ApiKey/Application/Services/AssignApiKeyService'
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
+import type { SumQuotaAllocatedForOrgService } from '@/Modules/ApiKey/Application/Services/SumQuotaAllocatedForOrgService'
+import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
@@ -26,6 +28,8 @@ export class ManagerApiKeyCreatePage {
     private readonly assignApiKeyService: AssignApiKeyService,
     private readonly listMembersService: ListMembersService,
     private readonly membershipService: GetUserMembershipService,
+    private readonly contractQuotaService: GetActiveOrgContractQuotaService,
+    private readonly sumAllocatedService: SumQuotaAllocatedForOrgService,
   ) {}
 
   private async resolveOrgId(
@@ -41,7 +45,11 @@ export class ManagerApiKeyCreatePage {
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const r = await this.resolveOrgId(ctx)
     if ('redirect' in r) return r.redirect
-    const members = await this.listMembersService.execute(r.orgId, auth.userId, auth.role)
+    const [members, quotaResult, allocatedResult] = await Promise.all([
+      this.listMembersService.execute(r.orgId, auth.userId, auth.role),
+      this.contractQuotaService.execute(r.orgId, auth.userId, auth.role),
+      this.sumAllocatedService.execute(r.orgId, auth.userId, auth.role),
+    ])
     const assignees = members.success
       ? ((members.data?.members ?? []) as Array<{ userId: string; role: string; email?: string }>)
           .filter((m) => m.role === 'member')
@@ -53,6 +61,8 @@ export class ManagerApiKeyCreatePage {
     return this.inertia.render(ctx, 'Manager/ApiKeys/Create', {
       orgId: r.orgId,
       assignees,
+      contractQuota: quotaResult.success ? (quotaResult.data?.contractQuota ?? null) : null,
+      totalAllocated: allocatedResult.success ? (allocatedResult.data?.totalAllocated ?? null) : null,
     })
   }
 
@@ -61,6 +71,24 @@ export class ManagerApiKeyCreatePage {
     const r = await this.resolveOrgId(ctx)
     if ('redirect' in r) return r.redirect
     const body = (ctx.get('validated') as CreateForm | undefined) ?? { label: '' }
+
+    if (body.quotaAllocated != null) {
+      const [quotaResult, allocatedResult] = await Promise.all([
+        this.contractQuotaService.execute(r.orgId, auth.userId, auth.role),
+        this.sumAllocatedService.execute(r.orgId, auth.userId, auth.role),
+      ])
+      if (quotaResult.success && allocatedResult.success) {
+        const available =
+          (quotaResult.data?.contractQuota ?? 0) - (allocatedResult.data?.totalAllocated ?? 0)
+        if (body.quotaAllocated > available) {
+          setFlash(ctx, 'error', {
+            key: 'manager.apiKeys.quotaExceedsAvailable',
+            params: { available: String(available) },
+          })
+          return ctx.redirect('/manager/api-keys/create')
+        }
+      }
+    }
 
     const created = await this.createApiKeyService.execute({
       orgId: r.orgId,
@@ -102,7 +130,11 @@ export class ManagerApiKeyCreatePage {
       })
     }
 
-    const members = await this.listMembersService.execute(r.orgId, auth.userId, auth.role)
+    const [members, quotaResult, allocatedResult] = await Promise.all([
+      this.listMembersService.execute(r.orgId, auth.userId, auth.role),
+      this.contractQuotaService.execute(r.orgId, auth.userId, auth.role),
+      this.sumAllocatedService.execute(r.orgId, auth.userId, auth.role),
+    ])
     const assignees = members.success
       ? ((members.data?.members ?? []) as Array<{ userId: string; role: string; email?: string }>)
           .filter((m) => m.role === 'member')
@@ -114,6 +146,8 @@ export class ManagerApiKeyCreatePage {
     return this.inertia.render(ctx, 'Manager/ApiKeys/Create', {
       orgId: r.orgId,
       assignees,
+      contractQuota: quotaResult.success ? (quotaResult.data?.contractQuota ?? null) : null,
+      totalAllocated: allocatedResult.success ? (allocatedResult.data?.totalAllocated ?? null) : null,
       newKeyValue,
     })
   }

@@ -46,6 +46,13 @@ function makeCtx(body?: unknown, overrides: Partial<IHttpContext> = {}): IHttpCo
   } as unknown as IHttpContext
 }
 
+const makeQuotaSvc = () => ({
+  execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { contractQuota: 5000, contractId: 'c-1' } })),
+})
+const makeAllocatedSvc = () => ({
+  execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { totalAllocated: 1000 } })),
+})
+
 describe('ManagerApiKeyCreatePage', () => {
   test('handle 渲染 Create 頁並提供可指派成員', async () => {
     const captured: { lastCall: { component: string; props: Record<string, unknown> } | null } = {
@@ -75,10 +82,14 @@ describe('ManagerApiKeyCreatePage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      makeQuotaSvc() as any,
+      makeAllocatedSvc() as any,
     )
     await page.handle(makeCtx())
     expect(captured.lastCall?.component).toBe('Manager/ApiKeys/Create')
     expect((captured.lastCall?.props as any).assignees.length).toBe(1)
+    expect((captured.lastCall?.props as any).contractQuota).toBe(5000)
+    expect((captured.lastCall?.props as any).totalAllocated).toBe(1000)
   })
 
   test('store: create 成功 + assignee 非空 → 呼叫 assign 並 render 頁面含 newKeyValue', async () => {
@@ -114,6 +125,8 @@ describe('ManagerApiKeyCreatePage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      makeQuotaSvc() as any,
+      makeAllocatedSvc() as any,
     )
     await page.store(makeCtx(body))
     expect(createSvc.execute).toHaveBeenCalled()
@@ -146,6 +159,8 @@ describe('ManagerApiKeyCreatePage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      makeQuotaSvc() as any,
+      makeAllocatedSvc() as any,
     )
     await page.store(makeCtx(body))
     expect(inertia.render).toHaveBeenCalled()
@@ -180,6 +195,8 @@ describe('ManagerApiKeyCreatePage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      makeQuotaSvc() as any,
+      makeAllocatedSvc() as any,
     )
     const res = await page.store(
       makeCtx(body, {
@@ -220,8 +237,38 @@ describe('ManagerApiKeyCreatePage', () => {
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
+      makeQuotaSvc() as any,
+      makeAllocatedSvc() as any,
     )
     await page.store(makeCtx(body))
     expect(assignSvc.execute).not.toHaveBeenCalled()
+  })
+
+  test('store: quotaAllocated 超過可用量時 flash error 並導回建立頁', async () => {
+    const setCookieCalls: Array<{ name: string; value: string }> = []
+    const createSvc = { execute: mock() }
+    const inertia = { render: mock() } as any
+    const body = { label: 'Big', quotaAllocated: 9999, budgetResetPeriod: '30d' }
+    const page = new ManagerApiKeyCreatePage(
+      inertia,
+      createSvc as any,
+      { execute: mock() } as any,
+      { execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { members: [] } })) } as any,
+      { execute: mock(() => Promise.resolve({ orgId: 'org-A' })) } as any,
+      { execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { contractQuota: 5000, contractId: 'c-1' } })) } as any,
+      { execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { totalAllocated: 4500 } })) } as any,
+    )
+    const res = await page.store(
+      makeCtx(body, {
+        setCookie: (name: string, value: string) => { setCookieCalls.push({ name, value }) },
+      }),
+    )
+    expect(res.headers.get('location')).toBe('/manager/api-keys/create')
+    expect(createSvc.execute).not.toHaveBeenCalled()
+    const flashCookie = setCookieCalls.find((c) => c.name === 'flash:error')
+    expect(flashCookie).toBeDefined()
+    const parsed = JSON.parse(decodeURIComponent(flashCookie!.value)) as { key: string; params?: Record<string, string> }
+    expect(parsed.key).toBe('manager.apiKeys.quotaExceedsAvailable')
+    expect(parsed.params?.available).toBe('500')
   })
 })

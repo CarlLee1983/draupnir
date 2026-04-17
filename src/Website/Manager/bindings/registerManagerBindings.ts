@@ -84,6 +84,8 @@ export function registerManagerBindings(container: IContainer): void {
       c.make('assignApiKeyService') as AssignApiKeyService,
       c.make('listMembersService') as ListMembersService,
       c.make('getUserMembershipService') as GetUserMembershipService,
+      c.make('getActiveOrgContractQuotaService') as GetActiveOrgContractQuotaService,
+      c.make('sumQuotaAllocatedForOrgService') as SumQuotaAllocatedForOrgService,
     )
   })
 
