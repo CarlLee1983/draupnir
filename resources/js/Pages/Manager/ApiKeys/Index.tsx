@@ -60,7 +60,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const revoke = (id: string) => {
-    if (!confirm('撤銷後此 key 將失效，確定執行？')) return
+    if (!confirm(t('ui.manager.apiKeys.revokeConfirm'))) return
     router.post(`/manager/api-keys/${id}/revoke`)
   }
 
@@ -76,13 +76,51 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
     })
   }
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return (
+          <Badge className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20">
+            <ShieldCheck className="h-3 w-3" />
+            {t('ui.common.status.active')}
+          </Badge>
+        )
+      case 'pending':
+        return (
+          <Badge variant="secondary" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
+            {t('ui.common.status.pending')}
+          </Badge>
+        )
+      case 'revoked':
+        return (
+          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
+            <ShieldAlert className="h-3 w-3" />
+            {t('ui.common.status.revoked')}
+          </Badge>
+        )
+      case 'suspended_no_credit':
+        return (
+          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
+            <ShieldAlert className="h-3 w-3" />
+            {t('ui.common.status.suspendedNoCredit')}
+          </Badge>
+        )
+      default:
+        return (
+          <Badge variant="outline" className="px-2.5 py-0.5 rounded-md shadow-sm">
+            {status}
+          </Badge>
+        )
+    }
+  }
+
   return (
     <ManagerLayout>
-      <Head title="API Keys" />
+      <Head title={t('ui.member.apiKeys.title')} />
       <div className="p-6 space-y-6 max-w-7xl mx-auto">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">API Keys</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ui.member.apiKeys.title')}</h1>
             <p className="text-muted-foreground mt-1">
               管理供成員呼叫 LLM Gateway 使用的 API 金鑰。
             </p>
@@ -90,7 +128,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
           <Link href="/manager/api-keys/create">
             <Button size="lg" className="gap-2 shadow-sm transition-all active:scale-95">
               <Plus className="h-4 w-4" />
-              建立 Key
+              {t('ui.member.apiKeys.createButton')}
             </Button>
           </Link>
         </div>
@@ -108,22 +146,22 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
           <CardHeader className="pb-3 border-b border-muted/40">
             <div className="flex items-center gap-2">
               <Key className="h-5 w-5 text-primary" />
-              <CardTitle>金鑰清單</CardTitle>
+              <CardTitle>{t('ui.manager.apiKeys.listTitle')}</CardTitle>
             </div>
             <CardDescription>
-              每個 Key 都可以獨立設定配額重置週期並指派給特定成員。
+              {t('ui.manager.apiKeys.listDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader className="bg-muted/30">
                 <TableRow className="hover:bg-transparent border-muted/40">
-                  <TableHead className="w-[200px] font-bold">名稱</TableHead>
+                  <TableHead className="w-[200px] font-bold">{t('ui.common.name')}</TableHead>
                   <TableHead className="font-bold">Gateway API Key</TableHead>
-                  <TableHead className="font-bold text-right">配額</TableHead>
-                  <TableHead className="font-bold">狀態</TableHead>
-                  <TableHead className="font-bold">指派對象</TableHead>
-                  <TableHead className="text-right font-bold pr-6">操作</TableHead>
+                  <TableHead className="font-bold text-right">{t('ui.common.quota')}</TableHead>
+                  <TableHead className="font-bold">{t('ui.common.status')}</TableHead>
+                  <TableHead className="font-bold">{t('ui.manager.apiKeys.assignedTo')}</TableHead>
+                  <TableHead className="text-right font-bold pr-6">{t('ui.common.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -132,9 +170,9 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                     <TableCell colSpan={6} className="h-48 text-center text-muted-foreground">
                       <div className="flex flex-col items-center justify-center space-y-2">
                         <Key className="h-8 w-8 opacity-20" />
-                        <p>目前尚無 API Key。</p>
+                        <p>{t('ui.manager.apiKeys.noKeys')}</p>
                         <Link href="/manager/api-keys/create">
-                          <Button variant="link" className="text-primary">立即建立第一個 Key</Button>
+                          <Button variant="link" className="text-primary">{t('ui.manager.apiKeys.createFirstKey')}</Button>
                         </Link>
                       </div>
                     </TableCell>
@@ -170,55 +208,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                         {k.quotaAllocated.toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        {(() => {
-                          const status = k.status
-                          switch (status) {
-                            case 'active':
-                              return (
-                                <Badge
-                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20"
-                                >
-                                  <ShieldCheck className="h-3 w-3" />
-                                  使用中
-                                </Badge>
-                              )
-                            case 'pending':
-                              return (
-                                <Badge
-                                  variant="secondary"
-                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
-                                >
-                                  待啟用
-                                </Badge>
-                              )
-                            case 'revoked':
-                              return (
-                                <Badge
-                                  variant="destructive"
-                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
-                                >
-                                  <ShieldAlert className="h-3 w-3" />
-                                  已撤銷
-                                </Badge>
-                              )
-                            case 'suspended_no_credit':
-                              return (
-                                <Badge
-                                  variant="destructive"
-                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
-                                >
-                                  <ShieldAlert className="h-3 w-3" />
-                                  餘額不足停用
-                                </Badge>
-                              )
-                            default:
-                              return (
-                                <Badge variant="outline" className="px-2.5 py-0.5 rounded-md shadow-sm">
-                                  {status}
-                                </Badge>
-                              )
-                          }
-                        })()}
+                        {getStatusBadge(k.status)}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
@@ -229,7 +219,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                             onChange={(e) => onAssignChange(k.id, e.target.value)}
                             disabled={k.status === 'revoked'}
                           >
-                            <option value="">未指派</option>
+                            <option value="">{t('ui.common.notAssigned')}</option>
                             {assignees.map((a) => (
                               <option key={a.userId} value={a.userId}>
                                 {a.email || a.userId}
@@ -247,7 +237,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuLabel>管理操作</DropdownMenuLabel>
+                            <DropdownMenuLabel>{t('ui.manager.apiKeys.mgmtActions')}</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-destructive focus:bg-destructive focus:text-destructive-foreground cursor-pointer"
@@ -255,7 +245,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                               disabled={k.status === 'revoked'}
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
-                              撤銷 Key
+                              {t('ui.manager.apiKeys.revokeKey')}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -271,7 +261,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
         {error && (
           <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-medium flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />
-            金鑰載入失敗，請確認您的權限或網路連線。
+            {t('ui.manager.apiKeys.loadFailed')}
           </div>
         )}
       </div>

@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { ShieldCheck, ShieldAlert } from 'lucide-react'
+import { useTranslation } from '@/lib/i18n'
 
 interface KeyRow {
   id: string
@@ -42,21 +44,6 @@ const getUsageStatus = (current: number, total: number) => {
   return 'default'
 }
 
-const getStatusBadge = (status: string) => {
-  switch (status) {
-    case 'active':
-      return <Badge className="bg-green-500 hover:bg-green-600">作用中</Badge>
-    case 'pending':
-      return <Badge variant="secondary">待啟用</Badge>
-    case 'revoked':
-      return <Badge variant="destructive">已撤銷</Badge>
-    case 'suspended_no_credit':
-      return <Badge variant="destructive">餘額不足停用</Badge>
-    default:
-      return <Badge variant="outline">{status}</Badge>
-  }
-}
-
 export default function ManagerDashboardIndex({
   orgId,
   contractQuota,
@@ -64,14 +51,54 @@ export default function ManagerDashboardIndex({
   keys,
   error,
 }: Props) {
+  const { t } = useTranslation()
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return (
+          <Badge className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20">
+            <ShieldCheck className="h-3 w-3" />
+            {t('ui.common.status.active')}
+          </Badge>
+        )
+      case 'pending':
+        return (
+          <Badge variant="secondary" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
+            {t('ui.common.status.pending')}
+          </Badge>
+        )
+      case 'revoked':
+        return (
+          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
+            <ShieldAlert className="h-3 w-3" />
+            {t('ui.common.status.revoked')}
+          </Badge>
+        )
+      case 'suspended_no_credit':
+        return (
+          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
+            <ShieldAlert className="h-3 w-3" />
+            {t('ui.common.status.suspendedNoCredit')}
+          </Badge>
+        )
+      default:
+        return (
+          <Badge variant="outline" className="px-2.5 py-0.5 rounded-md shadow-sm">
+            {status}
+          </Badge>
+        )
+    }
+  }
+
   return (
     <ManagerLayout>
-      <Head title="Manager Dashboard" />
+      <Head title={t('ui.manager.dashboard.top10Keys')} />
       <div className="grid gap-4 p-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">組織餘額</CardTitle>
-            <CardDescription className="text-xs">作用中合約配額上限</CardDescription>
+            <CardTitle className="text-sm font-medium">{t('ui.manager.dashboard.orgBalance')}</CardTitle>
+            <CardDescription className="text-xs">{t('ui.manager.dashboard.orgBalanceDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatNumber(contractQuota)}</div>
@@ -79,8 +106,8 @@ export default function ManagerDashboardIndex({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">已配發配額</CardTitle>
-            <CardDescription className="text-xs">作用中 API keys 配發加總</CardDescription>
+            <CardTitle className="text-sm font-medium">{t('ui.manager.dashboard.totalAllocated')}</CardTitle>
+            <CardDescription className="text-xs">{t('ui.manager.dashboard.totalAllocatedDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatNumber(totalAllocated)}</div>
@@ -88,8 +115,8 @@ export default function ManagerDashboardIndex({
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">API Keys 數量</CardTitle>
-            <CardDescription className="text-xs">目前建立的 Key 總數</CardDescription>
+            <CardTitle className="text-sm font-medium">{t('ui.manager.dashboard.apiKeyCount')}</CardTitle>
+            <CardDescription className="text-xs">{t('ui.manager.dashboard.apiKeyCountDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{keys.length}</div>
@@ -100,33 +127,33 @@ export default function ManagerDashboardIndex({
       <div className="p-4 pt-0">
         <Card>
           <CardHeader>
-            <CardTitle>各 Key 用量</CardTitle>
-            <CardDescription>Top 10 使用中的 key</CardDescription>
+            <CardTitle>{t('ui.manager.dashboard.top10Keys')}</CardTitle>
+            <CardDescription>{t('ui.manager.dashboard.top10KeysDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Label</TableHead>
-                  <TableHead className="text-center">狀態</TableHead>
-                  <TableHead className="text-right">配額</TableHead>
-                  <TableHead className="text-right">用量</TableHead>
-                  <TableHead className="text-right">使用率</TableHead>
-                  <TableHead className="text-center">指派狀態</TableHead>
+                  <TableHead>{t('ui.common.name')}</TableHead>
+                  <TableHead className="text-center">{t('ui.common.status')}</TableHead>
+                  <TableHead className="text-right">{t('ui.common.quota')}</TableHead>
+                  <TableHead className="text-right">{t('ui.common.usage')}</TableHead>
+                  <TableHead className="text-right">{t('ui.common.usageRate')}</TableHead>
+                  <TableHead className="text-center">{t('ui.common.assignedStatus')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {keys.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                      目前沒有 API Key
+                      {t('ui.common.noData')}
                     </TableCell>
                   </TableRow>
                 ) : (
                   keys.slice(0, 10).map((k) => {
                     const usage = k.usageCurrent ?? 0
                     const percentage = k.quotaAllocated > 0 ? (usage / k.quotaAllocated) * 100 : 0
-                    const status = getUsageStatus(usage, k.quotaAllocated)
+                    const usageStatus = getUsageStatus(usage, k.quotaAllocated)
 
                     return (
                       <TableRow key={k.id}>
@@ -138,8 +165,8 @@ export default function ManagerDashboardIndex({
                           <span
                             className={cn(
                               'font-mono font-medium',
-                              status === 'destructive' && 'text-red-500',
-                              status === 'warning' && 'text-yellow-500'
+                              usageStatus === 'destructive' && 'text-red-500',
+                              usageStatus === 'warning' && 'text-yellow-500'
                             )}
                           >
                             {percentage.toFixed(1)}%
@@ -147,10 +174,10 @@ export default function ManagerDashboardIndex({
                         </TableCell>
                         <TableCell className="text-center">
                           {k.assignedMemberId ? (
-                            <Badge variant="secondary">已指派</Badge>
+                            <Badge variant="secondary">{t('ui.common.assigned')}</Badge>
                           ) : (
                             <Badge variant="outline" className="text-muted-foreground">
-                              未指派
+                              {t('ui.common.notAssigned')}
                             </Badge>
                           )}
                         </TableCell>
@@ -162,8 +189,8 @@ export default function ManagerDashboardIndex({
             </Table>
           </CardContent>
         </Card>
-        {error && <p className="text-sm text-red-500 mt-2">載入失敗</p>}
-        {!orgId && <p className="text-sm text-muted-foreground mt-2">尚未加入任何組織</p>}
+        {error && <p className="text-sm text-red-500 mt-2">{t('ui.common.failed')}</p>}
+        {!orgId && <p className="text-sm text-muted-foreground mt-2">{t('member.dashboard.selectOrg')}</p>}
       </div>
     </ManagerLayout>
   )
