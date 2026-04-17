@@ -15,24 +15,29 @@ interface UserProfile {
   role: string
 }
 
-interface Props {
-  user: UserProfile
-  formError: I18nMessage | null
+interface Profile {
+  displayName?: string
 }
 
-export default function MemberSettings({ user, formError }: Props) {
+interface Props {
+  user: UserProfile
+  profile: Profile | null
+  error: { key: string } | null
+}
+
+export default function MemberSettings({ user, profile, error }: Props) {
   const { toast } = useToast()
   const { t } = useTranslation()
   const { data, setData, put, processing, errors } = useForm({
-    name: user.name || '',
+    displayName: profile?.displayName || '',
     email: user.email,
   })
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (formError) {
-      toast({ title: t('ui.common.failed'), description: t(formError.key, formError.params), variant: 'destructive' })
+    if (error) {
+      toast({ title: t('ui.common.failed'), description: t(error.key), variant: 'destructive' })
       return
     }
 
@@ -62,13 +67,13 @@ export default function MemberSettings({ user, formError }: Props) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="name">{t('ui.member.settings.nameLabel')}</Label>
+                <Label htmlFor="displayName">{t('ui.member.settings.nameLabel')}</Label>
                 <Input
-                  id="name"
-                  value={data.name}
-                  onChange={(e) => setData('name', e.target.value)}
+                  id="displayName"
+                  value={data.displayName}
+                  onChange={(e) => setData('displayName', e.target.value)}
                 />
-                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                {errors.displayName && <p className="text-xs text-destructive">{errors.displayName}</p>}
               </div>
 
               <div className="space-y-2">

@@ -18,6 +18,16 @@
 | [`website-inertia-layer.md`](./website-inertia-layer.md) | **Website／Inertia 層** - `src/Website` 目錄、middleware 群組、`WebsiteServiceProvider`、與 Modules 邊界 | 全體 |
 | [`http-middleware-stack.md`](./http-middleware-stack.md) | **HTTP middleware 堆疊** - Global／路由／Inertia 鏈、靜默 refresh、範例請求 | 全體 |
 
+### 📊 UML 圖表（補全的完整設計圖集）
+
+| 檔案 | 內容 | 優先級 | 適合對象 |
+|------|------|-------|--------|
+| [`uml/use-case-diagram.md`](./uml/use-case-diagram.md) | **使用案例圖** - Admin、Developer、End User 三大角色的 17 個核心用例、交互矩陣 | 🔴 高 | 產品、全體開發 |
+| [`uml/sequence-diagrams.md`](./uml/sequence-diagrams.md) | **時序圖** - 5 大關鍵流程（API 計費、告警評估、報表生成、邀請、合約續約）的時間序列與組件交互 | 🔴 高 | 全體開發、QA |
+| [`uml/state-diagrams.md`](./uml/state-diagrams.md) | **狀態圖** - 6 大聚合根的生命週期與合法狀態轉移（User、Contract、CreditAccount、AlertConfig、Application、Organization） | 🟠 中 | 後端、Domain 設計 |
+| [`uml/component-and-deployment-diagrams.md`](./uml/component-and-deployment-diagrams.md) | **元件 + 部署圖** - 系統元件細化依賴、本地／預發佈／生產三層部署拓撲、基礎設施決策 | 🟠 中 | DevOps、架構師 |
+| [`uml/activity-diagrams.md`](./uml/activity-diagrams.md) | **活動圖** - 5 大複雜流程的決策分支、異常恢復、並行活動（API 請求、合約續約、邀請、告警、報表） | 🟡 低 | 流程梳理、優化 |
+
 ### 📚 知識與決策
 
 完整的工程知識見 [`docs/draupnir/knowledge/`](../knowledge/)：
@@ -76,6 +86,42 @@
 - 發佈與訂閱
 - Credit 模組的事件例子
 - 測試策略
+
+#### 📊 **理解系統角色與流程**（UML 完整視角）
+👉 開始於 [`uml/use-case-diagram.md`](./uml/use-case-diagram.md)
+- Admin、Developer、End User 的 17 個核心用例
+- 功能使用矩陣
+- 系統內部流程（扣費、告警、報表）
+
+#### ⏱️ **深入關鍵業務流程的時間序列**（時序圖）
+👉 開始於 [`uml/sequence-diagrams.md`](./uml/sequence-diagrams.md)
+- API 請求 → 驗證 → 轉發 → 非同步扣費（同步/非同步混合）
+- 告警評估與多渠道通知（Email / Webhook）
+- 報表生成與投遞
+- 成員邀請與自動加入
+- 合約續約與提醒
+
+#### 🔄 **聚合根的生命週期與狀態轉移**（狀態圖）
+👉 開始於 [`uml/state-diagrams.md`](./uml/state-diagrams.md)
+- User：None → PendingEmail → Active → Deactivated → Deleted
+- Contract：Draft → Active → Expiring → Expired → Renewed
+- CreditAccount：Normal → LowBalance → Depleted → Locked → Suspended
+- AlertConfig、Application、Organization 的狀態機
+
+#### 🏗️ **系統部署與基礎設施決策**（元件 + 部署圖）
+👉 開始於 [`uml/component-and-deployment-diagrams.md`](./uml/component-and-deployment-diagrams.md)
+- 本地開發、Staging、Production 三層部署拓撲
+- 元件級細化依賴（以 Credit 模組為例）
+- 跨模組 Port 依賴
+- 環境變數管理與部署清單
+
+#### 🎬 **複雜業務流程的決策與並行活動**（活動圖）
+👉 開始於 [`uml/activity-diagrams.md`](./uml/activity-diagrams.md)
+- API 請求的驗證、轉發、非同步扣費（含異常分支）
+- 合約續約的審批與選項
+- 邀請流程的郵箱驗證與邊界情況
+- 告警觸發的去重與並行通知
+- 報表生成與並行投遞
 
 ---
 

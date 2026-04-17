@@ -1,6 +1,6 @@
 # 認證流程圖
 
-與程式對齊重點：`POST /api/auth/*`、`LoginUserService` + `IAuthTokenRepository`、`AuthMiddleware`（JWT + 可選撤銷檢查 + Cookie `auth_token`）、SDK 為 `AppAuthMiddleware` + `AuthenticateApp` + `drp_app_` 前綴與 `/sdk/v1/*` 路由。
+與程式對齊重點：`POST /api/auth/*`、`LoginUserService` + `IAuthTokenRepository`、`AuthMiddleware`（JWT + 可選撤銷檢查 + Cookie `auth_token`）、`POST /api/auth/logout` 經 `attachJwt()` 亦可帶 Cookie；SDK 為 `AppAuthMiddleware` + `AuthenticateApp` + `drp_app_` 前綴與 `/sdk/v1/*` 路由。
 
 ---
 
@@ -58,7 +58,7 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**相關端點：** `POST /api/auth/register`、`POST /api/auth/refresh`、`POST /api/auth/logout`（logout 需 Bearer access token，並透過 `LogoutUserService` 撤銷）。
+**相關端點：** `POST /api/auth/register`、`POST /api/auth/refresh`、`POST /api/auth/logout`（logout 路由掛 `attachJwt()`：有效 **access** JWT 可來自 `Authorization: Bearer` 或 `Cookie: auth_token`，並透過 `LogoutUserService` 撤銷）。
 
 ### 1b. Inertia 表單登入（Cookie）
 
@@ -69,12 +69,16 @@
        │ POST（表單）→ LoginPage.store
        ↓
 ┌──────────────────────────────────────────────────────────────────┐
-│  Pages/Auth/LoginPage                                            │
+│  Website/Auth/Pages/LoginPage                                    │
 │  ├─ LoginUserService.execute({ email, password })                │
-│  └─ 成功時 setCookie('auth_token', accessToken, httpOnly, ...)   │
-│      maxAge 與 access token 壽命策略一致（目前 3600s）           │
+│  └─ 成功時 httpOnly Cookie：                                     │
+│      • auth_token = accessToken，maxAge **900**（與 access JWT   │
+│        15 分鐘一致，`JwtTokenService` ACCESS_TOKEN_EXPIRES_IN）   │
+│      • refresh_token = refreshToken，maxAge 7 天（與 refresh JWT）│
+│      sameSite=Lax、path=/、secure 視 HTTPS                       │
 └──────────────────────────────────────────────────────────────────┘
-       │ redirect → /member/dashboard
+       │ redirect：admin → /admin/dashboard；manager → /manager/dashboard；
+       │ 其餘 → /member/dashboard
        ↓
 ```
 
@@ -149,14 +153,16 @@
 
 ```
 ┌──────────────┐
-│ 已登入成員    │ 需能通過 requireOrganizationContext（該 org 成員）
+│ 已登入使用者  │
 └────┬─────────┘
+     │ 路由：`requireOrganizationContext()`（須為該 org 成員或全域 admin）
+     │ 注意：一般 member 也能通過此中介層；能否送出邀請由下一步 `requireOrgManager` 決定
      │ POST /api/organizations/:id/invitations
      │ { email, role? }  — role 預設 member（manager | member）
      ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │  InviteMemberService.execute(orgId, invitedByUserId, systemRole, request) │
-│  ├─ orgAuth.requireOrgManager（或 admin 略過）                    │
+│  ├─ orgAuth.requireOrgManager（非 manager 且非 admin → 失敗）   │
 │  ├─ OrganizationInvitation.create(orgId, email, role, invitedBy)  │
 │  └─ invitationRepository.save                                   │
 └─────────────────────────────────────────────────────────────────┘
@@ -165,8 +171,9 @@
      ↓
 ┌─────────────────────────────────────────────────────────────────┐
 │ POST /api/invitations/:token/accept  [requireAuth]              │
-│ Body: { "token": "<邀請 token>" }（AcceptInvitationRequest）     │
-│ 注意：服務層使用 body.token；呼叫端請送 JSON，勿僅依賴路徑占位   │
+│ Body: { "token": "<邀請 token>" }（AcceptInvitationRequest，預設 │
+│ 自 **JSON body** 驗證；路徑上的 `:token` 不作為驗證／查詢來源）   │
+│ 另：`POST /api/invitations/:id/accept-by-id`、`POST /api/invitations/:id/decline` │
 └─────────────────────────────────────────────────────────────────┘
      ↓
 ┌─────────────────────────────────────────────────────────────────┐
@@ -195,7 +202,9 @@ HTTP 請求
             → 成功 → ctx.auth / ctx.user
 ```
 
-**需登入的 API：** `requireAuth()`（見 `RoleMiddleware`）檢查 `AuthMiddleware.getAuthContext`，無則 401。
+**需登入的 API：** `RoleMiddleware` 的 `requireAuth()` 中介層：先跑與 `attachJwt()` 相同的 `AuthMiddleware.handle`，再以 `AuthMiddleware.isAuthenticated` 判斷；無有效認證脈絡則 **401** JSON（`UNAUTHORIZED`）。無效／撤銷 token 不會寫入 `auth`，故同樣 401。
+
+**網站 Inertia 頁面：** 另見 `Website/Http/Middleware/requireAuth.ts` 的函式 `requireAuth(ctx)` — 於 JWT 已由頁面管線附上之後檢查 `AuthMiddleware.getAuthContext`，未登入則 **redirect `/login`**（與 API 中介層不同名稱、不同回應型態）。
 
 **SDK 路由：** 不使用上述 JWT 管線作為主要機制；由 `AppAuthMiddleware` 單獨驗證 `drp_app_`，失敗直接 401 JSON。
 
@@ -218,8 +227,9 @@ member  — 一般成員
 
 ### 組織操作範例
 
-- 邀請：`requireOrgManager` + `InviteMemberService`
-- 僅成員可讀：`requireOrgMembership`（`OrganizationMiddleware` / Controller 內）
+- 邀請：路由 `requireOrganizationContext` + `InviteMemberService`（內含 `requireOrgManager`）
+- 僅成員可讀：`requireOrgMembership`（`OrganizationMiddleware` 的 `requireOrganizationContext` 等）
+- 組織內管理操作：`requireOrganizationManager()`（會員 + `currentOrg.role === 'manager'` 或全域 admin），用於 Reports／Alerts 等路由
 
 ---
 
@@ -232,7 +242,8 @@ member  — 一般成員
 | 路由 | `src/Modules/Auth/Presentation/Routes/auth.routes.ts` |
 | JWT 與 Payload | `src/Modules/Auth/Infrastructure/Services/JwtTokenService.ts`、`Domain/ValueObjects/AuthToken.ts` |
 | 共用中介層 | `src/Shared/Infrastructure/Middleware/AuthMiddleware.ts` |
-| 登入頁 Cookie | `src/Pages/Auth/LoginPage.ts` |
+| 登入頁 Cookie | `src/Website/Auth/Pages/LoginPage.ts` |
+| 組織 org 中介層 | `src/Modules/Organization/Presentation/Middleware/OrganizationMiddleware.ts` |
 | 組織 API 密鑰 | `src/Modules/ApiKey/` |
 | App 密鑰與 SDK | `src/Modules/AppApiKey/`、`src/Modules/SdkApi/`（`AppAuthMiddleware`、`AuthenticateApp`、`ProxyModelCall`） |
 | 邀請／接受 | `src/Modules/Organization/Application/Services/InviteMemberService.ts`、`AcceptInvitationService.ts` |

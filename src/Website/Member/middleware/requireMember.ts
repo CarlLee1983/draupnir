@@ -22,5 +22,13 @@ export function requireMember(ctx: IHttpContext): MemberAuthResult {
     return { ok: false, response: ctx.redirect('/login') }
   }
 
+  // Redirect specialized roles to their own dashboards if they land on generic member paths
+  if (auth.role === 'admin') {
+    return { ok: false, response: ctx.redirect('/admin/dashboard') }
+  }
+  if (auth.role === 'manager') {
+    return { ok: false, response: ctx.redirect('/manager/dashboard') }
+  }
+
   return { ok: true, auth }
 }

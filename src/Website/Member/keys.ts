@@ -11,8 +11,7 @@ export const MEMBER_PAGE_KEYS = {
   costBreakdown: 'page.member.costBreakdown',
   contracts: 'page.member.contracts',
   settings: 'page.member.settings',
-  ALERTS: 'member/alerts',
-  alerts: 'member/alerts',
+  alerts: 'page.member.alerts',
 } as const
 
 export type MemberPageBindingKey = (typeof MEMBER_PAGE_KEYS)[keyof typeof MEMBER_PAGE_KEYS]

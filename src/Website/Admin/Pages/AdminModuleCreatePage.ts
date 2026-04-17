@@ -1,3 +1,4 @@
+import type { RegisterModuleParams } from '@/Modules/AppModule/Presentation/Requests/RegisterModuleRequest'
 import type { RegisterModuleService } from '@/Modules/AppModule/Application/Services/RegisterModuleService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -22,33 +23,24 @@ export class AdminModuleCreatePage {
   }
 
   /**
-   * POST `/admin/modules`: registers a new module from JSON body (`name`, `description`, `type`).
+   * POST `/admin/modules`: registers a new module using `RegisterModuleRequest`.
    *
    * @returns Redirect to `/admin/modules` on success or re-render with validation error.
    */
   async store(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
+    const body = ctx.get('validated') as RegisterModuleParams | undefined
 
-    const body = await ctx.getJsonBody<{
-      name?: string
-      description?: string
-      type?: string
-    }>()
-
-    const name = typeof body.name === 'string' ? body.name.trim() : ''
-    const description = typeof body.description === 'string' ? body.description.trim() : ''
-    const typeRaw = body.type === 'paid' ? 'paid' : 'free'
-
-    if (!name) {
+    if (!body) {
       return this.inertia.render(ctx, 'Admin/Modules/Create', {
         formError: { key: 'admin.modules.nameRequired' },
       })
     }
 
     const result = await this.registerModuleService.execute({
-      name,
-      description,
-      type: typeRaw,
+      name: body.name,
+      description: body.description,
+      type: body.type,
       callerRole: auth.role,
     })
 

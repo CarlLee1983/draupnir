@@ -6,6 +6,8 @@
  * wrapped with Inertia middleware to handle authentication and shared state.
  */
 
+import type { FormRequestClass } from '@gravito/core'
+import { UpdateProfileRequest } from '@/Modules/Profile/Presentation/Requests/UpdateProfileRequest'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type {
@@ -27,12 +29,13 @@ type MemberPageInstance = {
   update?(ctx: IHttpContext): Promise<Response>
 }
 
-type MemberRouteDef = {
+export type MemberRouteDef = {
   readonly method: 'get' | 'post' | 'put'
   readonly path: string
   readonly page: MemberPageBindingKey
   readonly action: keyof MemberPageInstance & string
   readonly name?: string
+  readonly formRequest?: FormRequestClass
 }
 
 const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
@@ -73,6 +76,13 @@ const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
   },
   {
     method: 'get',
+    path: '/member/alerts',
+    page: MEMBER_PAGE_KEYS.alerts,
+    action: 'handle',
+    name: 'pages.member.alerts',
+  },
+  {
+    method: 'get',
     path: '/member/settings',
     page: MEMBER_PAGE_KEYS.settings,
     action: 'handle',
@@ -83,6 +93,7 @@ const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
     path: '/member/settings',
     page: MEMBER_PAGE_KEYS.settings,
     action: 'update',
+    formRequest: UpdateProfileRequest,
     name: 'pages.member.settings.update',
   },
 ]
@@ -93,11 +104,18 @@ function registerMemberHttpRoute(
   path: string,
   handler: RouteHandler,
   routeOptions?: ModuleRouteOptions,
+  formRequest?: FormRequestClass,
 ): void {
   if (method === 'get') {
     router.get(path, handler, routeOptions)
   } else if (method === 'post') {
-    router.post(path, handler, routeOptions)
+    if (formRequest) {
+      router.post(path, formRequest, handler, routeOptions)
+    } else {
+      router.post(path, handler, routeOptions)
+    }
+  } else if (formRequest) {
+    router.put(path, formRequest, handler, routeOptions)
   } else {
     router.put(path, handler, routeOptions)
   }
@@ -113,22 +131,9 @@ export function registerMemberRoutes(
   router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   container: IContainer,
 ): void {
-  for (const { method, path, page, action, name } of MEMBER_PAGE_ROUTES) {
+  for (const { method, path, page, action, name, formRequest } of MEMBER_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerMemberHttpRoute(router, method, path, withMemberInertiaPageHandler(inner), opts)
+    registerMemberHttpRoute(router, method, path, withMemberInertiaPageHandler(inner), opts, formRequest)
   }
-
-  const alertsHandler = bindPageAction(
-    container,
-    MEMBER_PAGE_KEYS.ALERTS,
-    'handle',
-  ) as InertiaHandler
-  // No org middleware here — requireOrganizationManager() returns plain JSON (no X-Inertia header)
-  // which breaks Inertia navigation. The page handler itself handles missing-orgId gracefully.
-  router.get(
-    '/member/alerts',
-    withMemberInertiaPageHandler(alertsHandler),
-    { name: 'pages.member.alerts' },
-  )
 }

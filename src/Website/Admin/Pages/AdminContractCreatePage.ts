@@ -1,3 +1,4 @@
+import type { CreateContractParams } from '@/Modules/Contract/Presentation/Requests/CreateContractRequest'
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -22,54 +23,34 @@ export class AdminContractCreatePage {
   }
 
   /**
-   * POST `/admin/contracts`: parses JSON body and calls `CreateContractService.execute`.
+   * POST `/admin/contracts`: uses `CreateContractRequest` validated body.
    *
-   * @param ctx - JSON body with target and terms; uses admin JWT from context.
+   * @param ctx - HTTP context (`validated` injected by `CreateContractRequest`).
    * @returns Redirect to contract list on success or re-render with `formError`.
    */
   async store(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
+    const body = ctx.get('validated') as CreateContractParams | undefined
 
-    const body = await ctx.getJsonBody<{
-      targetType?: string
-      targetId?: string
-      terms?: {
-        creditQuota?: number
-        allowedModules?: string[]
-        rateLimit?: { rpm?: number; tpm?: number }
-        validityPeriod?: { startDate?: string; endDate?: string }
-      }
-    }>()
-
-    const targetType = body.targetType === 'user' ? 'user' : 'organization'
-    const targetId = typeof body.targetId === 'string' ? body.targetId.trim() : ''
-    const terms = body.terms
-
-    if (
-      !targetId ||
-      !terms?.validityPeriod?.startDate ||
-      !terms.validityPeriod.endDate ||
-      typeof terms.creditQuota !== 'number' ||
-      !terms.allowedModules?.length
-    ) {
+    if (!body) {
       return this.inertia.render(ctx, 'Admin/Contracts/Create', {
         formError: { key: 'admin.contracts.validationFailed' },
       })
     }
 
     const result = await this.createContractService.execute({
-      targetType,
-      targetId,
+      targetType: body.targetType,
+      targetId: body.targetId,
       terms: {
-        creditQuota: terms.creditQuota,
-        allowedModules: terms.allowedModules,
+        creditQuota: body.terms.creditQuota,
+        allowedModules: body.terms.allowedModules,
         rateLimit: {
-          rpm: Number(terms.rateLimit?.rpm ?? 0),
-          tpm: Number(terms.rateLimit?.tpm ?? 0),
+          rpm: Number(body.terms.rateLimit?.rpm ?? 0),
+          tpm: Number(body.terms.rateLimit?.tpm ?? 0),
         },
         validityPeriod: {
-          startDate: terms.validityPeriod.startDate,
-          endDate: terms.validityPeriod.endDate,
+          startDate: body.terms.validityPeriod.startDate,
+          endDate: body.terms.validityPeriod.endDate,
         },
       },
       callerUserId: auth.userId,

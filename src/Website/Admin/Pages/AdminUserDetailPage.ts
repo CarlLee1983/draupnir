@@ -60,9 +60,9 @@ export class AdminUserDetailPage {
   }
 
   /**
-   * POST `/admin/users/:id/status`: updates account status from JSON body (`active` | `suspended`).
+   * POST `/admin/users/:id/status`: updates account status using `ChangeStatusRequest`.
    *
-   * @param ctx - Route param `id`; body `{ status }` from `getJsonBody`.
+   * @param ctx - Route param `id`; `validated` body from context.
    * @returns Redirect back to the user detail path.
    */
   async postStatus(ctx: IHttpContext): Promise<Response> {
@@ -71,13 +71,12 @@ export class AdminUserDetailPage {
       return ctx.redirect('/admin/users')
     }
 
-    const body = await ctx.getJsonBody<{ status?: string }>()
-    const raw = body.status
-    if (raw !== 'active' && raw !== 'suspended') {
+    const body = ctx.get('validated') as { status: 'active' | 'suspended' | 'archived' } | undefined
+    if (!body || (body.status !== 'active' && body.status !== 'suspended')) {
       return ctx.redirect(`/admin/users/${userId}`)
     }
 
-    await this.changeUserStatusService.execute(userId, { status: raw })
+    await this.changeUserStatusService.execute(userId, { status: body.status })
     return ctx.redirect(`/admin/users/${userId}`)
   }
 }

@@ -4,6 +4,10 @@
  * Page classes are **not** constructed here; `bindPageAction` resolves singletons registered in
  * `registerAdminPageBindings`. Static paths must appear before dynamic `/:id` segments.
  */
+import type { FormRequestClass } from '@gravito/core'
+import { RegisterModuleRequest } from '@/Modules/AppModule/Presentation/Requests/RegisterModuleRequest'
+import { CreateContractRequest } from '@/Modules/Contract/Presentation/Requests/CreateContractRequest'
+import { ChangeStatusRequest } from '@/Modules/Profile/Presentation/Requests/ChangeStatusRequest'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type {
@@ -19,24 +23,22 @@ import { withAdminInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaP
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
-type AdminRouteDef = {
-  readonly method: 'get' | 'post'
-  readonly path: string
-  /** Container binding key (see `registerAdminPageBindings`). */
-  readonly page: AdminPageBindingKey
-  /** Instance method name on the page class. */
-  readonly action: keyof AdminPageInstance & string
-  /** Optional named route for URL generation / `route:list` (framework-agnostic). */
-  readonly name?: string
-}
-
-/** Minimal shape for `bindPageAction` typing; each admin page exposes these method names. */
 type AdminPageInstance = {
   handle(ctx: IHttpContext): Promise<Response>
   store?(ctx: IHttpContext): Promise<Response>
+  update?(ctx: IHttpContext): Promise<Response>
   postStatus?(ctx: IHttpContext): Promise<Response>
   postAction?(ctx: IHttpContext): Promise<Response>
   postQuota?(ctx: IHttpContext): Promise<Response>
+}
+
+export type AdminRouteDef = {
+  readonly method: 'get' | 'post' | 'put'
+  readonly path: string
+  readonly page: AdminPageBindingKey
+  readonly action: keyof AdminPageInstance & string
+  readonly name?: string
+  readonly formRequest?: FormRequestClass
 }
 
 /**
@@ -70,6 +72,7 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
     path: '/admin/users/:id/status',
     page: ADMIN_PAGE_KEYS.userDetail,
     action: 'postStatus',
+    formRequest: ChangeStatusRequest,
     name: 'pages.admin.users.status',
   },
   {
@@ -105,6 +108,7 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
     path: '/admin/contracts',
     page: ADMIN_PAGE_KEYS.contractCreate,
     action: 'store',
+    formRequest: CreateContractRequest,
     name: 'pages.admin.contracts.store',
   },
   {
@@ -147,6 +151,7 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
     path: '/admin/modules',
     page: ADMIN_PAGE_KEYS.moduleCreate,
     action: 'store',
+    formRequest: RegisterModuleRequest,
     name: 'pages.admin.modules.store',
   },
   {
@@ -180,32 +185,41 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
 ]
 
 function registerAdminHttpRoute(
-  router: Pick<IModuleRouter, 'get' | 'post'>,
-  method: 'get' | 'post',
+  router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
+  method: 'get' | 'post' | 'put',
   path: string,
   handler: RouteHandler,
   routeOptions?: ModuleRouteOptions,
+  formRequest?: FormRequestClass,
 ): void {
   if (method === 'get') {
     router.get(path, handler, routeOptions)
+  } else if (method === 'post') {
+    if (formRequest) {
+      router.post(path, formRequest, handler, routeOptions)
+    } else {
+      router.post(path, handler, routeOptions)
+    }
+  } else if (formRequest) {
+    router.put(path, formRequest, handler, routeOptions)
   } else {
-    router.post(path, handler, routeOptions)
+    router.put(path, handler, routeOptions)
   }
 }
 
 /**
  * Registers all admin area Inertia routes on the module router.
  *
- * @param router - Router supporting GET/POST.
+ * @param router - Router supporting GET/POST/PUT.
  * @param container - DI container with admin page bindings.
  */
 export function registerAdminRoutes(
-  router: Pick<IModuleRouter, 'get' | 'post'>,
+  router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   container: IContainer,
 ): void {
-  for (const { method, path, page, action, name } of ADMIN_PAGE_ROUTES) {
+  for (const { method, path, page, action, name, formRequest } of ADMIN_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerAdminHttpRoute(router, method, path, withAdminInertiaPageHandler(inner), opts)
+    registerAdminHttpRoute(router, method, path, withAdminInertiaPageHandler(inner), opts, formRequest)
   }
 }

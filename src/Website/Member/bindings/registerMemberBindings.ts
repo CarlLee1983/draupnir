@@ -95,7 +95,7 @@ export function registerMemberBindings(container: IContainer): void {
   )
 
   container.singleton(
-    k.ALERTS,
+    k.alerts,
     (c) =>
       new MemberAlertsPage(
         c.make(i) as InertiaService,

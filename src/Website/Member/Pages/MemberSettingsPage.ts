@@ -1,3 +1,4 @@
+import type { UpdateProfileParams } from '@/Modules/Profile/Presentation/Requests/UpdateProfileRequest'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -17,13 +18,10 @@ export class MemberSettingsPage {
     private readonly updateProfileService: UpdateProfileService,
   ) {}
 
-  /**
-   * Displays the profile settings page.
-   *
-   * @param ctx - Context to identify the authenticated user.
-   * @returns Current user profile in Inertia response.
-   */
-  async handle(ctx: IHttpContext): Promise<Response> {
+  private async renderSettings(
+    ctx: IHttpContext,
+    extras: Record<string, unknown> = {},
+  ): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const result = await this.getProfileService.execute(auth.userId)
 
@@ -34,36 +32,37 @@ export class MemberSettingsPage {
         name: result.success ? (result.data?.displayName ?? '') : '',
         role: auth.role,
       },
-      formError: result.success ? null : { key: 'member.settings.loadFailed' },
+      profile: result.success ? (result.data ?? null) : null,
+      error: result.success ? null : { key: 'member.settings.loadFailed' },
+      ...extras,
     })
+  }
+
+  /**
+   * Displays the profile settings page.
+   *
+   * @param ctx - Context to identify the authenticated user.
+   * @returns Current user profile in Inertia response.
+   */
+  async handle(ctx: IHttpContext): Promise<Response> {
+    return this.renderSettings(ctx)
   }
 
   /**
    * Updates the member's profile information.
    *
-   * @param ctx - Context containing updated profile fields in JSON body.
+   * @param ctx - Context containing updated profile fields validated by UpdateProfileRequest.
    * @returns Updated settings page or failure message.
    */
   async update(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
+    const body = (ctx.get('validated') as UpdateProfileParams | undefined) ?? {}
 
-    const body = await ctx.getJsonBody<{ name?: string }>()
-    const displayName = typeof body.name === 'string' ? body.name : ''
-
-    const updateResult = await this.updateProfileService.execute(auth.userId, {
-      displayName,
+    await this.updateProfileService.execute(auth.userId, {
+      displayName: body.displayName,
     })
 
-    const profileResult = await this.getProfileService.execute(auth.userId)
-
-    return this.inertia.render(ctx, 'Member/Settings/Index', {
-      user: {
-        id: auth.userId,
-        email: auth.email,
-        name: profileResult.success ? (profileResult.data?.displayName ?? '') : '',
-        role: auth.role,
-      },
-      formError: updateResult.success ? null : { key: 'member.settings.loadFailed' },
-    })
+    return ctx.redirect('/member/settings')
   }
 }
+

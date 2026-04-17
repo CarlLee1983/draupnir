@@ -24,17 +24,10 @@ export function requireAdmin(ctx: IHttpContext): AdminAuthResult {
   }
 
   if (auth.role !== 'admin') {
-    const { messages } = getInertiaShared(ctx)
-    const t = (key: string) => (messages as any)[key] ?? key
-    return {
-      ok: false,
-      response: new Response(
-        '<html><body><h1>403 Forbidden</h1><p>' +
-          t('auth.forbidden.adminOnly') +
-          '</p></body></html>',
-        { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8' } },
-      ),
+    if (auth.role === 'manager') {
+      return { ok: false, response: ctx.redirect('/manager/dashboard') }
     }
+    return { ok: false, response: ctx.redirect('/member/dashboard') }
   }
 
   return { ok: true, auth }
