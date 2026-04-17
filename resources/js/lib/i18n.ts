@@ -173,6 +173,7 @@ const frontendCatalog = {
   'ui.member.apiKeys.revokeConfirm': true,
   'ui.member.apiKeys.revokeAction': true,
   'ui.member.apiKeys.budgetMenuItem': true,
+  'ui.member.apiKeys.copyKeyAria': true,
   // Member — ApiKeys Create
   'ui.member.apiKeys.create.title': true,
   'ui.member.apiKeys.create.successTitle': true,

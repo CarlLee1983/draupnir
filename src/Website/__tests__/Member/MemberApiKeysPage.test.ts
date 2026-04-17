@@ -97,6 +97,7 @@ describe('MemberApiKeysPage', () => {
                 id: 'key-1',
                 label: 'Test Key',
                 keyPrefix: 'sk_test_',
+                gatewayKeyValue: 'drp_sk_full_secret',
                 status: 'active',
                 createdAt: '2026-01-01T00:00:00Z',
                 lastUsedAt: null,
@@ -124,6 +125,8 @@ describe('MemberApiKeysPage', () => {
     expect(captured.lastCall?.props.balance).toEqual({ balance: '100.00' })
     expect(captured.lastCall?.props.hasOrganization).toBe(true)
     expect(captured.lastCall?.props.keys).not.toBe(null)
+    const keys = captured.lastCall?.props.keys as Array<{ gatewayKeyValue?: string | null }>
+    expect(keys[0]?.gatewayKeyValue).toBe('drp_sk_full_secret')
   })
 
   test('without membership renders onboarding state', async () => {

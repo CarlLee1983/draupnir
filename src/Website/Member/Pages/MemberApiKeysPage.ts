@@ -69,6 +69,7 @@ export class MemberApiKeysPage {
               id: row.id as string,
               label: row.label as string,
               keyPreview: (row.keyPrefix as string) ?? '',
+              gatewayKeyValue: (row.gatewayKeyValue as string | null | undefined) ?? null,
               status: row.status as 'active' | 'revoked' | 'suspended_no_credit',
               createdAt: row.createdAt as string,
               lastUsedAt: (row.lastUsedAt as string | null | undefined) ?? null,

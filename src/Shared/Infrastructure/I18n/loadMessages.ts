@@ -196,6 +196,7 @@ const zhTW = {
   'ui.member.apiKeys.revokeConfirm': '確定要撤銷此 API Key？撤銷後無法復原。',
   'ui.member.apiKeys.revokeAction': '撤銷',
   'ui.member.apiKeys.budgetMenuItem': '花費上限（7 天／30 天）',
+  'ui.member.apiKeys.copyKeyAria': '複製完整 API Key',
   // Member — ApiKeys Create
   'ui.member.apiKeys.create.title': '建立 API Key',
   'ui.member.apiKeys.create.successTitle': 'Key 建立成功',
@@ -581,6 +582,7 @@ const catalogs = {
     'ui.member.apiKeys.revokeConfirm': 'Are you sure you want to revoke this API Key? This cannot be undone.',
     'ui.member.apiKeys.revokeAction': 'Revoke',
     'ui.member.apiKeys.budgetMenuItem': 'Spend cap (7d / 30d)',
+    'ui.member.apiKeys.copyKeyAria': 'Copy full API key',
     'ui.member.apiKeys.create.title': 'Create API Key',
     'ui.member.apiKeys.create.successTitle': 'Key Created',
     'ui.member.apiKeys.create.copyWarning': 'Copy this key now — it will not be shown again',
