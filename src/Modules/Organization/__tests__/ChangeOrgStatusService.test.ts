@@ -7,6 +7,7 @@ import type { IOrganizationRepository } from '../Domain/Repositories/IOrganizati
 function makeMockOrgRepo(): IOrganizationRepository {
   return {
     findById: mock(),
+    findByIdForUpdate: mock(),
     findBySlug: mock(),
     save: mock(),
     update: mock(),
