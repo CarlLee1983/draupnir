@@ -109,6 +109,18 @@ export interface IQueryBuilder {
   whereBetween(column: string, range: readonly [Date | string, Date | string]): IQueryBuilder
 
   /**
+   * Applies a row-level lock (SELECT ... FOR UPDATE) to the query.
+   *
+   * Must be invoked inside an open transaction (via {@link IDatabaseAccess.transaction}).
+   * The lock is released when the transaction commits or rolls back.
+   *
+   * Memory adapter is single-threaded and treats this as a no-op.
+   *
+   * @returns Returns self to support chaining.
+   */
+  forUpdate(): IQueryBuilder
+
+  /**
    * Counts records matching the criteria.
    * @returns Record count.
    */

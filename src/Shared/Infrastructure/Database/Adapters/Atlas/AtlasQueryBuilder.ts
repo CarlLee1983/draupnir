@@ -31,6 +31,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
   private orderByConfig: { column: string; direction: 'ASC' | 'DESC' } | null = null
   private limitValue: number | null = null
   private offsetValue: number | null = null
+  private forUpdateFlag = false
 
   constructor(
     private tableName: string,
@@ -68,6 +69,10 @@ export class AtlasQueryBuilder implements IQueryBuilder {
       if (this.orderByConfig) {
         const dir = this.orderByConfig.direction === 'ASC' ? 'asc' : 'desc'
         query = query.orderBy(this.orderByConfig.column, dir)
+      }
+
+      if (this.forUpdateFlag && typeof query.forUpdate === 'function') {
+        query = query.forUpdate()
       }
 
       // Atlas QueryBuilder is not thenable; must call .first() to execute.
@@ -108,6 +113,10 @@ export class AtlasQueryBuilder implements IQueryBuilder {
       // 應用 LIMIT
       if (this.limitValue) {
         query = query.limit(this.limitValue)
+      }
+
+      if (this.forUpdateFlag && typeof query.forUpdate === 'function') {
+        query = query.forUpdate()
       }
 
       // Atlas QueryBuilder is not thenable; must call .get() to execute SELECT.
@@ -379,6 +388,18 @@ export class AtlasQueryBuilder implements IQueryBuilder {
    */
   whereBetween(column: string, range: [Date, Date]): IQueryBuilder {
     this.whereConditions.push({ column, operator: 'between', value: range })
+    return this
+  }
+
+  /**
+   * Row-level lock (SELECT ... FOR UPDATE). Must be invoked inside a transaction.
+   *
+   * If the underlying Atlas query builder does not expose `.forUpdate()` (older
+   * version / dialect), the flag is silently dropped — callers fall back to
+   * relying on higher layers (advisory lock / app mutex) for serialization.
+   */
+  forUpdate(): IQueryBuilder {
+    this.forUpdateFlag = true
     return this
   }
 

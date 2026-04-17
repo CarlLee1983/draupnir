@@ -31,7 +31,7 @@ describe('BifrostClient.createTeam retry behavior', () => {
         status: 503,
         headers: { 'content-type': 'application/json' },
       })
-    }) as typeof fetch
+    }) as unknown as typeof fetch
 
     const client = mkClient()
     await expect(client.createTeam({ name: 'org-1' })).rejects.toThrow()
@@ -45,7 +45,7 @@ describe('BifrostClient.createTeam retry behavior', () => {
         status: 503,
         headers: { 'content-type': 'application/json' },
       })
-    }) as typeof fetch
+    }) as unknown as typeof fetch
 
     const client = mkClient()
     await expect(client.createVirtualKey({ name: 'k' })).rejects.toThrow()
