@@ -1,5 +1,8 @@
+import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { dashboardPathForWebRole } from '@/Website/Auth/dashboardPathForWebRole'
 import type { AcceptInvitationByIdService } from '../../Application/Services/AcceptInvitationByIdService'
 import type { AcceptInvitationService } from '../../Application/Services/AcceptInvitationService'
 import type { CancelInvitationService } from '../../Application/Services/CancelInvitationService'
@@ -118,6 +121,7 @@ export class OrganizationController {
     private cancelInvitationService: CancelInvitationService,
   private acceptInvitationByIdService: AcceptInvitationByIdService,
   private declineInvitationService: DeclineInvitationService,
+  private jwtTokenService: IJwtTokenService,
   ) {}
 
   async create(ctx: IHttpContext): Promise<Response> {
@@ -130,7 +134,37 @@ export class OrganizationController {
       ...body,
       managerUserId: auth.userId,
     })
-    return ctx.json(result, result.success ? 201 : 400)
+
+    if (result.success) {
+      // Rotate access JWT：role 從 member 升為 manager，舊 token 還帶著舊 role，
+      // 必須在此路由簽新 access token 並以 httpOnly cookie 回寫，讓 downstream
+      // 導頁到 /manager/dashboard 時不會被 requireManager middleware 退回。
+      const accessToken = this.jwtTokenService.signAccessToken({
+        userId: auth.userId,
+        email: auth.email,
+        role: 'manager',
+        permissions: [],
+      })
+      ctx.setCookie('auth_token', accessToken.getValue(), {
+        httpOnly: true,
+        sameSite: 'Lax',
+        path: '/',
+        maxAge: 900,
+        secure: isSecureRequest(ctx),
+      })
+      return ctx.json(
+        {
+          ...result,
+          data: {
+            ...(result.data ?? {}),
+            redirectTo: dashboardPathForWebRole('manager'),
+          },
+        },
+        201,
+      )
+    }
+
+    return ctx.json(result, 400)
   }
 
   async list(ctx: IHttpContext): Promise<Response> {
