@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 interface KeyRow {
   id: string
   label: string
+  status: string
   quotaAllocated: number
   usageCurrent?: number
   assignedMemberId: string | null
@@ -39,6 +40,21 @@ const getUsageStatus = (current: number, total: number) => {
   if (percentage >= 95) return 'destructive'
   if (percentage >= 80) return 'warning'
   return 'default'
+}
+
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'active':
+      return <Badge className="bg-green-500 hover:bg-green-600">作用中</Badge>
+    case 'pending':
+      return <Badge variant="secondary">待啟用</Badge>
+    case 'revoked':
+      return <Badge variant="destructive">已撤銷</Badge>
+    case 'suspended_no_credit':
+      return <Badge variant="destructive">餘額不足停用</Badge>
+    default:
+      return <Badge variant="outline">{status}</Badge>
+  }
 }
 
 export default function ManagerDashboardIndex({
@@ -92,6 +108,7 @@ export default function ManagerDashboardIndex({
               <TableHeader>
                 <TableRow>
                   <TableHead>Label</TableHead>
+                  <TableHead className="text-center">狀態</TableHead>
                   <TableHead className="text-right">配額</TableHead>
                   <TableHead className="text-right">用量</TableHead>
                   <TableHead className="text-right">使用率</TableHead>
@@ -101,7 +118,7 @@ export default function ManagerDashboardIndex({
               <TableBody>
                 {keys.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
                       目前沒有 API Key
                     </TableCell>
                   </TableRow>
@@ -114,6 +131,7 @@ export default function ManagerDashboardIndex({
                     return (
                       <TableRow key={k.id}>
                         <TableCell className="font-medium">{k.label}</TableCell>
+                        <TableCell className="text-center">{getStatusBadge(k.status)}</TableCell>
                         <TableCell className="text-right">{formatNumber(k.quotaAllocated)}</TableCell>
                         <TableCell className="text-right">{formatNumber(k.usageCurrent)}</TableCell>
                         <TableCell className="text-right">

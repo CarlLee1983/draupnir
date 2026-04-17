@@ -170,24 +170,55 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                         {k.quotaAllocated.toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={k.status === 'active' ? 'default' : 'secondary'}
-                          className={`gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm ${
-                            k.status === 'active' ? 'bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20' : ''
-                          }`}
-                        >
-                          {k.status === 'active' ? (
-                            <>
-                              <ShieldCheck className="h-3 w-3" />
-                              使用中
-                            </>
-                          ) : (
-                            <>
-                              <ShieldAlert className="h-3 w-3" />
-                              已撤銷
-                            </>
-                          )}
-                        </Badge>
+                        {(() => {
+                          const status = k.status
+                          switch (status) {
+                            case 'active':
+                              return (
+                                <Badge
+                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20"
+                                >
+                                  <ShieldCheck className="h-3 w-3" />
+                                  使用中
+                                </Badge>
+                              )
+                            case 'pending':
+                              return (
+                                <Badge
+                                  variant="secondary"
+                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
+                                >
+                                  待啟用
+                                </Badge>
+                              )
+                            case 'revoked':
+                              return (
+                                <Badge
+                                  variant="destructive"
+                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
+                                >
+                                  <ShieldAlert className="h-3 w-3" />
+                                  已撤銷
+                                </Badge>
+                              )
+                            case 'suspended_no_credit':
+                              return (
+                                <Badge
+                                  variant="destructive"
+                                  className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
+                                >
+                                  <ShieldAlert className="h-3 w-3" />
+                                  餘額不足停用
+                                </Badge>
+                              )
+                            default:
+                              return (
+                                <Badge variant="outline" className="px-2.5 py-0.5 rounded-md shadow-sm">
+                                  {status}
+                                </Badge>
+                              )
+                          }
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
