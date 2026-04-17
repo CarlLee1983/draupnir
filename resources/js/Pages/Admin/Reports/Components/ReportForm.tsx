@@ -13,7 +13,7 @@ interface Props {
 
 export function ReportForm({ orgId, initialData, onSuccess }: Props) {
   const { t } = useTranslation()
-  const { data, setData, post, put, processing, errors } = useForm({
+  const form = useForm({
     type: initialData?.type || 'weekly',
     day: initialData?.day || 1,
     time: initialData?.time || '09:00',
@@ -21,23 +21,21 @@ export function ReportForm({ orgId, initialData, onSuccess }: Props) {
     recipients: initialData?.recipients?.join(', ') || '',
     enabled: initialData?.enabled ?? true,
   })
+  const { data, setData, processing, errors } = form
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
-    const payload = {
-      ...data,
-      recipients: data.recipients.split(',').map((s: string) => s.trim()).filter(Boolean)
-    }
+
+    const options = { onSuccess: () => onSuccess() }
+    form.transform((d) => ({
+      ...d,
+      recipients: d.recipients.split(',').map((s: string) => s.trim()).filter(Boolean),
+    }))
 
     if (initialData) {
-      put(`/v1/reports/${initialData.id}`, {
-        onSuccess: () => onSuccess()
-      })
+      form.put(`/v1/org/${orgId}/reports/${initialData.id}`, options)
     } else {
-      post(`/v1/org/${orgId}/reports`, {
-        onSuccess: () => onSuccess()
-      })
+      form.post(`/v1/org/${orgId}/reports`, options)
     }
   }
 

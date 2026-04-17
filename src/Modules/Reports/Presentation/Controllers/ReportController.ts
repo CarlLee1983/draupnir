@@ -43,10 +43,14 @@ export class ReportController {
   }
 
   async update(ctx: IHttpContext): Promise<Response> {
-    const id = ctx.getParam('id')!
-    const schedule = await this.reportRepository.findById(id)
+    const orgId = ctx.getParam('orgId')!
+    const reportId = ctx.getParam('reportId')!
+    const schedule = await this.reportRepository.findById(reportId)
     if (!schedule) {
       return ctx.json({ error: 'Report schedule not found' }, 404)
+    }
+    if (schedule.orgId !== orgId) {
+      return ctx.json({ error: 'Forbidden' }, 403)
     }
 
     try {
@@ -77,10 +81,14 @@ export class ReportController {
   }
 
   async destroy(ctx: IHttpContext): Promise<Response> {
-    const id = ctx.getParam('id')!
-    const schedule = await this.reportRepository.findById(id)
+    const orgId = ctx.getParam('orgId')!
+    const reportId = ctx.getParam('reportId')!
+    const schedule = await this.reportRepository.findById(reportId)
     if (!schedule) {
       return ctx.json({ error: 'Report schedule not found' }, 404)
+    }
+    if (schedule.orgId !== orgId) {
+      return ctx.json({ error: 'Forbidden' }, 403)
     }
 
     await this.reportRepository.delete(schedule.id)
