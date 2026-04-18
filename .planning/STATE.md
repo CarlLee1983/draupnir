@@ -4,7 +4,7 @@ milestone: pending
 milestone_name: "(next)"
 status: Between milestones (v1.4 shipped and archived)
 stopped_at: Milestone v1.4 complete; run /gsd-new-milestone for v1.5+ scope
-last_updated: "2026-04-13T12:00:00Z"
+last_updated: "2026-04-18T13:46:12Z"
 progress:
   total_phases: 0
   completed_phases: 0
@@ -48,6 +48,7 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 260418-u2y | Restrict AppApiKey writes to managers | 2026-04-18 | d319193 | — |
 | 260413-uzv | 修復 Auth 模組 DDD 戰術設計問題 | 2026-04-13 | 2a0ce69 | [260413-uzv-auth-ddd](.planning/quick/260413-uzv-auth-ddd/) |
 | 260413-vdk | 解耦 Auth ↔ Profile：引入 UserRegistered domain event | 2026-04-13 | 157ee29 | [260413-vdk-domain-event-userregistered-auth-profile](.planning/quick/260413-vdk-domain-event-userregistered-auth-profile/) |
 | 260413-vsz | ListUsersService 篩選下推 — role/status filter 移至 SQL WHERE | 2026-04-13 | f042e2c | [260413-vsz-listusersservice-iauthrepository-findall](.planning/quick/260413-vsz-listusersservice-iauthrepository-findall/) |
@@ -59,5 +60,5 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 
 ## Session continuity
 
-Last activity: 2026-04-17 - Completed quick task 260418-0ep: 建立組織成功後 rotate access JWT（4 commits, 含 Rule 2 token-hash fix）
+Last activity: 2026-04-18 - Completed quick task 260418-u2y: Restrict AppApiKey writes to managers（1 commit, 含 manager-only auth 收斂）
 Next step: `/gsd-new-milestone` when ready to plan v1.5+.
