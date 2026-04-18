@@ -2,6 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { formatDateTime, maskApiKey } from '@/lib/format'
 import type { Translator } from '@/lib/i18n'
+import { ShieldCheck, ShieldAlert, Key } from 'lucide-react'
 
 export interface AdminApiKeyRow {
   id: string
@@ -18,11 +19,32 @@ export interface AdminApiKeyRow {
 function statusBadge(status: AdminApiKeyRow['status'], t: Translator) {
   switch (status) {
     case 'active':
-      return <Badge className="bg-green-500 hover:bg-green-600">{t('ui.common.status.active')}</Badge>
+      return (
+        <Badge className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20">
+          <ShieldCheck className="h-3 w-3" />
+          {t('ui.common.status.active')}
+        </Badge>
+      )
     case 'revoked':
-      return <Badge variant="destructive">{t('ui.common.status.revoked')}</Badge>
+      return (
+        <Badge
+          variant="destructive"
+          className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
+        >
+          <ShieldAlert className="h-3 w-3" />
+          {t('ui.common.status.revoked')}
+        </Badge>
+      )
     case 'suspended_no_credit':
-      return <Badge variant="outline">{t('ui.common.status.insufficientCredit')}</Badge>
+      return (
+        <Badge
+          variant="outline"
+          className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm border-amber-200 bg-amber-50 text-amber-700"
+        >
+          <ShieldAlert className="h-3 w-3" />
+          {t('ui.common.status.insufficientCredit')}
+        </Badge>
+      )
   }
 }
 

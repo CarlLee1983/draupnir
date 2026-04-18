@@ -1,12 +1,13 @@
 import { Head } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { DataTable } from '@/components/tables/DataTable'
 import { createAdminApiKeyColumns, type AdminApiKeyRow } from './columns'
 import { router } from '@inertiajs/react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
+import { Key } from 'lucide-react'
 
 interface OrgOption {
   id: string
@@ -36,12 +37,20 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
     <AdminLayout>
       <Head title={t('ui.admin.apiKeys.title')} />
 
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">{t('ui.admin.apiKeys.title')}</h1>
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.apiKeys.title')}</h1>
+            <p className="text-muted-foreground mt-1">
+              檢視各組織的 API 金鑰與相關狀態。
+            </p>
+          </div>
+        </div>
 
-        <Card>
+        <Card className="shadow-sm border-muted/60">
           <CardHeader>
-            <CardTitle>{t('ui.admin.apiKeys.selectOrgTitle')}</CardTitle>
+            <CardTitle className="text-base">{t('ui.admin.apiKeys.selectOrgTitle')}</CardTitle>
+            <CardDescription>選擇組織以載入金鑰列表。</CardDescription>
           </CardHeader>
           <CardContent className="max-w-md space-y-2">
             <Label htmlFor="orgSelect">{t('ui.admin.apiKeys.orgLabel')}</Label>
@@ -49,7 +58,7 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
               id="orgSelect"
               value={selectedOrgId ?? ''}
               onChange={handleOrgChange}
-              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+              className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="">{t('ui.admin.apiKeys.orgPlaceholder')}</option>
               {organizations.map((org) => (
@@ -62,25 +71,35 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
         </Card>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">
+          <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-destructive text-sm font-medium">
             {t(error.key, error.params)}
           </div>
         )}
 
-        {selectedOrgId ? (
-          <DataTable
-            columns={columns}
-            data={keys}
-            searchPlaceholder={t('ui.admin.apiKeys.searchPlaceholder')}
-            searchColumn="label"
-          />
-        ) : (
-          <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              {t('ui.admin.apiKeys.emptyState')}
-            </CardContent>
-          </Card>
-        )}
+        <Card className="shadow-sm border-muted/60 overflow-hidden">
+          <CardHeader className="pb-3 border-b border-muted/40">
+            <div className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-primary" />
+              <CardTitle>金鑰清單</CardTitle>
+            </div>
+            <CardDescription>目前組織中的所有金鑰。</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6">
+            {selectedOrgId ? (
+              <DataTable
+                columns={columns}
+                data={keys}
+                searchPlaceholder={t('ui.admin.apiKeys.searchPlaceholder')}
+                searchColumn="label"
+              />
+            ) : (
+              <div className="py-12 text-center text-muted-foreground flex flex-col items-center gap-2">
+                <Key className="h-10 w-10 opacity-20" />
+                <p>{t('ui.admin.apiKeys.emptyState')}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   )

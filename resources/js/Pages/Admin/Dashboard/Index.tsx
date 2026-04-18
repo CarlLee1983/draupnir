@@ -31,8 +31,15 @@ export default function AdminDashboard({ totals }: Props) {
     <AdminLayout>
       <Head title={t('ui.admin.dashboard.title')} />
 
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">{t('ui.admin.dashboard.title')}</h1>
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.dashboard.title')}</h1>
+            <p className="text-muted-foreground mt-1">
+              系統運行概況與關鍵指標。
+            </p>
+          </div>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard

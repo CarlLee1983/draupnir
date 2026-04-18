@@ -3,9 +3,10 @@ import { AdminLayout } from '@/layouts/AdminLayout'
 import { DataTable } from '@/components/tables/DataTable'
 import { createAdminContractColumns, type AdminContractRow } from './columns'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, FileText } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 
 interface Props {
   contracts: AdminContractRow[]
@@ -20,27 +21,45 @@ export default function ContractsIndex({ contracts, error }: Props) {
     <AdminLayout>
       <Head title={t('ui.admin.contracts.title')} />
 
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{t('ui.admin.contracts.title')}</h1>
-          <Button asChild>
+      <div className="p-6 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.contracts.title')}</h1>
+            <p className="text-muted-foreground mt-1">
+              管理系統中的所有合約協議與配額設定。
+            </p>
+          </div>
+          <Button asChild size="lg" className="gap-2 shadow-sm transition-all active:scale-95">
             <Link href="/admin/contracts/create">
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus className="h-4 w-4" />
               {t('ui.admin.contracts.createButton')}
             </Link>
           </Button>
         </div>
 
         {error && (
-          <div className="rounded-md border border-destructive p-4 text-destructive">{t(error.key, error.params)}</div>
+          <div className="rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-destructive text-sm font-medium">
+            {t(error.key, error.params)}
+          </div>
         )}
 
-        <DataTable
-          columns={columns}
-          data={contracts}
-          searchPlaceholder={t('ui.admin.contracts.searchPlaceholder')}
-          searchColumn="name"
-        />
+        <Card className="shadow-sm border-muted/60 overflow-hidden">
+          <CardHeader className="pb-3 border-b border-muted/40">
+            <div className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-primary" />
+              <CardTitle>合約清單</CardTitle>
+            </div>
+            <CardDescription>目前的合約與配額資訊概覽。</CardDescription>
+          </CardHeader>
+          <CardContent className="p-4 sm:p-6">
+            <DataTable
+              columns={columns}
+              data={contracts}
+              searchPlaceholder={t('ui.admin.contracts.searchPlaceholder')}
+              searchColumn="name"
+            />
+          </CardContent>
+        </Card>
       </div>
     </AdminLayout>
   )

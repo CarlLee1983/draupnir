@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Link } from '@inertiajs/react'
 import { formatDate } from '@/lib/format'
 import type { Translator } from '@/lib/i18n'
+import { CheckCircle2, Clock, XCircle, FileText } from 'lucide-react'
 
 export interface AdminContractRow {
   id: string
@@ -16,14 +17,51 @@ export interface AdminContractRow {
 }
 
 function statusBadge(status: AdminContractRow['status'], t: Translator) {
-  const map = {
-    draft: { label: t('ui.common.status.draft'), variant: 'outline' as const },
-    active: { label: t('ui.common.status.active'), variant: 'default' as const },
-    expired: { label: t('ui.common.status.expired'), variant: 'secondary' as const },
-    terminated: { label: t('ui.common.status.terminated'), variant: 'destructive' as const },
+  switch (status) {
+    case 'active':
+      return (
+        <Badge className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20">
+          <CheckCircle2 className="h-3 w-3" />
+          {t('ui.common.status.active')}
+        </Badge>
+      )
+    case 'draft':
+      return (
+        <Badge
+          variant="outline"
+          className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-muted/50"
+        >
+          <FileText className="h-3 w-3 text-muted-foreground" />
+          {t('ui.common.status.draft')}
+        </Badge>
+      )
+    case 'expired':
+      return (
+        <Badge
+          variant="secondary"
+          className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
+        >
+          <Clock className="h-3 w-3" />
+          {t('ui.common.status.expired')}
+        </Badge>
+      )
+    case 'terminated':
+      return (
+        <Badge
+          variant="destructive"
+          className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
+        >
+          <XCircle className="h-3 w-3" />
+          {t('ui.common.status.terminated')}
+        </Badge>
+      )
+    default:
+      return (
+        <Badge variant="outline" className="px-2.5 py-0.5 rounded-md shadow-sm">
+          {status}
+        </Badge>
+      )
   }
-  const { label, variant } = map[status]
-  return <Badge variant={variant}>{label}</Badge>
 }
 
 export const createAdminContractColumns = (t: Translator): ColumnDef<AdminContractRow>[] => [
