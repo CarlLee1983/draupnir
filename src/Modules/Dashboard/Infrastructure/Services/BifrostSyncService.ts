@@ -26,6 +26,7 @@ interface SyncRunRequest {
 }
 
 const LOG_PAGE_SIZE = 500
+const MAX_SYNC_PAGES = 50
 
 export class BifrostSyncService {
   constructor(
@@ -83,7 +84,16 @@ export class BifrostSyncService {
     const affectedOrgIds = new Set<string>()
     const windowEndTime = request.endTime ?? new Date().toISOString()
 
-    for (let offset = 0; ; ) {
+    let offset = 0
+    let pageCount = 0
+    while (true) {
+      if (pageCount >= MAX_SYNC_PAGES) {
+        console.warn(
+          `[BifrostSyncService] Reached MAX_SYNC_PAGES (${MAX_SYNC_PAGES}) for window ${request.startTime}..${windowEndTime}; aborting pagination to avoid runaway loop`,
+        )
+        break
+      }
+
       const logs = await this.gatewayClient.getUsageLogs([], {
         startTime: request.startTime,
         endTime: windowEndTime,
@@ -130,6 +140,7 @@ export class BifrostSyncService {
       }
 
       offset += logs.length
+      pageCount++
     }
 
     if (request.advanceCursor) {

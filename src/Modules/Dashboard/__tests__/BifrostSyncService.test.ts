@@ -370,6 +370,70 @@ describe('BifrostSyncService', () => {
     expect(getCursorState()).toBeNull()
   })
 
+  it('paginates sync() and advances cursor to windowEndTime with last processed logId', async () => {
+    await seedApiKey('key-1', 'bfr-vk-1')
+    gateway.seedUsageLogs(Array.from({ length: 501 }, (_, index) => makeLog(index + 1)))
+
+    const result = await service.sync()
+
+    expect(result.synced).toBe(501)
+    expect(result.quarantined).toBe(0)
+    expect(await db.table('usage_records').count()).toBe(501)
+    // Two pages: [0, 500) then [500, 501)
+    expect(gateway.calls.getUsageLogs).toHaveLength(2)
+    expect(gateway.calls.getUsageLogs[0]?.query?.offset).toBeUndefined()
+    expect(gateway.calls.getUsageLogs[1]?.query?.offset).toBe(500)
+    // Both pages must share the same windowEndTime snapshot
+    const firstEnd = gateway.calls.getUsageLogs[0]?.query?.endTime
+    expect(firstEnd).toBeTruthy()
+    expect(gateway.calls.getUsageLogs[1]?.query?.endTime).toBe(firstEnd)
+    // Cursor advances to windowEndTime and holds the last log's id across pages
+    const cursor = getCursorState()
+    expect(cursor?.lastSyncedAt).toBe(firstEnd)
+    expect(cursor?.lastBifrostLogId).toBe('log-501')
+  })
+
+  it('issues exactly two gateway calls when a window holds exactly 500 logs', async () => {
+    await seedApiKey('key-1', 'bfr-vk-1')
+    gateway.seedUsageLogs(Array.from({ length: 500 }, (_, index) => makeLog(index + 1)))
+
+    const result = await service.backfill({
+      startTime: '2026-04-09T00:00:00Z',
+      endTime: '2026-04-09T23:59:59Z',
+    })
+
+    expect(result).toEqual({ synced: 500, quarantined: 0, affectedOrgIds: ['org-1'] })
+    expect(await db.table('usage_records').count()).toBe(500)
+    // First page returns 500 (== LOG_PAGE_SIZE), so loop probes the next page;
+    // second page returns 0 and the loop exits.
+    expect(gateway.calls.getUsageLogs).toHaveLength(2)
+    expect(gateway.calls.getUsageLogs[0]?.query?.offset).toBeUndefined()
+    expect(gateway.calls.getUsageLogs[1]?.query?.offset).toBe(500)
+  })
+
+  it('accumulates synced and quarantined counts correctly across paginated pages', async () => {
+    await seedApiKey('key-1', 'bfr-vk-1')
+    // 501 logs: every 100th (indices 100, 200, 300, 400, 500) uses an unknown vk → 5 quarantined
+    const logs: LogEntry[] = Array.from({ length: 501 }, (_, i) => {
+      const idx = i + 1
+      return idx % 100 === 0 ? makeLog(idx, 'unknown-vk') : makeLog(idx)
+    })
+    gateway.seedUsageLogs(logs)
+
+    const result = await service.backfill({
+      startTime: '2026-04-09T00:00:00Z',
+      endTime: '2026-04-09T23:59:59Z',
+    })
+
+    expect(result.synced).toBe(496)
+    expect(result.quarantined).toBe(5)
+    expect(result.affectedOrgIds).toEqual(['org-1'])
+    expect(await db.table('usage_records').count()).toBe(496)
+    expect(await db.table('quarantined_logs').count()).toBe(5)
+    // Must have paged — quarantined logs in page 1 should not prevent page 2 from being fetched
+    expect(gateway.calls.getUsageLogs).toHaveLength(2)
+  })
+
   it('returns { synced: 0, quarantined: 0 } when sync body exceeds 30 seconds', async () => {
     let timeoutCb: (() => void) | undefined
     const originalSetTimeout = globalThis.setTimeout
