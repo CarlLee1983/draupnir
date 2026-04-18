@@ -102,4 +102,14 @@ describe('RotateAppKeyService', () => {
     expect(result.success).toBe(false)
     expect(result.error).toBe('NOT_ORG_MANAGER')
   })
+
+  it('System admin 未加入組織仍可輪換（admin bypass）', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-rotate',
+      callerUserId: 'cloud-admin',
+      callerSystemRole: 'admin',
+    })
+    expect(result.success).toBe(true)
+    expect((result.data?.rawKey as string).startsWith('drp_app_')).toBe(true)
+  })
 })

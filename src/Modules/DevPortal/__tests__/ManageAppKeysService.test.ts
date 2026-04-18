@@ -143,7 +143,7 @@ describe('ManageAppKeysService', () => {
     expect(result.error).toBe('APP_NOT_FOUND')
   })
 
-  it('非 Org 成員應回傳錯誤', async () => {
+  it('非 Org 成員呼叫 list 應回傳 NOT_ORG_MEMBER', async () => {
     const result = await service.execute({
       applicationId: 'app-1',
       callerUserId: 'outsider',
@@ -152,5 +152,55 @@ describe('ManageAppKeysService', () => {
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('NOT_ORG_MEMBER')
+  })
+
+  it('非 Org 成員呼叫 issue 應回傳 NOT_ORG_MEMBER 且不觸發底層 service', async () => {
+    const result = await service.execute({
+      applicationId: 'app-1',
+      callerUserId: 'outsider',
+      callerSystemRole: 'user',
+      action: 'issue',
+      label: 'Outsider Key',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('NOT_ORG_MEMBER')
+    expect(mockIssueAppKeyService.execute).not.toHaveBeenCalled()
+  })
+
+  it('非 Org 成員呼叫 revoke 應回傳 NOT_ORG_MEMBER 且不觸發底層 service', async () => {
+    const result = await service.execute({
+      applicationId: 'app-1',
+      callerUserId: 'outsider',
+      callerSystemRole: 'user',
+      action: 'revoke',
+      keyId: 'appkey-1',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('NOT_ORG_MEMBER')
+    expect(mockRevokeAppKeyService.execute).not.toHaveBeenCalled()
+  })
+
+  it('System admin 以 outsider 身分仍可透過 issue action 發 App Key', async () => {
+    const result = await service.execute({
+      applicationId: 'app-1',
+      callerUserId: 'cloud-admin',
+      callerSystemRole: 'admin',
+      action: 'issue',
+      label: 'Admin Key',
+    })
+    expect(result.success).toBe(true)
+    expect(mockIssueAppKeyService.execute).toHaveBeenCalledOnce()
+  })
+
+  it('System admin 以 outsider 身分仍可透過 revoke action 撤銷 App Key', async () => {
+    const result = await service.execute({
+      applicationId: 'app-1',
+      callerUserId: 'cloud-admin',
+      callerSystemRole: 'admin',
+      action: 'revoke',
+      keyId: 'appkey-1',
+    })
+    expect(result.success).toBe(true)
+    expect(mockRevokeAppKeyService.execute).toHaveBeenCalledOnce()
   })
 })

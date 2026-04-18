@@ -109,6 +109,17 @@ describe('IssueAppKeyService', () => {
     expect(result.error).toBe('NOT_ORG_MANAGER')
   })
 
+  it('System admin 未加入組織仍可 issue（admin bypass）', async () => {
+    const result = await service.execute({
+      orgId: 'org-1',
+      issuedByUserId: 'cloud-admin',
+      callerSystemRole: 'admin',
+      label: 'Admin Key',
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.rawKey).toMatch(/^drp_app_/)
+  })
+
   it('空 label 應回傳錯誤', async () => {
     const result = await service.execute({
       orgId: 'org-1',

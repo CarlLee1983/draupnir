@@ -92,4 +92,15 @@ describe('RevokeAppKeyService', () => {
     expect(result.success).toBe(false)
     expect(result.error).toBe('NOT_ORG_MANAGER')
   })
+
+  it('System admin 未加入組織仍可撤銷（admin bypass）', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-revoke',
+      callerUserId: 'cloud-admin',
+      callerSystemRole: 'admin',
+    })
+    expect(result.success).toBe(true)
+    const updated = await appKeyRepo.findById('appkey-revoke')
+    expect(updated?.status).toBe('revoked')
+  })
 })

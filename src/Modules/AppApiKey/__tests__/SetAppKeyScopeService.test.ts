@@ -101,4 +101,15 @@ describe('SetAppKeyScopeService', () => {
     expect(result.success).toBe(false)
     expect(result.error).toBe('NOT_ORG_MANAGER')
   })
+
+  it('System admin 未加入組織仍可更新 scope（admin bypass）', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-scope',
+      callerUserId: 'cloud-admin',
+      callerSystemRole: 'admin',
+      scope: 'admin',
+    })
+    expect(result.success).toBe(true)
+    expect(result.data?.scope).toBe('admin')
+  })
 })
