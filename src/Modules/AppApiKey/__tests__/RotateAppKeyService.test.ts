@@ -83,7 +83,7 @@ describe('RotateAppKeyService', () => {
     expect(result.error).toBe('KEY_NOT_FOUND')
   })
 
-  it('非 Org 成員應回傳錯誤', async () => {
+  it('未加入組織應回傳 NOT_ORG_MEMBER', async () => {
     const result = await service.execute({
       keyId: 'appkey-rotate',
       callerUserId: 'outsider',
@@ -93,7 +93,7 @@ describe('RotateAppKeyService', () => {
     expect(result.error).toBe('NOT_ORG_MEMBER')
   })
 
-  it('Org Member 但非 Manager 應回傳錯誤', async () => {
+  it('Org Member 但非 Manager 應回傳 NOT_ORG_MANAGER', async () => {
     const result = await service.execute({
       keyId: 'appkey-rotate',
       callerUserId: 'user-2',

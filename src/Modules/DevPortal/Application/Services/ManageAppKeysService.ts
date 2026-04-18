@@ -72,6 +72,8 @@ export class ManageAppKeysService {
 
       switch (request.action) {
         case 'issue': {
+          // 縱深防禦：底層 IssueAppKeyService 也會跑 requireOrgManager，
+          // 這層刻意重複以阻止底層 service 被替換或直接呼叫時的授權繞過。
           const managerAuth = await this.orgAuth.requireOrgManager(
             application.orgId,
             request.callerUserId,
@@ -103,6 +105,8 @@ export class ManageAppKeysService {
           if (!request.keyId) {
             return { success: false, message: 'Missing keyId', error: 'KEY_ID_REQUIRED' }
           }
+          // 縱深防禦：底層 RevokeAppKeyService 也會跑 requireOrgManager，
+          // 這層刻意重複以阻止底層 service 被替換或直接呼叫時的授權繞過。
           const managerAuth = await this.orgAuth.requireOrgManager(
             application.orgId,
             request.callerUserId,

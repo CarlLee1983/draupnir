@@ -91,7 +91,7 @@ describe('SetAppKeyScopeService', () => {
     expect(result.error).toBe('KEY_NOT_FOUND')
   })
 
-  it('Org Member 但非 Manager 應回傳錯誤', async () => {
+  it('Org Member 但非 Manager 應回傳 NOT_ORG_MANAGER', async () => {
     const result = await service.execute({
       keyId: 'appkey-scope',
       callerUserId: 'user-2',

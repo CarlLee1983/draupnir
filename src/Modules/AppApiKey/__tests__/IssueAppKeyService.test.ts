@@ -87,7 +87,7 @@ describe('IssueAppKeyService', () => {
     expect(policy.rotation_interval_days).toBe(90)
   })
 
-  it('非 Org 成員應回傳錯誤', async () => {
+  it('未加入組織應回傳 NOT_ORG_MEMBER', async () => {
     const result = await service.execute({
       orgId: 'org-1',
       issuedByUserId: 'outsider',
@@ -98,7 +98,7 @@ describe('IssueAppKeyService', () => {
     expect(result.error).toBe('NOT_ORG_MEMBER')
   })
 
-  it('Org Member 但非 Manager 應回傳錯誤', async () => {
+  it('Org Member 但非 Manager 應回傳 NOT_ORG_MANAGER', async () => {
     const result = await service.execute({
       orgId: 'org-1',
       issuedByUserId: 'user-2',

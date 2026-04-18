@@ -190,6 +190,7 @@ AppApiKey 與 ApiKey 的差異：
 
 **Key rules**
 - Issue 現已要求 `requireOrgManager`——只有 Org Manager / Admin 能發 App-Key；list 仍可由 Org Member 查閱
+- Route 層僅掛 `requireAuth + createModuleAccessMiddleware('app_api_keys')`；role 檢查只在 Service 層（`IssueAppKeyService`、`RotateAppKeyService`、`RevokeAppKeyService`、`SetAppKeyScopeService`）。新增 route 時請勿倚賴 middleware 做 manager 檢查。
 - 新 key 的 rawKey 只在 issue 回應回傳一次，之後存庫只有 hash（同 ApiKey 的 pattern）
 - 發 App-Key 會同步建立對應的 Bifrost virtual key（`IAppKeyBifrostSync`），失敗與 ApiKey 類似做 rollback 嘗試
 - App-Key 綁定 `BoundModules`（哪些 module 可用）、`AppKeyScope`（允許的 model 等）、`KeyRotationPolicy`（多久須輪替）
@@ -211,7 +212,7 @@ AppApiKey 與 ApiKey 的差異：
   - `RotateAppKeyService.execute()` → `src/Modules/AppApiKey/Application/Services/RotateAppKeyService.ts`
   - `RevokeAppKeyService.execute()` → 同目錄
 - Controller: `AppApiKeyController.rotate()` / `revoke()`
-- Routes：`POST /api/app-keys/:keyId/rotate`、`POST /api/app-keys/:keyId/revoke`（皆 `requireAuth`；服務內部還會 `requireOrgMembership`）
+- Routes：`POST /api/app-keys/:keyId/rotate`、`POST /api/app-keys/:keyId/revoke`（皆 `requireAuth`；服務內部會 `requireOrgManager`，Route 層不做 role 檢查）
 
 **Key rules**
 - Rotate 產生新 rawKey（**只回一次**），舊 key 隨即作廢；中間有短暫雙效期可由 rotation policy 控制（依 `KeyRotationPolicy`）
