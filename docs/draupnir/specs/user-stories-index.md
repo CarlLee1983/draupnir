@@ -73,8 +73,15 @@
 | [US-ALERTS-003](./4-credit-billing/user-stories.md#us-alerts-003-manager-測試-webhook-連線) | Manager 測試 Webhook 連線 | Org Manager | Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-ALERTS-004](./4-credit-billing/user-stories.md#us-alerts-004-系統定期評估閾值並觸發-alertemail--webhook) | 系統評估閾值觸發 Alert | System | Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-ALERTS-005](./4-credit-billing/user-stories.md#us-alerts-005-manager-查看-alert-歷史補發未達-delivery) | Manager 查 Alert 歷史 / 補發 Delivery | Org Manager | Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
+| [US-APPKEY-001](./3-api-keys/user-stories.md#us-appkey-001-org-成員發--列-app-key) | Org 成員發 / 列 App-Key | Org Member 以上 | AppApiKey | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-APPKEY-002](./3-api-keys/user-stories.md#us-appkey-002-org-成員-rotate--revoke-app-key) | Rotate / Revoke App-Key | Org Member 以上 | AppApiKey | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-APPKEY-003](./3-api-keys/user-stories.md#us-appkey-003-org-成員修改-app-key-的-scope) | 修改 App-Key Scope | Org Member 以上 | AppApiKey | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-APPKEY-004](./3-api-keys/user-stories.md#us-appkey-004-org-成員查-app-key-使用量) | 查 App-Key 使用量 | Org Member 以上 | AppApiKey | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-APPMODULE-001](./3-api-keys/user-stories.md#us-appmodule-001-cloud-admin-註冊新-module) | Admin 註冊 Module | Cloud Admin | AppModule | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-APPMODULE-002](./3-api-keys/user-stories.md#us-appmodule-002-cloud-admin-讓-org-訂閱--取消訂閱-module) | Admin 訂閱 / 取消訂閱 Module | Cloud Admin | AppModule | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-APPMODULE-003](./3-api-keys/user-stories.md#us-appmodule-003-任何已驗證使用者列出--查看-modules) | 任何人列 Modules / 查詳細 | 所有人 | AppModule | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-APPMODULE-004](./3-api-keys/user-stories.md#us-appmodule-004-系統檢查-org-對-module-的存取權middleware-驗證--初始-provisioning) | Module Access + Provisioning | System | AppModule | [3-api-keys](./3-api-keys/user-stories.md) |
 
-<!-- TODO(task-6): AppApiKey + AppModule story 列 -->
 <!-- TODO(task-7): SdkApi + CliApi + DevPortal story 列 -->
 
 ---
@@ -83,15 +90,16 @@
 
 | Actor | Story IDs |
 |---|---|
-| **Cloud Admin** | US-AUTH-010, US-ORG-007, US-ORG-008, US-CONTRACT-001, US-CONTRACT-002, US-CONTRACT-003, US-CONTRACT-004, US-CONTRACT-006, US-CREDIT-001 |
-| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006, US-CONTRACT-006, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-REPORTS-001, US-ALERTS-001, US-ALERTS-002, US-ALERTS-003, US-ALERTS-005 |
-| **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-ALERTS-001（只讀）|
+| **Cloud Admin** | US-AUTH-010, US-ORG-007, US-ORG-008, US-CONTRACT-001, US-CONTRACT-002, US-CONTRACT-003, US-CONTRACT-004, US-CONTRACT-006, US-CREDIT-001, US-APPMODULE-001, US-APPMODULE-002 |
+| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006, US-CONTRACT-006, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-REPORTS-001, US-ALERTS-001, US-ALERTS-002, US-ALERTS-003, US-ALERTS-005, US-APPKEY-001~004 |
+| **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-ALERTS-001（只讀）, US-APPKEY-001~004（與 Manager 同權，service 僅 require org membership）|
 | **受邀者（未必已入 org）** | US-ORG-004 |
 | **使用者（未登入 / 新註冊）** | US-AUTH-001, US-AUTH-002, US-AUTH-005, US-AUTH-006, US-AUTH-007, US-AUTH-008 |
 | **使用者（已登入，尚未建立 / 加入 org）** | US-AUTH-003, US-AUTH-004, US-ORG-001 |
 | **Bifrost Sync Job** | US-DASHBOARD-007 |
 | **SDK Client** | <!-- TODO(task-7) --> |
-| **System（自動化）** | US-APIKEY-008, US-CONTRACT-005, US-CREDIT-004, US-CREDIT-005, US-CREDIT-006, US-REPORTS-002, US-REPORTS-003, US-ALERTS-004 |
+| **System（自動化）** | US-APIKEY-008, US-CONTRACT-005, US-CREDIT-004, US-CREDIT-005, US-CREDIT-006, US-REPORTS-002, US-REPORTS-003, US-ALERTS-004, US-APPMODULE-004 |
+| **所有人（匿名或已登入）** | US-APPMODULE-003（module catalog 公開）|
 
 ---
 
@@ -112,6 +120,8 @@
 | **Admin 組織治理** | US-ORG-008 → US-ORG-007 → US-AUTH-010 |
 | **鏡像失敗防禦（Bifrost 中斷）** | US-APIKEY-008 |
 | **告警生命週期** | US-ALERTS-001（設 budget）→ US-ALERTS-002（設 webhook）→ US-ALERTS-003（測試 webhook）→ US-ALERTS-004（系統觸發）→ US-ALERTS-005（查歷史 / 補發）|
+| **App-Key 生命週期（Application-level）** | US-APPKEY-001 → US-APPKEY-003（改 scope）→ US-APPKEY-002（rotate / revoke）→ US-APPKEY-004（查使用量）|
+| **AppModule 生命週期** | US-APPMODULE-001（Admin 註冊）→ US-APPMODULE-002（訂閱給 org）→ US-APPMODULE-004（middleware 驗證）→ US-APPMODULE-003（公開 catalog）|
 
 ---
 
