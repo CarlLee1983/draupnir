@@ -10,8 +10,7 @@
 
 **覆蓋進度**：
 - ✅ Stage 0（Pilot）：ApiKey
-- ✅ Stage 1（進行中）：Auth + Profile（本批）
-- ⏳ Stage 1（剩餘）：Organization、Contract、Credit、Dashboard、Reports、Alerts（Task 2~5）
+- ✅ Stage 1（完成）：Auth + Profile + Organization + Contract + Credit + Dashboard + Reports + Alerts
 - ⏳ Stage 2：AppApiKey、AppModule、SdkApi、CliApi、DevPortal（Task 6~7）
 
 ---
@@ -69,8 +68,12 @@
 | [US-REPORTS-001](./4-credit-billing/user-stories.md#us-reports-001-manager-管理排程-reportcrud) | Manager 管理排程 Report | Org Manager | Reports | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-REPORTS-002](./4-credit-billing/user-stories.md#us-reports-002-系統依排程送出-pdf-report-email) | 系統依排程送 Report Email | System | Reports | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-REPORTS-003](./4-credit-billing/user-stories.md#us-reports-003-pdf-渲染以-token-保護的-template-endpoint) | PDF 渲染走 Token 保護 Endpoint | System | Reports | [4-credit-billing](./4-credit-billing/user-stories.md) |
+| [US-ALERTS-001](./4-credit-billing/user-stories.md#us-alerts-001-manager-設定--查看-org-的-budget-閾值) | Manager 設定 / 看 Budget 閾值 | Org Manager（Member 可讀）| Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
+| [US-ALERTS-002](./4-credit-billing/user-stories.md#us-alerts-002-manager-管理-webhook-endpointscrud--rotate-secret) | Manager 管理 Webhook Endpoints | Org Manager | Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
+| [US-ALERTS-003](./4-credit-billing/user-stories.md#us-alerts-003-manager-測試-webhook-連線) | Manager 測試 Webhook 連線 | Org Manager | Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
+| [US-ALERTS-004](./4-credit-billing/user-stories.md#us-alerts-004-系統定期評估閾值並觸發-alertemail--webhook) | 系統評估閾值觸發 Alert | System | Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
+| [US-ALERTS-005](./4-credit-billing/user-stories.md#us-alerts-005-manager-查看-alert-歷史補發未達-delivery) | Manager 查 Alert 歷史 / 補發 Delivery | Org Manager | Alerts | [4-credit-billing](./4-credit-billing/user-stories.md) |
 
-<!-- TODO(task-5): Alerts story 列 -->
 <!-- TODO(task-6): AppApiKey + AppModule story 列 -->
 <!-- TODO(task-7): SdkApi + CliApi + DevPortal story 列 -->
 
@@ -81,14 +84,14 @@
 | Actor | Story IDs |
 |---|---|
 | **Cloud Admin** | US-AUTH-010, US-ORG-007, US-ORG-008, US-CONTRACT-001, US-CONTRACT-002, US-CONTRACT-003, US-CONTRACT-004, US-CONTRACT-006, US-CREDIT-001 |
-| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006, US-CONTRACT-006, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-REPORTS-001 |
-| **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006 |
+| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006, US-CONTRACT-006, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-REPORTS-001, US-ALERTS-001, US-ALERTS-002, US-ALERTS-003, US-ALERTS-005 |
+| **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-ALERTS-001（只讀）|
 | **受邀者（未必已入 org）** | US-ORG-004 |
 | **使用者（未登入 / 新註冊）** | US-AUTH-001, US-AUTH-002, US-AUTH-005, US-AUTH-006, US-AUTH-007, US-AUTH-008 |
 | **使用者（已登入，尚未建立 / 加入 org）** | US-AUTH-003, US-AUTH-004, US-ORG-001 |
 | **Bifrost Sync Job** | US-DASHBOARD-007 |
 | **SDK Client** | <!-- TODO(task-7) --> |
-| **System（自動化）** | US-APIKEY-008, US-CONTRACT-005, US-CREDIT-004, US-CREDIT-005, US-CREDIT-006, US-REPORTS-002, US-REPORTS-003 |
+| **System（自動化）** | US-APIKEY-008, US-CONTRACT-005, US-CREDIT-004, US-CREDIT-005, US-CREDIT-006, US-REPORTS-002, US-REPORTS-003, US-ALERTS-004 |
 
 ---
 
@@ -100,7 +103,7 @@
 | **額度發放到扣款** | US-CONTRACT-001 → US-CONTRACT-002（啟用）→ US-CONTRACT-003（指派 org）→ US-APIKEY-001（Manager 分配 key quota）→ US-DASHBOARD-007（Bifrost Sync 拉 usage）→ US-CREDIT-004（系統扣款）→ US-DASHBOARD-001/002（成本可視化） |
 | **額度耗盡與恢復** | US-CREDIT-004 → US-CREDIT-005（凍結）→ US-CREDIT-001（Admin 加值）→ US-CREDIT-006（解凍）|
 | **Contract 調整與硬擋** | US-CONTRACT-004（調 cap）→ US-APIKEY-001（影響 key 額度預檢）|
-| **Contract 到期** | US-CONTRACT-005 <!-- TODO(task-5): → US-ALERTS-xxx 發通知 --> |
+| **Contract 到期** | US-CONTRACT-005（dispatch `ContractExpiring` / `ContractExpired`）→ US-ALERTS-004（下游通知 channel）|
 | **監控與報表** | US-DASHBOARD-007（sync 資料）→ US-DASHBOARD-001~006（儀表板視覺化）→ US-REPORTS-001（設排程）→ US-REPORTS-002（定期寄 PDF）|
 | **使用者註冊到打 API（自建 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-001 → US-APIKEY-001 <!-- TODO(task-7): → US-SDK-001 --> |
 | **使用者註冊到打 API（受邀加入 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-004（接受邀請）→ US-APIKEY-007（收到 key）<!-- TODO(task-7): → US-SDK-001 --> |
@@ -108,7 +111,7 @@
 | **組織組建（Manager 視角）** | US-ORG-001 → US-ORG-002 → US-ORG-003 → US-ORG-005 → US-ORG-006 |
 | **Admin 組織治理** | US-ORG-008 → US-ORG-007 → US-AUTH-010 |
 | **鏡像失敗防禦（Bifrost 中斷）** | US-APIKEY-008 |
-| **告警生命週期** | <!-- TODO(task-5) --> |
+| **告警生命週期** | US-ALERTS-001（設 budget）→ US-ALERTS-002（設 webhook）→ US-ALERTS-003（測試 webhook）→ US-ALERTS-004（系統觸發）→ US-ALERTS-005（查歷史 / 補發）|
 
 ---
 

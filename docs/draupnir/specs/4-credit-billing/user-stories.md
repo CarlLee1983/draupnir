@@ -5,8 +5,7 @@
 
 ## 範圍
 
-- 本檔覆蓋：**Contract 模組** + **Credit 模組** + **Dashboard 模組** + **Reports 模組**
-- **下批再補**（Task 5）：Alerts（本檔會再附加章節）
+- 本檔覆蓋：**Contract 模組** + **Credit 模組** + **Dashboard 模組** + **Reports 模組** + **Alerts 模組**
 - 計畫刻意把這五個模組放同一份檔——它們共同構成「額度發放 → 使用 → 監控 → 告警」的商業閉環
 
 ## 相關 personas
@@ -471,6 +470,127 @@
 
 ---
 
+## Alerts
+
+### US-ALERTS-001 | Manager 設定 / 查看 Org 的 Budget 閾值
+
+**As** an Org Manager
+**I want to** set a monthly budget amount for my org and read the current value
+**so that** Draupnir can evaluate usage against it and notify us when we approach or exceed the cap.
+
+**Related**
+- Module: `src/Modules/Alerts`
+- Entries：
+  - `SetBudgetService.execute(orgId, budgetUsd)` → `src/Modules/Alerts/Application/Services/SetBudgetService.ts`
+  - `GetBudgetService.execute(orgId)` → 同目錄
+- Controller: `AlertController.setBudget()` / `getBudget()` → `src/Modules/Alerts/Presentation/Controllers/AlertController.ts`
+- Routes：
+  - `PUT /api/organizations/:orgId/alerts/budget`（`requireOrganizationManager`）
+  - `GET /api/organizations/:orgId/alerts/budget`（`requireOrganizationContext`——同 org 成員皆可讀）
+
+**Key rules**
+- `budgetUsd` 走 `BudgetAmount` value object 驗證（必須為正的 decimal 字串，保留精度）
+- 設定會 upsert `AlertConfig` 聚合；同一 org 同時只有一筆 config
+- 讀取路徑放給全體 org member（Manager + Member 都能看到目前閾值），但只有 Manager 能改
+
+---
+
+### US-ALERTS-002 | Manager 管理 Webhook Endpoints（CRUD + Rotate Secret）
+
+**As** an Org Manager
+**I want to** register, list, update, delete, and rotate secrets for webhook endpoints that should receive alerts
+**so that** our ops tooling (Slack, PagerDuty, internal webhook) can react to Draupnir alerts automatically.
+
+**Related**
+- Module: `src/Modules/Alerts`
+- Entries：
+  - `RegisterWebhookEndpointService.register(orgId, url, description)` → `src/Modules/Alerts/Application/Services/RegisterWebhookEndpointService.ts`
+  - `ListWebhookEndpointsService.execute(orgId)` → 同目錄
+  - `UpdateWebhookEndpointService.execute(...)` → 同目錄
+  - `DeleteWebhookEndpointService.execute(endpointId)` → 同目錄
+  - `RotateWebhookSecretService.execute(endpointId)` → 同目錄
+- Controller: `WebhookEndpointController.list()` / `create()` / `update()` / `rotateSecret()` / `delete()` → `src/Modules/Alerts/Presentation/Controllers/WebhookEndpointController.ts`
+- Routes（全部 `requireOrganizationManager`）：
+  - `GET /api/organizations/:orgId/alerts/webhooks`
+  - `POST /api/organizations/:orgId/alerts/webhooks`
+  - `PATCH /api/organizations/:orgId/alerts/webhooks/:endpointId`
+  - `DELETE /api/organizations/:orgId/alerts/webhooks/:endpointId`
+  - `POST /api/organizations/:orgId/alerts/webhooks/:endpointId/rotate-secret`
+
+**Key rules**
+- 每個 org 最多 **5 組 webhook endpoint**（`RegisterWebhookEndpointService` 硬限制）
+- URL 走 `WebhookUrl.create`；預設只允許 https，本地開發可由 `allowHttp` 放行
+- 建立時回傳的 `plaintextSecret` **只回一次**；之後只能 rotate，不能查原始值
+- Rotate secret 會產生新 secret 並作廢舊 secret；已在途的 alert delivery 還是以當下的 secret 簽章
+
+---
+
+### US-ALERTS-003 | Manager 測試 Webhook 連線
+
+**As** an Org Manager
+**I want to** send a test payload to a registered webhook endpoint
+**so that** I can verify the URL and secret work before relying on it for real alerts.
+
+**Related**
+- Module: `src/Modules/Alerts`
+- Entry: `TestWebhookEndpointService.execute(endpointId)` → `src/Modules/Alerts/Application/Services/TestWebhookEndpointService.ts`
+- Controller: `WebhookEndpointController.test()`
+- Route: `POST /api/organizations/:orgId/alerts/webhooks/:endpointId/test`（Manager）
+
+**Key rules**
+- Test payload 會走與真實 alert 相同的簽章流程，讓接收端的驗證邏輯能同時被驗證
+- 回傳 HTTP 響應摘要（狀態碼、時間、錯誤訊息）——讓 Manager 能直接判斷是否通
+- Test 呼叫**不**寫入 alert event / delivery 歷史——避免污染真實紀錄
+
+---
+
+### US-ALERTS-004 | 系統定期評估閾值並觸發 Alert（Email + Webhook）
+
+**As** the Draupnir system (on behalf of monthly budget evaluation)
+**I want to** compare each org's accumulated usage cost against its configured budget and, when the current month crosses a threshold tier, send alert notifications via email and webhook
+**so that** Manager / key stakeholders know to act before spend runs away.
+
+**Related**
+- Module: `src/Modules/Alerts`
+- Entries：
+  - `EvaluateThresholdsService.evaluateOrgs(orgIds)` → `src/Modules/Alerts/Application/Services/EvaluateThresholdsService.ts`
+  - `SendAlertService.send(params)` → `src/Modules/Alerts/Application/Services/SendAlertService.ts`
+- 觸發源：Dashboard 的 `BifrostSyncCompletedEvent` 會帶 `affectedOrgIds`，讓 Evaluator 知道要評估哪幾個 org
+- 領域互動：`AlertConfig`（閾值）、`MonthlyPeriod`（月份切割）、`ThresholdTier`（warning / critical 兩階）、`AlertEvent`（寫入歷史）
+- 遞送：多 `IAlertNotifier` 策略——目前包含 email 與 webhook
+
+**Key rules**
+- 評估單位為「月」：`MonthlyPeriod` 以 org 時區 / UTC 月界劃分，跨月後計數歸零
+- 每個 tier（warning / critical）一個月只通知一次——避免 spam；同月已發過該 tier 不再觸發
+- 通知失敗（email bounce / webhook 5xx）不中斷整體流程，相關 delivery 記錄為失敗、供後續 resend（見 US-ALERTS-005）
+- Recipient 解析：email 走 `IAlertRecipientResolver.resolveByOrg(orgId)`——通常是 org 的 Managers
+
+---
+
+### US-ALERTS-005 | Manager 查看 Alert 歷史、補發未達 Delivery
+
+**As** an Org Manager
+**I want to** see the history of alert events and individual deliveries (email / webhook) and optionally resend a failed delivery
+**so that** I can audit what was triggered, confirm stakeholders got it, and retry after fixing a webhook URL or email address.
+
+**Related**
+- Module: `src/Modules/Alerts`
+- Entries：
+  - `GetAlertHistoryService.execute(orgId, ...)` → `src/Modules/Alerts/Application/Services/GetAlertHistoryService.ts`
+  - `ResendDeliveryService.execute(deliveryId)` → 同目錄
+- Controller: `AlertHistoryController.list()` / `resend()` → `src/Modules/Alerts/Presentation/Controllers/AlertHistoryController.ts`
+- Routes（皆 Manager）：
+  - `GET /api/organizations/:orgId/alerts/history`
+  - `POST /api/organizations/:orgId/alerts/deliveries/:deliveryId/resend`
+
+**Key rules**
+- History 回傳 `AlertEvent` + 其關聯的 deliveries（每個 channel 一筆 delivery，含 status）
+- 支援 pagination（時間倒序）
+- Resend 只針對「失敗狀態」的 delivery；成功的 delivery 不允許重發避免重覆通知
+- Resend 會建立新的 delivery 紀錄（不覆蓋舊的），讓歷史留下 audit trail
+
+---
+
 ## Coverage map
 
 ### Contract 模組 Application Services
@@ -529,6 +649,23 @@
 | `GeneratePdfService.generate` | US-REPORTS-002, US-REPORTS-003 | Playwright 渲染 PDF；依賴 verify-template |
 | `SendReportEmailService.send` | US-REPORTS-002 | 寄 email 帶 PDF 附件 |
 
+### Alerts 模組 Application Services
+
+| Service method | Story ID | 備註 |
+|---|---|---|
+| `SetBudgetService.execute` | US-ALERTS-001 | 設定 budget 閾值 |
+| `GetBudgetService.execute` | US-ALERTS-001 | 讀取目前閾值 |
+| `RegisterWebhookEndpointService.register` | US-ALERTS-002 | 新增 webhook |
+| `ListWebhookEndpointsService.execute` | US-ALERTS-002 | 列 webhook |
+| `UpdateWebhookEndpointService.execute` | US-ALERTS-002 | 改 webhook |
+| `DeleteWebhookEndpointService.execute` | US-ALERTS-002 | 刪 webhook |
+| `RotateWebhookSecretService.execute` | US-ALERTS-002 | 輪替 webhook secret |
+| `TestWebhookEndpointService.execute` | US-ALERTS-003 | 測試 webhook 連線 |
+| `EvaluateThresholdsService.evaluateOrgs` | US-ALERTS-004 | 背景評估閾值 |
+| `SendAlertService.send` | US-ALERTS-004 | 實際送 email + webhook |
+| `GetAlertHistoryService.execute` | US-ALERTS-005 | 查歷史 |
+| `ResendDeliveryService.execute` | US-ALERTS-005 | 補發失敗的 delivery |
+
 ### Presentation 入口
 
 | Entry | Story ID | 備註 |
@@ -561,6 +698,17 @@
 | `BifrostSyncService`（registered via `DashboardServiceProvider.registerJobs`） | US-DASHBOARD-007 | Scheduler-driven，無 HTTP 入口 |
 | `ScheduleReportService`（registered via scheduler） | US-REPORTS-002 | Scheduler-driven，無 HTTP 入口 |
 | Member / Manager Portal 的 Dashboard / Usage / Cost 頁面 | US-DASHBOARD-001~006 | Inertia，各 portal 各自 binding |
+| `AlertController.setBudget` | US-ALERTS-001 | REST（Manager only）|
+| `AlertController.getBudget` | US-ALERTS-001 | REST（org member）|
+| `WebhookEndpointController.list` | US-ALERTS-002 | REST（Manager only）|
+| `WebhookEndpointController.create` | US-ALERTS-002 | REST（Manager only）|
+| `WebhookEndpointController.update` | US-ALERTS-002 | REST（Manager only）|
+| `WebhookEndpointController.delete` | US-ALERTS-002 | REST（Manager only）|
+| `WebhookEndpointController.rotateSecret` | US-ALERTS-002 | REST（Manager only）|
+| `WebhookEndpointController.test` | US-ALERTS-003 | REST（Manager only）|
+| `AlertHistoryController.list` | US-ALERTS-005 | REST（Manager only）|
+| `AlertHistoryController.resend` | US-ALERTS-005 | REST（Manager only）|
+| `EvaluateThresholdsService`（由 `BifrostSyncCompletedEvent` 消費） | US-ALERTS-004 | Event-driven，無 HTTP 入口 |
 
 ### 已知覆蓋缺口
 
@@ -570,3 +718,5 @@
 - **逾期未扣款的 backfill**：若 Bifrost sync 長時間中斷導致 usage 堆積，補扣流程沒有獨立 story；靠 Dashboard Sync（US-DASHBOARD-007）重跑，目前無獨立 "補扣" 故事
 - **已寄送 Report 的歷史記錄**：Reports 模組只管 "schedule configs"，不保留歷次 render 的 PDF 歷史；若後續要查 "之前寄過什麼" 需新 story
 - **Reports 排程失敗的重試**：若 cron tick 發 email 失敗（mailer 錯誤），目前無獨立重試機制；依賴 scheduler 下次 tick
+- **多通道同時 off（僅剩 webhook 失敗）情境**：若 email 送出但 webhook 全失敗，目前僅記錄 delivery 失敗、不自動升級——依賴 Manager 看 history 主動處理
+- **Alert Tier 的自訂閾值百分比**：v1 以 warning / critical 兩階為主，`ThresholdTier` 若未來支援自訂百分比需新 story
