@@ -7,8 +7,8 @@
 
 **Stage 覆蓋狀態**：
 - ✅ Stage 0（主 3 張）：Cloud Admin、Org Manager、Org Member
-- ✅ Stage 1.4：Bifrost Sync Job（Task 4 補）
-- ⏳ Stage 2.2：SDK Client（Task 7 補）
+- ✅ Stage 1.4：Bifrost Sync Job
+- ✅ Stage 2.2：SDK Client
 
 ---
 
@@ -109,4 +109,27 @@ Dashboard（本身所在模組，寫 `usage_records`）、ApiKey（比對 `virtu
 
 ---
 
-<!-- TODO(stage-2.2): SDK Client persona 卡將在 Task 7 補入 -->
+## 🔌 SDK Client
+
+**是誰**
+外部程式（客戶的系統、CI pipeline、CLI 工具如 Claude Code / Codex，或 App Server），拿著 Draupnir 發的 App-Key 或透過 CLI Device Flow 交換到的 user token，透過 Draupnir SdkApi / CliApi 呼叫 AI 模型。
+
+**兩種子類**：
+- **App-Key 模式**：拿到 App-Key，打 `/sdk/v1/chat/completions`，認證走 `AppAuthMiddleware`
+- **CLI Device-Flow 模式**：先 OAuth Device Flow 換 user token（見 [US-CLI-001](./7-developer-api/user-stories.md#us-cli-001-cli-client-oauth-device-flow-登入)），之後以 user 身份打 `/cli/proxy`
+
+**關切的事**
+- 能用 OpenAI 相容格式發 request、取得 AI 回應
+- 遇到錯誤（餘額不足、key revoked、scope 不足、module 未訂閱）能收到**清楚的錯誤 code 與訊息**
+- App-Key / token 能安全取得、rotate、撤銷
+
+**不關切**
+- 背後的 Bifrost gateway 細節、usage sync 流程
+- 額度扣款的計算邏輯（只需要知道「扣完了」）
+- 組織內部的 member 分工
+
+**會碰到哪些模組**
+SdkApi、CliApi、DevPortal（UI 端）、AppApiKey（底層 key 管理）
+
+**代表性 Story**
+[US-SDK-001](./7-developer-api/user-stories.md#us-sdk-001-sdk-client-以-app-key-打-chat-completion)（chat completion）、[US-SDK-002](./7-developer-api/user-stories.md#us-sdk-002-sdk-client-查餘額--查使用量)（查餘額 / 使用量）、[US-CLI-001](./7-developer-api/user-stories.md#us-cli-001-cli-client-oauth-device-flow-登入)（CLI 登入）、[US-CLI-002](./7-developer-api/user-stories.md#us-cli-002-cli-client-透過-proxy-呼叫-bifrost)（CLI proxy）

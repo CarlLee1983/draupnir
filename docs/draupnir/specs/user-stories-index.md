@@ -11,7 +11,7 @@
 **覆蓋進度**：
 - ✅ Stage 0（Pilot）：ApiKey
 - ✅ Stage 1（完成）：Auth + Profile + Organization + Contract + Credit + Dashboard + Reports + Alerts
-- ⏳ Stage 2：AppApiKey、AppModule、SdkApi、CliApi、DevPortal（Task 6~7）
+- ✅ Stage 2（完成）：AppApiKey + AppModule + SdkApi + CliApi + DevPortal
 
 ---
 
@@ -81,8 +81,15 @@
 | [US-APPMODULE-002](./3-api-keys/user-stories.md#us-appmodule-002-cloud-admin-讓-org-訂閱--取消訂閱-module) | Admin 訂閱 / 取消訂閱 Module | Cloud Admin | AppModule | [3-api-keys](./3-api-keys/user-stories.md) |
 | [US-APPMODULE-003](./3-api-keys/user-stories.md#us-appmodule-003-任何已驗證使用者列出--查看-modules) | 任何人列 Modules / 查詳細 | 所有人 | AppModule | [3-api-keys](./3-api-keys/user-stories.md) |
 | [US-APPMODULE-004](./3-api-keys/user-stories.md#us-appmodule-004-系統檢查-org-對-module-的存取權middleware-驗證--初始-provisioning) | Module Access + Provisioning | System | AppModule | [3-api-keys](./3-api-keys/user-stories.md) |
+| [US-SDK-001](./7-developer-api/user-stories.md#us-sdk-001-sdk-client-以-app-key-打-chat-completion) | SDK Client 以 App-Key 打 Chat Completion | SDK Client | SdkApi | [7-developer-api](./7-developer-api/user-stories.md) |
+| [US-SDK-002](./7-developer-api/user-stories.md#us-sdk-002-sdk-client-查餘額--查使用量) | SDK Client 查餘額 / 使用量 | SDK Client | SdkApi | [7-developer-api](./7-developer-api/user-stories.md) |
+| [US-CLI-001](./7-developer-api/user-stories.md#us-cli-001-cli-client-oauth-device-flow-登入) | CLI Device Flow 登入 | SDK Client（CLI）+ 使用者 | CliApi | [7-developer-api](./7-developer-api/user-stories.md) |
+| [US-CLI-002](./7-developer-api/user-stories.md#us-cli-002-cli-client-透過-proxy-呼叫-bifrost) | CLI Proxy 呼叫 Bifrost | SDK Client（CLI）| CliApi | [7-developer-api](./7-developer-api/user-stories.md) |
+| [US-CLI-003](./7-developer-api/user-stories.md#us-cli-003-cli-client-登出單裝置--全部裝置) | CLI 登出（單 / 全）| SDK Client（CLI）| CliApi | [7-developer-api](./7-developer-api/user-stories.md) |
+| [US-DEV-001](./7-developer-api/user-stories.md#us-dev-001-developer-在-devportal-註冊--列出-application) | DevPortal 註冊 / 列 App | Org Manager / Member | DevPortal | [7-developer-api](./7-developer-api/user-stories.md) |
+| [US-DEV-002](./7-developer-api/user-stories.md#us-dev-002-developer-管理-app-的-app-keysissue--list--revoke) | DevPortal 管理 App 的 App-Key | Org Manager / Member | DevPortal | [7-developer-api](./7-developer-api/user-stories.md) |
+| [US-DEV-003](./7-developer-api/user-stories.md#us-dev-003-developer-設定-app-webhook--讀取-api-文件) | DevPortal 設 Webhook / 讀 Docs | Org Manager / Member（Docs 公開） | DevPortal | [7-developer-api](./7-developer-api/user-stories.md) |
 
-<!-- TODO(task-7): SdkApi + CliApi + DevPortal story 列 -->
 
 ---
 
@@ -91,13 +98,13 @@
 | Actor | Story IDs |
 |---|---|
 | **Cloud Admin** | US-AUTH-010, US-ORG-007, US-ORG-008, US-CONTRACT-001, US-CONTRACT-002, US-CONTRACT-003, US-CONTRACT-004, US-CONTRACT-006, US-CREDIT-001, US-APPMODULE-001, US-APPMODULE-002 |
-| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006, US-CONTRACT-006, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-REPORTS-001, US-ALERTS-001, US-ALERTS-002, US-ALERTS-003, US-ALERTS-005, US-APPKEY-001~004 |
-| **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-ALERTS-001（只讀）, US-APPKEY-001~004（與 Manager 同權，service 僅 require org membership）|
+| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006, US-CONTRACT-006, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-REPORTS-001, US-ALERTS-001, US-ALERTS-002, US-ALERTS-003, US-ALERTS-005, US-APPKEY-001~004, US-DEV-001, US-DEV-002, US-DEV-003 |
+| **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-ALERTS-001（只讀）, US-APPKEY-001~004（與 Manager 同權，service 僅 require org membership）, US-DEV-001, US-DEV-002, US-DEV-003 |
 | **受邀者（未必已入 org）** | US-ORG-004 |
 | **使用者（未登入 / 新註冊）** | US-AUTH-001, US-AUTH-002, US-AUTH-005, US-AUTH-006, US-AUTH-007, US-AUTH-008 |
 | **使用者（已登入，尚未建立 / 加入 org）** | US-AUTH-003, US-AUTH-004, US-ORG-001 |
 | **Bifrost Sync Job** | US-DASHBOARD-007 |
-| **SDK Client** | <!-- TODO(task-7) --> |
+| **SDK Client** | US-SDK-001, US-SDK-002, US-CLI-001, US-CLI-002, US-CLI-003 |
 | **System（自動化）** | US-APIKEY-008, US-CONTRACT-005, US-CREDIT-004, US-CREDIT-005, US-CREDIT-006, US-REPORTS-002, US-REPORTS-003, US-ALERTS-004, US-APPMODULE-004 |
 | **所有人（匿名或已登入）** | US-APPMODULE-003（module catalog 公開）|
 
@@ -113,8 +120,8 @@
 | **Contract 調整與硬擋** | US-CONTRACT-004（調 cap）→ US-APIKEY-001（影響 key 額度預檢）|
 | **Contract 到期** | US-CONTRACT-005（dispatch `ContractExpiring` / `ContractExpired`）→ US-ALERTS-004（下游通知 channel）|
 | **監控與報表** | US-DASHBOARD-007（sync 資料）→ US-DASHBOARD-001~006（儀表板視覺化）→ US-REPORTS-001（設排程）→ US-REPORTS-002（定期寄 PDF）|
-| **使用者註冊到打 API（自建 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-001 → US-APIKEY-001 <!-- TODO(task-7): → US-SDK-001 --> |
-| **使用者註冊到打 API（受邀加入 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-004（接受邀請）→ US-APIKEY-007（收到 key）<!-- TODO(task-7): → US-SDK-001 --> |
+| **使用者註冊到打 API（自建 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-001 → US-DEV-001（註冊 app）→ US-DEV-002（發 App-Key）→ US-SDK-001（SDK Client 打 chat） |
+| **使用者註冊到打 API（受邀加入 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-004（接受邀請）→ US-APIKEY-007（收到 Model API key）→ US-SDK-001（SDK 打 chat）|
 | **帳號恢復流程** | US-AUTH-006 → US-AUTH-007 |
 | **組織組建（Manager 視角）** | US-ORG-001 → US-ORG-002 → US-ORG-003 → US-ORG-005 → US-ORG-006 |
 | **Admin 組織治理** | US-ORG-008 → US-ORG-007 → US-AUTH-010 |
@@ -122,6 +129,9 @@
 | **告警生命週期** | US-ALERTS-001（設 budget）→ US-ALERTS-002（設 webhook）→ US-ALERTS-003（測試 webhook）→ US-ALERTS-004（系統觸發）→ US-ALERTS-005（查歷史 / 補發）|
 | **App-Key 生命週期（Application-level）** | US-APPKEY-001 → US-APPKEY-003（改 scope）→ US-APPKEY-002（rotate / revoke）→ US-APPKEY-004（查使用量）|
 | **AppModule 生命週期** | US-APPMODULE-001（Admin 註冊）→ US-APPMODULE-002（訂閱給 org）→ US-APPMODULE-004（middleware 驗證）→ US-APPMODULE-003（公開 catalog）|
+| **SDK Client 打 AI（App-Key 模式）** | US-DEV-001（建 App）→ US-DEV-002（發 App-Key）→ US-SDK-001（SDK chat）→ US-SDK-002（查餘額 / 用量）|
+| **CLI Client 啟動到打 AI（Device Flow 模式）** | US-CLI-001（device flow 登入）→ US-CLI-002（proxy 呼叫）→ US-CLI-003（登出）|
+| **Developer 在 DevPortal 的完整旅程** | US-DEV-001（註冊 App）→ US-DEV-002（管 App-Key）→ US-DEV-003（設 webhook / 讀 API 文件）|
 
 ---
 
