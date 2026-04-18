@@ -1,14 +1,13 @@
-# 合約與額度使用者故事（Contract + Credit）
+# 合約 / 額度 / 監控 / 告警 使用者故事（Contract + Credit + Dashboard + Reports + Alerts）
 
-> 本文件對標代碼日期：2026-04-18（commit `9da786f`）。
+> 本文件對標代碼日期：2026-04-18（commit `2f0e58f`，Task 4 追加時）。
 > 若你看到的代碼與此文件明顯不一致，請提 issue 或直接 PR 修正。
 
 ## 範圍
 
-- 本檔覆蓋（本批 Task 3）：**Contract 模組** + **Credit 模組**
-- **下批補**（Task 4）：Dashboard + Reports（本檔會附加章節）
-- **再下批補**（Task 5）：Alerts（本檔會再附加章節）
-- 計畫刻意把這四個模組放同一份檔——它們共同構成「額度發放 → 使用 → 監控 → 告警」的商業閉環
+- 本檔覆蓋：**Contract 模組** + **Credit 模組** + **Dashboard 模組** + **Reports 模組**
+- **下批再補**（Task 5）：Alerts（本檔會再附加章節）
+- 計畫刻意把這五個模組放同一份檔——它們共同構成「額度發放 → 使用 → 監控 → 告警」的商業閉環
 
 ## 相關 personas
 
@@ -269,6 +268,209 @@
 
 ---
 
+## Dashboard
+
+### US-DASHBOARD-001 | Manager / Member 查看 Dashboard 摘要
+
+**As** an Org Manager or Member
+**I want to** see an at-a-glance summary card for my org (total spend, active keys, balance)
+**so that** I immediately know the org's current operating state when I log in.
+
+**Related**
+- Module: `src/Modules/Dashboard`
+- Entry: `GetDashboardSummaryService.execute()` → `src/Modules/Dashboard/Application/Services/GetDashboardSummaryService.ts`
+- Controller: `DashboardController.summary()` → `src/Modules/Dashboard/Presentation/Controllers/DashboardController.ts`
+- Route: `GET /api/organizations/:orgId/dashboard`（`requireAuth` + `createModuleAccessMiddleware('dashboard')`）
+
+**Key rules**
+- 呼叫者必須是該 org 的成員（透過 module access middleware 確認）
+- Summary 是 org 層級聚合數字——不會洩漏個別 member 或 key 的隱私細節
+- Member 視圖的 Dashboard 透過 `DashboardKeyScopeResolver` 將 org-wide query 收斂成「只看到指派給自己的 key 貢獻」
+
+---
+
+### US-DASHBOARD-002 | Manager / Member 查看 KPI 卡片
+
+**As** an Org Manager or Member
+**I want to** see KPI cards (e.g. total requests, total tokens, cost this period)
+**so that** I get headline metrics without having to dig into charts.
+
+**Related**
+- Module: `src/Modules/Dashboard`
+- Entry: `GetKpiSummaryService.execute()` → `src/Modules/Dashboard/Application/Services/GetKpiSummaryService.ts`
+- Controller: `DashboardController.kpiSummary()`
+- Route: `GET /api/organizations/:orgId/dashboard/kpi-summary`
+
+**Key rules**
+- KPI 值由 `usage_records`（Bifrost Sync 產生，見 US-DASHBOARD-007）聚合算出
+- 支援時間範圍 query（例：最近 7 / 30 天）
+- Member 視圖自動套用 key scope filter——只看到自己 key 的貢獻
+
+---
+
+### US-DASHBOARD-003 | Manager / Member 查看使用量趨勢圖（時間序列）
+
+**As** an Org Manager or Member
+**I want to** see a time-series chart of request count and token usage over time
+**so that** I can spot spikes, drops, or day-of-week patterns.
+
+**Related**
+- Module: `src/Modules/Dashboard`
+- Entry: `GetUsageChartService.execute()` → `src/Modules/Dashboard/Application/Services/GetUsageChartService.ts`
+- Controller: `DashboardController.usage()`
+- Route: `GET /api/organizations/:orgId/dashboard/usage`
+
+**Key rules**
+- 時間粒度（hour / day / week）可透過 query 參數指定
+- 時區一律以 UTC 回傳；前端負責轉本地時區顯示
+- 空值時段（無 usage record）不插 0——讓前端決定如何呈現缺口
+
+---
+
+### US-DASHBOARD-004 | Manager / Member 查看 Per-Key 成本拆解
+
+**As** an Org Manager or Member
+**I want to** see how the total cost breaks down by individual API key
+**so that** I can identify which keys consume the most and follow up with the owner.
+
+**Related**
+- Module: `src/Modules/Dashboard`
+- Entry: `GetPerKeyCostService.execute()` → `src/Modules/Dashboard/Application/Services/GetPerKeyCostService.ts`
+- Controller: `DashboardController.perKeyCost()`
+- Route: `GET /api/organizations/:orgId/dashboard/per-key-cost`
+
+**Key rules**
+- Manager 視圖：回所有 key；Member 視圖：只回指派給自己的 key（`DashboardKeyScopeResolver`）
+- 成本數字以 `Balance` value object 精度表達（字串、保留小數位）
+- 已撤銷的 key 若在區間內有 usage，仍會出現在清單（標註 revoked 狀態）
+
+---
+
+### US-DASHBOARD-005 | Manager / Member 查看模型比較
+
+**As** an Org Manager or Member
+**I want to** compare usage and cost across different AI models (GPT-4o, Claude, etc.) in one chart
+**so that** I can evaluate model choice trade-offs (quality vs cost) with data.
+
+**Related**
+- Module: `src/Modules/Dashboard`
+- Entry: `GetModelComparisonService.execute()` → `src/Modules/Dashboard/Application/Services/GetModelComparisonService.ts`
+- Controller: `DashboardController.modelComparison()`
+- Route: `GET /api/organizations/:orgId/dashboard/model-comparison`
+
+**Key rules**
+- 以 `model_id` 聚合 usage_records；回傳每個 model 的 request count、token in/out、總成本
+- 模型清單取決於該 org 合約涵蓋的模型（依 `allowedModels` 與實際 usage 交集）
+- 若 org 只有單一模型的 usage，仍回單元素陣列（前端決定是否顯示圖表）
+
+---
+
+### US-DASHBOARD-006 | Manager / Member 查看 Cost Trends
+
+**As** an Org Manager or Member
+**I want to** see cost trends over longer windows (month-over-month, quarter)
+**so that** I can spot cost inflation, predict next invoice, or plan capacity changes.
+
+**Related**
+- Module: `src/Modules/Dashboard`
+- Entry: `GetCostTrendsService.execute()` → `src/Modules/Dashboard/Application/Services/GetCostTrendsService.ts`
+- Controller: `DashboardController.costTrends()`
+- Route: `GET /api/organizations/:orgId/dashboard/cost-trends`
+
+**Key rules**
+- 與 US-DASHBOARD-003 的差別：usage chart 關注「單位時間量」；cost trends 關注「跨長區間的成本走勢」
+- 資料來源皆為 `usage_records`，差別只在聚合粒度與回傳欄位
+- Member 視圖同樣受 key scope filter 影響
+
+---
+
+### US-DASHBOARD-007 | Bifrost Sync Job：定期拉 Logs、寫 usage_records、隔離失敗 Logs
+
+**As** the Bifrost Sync cron job (system actor)
+**I want to** pull new usage logs from Bifrost Gateway, write them into `usage_records`, advance `sync_cursors`, and quarantine logs that can't be mapped to a known key
+**so that** downstream dashboards, billing, and alerts all see a consistent, timely picture of actual usage.
+
+**Related**
+- Module: `src/Modules/Dashboard`
+- Entry: `BifrostSyncService.sync()` → `src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts`
+- Schedule: 由 `DashboardServiceProvider.registerJobs()` 註冊到 `IScheduler`，cron 由 `appConfig.bifrostSyncCron`（預設 `*/5 * * * *`）驅動
+- Downstream：dispatch `BifrostSyncCompletedEvent`；`affectedOrgIds` 觸發 Credit 扣款（見 US-CREDIT-004）
+- 30s timeout：`BifrostSyncService.sync` 內建 `Promise.race` 與 timeout，避免單次卡住整個 scheduler
+
+**Key rules**
+- 一個 sync round 內：拉 log → 找不到對應 key → 寫入 `quarantined_logs`（原因 `virtual_key_not_found`）、不影響 cursor
+- Cursor 只在成功寫入 usage_records 後推進；失敗 log 不會讓 cursor 回退
+- Sync 完成後 dispatch `BifrostSyncCompletedEvent(affectedOrgIds)`；Credit 模組依此對每個 org 計算扣款量
+- Timeout 或 Gateway network 錯誤回 `{ synced: 0, quarantined: 0, affectedOrgIds: [] }`——不 throw，讓 scheduler 繼續下一輪
+
+---
+
+## Reports
+
+### US-REPORTS-001 | Manager 管理排程 Report（建立 / 列出 / 修改 / 刪除）
+
+**As** an Org Manager
+**I want to** create, list, update, or delete scheduled PDF report jobs for my org
+**so that** stakeholders receive regular cost and usage digests without me preparing them manually.
+
+**Related**
+- Module: `src/Modules/Reports`
+- Entry: `ScheduleReportService.schedule()` / `unschedule()` / `bootstrap()` → `src/Modules/Reports/Application/Services/ScheduleReportService.ts`
+- Controller: `ReportController.index()` / `store()` / `update()` / `destroy()` → `src/Modules/Reports/Presentation/Controllers/ReportController.ts`
+- Routes：
+  - `GET /v1/org/:orgId/reports`（`requireOrganizationContext`）：列出
+  - `POST /v1/org/:orgId/reports`（`requireOrganizationManager`）：建立
+  - `PUT /v1/org/:orgId/reports/:reportId`（`requireOrganizationManager`）：修改
+  - `DELETE /v1/org/:orgId/reports/:reportId`（`requireOrganizationManager`）：刪除
+
+**Key rules**
+- Index 讓任何 org member 讀得到目前的排程設定；create / update / delete 限 Manager
+- 變更排程後 `ScheduleReportService.schedule(id)` 會重新向 `IScheduler` 註冊 job；若 `enabled=false` 會取消註冊
+- 啟動時 `bootstrap()` 重新掃 `findAllEnabled()` 重新註冊所有啟用的排程——服務重啟後不會漏
+- 未來若新增「一次性手動觸發」或「報表 snapshot 查歷史」，需要新 story
+
+---
+
+### US-REPORTS-002 | 系統依排程送出 PDF Report Email
+
+**As** the Draupnir system (on behalf of an enabled scheduled report)
+**I want to** render a PDF for the target org and email it to the configured recipient list on the cron schedule
+**so that** stakeholders get the regular digest without manual intervention.
+
+**Related**
+- Module: `src/Modules/Reports`
+- Entries：
+  - `ScheduleReportService.execute(scheduleId)`（cron 觸發）→ `src/Modules/Reports/Application/Services/ScheduleReportService.ts`
+  - `GeneratePdfService.generate(orgId)` → `src/Modules/Reports/Application/Services/GeneratePdfService.ts`
+  - `SendReportEmailService.send(recipients, pdfBuffer, type)` → 同目錄
+- 外部依賴：Playwright（chromium）渲染 PDF、`IMailer` 寄信
+
+**Key rules**
+- Cron 觸發時依序跑：render PDF → 寄 email；任一步失敗整次 skip，不部分寄
+- PDF 以 A4 格式渲染 `/admin/reports/template?token=...`（見 US-REPORTS-003）
+- Email 主旨含 `type`（weekly / monthly / 等）與日期；附件檔名統一為 `Draupnir-Report-{type}-{date}.pdf`
+
+---
+
+### US-REPORTS-003 | PDF 渲染以 Token 保護的 Template Endpoint
+
+**As** the report PDF rendering process (headless browser, runs in the server)
+**I want to** access the admin report template via a short-lived token that identifies the org
+**so that** the Playwright browser can load the correct data without impersonating a real admin session.
+
+**Related**
+- Module: `src/Modules/Reports`
+- Entry: `ReportController.verifyTemplate()` → `src/Modules/Reports/Presentation/Controllers/ReportController.ts`
+- Value Object: `ReportToken.generate(orgId, expiresAt)` → `src/Modules/Reports/Domain/ValueObjects/ReportToken.ts`
+- Route: `GET /v1/reports/verify-template`（無一般 auth middleware；靠 token 驗證）
+
+**Key rules**
+- Token 是 server-side 簽發、30 分鐘有效；超時 verify-template 拒絕
+- 此 route 刻意沒有一般 user auth——用 token 代替；方便 Playwright headless browser 以 URL 載入模板
+- Token 綁定 org——同一 token 只能拉該 org 的資料
+
+---
+
 ## Coverage map
 
 ### Contract 模組 Application Services
@@ -300,6 +502,33 @@
 | `HandleBalanceDepletedService.execute` | US-CREDIT-005 | 餘額用盡 → 凍結 key |
 | `HandleCreditToppedUpService.execute` | US-CREDIT-006 | 充值 → 解凍 key |
 
+### Dashboard 模組 Application Services
+
+| Service method | Story ID | 備註 |
+|---|---|---|
+| `GetDashboardSummaryService.execute` | US-DASHBOARD-001 | Summary |
+| `GetKpiSummaryService.execute` | US-DASHBOARD-002 | KPI 卡片 |
+| `GetUsageChartService.execute` | US-DASHBOARD-003 | Usage 時間序列 |
+| `GetPerKeyCostService.execute` | US-DASHBOARD-004 | 成本分解到 key |
+| `GetModelComparisonService.execute` | US-DASHBOARD-005 | 模型比較 |
+| `GetCostTrendsService.execute` | US-DASHBOARD-006 | Cost trends（長區間）|
+| `DashboardKeyScopeResolver.*` | — | 內部 helper：Manager / Member 兩種視圖的 key scope 計算，被所有 Dashboard service 呼叫 |
+
+### Dashboard 模組 Infrastructure Services
+
+| Service method | Story ID | 備註 |
+|---|---|---|
+| `BifrostSyncService.sync` | US-DASHBOARD-007 | Cron 驅動的 usage 拉取 + 隔離 log + 推進 cursor |
+
+### Reports 模組 Application Services
+
+| Service method | Story ID | 備註 |
+|---|---|---|
+| `ScheduleReportService.schedule` / `unschedule` / `bootstrap` | US-REPORTS-001, US-REPORTS-002 | CRUD 後重註冊 cron；bootstrap 啟動時還原 |
+| `ScheduleReportService.execute`（cron tick） | US-REPORTS-002 | 一次性 render + send 流程 |
+| `GeneratePdfService.generate` | US-REPORTS-002, US-REPORTS-003 | Playwright 渲染 PDF；依賴 verify-template |
+| `SendReportEmailService.send` | US-REPORTS-002 | 寄 email 帶 PDF 附件 |
+
 ### Presentation 入口
 
 | Entry | Story ID | 備註 |
@@ -318,10 +547,26 @@
 | `CreditController.topUp` | US-CREDIT-001 | REST admin |
 | `CreditController.refund` | US-CREDIT-001 | REST admin |
 | Admin Portal：`/admin/contracts`、`/admin/contracts/create`、`/admin/contracts/:id`、`/admin/contracts/:id/action`、`/admin/contracts/:id/quota` | US-CONTRACT-001~006 | Inertia，為 Cloud Admin 日常入口 |
+| `DashboardController.summary` | US-DASHBOARD-001 | REST |
+| `DashboardController.usage` | US-DASHBOARD-003 | REST |
+| `DashboardController.kpiSummary` | US-DASHBOARD-002 | REST |
+| `DashboardController.costTrends` | US-DASHBOARD-006 | REST |
+| `DashboardController.modelComparison` | US-DASHBOARD-005 | REST |
+| `DashboardController.perKeyCost` | US-DASHBOARD-004 | REST |
+| `ReportController.index` | US-REPORTS-001 | REST |
+| `ReportController.store` | US-REPORTS-001 | REST（Manager only）|
+| `ReportController.update` | US-REPORTS-001 | REST（Manager only）|
+| `ReportController.destroy` | US-REPORTS-001 | REST（Manager only）|
+| `ReportController.verifyTemplate` | US-REPORTS-003 | Public-ish，靠 ReportToken 驗證 |
+| `BifrostSyncService`（registered via `DashboardServiceProvider.registerJobs`） | US-DASHBOARD-007 | Scheduler-driven，無 HTTP 入口 |
+| `ScheduleReportService`（registered via scheduler） | US-REPORTS-002 | Scheduler-driven，無 HTTP 入口 |
+| Member / Manager Portal 的 Dashboard / Usage / Cost 頁面 | US-DASHBOARD-001~006 | Inertia，各 portal 各自 binding |
 
 ### 已知覆蓋缺口
 
 - **Manager 依 slack 重配 key 額度（slack-based reallocation）**：計畫提到的這個使用情境需要 `UpdateApiKeyBudgetService` 接上 Presentation（見 [ApiKey Coverage map](../3-api-keys/user-stories.md#coverage-map)）；目前只能刪 key 重發。Task 6 會檢視是否能擴充 ApiKey story
 - **Manager 查看 org 自己的 contract 詳細**：目前 `/member/contracts` 共用 Member 視圖，沒有獨立 Manager Contract 詳細頁；待後續補強
 - **手動扣除 credit（非自動、非退款）**：Admin 目前無法直接扣款餘額，只能透過重算 refund 的負向——v1 視為刻意限制
-- **逾期未扣款的 backfill**：若 Bifrost sync 長時間中斷導致 usage 堆積，補扣流程沒有獨立 story；靠 Dashboard Sync（US-DASHBOARD-xxx、Task 4）重跑
+- **逾期未扣款的 backfill**：若 Bifrost sync 長時間中斷導致 usage 堆積，補扣流程沒有獨立 story；靠 Dashboard Sync（US-DASHBOARD-007）重跑，目前無獨立 "補扣" 故事
+- **已寄送 Report 的歷史記錄**：Reports 模組只管 "schedule configs"，不保留歷次 render 的 PDF 歷史；若後續要查 "之前寄過什麼" 需新 story
+- **Reports 排程失敗的重試**：若 cron tick 發 email 失敗（mailer 錯誤），目前無獨立重試機制；依賴 scheduler 下次 tick

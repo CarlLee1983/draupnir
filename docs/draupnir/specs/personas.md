@@ -7,7 +7,7 @@
 
 **Stage 覆蓋狀態**：
 - ✅ Stage 0（主 3 張）：Cloud Admin、Org Manager、Org Member
-- ⏳ Stage 1.4：Bifrost Sync Job（Task 4 補）
+- ✅ Stage 1.4：Bifrost Sync Job（Task 4 補）
 - ⏳ Stage 2.2：SDK Client（Task 7 補）
 
 ---
@@ -80,6 +80,33 @@ ApiKey（只看自己的 key）、Dashboard（member 視圖、只看自己的活
 
 ---
 
-<!-- TODO(stage-1.4): Bifrost Sync Job persona 卡將在 Task 4 補入 -->
+## 🤖 Bifrost Sync Job
+
+**是誰**
+定時 cron 任務（預設 `*/5 * * * *`，由 `appConfig.bifrostSyncCron` 控制），由 Scheduler 觸發，代表「系統自己」執行的背景工作。實作在 `BifrostSyncService`（`src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts`）。
+
+**關切的事**
+- 從 Bifrost Gateway 拉取最新的 usage logs
+- 寫入 `usage_records`、推進 `sync_cursors`（只在成功寫入後推進）
+- 失敗 log 寫入 `quarantined_logs`（例如 `virtual_key_not_found`）、不影響 cursor 前進
+- 完成時 dispatch `BifrostSyncCompletedEvent` 帶 `affectedOrgIds`，讓 Credit 模組接續扣款
+
+**不關切**
+- 使用者請求路徑（非 user-facing）
+- 業務規則驗證（log 來什麼拉什麼；意外的 log 隔離不阻塞）
+- 多輪之間的狀態保留（每輪獨立；靠 cursor 決定 resume 點）
+
+**會碰到哪些模組**
+Dashboard（本身所在模組，寫 `usage_records`）、ApiKey（比對 `virtual_key_id`）、Credit（事件下游扣款）
+
+**失效模式**
+- 單次 sync 30 秒 timeout：超時回 empty result，不 throw，等下次 tick
+- Gateway network 錯誤：同上，靜默 retry 下次 tick
+- Quarantine 過多：資料健康度問題，靠運維觀察 `quarantined_logs` 表
+
+**代表性 Story**
+[US-DASHBOARD-007](./4-credit-billing/user-stories.md#us-dashboard-007-bifrost-sync-job定期拉-logs寫-usage_records隔離失敗-logs)、[US-CREDIT-004](./4-credit-billing/user-stories.md#us-credit-004-系統依-bifrost-sync-結果扣款)
+
+---
 
 <!-- TODO(stage-2.2): SDK Client persona 卡將在 Task 7 補入 -->
