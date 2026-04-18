@@ -215,6 +215,7 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
         ...(query?.providers !== undefined && { providers: query.providers }),
         ...(query?.models !== undefined && { models: query.models }),
         ...(query?.limit !== undefined && { limit: query.limit }),
+        ...(query?.offset !== undefined && { offset: query.offset }),
       })
       return response.logs.map((entry) => ({
         logId: entry.id,

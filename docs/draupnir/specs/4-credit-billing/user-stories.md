@@ -282,6 +282,7 @@
 - 呼叫者必須是 Cloud Admin，且必須提供明確的 `startTime` / `endTime`；系統只回填該時間區間內的 usage
 - backfill 會重抓 Bifrost logs、補寫缺失的 `usage_records`，再只對尚未建立 deduction 的 `usage_record.id` 補扣
 - backfill 不推進增量 `sync_cursors`；scheduler 的正常同步位置與手動補救分開管理
+- backfill 會在固定 `startTime/endTime` 視窗內以 `limit + offset` 分頁取完所有 logs，不因單頁 500 筆上限漏資料
 
 ---
 
@@ -419,6 +420,7 @@
 - Cursor 只在成功寫入 usage_records 後推進；失敗 log 不會讓 cursor 回退
 - Sync 完成後 dispatch `BifrostSyncCompletedEvent(affectedOrgIds)`；Credit 模組依此對每個 org 計算扣款量
 - Admin 可用 `POST /api/dashboard/bifrost-sync/backfill` 指定時間區間重跑同一條流程；backfill 會 dispatch 同一事件但不推進 cursor
+- sync/backfill 會先固定查詢上界，再用 `limit + offset` 分頁掃完整個時間窗，避免超過單頁 500 筆時漏 ingest
 - Timeout 或 Gateway network 錯誤回 `{ synced: 0, quarantined: 0, affectedOrgIds: [] }`——不 throw，讓 scheduler 繼續下一輪
 
 ---

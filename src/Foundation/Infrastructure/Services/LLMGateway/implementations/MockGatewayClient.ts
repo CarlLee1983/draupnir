@@ -237,6 +237,8 @@ export class MockGatewayClient implements ILLMGatewayClient {
   async getUsageLogs(keyIds: readonly string[], query?: UsageQuery): Promise<readonly LogEntry[]> {
     this.maybeThrow()
     this._calls.getUsageLogs.push({ keyIds, query })
-    return [...this.seededLogs]
+    const offset = query?.offset ?? 0
+    const limit = query?.limit ?? this.seededLogs.length
+    return this.seededLogs.slice(offset, offset + limit)
   }
 }

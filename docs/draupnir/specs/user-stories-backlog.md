@@ -135,6 +135,6 @@
 - **關閉日期**：2026-04-18
 
 ### ✅ A3. 逾期未扣款 Backfill（Credit + Dashboard）— 本次實作 / `US-CREDIT-007`
-- **解法摘要**：新增 `ApplyUsageChargesService` 以 `usage_record.id` 做 deduction 去重；`BifrostSyncService.backfill(startTime, endTime)` 支援指定時間區間重跑且不推進 cursor；新增 admin-only `POST /api/dashboard/bifrost-sync/backfill` 手動補救入口。
+- **解法摘要**：新增 `ApplyUsageChargesService` 以 `usage_record.id` 做 deduction 去重；`BifrostSyncService.backfill(startTime, endTime)` 支援指定時間區間重跑且不推進 cursor，並以 `limit + offset` 分頁取完整個時間窗；新增 admin-only `POST /api/dashboard/bifrost-sync/backfill` 手動補救入口。
 - **對應 story**：`US-CREDIT-007`
 - **關閉日期**：2026-04-18

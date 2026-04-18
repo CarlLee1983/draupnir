@@ -111,6 +111,22 @@ describe('BifrostSyncService', () => {
     await apiKeyRepo.save(key.activate())
   }
 
+  function makeLog(index: number, keyId = 'bfr-vk-1'): LogEntry {
+    return {
+      logId: `log-${index}`,
+      timestamp: new Date(Date.UTC(2026, 3, 9, 0, 0, index)).toISOString(),
+      keyId,
+      model: 'gpt-4',
+      provider: 'openai',
+      inputTokens: 10 + index,
+      outputTokens: 5 + index,
+      totalTokens: 15 + index * 2,
+      latencyMs: 200 + index,
+      cost: 0.01 + index * 0.0001,
+      status: 'success',
+    }
+  }
+
   it('syncs matching logs and writes usage rows', async () => {
     await seedApiKey('key-1', 'bfr-vk-1')
     await seedApiKey('key-2', 'bfr-vk-2')
@@ -202,6 +218,7 @@ describe('BifrostSyncService', () => {
     gateway.seedUsageLogs([])
     await service.sync()
     expect(gateway.calls.getUsageLogs[0]?.query?.startTime).toBe(new Date(0).toISOString())
+    expect(gateway.calls.getUsageLogs[0]?.query?.endTime).toBe(firstCursorAdvance)
     expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(firstCursorAdvance)
   })
 
@@ -323,6 +340,32 @@ describe('BifrostSyncService', () => {
       startTime: '2026-04-09T00:00:00Z',
       endTime: '2026-04-09T23:59:59Z',
       limit: 500,
+    })
+    expect(getCursorState()).toBeNull()
+  })
+
+  it('paginates backfill when a single time window exceeds 500 logs', async () => {
+    await seedApiKey('key-1', 'bfr-vk-1')
+    gateway.seedUsageLogs(Array.from({ length: 501 }, (_, index) => makeLog(index + 1)))
+
+    const result = await service.backfill({
+      startTime: '2026-04-09T00:00:00Z',
+      endTime: '2026-04-09T23:59:59Z',
+    })
+
+    expect(result).toEqual({ synced: 501, quarantined: 0, affectedOrgIds: ['org-1'] })
+    expect(await db.table('usage_records').count()).toBe(501)
+    expect(gateway.calls.getUsageLogs).toHaveLength(2)
+    expect(gateway.calls.getUsageLogs[0]?.query).toEqual({
+      startTime: '2026-04-09T00:00:00Z',
+      endTime: '2026-04-09T23:59:59Z',
+      limit: 500,
+    })
+    expect(gateway.calls.getUsageLogs[1]?.query).toEqual({
+      startTime: '2026-04-09T00:00:00Z',
+      endTime: '2026-04-09T23:59:59Z',
+      limit: 500,
+      offset: 500,
     })
     expect(getCursorState()).toBeNull()
   })

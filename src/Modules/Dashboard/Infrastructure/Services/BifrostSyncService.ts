@@ -25,6 +25,8 @@ interface SyncRunRequest {
   readonly previousCursorLogId?: string
 }
 
+const LOG_PAGE_SIZE = 500
+
 export class BifrostSyncService {
   constructor(
     private readonly gatewayClient: ILLMGatewayClient,
@@ -75,52 +77,64 @@ export class BifrostSyncService {
   }
 
   private async syncInternal(request: SyncRunRequest): Promise<SyncResult> {
-    const logs = await this.gatewayClient.getUsageLogs([], {
-      startTime: request.startTime,
-      ...(request.endTime ? { endTime: request.endTime } : {}),
-      limit: 500,
-    })
-
     let synced = 0
     let quarantined = 0
     let lastProcessedLogId: string | undefined
-    let lastProcessedTimestamp: string | undefined
     const affectedOrgIds = new Set<string>()
+    const windowEndTime = request.endTime ?? new Date().toISOString()
 
-    for (const log of logs) {
-      const bifrostLogId = log.logId ?? `${log.timestamp}:${log.keyId}`
-      lastProcessedLogId = bifrostLogId
-      lastProcessedTimestamp = log.timestamp
+    for (let offset = 0; ; ) {
+      const logs = await this.gatewayClient.getUsageLogs([], {
+        startTime: request.startTime,
+        endTime: windowEndTime,
+        limit: LOG_PAGE_SIZE,
+        ...(offset > 0 ? { offset } : {}),
+      })
 
-      const apiKey = await this.apiKeyRepo.findByBifrostVirtualKeyId(log.keyId)
-      if (!apiKey) {
-        await this.quarantineLog(log, 'virtual_key_not_found')
-        quarantined++
-        continue
+      if (logs.length === 0) {
+        break
       }
 
-      await this.usageRepo.upsert({
-        id: crypto.randomUUID(),
-        bifrostLogId,
-        apiKeyId: apiKey.id,
-        orgId: apiKey.orgId,
-        model: log.model,
-        provider: log.provider,
-        inputTokens: log.inputTokens,
-        outputTokens: log.outputTokens,
-        creditCost: log.cost,
-        latencyMs: log.latencyMs,
-        status: log.status,
-        occurredAt: log.timestamp,
-        createdAt: new Date().toISOString(),
-      })
-      affectedOrgIds.add(apiKey.orgId)
-      synced++
+      for (const log of logs) {
+        const bifrostLogId = log.logId ?? `${log.timestamp}:${log.keyId}`
+        lastProcessedLogId = bifrostLogId
+
+        const apiKey = await this.apiKeyRepo.findByBifrostVirtualKeyId(log.keyId)
+        if (!apiKey) {
+          await this.quarantineLog(log, 'virtual_key_not_found')
+          quarantined++
+          continue
+        }
+
+        await this.usageRepo.upsert({
+          id: crypto.randomUUID(),
+          bifrostLogId,
+          apiKeyId: apiKey.id,
+          orgId: apiKey.orgId,
+          model: log.model,
+          provider: log.provider,
+          inputTokens: log.inputTokens,
+          outputTokens: log.outputTokens,
+          creditCost: log.cost,
+          latencyMs: log.latencyMs,
+          status: log.status,
+          occurredAt: log.timestamp,
+          createdAt: new Date().toISOString(),
+        })
+        affectedOrgIds.add(apiKey.orgId)
+        synced++
+      }
+
+      if (logs.length < LOG_PAGE_SIZE) {
+        break
+      }
+
+      offset += logs.length
     }
 
     if (request.advanceCursor) {
       await this.cursorRepo.advance('bifrost_logs', {
-        lastSyncedAt: new Date().toISOString(),
+        lastSyncedAt: windowEndTime,
         lastBifrostLogId: lastProcessedLogId ?? request.previousCursorLogId,
       })
     }
@@ -129,7 +143,7 @@ export class BifrostSyncService {
       await DomainEventDispatcher.getInstance().dispatch(
         new BifrostSyncCompletedEvent([...affectedOrgIds], {
           startTime: request.startTime,
-          endTime: request.endTime ?? lastProcessedTimestamp,
+          endTime: windowEndTime,
         }),
       )
     }

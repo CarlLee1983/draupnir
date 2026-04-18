@@ -57,6 +57,7 @@ export interface UsageQuery {
   readonly providers?: string // comma-separated provider filter (forwarded to gateway)
   readonly models?: string // comma-separated model filter (forwarded to gateway)
   readonly limit?: number // max log entries to return
+  readonly offset?: number // pagination offset for log queries
 }
 
 export interface UsageStats {

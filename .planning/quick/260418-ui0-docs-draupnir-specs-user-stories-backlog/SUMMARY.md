@@ -2,7 +2,7 @@
 quick_task: 260418-ui0
 status: complete
 completed_at: 2026-04-18
-commit: null
+commit: b83639f
 ---
 
 # Summary
@@ -18,6 +18,7 @@ commit: null
 - `credit_transactions` 新增 partial unique index，將 `deduction + usage_record` 的唯一性下沉到資料層。
 - `DeductCreditService` 對 usage deduction duplicate unique conflict 視為 no-op success，讓正常 sync、backfill 與重跑流程在競態下仍可安全收斂。
 - 新增 admin-only `POST /api/dashboard/bifrost-sync/backfill` 手動補救入口。
+- `BifrostSyncService` 改為固定查詢上界並以 `limit + offset` 分頁抓完整個時間窗，單次 backfill 超過 500 筆也不漏資料。
 - 同步更新 `user-stories.md`、`user-stories-index.md`、`user-stories-backlog.md`，新增 `US-CREDIT-007` 並關閉 backlog A3。
 
 ## Verification
@@ -31,4 +32,4 @@ commit: null
 ## Remaining Risks
 
 - usage deduction 現在已有 DB partial unique index + service no-op 收斂，但 bulk backfill 仍可能受事件平行觸發影響到日誌噪音與額外重試次數。
-- Bifrost log backfill 仍受 gateway `limit: 500` 上限影響；若單一時間窗超過 500 筆，需要後續再補 pagination/cursor 能力。
+- offset-based pagination 依賴 Bifrost logs 在固定時間窗內維持穩定排序；若上游排序不穩定，仍需升級為 cursor-based pagination。
