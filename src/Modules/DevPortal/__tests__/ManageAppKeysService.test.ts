@@ -57,6 +57,8 @@ describe('ManageAppKeysService', () => {
     await orgRepo.save(org)
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
     await memberRepo.save(member)
+    const nonManager = OrganizationMember.create('mem-2', 'org-1', 'user-2', new OrgMemberRole('member'))
+    await memberRepo.save(nonManager)
 
     const app = Application.create({
       id: 'app-1',
@@ -81,6 +83,19 @@ describe('ManageAppKeysService', () => {
     expect(mockIssueAppKeyService.execute).toHaveBeenCalledOnce()
   })
 
+  it('Org Member 但非 Manager 不可透過 issue action 配發新的 App Key', async () => {
+    const result = await service.execute({
+      applicationId: 'app-1',
+      callerUserId: 'user-2',
+      callerSystemRole: 'user',
+      action: 'issue',
+      label: 'Member Key',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('NOT_ORG_MANAGER')
+    expect(mockIssueAppKeyService.execute).not.toHaveBeenCalled()
+  })
+
   it('應透過 revoke action 撤銷 App Key', async () => {
     const result = await service.execute({
       applicationId: 'app-1',
@@ -91,6 +106,19 @@ describe('ManageAppKeysService', () => {
     })
     expect(result.success).toBe(true)
     expect(mockRevokeAppKeyService.execute).toHaveBeenCalledOnce()
+  })
+
+  it('Org Member 但非 Manager 不可透過 revoke action 撤銷 App Key', async () => {
+    const result = await service.execute({
+      applicationId: 'app-1',
+      callerUserId: 'user-2',
+      callerSystemRole: 'user',
+      action: 'revoke',
+      keyId: 'appkey-1',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('NOT_ORG_MANAGER')
+    expect(mockRevokeAppKeyService.execute).not.toHaveBeenCalled()
   })
 
   it('應透過 list action 列出 Application 的 Keys', async () => {

@@ -16,14 +16,6 @@
 
 ---
 
-## 🅰 Priority A（安全 / 財務 / 商業阻擋）
-
-### ⏳ A2. AppApiKey 授權收斂（AppApiKey）
-- **來源**：3-api-keys/user-stories.md
-- **現況**：issue / rotate / revoke / scope 皆僅 `requireOrgMembership`——任何 Member 都能發 App-Key
-- **風險**：Member 私自發的 App-Key 繞過 Manager 控管
-- **預估工作**：在 Service 加 `requireOrgManager` 或開放給 Manager Portal 的配置開關；更新 US-APPKEY-001~003 Key rules
-
 ### ⏳ A3. 逾期未扣款 Backfill（Credit + Dashboard）
 - **來源**：4-credit-billing/user-stories.md
 - **現況**：若 Bifrost sync 長時間中斷，usage 堆積；恢復後 `BifrostSyncService.sync` 只跑最新 tick，無補扣流程
@@ -126,7 +118,7 @@
 - **B6 解決** → 連帶解 **4-credit-billing 的 slack-based reallocation 缺口**
 - **A3 解決** → 新 story 會強化 US-DASHBOARD-007 與 US-CREDIT-004 的 Key rules
 - **B5 解決** → Cloud Admin Actor 在索引表的 story 清單會擴充
-- **A2 收緊後** → US-APPKEY-001/002/003 Key rules 需同步更新
+- **A2 收緊後** → US-APPKEY-001/002/003、US-DEV-002 Key rules 需同步更新
 
 ---
 
@@ -142,4 +134,9 @@
 ### ✅ A1. Session 管理（登入裝置列表 + 全部登出）（Auth）— `US-AUTH-011`
 - **解法摘要**：新增 `ListSessionsService`、`RevokeAllSessionsService`；`GET /api/auth/sessions`、`POST /api/auth/logout-all`；Manager/Member 設定頁「登入工作階段」區塊與 `POST …/settings/sessions/revoke-all`。改密碼實際上早已會 `revokeAllByUserId`（與 backlog 舊述不一致處已於 `1-authentication/user-stories.md` US-AUTH-009 更正）。
 - **對應 story**：`US-AUTH-011`
+- **關閉日期**：2026-04-18
+
+### ✅ A2. AppApiKey 授權收斂（AppApiKey）— 本次實作
+- **解法摘要**：將 AppApiKey 的 issue / rotate / revoke / scope 寫入路徑收斂為 `requireOrgManager`；DevPortal 的 App-Key issue / revoke 也同步收斂到同一套 manager-only 授權，避免 org-wide 與 app-level key 管理規則分叉。
+- **對應 story**：`US-APPKEY-001~003`、`US-DEV-002`
 - **關閉日期**：2026-04-18

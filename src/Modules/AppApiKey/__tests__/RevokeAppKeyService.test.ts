@@ -37,6 +37,8 @@ describe('RevokeAppKeyService', () => {
     await orgRepo.save(org)
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
     await memberRepo.save(member)
+    const nonManager = OrganizationMember.create('mem-2', 'org-1', 'user-2', new OrgMemberRole('member'))
+    await memberRepo.save(nonManager)
 
     const keyHash = await hashingService.hash('drp_app_revoke123')
     const key = AppApiKey.create({
@@ -79,5 +81,15 @@ describe('RevokeAppKeyService', () => {
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('NOT_ORG_MEMBER')
+  })
+
+  it('Org Member 但非 Manager 應回傳錯誤', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-revoke',
+      callerUserId: 'user-2',
+      callerSystemRole: 'user',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('NOT_ORG_MANAGER')
   })
 })

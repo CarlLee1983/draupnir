@@ -189,10 +189,13 @@ AppApiKey 與 ApiKey 的差異：
 - Routes：`POST /api/organizations/:orgId/app-keys`、`GET /api/organizations/:orgId/app-keys`（皆 `requireAuth + createModuleAccessMiddleware('app_api_keys')`）
 
 **Key rules**
-- Issue 只要求 `requireOrgMembership`——**任何** org member（不限 Manager）都能發 App-Key；若要收斂請在 Presentation 端加 role middleware
+- Issue 現已要求 `requireOrgManager`——只有 Org Manager / Admin 能發 App-Key；list 仍可由 Org Member 查閱
 - 新 key 的 rawKey 只在 issue 回應回傳一次，之後存庫只有 hash（同 ApiKey 的 pattern）
 - 發 App-Key 會同步建立對應的 Bifrost virtual key（`IAppKeyBifrostSync`），失敗與 ApiKey 類似做 rollback 嘗試
 - App-Key 綁定 `BoundModules`（哪些 module 可用）、`AppKeyScope`（允許的 model 等）、`KeyRotationPolicy`（多久須輪替）
+
+**已解決**
+- A2 已收斂（見 [user-stories-backlog.md](../user-stories-backlog.md)）；`US-APPKEY-001~003` 的 write path 與 `US-DEV-002` 的 issue / revoke 都已統一成 manager-only 授權。
 
 ---
 
@@ -213,7 +216,7 @@ AppApiKey 與 ApiKey 的差異：
 **Key rules**
 - Rotate 產生新 rawKey（**只回一次**），舊 key 隨即作廢；中間有短暫雙效期可由 rotation policy 控制（依 `KeyRotationPolicy`）
 - Revoke 單向不可逆；Draupnir 標 `revoked`，Bifrost 同步停用 virtual key
-- 同一 org 的成員都能 rotate / revoke 該 org 的任何 App-Key（v1 刻意簡化；若要收緊需改 service authz）
+- 只有 Org Manager / Admin 能 rotate / revoke 該 org 的任何 App-Key；Org Member 保留 read-only 行為
 
 ---
 
@@ -233,6 +236,7 @@ AppApiKey 與 ApiKey 的差異：
 - Scope 變更會即時同步到 Bifrost（透過 `IAppKeyBifrostSync`）
 - 空或不合法的 scope 會被 `AppKeyScope` value object 拒絕在進入持久層之前
 - 變更 `BoundModules` 時只能綁已登錄的 module（見 US-APPMODULE-001）
+- 只有 Org Manager / Admin 能修改 scope；Org Member 仍可查看已存在的 App-Key 與用量。
 
 ---
 

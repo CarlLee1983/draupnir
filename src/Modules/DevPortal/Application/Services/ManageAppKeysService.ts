@@ -72,6 +72,18 @@ export class ManageAppKeysService {
 
       switch (request.action) {
         case 'issue': {
+          const managerAuth = await this.orgAuth.requireOrgManager(
+            application.orgId,
+            request.callerUserId,
+            request.callerSystemRole,
+          )
+          if (!managerAuth.authorized) {
+            return {
+              success: false,
+              message: 'You are not authorized to issue App Keys for this application',
+              error: managerAuth.error ?? 'NOT_ORG_MANAGER',
+            }
+          }
           const issueResult = await this.issueAppKeyService.execute({
             orgId: application.orgId,
             issuedByUserId: request.callerUserId,
@@ -90,6 +102,18 @@ export class ManageAppKeysService {
         case 'revoke': {
           if (!request.keyId) {
             return { success: false, message: 'Missing keyId', error: 'KEY_ID_REQUIRED' }
+          }
+          const managerAuth = await this.orgAuth.requireOrgManager(
+            application.orgId,
+            request.callerUserId,
+            request.callerSystemRole,
+          )
+          if (!managerAuth.authorized) {
+            return {
+              success: false,
+              message: 'You are not authorized to revoke App Keys for this application',
+              error: managerAuth.error ?? 'NOT_ORG_MANAGER',
+            }
           }
           const revokeResult = await this.revokeAppKeyService.execute({
             keyId: request.keyId,

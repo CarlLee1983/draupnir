@@ -21,7 +21,7 @@ export class SetAppKeyScopeService {
         return { success: false, message: 'App Key not found', error: 'KEY_NOT_FOUND' }
       }
 
-      const authResult = await this.orgAuth.requireOrgMembership(
+      const authResult = await this.orgAuth.requireOrgManager(
         key.orgId,
         request.callerUserId,
         request.callerSystemRole,
@@ -29,8 +29,8 @@ export class SetAppKeyScopeService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: 'You are not a member of this organization',
-          error: authResult.error ?? 'NOT_ORG_MEMBER',
+          message: 'You are not authorized to update App Key scope for this organization',
+          error: authResult.error ?? 'NOT_ORG_MANAGER',
         }
       }
 

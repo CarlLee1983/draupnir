@@ -40,11 +40,11 @@ export class IssueAppKeyService {
    */
   async execute(request: IssueAppKeyRequest): Promise<AppApiKeyCreatedResponse> {
     try {
-      if (!request.label || !request.label.trim()) {
+      if (!request.label?.trim()) {
         return { success: false, message: 'Key label is required', error: 'LABEL_REQUIRED' }
       }
 
-      const authResult = await this.orgAuth.requireOrgMembership(
+      const authResult = await this.orgAuth.requireOrgManager(
         request.orgId,
         request.issuedByUserId,
         request.callerSystemRole,
@@ -52,8 +52,8 @@ export class IssueAppKeyService {
       if (!authResult.authorized) {
         return {
           success: false,
-          message: 'You are not a member of this organization',
-          error: authResult.error ?? 'NOT_ORG_MEMBER',
+          message: 'You are not authorized to issue App Keys for this organization',
+          error: authResult.error ?? 'NOT_ORG_MANAGER',
         }
       }
 

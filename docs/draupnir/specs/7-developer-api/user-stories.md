@@ -168,8 +168,9 @@
 
 **Key rules**
 - Key 只有在 issue 當下回一次明文；之後只存 hash
-- 任何 org member 皆可 issue / revoke（同 AppApiKey 的 permissive authz）
+- 只有 Org Manager / Admin 皆可 issue / revoke；list 仍可由 Org Member 查閱
 - DevPortal 的 key 列表會按 `appId` 過濾，與 `/api/organizations/:orgId/app-keys` 的「全 org 視角」不同
+- DevPortal 與底層 `AppApiKey` service 現在共用同一套 manager-only 授權，避免 org-wide 與 app-level 規則分叉。
 
 ---
 

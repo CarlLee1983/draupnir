@@ -30,6 +30,8 @@ describe('SetAppKeyScopeService', () => {
     await orgRepo.save(org)
     const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
     await memberRepo.save(member)
+    const nonManager = OrganizationMember.create('mem-2', 'org-1', 'user-2', new OrgMemberRole('member'))
+    await memberRepo.save(nonManager)
 
     const keyHash = await hashingService.hash('drp_app_scope123')
     const key = AppApiKey.create({
@@ -87,5 +89,16 @@ describe('SetAppKeyScopeService', () => {
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('KEY_NOT_FOUND')
+  })
+
+  it('Org Member 但非 Manager 應回傳錯誤', async () => {
+    const result = await service.execute({
+      keyId: 'appkey-scope',
+      callerUserId: 'user-2',
+      callerSystemRole: 'user',
+      scope: 'admin',
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('NOT_ORG_MANAGER')
   })
 })
