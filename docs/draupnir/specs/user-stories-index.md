@@ -39,8 +39,15 @@
 | [US-AUTH-009](./1-authentication/user-stories.md#us-auth-009-使用者登入狀態修改密碼) | 使用者（登入狀態）修改密碼 | Org Manager / Member | Auth | [1-authentication](./1-authentication/user-stories.md) |
 | [US-AUTH-010](./1-authentication/user-stories.md#us-auth-010-cloud-admin-列出--檢視--啟停使用者帳號) | Admin 管理使用者帳號狀態 | Cloud Admin | Auth | [1-authentication](./1-authentication/user-stories.md) |
 | [US-PROFILE-001](./1-authentication/user-stories.md#us-profile-001-使用者取得與更新自己的個人資料) | 使用者取得 / 更新個人資料 | Org Manager / Member | Profile | [1-authentication](./1-authentication/user-stories.md) |
+| [US-ORG-001](./2-user-organization/user-stories.md#us-org-001-使用者建立組織並自動升級為-manager) | 使用者建立組織（自動升 Manager） | 已登入使用者 | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
+| [US-ORG-002](./2-user-organization/user-stories.md#us-org-002-manager-查看--修改組織基本資料) | Manager 查看 / 修改 org 基本資料 | Org Manager | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
+| [US-ORG-003](./2-user-organization/user-stories.md#us-org-003-manager-邀請成員加入組織) | Manager 邀請成員 | Org Manager | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
+| [US-ORG-004](./2-user-organization/user-stories.md#us-org-004-受邀者接受或拒絕邀請) | 受邀者接受 / 拒絕邀請 | 受邀者 | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
+| [US-ORG-005](./2-user-organization/user-stories.md#us-org-005-manager-管理待處理邀請列出--撤銷) | Manager 管理待處理邀請 | Org Manager | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
+| [US-ORG-006](./2-user-organization/user-stories.md#us-org-006-manager-列出--移除組織成員) | Manager 列出 / 移除成員 | Org Manager | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
+| [US-ORG-007](./2-user-organization/user-stories.md#us-org-007-cloud-admin-調整組織成員角色) | Admin 調整成員角色 | Cloud Admin | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
+| [US-ORG-008](./2-user-organization/user-stories.md#us-org-008-cloud-admin-列出--啟停組織) | Admin 列出 / 啟停 orgs | Cloud Admin | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
 
-<!-- TODO(task-2): Organization story 列 -->
 <!-- TODO(task-3): Contract + Credit story 列 -->
 <!-- TODO(task-4): Dashboard + Reports story 列 -->
 <!-- TODO(task-5): Alerts story 列 -->
@@ -53,11 +60,12 @@
 
 | Actor | Story IDs |
 |---|---|
-| **Cloud Admin** | US-AUTH-010 <!-- TODO(task-3, task-4): contract provisioning / 手動調整 credit --> |
-| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001 |
+| **Cloud Admin** | US-AUTH-010, US-ORG-007, US-ORG-008 <!-- TODO(task-3, task-4): contract provisioning / 手動調整 credit --> |
+| **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006 |
 | **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001 |
+| **受邀者（未必已入 org）** | US-ORG-004 |
 | **使用者（未登入 / 新註冊）** | US-AUTH-001, US-AUTH-002, US-AUTH-005, US-AUTH-006, US-AUTH-007, US-AUTH-008 |
-| **使用者（已登入）** | US-AUTH-003, US-AUTH-004 |
+| **使用者（已登入，尚未建立 / 加入 org）** | US-AUTH-003, US-AUTH-004, US-ORG-001 |
 | **Bifrost Sync Job** | <!-- TODO(task-4) --> |
 | **SDK Client** | <!-- TODO(task-7) --> |
 | **System（自動化）** | US-APIKEY-008 |
@@ -70,8 +78,11 @@
 |---|---|
 | **API Key 生命週期** | US-APIKEY-001 → US-APIKEY-003 → US-APIKEY-004 → US-APIKEY-002 → US-APIKEY-005 |
 | **額度發放到扣款** | <!-- TODO(task-3, task-4): US-CONTRACT-001 → US-CREDIT-xxx → US-DASHBOARD-xxx --> |
-| **使用者註冊到打 API** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 <!-- TODO(task-2): → US-ORG-001 加入組織 --> → US-APIKEY-007（拿到 key）<!-- TODO(task-7): → US-SDK-001 --> |
+| **使用者註冊到打 API（自建 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-001 → US-APIKEY-001 <!-- TODO(task-7): → US-SDK-001 --> |
+| **使用者註冊到打 API（受邀加入 org 路徑）** | US-AUTH-001 → US-AUTH-008 → US-AUTH-002 → US-ORG-004（接受邀請）→ US-APIKEY-007（收到 key）<!-- TODO(task-7): → US-SDK-001 --> |
 | **帳號恢復流程** | US-AUTH-006 → US-AUTH-007 |
+| **組織組建（Manager 視角）** | US-ORG-001 → US-ORG-002 → US-ORG-003 → US-ORG-005 → US-ORG-006 |
+| **Admin 組織治理** | US-ORG-008 → US-ORG-007 → US-AUTH-010 |
 | **鏡像失敗防禦（Bifrost 中斷）** | US-APIKEY-008 |
 | **告警生命週期** | <!-- TODO(task-5) --> |
 
