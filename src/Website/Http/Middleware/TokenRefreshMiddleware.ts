@@ -20,10 +20,18 @@
  */
 
 import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
+import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { RefreshTokenService } from '@/Modules/Auth/Application/Services/RefreshTokenService'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
+
+/**
+ * Context key where the SHA-256 hash of the freshly-issued access token is stored
+ * after a silent refresh. Handlers that need to identify the current session
+ * (e.g. settings pages) should read this before falling back to the incoming request cookie.
+ */
+export const REFRESHED_AUTH_TOKEN_HASH_KEY = 'refreshedAuthTokenHash'
 
 let refreshService: RefreshTokenService | null = null
 const jwtService = new JwtTokenService()
@@ -66,6 +74,8 @@ export function createTokenRefreshMiddleware(): Middleware {
       maxAge: 900,
       secure: isSecureRequest(ctx),
     })
+
+    ctx.set(REFRESHED_AUTH_TOKEN_HASH_KEY, await sha256(newAccessToken))
 
     const payload = jwtService.verify(newAccessToken)
     if (payload) {

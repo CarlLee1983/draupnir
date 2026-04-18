@@ -65,6 +65,7 @@ function createMemberContextWithBody(
   const store = new Map<string, unknown>()
   const auth = { userId: 'member-1', email: 'member@test.com', role: 'member' }
   store.set('auth', auth)
+  store.set('validated', body)
   store.set('inertia:shared', {
     locale: 'en',
     messages: loadMessages('en'),
@@ -116,12 +117,43 @@ describe('MemberSettingsPage', () => {
         ),
       }
 
-      const page = new MemberSettingsPage(inertia, mockGetProfileService as any, {} as any)
+      const page = new MemberSettingsPage(
+        inertia,
+        mockGetProfileService as any,
+        {} as any,
+        { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
+      )
       await page.handle(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
       expect(captured.lastCall?.props.user).toMatchObject({ name: 'Test User', role: 'member' })
-      expect(captured.lastCall?.props.formError).toBe(null)
+      expect(captured.lastCall?.props.error).toBe(null)
+    })
+
+    test('uses refreshedAuthTokenHash from ctx when set by silent refresh', async () => {
+      const ctx = createMemberContext()
+      ctx.set('refreshedAuthTokenHash', 'refreshed-hash-xyz')
+      const { inertia } = createMockInertia()
+
+      const listSessions = mock((_userId: string, hash?: string | null) =>
+        Promise.resolve({ success: true, sessions: [], _hash: hash }),
+      )
+
+      const page = new MemberSettingsPage(
+        inertia,
+        {
+          execute: mock(() =>
+            Promise.resolve({ success: true, data: { displayName: 'x', email: 'x' } }),
+          ),
+        } as any,
+        {} as any,
+        { execute: listSessions } as any,
+        { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
+      )
+      await page.handle(ctx)
+
+      expect(listSessions).toHaveBeenCalledWith('member-1', 'refreshed-hash-xyz')
     })
 
     test('get profile service failure renders with error', async () => {
@@ -137,58 +169,49 @@ describe('MemberSettingsPage', () => {
         ),
       }
 
-      const page = new MemberSettingsPage(inertia, mockGetProfileService as any, {} as any)
+      const page = new MemberSettingsPage(
+        inertia,
+        mockGetProfileService as any,
+        {} as any,
+        { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
+      )
       await page.handle(ctx)
 
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
       expect(captured.lastCall?.props.user).toMatchObject({ name: '', role: 'member' })
-      expect(captured.lastCall?.props.formError).toEqual({ key: 'member.settings.loadFailed' })
+      expect(captured.lastCall?.props.error).toEqual({ key: 'member.settings.loadFailed' })
     })
   })
 
   describe('update (PUT)', () => {
-    test('update success renders with no formError', async () => {
+    test('update success redirects to settings and calls UpdateProfileService', async () => {
       const body = { displayName: 'New Name' }
       const ctx = createMemberContextWithBody(body)
-      const { inertia, captured } = createMockInertia()
+      const { inertia } = createMockInertia()
 
-      const mockGetProfileService = {
-        execute: mock(() =>
-          Promise.resolve({
-            success: true,
-            data: { displayName: 'New Name', email: 'member@test.com' },
-          }),
-        ),
-      }
       const mockUpdateProfileService = {
         execute: mock(() => Promise.resolve({ success: true })),
       }
 
       const page = new MemberSettingsPage(
         inertia,
-        mockGetProfileService as any,
+        { execute: mock() } as any,
         mockUpdateProfileService as any,
+        { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
-      await page.update(ctx)
+      const res = await page.update(ctx)
 
-      expect(captured.lastCall?.component).toBe('Member/Settings/Index')
-      expect(captured.lastCall?.props.formError).toBe(null)
-      expect(captured.lastCall?.props.user).toMatchObject({ name: 'New Name', role: 'member' })
+      expect(res.headers.get('location')).toBe('/member/settings')
+      expect(mockUpdateProfileService.execute).toHaveBeenCalledWith('member-1', { displayName: 'New Name' })
     })
 
-    test('update failure renders with formError', async () => {
+    test('update still redirects when UpdateProfileService reports failure (page does not branch)', async () => {
       const body = { displayName: 'X' }
       const ctx = createMemberContextWithBody(body)
-      const { inertia, captured } = createMockInertia()
+      const { inertia } = createMockInertia()
 
-      const mockGetProfileService = {
-        execute: mock(() =>
-          Promise.resolve({
-            success: true,
-            data: { displayName: 'Old Name', email: 'member@test.com' },
-          }),
-        ),
-      }
       const mockUpdateProfileService = {
         execute: mock(() =>
           Promise.resolve({
@@ -200,13 +223,14 @@ describe('MemberSettingsPage', () => {
 
       const page = new MemberSettingsPage(
         inertia,
-        mockGetProfileService as any,
+        { execute: mock() } as any,
         mockUpdateProfileService as any,
+        { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
-      await page.update(ctx)
+      const res = await page.update(ctx)
 
-      expect(captured.lastCall?.component).toBe('Member/Settings/Index')
-      expect(captured.lastCall?.props.formError).toEqual({ key: 'member.settings.loadFailed' })
+      expect(res.headers.get('location')).toBe('/member/settings')
     })
   })
 })

@@ -26,6 +26,7 @@ type ManagerPageInstance = {
   store?(ctx: IHttpContext): Promise<Response>
   update?(ctx: IHttpContext): Promise<Response>
   changePassword?(ctx: IHttpContext): Promise<Response>
+  revokeAllSessions?(ctx: IHttpContext): Promise<Response>
   invite?(ctx: IHttpContext): Promise<Response>
   remove?(ctx: IHttpContext): Promise<Response>
   assign?(ctx: IHttpContext): Promise<Response>
@@ -143,6 +144,13 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
     action: 'changePassword',
     formRequest: ChangePasswordRequest,
     name: 'pages.manager.settings.password',
+  },
+  {
+    method: 'post',
+    path: '/manager/settings/sessions/revoke-all',
+    page: MANAGER_PAGE_KEYS.settings,
+    action: 'revokeAllSessions',
+    name: 'pages.manager.settings.sessions.revokeAll',
   },
 ]
 

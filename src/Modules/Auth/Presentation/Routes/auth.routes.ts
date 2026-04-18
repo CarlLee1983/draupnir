@@ -24,4 +24,10 @@ export async function registerAuthRoutes(
 
   /** POST /api/auth/logout - Sign out and revoke token */
   router.post('/api/auth/logout', [attachJwt()], (ctx) => controller.logout(ctx))
+
+  /** GET /api/auth/sessions - List active access-token sessions */
+  router.get('/api/auth/sessions', [attachJwt()], (ctx) => controller.listSessions(ctx))
+
+  /** POST /api/auth/logout-all - Revoke all tokens for the current user */
+  router.post('/api/auth/logout-all', [attachJwt()], (ctx) => controller.logoutAll(ctx))
 }

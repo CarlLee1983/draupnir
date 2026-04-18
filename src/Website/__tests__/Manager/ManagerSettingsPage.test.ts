@@ -64,21 +64,52 @@ describe('ManagerSettingsPage', () => {
         }),
       ),
     }
-    const page = new ManagerSettingsPage(inertia, get as any, { execute: mock() } as any, {
-      execute: mock(),
-    } as any)
+    const page = new ManagerSettingsPage(
+      inertia,
+      get as any,
+      { execute: mock() } as any,
+      { execute: mock() } as any,
+      { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+      { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
+    )
     await page.handle(makeCtx())
     expect(captured.c).toBe('Manager/Settings/Index')
     expect((captured.p as any).profile.displayName).toBe('Mgr')
     expect((captured.p as any).passwordRequirements.minLength).toBe(8)
   })
 
+  test('handle: 使用 refreshedAuthTokenHash 作為 currentHash（silent refresh 後）', async () => {
+    const inertia = { render: () => new Response() } as any
+    const listSessions = mock((_userId: string, hash?: string | null) =>
+      Promise.resolve({ success: true, sessions: [], _hash: hash }),
+    )
+    const page = new ManagerSettingsPage(
+      inertia,
+      { execute: mock(() => Promise.resolve({ success: true, data: null })) } as any,
+      { execute: mock() } as any,
+      { execute: mock() } as any,
+      { execute: listSessions } as any,
+      { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
+    )
+
+    const ctx = makeCtx()
+    ctx.set('refreshedAuthTokenHash', 'refreshed-hash-abc')
+    await page.handle(ctx)
+
+    expect(listSessions).toHaveBeenCalledWith('mgr-1', 'refreshed-hash-abc')
+  })
+
   test('update: 呼叫 UpdateProfileService 並導回 /manager/settings', async () => {
     const inertia = { render: mock() } as any
     const update = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
-    const page = new ManagerSettingsPage(inertia, { execute: mock() } as any, update as any, {
-      execute: mock(),
-    } as any)
+    const page = new ManagerSettingsPage(
+      inertia,
+      { execute: mock() } as any,
+      update as any,
+      { execute: mock() } as any,
+      { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+      { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
+    )
     const res = await page.update(makeCtx({ displayName: 'N' }))
     expect(res.headers.get('location')).toBe('/manager/settings')
     expect(update.execute).toHaveBeenCalledWith('mgr-1', { displayName: 'N' })
@@ -94,6 +125,8 @@ describe('ManagerSettingsPage', () => {
       { execute: mock() } as any,
       { execute: mock() } as any,
       changePw as any,
+      { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+      { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
     )
     const res = await page.changePassword(
       makeCtx({

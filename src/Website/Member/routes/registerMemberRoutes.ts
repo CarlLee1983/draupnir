@@ -27,6 +27,7 @@ type MemberPageInstance = {
   handle(ctx: IHttpContext): Promise<Response>
   store?(ctx: IHttpContext): Promise<Response>
   update?(ctx: IHttpContext): Promise<Response>
+  revokeAllSessions?(ctx: IHttpContext): Promise<Response>
 }
 
 export type MemberRouteDef = {
@@ -95,6 +96,13 @@ const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
     action: 'update',
     formRequest: UpdateProfileRequest,
     name: 'pages.member.settings.update',
+  },
+  {
+    method: 'post',
+    path: '/member/settings/sessions/revoke-all',
+    page: MEMBER_PAGE_KEYS.settings,
+    action: 'revokeAllSessions',
+    name: 'pages.member.settings.sessions.revokeAll',
   },
 ]
 

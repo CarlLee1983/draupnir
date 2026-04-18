@@ -39,6 +39,7 @@
 | [US-AUTH-008](./1-authentication/user-stories.md#us-auth-008-使用者驗證-email) | 使用者驗證 Email | 新註冊使用者 | Auth | [1-authentication](./1-authentication/user-stories.md) |
 | [US-AUTH-009](./1-authentication/user-stories.md#us-auth-009-使用者登入狀態修改密碼) | 使用者（登入狀態）修改密碼 | Org Manager / Member | Auth | [1-authentication](./1-authentication/user-stories.md) |
 | [US-AUTH-010](./1-authentication/user-stories.md#us-auth-010-cloud-admin-列出--檢視--啟停使用者帳號) | Admin 管理使用者帳號狀態 | Cloud Admin | Auth | [1-authentication](./1-authentication/user-stories.md) |
+| [US-AUTH-011](./1-authentication/user-stories.md#us-auth-011-使用者檢視登入工作階段並全部登出) | 檢視登入工作階段並全部登出 | Org Manager / Member | Auth | [1-authentication](./1-authentication/user-stories.md) |
 | [US-PROFILE-001](./1-authentication/user-stories.md#us-profile-001-使用者取得與更新自己的個人資料) | 使用者取得 / 更新個人資料 | Org Manager / Member | Profile | [1-authentication](./1-authentication/user-stories.md) |
 | [US-ORG-001](./2-user-organization/user-stories.md#us-org-001-使用者建立組織並自動升級為-manager) | 使用者建立組織（自動升 Manager） | 已登入使用者 | Organization | [2-user-organization](./2-user-organization/user-stories.md) |
 | [US-ORG-002](./2-user-organization/user-stories.md#us-org-002-manager-查看--修改組織基本資料) | Manager 查看 / 修改 org 基本資料 | Org Manager | Organization | [2-user-organization](./2-user-organization/user-stories.md) |

@@ -20,20 +20,40 @@ interface PasswordRequirements {
   requiresSpecialChars?: boolean
 }
 
+interface AuthSessionRow {
+  id: string
+  type: 'access'
+  createdAt: string
+  expiresAt: string
+  isCurrent: boolean
+}
+
 interface Props {
   profile: Profile | null
   error: { key: string } | null
   passwordRequirements: PasswordRequirements
   passwordChangeError?: string | null
+  sessions: AuthSessionRow[]
+  sessionsRevokeError?: string | null
 }
 
 type SettingsTab = 'account' | 'security'
+
+function formatSessionTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('zh-TW', { dateStyle: 'medium', timeStyle: 'short' })
+  } catch {
+    return iso
+  }
+}
 
 export default function ManagerSettingsIndex({
   profile,
   error,
   passwordRequirements,
   passwordChangeError,
+  sessions,
+  sessionsRevokeError,
 }: Props) {
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '')
   const [currentPassword, setCurrentPassword] = useState('')
@@ -42,6 +62,7 @@ export default function ManagerSettingsIndex({
   const [profileSaving, setProfileSaving] = useState(false)
   const [passwordSaving, setPasswordSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<SettingsTab>('account')
+  const [revokingAll, setRevokingAll] = useState(false)
 
   const submitProfile = (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +72,13 @@ export default function ManagerSettingsIndex({
       { displayName },
       { onFinish: () => setProfileSaving(false) },
     )
+  }
+
+  const submitRevokeAllSessions = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!window.confirm('確定要從所有裝置登出？目前瀏覽器也會一併登出。')) return
+    setRevokingAll(true)
+    router.post('/manager/settings/sessions/revoke-all', {}, { onFinish: () => setRevokingAll(false) })
   }
 
   const submitPassword = (e: React.FormEvent) => {
@@ -193,8 +221,9 @@ export default function ManagerSettingsIndex({
               </Card>
               )}
 
-              {/* Password Section */}
+              {/* Password + sessions (security tab) */}
               {activeTab === 'security' && (
+              <>
               <Card
                 id="settings-panel-security"
                 role="tabpanel"
@@ -293,6 +322,69 @@ export default function ManagerSettingsIndex({
                   </form>
                 </CardContent>
               </Card>
+
+              <Card
+                className="rounded-none border-zinc-800 bg-zinc-900 shadow-none"
+              >
+                <CardHeader className="border-b border-zinc-800 px-6 py-4">
+                  <div className="flex items-center gap-2 text-zinc-100">
+                    <LogOut className="h-4 w-4 text-amber-400" />
+                    <CardTitle className="font-sans text-base font-semibold">登入工作階段</CardTitle>
+                  </div>
+                  <CardDescription className="font-sans text-xs text-zinc-500">
+                    檢視目前作用中的存取權杖。若帳號有異常，可立即從所有裝置登出。
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 p-6">
+                  {sessionsRevokeError && (
+                    <div className="flex items-center gap-2 border border-red-900/50 bg-red-950/20 p-3 text-sm text-red-400">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      <span>{sessionsRevokeError}</span>
+                    </div>
+                  )}
+                  {sessions.length === 0 ? (
+                    <p className="font-sans text-sm text-zinc-500">目前沒有列出中的工作階段。</p>
+                  ) : (
+                    <div className="overflow-x-auto border border-zinc-800">
+                      <table className="w-full min-w-[320px] border-collapse text-left font-sans text-xs">
+                        <thead>
+                          <tr className="border-b border-zinc-800 bg-zinc-950/80 text-zinc-500">
+                            <th className="px-3 py-2 font-mono uppercase tracking-wider">建立時間</th>
+                            <th className="px-3 py-2 font-mono uppercase tracking-wider">到期</th>
+                            <th className="px-3 py-2 font-mono uppercase tracking-wider">狀態</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sessions.map((s) => (
+                            <tr key={s.id} className="border-b border-zinc-800/80 text-zinc-300 last:border-0">
+                              <td className="px-3 py-2">{formatSessionTime(s.createdAt)}</td>
+                              <td className="px-3 py-2">{formatSessionTime(s.expiresAt)}</td>
+                              <td className="px-3 py-2">
+                                {s.isCurrent ? (
+                                  <span className="font-mono text-[10px] uppercase tracking-wide text-indigo-400">此裝置</span>
+                                ) : (
+                                  <span className="text-zinc-600">—</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                  <form onSubmit={submitRevokeAllSessions}>
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      className="rounded-none border-amber-900/50 bg-zinc-950 font-sans text-xs font-bold uppercase tracking-widest text-amber-200 hover:bg-amber-950/30 disabled:opacity-50"
+                      disabled={revokingAll}
+                    >
+                      {revokingAll ? '處理中…' : '從所有裝置登出'}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+              </>
               )}
             </div>
           </div>

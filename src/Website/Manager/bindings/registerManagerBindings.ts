@@ -17,6 +17,8 @@ import type { ListMembersService } from '@/Modules/Organization/Application/Serv
 import type { RemoveMemberService } from '@/Modules/Organization/Application/Services/RemoveMemberService'
 import type { UpdateOrganizationService } from '@/Modules/Organization/Application/Services/UpdateOrganizationService'
 import type { ChangePasswordService } from '@/Modules/Auth/Application/Services/ChangePasswordService'
+import type { ListSessionsService } from '@/Modules/Auth/Application/Services/ListSessionsService'
+import type { RevokeAllSessionsService } from '@/Modules/Auth/Application/Services/RevokeAllSessionsService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
@@ -95,6 +97,8 @@ export function registerManagerBindings(container: IContainer): void {
       c.make('getProfileService') as GetProfileService,
       c.make('updateProfileService') as UpdateProfileService,
       c.make('changePasswordService') as ChangePasswordService,
+      c.make('listSessionsService') as ListSessionsService,
+      c.make('revokeAllSessionsService') as RevokeAllSessionsService,
     )
   })
 }

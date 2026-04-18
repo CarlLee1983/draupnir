@@ -18,12 +18,6 @@
 
 ## 🅰 Priority A（安全 / 財務 / 商業阻擋）
 
-### ⏳ A1. Session 管理（登入裝置列表 + 全部登出）（Auth）
-- **來源**：1-authentication/user-stories.md 已知缺口
-- **現況**：US-AUTH-004 只能撤銷當前 token，改密碼不會自動撤銷其他裝置 session
-- **風險**：帳號被盜後使用者無法自助全域下線
-- **預估工作**：新增 `ListSessionsService`、`RevokeAllSessionsService`、對應 UI + story `US-AUTH-011`
-
 ### ⏳ A2. AppApiKey 授權收斂（AppApiKey）
 - **來源**：3-api-keys/user-stories.md
 - **現況**：issue / rotate / revoke / scope 皆僅 `requireOrgMembership`——任何 Member 都能發 App-Key
@@ -145,4 +139,7 @@
 - **關閉日期**：YYYY-MM-DD
 -->
 
-（目前為空——所有缺口皆未處理）
+### ✅ A1. Session 管理（登入裝置列表 + 全部登出）（Auth）— `US-AUTH-011`
+- **解法摘要**：新增 `ListSessionsService`、`RevokeAllSessionsService`；`GET /api/auth/sessions`、`POST /api/auth/logout-all`；Manager/Member 設定頁「登入工作階段」區塊與 `POST …/settings/sessions/revoke-all`。改密碼實際上早已會 `revokeAllByUserId`（與 backlog 舊述不一致處已於 `1-authentication/user-stories.md` US-AUTH-009 更正）。
+- **對應 story**：`US-AUTH-011`
+- **關閉日期**：2026-04-18

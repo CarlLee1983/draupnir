@@ -28,6 +28,26 @@ export interface AuthContext {
   tokenType: string
 }
 
+/**
+ * Reads the raw JWT string from `Authorization: Bearer` or the `auth_token` cookie.
+ * Shared by session listing and logout handlers so extraction matches middleware.
+ */
+export function extractRawAuthToken(ctx: IHttpContext): string | null {
+  const header =
+    ctx.getHeader('authorization') ??
+    ctx.getHeader('Authorization') ??
+    (ctx.headers as Record<string, string | undefined>)?.authorization ??
+    (ctx.headers as Record<string, string | undefined>)?.Authorization
+  if (header) {
+    const parts = header.split(' ')
+    if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+      return parts[1]
+    }
+  }
+
+  return ctx.getCookie('auth_token') ?? null
+}
+
 export class AuthMiddleware {
   private jwtService: JwtTokenService
 
@@ -91,19 +111,7 @@ export class AuthMiddleware {
    * Expected format: Authorization: Bearer <token>
    */
   private extractToken(ctx: IHttpContext): string | null {
-    const header =
-      ctx.getHeader('authorization') ??
-      ctx.getHeader('Authorization') ??
-      (ctx.headers as Record<string, string | undefined>)?.authorization ??
-      (ctx.headers as Record<string, string | undefined>)?.Authorization
-    if (header) {
-      const parts = header.split(' ')
-      if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
-        return parts[1]
-      }
-    }
-
-    return ctx.getCookie('auth_token') ?? null
+    return extractRawAuthToken(ctx)
   }
 
   /**

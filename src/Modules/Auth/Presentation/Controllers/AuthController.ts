@@ -8,12 +8,15 @@
  * - Map results to HTTP responses
  */
 
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import { AuthMiddleware, extractRawAuthToken } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import type { ListSessionsService } from '../../Application/Services/ListSessionsService'
 import type { LoginUserService } from '../../Application/Services/LoginUserService'
 import type { LogoutUserService } from '../../Application/Services/LogoutUserService'
 import type { RefreshTokenService } from '../../Application/Services/RefreshTokenService'
 import type { RegisterUserService } from '../../Application/Services/RegisterUserService'
+import type { RevokeAllSessionsService } from '../../Application/Services/RevokeAllSessionsService'
+import { sha256 } from '../../Application/Utils/sha256'
 import type { LoginParams, RefreshTokenParams, RegisterParams } from '../Requests'
 
 /**
@@ -28,6 +31,8 @@ export class AuthController {
     private loginUserService: LoginUserService,
     private refreshTokenService: RefreshTokenService,
     private logoutUserService: LogoutUserService,
+    private listSessionsService: ListSessionsService,
+    private revokeAllSessionsService: RevokeAllSessionsService,
   ) {}
 
   /**
@@ -89,5 +94,38 @@ export class AuthController {
 
     const result = await this.logoutUserService.execute({ token })
     return ctx.json(result, result.success ? 200 : 400)
+  }
+
+  /**
+   * Lists active access-token sessions for the authenticated user.
+   * `GET /api/auth/sessions`
+   */
+  async listSessions(ctx: IHttpContext): Promise<Response> {
+    if (!AuthMiddleware.isAuthenticated(ctx)) {
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    }
+    const authContext = AuthMiddleware.getAuthContext(ctx)!
+
+    const raw = extractRawAuthToken(ctx)
+    const currentHash = raw ? await sha256(raw) : null
+    const result = await this.listSessionsService.execute(authContext.userId, currentHash)
+    if (!result.success) {
+      return ctx.json(result, 500)
+    }
+    return ctx.json({ success: true, sessions: result.sessions })
+  }
+
+  /**
+   * Revokes all tokens for the authenticated user (every device).
+   * `POST /api/auth/logout-all`
+   */
+  async logoutAll(ctx: IHttpContext): Promise<Response> {
+    if (!AuthMiddleware.isAuthenticated(ctx)) {
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    }
+    const authContext = AuthMiddleware.getAuthContext(ctx)!
+
+    const result = await this.revokeAllSessionsService.execute(authContext.userId)
+    return ctx.json(result, result.success ? 200 : 500)
   }
 }

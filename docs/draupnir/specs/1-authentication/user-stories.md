@@ -186,7 +186,28 @@
 **Key rules**
 - 須先通過現任密碼驗證，否則拒；防偷走 session 後直接改密碼
 - 新密碼需通過 `Password` value object 強度檢查
-- 改密碼成功**不會**自動撤銷其他裝置 session（v1 行為；留待後續強化）
+- 改密碼成功後會呼叫 `authTokenRepository.revokeAllByUserId`，撤銷該帳號下所有 access/refresh 記錄，**所有裝置需重新登入**（與重設密碼流程一致）
+
+---
+
+### US-AUTH-011 | 使用者檢視登入工作階段並全部登出
+
+**As** a signed-in Manager / Member
+**I want to** see my active access-token sessions and sign out everywhere in one action
+**so that** I can recover from a suspected account takeover without waiting for support.
+
+**Related**
+- Module: `src/Modules/Auth`
+- Entries:
+  - `ListSessionsService.execute()` → `src/Modules/Auth/Application/Services/ListSessionsService.ts`
+  - `RevokeAllSessionsService.execute()` → `src/Modules/Auth/Application/Services/RevokeAllSessionsService.ts`
+- REST：`AuthController.listSessions` / `AuthController.logoutAll` → `GET /api/auth/sessions`、`POST /api/auth/logout-all`（需 JWT）
+- Inertia：`ManagerSettingsPage` / `MemberSettingsPage`（列表於 GET settings、`revokeAllSessions` → `POST /manager|member/settings/sessions/revoke-all`）
+
+**Key rules**
+- 列表只回傳**未撤銷且未過期**的 token；UI 僅展示 `access` 類型列（每次登入一筆），不含 token hash
+- 「目前裝置」以請求攜帶的 access token hash 與 `auth_tokens.token_hash` 比對
+- 「全部登出」等同撤銷該 user 在 `auth_tokens` 之所有列，與 `ChangePasswordService` / `ResetPasswordService` 之全域撤銷一致
 
 ---
 
@@ -256,6 +277,8 @@
 | `ResetPasswordService.execute` | US-AUTH-007 | 重設密碼 |
 | `EmailVerificationService.execute` | US-AUTH-008 | 驗證 email |
 | `ChangePasswordService.execute` | US-AUTH-009 | 改密碼（登入狀態）|
+| `ListSessionsService.execute` | US-AUTH-011 | 列出作用中 access sessions |
+| `RevokeAllSessionsService.execute` | US-AUTH-011 | 全部裝置登出 |
 | `ListUsersService.execute` | US-AUTH-010 | Admin 列出使用者 |
 | `GetUserDetailService.execute` | US-AUTH-010 | Admin Portal 查看使用者詳細 |
 | `ChangeUserStatusService.execute` | US-AUTH-010 | Admin 啟停使用者 |
@@ -275,6 +298,8 @@
 | `AuthController.login` | US-AUTH-002 | REST |
 | `AuthController.refresh` | US-AUTH-003 | REST |
 | `AuthController.logout` | US-AUTH-004 | REST |
+| `AuthController.listSessions` | US-AUTH-011 | REST |
+| `AuthController.logoutAll` | US-AUTH-011 | REST |
 | `ProfileController.getMe` | US-PROFILE-001 | REST |
 | `ProfileController.updateMe` | US-PROFILE-001 | REST |
 | `ProfileController.listUsers` | US-AUTH-010 | REST admin |
@@ -286,12 +311,11 @@
 | `EmailVerificationPage` | US-AUTH-008 | Inertia |
 | `GoogleOAuthCallbackPage` | US-AUTH-005 | Inertia |
 | `VerifyDevicePage` | — | ⚠️ 2FA / Device verification 相關頁面，v1 對應流程尚在迭代中；待後續 Task 針對 2FA 補 story |
-| `ManagerSettingsPage.handle/update/changePassword` | US-PROFILE-001, US-AUTH-009 | Inertia |
-| `MemberSettingsPage.handle/update` | US-PROFILE-001 | Inertia |
+| `ManagerSettingsPage.handle/update/changePassword/revokeAllSessions` | US-PROFILE-001, US-AUTH-009, US-AUTH-011 | Inertia |
+| `MemberSettingsPage.handle/update/revokeAllSessions` | US-PROFILE-001, US-AUTH-011 | Inertia |
 | `AdminUsersPage` / `AdminUserDetailPage` | US-AUTH-010 | Inertia admin |
 
 ### 已知覆蓋缺口
 
 - **Device verification / 2FA**：`VerifyDevicePage` 存在但 v1 流程未完全收斂，暫不寫獨立 story
 - **Change email**：使用者改 email 的完整流程（含 old/new email 雙向驗證）尚未實作，故無 story
-- **Session 管理（看目前有哪些登入中裝置 / 全部登出）**：v1 未提供

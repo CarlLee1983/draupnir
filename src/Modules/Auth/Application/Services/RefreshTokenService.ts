@@ -110,6 +110,19 @@ export class RefreshTokenService {
         createdAt: new Date(),
       })
 
+      // Close the race with a concurrent bulk revoke (e.g. RevokeAllSessionsService):
+      // if the refresh token was revoked between the initial check and our save,
+      // compensate by revoking the freshly-issued access token so the revoke-all promise holds.
+      const revokedAfterSave = await this.authTokenRepository.isRevoked(tokenHash)
+      if (revokedAfterSave) {
+        await this.authTokenRepository.revoke(newAccessTokenHash)
+        return {
+          success: false,
+          message: 'Refresh token has been revoked',
+          error: 'TOKEN_REVOKED',
+        }
+      }
+
       return {
         success: true,
         message: 'Token refreshed successfully',
