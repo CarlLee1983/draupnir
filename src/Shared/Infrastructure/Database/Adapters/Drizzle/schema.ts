@@ -8,7 +8,7 @@
  */
 
 import { sql } from 'drizzle-orm'
-import { index, integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 
 /**
  * Users 表
@@ -165,7 +165,14 @@ export const creditTransactions = sqliteTable(
     description: text('description'),
     created_at: text('created_at').notNull(),
   },
-  (table) => [index('idx_credit_transactions_account_id').on(table.credit_account_id)],
+  (table) => [
+    index('idx_credit_transactions_account_id').on(table.credit_account_id),
+    uniqueIndex('uniq_credit_usage_deduction')
+      .on(table.credit_account_id, table.reference_id)
+      .where(
+        sql`${table.type} = 'deduction' AND ${table.reference_type} = 'usage_record' AND ${table.reference_id} IS NOT NULL`,
+      ),
+  ],
 )
 
 /**

@@ -16,12 +16,6 @@
 
 ---
 
-### ⏳ A3. 逾期未扣款 Backfill（Credit + Dashboard）
-- **來源**：4-credit-billing/user-stories.md
-- **現況**：若 Bifrost sync 長時間中斷，usage 堆積；恢復後 `BifrostSyncService.sync` 只跑最新 tick，無補扣流程
-- **風險**：財務漏記
-- **預估工作**：新增 backfill Service（帶時間範圍）+ Admin 手動觸發 endpoint；新 story `US-CREDIT-007`
-
 ### ⏳ A4. Webhook-only 通道失敗升級（Alerts）
 - **來源**：4-credit-billing/user-stories.md
 - **現況**：email 成功 + 所有 webhook 失敗時，只記錄 delivery 失敗、不升級通知
@@ -116,7 +110,6 @@
 ## 交叉依賴圖
 
 - **B6 解決** → 連帶解 **4-credit-billing 的 slack-based reallocation 缺口**
-- **A3 解決** → 新 story 會強化 US-DASHBOARD-007 與 US-CREDIT-004 的 Key rules
 - **B5 解決** → Cloud Admin Actor 在索引表的 story 清單會擴充
 - **A2 收緊後** → US-APPKEY-001/002/003、US-DEV-002 Key rules 需同步更新
 
@@ -139,4 +132,9 @@
 ### ✅ A2. AppApiKey 授權收斂（AppApiKey）— 本次實作
 - **解法摘要**：將 AppApiKey 的 issue / rotate / revoke / scope 寫入路徑收斂為 `requireOrgManager`；DevPortal 的 App-Key issue / revoke 也同步收斂到同一套 manager-only 授權，避免 org-wide 與 app-level key 管理規則分叉。
 - **對應 story**：`US-APPKEY-001~003`、`US-DEV-002`
+- **關閉日期**：2026-04-18
+
+### ✅ A3. 逾期未扣款 Backfill（Credit + Dashboard）— 本次實作 / `US-CREDIT-007`
+- **解法摘要**：新增 `ApplyUsageChargesService` 以 `usage_record.id` 做 deduction 去重；`BifrostSyncService.backfill(startTime, endTime)` 支援指定時間區間重跑且不推進 cursor；新增 admin-only `POST /api/dashboard/bifrost-sync/backfill` 手動補救入口。
+- **對應 story**：`US-CREDIT-007`
 - **關閉日期**：2026-04-18

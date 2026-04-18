@@ -224,7 +224,7 @@
 
 **Key rules**
 - 扣款必扣足量（`applyDeduction`）；若扣到 0 或負值，dispatch `BalanceDepleted` 事件觸發 key 凍結（見 US-CREDIT-005）
-- 扣款同樣建 `CreditTransaction`，`referenceType` 指向來源（通常是 `usage_record`、`referenceId` 是該筆 usage 的 id）
+- 扣款同樣建 `CreditTransaction`，`referenceType = usage_record`、`referenceId = usage_record.id`，作為補扣 / 重跑時的冪等去重鍵
 - 連續扣款必須保持交易原子性（DB transaction）——避免半扣款狀態
 
 ---
@@ -264,6 +264,24 @@
 - 只解凍 `status = suspended` 且 `suspendReason = CREDIT_DEPLETED` 的 key；其他 suspend 原因（人工 revoke 等）不碰
 - 還原時使用凍結前記錄的 `preFreezeRateLimit`；若 pre-freeze 為 `null`（之前沒設限），用預設值補
 - Suspend 與 resume 是對稱動作，中間 pre-freeze 狀態存在 key entity 上
+
+---
+
+### US-CREDIT-007 | Cloud Admin 手動回填逾期未扣款
+
+**As** a Cloud Admin
+**I want to** manually trigger a ranged Bifrost backfill for overdue usage and missing deductions
+**so that** a long sync outage can be repaired without editing org balances or ledger rows by hand.
+
+**Related**
+- Module: `src/Modules/Credit`
+- Entry: `ApplyUsageChargesService.execute()` → `src/Modules/Credit/Application/Services/ApplyUsageChargesService.ts`
+- Trigger: `POST /api/dashboard/bifrost-sync/backfill` → `src/Modules/Dashboard/Presentation/Controllers/DashboardController.ts`
+
+**Key rules**
+- 呼叫者必須是 Cloud Admin，且必須提供明確的 `startTime` / `endTime`；系統只回填該時間區間內的 usage
+- backfill 會重抓 Bifrost logs、補寫缺失的 `usage_records`，再只對尚未建立 deduction 的 `usage_record.id` 補扣
+- backfill 不推進增量 `sync_cursors`；scheduler 的正常同步位置與手動補救分開管理
 
 ---
 
@@ -400,6 +418,7 @@
 - 一個 sync round 內：拉 log → 找不到對應 key → 寫入 `quarantined_logs`（原因 `virtual_key_not_found`）、不影響 cursor
 - Cursor 只在成功寫入 usage_records 後推進；失敗 log 不會讓 cursor 回退
 - Sync 完成後 dispatch `BifrostSyncCompletedEvent(affectedOrgIds)`；Credit 模組依此對每個 org 計算扣款量
+- Admin 可用 `POST /api/dashboard/bifrost-sync/backfill` 指定時間區間重跑同一條流程；backfill 會 dispatch 同一事件但不推進 cursor
 - Timeout 或 Gateway network 錯誤回 `{ synced: 0, quarantined: 0, affectedOrgIds: [] }`——不 throw，讓 scheduler 繼續下一輪
 
 ---
@@ -617,6 +636,7 @@
 | `TopUpCreditService.execute` | US-CREDIT-001 | Admin 加值 |
 | `RefundCreditService.execute` | US-CREDIT-001 | Admin 退款（亦為加回）|
 | `DeductCreditService.execute` | US-CREDIT-004 | 系統扣款 |
+| `ApplyUsageChargesService.execute` | US-CREDIT-007 | 掃描 usage_records、只補扣未建立 deduction 的 usage |
 | `GetBalanceService.execute` | US-CREDIT-002 | 讀餘額 |
 | `GetTransactionHistoryService.execute` | US-CREDIT-003 | 交易歷史 |
 | `HandleBalanceDepletedService.execute` | US-CREDIT-005 | 餘額用盡 → 凍結 key |
@@ -639,6 +659,7 @@
 | Service method | Story ID | 備註 |
 |---|---|---|
 | `BifrostSyncService.sync` | US-DASHBOARD-007 | Cron 驅動的 usage 拉取 + 隔離 log + 推進 cursor |
+| `BifrostSyncService.backfill` | US-CREDIT-007 | Admin 指定時間區間重跑 usage sync；不推進 cursor |
 
 ### Reports 模組 Application Services
 
@@ -690,12 +711,13 @@
 | `DashboardController.costTrends` | US-DASHBOARD-006 | REST |
 | `DashboardController.modelComparison` | US-DASHBOARD-005 | REST |
 | `DashboardController.perKeyCost` | US-DASHBOARD-004 | REST |
+| `DashboardController.backfillSync` | US-CREDIT-007 | REST admin |
 | `ReportController.index` | US-REPORTS-001 | REST |
 | `ReportController.store` | US-REPORTS-001 | REST（Manager only）|
 | `ReportController.update` | US-REPORTS-001 | REST（Manager only）|
 | `ReportController.destroy` | US-REPORTS-001 | REST（Manager only）|
 | `ReportController.verifyTemplate` | US-REPORTS-003 | Public-ish，靠 ReportToken 驗證 |
-| `BifrostSyncService`（registered via `DashboardServiceProvider.registerJobs`） | US-DASHBOARD-007 | Scheduler-driven，無 HTTP 入口 |
+| `BifrostSyncService`（registered via `DashboardServiceProvider.registerJobs`） | US-DASHBOARD-007, US-CREDIT-007 | Scheduler-driven + admin backfill hook |
 | `ScheduleReportService`（registered via scheduler） | US-REPORTS-002 | Scheduler-driven，無 HTTP 入口 |
 | Member / Manager Portal 的 Dashboard / Usage / Cost 頁面 | US-DASHBOARD-001~006 | Inertia，各 portal 各自 binding |
 | `AlertController.setBudget` | US-ALERTS-001 | REST（Manager only）|
@@ -715,7 +737,6 @@
 - **Manager 依 slack 重配 key 額度（slack-based reallocation）**：計畫提到的這個使用情境需要 `UpdateApiKeyBudgetService` 接上 Presentation（見 [ApiKey Coverage map](../3-api-keys/user-stories.md#coverage-map)）；目前只能刪 key 重發。Task 6 會檢視是否能擴充 ApiKey story
 - **Manager 查看 org 自己的 contract 詳細**：目前 `/member/contracts` 共用 Member 視圖，沒有獨立 Manager Contract 詳細頁；待後續補強
 - **手動扣除 credit（非自動、非退款）**：Admin 目前無法直接扣款餘額，只能透過重算 refund 的負向——v1 視為刻意限制
-- **逾期未扣款的 backfill**：若 Bifrost sync 長時間中斷導致 usage 堆積，補扣流程沒有獨立 story；靠 Dashboard Sync（US-DASHBOARD-007）重跑，目前無獨立 "補扣" 故事
 - **已寄送 Report 的歷史記錄**：Reports 模組只管 "schedule configs"，不保留歷次 render 的 PDF 歷史；若後續要查 "之前寄過什麼" 需新 story
 - **Reports 排程失敗的重試**：若 cron tick 發 email 失敗（mailer 錯誤），目前無獨立重試機制；依賴 scheduler 下次 tick
 - **多通道同時 off（僅剩 webhook 失敗）情境**：若 email 送出但 webhook 全失敗，目前僅記錄 delivery 失敗、不自動升級——依賴 Manager 看 history 主動處理

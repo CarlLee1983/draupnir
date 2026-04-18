@@ -1,4 +1,4 @@
-import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
@@ -7,6 +7,7 @@ import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IAp
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { DeductCreditService } from '../../Application/Services/DeductCreditService'
+import { ApplyUsageChargesService } from '../../Application/Services/ApplyUsageChargesService'
 import { GetBalanceService } from '../../Application/Services/GetBalanceService'
 import { GetTransactionHistoryService } from '../../Application/Services/GetTransactionHistoryService'
 import { HandleBalanceDepletedService } from '../../Application/Services/HandleBalanceDepletedService'
@@ -32,6 +33,12 @@ export class CreditServiceProvider extends ModuleServiceProvider implements IRou
     container.bind('deductCreditService', (c: IContainer) => new DeductCreditService(
       c.make('creditAccountRepository') as ICreditAccountRepository,
       c.make('creditTransactionRepository') as ICreditTransactionRepository,
+      db,
+    ))
+    container.bind('applyUsageChargesService', (c: IContainer) => new ApplyUsageChargesService(
+      c.make('creditAccountRepository') as ICreditAccountRepository,
+      c.make('creditTransactionRepository') as ICreditTransactionRepository,
+      c.make('deductCreditService') as DeductCreditService,
       db,
     ))
     container.bind('topUpCreditService', (c: IContainer) => new TopUpCreditService(
@@ -79,6 +86,18 @@ export class CreditServiceProvider extends ModuleServiceProvider implements IRou
 
   override boot(container: IContainer): void {
     const dispatcher = DomainEventDispatcher.getInstance()
+    dispatcher.on('bifrost.sync.completed', async (event) => {
+      const handler = container.make('applyUsageChargesService') as ApplyUsageChargesService
+      const orgIds = Array.isArray(event.data.orgIds)
+        ? event.data.orgIds.map((value) => String(value))
+        : []
+      await handler.execute({
+        orgIds,
+        startTime:
+          typeof event.data.startTime === 'string' ? (event.data.startTime as string) : undefined,
+        endTime: typeof event.data.endTime === 'string' ? (event.data.endTime as string) : undefined,
+      })
+    })
     dispatcher.on('credit.balance_depleted', async (event) => {
       const handler = container.make('handleBalanceDepletedService') as HandleBalanceDepletedService
       await handler.execute(event.data.orgId as string)

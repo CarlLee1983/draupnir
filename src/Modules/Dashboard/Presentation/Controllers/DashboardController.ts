@@ -6,6 +6,8 @@ import type { GetKpiSummaryService } from '../../Application/Services/GetKpiSumm
 import type { GetModelComparisonService } from '../../Application/Services/GetModelComparisonService'
 import type { GetPerKeyCostService } from '../../Application/Services/GetPerKeyCostService'
 import type { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
+import type { BifrostSyncService } from '../../Infrastructure/Services/BifrostSyncService'
+import type { BackfillBifrostSyncParams } from '../Requests'
 
 export class DashboardController {
   constructor(
@@ -15,6 +17,7 @@ export class DashboardController {
     private readonly costTrendsService: GetCostTrendsService,
     private readonly modelComparisonService: GetModelComparisonService,
     private readonly perKeyCostService: GetPerKeyCostService,
+    private readonly bifrostSyncService: BifrostSyncService,
   ) {}
 
   async summary(ctx: IHttpContext): Promise<Response> {
@@ -33,6 +36,7 @@ export class DashboardController {
       return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
+    const limit = ctx.getQuery('limit')
     const result = await this.usageChartService.execute({
       orgId,
       callerUserId: auth.userId,
@@ -41,7 +45,7 @@ export class DashboardController {
       endTime: ctx.getQuery('end_time') ?? undefined,
       providers: ctx.getQuery('providers') ?? undefined,
       models: ctx.getQuery('models') ?? undefined,
-      limit: ctx.getQuery('limit') ? parseInt(ctx.getQuery('limit')!, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
     })
     return ctx.json(result)
   }
@@ -112,6 +116,38 @@ export class DashboardController {
     })
     return ctx.json(result)
   }
+
+  async backfillSync(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) {
+      return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
+    }
+    if (auth.role !== 'admin') {
+      return ctx.json(
+        { success: false, message: 'Only admins can perform this action', error: 'FORBIDDEN' },
+        403,
+      )
+    }
+
+    const body = ctx.get('validated') as BackfillBifrostSyncParams
+    if (!isValidTimeRange(body.startTime, body.endTime)) {
+      return ctx.json(
+        { success: false, message: 'Invalid time range', error: 'INVALID_TIME_RANGE' },
+        400,
+      )
+    }
+
+    const result = await this.bifrostSyncService.backfill({
+      startTime: body.startTime,
+      endTime: body.endTime,
+    })
+
+    return ctx.json({
+      success: true,
+      message: 'Bifrost backfill processed',
+      data: result,
+    })
+  }
 }
 
 function parseApiKeyIds(raw: string | undefined): readonly string[] | undefined {
@@ -125,4 +161,10 @@ function parseApiKeyIds(raw: string | undefined): readonly string[] | undefined 
     .filter((value) => value.length > 0)
 
   return ids.length > 0 ? ids : undefined
+}
+
+function isValidTimeRange(startTime: string, endTime: string): boolean {
+  const start = Date.parse(startTime)
+  const end = Date.parse(endTime)
+  return !Number.isNaN(start) && !Number.isNaN(end) && start <= end
 }

@@ -1,9 +1,13 @@
 // src/Modules/Credit/__tests__/DeductCreditService.test.ts
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { DeductCreditService } from '../Application/Services/DeductCreditService'
 import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
+import type { CreditTransaction } from '../Domain/Entities/CreditTransaction'
+import type { ICreditAccountRepository } from '../Domain/Repositories/ICreditAccountRepository'
+import type { ICreditTransactionRepository } from '../Domain/Repositories/ICreditTransactionRepository'
 import { CreditAccountRepository } from '../Infrastructure/Repositories/CreditAccountRepository'
 import { CreditTransactionRepository } from '../Infrastructure/Repositories/CreditTransactionRepository'
 
@@ -92,5 +96,85 @@ describe('DeductCreditService', () => {
 
     expect(result.success).toBe(false)
     expect(result.error).toBe('ACCOUNT_NOT_FOUND')
+  })
+
+  it('duplicate usage deduction unique conflict should be treated as noop success', async () => {
+    const account = CreditAccount.fromDatabase({
+      id: 'acc-dup',
+      org_id: 'org-dup',
+      balance: '1000',
+      low_balance_threshold: '100',
+      status: 'active',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+
+    class FakeAccountRepo implements ICreditAccountRepository {
+      constructor(private readonly current: CreditAccount) {}
+
+      async findById(): Promise<CreditAccount | null> {
+        return this.current
+      }
+
+      async findByOrgId(): Promise<CreditAccount | null> {
+        return this.current
+      }
+
+      async save(): Promise<void> {}
+
+      async update(): Promise<void> {}
+
+      withTransaction(_tx: IDatabaseAccess): ICreditAccountRepository {
+        return this
+      }
+    }
+
+    class DuplicateTxRepo implements ICreditTransactionRepository {
+      async save(): Promise<void> {
+        throw new Error('SQLITE_CONSTRAINT: UNIQUE constraint failed: uniq_credit_usage_deduction')
+      }
+
+      async findByAccountId(): Promise<CreditTransaction[]> {
+        return []
+      }
+
+      async countByAccountId(): Promise<number> {
+        return 0
+      }
+
+      async findByAccountIdAndTypes(): Promise<CreditTransaction[]> {
+        return []
+      }
+
+      async findReferenceIdsByAccountAndReferenceType(): Promise<readonly string[]> {
+        return []
+      }
+
+      withTransaction(_tx: IDatabaseAccess): ICreditTransactionRepository {
+        return this
+      }
+    }
+
+    const noopService = new DeductCreditService(
+      new FakeAccountRepo(account),
+      new DuplicateTxRepo(),
+      {
+        table() {
+          throw new Error('not implemented')
+        },
+        async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
+          return fn(this)
+        },
+      },
+    )
+
+    const result = await noopService.execute({
+      orgId: 'org-dup',
+      amount: '100',
+      referenceType: 'usage_record',
+      referenceId: 'usage-dup',
+    })
+
+    expect(result).toEqual({ success: true, newBalance: '1000' })
   })
 })

@@ -1,13 +1,18 @@
-import { requireAuth } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
+import {
+  createRoleMiddleware,
+  requireAuth,
+} from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { createModuleAccessMiddleware } from '@/Shared/Infrastructure/Middleware/ModuleAccessMiddleware'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
 import type { DashboardController } from '../Controllers/DashboardController'
+import { BackfillBifrostSyncRequest } from '../Requests'
 
 export function registerDashboardRoutes(
   router: IModuleRouter,
   controller: DashboardController,
 ): void {
   const moduleAuth = [requireAuth(), createModuleAccessMiddleware('dashboard')]
+  const adminAuth = [createRoleMiddleware('admin')]
   router.get('/api/organizations/:orgId/dashboard', moduleAuth, (ctx) => controller.summary(ctx))
   router.get('/api/organizations/:orgId/dashboard/usage', moduleAuth, (ctx) =>
     controller.usage(ctx),
@@ -23,5 +28,8 @@ export function registerDashboardRoutes(
   )
   router.get('/api/organizations/:orgId/dashboard/per-key-cost', moduleAuth, (ctx) =>
     controller.perKeyCost(ctx),
+  )
+  router.post('/api/dashboard/bifrost-sync/backfill', adminAuth, BackfillBifrostSyncRequest, (ctx) =>
+    controller.backfillSync(ctx),
   )
 }

@@ -1,4 +1,4 @@
-import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
@@ -97,6 +97,7 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
       c.make('getCostTrendsService') as GetCostTrendsService,
       c.make('getModelComparisonService') as GetModelComparisonService,
       c.make('getPerKeyCostService') as GetPerKeyCostService,
+      c.make('bifrostSyncService') as BifrostSyncService,
     ))
   }
 

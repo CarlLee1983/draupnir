@@ -61,6 +61,7 @@
 | [US-CREDIT-004](./4-credit-billing/user-stories.md#us-credit-004-系統依-bifrost-sync-結果扣款) | 系統依 usage 扣款 | System | Credit | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-CREDIT-005](./4-credit-billing/user-stories.md#us-credit-005-系統在餘額用完時自動凍結-org-的-active-keys) | 系統餘額耗盡凍結 Key | System | Credit | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-CREDIT-006](./4-credit-billing/user-stories.md#us-credit-006-系統在充值後自動解凍被凍結的-keys) | 系統充值後解凍 Key | System | Credit | [4-credit-billing](./4-credit-billing/user-stories.md) |
+| [US-CREDIT-007](./4-credit-billing/user-stories.md#us-credit-007-cloud-admin-手動回填逾期未扣款) | Admin 手動回填逾期未扣款 | Cloud Admin | Credit | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-DASHBOARD-001](./4-credit-billing/user-stories.md#us-dashboard-001-manager--member-查看-dashboard-摘要) | Manager / Member 看 Dashboard 摘要 | Org Manager / Member | Dashboard | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-DASHBOARD-002](./4-credit-billing/user-stories.md#us-dashboard-002-manager--member-查看-kpi-卡片) | Manager / Member 看 KPI 卡片 | Org Manager / Member | Dashboard | [4-credit-billing](./4-credit-billing/user-stories.md) |
 | [US-DASHBOARD-003](./4-credit-billing/user-stories.md#us-dashboard-003-manager--member-查看使用量趨勢圖時間序列) | Manager / Member 看使用量趨勢 | Org Manager / Member | Dashboard | [4-credit-billing](./4-credit-billing/user-stories.md) |
@@ -100,7 +101,7 @@
 
 | Actor | Story IDs |
 |---|---|
-| **Cloud Admin** | US-AUTH-010, US-ORG-007, US-ORG-008, US-CONTRACT-001, US-CONTRACT-002, US-CONTRACT-003, US-CONTRACT-004, US-CONTRACT-006, US-CREDIT-001, US-APPMODULE-001, US-APPMODULE-002 |
+| **Cloud Admin** | US-AUTH-010, US-ORG-007, US-ORG-008, US-CONTRACT-001, US-CONTRACT-002, US-CONTRACT-003, US-CONTRACT-004, US-CONTRACT-006, US-CREDIT-001, US-CREDIT-007, US-APPMODULE-001, US-APPMODULE-002 |
 | **Org Manager** | US-APIKEY-001, US-APIKEY-002, US-APIKEY-003, US-APIKEY-004, US-APIKEY-005, US-APIKEY-006, US-AUTH-009, US-PROFILE-001, US-ORG-002, US-ORG-003, US-ORG-005, US-ORG-006, US-CONTRACT-006, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-REPORTS-001, US-ALERTS-001, US-ALERTS-002, US-ALERTS-003, US-ALERTS-005, US-APPKEY-001~004, US-DEV-001, US-DEV-002, US-DEV-003 |
 | **Org Member** | US-APIKEY-007, US-AUTH-009, US-PROFILE-001, US-CREDIT-002, US-CREDIT-003, US-DASHBOARD-001~006, US-ALERTS-001（只讀）, US-APPKEY-001~004（list / usage only；write path manager-only）, US-DEV-001, US-DEV-002（list only）, US-DEV-003 |
 | **受邀者（未必已入 org）** | US-ORG-004 |
@@ -120,6 +121,7 @@
 | **API Key 生命週期** | US-APIKEY-001 → US-APIKEY-003 → US-APIKEY-004 → US-APIKEY-002 → US-APIKEY-005 |
 | **額度發放到扣款** | US-CONTRACT-001 → US-CONTRACT-002（啟用）→ US-CONTRACT-003（指派 org）→ US-APIKEY-001（Manager 分配 key quota）→ US-DASHBOARD-007（Bifrost Sync 拉 usage）→ US-CREDIT-004（系統扣款）→ US-DASHBOARD-001/002（成本可視化） |
 | **額度耗盡與恢復** | US-CREDIT-004 → US-CREDIT-005（凍結）→ US-CREDIT-001（Admin 加值）→ US-CREDIT-006（解凍）|
+| **同步中斷補救** | US-DASHBOARD-007（正常 sync）→ US-CREDIT-007（Admin ranged backfill）→ US-CREDIT-004（補扣收斂） |
 | **Contract 調整與硬擋** | US-CONTRACT-004（調 cap）→ US-APIKEY-001（影響 key 額度預檢）|
 | **Contract 到期** | US-CONTRACT-005（dispatch `ContractExpiring` / `ContractExpired`）→ US-ALERTS-004（下游通知 channel）|
 | **監控與報表** | US-DASHBOARD-007（sync 資料）→ US-DASHBOARD-001~006（儀表板視覺化）→ US-REPORTS-001（設排程）→ US-REPORTS-002（定期寄 PDF）|

@@ -52,6 +52,23 @@ export class CreditTransactionRepository implements ICreditTransactionRepository
       .map((r) => CreditTransaction.fromDatabase(r))
   }
 
+  async findReferenceIdsByAccountAndReferenceType(
+    accountId: string,
+    transactionType: string,
+    referenceType: string,
+  ): Promise<readonly string[]> {
+    const rows = await this.db
+      .table('credit_transactions')
+      .where('credit_account_id', '=', accountId)
+      .where('type', '=', transactionType)
+      .where('reference_type', '=', referenceType)
+      .select()
+
+    return rows
+      .map((row) => row.reference_id)
+      .filter((value): value is string => typeof value === 'string' && value.length > 0)
+  }
+
   withTransaction(tx: IDatabaseAccess): CreditTransactionRepository {
     return new CreditTransactionRepository(tx)
   }

@@ -19,6 +19,12 @@ export interface ICreditTransactionRepository {
     startDate?: Date,
     endDate?: Date,
   ): Promise<CreditTransaction[]>
+  /** Lists reference ids for a specific account/transaction/reference type tuple. */
+  findReferenceIdsByAccountAndReferenceType(
+    accountId: string,
+    transactionType: string,
+    referenceType: string,
+  ): Promise<readonly string[]>
   /** Returns a new repository instance scoped to a transaction. */
   withTransaction(tx: IDatabaseAccess): ICreditTransactionRepository
 }

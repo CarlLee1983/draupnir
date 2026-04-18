@@ -13,6 +13,18 @@ export interface SyncResult {
   readonly affectedOrgIds: readonly string[]
 }
 
+export interface BackfillSyncRequest {
+  readonly startTime: string
+  readonly endTime: string
+}
+
+interface SyncRunRequest {
+  readonly startTime: string
+  readonly endTime?: string
+  readonly advanceCursor: boolean
+  readonly previousCursorLogId?: string
+}
+
 export class BifrostSyncService {
   constructor(
     private readonly gatewayClient: ILLMGatewayClient,
@@ -23,6 +35,23 @@ export class BifrostSyncService {
   ) {}
 
   async sync(): Promise<SyncResult> {
+    const cursor = await this.cursorRepo.get('bifrost_logs')
+    return this.runWithTimeout(() => this.syncInternal({
+      startTime: cursor?.lastSyncedAt ?? new Date(0).toISOString(),
+      advanceCursor: true,
+      previousCursorLogId: cursor?.lastBifrostLogId ?? undefined,
+    }))
+  }
+
+  async backfill(request: BackfillSyncRequest): Promise<SyncResult> {
+    return this.runWithTimeout(() => this.syncInternal({
+      startTime: request.startTime,
+      endTime: request.endTime,
+      advanceCursor: false,
+    }))
+  }
+
+  private async runWithTimeout(task: () => Promise<SyncResult>): Promise<SyncResult> {
     const TIMEOUT_MS = 30_000
     let timeoutId: ReturnType<typeof setTimeout> | undefined
     const timeoutPromise = new Promise<never>((_, reject) => {
@@ -32,7 +61,7 @@ export class BifrostSyncService {
     })
 
     try {
-      return await Promise.race([this.syncInternal(), timeoutPromise])
+      return await Promise.race([task(), timeoutPromise])
     } catch (error: unknown) {
       if (!(error instanceof GatewayError && error.code === 'NETWORK')) {
         console.error('[BifrostSyncService] Sync failed:', error)
@@ -45,19 +74,23 @@ export class BifrostSyncService {
     }
   }
 
-  private async syncInternal(): Promise<SyncResult> {
-    const cursor = await this.cursorRepo.get('bifrost_logs')
-    const since = cursor?.lastSyncedAt ?? new Date(0).toISOString()
-    const logs = await this.gatewayClient.getUsageLogs([], { startTime: since, limit: 500 })
+  private async syncInternal(request: SyncRunRequest): Promise<SyncResult> {
+    const logs = await this.gatewayClient.getUsageLogs([], {
+      startTime: request.startTime,
+      ...(request.endTime ? { endTime: request.endTime } : {}),
+      limit: 500,
+    })
 
     let synced = 0
     let quarantined = 0
     let lastProcessedLogId: string | undefined
+    let lastProcessedTimestamp: string | undefined
     const affectedOrgIds = new Set<string>()
 
     for (const log of logs) {
       const bifrostLogId = log.logId ?? `${log.timestamp}:${log.keyId}`
       lastProcessedLogId = bifrostLogId
+      lastProcessedTimestamp = log.timestamp
 
       const apiKey = await this.apiKeyRepo.findByBifrostVirtualKeyId(log.keyId)
       if (!apiKey) {
@@ -85,14 +118,19 @@ export class BifrostSyncService {
       synced++
     }
 
-    await this.cursorRepo.advance('bifrost_logs', {
-      lastSyncedAt: new Date().toISOString(),
-      lastBifrostLogId: lastProcessedLogId ?? cursor?.lastBifrostLogId ?? undefined,
-    })
+    if (request.advanceCursor) {
+      await this.cursorRepo.advance('bifrost_logs', {
+        lastSyncedAt: new Date().toISOString(),
+        lastBifrostLogId: lastProcessedLogId ?? request.previousCursorLogId,
+      })
+    }
 
     if (synced > 0) {
       await DomainEventDispatcher.getInstance().dispatch(
-        new BifrostSyncCompletedEvent([...affectedOrgIds]),
+        new BifrostSyncCompletedEvent([...affectedOrgIds], {
+          startTime: request.startTime,
+          endTime: request.endTime ?? lastProcessedTimestamp,
+        }),
       )
     }
 

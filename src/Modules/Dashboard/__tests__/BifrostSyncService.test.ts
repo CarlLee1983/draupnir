@@ -10,6 +10,7 @@ import type { IUsageRepository } from '../Application/Ports/IUsageRepository'
 import { BifrostSyncService } from '../Infrastructure/Services/BifrostSyncService'
 
 const hashingService = new KeyHashingService()
+type SetTimeoutCallback = Parameters<typeof setTimeout>[0]
 
 function makeUsageRepo(db: MemoryDatabaseAccess): IUsageRepository {
   return {
@@ -294,14 +295,47 @@ describe('BifrostSyncService', () => {
     expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(cursorAfterFirst)
   })
 
+  it('supports backfill with explicit time range without advancing the incremental cursor', async () => {
+    await seedApiKey('key-1', 'bfr-vk-1')
+    gateway.seedUsageLogs([
+      {
+        logId: 'log-backfill-1',
+        timestamp: '2026-04-09T10:00:00Z',
+        keyId: 'bfr-vk-1',
+        model: 'gpt-4',
+        provider: 'openai',
+        inputTokens: 12,
+        outputTokens: 6,
+        totalTokens: 18,
+        latencyMs: 210,
+        cost: 0.05,
+        status: 'success',
+      },
+    ])
+
+    const result = await service.backfill({
+      startTime: '2026-04-09T00:00:00Z',
+      endTime: '2026-04-09T23:59:59Z',
+    })
+
+    expect(result).toEqual({ synced: 1, quarantined: 0, affectedOrgIds: ['org-1'] })
+    expect(gateway.calls.getUsageLogs[0]?.query).toEqual({
+      startTime: '2026-04-09T00:00:00Z',
+      endTime: '2026-04-09T23:59:59Z',
+      limit: 500,
+    })
+    expect(getCursorState()).toBeNull()
+  })
+
   it('returns { synced: 0, quarantined: 0 } when sync body exceeds 30 seconds', async () => {
-    let timeoutCb: any
+    let timeoutCb: (() => void) | undefined
     const originalSetTimeout = globalThis.setTimeout
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
     const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(
-      ((cb: any, ms?: number) => {
+      ((cb: SetTimeoutCallback, ms?: number) => {
         if (ms === 30000) {
-          timeoutCb = cb
-          return 123 as any
+          timeoutCb = typeof cb === 'function' ? cb : undefined
+          return 123 as unknown as ReturnType<typeof setTimeout>
         }
         return originalSetTimeout(cb, ms)
       }) as typeof setTimeout,
@@ -318,24 +352,26 @@ describe('BifrostSyncService', () => {
 
       // Give syncInternal a tiny bit to start
       await new Promise((r) => originalSetTimeout(r, 0))
-      
+
       if (timeoutCb) timeoutCb()
 
       const result = await syncPromise
       expect(result).toEqual({ synced: 0, quarantined: 0, affectedOrgIds: [] })
     } finally {
+      consoleSpy.mockRestore()
       setTimeoutSpy.mockRestore()
     }
   })
 
   it('does not advance cursor when sync times out', async () => {
-    let timeoutCb: any
+    let timeoutCb: (() => void) | undefined
     const originalSetTimeout = globalThis.setTimeout
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
     const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(
-      ((cb: any, ms?: number) => {
+      ((cb: SetTimeoutCallback, ms?: number) => {
         if (ms === 30000) {
-          timeoutCb = cb
-          return 123 as any
+          timeoutCb = typeof cb === 'function' ? cb : undefined
+          return 123 as unknown as ReturnType<typeof setTimeout>
         }
         return originalSetTimeout(cb, ms)
       }) as typeof setTimeout,
@@ -356,6 +392,7 @@ describe('BifrostSyncService', () => {
       await syncPromise
       expect(getCursorState()).toBeNull()
     } finally {
+      consoleSpy.mockRestore()
       setTimeoutSpy.mockRestore()
     }
   })
