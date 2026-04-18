@@ -13,6 +13,8 @@
 - ✅ Stage 1（完成）：Auth + Profile + Organization + Contract + Credit + Dashboard + Reports + Alerts
 - ✅ Stage 2（完成）：AppApiKey + AppModule + SdkApi + CliApi + DevPortal
 
+**已知缺口**：彙整於 [user-stories-backlog.md](./user-stories-backlog.md)（Priority A/B/C）。排 sprint 前建議先看。
+
 ---
 
 ## 1. 依模組查找（主表）

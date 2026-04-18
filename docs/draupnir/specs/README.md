@@ -8,6 +8,7 @@
 - [**Personas**](./personas.md) — 五類使用者 / 非人類 actor 的人物卡（Cloud Admin / Org Manager / Org Member / Bifrost Sync Job / SDK Client）
 - [**User Stories 索引**](./user-stories-index.md) — 三張表檢視（依模組 / 依 Actor / 依 Epic 旅程）
 - 各模組 Story 位於該分區 `user-stories.md`，例：[3-api-keys/user-stories.md](./3-api-keys/user-stories.md)、[7-developer-api/user-stories.md](./7-developer-api/user-stories.md)
+- [**User Stories 覆蓋缺口 Backlog**](./user-stories-backlog.md) — Priority A/B/C 的未解決項目，排 sprint 時參考
 
 ---
 
