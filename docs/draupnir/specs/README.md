@@ -2,6 +2,15 @@
 
 > 按功能領域組織的設計規格，對標實現模組進度
 
+## 🎭 User Stories
+
+**新人 onboarding 首先讀這個**：
+- [**Personas**](./personas.md) — 五類使用者 / 非人類 actor 的人物卡（Cloud Admin / Org Manager / Org Member / Bifrost Sync Job / SDK Client）
+- [**User Stories 索引**](./user-stories-index.md) — 三張表檢視（依模組 / 依 Actor / 依 Epic 旅程）
+- 各模組 Story 位於該分區 `user-stories.md`，例：[3-api-keys/user-stories.md](./3-api-keys/user-stories.md)、[7-developer-api/user-stories.md](./7-developer-api/user-stories.md)
+
+---
+
 ## 📋 目錄結構
 
 ### [0. 規劃與總覽](./0-planning/)
@@ -65,6 +74,13 @@
   - 測試覆蓋率驗證：81-85%（符合 80%+ 要求）
   - 新增 5 個架構圖表
 
+### [7. 開發者 API](./7-developer-api/)
+**面向外部開發者的 API 層（SDK / CLI / DevPortal）**
+
+- **[分區 README](./7-developer-api/README.md)** — SdkApi / CliApi / DevPortal 對照說明
+- **[User Stories](./7-developer-api/user-stories.md)** — 8 則 SDK Client / Developer 旅程
+- **相關模組**：SdkApi、CliApi、DevPortal
+
 ### 呈現層與程式庫結構（日期規格）
 
 **Inertia／Web 殼層目錄與框架接線** — 與領域規格分開存放，便於對照實作遷移。
@@ -88,12 +104,14 @@
 | 4. 信用與計費 | Credit, UsageSync | ✅ 完成 | [4-credit-billing](./4-credit-billing/) |
 | 5. 測試與驗證 | Testing Infrastructure | 🟡 部分 | [5-testing-validation](./5-testing-validation/) |
 | 6. 架構決策 | 系統全景 | ✅ 完成 | [6-architecture](./6-architecture/) |
+| 7. 開發者 API | SdkApi, CliApi, DevPortal | ✅ 完成 | [7-developer-api](./7-developer-api/) |
 
 ---
 
 ## 📌 快速導航
 
 ### 按功能查找
+- **新成員入門？** → 先讀 [personas.md](./personas.md) → [user-stories-index.md](./user-stories-index.md)
 - **快速開始？** → 見 [0-planning](./0-planning/)
 - **做認證相關的工作？** → 見 [1-authentication](./1-authentication/)
 - **管理用戶或組織？** → 見 [2-user-organization](./2-user-organization/)
@@ -101,6 +119,7 @@
 - **實現 API Key 功能？** → 見 [3-api-keys](./3-api-keys/)
 - **開發計費或額度系統？** → 見 [4-credit-billing](./4-credit-billing/)
 - **寫測試或驗證？** → 見 [5-testing-validation](./5-testing-validation/)
+- **接外部 SDK / CLI / 建 DevPortal？** → 見 [7-developer-api](./7-developer-api/)
 - **評估架構或做決策？** → 見 [6-architecture](./6-architecture/)
 
 ### 按文檔類型查找
