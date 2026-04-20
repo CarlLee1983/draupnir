@@ -39,13 +39,8 @@ export function registerMemberBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MEMBER_PAGE_KEYS
 
-  container.singleton(k.dashboard, (c) => {
-    return new MemberDashboardPage(
-      c.make(i) as InertiaService,
-      c.make('getBalanceService') as GetBalanceService,
-      c.make('getUserMembershipService') as GetUserMembershipService,
-      c.make('getPendingInvitationsService') as GetPendingInvitationsService,
-    )
+  container.singleton(k.dashboard, () => {
+    return new MemberDashboardPage()
   })
 
   container.singleton(

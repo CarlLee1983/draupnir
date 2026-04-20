@@ -1,5 +1,4 @@
 import { type AuthContext, AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import { getInertiaShared } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 
 /** Result of {@link requireAdmin}: either proceed with `auth` or return a ready `Response`. */

@@ -1,7 +1,6 @@
-import { describe, expect, mock, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import type { InertiaService } from '../../Http/Inertia/InertiaRequestHandler'
 import { MemberDashboardPage } from '../../Member/Pages/MemberDashboardPage'
 
 function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext {
@@ -57,157 +56,14 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
   })
 }
 
-type InertiaCapture = { component: string; props: Record<string, unknown> } | null
-
-function createMockInertia(): { inertia: InertiaService; captured: { lastCall: InertiaCapture } } {
-  const captured = { lastCall: null as InertiaCapture }
-  const inertia = {
-    render: (_ctx: IHttpContext, component: string, props: Record<string, unknown>) => {
-      captured.lastCall = { component, props }
-      return new Response(JSON.stringify({ component, props }), {
-        headers: { 'Content-Type': 'application/json' },
-      })
-    },
-  } as unknown as InertiaService
-  return { inertia, captured }
-}
-
 describe('MemberDashboardPage', () => {
-  test('authenticated member request renders correct Inertia component', async () => {
+  test('handle redirects to api-keys page', async () => {
     const ctx = createMemberContext()
-    const { inertia, captured } = createMockInertia()
-
-    const mockBalanceService = {
-      execute: mock(() => Promise.resolve({ success: true, data: { balance: 50 } })),
-    }
-    const mockMembershipService = {
-      execute: mock(() => Promise.resolve({ orgId: 'org-123' })),
-    }
-    const mockPendingInvitationsService = {
-      execute: mock(() => Promise.resolve([])),
-    }
-
-    const page = new MemberDashboardPage(
-      inertia,
-      mockBalanceService as any,
-      mockMembershipService as any,
-      mockPendingInvitationsService as any,
-    )
-    await page.handle(ctx)
-
-    expect(captured.lastCall).not.toBe(null)
-    expect(captured.lastCall?.component).toBe('Member/Dashboard/Index')
-    expect(captured.lastCall?.props.orgId).toBe('org-123')
-    expect(captured.lastCall?.props.hasOrganization).toBe(true)
-  })
-
-  test('without membership renders no-org dashboard props with empty pendingInvitations', async () => {
-    const ctx = createMemberContext()
-    const { inertia, captured } = createMockInertia()
-
-    const mockBalanceService = {
-      execute: mock(() => Promise.resolve({ success: true, data: null })),
-    }
-    const mockMembershipService = {
-      execute: mock(() => Promise.resolve(null)),
-    }
-    const mockPendingInvitationsService = {
-      execute: mock(() => Promise.resolve([])),
-    }
-
-    const page = new MemberDashboardPage(
-      inertia,
-      mockBalanceService as any,
-      mockMembershipService as any,
-      mockPendingInvitationsService as any,
-    )
-    await page.handle(ctx)
-
-    expect(captured.lastCall?.props.hasOrganization).toBe(false)
-    expect(captured.lastCall?.props.pendingInvitations).toEqual([])
-  })
-
-  test('without membership passes pending invitations to Inertia props', async () => {
-    const ctx = createMemberContext()
-    const { inertia, captured } = createMockInertia()
-
-    const mockInvitation = {
-      id: 'inv-1',
-      organizationId: 'org-1',
-      organizationName: 'Test Org',
-      role: 'member',
-      expiresAt: '2026-05-01T00:00:00.000Z',
-    }
-
-    const mockBalanceService = {
-      execute: mock(() => Promise.resolve({ success: true, data: null })),
-    }
-    const mockMembershipService = {
-      execute: mock(() => Promise.resolve(null)),
-    }
-    const mockPendingInvitationsService = {
-      execute: mock(() => Promise.resolve([mockInvitation])),
-    }
-
-    const page = new MemberDashboardPage(
-      inertia,
-      mockBalanceService as any,
-      mockMembershipService as any,
-      mockPendingInvitationsService as any,
-    )
-    await page.handle(ctx)
-
-    expect(captured.lastCall?.props.pendingInvitations).toEqual([mockInvitation])
-  })
-
-  test('pending invitations service failure returns empty array (graceful degradation)', async () => {
-    const ctx = createMemberContext()
-    const { inertia, captured } = createMockInertia()
-
-    const mockBalanceService = {
-      execute: mock(() => Promise.resolve({ success: true, data: null })),
-    }
-    const mockMembershipService = {
-      execute: mock(() => Promise.resolve(null)),
-    }
-    const mockPendingInvitationsService = {
-      execute: mock(() => Promise.reject(new Error('DB error'))),
-    }
-
-    const page = new MemberDashboardPage(
-      inertia,
-      mockBalanceService as any,
-      mockMembershipService as any,
-      mockPendingInvitationsService as any,
-    )
-    await page.handle(ctx)
-
-    expect(captured.lastCall?.props.pendingInvitations).toEqual([])
-    expect(captured.lastCall?.props.hasOrganization).toBe(false)
-  })
-
-  test('service failure passes error message to Inertia', async () => {
-    const ctx = createMemberContext()
-    const { inertia, captured } = createMockInertia()
-
-    const mockBalanceService = {
-      execute: mock(() => Promise.resolve({ success: false, message: '組織不存在' })),
-    }
-    const mockMembershipService = {
-      execute: mock(() => Promise.resolve({ orgId: 'org-123' })),
-    }
-    const mockPendingInvitationsService = {
-      execute: mock(() => Promise.resolve([])),
-    }
-
-    const page = new MemberDashboardPage(
-      inertia,
-      mockBalanceService as any,
-      mockMembershipService as any,
-      mockPendingInvitationsService as any,
-    )
-    await page.handle(ctx)
-
-    expect(captured.lastCall?.props.error).toEqual({ key: 'member.dashboard.loadFailed' })
+    const page = new MemberDashboardPage()
+    
+    const response = await page.handle(ctx)
+    
+    expect(response.status).toBe(302)
+    expect(response.headers.get('Location')).toBe('/member/api-keys')
   })
 })

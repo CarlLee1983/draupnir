@@ -48,28 +48,10 @@ describe('MemberDashboardPage i18n', () => {
       setCookie: (_name: string, _value: string, _options?: unknown) => {},
     }
 
-    // Mock inertia render 來擷取 props
-    let capturedProps: Record<string, unknown> = {}
-    const mockInertia = {
-      render: (_ctx: IHttpContext, _component: string, props: Record<string, unknown>) => {
-        capturedProps = props
-        return new Response(JSON.stringify({ props }), {
-          headers: { 'Content-Type': 'application/json' },
-        })
-      },
-    } as any
+    const page = new MemberDashboardPage()
+    const response = await page.handle(ctx)
 
-    const mockMembershipService = {
-      execute: async () => null,
-    }
-
-    const mockPendingInvitationsService = {
-      execute: async () => [],
-    }
-    const page = new MemberDashboardPage(mockInertia, {} as any, mockMembershipService as any, mockPendingInvitationsService as any)
-    await page.handle(ctx)
-
-    expect(capturedProps.hasOrganization).toBe(false)
-    expect(capturedProps.error).toBe(null)
+    expect(response.status).toBe(302)
+    expect(response.headers.get('Location')).toBe('/member/api-keys')
   })
 })
