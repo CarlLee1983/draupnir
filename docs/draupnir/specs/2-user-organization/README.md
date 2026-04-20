@@ -4,35 +4,37 @@
 
 ## 📄 規格文檔
 
-### [Phase 2: Identity — User & Organization 詳細設計](../1-authentication/identity-design.md)
+### [Phase 2: Identity — Profile & Organization 詳細設計](../1-authentication/identity-design.md)
 
-本區域的設計規格位在認證區域的 Phase 2 文檔中。以下為快速索引：
+完整欄位、路由表、Schema 與實作對照以 [identity-design.md](../1-authentication/identity-design.md)（**最後審閱 2026-04-20**）為準。以下為快速索引：
 
-#### 2.2 User 模組 — [詳細設計](../1-authentication/identity-design.md#22-user-模組)
+#### 2.2 Profile 模組 — [詳細設計](../1-authentication/identity-design.md#22-profile-模組規格原user-模組)
 
-**職責**：用戶個人資料與帳戶設定
-
-| 項目 | 內容 |
-|------|------|
-| **Domain** | UserProfile Aggregate，包含 displayName、avatar、phone、bio、timezone、locale、notificationPreferences |
-| **Repository** | IUserProfileRepository，支持 CRUD、列表、分頁 |
-| **Services** | GetUserProfileService、UpdateUserProfileService、ListUsersService、ChangeUserStatusService |
-| **API** | `GET /api/users/me`、`PUT /api/users/me`、`GET /api/users`、`PUT /api/users/{id}/status` |
-
-#### 2.3 Organization 模組 — [詳細設計](../1-authentication/identity-design.md#23-organization-模組多租戶)
-
-**職責**：多租戶組織、成員管理、邀請與角色指派
+**職責**：用戶個人資料與（管理員）帳戶管理
 
 | 項目 | 內容 |
 |------|------|
-| **Domain** | Organization Aggregate、OrgMember Entity、OrgInvitation Entity、角色定義（OWNER/ADMIN/MEMBER） |
-| **Repository** | IOrganizationRepository、IOrgMemberRepository、IOrgInvitationRepository |
-| **Services** | CreateOrgService、ListMembersService、InviteMemberService、UpdateMemberRoleService、RemoveMemberService |
-| **API** | `POST /api/orgs`、`GET /api/orgs`、`GET /api/orgs/{id}/members`、`POST /api/orgs/{id}/invites` |
+| **程式位置** | `src/Modules/Profile/` |
+| **Domain** | `UserProfile` Aggregate；`Phone`／`Timezone`／`Locale` 等 VO |
+| **Repository** | `IUserProfileRepository` |
+| **Services** | `GetProfileService`、`UpdateProfileService`；`ListUsersService`、`ChangeUserStatusService` 實作於 **Auth**，由 **`ProfileController`** 暴露 |
+| **API** | `GET/PUT /api/users/me`、`GET /api/users`、`GET /api/users/:id`、`PATCH /api/users/:id/status`（`profile.routes.ts`） |
+
+#### 2.3 Organization 模組 — [詳細設計](../1-authentication/identity-design.md#23-organization-模組)
+
+**職責**：多租戶組織、成員管理、邀請與組織內角色；API 前綴為 **`/api/organizations`**（非 `/api/orgs`）
+
+| 項目 | 內容 |
+|------|------|
+| **Domain** | `Organization` Aggregate；**`OrganizationMember`**、**`OrganizationInvitation`** Entity；組織內角色 **`OrgMemberRole`：`manager`／`member`**（兩級；**無** OWNER／ADMIN／MEMBER 命名） |
+| **Repository** | `IOrganizationRepository`、`IOrganizationMemberRepository`、`IOrganizationInvitationRepository` |
+| **Services** | `CreateOrganizationService`、`ListMembersService`、`InviteMemberService`、`RemoveMemberService`、`ChangeOrgMemberRoleService` 等（見模組目錄） |
+| **租戶上下文** | 客戶端帶 **`X-Organization-Id`**；`requireOrganizationContext()` |
+| **API（摘）** | `POST/GET /api/organizations`、`GET/PUT/PATCH …/organizations/:id`、`GET …/members`、`POST/GET …/invitations`、`PATCH …/members/:userId/role`、`POST /api/invitations/...`（`organization.routes.ts`） |
 
 #### 組織合約與 API Key 配額 — [合約額度與配發規格](../2026-04-16-contract-quota-allocation-spec.md)
 
-**職責摘要**：組織合約上限（可配發至各 API Key 之總池）、未分配池、Admin 調降（先吸收未分配再比例縮減已配發）、Manager 依 `slack` 重配、硬擋與通知。各 Key 用量重置週期（7d／30d 等）與 Credit／計費模組之銜接見該規格 §2.5、關聯 [3-api-keys](../3-api-keys/README.md)。
+**職責摘要**：組織合約上限（可配發至各 API Key 之總池）、未分配池、Admin 調降、Manager 重配、硬擋與通知。與 Credit／計費、API Key 模組之銜接見該規格及 [3-api-keys](../3-api-keys/README.md)。
 
 ---
 
@@ -40,21 +42,20 @@
 
 ### ✅ 已完成的功能
 
-**User Profile**
-- ✅ Get 自己的 Profile
-- ✅ Update Profile（部分更新）
-- ✅ Admin List 用戶（分頁 + 篩選）
-- ✅ 啟用/停用帳戶
+**Profile**
+- ✅ Get 自己的 Profile（`GET /api/users/me`）
+- ✅ Update Profile（`PUT /api/users/me`，部分更新）
+- ✅ Admin List 用戶（分頁 + 篩選）、`GET /api/users/:id`
+- ✅ 啟用/停用帳戶（`PATCH /api/users/:id/status`）
 - ✅ 完整個人資訊（displayName, avatar, phone, bio, timezone, locale）
 - ✅ 通知偏好設定（JSON 儲存）
 
 **Organization**
-- ✅ 組織 CRUD
-- ✅ 組織切換機制
-- ✅ 成員邀請（邀請連結 + Token）
-- ✅ 成員角色指派（OWNER/ADMIN/MEMBER）
-- ✅ 成員移除
-- ✅ 組織成員列表（分頁 + 篩選）
+- ✅ 組織建立／列表／取得／更新／狀態（`/api/organizations`…）
+- ✅ 租戶上下文（`X-Organization-Id`）與前端組織切換
+- ✅ 成員邀請（邀請 Token／accept-by-id／decline）
+- ✅ 成員角色 **`manager`／`member`**（`ChangeOrgMemberRoleService`）
+- ✅ 成員移除、成員與邀請列表
 
 ### 📊 核心資料模型
 
@@ -73,28 +74,28 @@ UserProfile Aggregate
 └── updatedAt (timestamp)
 ```
 
-#### Organization
+#### Organization（Aggregate 不含內嵌成員陣列；成員／邀請為獨立 Entity／表）
 ```
 Organization Aggregate
 ├── id (UUID)
 ├── name (string)
-├── slug (OrgSlug VO - auto-generated)
+├── slug (OrgSlug VO，可由名稱生成)
 ├── description (string)
-├── members (OrgMember[] Entity)
-│   ├── id (UUID)
-│   ├── userId (UUID)
-│   ├── role (OrgRole VO - OWNER/ADMIN/MEMBER)
-│   ├── status (MemberStatus VO - PENDING/ACTIVE)
-│   └── joinedAt (timestamp)
-├── invitations (OrgInvitation[] Entity)
-│   ├── id (UUID)
-│   ├── email (string)
-│   ├── token (string, 邀請連結用)
-│   ├── status (PENDING/ACCEPTED/REVOKED)
-│   ├── expiresAt (timestamp)
-│   └── createdAt (timestamp)
+├── status (active | suspended)
+├── gatewayTeamId (string | null，Bifrost Team 連結)
 ├── createdAt (timestamp)
 └── updatedAt (timestamp)
+
+OrganizationMember Entity（持久化於獨立表）
+├── id, organizationId, userId
+├── role (OrgMemberRole: manager | member)
+└── …
+
+OrganizationInvitation Entity
+├── id, organizationId, token, email（等）
+├── role（邀請生效後的組織內角色）
+├── status／expiresAt 等
+└── …
 ```
 
 ---
@@ -115,27 +116,28 @@ src/Modules/
 │   │   ├── ValueObjects/Phone, Timezone, Locale
 │   │   └── Repositories/IUserProfileRepository
 │   ├── Application/
-│   │   └── Services/GetUserProfileService, UpdateUserProfileService, etc.
+│   │   └── Services/GetProfileService, UpdateProfileService, …
 │   ├── Infrastructure/
 │   │   └── Repositories/UserProfileRepository
 │   ├── Presentation/
-│   │   ├── Controllers/UserProfileController
-│   │   └── Routes/profileRoutes
+│   │   ├── Controllers/ProfileController
+│   │   └── Routes/profile.routes.ts
 │   └── __tests__/
 │
 ├── Organization/
 │   ├── Domain/
 │   │   ├── Aggregates/Organization
-│   │   ├── Entities/OrgMember, OrgInvitation
-│   │   ├── ValueObjects/OrgSlug, OrgRole, MemberStatus
-│   │   └── Repositories/IOrganizationRepository, IOrgMemberRepository, IOrgInvitationRepository
+│   │   ├── Entities/OrganizationMember, OrganizationInvitation
+│   │   ├── ValueObjects/OrgSlug, OrgMemberRole
+│   │   └── Repositories/IOrganizationRepository, IOrganizationMemberRepository, …
 │   ├── Application/
-│   │   └── Services/CreateOrgService, ListMembersService, InviteMemberService, etc.
+│   │   └── Services/CreateOrganizationService, ListMembersService, InviteMemberService, …
 │   ├── Infrastructure/
 │   │   └── Repositories/*Repository
 │   ├── Presentation/
 │   │   ├── Controllers/OrganizationController
-│   │   └── Routes/organizationRoutes
+│   │   ├── Middleware/OrganizationMiddleware（X-Organization-Id）
+│   │   └── Routes/organization.routes.ts
 │   └── __tests__/
 ```
 
@@ -143,51 +145,42 @@ src/Modules/
 
 ## 🧪 驗收標準
 
-### User Profile 模組
+### Profile 模組
 - [ ] 用戶可查看自己的 Profile ✅
 - [ ] 用戶可更新自己的 Profile ✅
-- [ ] Admin 可列表所有用戶（分頁+篩選） ✅
-- [ ] Admin 可啟用/停用帳戶 ✅
+- [ ] Admin 可列表所有用戶（分頁+篩選）、依 id 取得用戶 ✅
+- [ ] Admin 可啟用/停用帳戶（`PATCH …/status`） ✅
 - [ ] 完整個人資訊欄位支援 ✅
-- [ ] 測試覆蓋率 ≥80% ✅
+- [ ] 單元測試覆蓋率門檻：`bunfig.toml` `coverageThreshold = 0.8`，CI job `unit-coverage` ✅
 
 ### Organization 模組
-- [ ] Admin 可建立組織 ✅
-- [ ] 成員可查看所屬組織列表 ✅
-- [ ] 可邀請新成員（邀請連結方式） ✅
-- [ ] 已註冊用戶點擊邀請連結自動加入 ✅
-- [ ] 可指派成員角色（OWNER/ADMIN/MEMBER） ✅
+- [ ] 可建立組織（創建者為 `manager`） ✅
+- [ ] 可列出／取得組織（含租戶上下文） ✅
+- [ ] 可邀請成員、接受／拒絕邀請 ✅
+- [ ] 可變更成員組織內角色（`manager`／`member`） ✅
 - [ ] 可移除成員 ✅
-- [ ] Organization 成員列表分頁 ✅
-- [ ] 測試覆蓋率 ≥80% ✅
+- [ ] 成員與邀請列表 ✅
+- [ ] 單元測試覆蓋率門檻同上 ✅
 
 ---
 
 ## 📌 設計決策記錄
 
-### 用戶 ↔ 組織 關係：一對一
-**決策**：在 v1 中採用一對一簡化模型
-- 每個用戶對應一個默認組織
-- 用戶可建立或加入多個組織，但有默認組織概念
-- 便於初期實現，後期可升級為真正的多對多
+### 用戶 ↔ 組織：多對多
+**決策**：用戶可屬於多個組織；請求需帶 **`X-Organization-Id`** 以解析租戶上下文（見 `identity-design.md`、Organization 中介層）。
 
-### 邀請機制：邀請連結 + Token
-**決策**：採用邀請連結方式
-- 已註冊用戶點擊邀請連結自動加入
-- 未註冊用戶走註冊流程後自動加入
-- 彈性最大，支援多種邀請場景
+### 邀請機制：Token + API
+**決策**：邀請以 `OrganizationInvitation` + token／id 驅動；接受／拒絕走專用 API（見 `organization.routes.ts`）。
 
-### 組織 Slug：自動生成
-**決策**：Organization slug 自動生成
-- 基於組織名稱 + UUID 後綴確保唯一性
-- 便於 URL 美化（`/orgs/company-name`）
-- 不允許用戶自定義（避免重複與衝突）
+### 組織 Slug
+**決策**：`OrgSlug` 可由組織名稱生成並保證唯一；詳見模組與 identity 文檔。
 
-### 成員角色：三層級
-**決策**：OWNER / ADMIN / MEMBER
-- **OWNER**：組織創始人，無法更改角色
-- **ADMIN**：管理成員、檢視用量、管理 Key
-- **MEMBER**：管理自己的 Key
+### 組織內成員角色：兩層級
+**決策**：**`manager`／`member`**（`OrgMemberRole`）
+- **manager**：組織管理（含邀請、成員角色變更等，依路由與規則）
+- **member**：一般成員
+
+**平台級角色**（`admin` 等）屬 **Auth／全域**，與組織內 `manager`／`member` 分層（見 identity-design）。
 
 ---
 
@@ -206,5 +199,5 @@ src/Modules/
 ---
 
 **狀態**：✅ Phase 2 完成  
-**最後更新**：2026-04-10  
-**實現覆蓋率**：100% 功能完成，81-85% 測試覆蓋
+**最後更新**：2026-04-20  
+**驗證**：功能與路由以 `profile.routes.ts`、`organization.routes.ts` 及 `identity-design.md` 為準；覆蓋率門檻見根目錄 `bunfig.toml` 與 CI `unit-coverage`
