@@ -41,7 +41,7 @@ export class ProvisionOrganizationDefaultsService {
       if (!org) return
       if (org.gatewayTeamId) return
       try {
-        const team = await this.gatewayClient.ensureTeam({ name: orgId })
+        const team = await this.gatewayClient.ensureTeam({ name: org.slug })
         await orgRepo.update(org.attachGatewayTeam(team.id))
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
