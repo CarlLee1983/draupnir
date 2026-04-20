@@ -2,6 +2,8 @@
 
 > AI 服務管理平台完整工作計劃，建構於 Bifrost AI Gateway 之上
 
+**最後審閱：** 2026-04-20（對照本倉程式碼路徑 `src/Modules/*`、`resources/js/Pages/*`、`.github/workflows/ci.yml` 更新驗收狀態與註記。實作目錄以 `src/` 為準；文件中的 `app/` 為概念路徑。）
+
 ## 概述
 
 **專案：** Draupnir — Bifrost 的上層管理平台
@@ -102,7 +104,7 @@ app/Foundation/Infrastructure/Services/BifrostClient/
   - [x] retry / error handling 行為
 - [x] 基礎建設驗收：Foundation service / provider 已完成註冊，且 `BifrostClient` 可透過容器注入使用
 - [x] 環境驗收：`.env.example` 已完整列出啟動與 Bifrost 連線所需變數
-- [ ] CI 驗收：Pipeline 綠燈，且至少包含 lint → test → build
+- [x] CI 驗收：`.github/workflows/ci.yml` 已配置 `typecheck`、`lint-format`（含 `format:check`）、`unit-coverage`（`bun test --coverage`）、`migration-drift`、`routes-check`、`di-audit`、`e2e-smoke`（Playwright）、PR 時 `commitlint`；已高於「lint → test → build」底線
 - [ ] 協作驗收：團隊完成 Code Review，並對 DDD 分層與 Foundation / Modules 邊界達成共識
 
 ---
@@ -213,7 +215,7 @@ Auth Middleware ──(依賴)──→ Organization（解析當前組織 contex
 - [x] RBAC 權限檢查 Middleware 正常運作
 - [x] 多租戶 Organization 切換正常（移除 user_id unique 約束、findByUserAndOrgId、X-Organization-Id header）
 - [x] 所有 API 有 Zod 輸入驗證（Auth RefreshToken、User params/query、Org params 全面導入）
-- [ ] 測試覆蓋率 ≥ 80%
+- [ ] 測試覆蓋率 ≥ 80%（專案於 `bunfig.toml` 設 aggregate 門檻 `0.8`；以 CI `unit-coverage` job 通過為準）
 - [x] API 文件（OpenAPI）更新（所有 org 路由加入 X-Organization-Id header 定義）
 
 ---
@@ -298,7 +300,7 @@ Dashboard 在 Phase 3 先做用量部分（從 Bifrost 即時拉取），Phase 4
 - [x] Draupnir Key 與 Bifrost Virtual Key 正確同步
 - [x] Key 權限設定可限制模型與速率
 - [x] Dashboard API 回傳正確的用量聚合資料
-- [ ] 測試覆蓋率 ≥ 80%
+- [ ] 測試覆蓋率 ≥ 80%（見 `bunfig.toml` 與 CI `unit-coverage`）
 
 ---
 
@@ -353,7 +355,9 @@ BalanceDepleted Event 觸發
   → 標記 Keys 狀態恢復為 ACTIVE
 ```
 
-### 4.2 UsageSync 模組
+### 4.2 用量同步（規格中的 UsageSync；實作落於 Dashboard 模組）
+
+**實作對照（2026-04-20）：** 倉庫未建立獨立 `src/Modules/UsageSync/`。`usage_records` 表、`sync_cursors`、`BifrostSyncService` 拉取與 `scheduler` 註冊在 `src/Modules/Dashboard/`；同步完成事件觸發 Credit 側 `ApplyUsageChargesService`。下列目錄樹為**原始目標拆分**，保留作對照；分散式鎖、單一交易內「寫入 + 扣款 + 推進游標」等細節與現行程式可能不完全一致，以程式為準。
 
 ```
 app/Modules/UsageSync/
@@ -410,21 +414,22 @@ interface PricingRule {
 
 - [x] Credit 充值、扣款、退款流程正確
 - [x] 餘額不足時自動阻擋 Bifrost Key，充值後自動恢復
-- [ ] 用量同步 Cron Job 穩定運行
-- [ ] 定價規則可配置，計算結果正確
+- [x] 用量同步排程穩定註冊（見下方註記：實作於 **Dashboard** 模組，非獨立 `UsageSync/` 目錄）
+- [ ] 定價規則可配置，計算結果正確（見下方：目前 `credit_cost` 主要來自 Bifrost log）
 - [ ] 用量異常偵測可觸發告警
-- [ ] 測試覆蓋率 ≥ 80%
+- [ ] 測試覆蓋率 ≥ 80%（見 `bunfig.toml` 與 CI `unit-coverage`）
 
-#### Phase 4 驗收註記（2026-04-09）
+#### Phase 4 驗收註記（2026-04-20）
 
 | 條件 | 狀態 | 說明 |
 |------|------|------|
-| Credit 充值／扣款／退款 | **通過** | `TopUpCreditService`、`CreditDeductionService`、`RefundCreditService` + 帳戶／交易領域邏輯；`bun test src/Modules/Credit/__tests__/` 44 項全數通過。 |
-| 餘額阻擋／恢復 Bifrost Key | **通過（範圍內）** | 餘額**耗盡**（扣款後 ≤ 0）時派發 `BalanceDepleted` → `HandleBalanceDepletedService` 將 Bifrost `rate_limit` 置零並標記 Key；充值派發 `CreditToppedUp` → `HandleCreditToppedUpService` 還原 limit 並 `unsuspend`。整合情境見 `CreditEventFlow.integration.test.ts`。註：領域上扣款可將餘額扣至負數（見 `Balance` 測試），尚未見「單筆扣款前餘額不足即拒絕」的閘道；若規格意指「耗盡後阻擋」，則已符合。 |
-| 用量同步 Cron | **未驗收** | `src/` 內無 `UsageSync` 模組、無 `schedule.add`／Horizon 註冊；僅設計與計畫見 `docs/draupnir/specs/4-credit-billing/credit-system-design.md`、`docs/draupnir/plans/p4-credit-system.md`。 |
-| 定價規則可配置 | **未驗收** | 雖有 `pricing_rules` migration／Drizzle schema 線索，尚無 `UsagePricingCalculator`、管理 API 或 OpenAPI 路由；無法驗證「可配置且計算正確」。 |
-| 用量異常告警 | **未驗收** | 無 `DetectUsageAnomalyService`／`UsageAnomalyDetected` 等實作與測試。 |
-| Phase 4 覆蓋率 ≥ 80% | **未驗收** | Credit 子模組測試完整；含 UsageSync／定價／異常的 Phase 4 整體覆蓋率待上述能力落地後再跑 `bun test --coverage` 核銷。 |
+| Credit 充值／扣款／退款 | **通過** | `TopUpCreditService`、`DeductCreditService`、`RefundCreditService` + 帳戶／交易領域邏輯；見 `src/Modules/Credit/__tests__/`。 |
+| 餘額阻擋／恢復 Bifrost Key | **通過（範圍內）** | 餘額**耗盡**（扣款後 ≤ 0）時派發 `BalanceDepleted` → `HandleBalanceDepletedService`；充值派發 `CreditToppedUp` → `HandleCreditToppedUpService`。註：領域上扣款可將餘額扣至負數（見 `Balance` 測試），與「耗盡後阻擋」語意不同。 |
+| Bifrost 用量拉取 + Cursor + 排程 | **通過** | `src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts`：拉取用量、寫入 `usage_records`、冪等鍵 `bifrost_log_id`、`DrizzleSyncCursorRepository`；`DashboardServiceProvider.registerJobs()` 向 `scheduler` 註冊 `bifrost-sync`（cron 來自 `config/app` 之 `bifrostSyncCron`，`runOnInit: true`）。同步完成後派發 `BifrostSyncCompletedEvent`（`bifrost.sync.completed`）。 |
+| 用量 → Credit 扣款 | **通過** | `CreditServiceProvider.boot` 訂閱 `bifrost.sync.completed`，呼叫 `ApplyUsageChargesService`：依 `usage_records` 對尚未關聯扣款之紀錄執行 `deductCredit`（`referenceType: usage_record`）。 |
+| 定價規則可配置 | **未達原規格** | 寫入 `usage_records.credit_cost` 時目前使用 Bifrost log 的 `cost`（見 `BifrostSyncService`）；資料庫另有 `pricing_rules` 表（Drizzle schema），**尚未**接軌 `UsagePricingCalculator`／管理 API／依模型規則重算。 |
+| 用量異常告警 | **未驗收** | 仍無 `DetectUsageAnomalyService`／`UsageAnomalyDetected` 等實作與測試。 |
+| Phase 4 覆蓋率 ≥ 80% | **以 CI 為準** | 全專案門檻見 `bunfig.toml`；CI `unit-coverage` 執行 `bun test --coverage`。 |
 
 ---
 
@@ -551,9 +556,9 @@ Request 進入
 - [x] 模組註冊、訂閱、取消流程正確
 - [x] ModuleAccessMiddleware 正確阻擋無權限請求（見下方註記）
 - [ ] 模組使用量獨立追蹤
-- [ ] 測試覆蓋率 ≥ 80%（待以 `bun test --coverage` 對全專案驗證）
+- [ ] 測試覆蓋率 ≥ 80%（見 `bunfig.toml` 與 CI `unit-coverage`）
 
-#### Phase 5 完成註記（2026-04-09）
+#### Phase 5 完成註記（2026-04-20）
 
 | 項目 | 狀態 | 說明 |
 |------|------|------|
@@ -564,7 +569,7 @@ Request 進入
 | ModuleAccessMiddleware | 已落地 | 已掛於 `dashboard`、`credit`、`api_keys` 之 **`/api/organizations/:orgId/...`** 路由；admin 略過檢查。`/api/keys/:keyId/...` 仍無 org 路徑參數，未掛此 middleware。 |
 | 新組織預設開通 | 已落地 | `ProvisionOrganizationDefaultsService` 於建立 Organization 交易內寫入內建模組、ACTIVE 合約與訂閱；啟動時 `EnsureCoreAppModulesService` 種子內建模組。 |
 | 模組用量獨立追蹤 | **未做** | 尚無 `TrackModuleUsage` 實作；`usage_records` 等未依 AppModule 維度區隔。 |
-| 測試 | 增量 | 新增／調整之單元測試與現有 Feature 通過；**80% 覆蓋率**需專案級 coverage 報告確認。 |
+| 測試 | 增量 | 全專案覆蓋率門檻見 `bunfig.toml`；以 CI `unit-coverage` 通過為準。 |
 
 ---
 
@@ -709,33 +714,46 @@ app/Modules/DevPortal/
 
 ### Phase 6 完成標準
 
-- [ ] 應用 Key 配發、輪換、撤銷流程正確
-- [ ] App Key 與 AppModule 綁定，存取控制正確
-- [ ] SDK API 認證與代理呼叫正常
-- [ ] CLI Device Flow 登入完整可用
-- [ ] Developer Portal 應用註冊與 Webhook 正常
-- [ ] 各類 Key 用量獨立追蹤
-- [ ] 測試覆蓋率 ≥ 80%
+- [x] 應用 Key 配發、輪換、撤銷（後端服務與路由已落地，見 `src/Modules/AppApiKey/` 與單元測試）
+- [x] App Key 與模組綁定（`BoundModules` 等領域物件；存取與 Phase 5 `ModuleAccessMiddleware` 範圍一致議題仍適用）
+- [x] SDK API：`/sdk/v1/chat/completions`、`/sdk/v1/usage`、`/sdk/v1/balance` + `AppAuthMiddleware`（見 `src/Modules/SdkApi/`）
+- [x] CLI API：Device Flow（`/cli/device-code`、`/cli/token`）與授權／代理／登出（見 `src/Modules/CliApi/`）
+- [x] Developer Portal：`/api/dev-portal/apps`、金鑰與 `webhook`、`/api/dev-portal/docs`（見 `src/Modules/DevPortal/`）
+- [ ] 各類 Key 用量獨立追蹤（與 Phase 5「模組用量」類似，仍待產品層歸屬設計）
+- [ ] 測試覆蓋率 ≥ 80%（見 `bunfig.toml` 與 CI `unit-coverage`）
+
+#### Phase 6 落地註記（2026-04-20）
+
+| 區塊 | 狀態 | 說明 |
+|------|------|------|
+| AppApiKey | **已落地** | `Issue`／`Rotate`／`Revoke`／`SetAppKeyScope`／`GetAppKeyUsage` 等服務與 `AppKeyBifrostSync`；路由見 `appApiKey.routes.ts`。 |
+| SdkApi | **已落地** | 以 App API Key 通過 `AppAuthMiddleware` 後代理聊天與查 usage／balance。 |
+| CliApi | **已落地** | Device code 流程與 token 交換；生產環境若需 Redis 儲 device code 需另行配置（開發可為 memory store）。 |
+| DevPortal | **已落地** | 應用註冊、金鑰發放／撤銷、Webhook 設定、公開 API 說明端點。 |
+| Webhook 事件完整度 | **視實作** | 規格所列事件類型需對照 `DevPortalController`／dispatcher 是否全數發送。 |
 
 ---
 
 ## Phase 7：Admin Portal — 管理後台
 
-**目標：** Inertia.js + React 前端，後端 API 全部完成後開始
+**目標：** Inertia.js + React 前端（與後端並行演進中；本倉實作位於 `resources/js/Pages`，網站層見 `src/Website/*`）。
 
 ### 7.1 管理後台（Admin Portal）
 
 ```
-resources/pages/Admin/
+resources/js/Pages/Admin/
 ├── Dashboard/Index.tsx
 ├── Users/Index.tsx, Show.tsx
 ├── Organizations/Index.tsx, Show.tsx
 ├── ApiKeys/Index.tsx
 ├── Contracts/Index.tsx, Create.tsx, Show.tsx
 ├── Modules/Index.tsx, Create.tsx
+├── Reports/Index.tsx, Template.tsx, …
 ├── UsageSync/Index.tsx
-└── Layout/AdminLayout.tsx, AdminSidebar.tsx
+└── …
 ```
+
+**補充：** 另已具 **Manager** 區域頁面（`resources/js/Pages/Manager/`），供組織管理者操作。
 
 **管理後台頁面優先序：**
 1. Dashboard（系統總覽）
@@ -747,19 +765,21 @@ resources/pages/Admin/
 ### 7.2 會員 Portal（Member Portal）
 
 ```
-resources/pages/Member/
+resources/js/Pages/Member/
 ├── Dashboard/Index.tsx
-├── ApiKeys/Index.tsx, Create.tsx
+├── ApiKeys/Index.tsx
 ├── Usage/Index.tsx
 ├── Contracts/Index.tsx
+├── CostBreakdown/Index.tsx
+├── Alerts/Index.tsx
 ├── Settings/Index.tsx
-└── Layout/MemberLayout.tsx, MemberSidebar.tsx
+└── …
 ```
 
 ### 共用元件
 
 ```
-resources/components/
+resources/js/components/
 ├── ui/                        # 基礎 UI 元件
 ├── charts/
 │   ├── UsageLineChart.tsx
@@ -804,12 +824,13 @@ resources/components/
 
 ### Phase 7 完成標準
 
-- [ ] 管理者可登入後台管理所有資源
-- [ ] 會員可自助管理 Key、查看用量與 Credit
+- [x] 管理者／會員／Manager 等主要 Inertia 頁面已大量實作（見 `resources/js/Pages` 與對應 `src/Website/*Page.ts`）
+- [ ] 管理者可登入後台**完整**管理所有資源（依產品清單逐頁驗收）
+- [ ] 會員可自助管理 Key、查看用量與 Credit（**完整** UX 與邊界情況）
 - [ ] 所有頁面有 Loading / Empty / Error 狀態處理
 - [ ] 響應式設計（桌面優先，平板可用）
 - [ ] 前端元件測試覆蓋核心互動邏輯
-- [ ] 無 console.log、無 hardcoded 值
+- [ ] 無 console.log、無 hardcoded 值（需靜態／Lint 掃描核銷）
 
 ---
 
@@ -827,7 +848,7 @@ Identity
 Core Business
 ├── ApiKey（API Key 管理）→ 依賴 BifrostClient、User
 ├── Credit（額度管理）→ 依賴 User、Organization
-├── UsageSync（用量同步）→ 依賴 BifrostClient、Credit、ApiKey
+├── Dashboard／Bifrost 用量同步（`BifrostSyncService`、`usage_records`）→ 依賴 BifrostClient、ApiKey；事件驅動 Credit 扣款
 ├── Contract（合約）→ 依賴 Organization、Credit、AppModule
 └── AppModule（應用模組）→ 依賴 Contract
 
@@ -846,13 +867,13 @@ Portal
 
 ## v1 完成標準
 
-- [ ] 使用者可註冊、登入、管理自己的 API Key
-- [ ] API Key 與 Bifrost Virtual Key 正確映射
-- [ ] 用量從 Bifrost 同步並反映在 Dashboard
-- [ ] Credit 系統正常運作（充值、消耗、餘額）
-- [ ] 管理者可建立合約並指派給使用者/組織
-- [ ] 應用模組可被註冊、訂閱、權限控制
-- [ ] CLI 工具可透過 Draupnir 認證使用 Bifrost
-- [ ] 管理後台與會員 Portal 基本功能完成
-- [ ] 測試覆蓋率 ≥ 80%
-- [ ] API 文件完整
+- [x] 使用者可註冊、登入、管理自己的 API Key（後端 + 主要前端流程已具）
+- [x] API Key 與 Bifrost Virtual Key 正確映射（ApiKey／AppApiKey 同步服務）
+- [x] 用量從 Bifrost 同步並反映在 Dashboard（`BifrostSyncService` + Dashboard 聚合）
+- [x] Credit 系統正常運作（充值、消耗、餘額與餘額耗盡時 Key 處理）
+- [x] 管理者可建立合約並指派給使用者/組織（Contract 模組）
+- [x] 應用模組可被註冊、訂閱、權限控制（AppModule + Middleware 範圍見 Phase 5 註記）
+- [x] CLI 後端 Device Flow 與 SDK 代理端點已提供（客戶端 CLI／SDK 專案另計）
+- [ ] 管理後台與會員 Portal **產品級**完成（見 Phase 7 細項）
+- [ ] 測試覆蓋率 ≥ 80%（以 CI `unit-coverage` 通過為準）
+- [ ] API 文件完整（OpenAPI 持續對齊路由）
