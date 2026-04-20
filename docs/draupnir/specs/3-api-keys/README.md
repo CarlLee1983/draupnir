@@ -6,8 +6,8 @@
 
 Draupnir 支援兩類 API Key：
 
-1. **用戶個人 Key**（Phase 3）— 用戶建立和管理的個人 Key，映射到 Bifrost Virtual Key
-2. **應用層級 Key**（Phase 6）— 應用級別的專屬 Key，用於第三方應用整合
+1. **用戶個人 Key**（Phase 3）— 用戶於組織內建立與管理的 Key，與 Bifrost Virtual Key 同步（程式中常以 **gateway**／`gatewayKeyId` 表示）
+2. **應用層級 Key**（Phase 6）— 供 SDK／CLI／第三方使用的 **App API Key**（格式如 `drp_app_…`），由組織管理者配發
 
 ---
 
@@ -23,58 +23,65 @@ Draupnir 支援兩類 API Key：
 
 | 功能 | 說明 |
 |------|------|
-| **Key 建立** | 映射至 Bifrost Virtual Key，記錄 maskedKey 用於顯示 |
-| **Key 列表** | 支援分頁、篩選（状態、建立時間） |
-| **Key 停用** | 暫時禁用 Key，不刪除記錄 |
-| **Key 刪除** | 從 Bifrost 刪除虛擬 Key |
-| **Key 標籤** | 為 Key 添加標籤便於管理 |
-| **權限設定** | 可用模型、速率限制（RPM、TPM） |
-| **使用統計** | 從 Bifrost Logs API 拉取，展示 Key 的用量 |
+| **Key 建立** | 於 Bifrost 註冊 Virtual Key；本地存 `keyHash` 與 `gatewayKeyId`；建立時回傳可作 Bearer 的 gateway secret |
+| **Key 列表** | 組織範圍列表（分頁與依指派成員篩選等，見 `IApiKeyRepository`） |
+| **Key 撤銷** | `revoke` 並同步網關 |
+| **Key 標籤** | 更新顯示名稱（`label`） |
+| **權限設定** | 模型白名單、速率限制；可選 Bifrost budget／quota（見 `SetKeyPermissionsService` 等） |
+| **成員指派** | 可將 Key 指派給組織成員（Member portal 可視度） |
+| **使用統計** | 與 Dashboard／Bifrost 用量資料連動 |
 
 #### 3.2 Dashboard 資料聚合
 
-| API | 說明 |
-|-----|------|
-| `GET /api/org/{orgId}/dashboard` | Key 總覽、近期用量、費用摘要 |
-| `GET /api/org/{orgId}/usage-chart` | 用量圖表資料（依時間、模型、Provider 分組） |
-| `GET /api/org/{orgId}/cost-summary` | 費用摘要 |
+路由前綴為 **`/api/organizations/:orgId`**，並需具備 `dashboard` 模組權限（`ModuleAccessMiddleware`）。
 
-### 📊 核心資料模型
+| 方法與路徑 | 說明 |
+|------------|------|
+| `GET .../dashboard` | 儀表板摘要 |
+| `GET .../dashboard/usage` | 用量圖表／時間序列 |
+| `GET .../dashboard/kpi-summary` | KPI 摘要 |
+| `GET .../dashboard/cost-trends` | 費用趨勢 |
+| `GET .../dashboard/model-comparison` | 模型對比 |
+| `GET .../dashboard/per-key-cost` | 依 Key 成本 |
+
+管理員補同步：`POST /api/dashboard/bifrost-sync/backfill`（見 `dashboard.routes.ts`）。
+
+> 舊版文件中的 `GET /api/org/{orgId}/...`、`usage-chart`／`cost-summary` 等路徑已廢棄；請以上表為準。
+
+### 📊 核心資料模型（與實作對齊之摘要）
 
 ```
 ApiKey Aggregate
 ├── id (UUID)
-├── orgId (UUID) — FK to Organization
-├── name (string)
-├── maskedKey (string) — 展示時遮蔽部分內容
-├── virtualKeyId (string) — Bifrost Virtual Key ID
-├── status (enum: ACTIVE | SUSPENDED | DELETED)
-├── permissions (JSON) — 可用模型、速率限制
-│   ├── allowedModels (string[])
-│   ├── rateLimit { rpm: number, tpm: number }
-│   └── scope (read | write | admin)
-├── suspensionReason (string | null) — 凍結原因（CREDIT_DEPLETED | ADMIN_MANUAL）
-├── lastUsedAt (timestamp | null)
-├── createdAt (timestamp)
-└── updatedAt (timestamp)
+├── orgId (UUID)
+├── createdByUserId (UUID)
+├── label — 顯示名稱（KeyLabel）
+├── keyHash — 本地驗證用（KeyHash）
+├── gatewayKeyId — Bifrost Virtual Key 識別
+├── gatewayKeyValue — 建立流程可暫存／可為 null
+├── status — KeyStatus（active／suspended／revoked 等）
+├── scope — KeyScope（模型、速率等）
+├── quotaAllocated — 可選配額
+├── assignedMemberId — 可選，指派成員
+├── suspensionReason / preFreezeRateLimit / suspendedAt — 與信用凍結聯動
+├── expiresAt / revokedAt
+├── createdAt / updatedAt
 ```
 
 ### ✅ 實現狀態
 
-- ✅ ApiKey CRUD（建立、列表、更新、刪除）
-- ✅ Bifrost Virtual Key 映射
-- ✅ Key 權限與速率限制設定
-- ✅ Key 使用量查詢
-- ✅ Dashboard 聚合 API
-- ✅ 餘額不足時自動凍結 Key（Credit 模組聯動）
+- ✅ ApiKey 建立、列表、撤銷、標籤、權限（含 Bifrost 同步）
+- ✅ 成員指派與組織維度查詢
+- ✅ 餘額不足等情境之凍結／解凍聯動（Credit 模組）
+- ✅ Dashboard 聚合 API（見上表）
 
-### 驗收標準
-- [ ] 用戶可建立 Key ✅
-- [ ] Key 列表顯示正確，支援分頁 ✅
-- [ ] 可停用/刪除 Key ✅
-- [ ] 可設定 Key 權限與速率限制 ✅
-- [ ] Key 使用量統計準確 ✅
-- [ ] Dashboard API 返回正確資訊 ✅
+### 驗收標準（Phase 3）
+
+- [x] 用戶可建立 Key，並與 Bifrost Virtual Key 對應
+- [x] Key 列表正確，支援組織範圍查詢
+- [x] 可撤銷 Key 並更新權限／標籤
+- [x] Key 使用量與 Dashboard 聚合可取得
+- [x] 餘額不足時可自動凍結相關 Key
 
 ---
 
@@ -82,45 +89,49 @@ ApiKey Aggregate
 
 ### 規格來源
 
-詳細設計位於 [0-planning 工作計劃中的 Phase 6.1 章節](../0-planning/draupnir-v1-workplan.md#61-application-api-key應用層級-key)
+詳細設計位於 [0-planning 工作計劃中的 Phase 6.1 章節](../0-planning/draupnir-v1-workplan.md#61-application-api-key)
 
 ### 核心功能
 
 | 功能 | 說明 |
 |------|------|
-| **Key 配發** | 為註冊應用分配專屬 API Key |
-| **Key 與 Module 綁定** | 該 Key 只能存取特定模組功能 |
-| **Scope 定義** | read / write / admin 三個等級 |
-| **用量獨立追蹤** | 區別於用戶個人 Key 的使用量 |
-| **計費隔離** | 應用 Key 使用費用單獨計算 |
-| **生命週期管理** | 到期、輪換、撤銷 |
+| **Key 配發** | `IssueAppKeyService`；`POST /api/organizations/:orgId/app-keys` |
+| **列表** | `GET /api/organizations/:orgId/app-keys` |
+| **輪換** | `RotateAppKeyService`；`POST /api/app-keys/:keyId/rotate`（寬限期見領域欄位） |
+| **撤銷** | `POST /api/app-keys/:keyId/revoke` |
+| **Scope 與模組綁定** | `PUT /api/app-keys/:keyId/scope` — 更新 `AppKeyScope` 與 `BoundModules` |
+| **用量查詢** | `GET /api/app-keys/:keyId/usage`（`GetAppKeyUsageService`） |
+| **網關同步** | `AppKeyBifrostSync` |
 
-### 📊 核心資料模型
+### 📊 核心資料模型（與實作對齊之摘要）
 
 ```
 AppApiKey Aggregate
 ├── id (UUID)
-├── appId (UUID) — FK to Application（DevPortal 中的應用）
-├── name (string)
-├── key (string) — 加密儲存
-├── maskedKey (string) — 展示時遮蔽
-├── moduleBindings (AppModuleBinding[])
-│   ├── moduleId (UUID)
-│   ├── scope (read | write | admin)
-│   └── accessLevel (FULL | LIMITED)
-├── status (enum: ACTIVE | EXPIRED | REVOKED)
-├── expiresAt (timestamp)
-├── createdAt (timestamp)
-└── revokedAt (timestamp | null)
+├── orgId (UUID)
+├── issuedByUserId (UUID)
+├── label (KeyLabel)
+├── keyHash (KeyHash)
+├── gatewayKeyId — Bifrost Virtual Key
+├── status (KeyStatus)
+├── scope (AppKeyScope) — READ / WRITE / ADMIN 等
+├── rotationPolicy — 輪換策略
+├── boundModules (BoundModules) — 綁定模組 ID
+├── previousKeyHash / previousGatewayKeyId / gracePeriodEndsAt — 輪換寬限期
+├── expiresAt / revokedAt
+└── createdAt / updatedAt
 ```
 
 ### 📍 實現進度
 
-- ✅ AppApiKey CRUD（基礎實現）
-- ⏳ Module binding 詳細設計
-- ⏳ Scope 驗證邏輯
-- ⏳ 用量獨立追蹤
-- ⏳ 生命週期管理（到期、輪換）
+| 項目 | 狀態 |
+|------|------|
+| AppApiKey 配發／列表／撤銷 | ✅ |
+| 輪換（含寬限期欄位）與 `SetAppKeyScope` | ✅ |
+| `BoundModules` 與 SdkApi 認證 | ✅ |
+| `GetAppKeyUsage` | ✅ |
+| **各類 Key／模組維度之用量獨立歸屬與計費隔離** | ⏳ 與 Phase 5「模組用量」同屬產品與資料模型待議（見工作計劃） |
+| 測試覆蓋率門檻 | 持續對齊 `bunfig.toml` 與 CI |
 
 ---
 
@@ -135,64 +146,49 @@ AppApiKey Aggregate
 
 ```
 src/Modules/
-├── ApiKey/                          # Phase 3 用戶個人 Key
-│   ├── Domain/
-│   │   ├── Aggregates/ApiKey
-│   │   ├── ValueObjects/KeyStatus, KeyPermissions
-│   │   └── Repositories/IApiKeyRepository
-│   ├── Application/
-│   │   └── Services/CreateKeyService, UpdatePermissionsService, etc.
+├── ApiKey/                          # Phase 3 組織／用戶 Key
+│   ├── Domain/Aggregates/ApiKey
+│   ├── Application/Services/
 │   ├── Infrastructure/
-│   │   ├── Repositories/ApiKeyRepository
-│   │   └── Services/BifrostKeyBlocker (Credit 聯動)
 │   ├── Presentation/
 │   │   ├── Controllers/ApiKeyController
-│   │   └── Routes/apiKeyRoutes
+│   │   └── Routes/apikey.routes.ts
 │   └── __tests__/
 │
 ├── AppApiKey/                       # Phase 6 應用層級 Key
-│   ├── Domain/
-│   │   ├── Aggregates/AppApiKey
-│   │   ├── Entities/AppModuleBinding
-│   │   ├── ValueObjects/KeyScope, BindingStatus
-│   │   └── Repositories/IAppApiKeyRepository
-│   ├── Application/
-│   │   └── Services/IssueAppKeyService, RevokeKeyService, etc.
+│   ├── Domain/Aggregates/AppApiKey
+│   ├── Application/Services/
 │   ├── Infrastructure/
-│   │   └── Repositories/AppApiKeyRepository
 │   ├── Presentation/
 │   │   ├── Controllers/AppApiKeyController
-│   │   └── Routes/appApiKeyRoutes
+│   │   └── Routes/appApiKey.routes.ts
 │   └── __tests__/
 │
-├── Dashboard/                       # 資料聚合（Phase 3）
-│   └── Application/
-│       └── Services/DashboardAggregationService
+├── SdkApi/                          # App API Key 認證與代理
+├── Dashboard/                       # 儀表板聚合
+│   └── Application/Services/…
 ```
 
 ---
 
 ## 🧪 驗收標準
 
-### Phase 3 （用戶個人 Key）✅ 完成
+### Phase 3（用戶個人 Key）— 已完成
 
 - [x] 用戶可建立 Key
 - [x] Key 成功映射到 Bifrost Virtual Key
-- [x] 用戶可查看自己的 Key 列表
-- [x] 用戶可停用/刪除 Key
-- [x] 可設定 Key 的權限與速率限制
-- [x] Key 使用量正確計算
-- [x] Dashboard 聚合 API 有效
-- [x] 餘額不足時自動凍結相關 Key
+- [x] 用戶可查看組織 Key 列表
+- [x] 可撤銷 Key 並更新權限／標籤
+- [x] Key 使用量與 Dashboard 聚合可用
+- [x] 餘額不足時可自動凍結相關 Key
 
-### Phase 6.1 （應用層級 Key）🟡 進行中
+### Phase 6.1（應用層級 Key）— 後端核心已落地
 
-- [ ] 應用可配發專屬 Key
-- [ ] Key 正確綁定至特定 Module
-- [ ] Scope 驗證生效
-- [ ] 用量獨立追蹤
-- [ ] 計費隔離
-- [ ] Key 到期與輪換機制
+- [x] 可配發與列表 App API Key
+- [x] 可設定 Scope 與 `BoundModules`
+- [x] 可輪換與撤銷（含領域寬限期欄位）
+- [x] 可查詢 App Key 用量
+- [ ] 與個人 Key 完全分離的 **用量歸屬／計費隔離**（見工作計劃 Phase 5／6 待辦）
 
 ---
 
@@ -202,13 +198,13 @@ src/Modules/
 
 | 類型 | 用途 | 管理方 | 計費 |
 |------|------|--------|------|
-| **用戶個人 Key** | 開發者直接呼叫 LLM 服務 | 開發者自管 | 按開發者帳戶計費 |
-| **應用層級 Key** | 第三方應用呼叫 Draupnir 服務 | 應用開發者配發 | 按應用計費 |
+| **用戶／組織 Key** | 開發者經閘道呼叫模型 | 組織與成員 | 依組織／合約／Credit |
+| **應用層級 Key** | SDK／CLI／第三方呼叫 Draupnir 對外 API | 管理者配發 | 完整隔離仍待資料與產品定義 |
 
-### 為什麼使用 maskedKey？
-- 增強安全性：完整 Key 只在建立時顯示一次
-- 用戶界面顯示時遮蔽大部分內容，便於識別
-- 防止意外洩露
+### 為什麼本地存 keyHash 而非明文？
+
+- 可作 Bearer 的 secret 僅在建立／輪換時短暫回傳
+- 持久化以雜湊比對，降低資料庫外洩風險
 
 ### 為什麼要記錄 suspensionReason？
 - 區分凍結原因（信用不足 vs. 管理員手動）
@@ -220,16 +216,18 @@ src/Modules/
 ## 🚀 後續與擴展
 
 ### V1.1 計劃
-- Key 輪換機制（安全最佳實踐）
-- 更細粒度的 Module Binding
+
+- 組織 Key 與 App Key 的輪換／到期策略之 **產品化規則**（後端已有 App Key 輪換與到期欄位）
+- 更細的模組與 IP／時間窗限制（若產品需要）
 
 ### V1.2+ 可能擴展
-- IP 白名單（Key 只允許特定 IP 呼叫）
-- 時間窗口限制（Key 在特定時間段內有效）
-- 加密 Key 存儲（使用 KMS）
-- Key 分析儀表板（使用模式、異常檢測）
+
+- IP 白名單
+- 時間窗口限制
+- 與 KMS 整合
+- 異常偵測與進階分析儀表板
 
 ---
 
-**狀態**：✅ Phase 3 完成 / 🟡 Phase 6.1 進行中  
-**最後更新**：2026-04-10
+**狀態**：✅ Phase 3 完成｜✅ Phase 6.1 後端核心完成（用量／計費歸屬仍待）  
+**最後更新**：2026-04-20
