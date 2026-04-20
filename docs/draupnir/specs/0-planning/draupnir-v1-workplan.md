@@ -7,7 +7,7 @@
 ## 概述
 
 **專案：** Draupnir — Bifrost 的上層管理平台
-**技術棧：** Gravito DDD | Bun | Drizzle ORM | JWT | Inertia.js + React
+**技術棧：** Gravito DDD | Bun | Gravito Atlas ORM | JWT | Inertia.js + React
 **策略：** 嚴格瀑布式，Phase 內並行分工
 **團隊：** 較大團隊協作
 **時程壓力：** 無，品質優先
