@@ -8,7 +8,7 @@
 
 **核心目標**：完整的 Credit 儲值、扣款、餘額管理，以及從 Bifrost 同步用量並轉換為 Credit 消耗。
 
-本文件以 **目標模型／現行實作** 對照撰寫（含 API 路徑、模組落點、`bifrost_logs` 游標等），結尾 **§8 變更紀要** 記錄與早期草稿的差異；驗收勾選與「待補」以本 README 為準。
+本文件以 **目標模型／現行實作** 對照撰寫（含 API 路徑、模組落點、`bifrost_logs` 游標等），結尾 **第 8 節（變更紀要）** 記錄與早期草稿的差異；驗收勾選與「待補」以本 README 為準。
 
 ### [使用者故事與驗收](./user-stories.md)
 
@@ -21,9 +21,9 @@
 | 同步策略 | Bifrost 用量寫入 `usage_records` 後，由 `ApplyUsageChargesService` 對尚未入帳之紀錄扣款（可與同步管線分階段） | 與網路拉取解耦；扣款以 `usage_record` 做參照與去重 |
 | 定價規則 | DB 有 `pricing_rules` 表（schema）；**目前** `usage_records.credit_cost` 主要取自 Bifrost log 的 cost | 表結構預留；依模型規則重算與管理 API 為後續工作 |
 | Credit 精度 | `decimal(20, 10)` 支援高精度小數 | 避免浮點誤差 |
-| 排程系統 | `Foundation` 的 `IScheduler`；`DashboardServiceProvider.registerJobs()` 註冊 `bifrost-sync`，cron 來自 `config/app` 之 `bifrostSyncCron`（預設 `*/5 * * * *`） | 與應用 bootstrap 一致；可環境覆寫 |
+| 排程系統 | `Foundation` 的 `IScheduler`；`DashboardServiceProvider.registerJobs()` 註冊 `bifrost-sync`（`runOnInit: true`、重試與 backoff 見程式），cron 來自 `config/app` 之 `bifrostSyncCron`（預設 `*/5 * * * *`） | 與應用 bootstrap 一致；可環境覆寫 |
 | 分散式鎖 | 原規格為 Horizon + Stasis；**現行**同步以排程驅動為主（見程式） | 若需多實例互斥，可再補鎖 |
-| 事件驅動 | `@gravito/signal` / `DomainEventDispatcher`：同步完成 `bifrost.sync.completed` → Credit 扣款；餘額 `BalanceLow` / `BalanceDepleted` / `CreditToppedUp` | 鬆耦合、可擴展 |
+| 事件驅動 | `DomainEventDispatcher` 事件型別字串：`bifrost.sync.completed`（同步後）→ Credit 用量入帳；`credit.balance_low` / `credit.balance_depleted` / `credit.topped_up`（餘額與充值）；Alerts 亦訂閱 `bifrost.sync.completed` 做預算閾值評估（見下「Credit ↔ Alerts」） | 鬆耦合、可擴展 |
 | 資料來源 | Dashboard 聚合讀本地 DB | 避免依賴 Bifrost 即時查詢，降低延遲 |
 
 ---
@@ -42,24 +42,24 @@
 | **CreditTransaction** | Entity，記錄每筆信用異動（充值、扣款、退款、過期、調整） |
 | **Balance VO** | 餘額，使用字串操作避免浮點誤差 |
 | **TransactionType VO** | 交易類型列舉 |
-| **Domain Events** | BalanceLow、BalanceDepleted、CreditToppedUp |
+| **Domain Events** | `credit.balance_low`、`credit.balance_depleted`、`credit.topped_up`（對應類別 `BalanceLow`、`BalanceDepleted`、`CreditToppedUp`） |
 
 #### Application Services
 
 | Service | 職責 |
 |---------|------|
 | **TopUpCreditService** | 用戶/管理員充值 Credit |
-| **DeductCreditService** | 扣除 Credit（手動或對單筆用量）；領域內觸發低餘額／耗盡事件 |
+| **DeductCreditService** | 扣除 Credit（手動或對單筆用量）；餘額不足時扣至零（不拒絕）；領域內觸發 `credit.balance_low`／`credit.balance_depleted`；用量扣款與 DB 唯一鍵衝突時視為已入帳並回傳成功（冪等） |
 | **ApplyUsageChargesService** | 同步完成後掃描 `usage_records`，對尚未建立對應 deduction 的紀錄呼叫扣款（`referenceType: usage_record`） |
 | **RefundCreditService** | 退款（異常情況或取消訂單） |
 | **GetBalanceService** | 查詢當前餘額 |
 | **GetTransactionHistoryService** | 查詢交易歷史 |
-| **HandleBalanceDepletedService** | 響應 BalanceDepleted 事件，凍結 Keys |
-| **HandleCreditToppedUpService** | 響應 CreditToppedUp 事件，恢復 Keys |
+| **HandleBalanceDepletedService** | 響應 `credit.balance_depleted`，凍結 Keys |
+| **HandleCreditToppedUpService** | 響應 `credit.topped_up`，恢復 Keys |
 
 ### 2. 用量同步（規格稱 UsageSync；實作於 Dashboard 模組）
 
-**職責**：定時從 Bifrost 拉取用量、寫入 `usage_records` 與游標；完成後派發事件驅動 Credit 扣款。
+**職責**：定時經 **LLM Gateway**（`ILLMGatewayClient`）拉取用量、寫入 `usage_records` 與游標；若有新筆數入庫則派發事件驅動 Credit 扣款與 Alerts 評估。
 
 > **目錄說明**：倉庫**未**建立獨立 `src/Modules/UsageSync/`。拉取與入庫見 `src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts`；排程見 `DashboardServiceProvider.registerJobs()`。
 
@@ -68,15 +68,16 @@
 ```
 排程 job「bifrost-sync」（cron 可設定，預設每 5 分鐘）
   ↓
-BifrostSyncService：拉取 Bifrost usage logs → 寫入 usage_records（冪等鍵等）
+BifrostSyncService：經 Gateway 拉取 usage logs → 寫入 usage_records（冪等鍵等）
   ↓
-派發 bifrost.sync.completed（BifrostSyncCompletedEvent）
+當本輪 synced > 0 時派發 bifrost.sync.completed（BifrostSyncCompletedEvent；附 orgIds 與時間窗）
   ↓
-CreditServiceProvider：訂閱事件 → ApplyUsageChargesService
+CreditServiceProvider：訂閱 → ApplyUsageChargesService
+AlertsServiceProvider：訂閱 → EvaluateThresholdsService（月預算／用量閾值通知，與 Credit 餘額分屬不同管線）
   ↓
-對尚未入帳之 usage 呼叫 DeductCreditService（單筆交易內寫 Transaction + 更新餘額）
+對尚未入帳之 usage 呼叫 DeductCreditService（單筆 DB 交易內寫 Transaction + 更新餘額）
   ↓
-BalanceLow / BalanceDepleted / CreditToppedUp → 事件處理器（凍結／恢復 Key 等）
+credit.balance_low / credit.balance_depleted / credit.topped_up → 事件處理器（凍結／恢復 Key 等）
 ```
 
 #### 定價規則（目標模型 vs 現狀）
@@ -119,39 +120,44 @@ BalanceLow / BalanceDepleted / CreditToppedUp → 事件處理器（凍結／恢
 
 ### Credit ↔ ApiKey 聯動
 
-**餘額阻擋（BalanceDepleted）：**
+Gateway 呼叫經 **`ILLMGatewayClient.updateKey`**（非獨立 `BifrostClient` 類別名），將限流設為零以阻擋流量、恢復時寫回凍結前快照。
+
+**餘額阻擋（`credit.balance_depleted`）：**
 ```
-DeductCreditService 扣款後餘額 ≤ 0 → BalanceDepleted
-  ↓
-發送 BalanceDepleted 事件
+DeductCreditService 扣款後餘額 ≤ 0 → 派發 credit.balance_depleted
   ↓
 HandleBalanceDepletedService
   ↓
 遍歷該 Org 所有 ACTIVE 的 ApiKey
   ↓
 對每個 Key:
-  1. 記錄凍結前的 rate limit
+  1. 記錄凍結前的 rate limit（rpm/tpm）
   2. 設定 suspensionReason = 'CREDIT_DEPLETED'
-  3. BifrostClient.updateRateLimit(key, { rpm: 0, tpm: 0 })
-  4. 標記 Key 狀態為 SUSPENDED
+  3. gatewayClient.updateKey（rateLimit 設為零／最小允許值以阻擋請求）
+  4. 持久化為 SUSPENDED（經 ApiKey 聚合 suspend）
 ```
 
-**餘額恢復（CreditToppedUp）：**
+**餘額恢復（`credit.topped_up`）：**
 ```
 充值完成 → TopUpCreditService
   ↓
-發送 CreditToppedUp 事件
+派發 credit.topped_up
   ↓
 HandleCreditToppedUpService
   ↓
 遍歷該 Org 所有 suspensionReason = 'CREDIT_DEPLETED' 的 Key
   ↓
 對每個 Key:
-  1. 讀取凍結前的 rate limit 快照
-  2. BifrostClient.updateRateLimit(key, preFreezeRateLimit)
-  3. 清除 suspensionReason 等欄位
+  1. 讀取凍結前的 rate limit 快照（preFreezeRateLimit）
+  2. gatewayClient.updateKey 還原限流
+  3. unsuspend 清除 suspensionReason 等欄位
   4. 標記 Key 狀態恢復為 ACTIVE
 ```
+
+### Credit ↔ Alerts 聯動
+
+- **`bifrost.sync.completed`** 時，`AlertsServiceProvider` 會呼叫 **`EvaluateThresholdsService.evaluateOrgs`**，依各 Org 的 Alert 設定與**當月**用量／預算比對，觸發分級通知（與 Credit 帳本餘額無直接耦合）。
+- **`credit.balance_low`** 目前由領域層派發，供測試與後續擴充；若產品上要「餘額過低」與「用量預算」雙軌通知，可再訂閱該事件或接入 `@gravito/signal` 等通道。
 
 ---
 
@@ -166,7 +172,7 @@ Phase 4 功能驗收（與 [工作計劃 Phase 4](../0-planning/draupnir-v1-work
 - [x] Bifrost 用量拉取、`usage_records` / 游標、排程註冊（Dashboard 模組）
 - [x] `bifrost.sync.completed` → `ApplyUsageChargesService` → 依 `usage_record` 扣款（去重／冪等）
 - [x] 餘額耗盡時凍結 Key、充值後恢復（事件驅動）
-- [x] 低餘額告警（BalanceLow）
+- [x] 低餘額領域事件（`credit.balance_low` 派發；對外通知可再接 Alerts／Signal）
 
 **待補或延伸（原規格加值）**
 
@@ -190,7 +196,10 @@ Phase 4 功能驗收（與 [工作計劃 Phase 4](../0-planning/draupnir-v1-work
 
 ### 為什麼扣款與 Bifrost 拉取可分階段？
 - 網路拉取失敗不直接影響已入庫之扣款重試策略
-- `ApplyUsageChargesService` 可對單一 `usage_record` 做入帳冪等
+- `ApplyUsageChargesService` 可對單一 `usage_record` 做入帳冪等（與 `credit_transactions` 上 usage 扣款唯一性約束一致）
+
+### 為什麼 `bifrost.sync.completed` 僅在 `synced > 0` 時派發？
+- 本輪無新筆數入庫時不必驅動用量扣款與 Alerts 重算，避免空轉
 
 ### 為什麼記錄 preFreezeRateLimit？
 - 當充值恢復 Key 時，能精確恢復原先的 rate limit 設定
