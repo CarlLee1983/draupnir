@@ -8,27 +8,29 @@
 
 **核心目標**：完整的 Credit 儲值、扣款、餘額管理，以及從 Bifrost 同步用量並轉換為 Credit 消耗
 
+### [使用者故事與驗收](./user-stories.md)
+
 ---
 
 ## 📊 系統架構決策
 
 | 決策項目 | 選擇 | 理由 |
 |---------|------|------|
-| 同步策略 | UsageSync 在單一 DB 交易內完成扣款 | 強一致性，無分散式事務開銷 |
-| 定價規則 | 存 DB，管理者動態調整 | 靈活，便於實驗與優化 |
+| 同步策略 | Bifrost 用量寫入 `usage_records` 後，由 `ApplyUsageChargesService` 對尚未入帳之紀錄扣款（可與同步管線分階段） | 與網路拉取解耦；扣款以 `usage_record` 做參照與去重 |
+| 定價規則 | DB 有 `pricing_rules` 表（schema）；**目前** `usage_records.credit_cost` 主要取自 Bifrost log 的 cost | 表結構預留；依模型規則重算與管理 API 為後續工作 |
 | Credit 精度 | `decimal(20, 10)` 支援高精度小數 | 避免浮點誤差 |
-| 排程系統 | `@gravito/horizon` Cron Job | 統一任務排程 |
-| 分散式鎖 | Horizon + Stasis（Redis） | 防止併發同步衝突 |
-| 事件驅動 | `@gravito/signal` Domain Events | 鬆耦合、可擴展 |
-| 資料來源 | Dashboard 全部讀本地 DB | 避免依賴 Bifrost，降低延遲 |
+| 排程系統 | `Foundation` 的 `IScheduler`；`DashboardServiceProvider.registerJobs()` 註冊 `bifrost-sync`，cron 來自 `config/app` 之 `bifrostSyncCron`（預設 `*/5 * * * *`） | 與應用 bootstrap 一致；可環境覆寫 |
+| 分散式鎖 | 原規格為 Horizon + Stasis；**現行**同步以排程驅動為主（見程式） | 若需多實例互斥，可再補鎖 |
+| 事件驅動 | `@gravito/signal` / `DomainEventDispatcher`：同步完成 `bifrost.sync.completed` → Credit 扣款；餘額 `BalanceLow` / `BalanceDepleted` / `CreditToppedUp` | 鬆耦合、可擴展 |
+| 資料來源 | Dashboard 聚合讀本地 DB | 避免依賴 Bifrost 即時查詢，降低延遲 |
 
 ---
 
 ## 🏗️ 核心模組
 
-### 1. Credit 模組
+### 1. Credit 模組（`src/Modules/Credit/`）
 
-**職責**：Credit 帳戶管理、交易記錄、餘額扣款
+**職責**：Credit 帳戶管理、交易記錄、餘額扣款、用量入帳後扣款
 
 #### Domain Layer
 
@@ -45,56 +47,39 @@
 | Service | 職責 |
 |---------|------|
 | **TopUpCreditService** | 用戶/管理員充值 Credit |
-| **DeductCreditService** | 扣除 Credit（通常由 UsageSync 調用） |
+| **DeductCreditService** | 扣除 Credit（手動或對單筆用量）；領域內觸發低餘額／耗盡事件 |
+| **ApplyUsageChargesService** | 同步完成後掃描 `usage_records`，對尚未建立對應 deduction 的紀錄呼叫扣款（`referenceType: usage_record`） |
 | **RefundCreditService** | 退款（異常情況或取消訂單） |
 | **GetBalanceService** | 查詢當前餘額 |
 | **GetTransactionHistoryService** | 查詢交易歷史 |
 | **HandleBalanceDepletedService** | 響應 BalanceDepleted 事件，凍結 Keys |
 | **HandleCreditToppedUpService** | 響應 CreditToppedUp 事件，恢復 Keys |
 
-### 2. UsageSync 模組
+### 2. 用量同步（規格稱 UsageSync；實作於 Dashboard 模組）
 
-**職責**：定時同步 Bifrost 用量，轉換為 Credit 消耗
+**職責**：定時從 Bifrost 拉取用量、寫入 `usage_records` 與游標；完成後派發事件驅動 Credit 扣款。
 
-#### 核心流程
+> **目錄說明**：倉庫**未**建立獨立 `src/Modules/UsageSync/`。拉取與入庫見 `src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts`；排程見 `DashboardServiceProvider.registerJobs()`。
 
-```
-定時任務 (每小時)
-  ↓
-讀取 PricingRules (來自 DB)
-  ↓
-[分散式鎖] 防止併發同步
-  ↓
-查詢 Bifrost 新增用量日誌
-  ↓
-計算 Credit 消耗 (用量 * 單價)
-  ↓
-DB 交易：
-  1. 建立 CreditTransaction 記錄
-  2. 更新 CreditAccount balance
-  3. 發送 Domain Events (BalanceLow / BalanceDepleted)
-  ↓
-事件驅動：
-  - BalanceDepleted → HandleBalanceDepletedService
-    → 凍結該 Org 的所有 ACTIVE Keys
-  - 其他事件 → 通知/審計服務
-```
-
-#### 定價規則架構
+#### 核心流程（與現行程式對齊）
 
 ```
-PricingRule Aggregate
-├── id (UUID)
-├── model (string) — 模型名稱（gpt-4, claude-3 等）
-├── provider (string) — 提供商（OpenAI, Anthropic 等）
-├── unitType (enum) — 計費單位（TOKEN, REQUEST）
-├── inputPrice (decimal) — 輸入單價（per 1K token 或 per request）
-├── outputPrice (decimal) — 輸出單價
-├── effectiveFrom (timestamp) — 生效日期
-├── status (enum: ACTIVE | ARCHIVED)
-├── createdAt (timestamp)
-└── updatedAt (timestamp)
+排程 job「bifrost-sync」（cron 可設定，預設每 5 分鐘）
+  ↓
+BifrostSyncService：拉取 Bifrost usage logs → 寫入 usage_records（冪等鍵等）
+  ↓
+派發 bifrost.sync.completed（BifrostSyncCompletedEvent）
+  ↓
+CreditServiceProvider：訂閱事件 → ApplyUsageChargesService
+  ↓
+對尚未入帳之 usage 呼叫 DeductCreditService（單筆交易內寫 Transaction + 更新餘額）
+  ↓
+BalanceLow / BalanceDepleted / CreditToppedUp → 事件處理器（凍結／恢復 Key 等）
 ```
+
+#### 定價規則（目標模型 vs 現狀）
+
+規格中的 **PricingRule** 聚合（模型／單價／生效區間等）仍為產品方向；資料庫已有 `pricing_rules` 表定義，但**尚未**全面接軌「依規則重算 `credit_cost`」與管理 API。目前寫入 `usage_records` 時之成本主要沿用 Bifrost 回傳之 `cost`（見 `BifrostSyncService` 實作）。
 
 ---
 
@@ -134,7 +119,7 @@ PricingRule Aggregate
 
 **餘額阻擋（BalanceDepleted）：**
 ```
-CreditDeductionService 檢測餘額 ≤ 0
+DeductCreditService 扣款後餘額 ≤ 0 → BalanceDepleted
   ↓
 發送 BalanceDepleted 事件
   ↓
@@ -170,18 +155,22 @@ HandleCreditToppedUpService
 
 ## 🧪 驗收標準
 
-Phase 4 完成的功能驗收：
+Phase 4 功能驗收（與 [工作計劃 Phase 4](../0-planning/draupnir-v1-workplan.md#phase-4credit-system--額度與計費) 一節內「Phase 4 驗收註記（2026-04-20）」對照表一致）：
 
-- [x] Credit 帳戶建立與初始化 ✅
-- [x] 充值功能正常，餘額更新準確 ✅
-- [x] 扣款功能正常，支援多筆交易 ✅
-- [x] 交易歷史記錄完整可追蹤 ✅
-- [x] UsageSync 定時運行，用量計算準確 ✅
-- [x] 定價規則生效，Price 計算正確 ✅
-- [x] 餘額不足時自動凍結 Key ✅
-- [x] 充值後自動恢復 Key ✅
-- [x] 低餘額告警事件發送 ✅
-- [x] 測試覆蓋率 ≥80% ✅
+**已完成（核心）**
+
+- [x] Credit 帳戶建立與初始化
+- [x] 充值、扣款、退款流程與交易歷史可追蹤
+- [x] Bifrost 用量拉取、`usage_records` / 游標、排程註冊（Dashboard 模組）
+- [x] `bifrost.sync.completed` → `ApplyUsageChargesService` → 依 `usage_record` 扣款（去重／冪等）
+- [x] 餘額耗盡時凍結 Key、充值後恢復（事件驅動）
+- [x] 低餘額告警（BalanceLow）
+
+**待補或延伸（原規格加值）**
+
+- [ ] **定價規則**：`pricing_rules` 與依模型規則重算、管理 API 全面接軌
+- [ ] **用量異常偵測**（突增告警等）
+- [ ] **測試覆蓋率 ≥ 80%**：以 CI `unit-coverage`（`bun test --coverage`）與 `bunfig.toml` 門檻為準
 
 ---
 
@@ -197,10 +186,9 @@ Phase 4 完成的功能驗收：
 - 交易不可修改，確保帳務正確性
 - 便於對帳與糾紛解決
 
-### 為什麼單一 DB 交易而不用分散式交易？
-- 所有操作在單一資料庫，無網路延遲
-- 強一致性，無部分失敗風險
-- 簡化設計，避免分散式系統複雜性
+### 為什麼扣款與 Bifrost 拉取可分階段？
+- 網路拉取失敗不直接影響已入庫之扣款重試策略
+- `ApplyUsageChargesService` 可對單一 `usage_record` 做入帳冪等
 
 ### 為什麼記錄 preFreezeRateLimit？
 - 當充值恢復 Key 時，能精確恢復原先的 rate limit 設定
@@ -211,9 +199,10 @@ Phase 4 完成的功能驗收：
 ## 🚀 後續與擴展
 
 ### V1.1 計劃
+- **定價規則**全面接軌 DB 與管理後台
 - Credit 過期機制（預充值的 Credit 在一定期限後過期）
 - 更詳細的成本分析（按 Model、按 Provider 分組）
-- Credit 異常告警（突增、異常消耗模式）
+- 用量異常告警（突增、異常消耗模式）
 
 ### V1.2+ 可能擴展
 - 分級定價（使用量越多越便宜）
@@ -232,6 +221,6 @@ Phase 4 完成的功能驗收：
 
 ---
 
-**狀態**：✅ Phase 4 完成  
-**最後更新**：2026-04-10  
-**實現覆蓋率**：100% 功能完成，81-85% 測試覆蓋
+**狀態**：✅ Phase 4 核心（Credit + Bifrost 同步入庫 + 用量入帳扣款）已落地；定價規則接軌與異常偵測等見驗收「待補」  
+**最後更新**：2026-04-20  
+**測試覆蓋**：以 CI `unit-coverage` 為準（全專案門檻見 `bunfig.toml`）
