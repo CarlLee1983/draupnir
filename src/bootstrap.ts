@@ -49,6 +49,7 @@ import { WebsiteServiceProvider } from './Website/bootstrap/WebsiteServiceProvid
 import { warmInertiaService } from './Website/Http/Inertia/createInertiaRequestHandler'
 import { HttpKernel } from './Website/Http/HttpKernel'
 import { registerGlobalMiddlewares } from './Website/Http/GravitoKernelAdapter'
+import { setCurrentContainer } from './wiring/CurrentContainer'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
@@ -87,6 +88,9 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   setCurrentDatabaseAccess(db)
   const config = defineConfig({ config: configObj })
   const core = new PlanetCore(config)
+
+  const adaptedContainer = adaptGravitoContainer(core.container)
+  setCurrentContainer(adaptedContainer)
 
   core.container.singleton('database', () => db)
 

@@ -4,6 +4,10 @@ import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastruct
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
+import { getCurrentContainer } from '@/wiring/CurrentContainer'
+import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
+import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
+import type { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 
 export interface CurrentOrganizationContext {
   organizationId: string
@@ -42,6 +46,43 @@ function extractOrganizationId(ctx: Parameters<Middleware>[0]): string | null {
   )
 }
 
+/**
+ * 補償機制：如果組織缺少 gateway_team_id，立即嘗試修復。
+ * 若修復失敗（例如 Bifrost 仍然斷線），則阻止後續操作，避免產生 unscoped keys。
+ */
+async function autoRepairOrganizationGatewayTeam(organizationId: string, userId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const container = getCurrentContainer()
+  const orgRepo = container.make('organizationRepository') as IOrganizationRepository
+  const provisionService = container.make('provisionOrganizationDefaultsService') as ProvisionOrganizationDefaultsService
+
+  const org = await orgRepo.findById(organizationId)
+  if (!org) return { ok: false, error: 'ORG_NOT_FOUND' }
+
+  if (org.gatewayTeamId) {
+    return { ok: true }
+  }
+
+  console.log(`[OrganizationMiddleware] Organization ${organizationId} is missing gatewayTeamId. Triggering auto-repair...`)
+  
+  try {
+    // execute 是冪等的，會補建 Bifrost Team
+    await provisionService.execute(organizationId, userId)
+    
+    // 重新檢查
+    const updated = await orgRepo.findById(organizationId)
+    if (updated?.gatewayTeamId) {
+      console.log(`[OrganizationMiddleware] Auto-repair successful for organization ${organizationId}`)
+      return { ok: true }
+    }
+    
+    return { ok: false, error: 'BIFROST_PROVISIONING_FAILED' }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    console.error(`[OrganizationMiddleware] Auto-repair failed for organization ${organizationId}: ${message}`)
+    return { ok: false, error: 'BIFROST_PROVISIONING_ERROR' }
+  }
+}
+
 export function requireOrganizationContext(): Middleware {
   return async (ctx, next) => {
     await getJwtParser().handle(ctx)
@@ -50,7 +91,21 @@ export function requireOrganizationContext(): Middleware {
       return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
 
-    const organizationId = extractOrganizationId(ctx)
+    let organizationId = extractOrganizationId(ctx)
+
+    // ─── 自動解析機制 (Auto-resolve for Managers) ───
+    // 如果請求中缺少 Org ID，但使用者是 Manager，則自動尋找其所屬組織
+    if (!organizationId && auth.role === 'manager') {
+      const container = getCurrentContainer()
+      const memberRepo = container.make(
+        'organizationMemberRepository',
+      ) as IOrganizationMemberRepository
+      const membership = await memberRepo.findOrgManagerMembershipByUserId(auth.userId)
+      if (membership) {
+        organizationId = membership.organizationId
+      }
+    }
+
     if (!organizationId) {
       return ctx.json(
         { success: false, message: 'Missing organization ID', error: 'MISSING_ORGANIZATION_ID' },
@@ -71,6 +126,19 @@ export function requireOrganizationContext(): Middleware {
           error: orgAuth.error ?? 'FORBIDDEN',
         },
         403,
+      )
+    }
+
+    // ─── 自動補建機制 ───
+    const repairResult = await autoRepairOrganizationGatewayTeam(organizationId, auth.userId)
+    if (!repairResult.ok) {
+      return ctx.json(
+        {
+          success: false,
+          message: 'Organization initialization incomplete. Please contact support.',
+          error: repairResult.error,
+        },
+        503, // Service Unavailable (because Bifrost integration is required)
       )
     }
 
@@ -106,6 +174,9 @@ export function requireOrganizationManager(): Middleware {
         403,
       )
     }
+
+    // 雖然 requireOrganizationContext 已經檢查過一次，但在這裡確保 currentOrg 已更新
+    // (如果 repair 是在 requireOrganizationContext 內完成的，這裡其實是安全的)
 
     return next()
   }

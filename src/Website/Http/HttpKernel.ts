@@ -7,6 +7,7 @@ import {
 } from '@/Shared/Infrastructure/Middleware/CorsGlobalMiddleware'
 import { createSecurityHeadersMiddleware } from '@/Shared/Infrastructure/Middleware/SecurityHeadersGlobalMiddleware'
 import { createGlobalErrorMiddleware } from '@/Shared/Infrastructure/Middleware/GlobalErrorMiddleware'
+import { createOrganizationMemberLookupCacheMiddleware } from '@/Shared/Infrastructure/Middleware/OrganizationMemberLookupCacheMiddleware'
 import { createRequestIdMiddleware } from '@/Shared/Infrastructure/Middleware/RequestIdMiddleware'
 import { createRequestLoggerMiddleware } from '@/Shared/Infrastructure/Middleware/RequestLoggerMiddleware'
 import { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
@@ -14,6 +15,7 @@ import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 import { requireManager } from '@/Website/Manager/middleware/requireManager'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
+import { requireOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
 import { attachWebCsrf } from './Security/CsrfMiddleware'
 import { injectSharedData } from './Inertia/SharedPropsBuilder'
 import { createTokenRefreshMiddleware } from './Middleware/TokenRefreshMiddleware'
@@ -63,7 +65,6 @@ const webBase = (): Middleware[] => [
   attachJwt(),
   createTokenRefreshMiddleware(),
   attachWebCsrf(),
-  injectSharedDataMiddleware(),
 ]
 
 /**
@@ -81,10 +82,10 @@ const webBase = (): Middleware[] => [
 export const HttpKernel = {
   /**
    * 層一：Global middleware — 每個請求都經過。
-   * 掛載順序：BodySizeLimit → GlobalError → RequestId → RequestLogger → SecurityHeaders → CORS（有設定時）
+   * 掛載順序：BodySizeLimit → GlobalError → RequestId → OrgMemberLookupCache → RequestLogger → SecurityHeaders → CORS（有設定時）
    *
    * BodySizeLimit 必須排第一：413 拒絕不需要進入 error wrapper，
-   * 且避免讀取超大 body 對後續 middleware 造成記憶體壓力。
+   *且避免讀取超大 body 對後續 middleware 造成記憶體壓力。
    */
   global: (): Middleware[] => {
     const corsOrigins = parseCorsAllowedOrigins()
@@ -92,6 +93,7 @@ export const HttpKernel = {
       createBodySizeLimitMiddleware(512 * 1024),
       createGlobalErrorMiddleware(),
       createRequestIdMiddleware(),
+      createOrganizationMemberLookupCacheMiddleware(),
       createRequestLoggerMiddleware(),
       createSecurityHeadersMiddleware(),
       ...(corsOrigins.length > 0
@@ -105,19 +107,22 @@ export const HttpKernel = {
    */
   groups: {
     /** 公開頁面（login、register 等），無 role check */
-    web: (): Middleware[] => [...webBase(), pendingCookiesMiddleware()],
+    web: (): Middleware[] => [...webBase(), injectSharedDataMiddleware(), pendingCookiesMiddleware()],
     /** Admin 區域：web 基底 + admin role 驗證 */
-    admin: (): Middleware[] => [...webBase(), requireAdminMiddleware(), pendingCookiesMiddleware()],
+    admin: (): Middleware[] => [...webBase(), requireAdminMiddleware(), injectSharedDataMiddleware(), pendingCookiesMiddleware()],
     /** Manager 區域：web 基底 + manager role 驗證 */
     manager: (): Middleware[] => [
       ...webBase(),
       requireManagerMiddleware(),
+      requireOrganizationContext(),
+      injectSharedDataMiddleware(),
       pendingCookiesMiddleware(),
     ],
     /** Member 區域：web 基底 + 登入驗證 */
     member: (): Middleware[] => [
       ...webBase(),
       requireMemberMiddleware(),
+      injectSharedDataMiddleware(),
       pendingCookiesMiddleware(),
     ],
   },

@@ -1,4 +1,8 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import {
+  getCachedMembershipLookup,
+  setCachedMembershipLookup,
+} from '@/wiring/OrganizationMemberLookupCache'
 import type { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
 import { OrganizationMemberMapper } from '../Mappers/OrganizationMemberMapper'
@@ -12,12 +16,19 @@ export class OrganizationMemberRepository implements IOrganizationMemberReposito
   }
 
   async findByUserAndOrgId(userId: string, orgId: string): Promise<OrganizationMember | null> {
+    const memo = getCachedMembershipLookup(userId, orgId)
+    if (memo !== undefined) {
+      return memo
+    }
+
     const row = await this.db
       .table('organization_members')
       .where('user_id', '=', userId)
       .where('organization_id', '=', orgId)
       .first()
-    return row ? OrganizationMemberMapper.toEntity(row) : null
+    const entity = row ? OrganizationMemberMapper.toEntity(row) : null
+    setCachedMembershipLookup(userId, orgId, entity)
+    return entity
   }
 
   async findByOrgId(orgId: string, limit?: number, offset?: number): Promise<OrganizationMember[]> {

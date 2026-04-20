@@ -10,6 +10,7 @@ export class OrganizationPresenter {
       slug: entity.slug,
       description: entity.description,
       status: entity.status,
+      gatewayTeamId: entity.gatewayTeamId,
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
     }

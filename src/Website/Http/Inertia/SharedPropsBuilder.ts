@@ -132,6 +132,8 @@ export function getInertiaShared(ctx: IHttpContext): InertiaSharedData {
   }
 }
 
+import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
+
 /**
  * Attaches cross-cutting Inertia props on the request context under `inertia:shared`.
  *
@@ -153,7 +155,11 @@ export function injectSharedData(ctx: IHttpContext): void {
           },
         }
       : { user: null },
-    currentOrgId: ctx.getHeader('X-Organization-Id') ?? ctx.getHeader('x-organization-id') ?? null,
+    currentOrgId:
+      ctx.getHeader('X-Organization-Id') ??
+      ctx.getHeader('x-organization-id') ??
+      ctx.get<CurrentOrganizationContext>('currentOrg')?.organizationId ??
+      null,
     locale,
     messages,
     flash: {
