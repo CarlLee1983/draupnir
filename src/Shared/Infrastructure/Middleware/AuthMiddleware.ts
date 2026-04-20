@@ -57,8 +57,22 @@ export class AuthMiddleware {
 
   /**
    * Handles the request verification process.
+   *
+   * Idempotent: once JWT parsing has been attempted on this request context
+   * (tracked via the `jwtParsed` marker), the entire flow — including the
+   * `auth_tokens` DB look-up — is skipped on any subsequent invocation.
+   * This covers both the success path (auth set) and failure paths
+   * (expired, revoked, or malformed token) so the Atlas N+1 detector is
+   * not triggered by either case.
    */
   async handle(ctx: IHttpContext): Promise<void> {
+    // Idempotency guard: skip if JWT parsing was already attempted this request.
+    if (AuthMiddleware.hasParsed(ctx)) {
+      return
+    }
+    // Mark before any DB work so re-entrant calls always exit early.
+    AuthMiddleware.markParsed(ctx)
+
     try {
       // 1. Extract Token from Header
       const token = this.extractToken(ctx)
@@ -133,6 +147,22 @@ export class AuthMiddleware {
    */
   static getAuthError(ctx: IHttpContext): string | null {
     return ctx.get<string>('authError') || null
+  }
+
+  /**
+   * Returns true if JWT parsing has already been attempted on this request,
+   * regardless of whether authentication succeeded.
+   */
+  static hasParsed(ctx: IHttpContext): boolean {
+    return ctx.get<boolean>('jwtParsed') === true
+  }
+
+  /**
+   * Marks this request context as having undergone JWT parsing.
+   * Called at the very start of handle() before any DB work.
+   */
+  static markParsed(ctx: IHttpContext): void {
+    ctx.set('jwtParsed', true)
   }
 
   /**
