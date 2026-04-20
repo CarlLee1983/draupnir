@@ -6,7 +6,9 @@
 
 ### [Phase 4：Credit System — 額度與計費設計規格](./credit-system-design.md)
 
-**核心目標**：完整的 Credit 儲值、扣款、餘額管理，以及從 Bifrost 同步用量並轉換為 Credit 消耗
+**核心目標**：完整的 Credit 儲值、扣款、餘額管理，以及從 Bifrost 同步用量並轉換為 Credit 消耗。
+
+本文件以 **目標模型／現行實作** 對照撰寫（含 API 路徑、模組落點、`bifrost_logs` 游標等），結尾 **§8 變更紀要** 記錄與早期草稿的差異；驗收勾選與「待補」以本 README 為準。
 
 ### [使用者故事與驗收](./user-stories.md)
 
