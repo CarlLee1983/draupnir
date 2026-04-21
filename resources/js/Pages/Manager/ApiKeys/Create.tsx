@@ -58,20 +58,27 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
     })
   }
 
+  const quotaHint =
+    contractQuota != null && totalAllocated != null
+      ? t('ui.manager.apiKeys.createPage.quotaHintWithContract', {
+          contract: contractQuota.toLocaleString(),
+          allocated: totalAllocated.toLocaleString(),
+          available: (contractQuota - totalAllocated).toLocaleString(),
+        })
+      : t('ui.manager.apiKeys.createPage.quotaHintGeneric')
+
   return (
     <ManagerLayout>
-      <Head title="建立 API Key" />
+      <Head title={t('ui.manager.apiKeys.createPage.headTitle')} />
       <div className="p-6 space-y-6 max-w-2xl mx-auto">
         <Link href="/manager/api-keys" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group">
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-          返回列表
+          {t('ui.manager.apiKeys.createPage.backToList')}
         </Link>
 
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold tracking-tight">建立 API Key</h1>
-          <p className="text-muted-foreground">
-            建立一組新的金鑰並設定其配額限制。
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t('ui.manager.apiKeys.createPage.pageTitle')}</h1>
+          <p className="text-muted-foreground">{t('ui.manager.apiKeys.createPage.pageDescription')}</p>
         </div>
 
         {newKeyValue && (
@@ -81,8 +88,8 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
                 <ShieldCheck className="h-4 w-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-bold text-green-800">API Key 建立成功！</p>
-                <p className="text-xs text-green-700/80">請立即複製並妥善保存，離開此頁面後將無法再次查看完整的 Key 值。</p>
+                <p className="text-sm font-bold text-green-800">{t('ui.manager.apiKeys.createPage.successTitle')}</p>
+                <p className="text-xs text-green-700/80">{t('ui.manager.apiKeys.createPage.successHint')}</p>
               </div>
             </div>
             <CardContent className="p-6">
@@ -100,12 +107,12 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
                   {copied ? (
                     <>
                       <Check className="h-4 w-4" />
-                      已複製
+                      {t('ui.manager.apiKeys.copied')}
                     </>
                   ) : (
                     <>
                       <Copy className="h-4 w-4" />
-                      複製
+                      {t('ui.manager.apiKeys.copy')}
                     </>
                   )}
                 </Button>
@@ -126,54 +133,52 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
         <Card className="shadow-lg border-muted/60">
           <form onSubmit={submit}>
             <CardHeader>
-              <CardTitle>金鑰設定</CardTitle>
-              <CardDescription>設定金鑰的識別名稱與使用限制。</CardDescription>
+              <CardTitle>{t('ui.manager.apiKeys.createPage.cardTitle')}</CardTitle>
+              <CardDescription>{t('ui.manager.apiKeys.createPage.cardDescription')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="label" className="flex items-center gap-2">
                   <Key className="h-4 w-4 text-muted-foreground" />
-                  Key 名稱
+                  {t('ui.manager.apiKeys.createPage.keyNameLabel')}
                 </Label>
                 <Input
                   id="label"
-                  placeholder="例如: 開發用 Key, 前端專案..."
+                  placeholder={t('ui.manager.apiKeys.createPage.keyNamePlaceholder')}
                   required
                   value={label}
                   onChange={(e) => setLabel(e.target.value)}
                   className="h-11"
                 />
-                <p className="text-xs text-muted-foreground">這僅用於內部識別。</p>
+                <p className="text-xs text-muted-foreground">{t('ui.manager.apiKeys.createPage.keyNameHint')}</p>
               </div>
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="quota" className="flex items-center gap-2">
                     <ShieldCheck className="h-4 w-4 text-muted-foreground" />
-                    配額上限
+                    {t('ui.manager.apiKeys.createPage.quotaLabel')}
                   </Label>
                   <Input
                     id="quota"
                     type="number"
                     min={0}
                     max={contractQuota != null && totalAllocated != null ? contractQuota - totalAllocated : undefined}
-                    placeholder="不限"
+                    placeholder={t('ui.manager.apiKeys.createPage.quotaUnlimitedPlaceholder')}
                     value={quota}
                     onChange={(e) => setQuota(e.target.value === '' ? '' : Number(e.target.value))}
                     className="h-11"
                   />
                   <p className="text-xs text-muted-foreground flex items-center gap-1">
                     <HelpCircle className="h-3 w-3" />
-                    {contractQuota != null && totalAllocated != null
-                      ? `合約配額 ${contractQuota.toLocaleString()}，已分配 ${totalAllocated.toLocaleString()}，可用 ${(contractQuota - totalAllocated).toLocaleString()}`
-                      : '單位依 Gateway 設定而定'}
+                    {quotaHint}
                   </p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="period" className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    重置週期
+                    {t('ui.manager.apiKeys.createPage.periodLabel')}
                   </Label>
                   <div className="relative">
                     <select
@@ -182,8 +187,8 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
                       value={period}
                       onChange={(e) => setPeriod(e.target.value as '7d' | '30d')}
                     >
-                      <option value="7d">每 7 天重置</option>
-                      <option value="30d">每 30 天重置</option>
+                      <option value="7d">{t('ui.manager.apiKeys.createPage.period7d')}</option>
+                      <option value="30d">{t('ui.manager.apiKeys.createPage.period30d')}</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-muted-foreground">
                       <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
@@ -195,7 +200,7 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
               <div className="space-y-2 pt-2 border-t border-muted/40">
                 <Label htmlFor="assignee" className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4 text-muted-foreground" />
-                  指派給成員 (選填)
+                  {t('ui.manager.apiKeys.createPage.assigneeLabel')}
                 </Label>
                 <div className="relative">
                   <select
@@ -204,7 +209,7 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
                     value={assignee}
                     onChange={(e) => setAssignee(e.target.value)}
                   >
-                    <option value="">未指派</option>
+                    <option value="">{t('ui.manager.apiKeys.createPage.unassigned')}</option>
                     {assignees.map((a) => (
                       <option key={a.userId} value={a.userId}>
                         {a.email || a.userId}
@@ -215,13 +220,15 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
                     <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">指派後，該成員即可在他們的 Dashboard 中看到此 Key。</p>
+                <p className="text-xs text-muted-foreground">{t('ui.manager.apiKeys.createPage.assigneeHint')}</p>
               </div>
             </CardContent>
             <CardFooter className="bg-muted/30 border-t border-muted/40 px-6 py-4 flex justify-between items-center">
-              <Button type="button" variant="ghost" onClick={() => window.history.back()}>取消</Button>
+              <Button type="button" variant="ghost" onClick={() => window.history.back()}>
+                {t('ui.manager.apiKeys.createPage.cancel')}
+              </Button>
               <Button type="submit" className="px-8 shadow-sm">
-                確認建立
+                {t('ui.manager.apiKeys.createPage.submit')}
               </Button>
             </CardFooter>
           </form>

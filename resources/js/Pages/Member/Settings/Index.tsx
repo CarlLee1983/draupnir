@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import type { I18nMessage } from '@/lib/i18n'
+import type { I18nMessage, MessageKey } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
 interface UserProfile {
@@ -60,7 +60,7 @@ export default function MemberSettings({ user, profile, error, sessions, session
     e.preventDefault()
 
     if (error) {
-      toast({ title: t('ui.common.failed'), description: t(error.key), variant: 'destructive' })
+      toast({ title: t('ui.common.failed'), description: t(error.key as MessageKey), variant: 'destructive' })
       return
     }
 

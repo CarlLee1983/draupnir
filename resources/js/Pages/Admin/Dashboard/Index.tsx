@@ -35,9 +35,7 @@ export default function AdminDashboard({ totals }: Props) {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.dashboard.title')}</h1>
-            <p className="text-muted-foreground mt-1">
-              系統運行概況與關鍵指標。
-            </p>
+            <p className="text-muted-foreground mt-1">{t('ui.admin.dashboard.subtitle')}</p>
           </div>
         </div>
 

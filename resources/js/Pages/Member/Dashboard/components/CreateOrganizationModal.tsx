@@ -12,38 +12,40 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { useTranslation, type MessageKey } from '@/lib/i18n'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-const ERROR_MESSAGES: Record<string, string> = {
-  ADMIN_CANNOT_CREATE_ORG: '管理員帳號無法建立組織',
-  SLUG_EXISTS: '此識別名稱已被使用，請換一個組織名稱後再試',
-  NAME_REQUIRED: '請輸入組織名稱',
-  MANAGER_NOT_FOUND: '無法驗證帳號，請重新登入後再試',
-  CSRF_MISMATCH: '安全驗證失敗，請重新整理頁面後再試',
-  PROVISION_FAILED: '建立組織時發生錯誤，請稍後再試或聯絡管理員',
+const ERROR_CODE_TO_KEY: Record<string, MessageKey> = {
+  ADMIN_CANNOT_CREATE_ORG: 'ui.member.createOrganization.error.adminCannotCreate',
+  SLUG_EXISTS: 'ui.member.createOrganization.error.slugExists',
+  NAME_REQUIRED: 'ui.member.createOrganization.error.nameRequired',
+  MANAGER_NOT_FOUND: 'ui.member.createOrganization.error.managerNotFound',
+  CSRF_MISMATCH: 'ui.member.createOrganization.error.csrfMismatch',
+  PROVISION_FAILED: 'ui.member.createOrganization.error.provisionFailed',
 }
 
 export function CreateOrganizationModal({ open, onOpenChange }: Props) {
+  const { t } = useTranslation()
   const { csrfToken: inertiaCsrf } = usePage().props
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  const validate = (): string | null => {
-    if (name.trim().length < 2) return '組織名稱至少需要 2 個字元'
-    if (name.trim().length > 64) return '組織名稱不可超過 64 個字元'
+  const validate = (): MessageKey | null => {
+    if (name.trim().length < 2) return 'ui.member.createOrganization.validation.nameTooShort'
+    if (name.trim().length > 64) return 'ui.member.createOrganization.validation.nameTooLong'
     return null
   }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    const validationError = validate()
-    if (validationError) {
-      setError(validationError)
+    const validationKey = validate()
+    if (validationKey) {
+      setError(t(validationKey))
       return
     }
 
@@ -57,12 +59,14 @@ export function CreateOrganizationModal({ open, onOpenChange }: Props) {
         headers: {
           'Content-Type': 'application/json',
           Accept: 'application/json',
-          'X-CSRF-Token': resolveCsrfTokenForFetch(inertiaCsrf),
+          'X-CSRF-Token': resolveCsrfTokenForFetch(
+            typeof inertiaCsrf === 'string' ? inertiaCsrf : undefined,
+          ),
         },
         body: JSON.stringify({ name: name.trim() }),
       })
       if (response.status === 419) {
-        setError(ERROR_MESSAGES.CSRF_MISMATCH)
+        setError(t('ui.member.createOrganization.error.csrfMismatch'))
         return
       }
 
@@ -79,12 +83,11 @@ export function CreateOrganizationModal({ open, onOpenChange }: Props) {
         // Stale UI (e.g. another tab already created org); reload props from server
         router.visit('/member/dashboard', { replace: true })
       } else {
-        setError(
-          ERROR_MESSAGES[payload.error ?? ''] ?? payload.message ?? '建立失敗，請稍後再試',
-        )
+        const key = payload.error ? ERROR_CODE_TO_KEY[payload.error] : undefined
+        setError(key ? t(key) : payload.message ?? t('ui.member.createOrganization.error.generic'))
       }
     } catch {
-      setError('建立失敗，請稍後再試')
+      setError(t('ui.member.createOrganization.error.generic'))
     } finally {
       setSubmitting(false)
     }
@@ -94,20 +97,18 @@ export function CreateOrganizationModal({ open, onOpenChange }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>建立我的組織</DialogTitle>
-          <DialogDescription>
-            建立組織以開始使用 API Key、帳單與儀表板功能。
-          </DialogDescription>
+          <DialogTitle>{t('ui.member.createOrganization.title')}</DialogTitle>
+          <DialogDescription>{t('ui.member.createOrganization.description')}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="org-name">組織名稱</Label>
+            <Label htmlFor="org-name">{t('ui.member.createOrganization.nameLabel')}</Label>
             <Input
               id="org-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="例：我的科技公司"
+              placeholder={t('ui.member.createOrganization.namePlaceholder')}
               minLength={2}
               maxLength={64}
               disabled={submitting}
@@ -123,10 +124,12 @@ export function CreateOrganizationModal({ open, onOpenChange }: Props) {
               onClick={() => onOpenChange(false)}
               disabled={submitting}
             >
-              取消
+              {t('ui.member.createOrganization.cancel')}
             </Button>
             <Button type="submit" disabled={submitting || name.trim().length < 2}>
-              {submitting ? '建立中…' : '建立組織'}
+              {submitting
+                ? t('ui.member.createOrganization.submitting')
+                : t('ui.member.createOrganization.submit')}
             </Button>
           </DialogFooter>
         </form>

@@ -14,9 +14,13 @@ interface Props {
   error?: I18nMessage | null
 }
 
+type LoginPageProps = {
+  flash?: { success?: I18nMessage }
+} & Record<string, unknown>
+
 export default function Login({ lastEmail, error }: Props) {
   const { t } = useTranslation()
-  const { flash } = usePage().props
+  const { flash } = usePage<LoginPageProps>().props
   const [email, setEmail] = useState(lastEmail ?? '')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
