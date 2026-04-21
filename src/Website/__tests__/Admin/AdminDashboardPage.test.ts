@@ -96,12 +96,23 @@ describe('AdminDashboardPage', () => {
         }),
       ),
     }
+    const mockAdminUsageTrendService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: {
+            points: [{ date: '2026-04-20T12:00:00.000Z', requests: 2, tokens: 100 }],
+          },
+        }),
+      ),
+    }
 
     const page = new AdminDashboardPage(
       inertia,
       mockListUsersService as any,
       mockListOrgsService as any,
       mockListAdminContractsService as any,
+      mockAdminUsageTrendService as any,
     )
 
     const ctx = createAdminContext()
@@ -116,8 +127,13 @@ describe('AdminDashboardPage', () => {
     expect(totals?.users).toBe(10)
     expect(totals?.organizations).toBe(5)
     expect(totals?.contracts).toBe(3)
+    const trend = captured.lastCall?.props.usageTrend as
+      | { date: string; requests: number; tokens: number }[]
+      | undefined
+    expect(trend).toEqual([{ date: '2026-04-20T12:00:00.000Z', requests: 2, tokens: 100 }])
     expect(mockListUsersService.execute).toHaveBeenCalled()
     expect(mockListOrgsService.execute).toHaveBeenCalled()
     expect(mockListAdminContractsService.execute).toHaveBeenCalled()
+    expect(mockAdminUsageTrendService.execute).toHaveBeenCalled()
   })
 })

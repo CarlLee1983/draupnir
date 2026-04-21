@@ -561,6 +561,7 @@ const zhTW = {
   'ui.admin.dashboard.metricContracts': '合約總數',
   'ui.admin.dashboard.metricApiKeys': 'API Keys',
   'ui.admin.dashboard.usageTrendTitle': '全系統用量趨勢',
+  'ui.admin.dashboard.usageTrendEmpty': '此期間尚無同步的用量紀錄（近 14 日）。',
   'ui.admin.dashboard.subtitle': '系統運行概況與關鍵指標。',
   'ui.admin.apiKeys.columns.key': 'Key',
   'ui.admin.modules.columns.moduleKey': '模組識別碼',
@@ -1165,6 +1166,8 @@ const catalogs = {
     'ui.admin.dashboard.metricContracts': 'Total Contracts',
     'ui.admin.dashboard.metricApiKeys': 'API Keys',
     'ui.admin.dashboard.usageTrendTitle': 'System-wide Usage Trend',
+    'ui.admin.dashboard.usageTrendEmpty':
+      'No synced usage for this window (last 14 days).',
     'ui.admin.dashboard.subtitle': 'System health overview and key metrics.',
     'ui.admin.apiKeys.columns.key': 'Key',
     'ui.admin.modules.columns.moduleKey': 'Module key',

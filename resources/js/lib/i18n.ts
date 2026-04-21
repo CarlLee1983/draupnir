@@ -556,6 +556,7 @@ const frontendCatalog = {
   'ui.admin.dashboard.metricContracts': true,
   'ui.admin.dashboard.metricApiKeys': true,
   'ui.admin.dashboard.usageTrendTitle': true,
+  'ui.admin.dashboard.usageTrendEmpty': true,
   'ui.admin.dashboard.subtitle': true,
   'ui.admin.apiKeys.columns.key': true,
   'ui.admin.apiKeys.columns.quotaAllocated': true,

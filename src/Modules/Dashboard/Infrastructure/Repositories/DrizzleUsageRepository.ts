@@ -21,6 +21,13 @@ import type {
 export class DrizzleUsageRepository implements IUsageRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
+  async queryDailyCostPlatform(range: DateRange): Promise<readonly DailyCostBucket[]> {
+    return this.db
+      .table('usageRecords')
+      .whereBetween('occurred_at', [range.startDate, range.endDate])
+      .aggregate<DailyCostBucket>(this.dailyCostSpec())
+  }
+
   async upsert(record: UsageRecordInsert): Promise<void> {
     await this.db.table('usageRecords').insertOrIgnore(
       {

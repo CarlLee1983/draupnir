@@ -11,6 +11,7 @@ import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/
 import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorRepository'
 import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
+import { GetAdminPlatformUsageTrendService } from '../../Application/Services/GetAdminPlatformUsageTrendService'
 import { GetCostTrendsService } from '../../Application/Services/GetCostTrendsService'
 import { GetDashboardSummaryService } from '../../Application/Services/GetDashboardSummaryService'
 import { GetKpiSummaryService } from '../../Application/Services/GetKpiSummaryService'
@@ -87,6 +88,11 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
       c.make('drizzleUsageRepository') as IUsageRepository,
     ))
+    container.bind(
+      'getAdminPlatformUsageTrendService',
+      (c: IContainer) =>
+        new GetAdminPlatformUsageTrendService(c.make('drizzleUsageRepository') as IUsageRepository),
+    )
   }
 
   protected override registerControllers(container: IContainer): void {

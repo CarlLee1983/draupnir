@@ -31,6 +31,7 @@ function makeUsageRepo(db: MemoryDatabaseAccess): IUsageRepository {
         created_at: record.createdAt,
       })
     },
+    queryDailyCostPlatform: async () => [],
     queryDailyCostByOrg: async () => [],
     queryDailyCostByKeys: async () => [],
     queryModelBreakdown: async () => [],

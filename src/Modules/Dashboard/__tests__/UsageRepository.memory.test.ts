@@ -66,6 +66,27 @@ describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
     expect(rows[0].id).toBe('row-1')
   })
 
+  it('aggregates daily cost platform-wide (all orgs)', async () => {
+    await seedRecord({ orgId: 'org-1', occurredAt: '2026-04-11T10:00:00Z', creditCost: 1.0 })
+    await seedRecord({
+      orgId: 'org-2',
+      bifrostLogId: 'log-org2',
+      occurredAt: '2026-04-11T15:00:00Z',
+      creditCost: 2.0,
+    })
+    await seedRecord({ occurredAt: '2026-04-12T09:00:00Z', creditCost: 3.0 })
+
+    const result = await repository.queryDailyCostPlatform({
+      startDate: '2026-04-11T00:00:00Z',
+      endDate: '2026-04-12T23:59:59Z',
+    })
+
+    expect(result).toHaveLength(2)
+    expect(result[0].totalRequests).toBe(2)
+    expect(result[0].totalCost).toBe(3.0)
+    expect(result[1].totalCost).toBe(3.0)
+  })
+
   it('aggregates daily cost by organization', async () => {
     await seedRecord({ occurredAt: '2026-04-11T10:00:00Z', creditCost: 1.0 })
     await seedRecord({ occurredAt: '2026-04-11T15:00:00Z', creditCost: 2.5 })

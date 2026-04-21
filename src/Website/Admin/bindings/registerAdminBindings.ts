@@ -17,6 +17,7 @@ import type { ListAdminContractsService } from '@/Modules/Contract/Application/S
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
+import type { GetAdminPlatformUsageTrendService } from '@/Modules/Dashboard/Application/Services/GetAdminPlatformUsageTrendService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
@@ -56,6 +57,7 @@ export function registerAdminBindings(container: IContainer): void {
         c.make('listUsersService') as ListUsersService,
         c.make('listOrganizationsService') as ListOrganizationsService,
         c.make('listAdminContractsService') as ListAdminContractsService,
+        c.make('getAdminPlatformUsageTrendService') as GetAdminPlatformUsageTrendService,
       ),
   )
 

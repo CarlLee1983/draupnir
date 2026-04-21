@@ -8,7 +8,9 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts'
+import { formatDate } from '@/lib/format'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { EmptyChart } from './EmptyChart'
 
 export interface UsageDataPoint {
   date: string
@@ -19,10 +21,20 @@ export interface UsageDataPoint {
 interface UsageLineChartProps {
   data: UsageDataPoint[]
   title?: string
+  emptyMessage?: string
   isAnimationActive?: boolean
 }
 
-export function UsageLineChart({ data, title = '用量趨勢', isAnimationActive = true }: UsageLineChartProps) {
+export function UsageLineChart({
+  data,
+  title = '用量趨勢',
+  emptyMessage = '此期間尚無用量資料。',
+  isAnimationActive = true,
+}: UsageLineChartProps) {
+  if (data.length === 0) {
+    return <EmptyChart title={title} message={emptyMessage} />
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -32,9 +44,13 @@ export function UsageLineChart({ data, title = '用量趨勢', isAnimationActive
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-            <XAxis dataKey="date" className="text-xs" />
+            <XAxis
+              dataKey="date"
+              className="text-xs"
+              tickFormatter={(v) => formatDate(String(v))}
+            />
             <YAxis className="text-xs" />
-            <Tooltip />
+            <Tooltip labelFormatter={(v) => formatDate(String(v))} />
             <Legend />
             <Line
               type="monotone"

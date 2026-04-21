@@ -15,17 +15,11 @@ interface Totals {
 
 interface Props {
   totals: Totals
+  usageTrend: UsageDataPoint[]
 }
 
-export default function AdminDashboard({ totals }: Props) {
+export default function AdminDashboard({ totals, usageTrend }: Props) {
   const { t } = useTranslation()
-  const sampleUsageData: UsageDataPoint[] = [
-    { date: '03/01', requests: 420, tokens: 145000 },
-    { date: '03/02', requests: 650, tokens: 152000 },
-    { date: '03/03', requests: 598, tokens: 138000 },
-    { date: '03/04', requests: 800, tokens: 171000 },
-    { date: '03/05', requests: 775, tokens: 163000 },
-  ]
 
   return (
     <AdminLayout>
@@ -66,7 +60,11 @@ export default function AdminDashboard({ totals }: Props) {
           />
         </div>
 
-        <UsageLineChart data={sampleUsageData} title={t('ui.admin.dashboard.usageTrendTitle')} />
+        <UsageLineChart
+          data={usageTrend}
+          title={t('ui.admin.dashboard.usageTrendTitle')}
+          emptyMessage={t('ui.admin.dashboard.usageTrendEmpty')}
+        />
       </div>
     </AdminLayout>
   )

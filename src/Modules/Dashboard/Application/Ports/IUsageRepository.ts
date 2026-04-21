@@ -67,6 +67,8 @@ export interface UsageRecordInsert {
 
 export interface IUsageRepository {
   upsert(record: UsageRecordInsert): Promise<void>
+  /** All organizations — daily aggregates for admin platform overview. */
+  queryDailyCostPlatform(range: DateRange): Promise<readonly DailyCostBucket[]>
   queryDailyCostByOrg(orgId: string, range: DateRange): Promise<readonly DailyCostBucket[]>
   queryDailyCostByKeys(
     apiKeyIds: readonly string[],
