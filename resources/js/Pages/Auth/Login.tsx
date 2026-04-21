@@ -1,10 +1,12 @@
 import { Head, router, usePage } from '@inertiajs/react'
 import { useState } from 'react'
 import { AuthLayout } from '@/layouts/AuthLayout'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertCircle, CheckCircle2 } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -42,18 +44,20 @@ export default function Login({ lastEmail, error }: Props) {
           <CardDescription>{t('ui.auth.login.description')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {flash?.success && (
-              <div className="rounded-md bg-emerald-600/10 px-4 py-3 text-sm text-emerald-800 dark:text-emerald-200">
-                {t(flash.success.key, flash.success.params)}
-              </div>
+              <Alert variant="info">
+                <CheckCircle2 className="size-4" />
+                <AlertDescription>{t(flash.success.key, flash.success.params)}</AlertDescription>
+              </Alert>
             )}
             {error && (
-              <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {t(error.key, error.params)}
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="size-4" />
+                <AlertDescription>{t(error.key, error.params)}</AlertDescription>
+              </Alert>
             )}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="email">{t('ui.auth.login.emailLabel')}</Label>
               <Input
                 id="email"
@@ -65,7 +69,7 @@ export default function Login({ lastEmail, error }: Props) {
                 autoFocus
               />
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="password">{t('ui.auth.login.passwordLabel')}</Label>
               <Input
                 id="password"

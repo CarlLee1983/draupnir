@@ -1,10 +1,12 @@
 import { Head, router } from '@inertiajs/react'
 import { useState, type FormEvent } from 'react'
 import { AuthLayout } from '@/layouts/AuthLayout'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { AlertCircle } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -47,13 +49,14 @@ export default function Register({ passwordRequirements, error }: Props) {
           <CardDescription>{t('ui.auth.register.description')}</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {error && (
-              <div className="rounded-md bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {t(error.key, error.params)}
-              </div>
+              <Alert variant="destructive">
+                <AlertCircle className="size-4" />
+                <AlertDescription>{t(error.key, error.params)}</AlertDescription>
+              </Alert>
             )}
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="email">{t('ui.auth.register.emailLabel')}</Label>
               <Input
                 id="email"
@@ -64,7 +67,7 @@ export default function Register({ passwordRequirements, error }: Props) {
                 autoFocus
               />
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="password">{t('ui.auth.register.passwordLabel')}</Label>
               <Input
                 id="password"
@@ -73,7 +76,7 @@ export default function Register({ passwordRequirements, error }: Props) {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
-              <ul className="text-xs text-muted-foreground space-y-1 mt-1">
+              <ul className="text-xs text-muted-foreground flex flex-col gap-1 mt-1">
                 <li className={password.length >= passwordRequirements.minLength ? 'text-green-600' : ''}>
                   {t('ui.auth.register.passwordMinLength', { min: passwordRequirements.minLength })}
                 </li>
@@ -91,7 +94,7 @@ export default function Register({ passwordRequirements, error }: Props) {
                 )}
               </ul>
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="passwordConfirmation">{t('ui.auth.register.confirmPasswordLabel')}</Label>
               <Input
                 id="passwordConfirmation"
