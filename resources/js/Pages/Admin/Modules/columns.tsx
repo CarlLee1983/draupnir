@@ -14,7 +14,7 @@ export interface ModuleRow {
 export const createModuleColumns = (t: Translator): ColumnDef<ModuleRow>[] => [
   {
     accessorKey: 'key',
-    header: t('ui.admin.modules.create.nameLabel').split('（')[0], // Use a cleaner header
+    header: t('ui.admin.modules.columns.moduleKey'),
     cell: ({ row }) => <code className="text-xs">{row.original.key}</code>,
   },
   { accessorKey: 'name', header: t('ui.common.name') },

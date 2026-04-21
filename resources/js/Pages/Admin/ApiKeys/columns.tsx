@@ -2,7 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { formatDateTime, maskApiKey } from '@/lib/format'
 import type { Translator } from '@/lib/i18n'
-import { ShieldCheck, ShieldAlert, Key } from 'lucide-react'
+import { ShieldCheck, ShieldAlert } from 'lucide-react'
 
 export interface AdminApiKeyRow {
   id: string
@@ -52,7 +52,7 @@ export const createAdminApiKeyColumns = (t: Translator): ColumnDef<AdminApiKeyRo
   { accessorKey: 'label', header: t('ui.common.name') },
   {
     accessorKey: 'keyPreview',
-    header: 'Key',
+    header: t('ui.admin.apiKeys.columns.key'),
     cell: ({ row }) => <code className="text-xs">{maskApiKey(row.original.keyPreview)}</code>,
   },
   {
@@ -62,8 +62,7 @@ export const createAdminApiKeyColumns = (t: Translator): ColumnDef<AdminApiKeyRo
   },
   {
     accessorKey: 'userId',
-    header: t('ui.auth.verifyDevice.title'), // "Authorize Device" is a bit weird but users usually mean owner here. Let's use a better key if I have one.
-    // Actually ui.common.role.user might be better or just "Owner".
+    header: t('ui.admin.apiKeys.ownerLabel'),
     cell: ({ row }) => <code className="text-xs">{row.original.userId.slice(0, 8)}</code>,
   },
   {
@@ -73,7 +72,7 @@ export const createAdminApiKeyColumns = (t: Translator): ColumnDef<AdminApiKeyRo
   },
   {
     accessorKey: 'lastUsedAt',
-    header: t('ui.member.apiKeys.create.savedButton').split(',')[1]?.trim() || 'Last Used', // Fallback
+    header: t('ui.common.lastUsed'),
     cell: ({ row }) => formatDateTime(row.original.lastUsedAt),
   },
   {
