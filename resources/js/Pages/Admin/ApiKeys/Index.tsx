@@ -41,16 +41,14 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.apiKeys.title')}</h1>
-            <p className="text-muted-foreground mt-1">
-              檢視各組織的 API 金鑰與相關狀態。
-            </p>
+            <p className="text-muted-foreground mt-1">{t('ui.admin.apiKeys.pageDescription')}</p>
           </div>
         </div>
 
         <Card className="shadow-sm border-muted/60">
           <CardHeader>
             <CardTitle className="text-base">{t('ui.admin.apiKeys.selectOrgTitle')}</CardTitle>
-            <CardDescription>選擇組織以載入金鑰列表。</CardDescription>
+            <CardDescription>{t('ui.admin.apiKeys.selectOrgDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="max-w-md space-y-2">
             <Label htmlFor="orgSelect">{t('ui.admin.apiKeys.orgLabel')}</Label>
@@ -80,9 +78,9 @@ export default function ApiKeysIndex({ organizations, selectedOrgId, keys, error
           <CardHeader className="pb-3 border-b border-muted/40">
             <div className="flex items-center gap-2">
               <Key className="h-5 w-5 text-primary" />
-              <CardTitle>金鑰清單</CardTitle>
+              <CardTitle>{t('ui.admin.apiKeys.listTitle')}</CardTitle>
             </div>
-            <CardDescription>目前組織中的所有金鑰。</CardDescription>
+            <CardDescription>{t('ui.admin.apiKeys.listDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             {selectedOrgId ? (

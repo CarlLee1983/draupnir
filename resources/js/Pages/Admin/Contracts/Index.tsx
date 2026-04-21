@@ -25,9 +25,7 @@ export default function ContractsIndex({ contracts, error }: Props) {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.contracts.title')}</h1>
-            <p className="text-muted-foreground mt-1">
-              管理系統中的所有合約協議與配額設定。
-            </p>
+            <p className="text-muted-foreground mt-1">{t('ui.admin.contracts.pageDescription')}</p>
           </div>
           <Button asChild size="lg" className="gap-2 shadow-sm transition-all active:scale-95">
             <Link href="/admin/contracts/create">
@@ -47,9 +45,9 @@ export default function ContractsIndex({ contracts, error }: Props) {
           <CardHeader className="pb-3 border-b border-muted/40">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-primary" />
-              <CardTitle>合約清單</CardTitle>
+              <CardTitle>{t('ui.admin.contracts.listTitle')}</CardTitle>
             </div>
-            <CardDescription>目前的合約與配額資訊概覽。</CardDescription>
+            <CardDescription>{t('ui.admin.contracts.listDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <DataTable

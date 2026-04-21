@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Head, router } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
+import { useTranslation, type MessageKey } from '@/lib/i18n'
 import { ManagerLayout } from '@/layouts/ManagerLayout'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -39,9 +40,18 @@ interface Props {
 
 type SettingsTab = 'account' | 'security'
 
-function formatSessionTime(iso: string): string {
+const PASSWORD_STRENGTH_KEYS: MessageKey[] = [
+  'ui.manager.settings.passwordStrength.veryWeak',
+  'ui.manager.settings.passwordStrength.weak',
+  'ui.manager.settings.passwordStrength.medium',
+  'ui.manager.settings.passwordStrength.strong',
+  'ui.manager.settings.passwordStrength.veryStrong',
+]
+
+function formatSessionTime(iso: string, locale: string): string {
   try {
-    return new Date(iso).toLocaleString('zh-TW', { dateStyle: 'medium', timeStyle: 'short' })
+    const tag = locale === 'en' ? 'en-US' : 'zh-TW'
+    return new Date(iso).toLocaleString(tag, { dateStyle: 'medium', timeStyle: 'short' })
   } catch {
     return iso
   }
@@ -55,6 +65,7 @@ export default function ManagerSettingsIndex({
   sessions,
   sessionsRevokeError,
 }: Props) {
+  const { t, locale } = useTranslation()
   const [displayName, setDisplayName] = useState(profile?.displayName ?? '')
   const [currentPassword, setCurrentPassword] = useState('')
   const [password, setPassword] = useState('')
@@ -76,7 +87,7 @@ export default function ManagerSettingsIndex({
 
   const submitRevokeAllSessions = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!window.confirm('確定要從所有裝置登出？目前瀏覽器也會一併登出。')) return
+    if (!window.confirm(t('ui.member.settings.revokeAllSessionsConfirm'))) return
     setRevokingAll(true)
     router.post('/manager/settings/sessions/revoke-all', {}, { onFinish: () => setRevokingAll(false) })
   }
@@ -105,16 +116,20 @@ export default function ManagerSettingsIndex({
 
   const strength = getPasswordStrength(password)
   const strengthColors = ['bg-zinc-800', 'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500']
-  const strengthLabels = ['極弱', '弱', '中', '強', '極強']
+  const strengthLabel = t(PASSWORD_STRENGTH_KEYS[strength] ?? PASSWORD_STRENGTH_KEYS[0])
 
   return (
     <ManagerLayout>
-      <Head title="個人設定" />
+      <Head title={t('ui.member.settings.heading')} />
       <div className="min-h-screen bg-zinc-950 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-8">
-            <h1 className="font-sans text-2xl font-bold tracking-tight text-zinc-50">個人設定</h1>
-            <p className="mt-2 font-sans text-sm text-zinc-400">管理你的帳號資訊與安全設定。</p>
+            <h1 className="font-sans text-2xl font-bold tracking-tight text-zinc-50">
+              {t('ui.member.settings.heading')}
+            </h1>
+            <p className="mt-2 font-sans text-sm text-zinc-400">
+              {t('ui.manager.settings.pageDescription')}
+            </p>
           </div>
 
           <Separator className="mb-8 bg-zinc-800" />
@@ -124,7 +139,7 @@ export default function ManagerSettingsIndex({
               <nav
                 className="flex flex-row space-x-2 lg:flex-col lg:space-x-0 lg:space-y-1"
                 role="tablist"
-                aria-label="設定分類"
+                aria-label={t('ui.manager.settings.navAriaLabel')}
               >
                 <Button
                   type="button"
@@ -142,7 +157,7 @@ export default function ManagerSettingsIndex({
                   )}
                 >
                   <User className="mr-2 h-4 w-4" />
-                  帳號資訊
+                  {t('ui.manager.settings.tabAccount')}
                 </Button>
                 <Button
                   type="button"
@@ -160,7 +175,7 @@ export default function ManagerSettingsIndex({
                   )}
                 >
                   <Shield className="mr-2 h-4 w-4" />
-                  安全性
+                  {t('ui.manager.settings.tabSecurity')}
                 </Button>
               </nav>
             </aside>
@@ -177,10 +192,12 @@ export default function ManagerSettingsIndex({
                 <CardHeader className="border-b border-zinc-800 px-6 py-4">
                   <div className="flex items-center gap-2 text-zinc-100">
                     <User className="h-4 w-4 text-indigo-400" />
-                    <CardTitle className="font-sans text-base font-semibold">個人檔案</CardTitle>
+                    <CardTitle className="font-sans text-base font-semibold">
+                      {t('ui.manager.settings.profileCardTitle')}
+                    </CardTitle>
                   </div>
                   <CardDescription className="font-sans text-xs text-zinc-500">
-                    這是在系統中顯示給其他成員看到的名稱。
+                    {t('ui.manager.settings.profileCardDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -190,12 +207,18 @@ export default function ManagerSettingsIndex({
                         {displayName.slice(0, 2).toUpperCase() || '??'}
                       </div>
                       <div>
-                        <h4 className="font-sans text-sm font-medium text-zinc-200">頭像預覽</h4>
-                        <p className="font-sans text-xs text-zinc-500">基於顯示名稱自動生成</p>
+                        <h4 className="font-sans text-sm font-medium text-zinc-200">
+                          {t('ui.manager.settings.avatarPreview')}
+                        </h4>
+                        <p className="font-sans text-xs text-zinc-500">
+                          {t('ui.manager.settings.avatarPreviewHint')}
+                        </p>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">顯示名稱</label>
+                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                        {t('ui.member.settings.nameLabel')}
+                      </label>
                       <Input 
                         className="rounded-none border-zinc-800 bg-zinc-950 font-sans text-zinc-100 focus:border-indigo-500 focus:ring-0"
                         value={displayName} 
@@ -203,7 +226,7 @@ export default function ManagerSettingsIndex({
                       />
                       {error && (
                         <p className="flex items-center gap-1 font-sans text-xs text-red-400">
-                          <AlertCircle className="h-3 w-3" /> 載入失敗，請稍後再試。
+                          <AlertCircle className="h-3 w-3" /> {t('ui.manager.settings.loadFailedRetry')}
                         </p>
                       )}
                     </div>
@@ -213,7 +236,7 @@ export default function ManagerSettingsIndex({
                         className="rounded-none bg-indigo-600 px-8 font-sans text-xs font-bold uppercase tracking-widest text-white hover:bg-indigo-500 disabled:opacity-50"
                         disabled={profileSaving}
                       >
-                        {profileSaving ? '儲存中…' : '儲存變更'}
+                        {profileSaving ? t('ui.member.settings.submitLoading') : t('ui.member.settings.submitButton')}
                       </Button>
                     </div>
                   </form>
@@ -233,10 +256,12 @@ export default function ManagerSettingsIndex({
                 <CardHeader className="border-b border-zinc-800 px-6 py-4">
                   <div className="flex items-center gap-2 text-zinc-100">
                     <Shield className="h-4 w-4 text-zinc-400" />
-                    <CardTitle className="font-sans text-base font-semibold">變更密碼</CardTitle>
+                    <CardTitle className="font-sans text-base font-semibold">
+                      {t('ui.manager.settings.changePasswordTitle')}
+                    </CardTitle>
                   </div>
                   <CardDescription className="font-sans text-xs text-zinc-500">
-                    定期變更密碼以確保帳號安全。
+                    {t('ui.manager.settings.changePasswordDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -249,7 +274,9 @@ export default function ManagerSettingsIndex({
                     )}
                     
                     <div className="space-y-2">
-                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">目前密碼</label>
+                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                        {t('ui.manager.settings.currentPasswordLabel')}
+                      </label>
                       <Input
                         type="password"
                         className="rounded-none border-zinc-800 bg-zinc-950 text-zinc-100 focus:border-indigo-500 focus:ring-0"
@@ -260,7 +287,9 @@ export default function ManagerSettingsIndex({
                     </div>
 
                     <div className="space-y-2">
-                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">新密碼</label>
+                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                        {t('ui.manager.settings.newPasswordLabel')}
+                      </label>
                       <Input
                         type="password"
                         className="rounded-none border-zinc-800 bg-zinc-950 text-zinc-100 focus:border-indigo-500 focus:ring-0"
@@ -280,19 +309,30 @@ export default function ManagerSettingsIndex({
                         </div>
                         <div className="mt-2 flex items-center justify-between">
                           <p className="font-sans text-[10px] text-zinc-500">
-                            密碼強度：<span className={strength > 0 ? strengthColors[strength].replace('bg-', 'text-') : ''}>{strengthLabels[strength]}</span>
+                            {t('ui.manager.settings.passwordStrengthIntro')}
+                            <span className={strength > 0 ? strengthColors[strength].replace('bg-', 'text-') : ''}>
+                              {strengthLabel}
+                            </span>
                           </p>
                           <ul className="flex gap-3 font-sans text-[9px] text-zinc-600">
-                            <li className={password.length >= passwordRequirements.minLength ? 'text-zinc-400' : ''}>8+ 字元</li>
-                            <li className={/[A-Z]/.test(password) ? 'text-zinc-400' : ''}>大寫</li>
-                            <li className={/[0-9]/.test(password) ? 'text-zinc-400' : ''}>數字</li>
+                            <li className={password.length >= passwordRequirements.minLength ? 'text-zinc-400' : ''}>
+                              {t('ui.manager.settings.passwordHintShortMin', { min: passwordRequirements.minLength })}
+                            </li>
+                            <li className={/[A-Z]/.test(password) ? 'text-zinc-400' : ''}>
+                              {t('ui.auth.register.passwordUppercase')}
+                            </li>
+                            <li className={/[0-9]/.test(password) ? 'text-zinc-400' : ''}>
+                              {t('ui.auth.register.passwordNumbers')}
+                            </li>
                           </ul>
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">確認新密碼</label>
+                      <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-500">
+                        {t('ui.manager.settings.confirmNewPasswordLabel')}
+                      </label>
                       <Input
                         type="password"
                         className="rounded-none border-zinc-800 bg-zinc-950 text-zinc-100 focus:border-indigo-500 focus:ring-0"
@@ -309,13 +349,15 @@ export default function ManagerSettingsIndex({
                           className="rounded-none border border-zinc-700 bg-zinc-800 px-8 font-sans text-xs font-bold uppercase tracking-widest text-zinc-200 hover:bg-zinc-700 disabled:opacity-50"
                           disabled={passwordSaving}
                         >
-                          {passwordSaving ? '更新中…' : '更新密碼'}
+                          {passwordSaving
+                            ? t('ui.manager.settings.updatePasswordSubmitting')
+                            : t('ui.manager.settings.updatePasswordSubmit')}
                         </Button>
                       </div>
                       <div className="flex items-start gap-2 border-l border-zinc-800 pl-4 py-1">
                         <LogOut className="mt-0.5 h-3 w-3 text-zinc-600" />
                         <p className="font-sans text-[10px] italic leading-relaxed text-zinc-500">
-                          更新成功後會登出所有裝置，請以新密碼重新登入。
+                          {t('ui.manager.settings.passwordChangeLogoutNote')}
                         </p>
                       </div>
                     </div>
@@ -329,10 +371,12 @@ export default function ManagerSettingsIndex({
                 <CardHeader className="border-b border-zinc-800 px-6 py-4">
                   <div className="flex items-center gap-2 text-zinc-100">
                     <LogOut className="h-4 w-4 text-amber-400" />
-                    <CardTitle className="font-sans text-base font-semibold">登入工作階段</CardTitle>
+                    <CardTitle className="font-sans text-base font-semibold">
+                      {t('ui.member.settings.sessionsCard')}
+                    </CardTitle>
                   </div>
                   <CardDescription className="font-sans text-xs text-zinc-500">
-                    檢視目前作用中的存取權杖。若帳號有異常，可立即從所有裝置登出。
+                    {t('ui.manager.settings.sessionsDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 p-6">
@@ -343,25 +387,35 @@ export default function ManagerSettingsIndex({
                     </div>
                   )}
                   {sessions.length === 0 ? (
-                    <p className="font-sans text-sm text-zinc-500">目前沒有列出中的工作階段。</p>
+                    <p className="font-sans text-sm text-zinc-500">
+                      {t('ui.manager.settings.sessionsEmptyList')}
+                    </p>
                   ) : (
                     <div className="overflow-x-auto border border-zinc-800">
                       <table className="w-full min-w-[320px] border-collapse text-left font-sans text-xs">
                         <thead>
                           <tr className="border-b border-zinc-800 bg-zinc-950/80 text-zinc-500">
-                            <th className="px-3 py-2 font-mono uppercase tracking-wider">建立時間</th>
-                            <th className="px-3 py-2 font-mono uppercase tracking-wider">到期</th>
-                            <th className="px-3 py-2 font-mono uppercase tracking-wider">狀態</th>
+                            <th className="px-3 py-2 font-mono uppercase tracking-wider">
+                              {t('ui.member.settings.sessionsColCreated')}
+                            </th>
+                            <th className="px-3 py-2 font-mono uppercase tracking-wider">
+                              {t('ui.member.settings.sessionsColExpires')}
+                            </th>
+                            <th className="px-3 py-2 font-mono uppercase tracking-wider">
+                              {t('ui.member.settings.sessionsColStatus')}
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
                           {sessions.map((s) => (
                             <tr key={s.id} className="border-b border-zinc-800/80 text-zinc-300 last:border-0">
-                              <td className="px-3 py-2">{formatSessionTime(s.createdAt)}</td>
-                              <td className="px-3 py-2">{formatSessionTime(s.expiresAt)}</td>
+                              <td className="px-3 py-2">{formatSessionTime(s.createdAt, locale)}</td>
+                              <td className="px-3 py-2">{formatSessionTime(s.expiresAt, locale)}</td>
                               <td className="px-3 py-2">
                                 {s.isCurrent ? (
-                                  <span className="font-mono text-[10px] uppercase tracking-wide text-indigo-400">此裝置</span>
+                                  <span className="font-mono text-[10px] uppercase tracking-wide text-indigo-400">
+                                    {t('ui.manager.settings.sessionThisDevice')}
+                                  </span>
                                 ) : (
                                   <span className="text-zinc-600">—</span>
                                 )}
@@ -379,7 +433,9 @@ export default function ManagerSettingsIndex({
                       className="rounded-none border-amber-900/50 bg-zinc-950 font-sans text-xs font-bold uppercase tracking-widest text-amber-200 hover:bg-amber-950/30 disabled:opacity-50"
                       disabled={revokingAll}
                     >
-                      {revokingAll ? '處理中…' : '從所有裝置登出'}
+                      {revokingAll
+                        ? t('ui.manager.settings.revokeAllProcessing')
+                        : t('ui.manager.settings.revokeAllDevices')}
                     </Button>
                   </form>
                 </CardContent>
