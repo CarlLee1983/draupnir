@@ -1,23 +1,17 @@
-import { useState } from 'react'
 import { Head } from '@inertiajs/react'
 import { MemberLayout } from '@/layouts/MemberLayout'
 import { Card, CardContent } from '@/components/ui/card'
-import type { AlertsPageProps, AlertsTab } from './types'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import type { AlertsPageProps } from './types'
 import BudgetsTab from './tabs/BudgetsTab'
 import WebhooksTab from './tabs/WebhooksTab'
 import HistoryTab from './tabs/HistoryTab'
-import { Banner } from '@/components/ui/banner'
+import { AlertCircle, AlertTriangle } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTranslation } from '@/lib/i18n'
 
 export default function AlertsIndex(props: AlertsPageProps) {
   const { t } = useTranslation()
-  const [tab, setTab] = useState<AlertsTab>('budgets')
-
-  const tabLabel = (item: AlertsTab) => {
-    if (item === 'budgets') return t('ui.member.alerts.tab.budgets')
-    if (item === 'webhooks') return t('ui.member.alerts.tab.webhooks')
-    return t('ui.member.alerts.tab.history')
-  }
 
   return (
     <MemberLayout>
@@ -45,42 +39,43 @@ export default function AlertsIndex(props: AlertsPageProps) {
             </div>
 
             {props.error && (
-              <Banner
-                tone={props.error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
-                message={t(props.error.key, props.error.params)}
-              />
+              <Alert
+                variant={props.error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
+              >
+                {props.error.key.endsWith('.selectOrg') ? (
+                  <AlertTriangle className="size-4" />
+                ) : (
+                  <AlertCircle className="size-4" />
+                )}
+                <AlertDescription>{t(props.error.key, props.error.params)}</AlertDescription>
+              </Alert>
             )}
           </div>
 
           <Card className="border-muted/60">
-            <CardContent className="space-y-6 p-4 sm:p-6">
-              <div className="flex flex-wrap gap-2 rounded-2xl bg-muted/50 p-2">
-                {(['budgets', 'webhooks', 'history'] as const).map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    onClick={() => setTab(item)}
-                    className={[
-                      'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
-                      tab === item
-                        ? 'bg-background text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-foreground',
-                    ].join(' ')}
-                  >
-                    {tabLabel(item)}
-                  </button>
-                ))}
-              </div>
-
-              {tab === 'budgets' ? (
-                <BudgetsTab orgId={props.orgId ?? ''} initial={props.budget} />
-              ) : null}
-              {tab === 'webhooks' ? (
-                <WebhooksTab orgId={props.orgId ?? ''} initial={props.webhookEndpoints} />
-              ) : null}
-              {tab === 'history' ? (
-                <HistoryTab orgId={props.orgId ?? ''} initial={props.alertHistory} />
-              ) : null}
+            <CardContent className="p-4 sm:p-6">
+              <Tabs defaultValue="budgets">
+                <TabsList className="flex-wrap rounded-2xl bg-muted/50 p-2">
+                  <TabsTrigger value="budgets" className="rounded-xl">
+                    {t('ui.member.alerts.tab.budgets')}
+                  </TabsTrigger>
+                  <TabsTrigger value="webhooks" className="rounded-xl">
+                    {t('ui.member.alerts.tab.webhooks')}
+                  </TabsTrigger>
+                  <TabsTrigger value="history" className="rounded-xl">
+                    {t('ui.member.alerts.tab.history')}
+                  </TabsTrigger>
+                </TabsList>
+                <TabsContent value="budgets">
+                  <BudgetsTab orgId={props.orgId ?? ''} initial={props.budget} />
+                </TabsContent>
+                <TabsContent value="webhooks">
+                  <WebhooksTab orgId={props.orgId ?? ''} initial={props.webhookEndpoints} />
+                </TabsContent>
+                <TabsContent value="history">
+                  <HistoryTab orgId={props.orgId ?? ''} initial={props.alertHistory} />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </div>
