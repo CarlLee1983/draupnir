@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { resendDelivery } from '../api'
 import DeliveryStatusBadge from './DeliveryStatusBadge'
 import type { AlertEventHistoryDTO } from '../types'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   event: AlertEventHistoryDTO
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function AlertEventRow({ event, orgId, onResent }: Props) {
+  const { t } = useTranslation()
   const { toast } = useToast()
   const [pendingDeliveryId, setPendingDeliveryId] = useState<string | null>(null)
 
@@ -20,12 +22,15 @@ export default function AlertEventRow({ event, orgId, onResent }: Props) {
     setPendingDeliveryId(deliveryId)
     try {
       await resendDelivery(orgId, deliveryId)
-      toast({ title: 'Resent', description: 'Delivery queued for retry.' })
+      toast({
+        title: t('ui.member.alerts.toast.deliveryResent'),
+        description: t('ui.member.alerts.toast.deliveryQueued'),
+      })
       onResent()
     } catch (error_) {
       toast({
-        title: 'Resend failed',
-        description: error_ instanceof Error ? error_.message : 'Unable to resend delivery',
+        title: t('ui.member.alerts.toast.resendFailed'),
+        description: error_ instanceof Error ? error_.message : t('ui.member.alerts.toast.resendFailedBody'),
         variant: 'destructive',
       })
     } finally {
@@ -40,17 +45,26 @@ export default function AlertEventRow({ event, orgId, onResent }: Props) {
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant={event.tier === 'critical' ? 'destructive' : 'secondary'}>
-                {event.tier}
+                {event.tier === 'critical'
+                  ? t('ui.member.alerts.tier.critical')
+                  : t('ui.member.alerts.tier.warning')}
               </Badge>
               <span className="text-sm text-muted-foreground">{event.month}</span>
             </div>
-            <h4 className="text-lg font-medium">${event.actualCostUsd} of ${event.budgetUsd}</h4>
+            <h4 className="text-lg font-medium">
+              {t('ui.member.alerts.event.costLine', { actual: event.actualCostUsd, budget: event.budgetUsd })}
+            </h4>
             <p className="text-sm text-muted-foreground">
-              {event.percentage}% of budget • {new Date(event.createdAt).toLocaleString()}
+              {t('ui.member.alerts.event.percentLine', {
+                pct: event.percentage,
+                time: new Date(event.createdAt).toLocaleString(),
+              })}
             </p>
           </div>
           <div className="text-sm text-muted-foreground">
-            {event.deliveries.length} delivery{event.deliveries.length === 1 ? '' : 'ies'}
+            {event.deliveries.length === 1
+              ? t('ui.member.alerts.event.deliveryCountOne')
+              : t('ui.member.alerts.event.deliveryCount', { count: event.deliveries.length })}
           </div>
         </div>
       </summary>
@@ -62,18 +76,27 @@ export default function AlertEventRow({ event, orgId, onResent }: Props) {
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <DeliveryStatusBadge status={delivery.status} />
-                  <Badge variant="outline">{delivery.channel}</Badge>
+                  <Badge variant="outline">
+                    {delivery.channel === 'email'
+                      ? t('ui.member.alerts.channel.email')
+                      : t('ui.member.alerts.channel.webhook')}
+                  </Badge>
                 </div>
                 <p className="font-medium break-all">{delivery.target}</p>
                 {delivery.targetUrl ? (
                   <p className="text-xs text-muted-foreground break-all">{delivery.targetUrl}</p>
                 ) : null}
                 <p className="text-xs text-muted-foreground">
-                  Attempts: {delivery.attempts} • Sent {new Date(delivery.dispatchedAt).toLocaleString()}
+                  {t('ui.member.alerts.event.attemptsLine', {
+                    attempts: delivery.attempts,
+                    dispatched: new Date(delivery.dispatchedAt).toLocaleString(),
+                  })}
                 </p>
                 {delivery.deliveredAt ? (
                   <p className="text-xs text-muted-foreground">
-                    Delivered {new Date(delivery.deliveredAt).toLocaleString()}
+                    {t('ui.member.alerts.event.deliveredAt', {
+                      time: new Date(delivery.deliveredAt).toLocaleString(),
+                    })}
                   </p>
                 ) : null}
                 {delivery.errorMessage ? (
@@ -88,7 +111,9 @@ export default function AlertEventRow({ event, orgId, onResent }: Props) {
                   onClick={() => void handleResend(delivery.id)}
                   disabled={pendingDeliveryId === delivery.id}
                 >
-                  {pendingDeliveryId === delivery.id ? 'Resending…' : 'Resend'}
+                  {pendingDeliveryId === delivery.id
+                    ? t('ui.member.alerts.event.resending')
+                    : t('ui.member.alerts.event.resend')}
                 </Button>
               ) : null}
             </div>

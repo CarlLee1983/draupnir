@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   onSubmit: (values: { url: string; description: string | null }) => Promise<void>
 }
 
 export default function WebhookEndpointForm({ onSubmit }: Props) {
+  const { t } = useTranslation()
   const [url, setUrl] = useState('')
   const [description, setDescription] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -25,7 +27,7 @@ export default function WebhookEndpointForm({ onSubmit }: Props) {
       setUrl('')
       setDescription('')
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Failed to create webhook endpoint')
+      setError(error_ instanceof Error ? error_.message : t('ui.member.alerts.webhooks.createFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -34,8 +36,10 @@ export default function WebhookEndpointForm({ onSubmit }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border bg-card p-5 shadow-sm">
       <div>
-        <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground">Create endpoint</p>
-        <h3 className="mt-1 text-lg font-semibold">Register a new webhook URL</h3>
+        <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground">
+          {t('ui.member.alerts.webhooks.createEyebrow')}
+        </p>
+        <h3 className="mt-1 text-lg font-semibold">{t('ui.member.alerts.webhooks.registerTitle')}</h3>
       </div>
 
       {error ? (
@@ -46,30 +50,30 @@ export default function WebhookEndpointForm({ onSubmit }: Props) {
 
       <div className="grid gap-4 md:grid-cols-[1.6fr_1fr_auto]">
         <div className="space-y-2">
-          <Label htmlFor="webhook-url">Webhook URL</Label>
+          <Label htmlFor="webhook-url">{t('ui.member.alerts.webhooks.urlLabel')}</Label>
           <Input
             id="webhook-url"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://example.com/webhook"
+            placeholder={t('ui.member.alerts.webhooks.placeholderUrl')}
             required
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="webhook-description">Description</Label>
+          <Label htmlFor="webhook-description">{t('ui.member.alerts.webhooks.descriptionLabel')}</Label>
           <Input
             id="webhook-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Primary alerts sink"
+            placeholder={t('ui.member.alerts.webhooks.placeholderDescription')}
             maxLength={200}
           />
         </div>
 
         <div className="flex items-end">
           <Button type="submit" disabled={submitting} className="w-full md:w-auto">
-            {submitting ? 'Creating…' : 'Create'}
+            {submitting ? t('ui.member.alerts.webhooks.creating') : t('ui.member.alerts.webhooks.createSubmit')}
           </Button>
         </div>
       </div>

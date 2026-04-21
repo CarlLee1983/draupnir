@@ -14,6 +14,7 @@ import {
   updateWebhook,
 } from '../api'
 import type { WebhookEndpointCreatedDTO, WebhookEndpointListDTO } from '../types'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   orgId: string
@@ -26,6 +27,7 @@ interface SecretRevealState {
 }
 
 export default function WebhooksTab({ orgId, initial }: Props) {
+  const { t } = useTranslation()
   const { toast } = useToast()
   const [endpoints, setEndpoints] = useState(initial)
   const [secretReveal, setSecretReveal] = useState<SecretRevealState | null>(null)
@@ -48,12 +50,15 @@ export default function WebhooksTab({ orgId, initial }: Props) {
     try {
       const created = await createWebhook(orgId, values)
       revealSecret(created)
-      toast({ title: 'Created', description: 'Webhook endpoint registered.' })
+      toast({
+        title: t('ui.member.alerts.toast.webhookCreated'),
+        description: t('ui.member.alerts.toast.webhookCreatedDesc'),
+      })
       await reload()
     } catch (error_) {
       toast({
-        title: 'Create failed',
-        description: error_ instanceof Error ? error_.message : 'Unable to create webhook',
+        title: t('ui.member.alerts.toast.webhookCreateFailed'),
+        description: error_ instanceof Error ? error_.message : t('ui.member.alerts.webhooks.createFailed'),
         variant: 'destructive',
       })
       throw error_
@@ -65,12 +70,17 @@ export default function WebhooksTab({ orgId, initial }: Props) {
   async function handleToggleActive(endpoint: WebhookEndpointListDTO) {
     try {
       await updateWebhook(orgId, endpoint.id, { active: !endpoint.active })
-      toast({ title: 'Updated', description: endpoint.active ? 'Webhook paused.' : 'Webhook activated.' })
+      toast({
+        title: t('ui.member.alerts.toast.webhookUpdated'),
+        description: endpoint.active
+          ? t('ui.member.alerts.toast.webhookPaused')
+          : t('ui.member.alerts.toast.webhookActivated'),
+      })
       await reload()
     } catch (error_) {
       toast({
-        title: 'Update failed',
-        description: error_ instanceof Error ? error_.message : 'Unable to update webhook',
+        title: t('ui.member.alerts.toast.webhookUpdateFailed'),
+        description: error_ instanceof Error ? error_.message : t('ui.member.alerts.webhooks.createFailed'),
         variant: 'destructive',
       })
     }
@@ -80,12 +90,15 @@ export default function WebhooksTab({ orgId, initial }: Props) {
     try {
       const rotated = await rotateSecret(orgId, endpoint.id)
       revealSecret(rotated)
-      toast({ title: 'Rotated', description: 'New secret generated.' })
+      toast({
+        title: t('ui.member.alerts.toast.secretRotated'),
+        description: t('ui.member.alerts.toast.newSecretGenerated'),
+      })
       await reload()
     } catch (error_) {
       toast({
-        title: 'Rotate failed',
-        description: error_ instanceof Error ? error_.message : 'Unable to rotate secret',
+        title: t('ui.member.alerts.toast.webhookRotateFailed'),
+        description: error_ instanceof Error ? error_.message : t('ui.member.alerts.webhooks.createFailed'),
         variant: 'destructive',
       })
     }
@@ -95,33 +108,36 @@ export default function WebhooksTab({ orgId, initial }: Props) {
     try {
       const result = await testWebhook(orgId, endpoint.id)
       toast({
-        title: result.success ? 'Test sent' : 'Test failed',
+        title: result.success ? t('ui.member.alerts.toast.testSent') : t('ui.member.alerts.toast.testFailed'),
         description: result.success
-          ? `Attempts: ${result.attempts}`
-          : result.error ?? 'Webhook test failed',
+          ? t('ui.member.alerts.toast.testAttempts', { attempts: result.attempts })
+          : result.error ?? t('ui.member.alerts.toast.testFailedDesc'),
         variant: result.success ? 'default' : 'destructive',
       })
     } catch (error_) {
       toast({
-        title: 'Test failed',
-        description: error_ instanceof Error ? error_.message : 'Unable to test webhook',
+        title: t('ui.member.alerts.toast.webhookTestFailed'),
+        description: error_ instanceof Error ? error_.message : t('ui.member.alerts.webhooks.createFailed'),
         variant: 'destructive',
       })
     }
   }
 
   async function handleDelete(endpoint: WebhookEndpointListDTO) {
-    const confirmed = window.confirm(`Delete webhook endpoint ${endpoint.url}?`)
+    const confirmed = window.confirm(t('ui.member.alerts.webhooks.deleteConfirm', { url: endpoint.url }))
     if (!confirmed) return
 
     try {
       await deleteWebhook(orgId, endpoint.id)
-      toast({ title: 'Deleted', description: 'Webhook endpoint removed.' })
+      toast({
+        title: t('ui.member.alerts.toast.webhookDeleted'),
+        description: t('ui.member.alerts.toast.webhookRemovedDesc'),
+      })
       await reload()
     } catch (error_) {
       toast({
-        title: 'Delete failed',
-        description: error_ instanceof Error ? error_.message : 'Unable to delete webhook',
+        title: t('ui.member.alerts.toast.webhookDeleteFailed'),
+        description: error_ instanceof Error ? error_.message : t('ui.member.alerts.webhooks.createFailed'),
         variant: 'destructive',
       })
     }
@@ -135,17 +151,19 @@ export default function WebhooksTab({ orgId, initial }: Props) {
         <CardContent className="space-y-4 p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground">Registered webhooks</p>
-              <h3 className="mt-1 text-lg font-semibold">Delivery endpoints</h3>
+              <p className="text-sm uppercase tracking-[0.18em] text-muted-foreground">
+                {t('ui.member.alerts.webhooks.listEyebrow')}
+              </p>
+              <h3 className="mt-1 text-lg font-semibold">{t('ui.member.alerts.webhooks.listTitle')}</h3>
             </div>
             <Button variant="outline" size="sm" disabled={loading} onClick={() => void reload()}>
-              Refresh
+              {t('ui.member.alerts.webhooks.refresh')}
             </Button>
           </div>
 
           {endpoints.length === 0 ? (
             <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-              No webhook endpoints have been registered yet.
+              {t('ui.member.alerts.webhooks.empty')}
             </div>
           ) : (
             <div className="space-y-3">

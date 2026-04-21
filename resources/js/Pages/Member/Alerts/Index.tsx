@@ -9,15 +9,15 @@ import HistoryTab from './tabs/HistoryTab'
 import { Banner } from '@/components/ui/banner'
 import { useTranslation } from '@/lib/i18n'
 
-const TAB_LABELS: Record<AlertsTab, string> = {
-  budgets: 'Budgets',
-  webhooks: 'Webhooks',
-  history: 'History',
-}
-
 export default function AlertsIndex(props: AlertsPageProps) {
   const { t } = useTranslation()
   const [tab, setTab] = useState<AlertsTab>('budgets')
+
+  const tabLabel = (item: AlertsTab) => {
+    if (item === 'budgets') return t('ui.member.alerts.tab.budgets')
+    if (item === 'webhooks') return t('ui.member.alerts.tab.webhooks')
+    return t('ui.member.alerts.tab.history')
+  }
 
   return (
     <MemberLayout>
@@ -26,20 +26,20 @@ export default function AlertsIndex(props: AlertsPageProps) {
       <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.12),_transparent_32%),linear-gradient(180deg,_rgba(255,255,255,1),_rgba(248,250,252,1))] p-6">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="space-y-3 rounded-3xl border bg-background/90 p-6 shadow-sm backdrop-blur">
-            <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">Member alerts</p>
+            <p className="text-sm uppercase tracking-[0.22em] text-muted-foreground">
+              {t('ui.member.alerts.eyebrow')}
+            </p>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="space-y-2">
                 <h1 className="text-3xl font-semibold tracking-tight">{t('ui.member.alerts.heading')}</h1>
-                <p className="max-w-2xl text-sm text-muted-foreground">
-                  Manage budgets, webhook endpoints, and alert delivery history from one place.
-                </p>
+                <p className="max-w-2xl text-sm text-muted-foreground">{t('ui.member.alerts.intro')}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <div className="rounded-full border bg-muted/40 px-3 py-1.5 text-sm">
-                  {props.webhookEndpoints.length} webhooks
+                  {t('ui.member.alerts.webhooksCount', { count: props.webhookEndpoints.length })}
                 </div>
                 <div className="rounded-full border bg-muted/40 px-3 py-1.5 text-sm">
-                  {props.alertHistory.length} events
+                  {t('ui.member.alerts.eventsCount', { count: props.alertHistory.length })}
                 </div>
               </div>
             </div>
@@ -55,7 +55,7 @@ export default function AlertsIndex(props: AlertsPageProps) {
           <Card className="border-muted/60">
             <CardContent className="space-y-6 p-4 sm:p-6">
               <div className="flex flex-wrap gap-2 rounded-2xl bg-muted/50 p-2">
-                {(Object.keys(TAB_LABELS) as AlertsTab[]).map((item) => (
+                {(['budgets', 'webhooks', 'history'] as const).map((item) => (
                   <button
                     key={item}
                     type="button"
@@ -67,7 +67,7 @@ export default function AlertsIndex(props: AlertsPageProps) {
                         : 'text-muted-foreground hover:text-foreground',
                     ].join(' ')}
                   >
-                    {TAB_LABELS[item]}
+                    {tabLabel(item)}
                   </button>
                 ))}
               </div>
