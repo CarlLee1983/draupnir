@@ -70,7 +70,7 @@ export function createApiKeyColumns(t: Translator): ColumnDef<ApiKeyRow>[] {
     },
     {
       accessorKey: 'keyPreview',
-      header: 'Key',
+      header: t('ui.admin.apiKeys.columns.key'),
       cell: ({ row }) => <KeyCopyCell row={row.original} t={t} />,
     },
     {

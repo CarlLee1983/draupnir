@@ -9,6 +9,7 @@ import {
   Legend,
 } from 'recharts'
 import { formatDate } from '@/lib/format'
+import { useTranslation } from '@/lib/i18n'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { EmptyChart } from './EmptyChart'
 
@@ -20,25 +21,33 @@ export interface UsageDataPoint {
 
 interface UsageLineChartProps {
   data: UsageDataPoint[]
+  /** 未傳入時使用 `ui.member.usage.trendTitle`；傳入空字串則不顯示標題文字。 */
   title?: string
+  /** 未傳入時使用 `ui.member.usage.empty`。 */
   emptyMessage?: string
   isAnimationActive?: boolean
 }
 
 export function UsageLineChart({
   data,
-  title = '用量趨勢',
-  emptyMessage = '此期間尚無用量資料。',
+  title,
+  emptyMessage,
   isAnimationActive = true,
 }: UsageLineChartProps) {
+  const { t } = useTranslation()
+  const resolvedTitle =
+    title === undefined ? t('ui.member.usage.trendTitle') : title
+  const resolvedEmpty =
+    emptyMessage === undefined ? t('ui.member.usage.empty') : emptyMessage
+
   if (data.length === 0) {
-    return <EmptyChart title={title} message={emptyMessage} />
+    return <EmptyChart title={resolvedTitle} message={resolvedEmpty} />
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>{resolvedTitle}</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -55,7 +64,7 @@ export function UsageLineChart({
             <Line
               type="monotone"
               dataKey="requests"
-              name="請求數"
+              name={t('ui.charts.usageLine.legendRequests')}
               stroke="hsl(222.2 47.4% 11.2%)"
               strokeWidth={2}
               dot={false}
@@ -64,7 +73,7 @@ export function UsageLineChart({
             <Line
               type="monotone"
               dataKey="tokens"
-              name="Token 用量"
+              name={t('ui.charts.usageLine.legendTokens')}
               stroke="hsl(210 40% 60%)"
               strokeWidth={2}
               dot={false}

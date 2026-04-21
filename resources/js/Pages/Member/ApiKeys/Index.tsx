@@ -68,7 +68,7 @@ export default function ApiKeysIndex({
 
             {invitations.length > 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-white/60">你有待處理的組織邀請：</p>
+                <p className="text-sm text-white/60">{t('ui.member.dashboard.invitationsIntro')}</p>
                 {invitations.map((inv) => (
                   <InvitationCard
                     key={inv.id}
@@ -82,9 +82,9 @@ export default function ApiKeysIndex({
             {invitations.length === 0 && (
               <Card className="border-border rounded-lg bg-white/[0.02] shadow-indigo-500/5 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-base text-white">尚無組織</CardTitle>
+                  <CardTitle className="text-base text-white">{t('ui.member.dashboard.noOrgTitle')}</CardTitle>
                   <CardDescription className="text-white/40">
-                    建立組織以開始使用 API Key、帳單與儀表板功能
+                    {t('ui.member.dashboard.noOrgDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -93,7 +93,7 @@ export default function ApiKeysIndex({
                     onClick={() => setCreateOrgOpen(true)}
                     className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   >
-                    建立我的組織
+                    {t('ui.member.createOrganization.submit')}
                   </Button>
                 </CardContent>
               </Card>

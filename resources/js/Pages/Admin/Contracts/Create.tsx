@@ -188,7 +188,7 @@ export default function ContractCreate({ formError }: Props) {
                 <Input
                   id="allowedModules"
                   defaultValue="dashboard,credit,api_keys"
-                  placeholder="dashboard,credit,api_keys"
+                  placeholder={t('ui.admin.contracts.create.modulesPlaceholder')}
                 />
               </div>
 

@@ -65,7 +65,7 @@ export default function ForgotPassword() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder={t('ui.auth.forgotPassword.emailPlaceholder')}
                   className="pl-10"
                   value={data.email}
                   onChange={(e) => setData('email', e.target.value)}

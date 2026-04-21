@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCredit, formatDate } from '@/lib/format'
 import { EmptyChart } from './EmptyChart'
+import { useTranslation } from '@/lib/i18n'
 
 export interface CostTrendPoint {
   date: string
@@ -25,16 +26,18 @@ interface Props {
   title?: string
 }
 
-export const CostTrendAreaChart = React.memo(({ data, title = '成本趨勢' }: Props) => {
+export const CostTrendAreaChart = React.memo(({ data, title }: Props) => {
+  const { t } = useTranslation()
+  const resolvedTitle = title ?? t('ui.member.dashboard.chartCost')
   if (data.length === 0) {
-    return <EmptyChart title={title} message="No cost trend data for this window." />
+    return <EmptyChart title={resolvedTitle} message={t('ui.charts.costTrend.empty')} />
   }
 
   return (
     <Card className="overflow-hidden border-border rounded-lg shadow-indigo-500/5 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>每日 cached cost 變化</CardDescription>
+        <CardTitle className="text-base">{resolvedTitle}</CardTitle>
+        <CardDescription>{t('ui.charts.costTrend.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -64,7 +67,7 @@ export const CostTrendAreaChart = React.memo(({ data, title = '成本趨勢' }: 
             <Area
               type="monotone"
               dataKey="totalCost"
-              name="成本"
+              name={t('ui.charts.costTrend.seriesName')}
               stroke="var(--primary)"
               fill="url(#costTrendFill)"
               strokeWidth={2}
@@ -79,30 +82,34 @@ export const CostTrendAreaChart = React.memo(({ data, title = '成本趨勢' }: 
 
 CostTrendAreaChart.displayName = 'CostTrendAreaChart'
 
-const TrendTooltip = React.memo(({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean
-  payload?: readonly { value?: number }[]
-  label?: string
-}) => {
-  if (!active || !payload?.length) return null
+const TrendTooltip = React.memo(
+  ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean
+    payload?: readonly { value?: number }[]
+    label?: string
+  }) => {
+    const { t } = useTranslation()
+    if (!active || !payload?.length) return null
 
-  const point = payload[0]?.value ?? 0
+    const point = payload[0]?.value ?? 0
 
-  return (
-    <div className="rounded-none border border-border bg-background/80 px-3 py-2 text-sm shadow-xl backdrop-blur-md">
-      <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-        {label ? formatDate(label) : '—'}
+    return (
+      <div className="rounded-none border border-border bg-background/80 px-3 py-2 text-sm shadow-xl backdrop-blur-md">
+        <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+          {label ? formatDate(label) : '—'}
+        </div>
+        <div className="font-medium text-white">
+          {t('ui.charts.costTrend.tooltipCost', { value: formatCredit(point) })}
+        </div>
       </div>
-      <div className="font-medium text-white">成本 {formatCredit(point)}</div>
-    </div>
-  )
-})
+    )
+  },
+)
 
 TrendTooltip.displayName = 'TrendTooltip'
-
 
 export type { CostTrendPoint as CostTrendDataPoint }

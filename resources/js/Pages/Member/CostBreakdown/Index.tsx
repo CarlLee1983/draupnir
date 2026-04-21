@@ -31,16 +31,10 @@ interface Props {
   error: I18nMessage | null
 }
 
-const WINDOW_OPTIONS: readonly { value: WindowOption; label: string }[] = [
-  { value: 7, label: '7d' },
-  { value: 30, label: '30d' },
-  { value: 90, label: '90d' },
-]
-
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export default function CostBreakdown({ orgId, error }: Props) {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [selectedWindow, setSelectedWindow] = useState<WindowOption>(30)
   const [perKeyData, setPerKeyData] = useState<PerKeyCostData | null>(null)
   const [modelRows, setModelRows] = useState<readonly ModelRow[]>([])
@@ -80,12 +74,12 @@ export default function CostBreakdown({ orgId, error }: Props) {
           data?: PerKeyCostData
         }
         if (!payload.success) {
-          throw new Error(payload.message ?? 'Failed to load cost breakdown')
+          throw new Error(payload.message ?? t('ui.member.costBreakdown.fetchPerKeyFailed'))
         }
         setPerKeyData(payload.data ?? null)
       } catch (error_) {
         if (controller.signal.aborted) return
-        const message = error_ instanceof Error ? error_.message : 'Failed to load cost breakdown'
+        const message = error_ instanceof Error ? error_.message : t('ui.member.costBreakdown.fetchPerKeyFailed')
         setFetchError(message)
         setPerKeyData(null)
       } finally {
@@ -98,7 +92,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
     void loadPerKeyCost()
 
     return () => controller.abort()
-  }, [orgId, selectedWindow])
+  }, [orgId, selectedWindow, t])
 
   useEffect(() => {
     if (!orgId) {
@@ -128,12 +122,12 @@ export default function CostBreakdown({ orgId, error }: Props) {
           data?: { rows?: readonly ModelRow[] }
         }
         if (!payload.success) {
-          throw new Error(payload.message ?? 'Failed to load model distribution')
+          throw new Error(payload.message ?? t('ui.member.costBreakdown.fetchModelDistFailed'))
         }
         setModelRows(payload.data?.rows ?? [])
       } catch (error_) {
         if (controller.signal.aborted) return
-        const message = error_ instanceof Error ? error_.message : 'Failed to load model distribution'
+        const message = error_ instanceof Error ? error_.message : t('ui.member.costBreakdown.fetchModelDistFailed')
         setFetchError(message)
         setModelRows([])
       } finally {
@@ -146,7 +140,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
     void loadModelDistribution()
 
     return () => controller.abort()
-  }, [orgId, selectedWindow])
+  }, [orgId, selectedWindow, t])
 
   const loading = perKeyLoading || modelLoading
 
@@ -178,7 +172,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
         <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between print:hidden">
           <div className="space-y-2">
             <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Member Analytics
+              {t('ui.member.costBreakdown.eyebrow')}
             </p>
             <h1 className="text-3xl font-semibold tracking-tight">{t('ui.member.costBreakdown.title')}</h1>
             <p className="max-w-2xl text-sm text-muted-foreground">
@@ -196,7 +190,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
         <div className="hidden print:block">
           <h1 className="text-3xl font-semibold tracking-tight">{t('ui.member.costBreakdown.reportTitle')}</h1>
           <p className="text-sm text-muted-foreground">
-            Generated: {new Date().toLocaleDateString('zh-TW')}
+            {t('ui.member.costBreakdown.generatedLine', { date: new Date().toLocaleDateString(locale) })}
           </p>
         </div>
 
@@ -207,14 +201,14 @@ export default function CostBreakdown({ orgId, error }: Props) {
             ) : (
               <AlertCircle className="size-4" />
             )}
-            <AlertTitle>Organization</AlertTitle>
+            <AlertTitle>{t('ui.member.dashboard.alertTitle.organization')}</AlertTitle>
             <AlertDescription>{t(error.key, error.params)}</AlertDescription>
           </Alert>
         )}
         {fetchError && (
           <Alert variant="destructive">
             <AlertCircle className="size-4" />
-            <AlertTitle>Analytics</AlertTitle>
+            <AlertTitle>{t('ui.member.dashboard.alertTitle.analytics')}</AlertTitle>
             <AlertDescription>{fetchError}</AlertDescription>
           </Alert>
         )}
@@ -227,7 +221,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
           <>
             <Card className="print-page-break">
               <CardHeader>
-                <CardTitle className="text-base">Per-Key Cost Breakdown</CardTitle>
+                <CardTitle className="text-base">{t('ui.member.costBreakdown.perKeyCardTitle')}</CardTitle>
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -241,7 +235,7 @@ export default function CostBreakdown({ orgId, error }: Props) {
                   />
                 ) : (
                   <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
-                    No cost data available for this period.
+                    {t('ui.member.costBreakdown.noCostDataPeriod')}
                   </div>
                 )}
               </CardContent>
@@ -269,9 +263,16 @@ function WindowSelector({
   value: WindowOption
   onChange: (value: WindowOption) => void
 }) {
+  const { t } = useTranslation()
+  const options: { value: WindowOption; days: number }[] = [
+    { value: 7, days: 7 },
+    { value: 30, days: 30 },
+    { value: 90, days: 90 },
+  ]
+
   return (
     <div className="inline-flex rounded-xl border bg-background p-1 shadow-sm">
-      {WINDOW_OPTIONS.map((option) => {
+      {options.map((option) => {
         const active = value === option.value
         return (
           <Button
@@ -282,7 +283,7 @@ function WindowSelector({
             className={cn('min-w-16 rounded-lg px-4 transition-all', active ? 'shadow-sm' : 'text-muted-foreground')}
             onClick={() => onChange(option.value)}
           >
-            {option.label}
+            {t('ui.member.dashboard.windowDays', { days: option.days })}
           </Button>
         )
       })}

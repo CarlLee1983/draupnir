@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatDate, formatNumber } from '@/lib/format'
 import { EmptyChart } from './EmptyChart'
+import { useTranslation } from '@/lib/i18n'
 
 export interface TokenUsagePoint {
   date: string
@@ -26,16 +27,21 @@ interface Props {
   title?: string
 }
 
-export const TokenUsageAreaChart = React.memo(({ data, title = 'Token 用量' }: Props) => {
+export const TokenUsageAreaChart = React.memo(({ data, title }: Props) => {
+  const { t } = useTranslation()
+  const resolvedTitle = title ?? t('ui.member.dashboard.chartTokens')
   if (data.length === 0) {
-    return <EmptyChart title={title} message="No token usage data for this window." />
+    return <EmptyChart title={resolvedTitle} message={t('ui.charts.tokenUsage.empty')} />
   }
+
+  const legendInput = t('ui.charts.tokenUsage.legendInput')
+  const legendOutput = t('ui.charts.tokenUsage.legendOutput')
 
   return (
     <Card className="overflow-hidden border-border rounded-lg shadow-indigo-500/5 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>Input / output token 趨勢</CardDescription>
+        <CardTitle className="text-base">{resolvedTitle}</CardTitle>
+        <CardDescription>{t('ui.charts.tokenUsage.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
@@ -70,7 +76,7 @@ export const TokenUsageAreaChart = React.memo(({ data, title = 'Token 用量' }:
             <Area
               type="monotone"
               dataKey="totalInputTokens"
-              name="Input Tokens"
+              name={legendInput}
               stackId="tokens"
               stroke="var(--cyan)"
               fill="url(#tokenInputFill)"
@@ -80,7 +86,7 @@ export const TokenUsageAreaChart = React.memo(({ data, title = 'Token 用量' }:
             <Area
               type="monotone"
               dataKey="totalOutputTokens"
-              name="Output Tokens"
+              name={legendOutput}
               stackId="tokens"
               stroke="var(--blue)"
               fill="url(#tokenOutputFill)"
@@ -96,38 +102,40 @@ export const TokenUsageAreaChart = React.memo(({ data, title = 'Token 用量' }:
 
 TokenUsageAreaChart.displayName = 'TokenUsageAreaChart'
 
-const TokenTooltip = React.memo(({
-  active,
-  payload,
-  label,
-}: {
-  active?: boolean
-  payload?: readonly { name?: string; value?: number }[]
-  label?: string
-}) => {
-  if (!active || !payload?.length) return null
+const TokenTooltip = React.memo(
+  ({
+    active,
+    payload,
+    label,
+  }: {
+    active?: boolean
+    payload?: readonly { dataKey?: string; value?: number }[]
+    label?: string
+  }) => {
+    const { t } = useTranslation()
+    if (!active || !payload?.length) return null
 
-  const input = payload.find((entry) => entry.name === 'Input Tokens')?.value ?? 0
-  const output = payload.find((entry) => entry.name === 'Output Tokens')?.value ?? 0
+    const input = payload.find((entry) => entry.dataKey === 'totalInputTokens')?.value ?? 0
+    const output = payload.find((entry) => entry.dataKey === 'totalOutputTokens')?.value ?? 0
 
-  return (
-    <div className="rounded-none border border-border bg-background/80 px-3 py-2 text-sm shadow-xl backdrop-blur-md">
-      <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-        {label ? formatDate(label) : '—'}
+    return (
+      <div className="rounded-none border border-border bg-background/80 px-3 py-2 text-sm shadow-xl backdrop-blur-md">
+        <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+          {label ? formatDate(label) : '—'}
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-muted-foreground">{t('ui.charts.tokenUsage.tooltipInput')}</span>
+          <span className="font-medium text-white">{formatNumber(input)}</span>
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-muted-foreground">{t('ui.charts.tokenUsage.tooltipOutput')}</span>
+          <span className="font-medium text-white">{formatNumber(output)}</span>
+        </div>
       </div>
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-muted-foreground">Input</span>
-        <span className="font-medium text-white">{formatNumber(input)}</span>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-muted-foreground">Output</span>
-        <span className="font-medium text-white">{formatNumber(output)}</span>
-      </div>
-    </div>
-  )
-})
+    )
+  },
+)
 
 TokenTooltip.displayName = 'TokenTooltip'
-
 
 export type { TokenUsagePoint as TokenUsageDataPoint }

@@ -109,7 +109,7 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, pendi
         })
       } catch (error_) {
         if (controller.signal.aborted) return
-        const message = error_ instanceof Error ? error_.message : 'Failed to load dashboard analytics'
+        const message = error_ instanceof Error ? error_.message : t('ui.member.dashboard.fetchAnalyticsFailed')
         setFetchError(message)
         setBundle(null)
       } finally {
@@ -122,7 +122,7 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, pendi
     void loadAnalytics()
 
     return () => controller.abort()
-  }, [orgId, selectedWindow])
+  }, [orgId, selectedWindow, t])
 
   const hasUsageRows = (bundle?.kpi.usage.totalRequests ?? 0) > 0
   const showEmptyState = Boolean(orgId) && !fetchError && !hasUsageRows
@@ -138,7 +138,7 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, pendi
 
             {invitations.length > 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-white/60">你有待處理的組織邀請：</p>
+                <p className="text-sm text-white/60">{t('ui.member.dashboard.invitationsIntro')}</p>
                 {invitations.map((inv) => (
                   <InvitationCard
                     key={inv.id}
@@ -152,9 +152,9 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, pendi
             {invitations.length === 0 && (
               <Card className="border-border rounded-lg bg-white/[0.02] shadow-indigo-500/5 shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-base text-white">尚無組織</CardTitle>
+                  <CardTitle className="text-base text-white">{t('ui.member.dashboard.noOrgTitle')}</CardTitle>
                   <CardDescription className="text-white/40">
-                    建立組織以開始使用 API Key、帳單與儀表板功能
+                    {t('ui.member.dashboard.noOrgDescription')}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -163,7 +163,7 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, pendi
                     onClick={() => setCreateOrgOpen(true)}
                     className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
                   >
-                    建立我的組織
+                    {t('ui.member.createOrganization.submit')}
                   </Button>
                 </CardContent>
               </Card>
@@ -185,14 +185,14 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, pendi
             ) : (
               <AlertCircle className="size-4" />
             )}
-            <AlertTitle>Organization</AlertTitle>
+            <AlertTitle>{t('ui.member.dashboard.alertTitle.organization')}</AlertTitle>
             <AlertDescription>{t(error.key, error.params)}</AlertDescription>
           </Alert>
         )}
         {fetchError && (
           <Alert variant="destructive">
             <AlertCircle className="size-4" />
-            <AlertTitle>Analytics</AlertTitle>
+            <AlertTitle>{t('ui.member.dashboard.alertTitle.analytics')}</AlertTitle>
             <AlertDescription>{fetchError}</AlertDescription>
           </Alert>
         )}

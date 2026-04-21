@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import React from 'react'
+import { useTranslation } from '@/lib/i18n'
 
 interface Props {
   title: string
@@ -7,11 +8,12 @@ interface Props {
 }
 
 export const EmptyChart = React.memo(({ title, message }: Props) => {
+  const { t } = useTranslation()
   return (
     <Card className="overflow-hidden border-dashed border-border rounded-lg shadow-none">
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>Chart placeholder</CardDescription>
+        <CardDescription>{t('ui.charts.empty.subtitle')}</CardDescription>
       </CardHeader>
       <CardContent className="flex min-h-[300px] items-center justify-center text-sm text-muted-foreground">
         {message}

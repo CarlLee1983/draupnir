@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { formatCredit, formatNumber } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { ModelRow } from './ModelDistributionDonut'
+import { useTranslation } from '@/lib/i18n'
 
 export interface PerKeyCostRow {
   apiKeyId: string
@@ -52,6 +53,7 @@ type SortDirection = 'asc' | 'desc'
 const DAY_MS = 24 * 60 * 60 * 1000
 
 export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, className }: Props) {
+  const { t } = useTranslation()
   const [sortKey, setSortKey] = useState<SortKey>('cost')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set())
@@ -106,7 +108,7 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
       }
 
       if (!payload.success) {
-        throw new Error(payload.message ?? 'Failed to load model breakdown')
+        throw new Error(payload.message ?? t('ui.charts.perKey.modelBreakdownFailed'))
       }
 
       if (!mountedRef.current || scopeRef.current !== scope) {
@@ -159,7 +161,7 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
           className,
         )}
       >
-        No cost data available for this period.
+        {t('ui.charts.perKey.empty')}
       </div>
     )
   }
@@ -170,31 +172,31 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
         <TableHeader>
           <TableRow>
             <SortableHead
-              label="Key Name"
+              label={t('ui.charts.perKey.colKeyName')}
               active={sortKey === 'keyName'}
               direction={sortDirection}
               onClick={() => toggleSort('keyName', sortKey, sortDirection, setSortKey, setSortDirection)}
             />
             <SortableHead
-              label="Cost"
+              label={t('ui.charts.perKey.colCost')}
               active={sortKey === 'cost'}
               direction={sortDirection}
               onClick={() => toggleSort('cost', sortKey, sortDirection, setSortKey, setSortDirection)}
             />
             <SortableHead
-              label="Requests"
+              label={t('ui.charts.perKey.colRequests')}
               active={sortKey === 'requests'}
               direction={sortDirection}
               onClick={() => toggleSort('requests', sortKey, sortDirection, setSortKey, setSortDirection)}
             />
             <SortableHead
-              label="Tokens"
+              label={t('ui.charts.perKey.colTokens')}
               active={sortKey === 'tokens'}
               direction={sortDirection}
               onClick={() => toggleSort('tokens', sortKey, sortDirection, setSortKey, setSortDirection)}
             />
             <SortableHead
-              label="$ / Request"
+              label={t('ui.charts.perKey.colCostPerRequest')}
               active={sortKey === 'costPerRequest'}
               direction={sortDirection}
               onClick={() =>
@@ -202,7 +204,7 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
               }
             />
             <SortableHead
-              label="Tokens / Request"
+              label={t('ui.charts.perKey.colTokensPerRequest')}
               active={sortKey === 'tokensPerRequest'}
               direction={sortDirection}
               onClick={() =>
@@ -210,7 +212,7 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
               }
             />
             <SortableHead
-              label="% of Total"
+              label={t('ui.charts.perKey.colPercentOfTotal')}
               active={sortKey === 'percent'}
               direction={sortDirection}
               onClick={() => toggleSort('percent', sortKey, sortDirection, setSortKey, setSortDirection)}
@@ -248,16 +250,16 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
                       {isLoading ? (
                         <div className="flex items-center gap-3">
                           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">Loading model breakdown...</span>
+                          <span className="text-sm text-muted-foreground">{t('ui.charts.perKey.loadingBreakdown')}</span>
                         </div>
                       ) : modelRows && modelRows.length > 0 ? (
                         <div className="overflow-hidden rounded-lg border bg-background">
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>Model</TableHead>
-                                <TableHead>Cost</TableHead>
-                                <TableHead>Requests</TableHead>
+                                <TableHead>{t('ui.charts.perKey.breakdownColModel')}</TableHead>
+                                <TableHead>{t('ui.charts.perKey.colCost')}</TableHead>
+                                <TableHead>{t('ui.charts.perKey.colRequests')}</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -273,7 +275,7 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
                         </div>
                       ) : (
                         <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
-                          No model breakdown available for this key.
+                          {t('ui.charts.perKey.breakdownEmpty')}
                         </div>
                       )}
                     </TableCell>
@@ -285,7 +287,7 @@ export function PerKeyCostTable({ rows, grandTotal, orgId, selectedWindow, class
         </TableBody>
         <TableFooter>
           <TableRow className="border-t-2 font-semibold">
-            <TableCell>Total</TableCell>
+            <TableCell>{t('ui.charts.perKey.total')}</TableCell>
             <TableCell>{formatCredit(grandTotal.totalCost)}</TableCell>
             <TableCell>{formatNumber(grandTotal.totalRequests)}</TableCell>
             <TableCell>{formatNumber(grandTotal.totalTokens)}</TableCell>

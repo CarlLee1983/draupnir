@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/table'
 import { formatCredit, formatNumber } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { useTranslation } from '@/lib/i18n'
 
 export interface ModelComparisonRow {
   model: string
@@ -31,7 +32,9 @@ interface Props {
   className?: string
 }
 
-export const ModelComparisonTable = React.memo(({ data, title = '模型比較', className }: Props) => {
+export const ModelComparisonTable = React.memo(({ data, title, className }: Props) => {
+  const { t } = useTranslation()
+  const resolvedTitle = title ?? t('ui.member.dashboard.chartModelComp')
   const [sortKey, setSortKey] = useState<SortKey>('cost')
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
 
@@ -41,38 +44,44 @@ export const ModelComparisonTable = React.memo(({ data, title = '模型比較', 
   })
 
   return (
-    <Card className={cn("overflow-hidden border-border rounded-lg shadow-indigo-500/5 shadow-sm", className)}>
+    <Card className={cn('overflow-hidden border-border rounded-lg shadow-indigo-500/5 shadow-sm', className)}>
       <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        <CardDescription>Client-side sortable model comparison</CardDescription>
+        <CardTitle className="text-base">{resolvedTitle}</CardTitle>
+        <CardDescription>{t('ui.charts.modelComparison.description')}</CardDescription>
       </CardHeader>
       <CardContent>
         {sortedRows.length === 0 ? (
           <div className="flex min-h-[240px] items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground">
-            No model comparison data for this window.
+            {t('ui.charts.modelComparison.empty')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table>
-              <TableCaption className="font-mono text-[10px] uppercase tracking-wider">Top 10 models ordered by cached usage cost.</TableCaption>
+              <TableCaption className="font-mono text-[10px] uppercase tracking-wider">
+                {t('ui.charts.modelComparison.caption')}
+              </TableCaption>
               <TableHeader>
                 <TableRow className="hover:bg-transparent border-border">
-                  <TableHead className="font-mono text-[10px] uppercase tracking-wider">Model</TableHead>
-                  <TableHead className="font-mono text-[10px] uppercase tracking-wider">Provider</TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-wider">
+                    {t('ui.charts.modelComparison.colModel')}
+                  </TableHead>
+                  <TableHead className="font-mono text-[10px] uppercase tracking-wider">
+                    {t('ui.charts.modelComparison.colProvider')}
+                  </TableHead>
                   <SortableHead
-                    label="Cost"
+                    label={t('ui.charts.modelComparison.colCost')}
                     active={sortKey === 'cost'}
                     direction={sortDirection}
                     onClick={() => toggleSort('cost', sortKey, sortDirection, setSortKey, setSortDirection)}
                   />
                   <SortableHead
-                    label="Requests"
+                    label={t('ui.charts.modelComparison.colRequests')}
                     active={sortKey === 'requests'}
                     direction={sortDirection}
                     onClick={() => toggleSort('requests', sortKey, sortDirection, setSortKey, setSortDirection)}
                   />
                   <SortableHead
-                    label="Avg Latency"
+                    label={t('ui.charts.modelComparison.colLatency')}
                     active={sortKey === 'latency'}
                     direction={sortDirection}
                     onClick={() => toggleSort('latency', sortKey, sortDirection, setSortKey, setSortDirection)}
@@ -81,7 +90,10 @@ export const ModelComparisonTable = React.memo(({ data, title = '模型比較', 
               </TableHeader>
               <TableBody>
                 {sortedRows.map((row) => (
-                  <TableRow key={`${row.model}:${row.provider ?? 'none'}`} className="border-border hover:bg-white/[0.02] transition-colors">
+                  <TableRow
+                    key={`${row.model}:${row.provider ?? 'none'}`}
+                    className="border-border hover:bg-white/[0.02] transition-colors"
+                  >
                     <TableCell className="font-medium text-white">{row.model}</TableCell>
                     <TableCell className="text-muted-foreground">{row.provider ?? '—'}</TableCell>
                     <TableCell className="font-mono text-xs">{formatCredit(row.totalCost)}</TableCell>
@@ -100,46 +112,47 @@ export const ModelComparisonTable = React.memo(({ data, title = '模型比較', 
 
 ModelComparisonTable.displayName = 'ModelComparisonTable'
 
-const SortableHead = React.memo(({
-  label,
-  active,
-  direction,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  direction: SortDirection
-  onClick: () => void
-}) => {
-  return (
-    <TableHead>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className={cn(
-          "h-8 -translate-x-2 px-2 text-left font-mono text-[10px] uppercase tracking-wider hover:bg-white/5",
-          active ? "text-indigo-400" : "text-muted-foreground hover:text-white"
-        )}
-        onClick={onClick}
-      >
-        <span>{label}</span>
-        {active ? (
-          direction === 'asc' ? (
-            <ArrowUp className="ml-1 h-3 w-3" />
+const SortableHead = React.memo(
+  ({
+    label,
+    active,
+    direction,
+    onClick,
+  }: {
+    label: string
+    active: boolean
+    direction: SortDirection
+    onClick: () => void
+  }) => {
+    return (
+      <TableHead>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className={cn(
+            'h-8 -translate-x-2 px-2 text-left font-mono text-[10px] uppercase tracking-wider hover:bg-white/5',
+            active ? 'text-indigo-400' : 'text-muted-foreground hover:text-white',
+          )}
+          onClick={onClick}
+        >
+          <span>{label}</span>
+          {active ? (
+            direction === 'asc' ? (
+              <ArrowUp className="ml-1 h-3 w-3" />
+            ) : (
+              <ArrowDown className="ml-1 h-3 w-3" />
+            )
           ) : (
-            <ArrowDown className="ml-1 h-3 w-3" />
-          )
-        ) : (
-          <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />
-        )}
-      </Button>
-    </TableHead>
-  )
-})
+            <ArrowUpDown className="ml-1 h-3 w-3 opacity-30" />
+          )}
+        </Button>
+      </TableHead>
+    )
+  },
+)
 
 SortableHead.displayName = 'SortableHead'
-
 
 function compareRows(left: ModelComparisonRow, right: ModelComparisonRow, key: SortKey): number {
   if (key === 'cost') return left.totalCost - right.totalCost

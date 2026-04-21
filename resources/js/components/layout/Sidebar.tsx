@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react'
 import { cn } from '@/lib/utils'
 import type { ReactNode } from 'react'
+import { useTranslation } from '@/lib/i18n'
 
 export interface NavItem {
   label: string
@@ -17,6 +18,7 @@ interface SidebarProps {
 
 export function Sidebar({ title, items, open, onClose }: SidebarProps) {
   const { url } = usePage()
+  const { t } = useTranslation()
 
   return (
     <>
@@ -25,7 +27,7 @@ export function Sidebar({ title, items, open, onClose }: SidebarProps) {
           type="button"
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={onClose}
-          aria-label="關閉側邊欄"
+          aria-label={t('ui.layout.sidebar.closeOverlay')}
         />
       )}
 
@@ -34,7 +36,7 @@ export function Sidebar({ title, items, open, onClose }: SidebarProps) {
           'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-background transition-transform lg:static lg:translate-x-0',
           open ? 'translate-x-0' : '-translate-x-full',
         )}
-        aria-label="主要導覽選單"
+        aria-label={t('ui.layout.sidebar.ariaNav')}
       >
         <div className="flex h-14 items-center border-b border-border px-4">
           <Link href="/" className="font-mono text-sm font-bold uppercase tracking-widest text-foreground">
@@ -42,12 +44,12 @@ export function Sidebar({ title, items, open, onClose }: SidebarProps) {
           </Link>
         </div>
 
-        <nav aria-label="主要導覽選單" className="flex-1 space-y-0.5 py-4">
+        <nav aria-label={t('ui.layout.sidebar.ariaNav')} className="flex-1 space-y-0.5 py-4">
           {items.map((item) => {
-            const isActive = item.href === '/member/dashboard' 
-              ? url === '/member/dashboard' 
+            const isActive = item.href === '/member/dashboard'
+              ? url === '/member/dashboard'
               : url.startsWith(item.href)
-              
+
             return (
               <Link
                 key={item.href}

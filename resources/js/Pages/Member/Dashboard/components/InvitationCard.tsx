@@ -5,6 +5,7 @@ import { resolveCsrfTokenForFetch } from '@/lib/csrf'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { useTranslation, type MessageKey, type Translator } from '@/lib/i18n'
 
 export interface PendingInvitation {
   id: string
@@ -19,24 +20,38 @@ interface Props {
   onDeclined: (id: string) => void
 }
 
-function formatExpiry(isoDate: string): string {
+function formatExpiry(isoDate: string, locale: string): string {
   const d = new Date(isoDate)
   if (isNaN(d.getTime())) return isoDate
-  return d.toLocaleDateString()
+  return d.toLocaleDateString(locale)
 }
 
-const ERROR_MESSAGES: Record<string, string> = {
-  INVALID_INVITATION: '邀請已過期或無效',
-  EMAIL_MISMATCH: '此邀請並非寄送給你的帳號',
-  USER_ALREADY_IN_ORG: '你已是該組織成員',
-  UNAUTHORIZED: '請重新登入後再試',
+function invitationErrorKey(code: string | undefined): MessageKey | null {
+  switch (code) {
+    case 'INVALID_INVITATION':
+      return 'ui.member.invitation.error.INVALID_INVITATION'
+    case 'EMAIL_MISMATCH':
+      return 'ui.member.invitation.error.EMAIL_MISMATCH'
+    case 'USER_ALREADY_IN_ORG':
+      return 'ui.member.invitation.error.USER_ALREADY_IN_ORG'
+    case 'UNAUTHORIZED':
+      return 'ui.member.invitation.error.UNAUTHORIZED'
+    default:
+      return null
+  }
 }
 
 export function InvitationCard({ invitation, onDeclined }: Props) {
+  const { t, locale } = useTranslation()
   const { csrfToken: inertiaCsrf } = usePage().props as { csrfToken?: string }
   const [accepting, setAccepting] = useState(false)
   const [declining, setDeclining] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const resolveError = (tt: Translator, code: string | undefined, message: string | undefined, fallback: MessageKey) => {
+    const key = invitationErrorKey(code)
+    return key ? tt(key) : message ?? tt(fallback)
+  }
 
   const handleAccept = async () => {
     setAccepting(true)
@@ -56,10 +71,10 @@ export function InvitationCard({ invitation, onDeclined }: Props) {
       if (payload.success) {
         router.visit('/member/dashboard', { replace: true })
       } else {
-        setError(ERROR_MESSAGES[payload.error ?? ''] ?? payload.message ?? '接受邀請失敗，請稍後再試')
+        setError(resolveError(t, payload.error, payload.message, 'ui.member.invitation.acceptFailed'))
       }
     } catch {
-      setError('接受邀請失敗，請稍後再試')
+      setError(t('ui.member.invitation.acceptFailed'))
     } finally {
       setAccepting(false)
     }
@@ -83,10 +98,10 @@ export function InvitationCard({ invitation, onDeclined }: Props) {
       if (payload.success) {
         onDeclined(invitation.id)
       } else {
-        setError(ERROR_MESSAGES[payload.error ?? ''] ?? payload.message ?? '拒絕邀請失敗，請稍後再試')
+        setError(resolveError(t, payload.error, payload.message, 'ui.member.invitation.declineFailed'))
       }
     } catch {
-      setError('拒絕邀請失敗，請稍後再試')
+      setError(t('ui.member.invitation.declineFailed'))
     } finally {
       setDeclining(false)
     }
@@ -104,7 +119,9 @@ export function InvitationCard({ invitation, onDeclined }: Props) {
           </Badge>
         </div>
         <CardDescription className="text-white/40">
-          邀請加入組織 · 到期日：{formatExpiry(invitation.expiresAt)}
+          {t('ui.member.invitation.cardSubtitle', {
+            date: formatExpiry(invitation.expiresAt, locale),
+          })}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -116,15 +133,10 @@ export function InvitationCard({ invitation, onDeclined }: Props) {
             disabled={accepting || declining}
             className="bg-indigo-500 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
           >
-            {accepting ? '接受中…' : '接受邀請'}
+            {accepting ? t('ui.member.invitation.accepting') : t('ui.member.invitation.accept')}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleDecline}
-            disabled={accepting || declining}
-          >
-            {declining ? '拒絕中…' : '拒絕'}
+          <Button type="button" variant="outline" onClick={handleDecline} disabled={accepting || declining}>
+            {declining ? t('ui.member.invitation.declining') : t('ui.member.invitation.decline')}
           </Button>
         </div>
       </CardContent>

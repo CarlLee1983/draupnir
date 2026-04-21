@@ -10,6 +10,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useTranslation } from '@/lib/i18n'
 
 interface TopBarProps {
   onToggleSidebar: () => void
@@ -17,6 +18,7 @@ interface TopBarProps {
 
 export function TopBar({ onToggleSidebar }: TopBarProps) {
   const { user } = useAuth()
+  const { t } = useTranslation()
 
   const getInitials = (email: string, name?: string) => {
     if (name) {
@@ -30,7 +32,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
     return localPart.slice(0, 2).toUpperCase()
   }
 
-  const initials = user ? getInitials(user.email, (user as any).name) : '??'
+  const initials = user ? getInitials(user.email, (user as { name?: string }).name) : '??'
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-border bg-background px-4 sm:px-6">
@@ -39,12 +41,12 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           variant="ghost"
           size="icon"
           onClick={onToggleSidebar}
-          aria-label="開啟側邊選單"
+          aria-label={t('ui.layout.topBar.openMenu')}
         >
           <Menu className="h-5 w-5" />
         </Button>
         <Link href="/" className="font-mono text-xs font-bold uppercase tracking-widest text-foreground">
-          Draupnir
+          {t('ui.layout.brand.memberShell')}
         </Link>
       </div>
 
@@ -56,7 +58,7 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           <Button
             variant="ghost"
             className="relative h-8 w-8 rounded-none border border-border bg-muted/30"
-            aria-label="使用者選單"
+            aria-label={t('ui.layout.topBar.userMenu')}
           >
             <Avatar className="h-8 w-8 rounded-none">
               <AvatarFallback className="rounded-none bg-transparent font-mono text-[11px]">{initials}</AvatarFallback>
@@ -72,13 +74,13 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
           )}
           <DropdownMenuItem asChild className="cursor-pointer focus:bg-primary focus:text-primary-foreground">
             <Link href="/member/settings" className="flex w-full items-center px-2 py-1.5">
-              設定
+              {t('ui.layout.topBar.settings')}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator className="bg-border" />
           <DropdownMenuItem asChild className="cursor-pointer focus:bg-destructive focus:text-destructive-foreground">
             <Link href="/logout" method="post" as="button" className="flex w-full items-center px-2 py-1.5">
-              登出
+              {t('ui.layout.topBar.logout')}
             </Link>
           </DropdownMenuItem>
         </DropdownMenuContent>

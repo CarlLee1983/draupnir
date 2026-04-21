@@ -133,7 +133,7 @@ export default function ManagerMembersIndex({
                     </label>
                     <Input
                       id="email"
-                      placeholder="email@example.com"
+                      placeholder={t('ui.manager.members.inviteEmailPlaceholder')}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required

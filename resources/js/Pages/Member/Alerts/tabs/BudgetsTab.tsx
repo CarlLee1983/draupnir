@@ -79,7 +79,7 @@ export default function BudgetsTab({ orgId, initial }: Props) {
                 id="budgetUsd"
                 value={budgetUsd}
                 onChange={(e) => setBudgetUsd(e.target.value)}
-                placeholder="1000.00"
+                placeholder={t('ui.member.alerts.budgets.amountPlaceholder')}
                 inputMode="decimal"
                 required
               />

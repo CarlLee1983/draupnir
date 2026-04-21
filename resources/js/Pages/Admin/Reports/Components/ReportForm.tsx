@@ -101,7 +101,7 @@ export function ReportForm({ orgId, initialData, onSuccess }: Props) {
       <div className="space-y-2">
         <Label>{t('ui.admin.reports.recipientsLabel')}</Label>
         <Input 
-          placeholder="admin@example.com, finance@example.com" 
+          placeholder={t('ui.admin.reports.recipientsPlaceholder')} 
           value={data.recipients}
           onChange={(e) => setData('recipients', e.target.value)}
         />
