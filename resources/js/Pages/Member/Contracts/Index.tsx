@@ -1,8 +1,9 @@
 import { Head } from '@inertiajs/react'
 import { MemberLayout } from '@/layouts/MemberLayout'
-import { Banner } from '@/components/ui/banner'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { DataTable } from '@/components/tables/DataTable'
 import { createContractColumns, type ContractRow } from './columns'
+import { AlertCircle, AlertTriangle } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -24,10 +25,14 @@ export default function ContractsIndex({ contracts, error }: Props) {
         <h1 className="text-2xl font-bold">{t('ui.member.contracts.title')}</h1>
 
         {error && (
-          <Banner
-            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
-            message={t(error.key, error.params)}
-          />
+          <Alert variant={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}>
+            {error.key.endsWith('.selectOrg') ? (
+              <AlertTriangle className="size-4" />
+            ) : (
+              <AlertCircle className="size-4" />
+            )}
+            <AlertDescription>{t(error.key, error.params)}</AlertDescription>
+          </Alert>
         )}
 
         <DataTable columns={columns} data={contracts} paginated={false} />

@@ -3,8 +3,8 @@ import { MemberLayout } from '@/layouts/MemberLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UsageLineChart, type UsageDataPoint } from '@/components/charts/UsageLineChart'
 import { formatNumber } from '@/lib/format'
-import { Activity, Zap } from 'lucide-react'
-import { Banner } from '@/components/ui/banner'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Activity, AlertCircle, AlertTriangle, Zap } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -30,11 +30,17 @@ export default function MemberUsage({ totals, chartData, error }: Props) {
         <h1 className="text-2xl font-bold">{t('ui.member.usage.heading')}</h1>
 
         {error && (
-          <Banner
-            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
-            message={t(error.key, error.params)}
+          <Alert
+            variant={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
             className="mb-6"
-          />
+          >
+            {error.key.endsWith('.selectOrg') ? (
+              <AlertTriangle className="size-4" />
+            ) : (
+              <AlertCircle className="size-4" />
+            )}
+            <AlertDescription>{t(error.key, error.params)}</AlertDescription>
+          </Alert>
         )}
 
         <div className="grid gap-4 md:grid-cols-2">

@@ -3,12 +3,13 @@ import { Head } from '@inertiajs/react'
 import { MemberLayout } from '@/layouts/MemberLayout'
 import { DataTable } from '@/components/tables/DataTable'
 import { createApiKeyColumns, type ApiKeyRow } from './columns'
-import { Banner } from '@/components/ui/banner'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { BalanceCard } from '../Dashboard/components/BalanceCard'
 import { CreateOrganizationModal } from '../Dashboard/components/CreateOrganizationModal'
 import { InvitationCard, type PendingInvitation } from '../Dashboard/components/InvitationCard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { AlertCircle, AlertTriangle } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 
@@ -51,10 +52,14 @@ export default function ApiKeysIndex({
         </div>
 
         {error && (
-          <Banner
-            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
-            message={t(error.key, error.params)}
-          />
+          <Alert variant={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}>
+            {error.key.endsWith('.selectOrg') ? (
+              <AlertTriangle className="size-4" />
+            ) : (
+              <AlertCircle className="size-4" />
+            )}
+            <AlertDescription>{t(error.key, error.params)}</AlertDescription>
+          </Alert>
         )}
 
         {!hasOrganization ? (
