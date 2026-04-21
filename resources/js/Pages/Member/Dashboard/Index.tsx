@@ -18,7 +18,8 @@ import {
   type ModelComparisonRow,
 } from '@/components/charts/ModelComparisonTable'
 import { cn } from '@/lib/utils'
-import { Banner } from '@/components/ui/banner'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { AlertCircle, AlertTriangle } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 import { fetchJson } from '@/lib/api'
@@ -178,13 +179,23 @@ export default function MemberDashboard({ orgId, balance, hasOrganization, pendi
         />
 
         {error && (
-          <Banner
-            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
-            title="Organization"
-            message={t(error.key, error.params)}
-          />
+          <Alert variant={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}>
+            {error.key.endsWith('.selectOrg') ? (
+              <AlertTriangle className="size-4" />
+            ) : (
+              <AlertCircle className="size-4" />
+            )}
+            <AlertTitle>Organization</AlertTitle>
+            <AlertDescription>{t(error.key, error.params)}</AlertDescription>
+          </Alert>
         )}
-        {fetchError && <Banner tone="destructive" title="Analytics" message={fetchError} />}
+        {fetchError && (
+          <Alert variant="destructive">
+            <AlertCircle className="size-4" />
+            <AlertTitle>Analytics</AlertTitle>
+            <AlertDescription>{fetchError}</AlertDescription>
+          </Alert>
+        )}
 
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] print:hidden">
           <BalanceCard balance={balance} />

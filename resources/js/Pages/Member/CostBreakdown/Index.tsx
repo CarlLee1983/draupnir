@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { MemberLayout } from '@/layouts/MemberLayout'
-import { Banner } from '@/components/ui/banner'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
+import { AlertCircle, AlertTriangle } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 import {
@@ -200,13 +201,23 @@ export default function CostBreakdown({ orgId, error }: Props) {
         </div>
 
         {error && (
-          <Banner
-            tone={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}
-            title="Organization"
-            message={t(error.key, error.params)}
-          />
+          <Alert variant={error.key.endsWith('.selectOrg') ? 'warning' : 'destructive'}>
+            {error.key.endsWith('.selectOrg') ? (
+              <AlertTriangle className="size-4" />
+            ) : (
+              <AlertCircle className="size-4" />
+            )}
+            <AlertTitle>Organization</AlertTitle>
+            <AlertDescription>{t(error.key, error.params)}</AlertDescription>
+          </Alert>
         )}
-        {fetchError && <Banner tone="destructive" title="Analytics" message={fetchError} />}
+        {fetchError && (
+          <Alert variant="destructive">
+            <AlertCircle className="size-4" />
+            <AlertTitle>Analytics</AlertTitle>
+            <AlertDescription>{fetchError}</AlertDescription>
+          </Alert>
+        )}
 
         {!orgId ? (
           <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
