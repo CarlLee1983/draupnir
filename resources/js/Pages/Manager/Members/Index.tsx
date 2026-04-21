@@ -5,6 +5,7 @@ import { ManagerLayout } from '@/layouts/ManagerLayout'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useTranslation } from '@/lib/i18n'
 import {
   Table,
@@ -402,10 +403,10 @@ export default function ManagerMembersIndex({
         </Card>
 
         {error && (
-          <div className="p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-medium flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
-            {t('ui.manager.members.loadFailedBanner')}
-          </div>
+          <Alert variant="destructive">
+            <AlertCircle className="size-4" />
+            <AlertDescription>{t('ui.manager.members.loadFailedBanner')}</AlertDescription>
+          </Alert>
         )}
       </div>
     </ManagerLayout>
