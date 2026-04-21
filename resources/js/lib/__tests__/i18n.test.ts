@@ -52,7 +52,7 @@ describe('createTranslator', () => {
       const t = createTranslator({})
       const key: MessageKey = 'admin.contracts.missingId'
       t(key)
-      expect(warnSpy).toHaveBeenCalledOnce()
+      expect(warnSpy).toHaveBeenCalledTimes(1)
       expect(warnSpy).toHaveBeenCalledWith(
         `[i18n] Missing translation key: "${key}"`,
       )
