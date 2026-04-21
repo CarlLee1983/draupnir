@@ -7,6 +7,8 @@
  * - Equality is based on values, not references.
  */
 export abstract class ValueObject {
+  protected constructor() {}
+
   /**
    * Compares two value objects for equality.
    * Subclasses should override this method to compare all their attributes.

@@ -210,4 +210,16 @@ describe('CronerScheduler', () => {
       scheduler.unschedule('job-8')
     }
   })
+
+  it('stops all jobs when stopAll() is invoked', () => {
+    const scheduler = new CronerScheduler()
+
+    scheduler.schedule({ name: 'job-a', cron: '* * * * * *' }, async () => {})
+    scheduler.schedule({ name: 'job-b', cron: '* * * * * *' }, async () => {})
+
+    scheduler.stopAll()
+
+    expect(scheduler.has('job-a')).toBe(false)
+    expect(scheduler.has('job-b')).toBe(false)
+  })
 })

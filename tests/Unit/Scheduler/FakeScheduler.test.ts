@@ -66,4 +66,15 @@ describe('FakeScheduler', () => {
     expect(scheduler.scheduled.get('x')?.spec).toBe(spec)
     expect(scheduler.scheduled.get('x')?.handler).toBe(handler)
   })
+
+  it('clears all scheduled jobs on stopAll()', () => {
+    const scheduler = new FakeScheduler()
+
+    scheduler.schedule({ name: 'a', cron: '* * * * *' }, async () => {})
+    scheduler.schedule({ name: 'b', cron: '* * * * *' }, async () => {})
+
+    scheduler.stopAll()
+
+    expect(scheduler.scheduled.size).toBe(0)
+  })
 })

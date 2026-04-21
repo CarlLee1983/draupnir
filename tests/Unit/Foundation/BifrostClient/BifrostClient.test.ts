@@ -206,6 +206,83 @@ describe('BifrostClient', () => {
     })
   })
 
+  describe('teams', () => {
+    it('should create a team', async () => {
+      const mockResponse: TeamResponse = {
+        message: 'created',
+        team: { id: 'team-1', name: 'org-1' },
+      }
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
+
+      const result = await client.createTeam({ name: 'org-1' })
+
+      expect(result.id).toBe('team-1')
+      const fetchCall = (globalThis.fetch as any).mock.calls[0]
+      expect(fetchCall[0]).toBe('https://bifrost.test/api/governance/teams')
+      expect(fetchCall[1].method).toBe('POST')
+    })
+
+    it('should list teams with optional query params', async () => {
+      const mockResponse: TeamListResponse = {
+        teams: [{ id: 'team-1', name: 'org-1' }],
+      }
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
+
+      const result = await client.listTeams({ customer_id: 'cust-1', from_memory: true })
+
+      expect(result).toHaveLength(1)
+      const url = (globalThis.fetch as any).mock.calls[0][0] as string
+      expect(url).toContain('/api/governance/teams?')
+      expect(url).toContain('customer_id=cust-1')
+      expect(url).toContain('from_memory=true')
+    })
+
+    it('should list teams without query params', async () => {
+      const mockResponse: TeamListResponse = {
+        teams: [{ id: 'team-1', name: 'org-1' }],
+      }
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
+
+      const result = await client.listTeams()
+
+      expect(result).toHaveLength(1)
+      const url = (globalThis.fetch as any).mock.calls[0][0] as string
+      expect(url).toBe('https://bifrost.test/api/governance/teams')
+    })
+
+    it('should get and update a team by ID', async () => {
+      const getResponse: TeamResponse = {
+        message: 'ok',
+        team: { id: 'team-1', name: 'org-1' },
+      }
+      const updateResponse: TeamResponse = {
+        message: 'updated',
+        team: { id: 'team-1', name: 'org-1-updated' },
+      }
+      globalThis.fetch = mock((url: string, init: RequestInit) => {
+        if (init.method === 'GET') return Promise.resolve(mockFetchResponse(200, getResponse))
+        if (init.method === 'PUT') return Promise.resolve(mockFetchResponse(200, updateResponse))
+        throw new Error(`unexpected method: ${init.method}`)
+      }) as any
+
+      const team = await client.getTeam('team-1')
+      expect(team.name).toBe('org-1')
+
+      const updated = await client.updateTeam('team-1', { name: 'org-1-updated' })
+      expect(updated.name).toBe('org-1-updated')
+    })
+
+    it('should delete a team', async () => {
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, { message: 'ok' }))) as any
+
+      await client.deleteTeam('team-1')
+
+      const fetchCall = (globalThis.fetch as any).mock.calls[0]
+      expect(fetchCall[1].method).toBe('DELETE')
+      expect(fetchCall[0]).toBe('https://bifrost.test/api/governance/teams/team-1')
+    })
+  })
+
   describe('request headers', () => {
     it('should include Authorization and Content-Type headers', async () => {
       globalThis.fetch = mock(() =>

@@ -3,6 +3,8 @@ import type {
   BifrostClientConfig,
   BifrostLogsResponse,
   BifrostLogsStats,
+  TeamListResponse,
+  TeamResponse,
   VirtualKeyResponse,
 } from '@draupnir/bifrost-sdk'
 import { BifrostApiError, BifrostClient } from '@draupnir/bifrost-sdk'
@@ -38,6 +40,56 @@ describe('BifrostGatewayAdapter', () => {
 
   afterEach(() => {
     globalThis.fetch = originalFetch
+  })
+
+  describe('ensureTeam', () => {
+    it('returns the existing team when name matches', async () => {
+      const listResponse: TeamListResponse = {
+        teams: [{ id: 'team-1', name: 'org-1', customer_id: 'cust-1', budget_id: 'budget-1' }],
+      }
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, listResponse))) as any
+
+      const team = await adapter.ensureTeam({ name: 'org-1' })
+
+      expect(team).toEqual({
+        id: 'team-1',
+        name: 'org-1',
+        customerId: 'cust-1',
+        budgetId: 'budget-1',
+      })
+      expect((globalThis.fetch as any).mock.calls).toHaveLength(1)
+    })
+
+    it('creates a new team when no match exists', async () => {
+      const listResponse: TeamListResponse = { teams: [] }
+      const createResponse: TeamResponse = {
+        message: 'created',
+        team: { id: 'team-2', name: 'org-2', customer_id: 'cust-2' },
+      }
+      globalThis.fetch = mock((url: string, init: RequestInit) => {
+        if (init.method === 'GET') return Promise.resolve(mockFetchResponse(200, listResponse))
+        if (init.method === 'POST') return Promise.resolve(mockFetchResponse(200, createResponse))
+        throw new Error(`unexpected method: ${init.method}`)
+      }) as any
+
+      const team = await adapter.ensureTeam({
+        name: 'org-2',
+        customerId: 'cust-2',
+        budget: { maxLimit: 100, resetDuration: '30d', calendarAligned: true },
+      })
+
+      expect(team.id).toBe('team-2')
+
+      const postCall = (globalThis.fetch as any).mock.calls.find(
+        (call: any[]) => call[1]?.method === 'POST',
+      )
+      const body = JSON.parse(postCall[1].body)
+      expect(body).toEqual({
+        name: 'org-2',
+        customer_id: 'cust-2',
+        budget: { max_limit: 100, reset_duration: '30d', calendar_aligned: true },
+      })
+    })
   })
 
   // ============================================================
@@ -194,6 +246,24 @@ describe('BifrostGatewayAdapter', () => {
 
       expect(result.id).toBe('vk-1')
       expect(result.isActive).toBe(false)
+    })
+
+    it('should map providerConfigs.allowedModels to allowed_models', async () => {
+      const mockResponse: VirtualKeyResponse = {
+        message: 'updated',
+        virtual_key: { id: 'vk-1', name: 'updated', is_active: false, provider_configs: [] },
+      }
+      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
+
+      await adapter.updateKey('vk-1', {
+        providerConfigs: [{ provider: 'openai', allowedModels: ['gpt-4', 'gpt-4o'] }],
+      })
+
+      const fetchCall = (globalThis.fetch as any).mock.calls[0]
+      const body = JSON.parse(fetchCall[1].body)
+      expect(body.provider_configs).toEqual([
+        { provider: 'openai', allowed_models: ['gpt-4', 'gpt-4o'] },
+      ])
     })
   })
 
