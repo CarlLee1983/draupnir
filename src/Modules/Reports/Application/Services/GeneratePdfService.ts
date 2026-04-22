@@ -2,7 +2,7 @@ import { chromium } from 'playwright'
 import { ReportToken } from '../../Domain/ValueObjects/ReportToken'
 
 export class GeneratePdfService {
-  async generate(orgId: string): Promise<Buffer> {
+  async generate(orgId: string, scheduleId: string): Promise<Buffer> {
     const browser = await chromium.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     })
@@ -12,7 +12,7 @@ export class GeneratePdfService {
 
       // Generate a token valid for 30 minutes
       const expiresAt = new Date(Date.now() + 30 * 60 * 1000)
-      const token = await ReportToken.generate(orgId, expiresAt)
+      const token = await ReportToken.generate(orgId, scheduleId, expiresAt)
 
       const appUrl = process.env.APP_URL || 'http://localhost:3000'
       const url = `${appUrl}/admin/reports/template?token=${token.value}&isAnimationActive=false`

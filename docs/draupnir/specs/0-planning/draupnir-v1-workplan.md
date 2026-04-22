@@ -760,7 +760,7 @@ resources/js/Pages/Admin/
 2. Users + Organizations（最常用管理操作）
 3. Contracts + Modules（核心業務管理）
 4. ApiKeys 全域總覽（監控）
-5. UsageSync 狀態（運維監控）
+5. Bifrost sync 狀態（運維監控）
 
 ### 7.2 會員 Portal（Member Portal）
 

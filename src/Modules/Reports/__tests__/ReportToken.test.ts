@@ -17,29 +17,33 @@ describe('ReportToken', () => {
 
   it('should generate a valid signed token', async () => {
     const orgId = 'org-123'
+    const scheduleId = 'schedule-123'
     const expiresAt = new Date(Date.now() + 3600 * 1000)
 
-    const token = await ReportToken.generate(orgId, expiresAt)
+    const token = await ReportToken.generate(orgId, scheduleId, expiresAt)
     expect(token).toBeDefined()
     expect(typeof token.value).toBe('string')
   })
 
   it('should verify a valid token', async () => {
     const orgId = 'org-123'
+    const scheduleId = 'schedule-123'
     const expiresAt = new Date(Date.now() + 3600 * 1000)
 
-    const token = await ReportToken.generate(orgId, expiresAt)
+    const token = await ReportToken.generate(orgId, scheduleId, expiresAt)
     const result = await ReportToken.verify(token.value)
 
     expect(result).not.toBeNull()
     expect(result?.orgId).toBe(orgId)
+    expect(result?.scheduleId).toBe(scheduleId)
   })
 
   it('should fail verification if token is expired', async () => {
     const orgId = 'org-123'
+    const scheduleId = 'schedule-123'
     const expiresAt = new Date(Date.now() - 3600 * 1000) // 1 hour ago
 
-    const token = await ReportToken.generate(orgId, expiresAt)
+    const token = await ReportToken.generate(orgId, scheduleId, expiresAt)
     const result = await ReportToken.verify(token.value)
 
     expect(result).toBeNull()
@@ -47,9 +51,10 @@ describe('ReportToken', () => {
 
   it('should fail verification if token is tampered with', async () => {
     const orgId = 'org-123'
+    const scheduleId = 'schedule-123'
     const expiresAt = new Date(Date.now() + 3600 * 1000)
 
-    const token = await ReportToken.generate(orgId, expiresAt)
+    const token = await ReportToken.generate(orgId, scheduleId, expiresAt)
     // Tamper with the payload part
     const parts = token.value.split('.')
     const payload = parts[0]

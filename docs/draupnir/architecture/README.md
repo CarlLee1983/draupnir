@@ -16,6 +16,9 @@
 | [`entity-relationship-overview.md`](./entity-relationship-overview.md) | **ER 圖** - 以 Drizzle schema／migration 為準的 Aggregate、Entity、ValueObject 映射 | DB、後端 |
 | [`auth-flow-diagrams.md`](./auth-flow-diagrams.md) | **認證流程圖** - JWT（API／Inertia Cookie）、撤銷、API Key、App Key、`/sdk/v1` 閘道 | 全體 |
 | [`website-inertia-layer.md`](./website-inertia-layer.md) | **Website／Inertia 層** - `src/Website` 目錄、middleware 群組、`WebsiteServiceProvider`、與 Modules 邊界 | 全體 |
+| [`data-flow-overview.md`](./data-flow-overview.md) | **資料流總覽** - Bifrost、Usage read model、Dashboard、Reports、Credit、Alerts 的單頁入口 | 新成員、全體 |
+| [`bifrost-sync-data-flow.md`](./bifrost-sync-data-flow.md) | **Bifrost 用量同步資料流** - gateway → usage_records → Dashboard / Reports / Credit / Alerts | 後端、架構審閱者 |
+| [`report-rendering-data-flow.md`](./report-rendering-data-flow.md) | **報表模板渲染資料流** - 釐清 token、schedule、usage read model 與 gateway 邊界 | 後端、前端、QA |
 | [`http-middleware-stack.md`](./http-middleware-stack.md) | **HTTP middleware 堆疊** - Global／路由／Inertia 鏈、靜默 refresh、範例請求 | 全體 |
 
 ### 📊 UML 圖表（補全的完整設計圖集）
@@ -23,7 +26,7 @@
 | 檔案 | 內容 | 優先級 | 適合對象 |
 |------|------|-------|--------|
 | [`uml/use-case-diagram.md`](./uml/use-case-diagram.md) | **使用案例圖** - Admin、Developer、End User 三大角色的 17 個核心用例、交互矩陣 | 🔴 高 | 產品、全體開發 |
-| [`uml/sequence-diagrams.md`](./uml/sequence-diagrams.md) | **時序圖** - 5 大關鍵流程（API 計費、告警評估、報表生成、邀請、合約續約）的時間序列與組件交互 | 🔴 高 | 全體開發、QA |
+| [`uml/sequence-diagrams.md`](./uml/sequence-diagrams.md) | **時序圖** - 6 大關鍵流程（API 計費、Bifrost 用量同步、告警評估、報表生成、邀請、合約續約）的時間序列與組件交互 | 🔴 高 | 全體開發、QA |
 | [`uml/state-diagrams.md`](./uml/state-diagrams.md) | **狀態圖** - 6 大聚合根的生命週期與合法狀態轉移（User、Contract、CreditAccount、AlertConfig、Application、Organization） | 🟠 中 | 後端、Domain 設計 |
 | [`uml/component-and-deployment-diagrams.md`](./uml/component-and-deployment-diagrams.md) | **元件 + 部署圖** - 系統元件細化依賴、本地／預發佈／生產三層部署拓撲、基礎設施決策 | 🟠 中 | DevOps、架構師 |
 | [`uml/activity-diagrams.md`](./uml/activity-diagrams.md) | **活動圖** - 5 大複雜流程的決策分支、異常恢復、並行活動（API 請求、合約續約、邀請、告警、報表） | 🟡 低 | 流程梳理、優化 |
@@ -96,6 +99,7 @@
 #### ⏱️ **深入關鍵業務流程的時間序列**（時序圖）
 👉 開始於 [`uml/sequence-diagrams.md`](./uml/sequence-diagrams.md)
 - API 請求 → 驗證 → 轉發 → 非同步扣費（同步/非同步混合）
+- Bifrost 用量同步與本地寫入
 - 告警評估與多渠道通知（Email / Webhook）
 - 報表生成與投遞
 - 成員邀請與自動加入
@@ -122,6 +126,23 @@
 - 邀請流程的郵箱驗證與邊界情況
 - 告警觸發的去重與並行通知
 - 報表生成與並行投遞
+
+#### 📄 **報表模板的資料來源與 gateway 邊界**
+👉 開始於 [`report-rendering-data-flow.md`](./report-rendering-data-flow.md)
+- token 驗證與 schedule live lookup
+- usage read model 與 gateway 的分層
+- 前端模板純 render 與 snapshot 生成邊界
+
+#### 🔄 **Bifrost 用量同步如何落到本地 read model**
+👉 開始於 [`bifrost-sync-data-flow.md`](./bifrost-sync-data-flow.md)
+- cron 排程與 gateway 抓取
+- `usage_records` / `quarantined_logs` / `sync_cursors`
+- 同步完成事件如何銜接 Credit / Alerts / Reports
+
+#### 🧭 **一頁式資料流總覽**
+👉 開始於 [`data-flow-overview.md`](./data-flow-overview.md)
+- 快速理解 gateway / sync / read model / report 的分工
+- 適合 onboarding 與架構導覽第一站
 
 ---
 

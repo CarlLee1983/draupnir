@@ -1,8 +1,19 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { ScheduleReportService } from '../../Application/Services/ScheduleReportService'
-import { ReportSchedule } from '../../Domain/Aggregates/ReportSchedule'
+import { ReportSchedule, type ReportType } from '../../Domain/Aggregates/ReportSchedule'
 import type { IReportRepository } from '../../Domain/Repositories/IReportRepository'
 import { ReportToken } from '../../Domain/ValueObjects/ReportToken'
+
+interface CreateReportScheduleBody {
+  type: ReportType
+  day: number
+  time: string
+  timezone: string
+  recipients: string[]
+  enabled?: boolean
+}
+
+type UpdateReportScheduleBody = Partial<CreateReportScheduleBody>
 
 export class ReportController {
   constructor(
@@ -11,15 +22,23 @@ export class ReportController {
   ) {}
 
   async index(ctx: IHttpContext): Promise<Response> {
-    const orgId = ctx.getParam('orgId')!
+    const orgId = getRequiredParam(ctx, 'orgId')
+    if (!orgId) {
+      return ctx.json({ error: 'Missing organization ID' }, 400)
+    }
+
     const schedules = await this.reportRepository.findByOrgId(orgId)
     return ctx.json(schedules)
   }
 
   async store(ctx: IHttpContext): Promise<Response> {
     try {
-      const orgId = ctx.getParam('orgId')!
-      const body = await ctx.getBody<any>()
+      const orgId = getRequiredParam(ctx, 'orgId')
+      if (!orgId) {
+        return ctx.json({ error: 'Missing organization ID' }, 400)
+      }
+
+      const body = await ctx.getBody<CreateReportScheduleBody>()
       const schedule = ReportSchedule.create({
         orgId,
         type: body.type,
@@ -37,14 +56,22 @@ export class ReportController {
       }
 
       return ctx.json(schedule, 201)
-    } catch (error: any) {
-      return ctx.json({ error: error.message }, 400)
+    } catch (error: unknown) {
+      return ctx.json({ error: getErrorMessage(error) }, 400)
     }
   }
 
   async update(ctx: IHttpContext): Promise<Response> {
-    const orgId = ctx.getParam('orgId')!
-    const reportId = ctx.getParam('reportId')!
+    const orgId = getRequiredParam(ctx, 'orgId')
+    if (!orgId) {
+      return ctx.json({ error: 'Missing organization ID' }, 400)
+    }
+
+    const reportId = getRequiredParam(ctx, 'reportId')
+    if (!reportId) {
+      return ctx.json({ error: 'Missing report ID' }, 400)
+    }
+
     const schedule = await this.reportRepository.findById(reportId)
     if (!schedule) {
       return ctx.json({ error: 'Report schedule not found' }, 404)
@@ -54,7 +81,7 @@ export class ReportController {
     }
 
     try {
-      const body = await ctx.getBody<any>()
+      const body = await ctx.getBody<UpdateReportScheduleBody>()
       const updatedSchedule = ReportSchedule.create({
         id: schedule.id,
         orgId: schedule.orgId,
@@ -75,14 +102,22 @@ export class ReportController {
       }
 
       return ctx.json(updatedSchedule)
-    } catch (error: any) {
-      return ctx.json({ error: error.message }, 400)
+    } catch (error: unknown) {
+      return ctx.json({ error: getErrorMessage(error) }, 400)
     }
   }
 
   async destroy(ctx: IHttpContext): Promise<Response> {
-    const orgId = ctx.getParam('orgId')!
-    const reportId = ctx.getParam('reportId')!
+    const orgId = getRequiredParam(ctx, 'orgId')
+    if (!orgId) {
+      return ctx.json({ error: 'Missing organization ID' }, 400)
+    }
+
+    const reportId = getRequiredParam(ctx, 'reportId')
+    if (!reportId) {
+      return ctx.json({ error: 'Missing report ID' }, 400)
+    }
+
     const schedule = await this.reportRepository.findById(reportId)
     if (!schedule) {
       return ctx.json({ error: 'Report schedule not found' }, 404)
@@ -108,6 +143,15 @@ export class ReportController {
       return ctx.json({ error: 'Invalid or expired report token' }, 401)
     }
 
-    return ctx.json({ valid: true, orgId: payload.orgId })
+    return ctx.json({ valid: true, orgId: payload.orgId, scheduleId: payload.scheduleId })
   }
+}
+
+function getRequiredParam(ctx: IHttpContext, name: 'orgId' | 'reportId'): string | undefined {
+  const value = ctx.getParam(name)
+  return value && value.length > 0 ? value : undefined
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error'
 }

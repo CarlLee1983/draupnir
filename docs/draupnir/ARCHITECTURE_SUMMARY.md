@@ -4,8 +4,21 @@
 > 配置詳情見 `DESIGN_DECISIONS.md`，技術細節見 `.planning/codebase/` 目錄。
 
 **文檔版本**: v1.4  
-**更新日期**: 2026-04-13  
+**更新日期**: 2026-04-22  
 **專案**: Draupnir — 企業級 AI 服務管理平台（建構於 Bifrost 之上）
+
+---
+
+## 資料流總覽入口
+
+如果你只想先搞懂「資料從哪裡來、去哪裡」，先看這三份文件：
+
+- `docs/draupnir/architecture/data-flow-overview.md`
+  - 一頁式總覽，先建立全局心智模型
+- `docs/draupnir/architecture/bifrost-sync-data-flow.md`
+  - 說明 Bifrost 用量同步如何落到本地 `usage_records`
+- `docs/draupnir/architecture/report-rendering-data-flow.md`
+  - 說明報表模板 render 時如何讀本地資料，而不是直接打 gateway
 
 ---
 
@@ -162,7 +175,7 @@ Application 層定義 Port（接口），Infrastructure 層注入具體實現（
 使用 `DomainEventDispatcher` 進行進程內通訊。例如：
 - `UserRegisteredEvent` -> 自動創建默認組織。
 - `BalanceDepleted` -> 觸發告警通知並使關聯 API Key 失效。
-- `BifrostSyncCompleted` -> 觸發告警評估。
+- `BifrostSyncCompletedEvent` -> 觸發告警評估。
 
 ### 3. 統一調度 (IScheduler)
 Phase 18 引入的 `IScheduler` 提供標準化的後台任務管理，確保報表、合約到期掃描等任務在分佈式環境下安全運行。

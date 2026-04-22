@@ -15,11 +15,13 @@ import type {
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
-
+import {
+  withAdminInertiaPageHandler,
+  withInertiaPageHandler,
+} from '@/Website/Http/Inertia/withInertiaPage'
+import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
 import type { AdminPageBindingKey } from '../keys'
 import { ADMIN_PAGE_KEYS } from '../keys'
-import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
-import { withAdminInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -39,6 +41,7 @@ export type AdminRouteDef = {
   readonly action: keyof AdminPageInstance & string
   readonly name?: string
   readonly formRequest?: FormRequestClass
+  readonly publicPage?: boolean
 }
 
 /**
@@ -181,6 +184,7 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
     page: ADMIN_PAGE_KEYS.reportTemplate,
     action: 'handle',
     name: 'pages.admin.reports.template',
+    publicPage: true,
   },
 ]
 
@@ -217,9 +221,16 @@ export function registerAdminRoutes(
   router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   container: IContainer,
 ): void {
-  for (const { method, path, page, action, name, formRequest } of ADMIN_PAGE_ROUTES) {
+  for (const { method, path, page, action, name, formRequest, publicPage } of ADMIN_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerAdminHttpRoute(router, method, path, withAdminInertiaPageHandler(inner), opts, formRequest)
+    registerAdminHttpRoute(
+      router,
+      method,
+      path,
+      publicPage ? withInertiaPageHandler(inner) : withAdminInertiaPageHandler(inner),
+      opts,
+      formRequest,
+    )
   }
 }

@@ -25,7 +25,7 @@ export class ScheduleReportService {
     }
 
     const schedule = await this.reportRepository.findById(scheduleId)
-    if (!schedule || !schedule.enabled) {
+    if (!schedule?.enabled) {
       return
     }
 
@@ -38,7 +38,7 @@ export class ScheduleReportService {
       async () => {
         try {
           console.log(`[Reports] Generating scheduled report for schedule ${scheduleId}`)
-          const pdfBuffer = await this.pdfService.generate(schedule.orgId)
+          const pdfBuffer = await this.pdfService.generate(schedule.orgId, schedule.id)
           await this.emailService.send(schedule.recipients, pdfBuffer, schedule.type)
           console.log(`[Reports] Successfully sent scheduled report for schedule ${scheduleId}`)
         } catch (error) {

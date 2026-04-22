@@ -1,7 +1,7 @@
 # Draupnir 時序圖（Sequence Diagrams）
 
 **文檔版本**: v1.0  
-**更新日期**: 2026-04-17  
+**更新日期**: 2026-04-22  
 **目的**: 展現關鍵業務流程的時間順序與組件交互
 
 ---
@@ -104,7 +104,76 @@ sequenceDiagram
 
 ---
 
-## 2. 告警評估與通知流程
+## 2. Bifrost 用量同步與落庫流程
+
+### 流程概述
+Scheduler → Bifrost Gateway → 映射本地 API Key → 寫入 `usage_records` → 發出同步完成事件
+
+```mermaid
+sequenceDiagram
+    participant Scheduler as IScheduler
+    participant Sync as BifrostSyncService
+    participant Gateway as ILLMGatewayClient
+    participant ApiKeys as IApiKeyRepository
+    participant UsageRepo as IUsageRepository
+    participant DB as usage_records / quarantined_logs / sync_cursors
+    participant EventBus as DomainEventDispatcher
+
+    Note over Scheduler: 定時觸發（預設每 5 分鐘）
+    Scheduler->>Sync: sync()
+    Sync->>Sync: 讀取 bifrost_logs cursor
+
+    loop 分頁抓取
+        Sync->>Gateway: getUsageLogs([], {<br/>startTime, endTime, limit, offset })
+        Gateway-->>Sync: logs[]
+
+        loop 每筆 log
+            Sync->>ApiKeys: findByBifrostVirtualKeyId(log.keyId)
+
+            alt 找得到對應 key
+                Sync->>UsageRepo: upsert(UsageRecordInsert)
+                UsageRepo->>DB: insertOrIgnore into usage_records
+            else 找不到對應 key
+                Sync->>DB: insert quarantined_logs
+            end
+        end
+    end
+
+    Sync->>DB: advance sync_cursor
+    opt 有成功寫入
+        Sync->>EventBus: dispatch(BifrostSyncCompletedEvent)
+    end
+```
+
+### 關鍵特性
+
+| 階段 | 操作 | 同步/非同步 | 對應模組 |
+|------|------|-----------|---------|
+| **抓取** | 透過 `ILLMGatewayClient.getUsageLogs()` 拉取原始 usage logs | 同步 | Dashboard, Gateway |
+| **映射** | 以 `virtualKeyId` 解析本地 `apiKeyId` | 同步 | Dashboard, ApiKey |
+| **入庫** | 寫入 `usage_records` / `quarantined_logs` / `sync_cursors` | 同步 | Dashboard |
+| **通知** | 發佈 `BifrostSyncCompletedEvent` | 非同步 | Domain Event, Credit, Alerts |
+
+### 錯誤場景
+
+```mermaid
+sequenceDiagram
+    participant Sync as BifrostSyncService
+    participant Gateway as ILLMGatewayClient
+
+    Sync->>Gateway: getUsageLogs(...)
+
+    alt Gateway timeout / network error
+        Gateway-->>Sync: error
+        Sync-->>Sync: 回傳 { synced: 0, quarantined: 0, affectedOrgIds: [] }
+    else Timeout reached
+        Sync-->>Sync: 結束此次 sync，等待下次排程
+    end
+```
+
+---
+
+## 3. 告警評估與通知流程
 
 ### 流程概述
 Bifrost 同步完成 → 監聽事件 → 掃描告警配置 → 評估閾值 → 觸發通知
@@ -219,7 +288,7 @@ stateDiagram-v2
 
 ---
 
-## 3. 報表生成與投遞流程
+## 4. 報表生成與投遞流程
 
 ### 流程概述
 定時任務 → 聚合指標 → 生成 PDF → 發送郵件
@@ -288,7 +357,7 @@ Monthly Report Template
 
 ---
 
-## 4. 成員邀請流程
+## 5. 成員邀請流程
 
 ### 流程概述
 生成邀請 Token → 發送郵件 → 點擊驗證 → 自動加入組織
@@ -379,7 +448,7 @@ stateDiagram-v2
 
 ---
 
-## 5. 合約到期與續約流程
+## 6. 合約到期與續約流程
 
 ### 流程概述
 檢測合約即將過期 → 發送提醒 → Admin 續約 → 更新有效期

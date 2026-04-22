@@ -24,6 +24,21 @@ export function formatDate(isoString: string | null | undefined): string {
   })
 }
 
+export function formatDateInTimeZone(
+  isoString: string | null | undefined,
+  timeZone: string,
+): string {
+  if (!isoString) return '—'
+  const date = new Date(isoString)
+  if (Number.isNaN(date.getTime())) return '—'
+  return new Intl.DateTimeFormat('zh-TW', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date)
+}
+
 export function formatDateTime(isoString: string | null | undefined): string {
   if (!isoString) return '—'
   const date = new Date(isoString)

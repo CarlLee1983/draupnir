@@ -192,11 +192,11 @@ curl http://localhost:3000/api/keys/key123/usage
 
 | 檢查項 | 預期 | 實際 | 驗證位置 |
 |--------|------|------|---------|
-| 定時同步 Bifrost 用量日誌 | ✅ 後台任務 | ✅ `UsageSyncService` 透過 `IScheduler` 調度 | `BifrostSyncServiceProvider.registerJobs()` |
+| 定時同步 Bifrost 用量日誌 | ✅ 後台任務 | ✅ `BifrostSyncService` 透過 `IScheduler` 調度 | `DashboardServiceProvider.registerJobs()` |
 | 用量 → Credit 轉換 | ✅ 定價規則引擎 | ✅ `PricingRule` + `CalculateCostService` | `pricing_rules` 表管理定價；計算邏輯正確 |
 | 異常偵測 | ✅ 告警機制 | ✅ 邏輯實現 | `quarantined_logs` 隔離異常日誌，可人工審核 |
 | 同步狀態監控 | ✅ API 端點 | ✅ `sync_cursors` 追蹤同步位置 | 可查詢最近同步時間 + 同步狀態 |
-| 單元測試 | ✅ 完整 | ✅ 5+ 測試 | `/src/Modules/UsageSync/__tests__/` |
+| 單元測試 | ✅ 完整 | ✅ 5+ 測試 | `/src/Modules/Dashboard/__tests__/BifrostSyncService.test.ts` |
 
 **驗收結論**: ✅ **通過** — 用量同步已透過統一調度器 (IScheduler) 自動化
 
@@ -239,7 +239,7 @@ curl http://localhost:3000/api/keys/key123/usage
 
 **❌ 缺口 (高優先級)**:
 - [ ] **建立 `module_subscriptions` 遷移** — `ModuleSubscriptionRepository` 目前因表不存在而無法運作
-- [ ] **模組使用量獨立追蹤** — 需在 `usage_records` 表新增 `module_id` 欄位，並在 UsageSync 時依模組分組計費
+- [ ] **模組使用量獨立追蹤** — 需在 `usage_records` 表新增 `module_id` 欄位，並在 Bifrost sync 時依模組分組計費
 
 ---
 
@@ -288,7 +288,7 @@ curl http://localhost:3000/api/keys/key123/usage
 | Token 本地儲存 | ✅ 自動刷新 | ✅ 支持 Refresh Token | API 已備妥，CLI 本體須實現 | ✅ API |
 | 模組權限驗證 | ✅ 檢查授權 | ✅ Middleware 檢查 | `AppModuleAccessMiddleware` | ✅ |
 | CLI 請求代理 | ✅ 轉發至 Bifrost | ✅ Proxy 端點 | `POST /api/cli/proxy` | ✅ |
-| 用量即時扣款 | ✅ 實時計費 | ✅ 請求完成後扣除 | UsageSync 邏輯 | ✅ |
+| 用量即時扣款 | ✅ 實時計費 | ✅ 請求完成後扣除 | Bifrost sync / Usage read model | ✅ |
 | Session 管理 | ✅ 速率限制 | ✅ 已實現 | Rate Limit Middleware | ✅ |
 | 單元測試 | ✅ 完整 | ✅ 5+ 測試 | `/src/Modules/CliApi/__tests__/` | ✅ |
 
@@ -333,7 +333,7 @@ curl http://localhost:3000/api/keys/key123/usage
 **⚠️ 改進項**:
 - [ ] 用量儀表板：補充實時更新（Polling / WebSocket）
 - [ ] 用量儀表板：支持多維度分析（按模型、按模組、按用戶）
-- [ ] 新增「同步狀態監控」頁面（UsageSync 狀態、失敗告警）
+- [ ] 新增「同步狀態監控」頁面（Bifrost sync 狀態、失敗告警）
 
 ---
 
@@ -363,7 +363,7 @@ curl http://localhost:3000/api/keys/key123/usage
 |---|------|------|------|------|------|
 | 1 | 使用者可註冊、登入、管理 API Key | ✅ | ✅ 完整端點 + UI | Phase 2, 3 通過 | ✅ |
 | 2 | API Key 與 Bifrost 虛擬 Key 正確映射 | ✅ | ✅ 1:1 映射、創建時同步 | ApiKey 服務驗證 | ✅ |
-| 3 | 用量從 Bifrost 同步並反映 | ✅ | ✅ UsageSync 服務 + Dashboard 顯示 | Phase 4 驗證 | ✅ |
+| 3 | 用量從 Bifrost 同步並反映 | ✅ | ✅ BifrostSyncService + Dashboard 顯示 | Phase 4 驗證 | ✅ |
 | 4 | Credit 系統正常運作 | ✅ | ✅ 充值、消耗、餘額管理 | Phase 4 通過 | ✅ |
 | 5 | 管理者可建立合約並指派 | ✅ | ✅ Contract CRUD + 自動到期檢查 | Phase 5 通過 | ✅ |
 | 6 | 應用模組可註冊、訂閱、權限控制 | ✅ | ⚠️ 核心邏輯完成，**缺訂閱表遷移** | Phase 5.2 驗證 | ⚠️ |
@@ -401,7 +401,7 @@ curl http://localhost:3000/api/keys/key123/usage
    
 2. **模組使用量獨立追蹤** (Phase 5.2)
    - 影響：無法按模組分組計費與顯示圖表
-   - 工作量：1 天（`usage_records` 欄位遷移 + UsageSync 邏輯更新）
+   - 工作量：1 天（`usage_records` 欄位遷移 + Bifrost sync 邏輯更新）
 
 ### 中優先級 ⚠️
 

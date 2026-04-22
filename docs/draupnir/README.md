@@ -2,7 +2,15 @@
 
 本資料夾集中存放 **Draupnir 產品與工程規劃**（規格、計畫、審查、路線圖）。
 
-**索引更新**：2026-04-17
+**索引更新**：2026-04-22
+
+## onboarding 第一站：資料流快速導覽
+
+如果你只想先搞懂資料怎麼流，先看這三個：
+
+1. [`architecture/data-flow-overview.md`](./architecture/data-flow-overview.md) — 一頁式總覽
+2. [`architecture/bifrost-sync-data-flow.md`](./architecture/bifrost-sync-data-flow.md) — Gateway → `usage_records`
+3. [`architecture/report-rendering-data-flow.md`](./architecture/report-rendering-data-flow.md) — 報表 render 為什麼不直接打 gateway
 
 ## 快速參考（核心文件）
 
@@ -10,6 +18,9 @@
 |------|------|
 | **架構概覽與模組指南** | [`ARCHITECTURE_SUMMARY.md`](./ARCHITECTURE_SUMMARY.md) |
 | **Website（Inertia，`src/Website`）** | [`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md) |
+| **資料流總覽** | [`architecture/data-flow-overview.md`](./architecture/data-flow-overview.md) |
+| **Bifrost 用量同步資料流** | [`architecture/bifrost-sync-data-flow.md`](./architecture/bifrost-sync-data-flow.md) |
+| **報表模板渲染資料流** | [`architecture/report-rendering-data-flow.md`](./architecture/report-rendering-data-flow.md) |
 | **設計決策彙總** | [`DESIGN_DECISIONS.md`](./DESIGN_DECISIONS.md) |
 | **開發指南**（目錄、環境、新增模組） | [`DEVELOPMENT.md`](./DEVELOPMENT.md) |
 | **指令一覽** | [`COMMANDS.md`](./COMMANDS.md) |
@@ -29,6 +40,9 @@
 | [`architecture/auth-flow-diagrams.md`](./architecture/auth-flow-diagrams.md) | 認證流程（JWT、API Key、OAuth、SDK 閘道） |
 | [`architecture/http-middleware-stack.md`](./architecture/http-middleware-stack.md) | HTTP middleware 三層、Inertia 鏈、**網頁靜默 token refresh** |
 | [`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md) | Website／Inertia 層（`src/Website`：路由、middleware、DI、Vite） |
+| [`architecture/data-flow-overview.md`](./architecture/data-flow-overview.md) | 一頁式資料流入口，串起 Bifrost / Usage / Dashboard / Reports |
+| [`architecture/bifrost-sync-data-flow.md`](./architecture/bifrost-sync-data-flow.md) | Bifrost 用量同步、`usage_records`、`quarantined_logs`、`sync_cursors` |
+| [`architecture/report-rendering-data-flow.md`](./architecture/report-rendering-data-flow.md) | 報表模板資料流、token 驗證、schedule live lookup、usage read model |
 
 ## 路線圖
 

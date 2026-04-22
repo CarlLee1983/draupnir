@@ -8,22 +8,24 @@ import type { RegisterModuleService } from '@/Modules/AppModule/Application/Serv
 import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
 import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/GetUserDetailService'
 import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
-import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
 import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
 import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
+import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
 import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
 import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
+import type { IUsageRepository } from '@/Modules/Dashboard/Application/Ports/IUsageRepository'
+import type { GetAdminPlatformUsageTrendService } from '@/Modules/Dashboard/Application/Services/GetAdminPlatformUsageTrendService'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
-import type { GetAdminPlatformUsageTrendService } from '@/Modules/Dashboard/Application/Services/GetAdminPlatformUsageTrendService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
-import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
+import type { IReportRepository } from '@/Modules/Reports/Domain/Repositories/IReportRepository'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
-
+import { PAGE_CONTAINER_KEYS } from '@/Website/Http/Inertia/createInertiaRequestHandler'
+import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { ADMIN_PAGE_KEYS } from '../keys'
 import { AdminApiKeysPage } from '../Pages/AdminApiKeysPage'
 import { AdminContractCreatePage } from '../Pages/AdminContractCreatePage'
 import { AdminContractDetailPage } from '../Pages/AdminContractDetailPage'
@@ -38,8 +40,6 @@ import { AdminReportTemplatePage } from '../Pages/AdminReportTemplatePage'
 import { AdminUsageSyncPage } from '../Pages/AdminUsageSyncPage'
 import { AdminUserDetailPage } from '../Pages/AdminUserDetailPage'
 import { AdminUsersPage } from '../Pages/AdminUsersPage'
-
-import { ADMIN_PAGE_KEYS } from '../keys'
 
 /**
  * @param container - Gravito DI container; `InertiaService` must already be bound under
@@ -164,11 +164,20 @@ export function registerAdminBindings(container: IContainer): void {
 
   container.singleton(
     k.reports,
-    (c) => new AdminReportsPage(c.make(i) as InertiaService, c.make('reportRepository') as any),
+    (c) =>
+      new AdminReportsPage(
+        c.make(i) as InertiaService,
+        c.make('reportRepository') as IReportRepository,
+      ),
   )
 
   container.singleton(
     k.reportTemplate,
-    (c) => new AdminReportTemplatePage(c.make(i) as InertiaService),
+    (c) =>
+      new AdminReportTemplatePage(
+        c.make(i) as InertiaService,
+        c.make('reportRepository') as IReportRepository,
+        c.make('drizzleUsageRepository') as IUsageRepository,
+      ),
   )
 }

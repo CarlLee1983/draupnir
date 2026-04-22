@@ -12,6 +12,10 @@
 
 ### [使用者故事與驗收](./user-stories.md)
 
+相關架構文件：
+- [`architecture/bifrost-sync-data-flow.md`](../../architecture/bifrost-sync-data-flow.md)
+- [`architecture/report-rendering-data-flow.md`](../../architecture/report-rendering-data-flow.md)
+
 ---
 
 ## 📊 系統架構決策
@@ -57,7 +61,7 @@
 | **HandleBalanceDepletedService** | 響應 `credit.balance_depleted`，凍結 Keys |
 | **HandleCreditToppedUpService** | 響應 `credit.topped_up`，恢復 Keys |
 
-### 2. 用量同步（規格稱 UsageSync；實作於 Dashboard 模組）
+### 2. 用量同步（現行實作於 Dashboard 的 BifrostSyncService）
 
 **職責**：定時經 **LLM Gateway**（`ILLMGatewayClient`）拉取用量、寫入 `usage_records` 與游標；若有新筆數入庫則派發事件驅動 Credit 扣款與 Alerts 評估。
 

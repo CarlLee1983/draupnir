@@ -1,9 +1,9 @@
 # Phase 4：Credit System — 額度與計費 設計規格
 
-> P4 完整設計規格，涵蓋 Credit 模組、用量同步（概念上原稱 UsageSync）、Dashboard 費用補完。  
+> P4 完整設計規格，涵蓋 Credit 模組、用量同步（概念上原稱 UsageSync；現行實作於 Dashboard 的 BifrostSyncService）、Dashboard 費用補完。  
 > **實作對照與驗收狀態**見同目錄 [README.md](./README.md)；本文件在「目標模型」與「已落地程式」並列處會標註。
 
-**最後更新**：2026-04-20
+**最後更新**：2026-04-22
 
 ## 概述
 
@@ -177,7 +177,7 @@ HandleCreditToppedUpService:
 
 ---
 
-## 2. 用量同步（概念模組 UsageSync；實作於 Dashboard + Credit）
+## 2. 用量同步（概念模組 UsageSync；現行實作於 Dashboard + Credit）
 
 ### 2.1 實作位置（取代獨立 `src/Modules/UsageSync/`）
 
@@ -392,7 +392,7 @@ Dashboard（讀取）
 
 ## 8. 變更紀要（2026-04-20）
 
-- 對齊實作：**無獨立 UsageSync 模組**；同步在 **Dashboard**，扣款在 **Credit** + 事件。
+- 對齊實作：**無獨立同步模組**；同步在 **Dashboard**（`BifrostSyncService`），扣款在 **Credit** + 事件。
 - 以 **`DeductCreditService` / `ApplyUsageChargesService`** 取代文件中的 **`CreditDeductionService`** 命名。
 - 排程改為 **`IScheduler` + `DashboardServiceProvider`**，cron 可設定。
 - **API 路徑**改為 **`/api/organizations/:orgId/...`** 前綴（Credit／Dashboard）。

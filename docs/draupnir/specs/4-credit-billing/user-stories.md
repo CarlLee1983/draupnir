@@ -461,13 +461,13 @@
 - Module: `src/Modules/Reports`
 - Entries：
   - `ScheduleReportService.execute(scheduleId)`（cron 觸發）→ `src/Modules/Reports/Application/Services/ScheduleReportService.ts`
-  - `GeneratePdfService.generate(orgId)` → `src/Modules/Reports/Application/Services/GeneratePdfService.ts`
+  - `GeneratePdfService.generate(orgId, scheduleId)` → `src/Modules/Reports/Application/Services/GeneratePdfService.ts`
   - `SendReportEmailService.send(recipients, pdfBuffer, type)` → 同目錄
 - 外部依賴：Playwright（chromium）渲染 PDF、`IMailer` 寄信
 
 **Key rules**
 - Cron 觸發時依序跑：render PDF → 寄 email；任一步失敗整次 skip，不部分寄
-- PDF 以 A4 格式渲染 `/admin/reports/template?token=...`（見 US-REPORTS-003）
+- PDF 以 A4 格式渲染 `/admin/reports/template?token=...`（見 US-REPORTS-003）；template render 會用 `scheduleId` live lookup schedule，再讀本地 usage read model
 - Email 主旨含 `type`（weekly / monthly / 等）與日期；附件檔名統一為 `Draupnir-Report-{type}-{date}.pdf`
 
 ---
@@ -481,13 +481,13 @@
 **Related**
 - Module: `src/Modules/Reports`
 - Entry: `ReportController.verifyTemplate()` → `src/Modules/Reports/Presentation/Controllers/ReportController.ts`
-- Value Object: `ReportToken.generate(orgId, expiresAt)` → `src/Modules/Reports/Domain/ValueObjects/ReportToken.ts`
+- Value Object: `ReportToken.generate(orgId, scheduleId, expiresAt)` → `src/Modules/Reports/Domain/ValueObjects/ReportToken.ts`
 - Route: `GET /v1/reports/verify-template`（無一般 auth middleware；靠 token 驗證）
 
 **Key rules**
 - Token 是 server-side 簽發、30 分鐘有效；超時 verify-template 拒絕
 - 此 route 刻意沒有一般 user auth——用 token 代替；方便 Playwright headless browser 以 URL 載入模板
-- Token 綁定 org——同一 token 只能拉該 org 的資料
+- Token 綁定 org + scheduleId——同一 token 只能拉該 org、該排程的資料
 
 ---
 

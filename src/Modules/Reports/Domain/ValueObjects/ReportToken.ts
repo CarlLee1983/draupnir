@@ -1,13 +1,17 @@
 export class ReportToken {
   constructor(public readonly value: string) {}
 
-  static async generate(orgId: string, expiresAt: Date): Promise<ReportToken> {
+  static async generate(orgId: string, scheduleId: string, expiresAt: Date): Promise<ReportToken> {
     const secret = process.env.REPORT_SIGNING_SECRET
     if (!secret) {
       throw new Error('REPORT_SIGNING_SECRET is not set')
     }
 
-    const payload = JSON.stringify({ orgId, expiresAt: expiresAt.getTime() })
+    const payload = JSON.stringify({
+      orgId,
+      scheduleId,
+      expiresAt: expiresAt.getTime(),
+    })
     const base64Payload = Buffer.from(payload).toString('base64url')
 
     const key = await crypto.subtle.importKey(
@@ -29,7 +33,9 @@ export class ReportToken {
     return new ReportToken(`${base64Payload}.${signature}`)
   }
 
-  static async verify(token: string): Promise<{ orgId: string; expiresAt: number } | null> {
+  static async verify(
+    token: string,
+  ): Promise<{ orgId: string; scheduleId: string; expiresAt: number } | null> {
     try {
       const secret = process.env.REPORT_SIGNING_SECRET
       if (!secret) {
@@ -62,12 +68,29 @@ export class ReportToken {
         return null
       }
 
-      const payload = JSON.parse(Buffer.from(base64Payload, 'base64url').toString())
+      const payload = JSON.parse(Buffer.from(base64Payload, 'base64url').toString()) as {
+        orgId?: unknown
+        scheduleId?: unknown
+        expiresAt?: unknown
+      }
+
+      if (
+        typeof payload.orgId !== 'string' ||
+        typeof payload.scheduleId !== 'string' ||
+        typeof payload.expiresAt !== 'number'
+      ) {
+        return null
+      }
+
       if (Date.now() > payload.expiresAt) {
         return null
       }
 
-      return payload
+      return {
+        orgId: payload.orgId,
+        scheduleId: payload.scheduleId,
+        expiresAt: payload.expiresAt,
+      }
     } catch {
       return null
     }

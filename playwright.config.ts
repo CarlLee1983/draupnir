@@ -10,20 +10,20 @@
 import { defineConfig } from '@playwright/test'
 
 export default defineConfig({
-	testDir: 'e2e',
-	testMatch: '**/*.e2e.ts',
-	timeout: 30_000,
-	use: {
-		baseURL: 'http://localhost:3001',
-		httpCredentials: undefined,
-	},
-	webServer: {
-		command:
-			'bun run build:frontend && PORT=3001 ORM=memory SERVE_VITE_BUILD=true bun run src/index.ts',
-		port: 3001,
-		reuseExistingServer: false,
-		stdout: 'ignore',
-		stderr: 'pipe',
-	},
-	reporter: 'html',
+  testDir: 'e2e',
+  testMatch: '**/*.e2e.ts',
+  timeout: 30_000,
+  use: {
+    baseURL: 'http://localhost:3001',
+    httpCredentials: undefined,
+  },
+  webServer: {
+    command:
+      'REPORT_SIGNING_SECRET=e2e-report-signing-secret-12345678901234567890123456789012 bun run build:frontend && REPORT_SIGNING_SECRET=e2e-report-signing-secret-12345678901234567890123456789012 PORT=3001 ORM=memory SERVE_VITE_BUILD=true bun run src/index.ts',
+    port: 3001,
+    reuseExistingServer: false,
+    stdout: 'ignore',
+    stderr: 'pipe',
+  },
+  reporter: 'html',
 })

@@ -5,9 +5,13 @@
  * 每個測試確認：heading 可見、關鍵 UI 元件存在。
  */
 
-import { test, expect } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { ReportToken } from '../src/Modules/Reports/Domain/ValueObjects/ReportToken'
 
 const PASSWORD = 'Test1234!'
+const REPORT_SECRET = 'e2e-report-signing-secret-12345678901234567890123456789012'
+
+process.env.REPORT_SIGNING_SECRET = REPORT_SECRET
 
 /** 建立 admin 帳號並回傳 Bearer token */
 async function createAdminAndGetToken(
@@ -15,13 +19,17 @@ async function createAdminAndGetToken(
 ): Promise<string> {
   const email = `admin-full-${Date.now()}@test.com`
 
-  const registerRes = await request.post('/api/auth/register', { data: { email, password: PASSWORD } })
+  const registerRes = await request.post('/api/auth/register', {
+    data: { email, password: PASSWORD },
+  })
   expect(registerRes.ok()).toBeTruthy()
   const registerJson = (await registerRes.json()) as { data?: { id: string } }
   const userId = registerJson.data?.id
   expect(userId).toBeTruthy()
 
-  const seedRes = await request.patch('/api/__test__/seed-role', { data: { userId, role: 'admin' } })
+  const seedRes = await request.patch('/api/__test__/seed-role', {
+    data: { userId, role: 'admin' },
+  })
   expect(seedRes.ok()).toBeTruthy()
 
   const loginRes = await request.post('/api/auth/login', { data: { email, password: PASSWORD } })
@@ -30,7 +38,11 @@ async function createAdminAndGetToken(
   const token = loginJson.data?.accessToken
   expect(token).toBeTruthy()
 
-  return token!
+  if (!token) {
+    throw new Error('Expected access token')
+  }
+
+  return token
 }
 
 test.describe('Admin 頁面完整白箱測試', () => {
@@ -116,7 +128,9 @@ test.describe('Admin 頁面完整白箱測試', () => {
     await page.setExtraHTTPHeaders({ Authorization: `Bearer ${adminToken}` })
     await page.goto('/admin/api-keys', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByRole('heading', { name: 'API Keys 總覽' })).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: 'API Keys 總覽' })).toBeVisible({
+      timeout: 15_000,
+    })
     // 選擇組織下拉選單
     await expect(page.locator('#orgSelect')).toBeVisible()
     // 無組織選擇時顯示提示
@@ -130,7 +144,9 @@ test.describe('Admin 頁面完整白箱測試', () => {
     await page.setExtraHTTPHeaders({ Authorization: `Bearer ${adminToken}` })
     await page.goto('/admin/usage-sync', { waitUntil: 'domcontentloaded' })
 
-    await expect(page.getByRole('heading', { name: '用量同步狀態' })).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: '用量同步狀態' })).toBeVisible({
+      timeout: 15_000,
+    })
     // 顯示同步相關 card
     await expect(page.getByText('上次同步時間')).toBeVisible()
     await expect(page.getByText('下次同步時間')).toBeVisible()
@@ -140,15 +156,94 @@ test.describe('Admin 頁面完整白箱測試', () => {
     console.log('✅ /admin/usage-sync 渲染正常')
   })
 
-  test('Report Template /admin/reports/template 正確渲染', async ({ page }) => {
-    await page.setExtraHTTPHeaders({ Authorization: `Bearer ${adminToken}` })
-    const response = await page.goto('/admin/reports/template', { waitUntil: 'domcontentloaded' })
+  test('Report Template /admin/reports/template 正確渲染', async ({ page, request }) => {
+    const email = `report-template-${Date.now()}@test.com`
+    const password = PASSWORD
+
+    const registerRes = await request.post('/api/auth/register', {
+      data: { email, password },
+    })
+    expect(registerRes.ok()).toBeTruthy()
+
+    const loginRes = await request.post('/api/auth/login', {
+      data: { email, password },
+    })
+    expect(loginRes.ok()).toBeTruthy()
+    const loginJson = (await loginRes.json()) as { data?: { accessToken: string } }
+    const memberToken = loginJson.data?.accessToken
+    expect(memberToken).toBeTruthy()
+    if (!memberToken) {
+      throw new Error('Expected member token')
+    }
+
+    const createOrgRes = await request.post('/api/organizations', {
+      data: { name: `Report Template Org ${Date.now()}` },
+      headers: { Authorization: `Bearer ${memberToken}` },
+    })
+    expect(createOrgRes.ok()).toBeTruthy()
+    const createOrgJson = (await createOrgRes.json()) as {
+      success?: boolean
+      data?: { id?: string }
+    }
+    const orgId = createOrgJson.data?.id
+    expect(orgId).toBeTruthy()
+
+    const setCookieHeaders = createOrgRes
+      .headersArray()
+      .filter((h) => h.name.toLowerCase() === 'set-cookie')
+    const authCookie = setCookieHeaders.find((h) => h.value.startsWith('auth_token='))
+    expect(authCookie).toBeTruthy()
+    if (!authCookie) {
+      throw new Error('Expected auth cookie')
+    }
+    const firstSegment = authCookie.value.split(';')[0]
+    if (!firstSegment) {
+      throw new Error('Expected auth cookie segment')
+    }
+    const eqIdx = firstSegment.indexOf('=')
+    const managerToken = firstSegment.slice(eqIdx + 1)
+    expect(managerToken).toBeTruthy()
+
+    const createScheduleRes = await request.post(`/v1/org/${orgId}/reports`, {
+      data: {
+        type: 'weekly',
+        day: 1,
+        time: '09:00',
+        timezone: 'Asia/Taipei',
+        recipients: ['reports@test.com'],
+        enabled: true,
+      },
+      headers: { Authorization: `Bearer ${managerToken}` },
+    })
+    expect(createScheduleRes.ok()).toBeTruthy()
+    const createScheduleJson = (await createScheduleRes.json()) as {
+      id?: string
+      props?: { id?: string }
+    }
+    const scheduleId = createScheduleJson.id ?? createScheduleJson.props?.id
+    expect(scheduleId).toBeTruthy()
+
+    if (!orgId || !scheduleId) {
+      throw new Error('Expected orgId and scheduleId')
+    }
+
+    const token = await ReportToken.generate(
+      orgId,
+      scheduleId,
+      new Date(Date.now() + 30 * 60 * 1000),
+    )
+    const response = await page.goto(
+      `/admin/reports/template?token=${encodeURIComponent(token.value)}&isAnimationActive=false`,
+      { waitUntil: 'domcontentloaded' },
+    )
 
     const status = response?.status() ?? 0
     await page.screenshot({ path: '/tmp/admin-reports-template.png', fullPage: true })
 
-    // 不應回傳 404
-    expect(status).not.toBe(404)
+    expect(status).toBeLessThan(400)
+    await expect(page.getByRole('heading', { name: 'Draupnir' })).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText('Automated Cost & Usage Report')).toBeVisible()
+    await expect(page.getByText('Live snapshot').first()).toBeVisible()
     console.log(`✅ /admin/reports/template 回傳 ${status}`)
   })
 })

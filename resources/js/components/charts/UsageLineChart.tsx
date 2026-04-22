@@ -1,14 +1,14 @@
 import {
-  LineChart,
+  CartesianGrid,
+  Legend,
   Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from 'recharts'
-import { formatDate } from '@/lib/format'
+import { formatDate, formatDateInTimeZone } from '@/lib/format'
 import { useTranslation } from '@/lib/i18n'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { EmptyChart } from './EmptyChart'
@@ -25,6 +25,7 @@ interface UsageLineChartProps {
   title?: string
   /** 未傳入時使用 `ui.member.usage.empty`。 */
   emptyMessage?: string
+  timeZone?: string
   isAnimationActive?: boolean
 }
 
@@ -32,13 +33,15 @@ export function UsageLineChart({
   data,
   title,
   emptyMessage,
+  timeZone,
   isAnimationActive = true,
 }: UsageLineChartProps) {
   const { t } = useTranslation()
-  const resolvedTitle =
-    title === undefined ? t('ui.member.usage.trendTitle') : title
-  const resolvedEmpty =
-    emptyMessage === undefined ? t('ui.member.usage.empty') : emptyMessage
+  const resolvedTitle = title === undefined ? t('ui.member.usage.trendTitle') : title
+  const resolvedEmpty = emptyMessage === undefined ? t('ui.member.usage.empty') : emptyMessage
+
+  const formatLabel = (value: string): string =>
+    timeZone ? formatDateInTimeZone(value, timeZone) : formatDate(value)
 
   if (data.length === 0) {
     return <EmptyChart title={resolvedTitle} message={resolvedEmpty} />
@@ -56,10 +59,10 @@ export function UsageLineChart({
             <XAxis
               dataKey="date"
               className="text-xs"
-              tickFormatter={(v) => formatDate(String(v))}
+              tickFormatter={(v) => formatLabel(String(v))}
             />
             <YAxis className="text-xs" />
-            <Tooltip labelFormatter={(v) => formatDate(String(v))} />
+            <Tooltip labelFormatter={(v) => formatLabel(String(v))} />
             <Legend />
             <Line
               type="monotone"
