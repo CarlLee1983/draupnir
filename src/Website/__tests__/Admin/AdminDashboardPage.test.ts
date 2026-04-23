@@ -131,9 +131,37 @@ describe('AdminDashboardPage', () => {
       | { date: string; requests: number; tokens: number }[]
       | undefined
     expect(trend).toEqual([{ date: '2026-04-20T12:00:00.000Z', requests: 2, tokens: 100 }])
+    expect(captured.lastCall?.props.usageWindowDays).toBe(15)
     expect(mockListUsersService.execute).toHaveBeenCalled()
     expect(mockListOrgsService.execute).toHaveBeenCalled()
     expect(mockListAdminContractsService.execute).toHaveBeenCalled()
-    expect(mockAdminUsageTrendService.execute).toHaveBeenCalled()
+    expect(mockAdminUsageTrendService.execute).toHaveBeenCalledWith(15)
+  })
+
+  test('uses days=30 from query for usage trend', async () => {
+    const { inertia, captured } = createMockInertia()
+    const mockListUsersService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
+    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
+    const mockListAdminContractsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })),
+    }
+    const mockAdminUsageTrendService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { points: [] } })),
+    }
+
+    const page = new AdminDashboardPage(
+      inertia,
+      mockListUsersService as any,
+      mockListOrgsService as any,
+      mockListAdminContractsService as any,
+      mockAdminUsageTrendService as any,
+    )
+
+    const ctx = createAdminContext()
+    const withDays = { ...ctx, getQuery: (key: string) => (key === 'days' ? '30' : undefined) } as IHttpContext
+    await page.handle(withDays)
+
+    expect(captured.lastCall?.props.usageWindowDays).toBe(30)
+    expect(mockAdminUsageTrendService.execute).toHaveBeenCalledWith(30)
   })
 })

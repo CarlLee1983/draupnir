@@ -1,11 +1,16 @@
 import type { ReactNode } from 'react'
-import { Head, Link } from '@inertiajs/react'
+import { Head, Link, router } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UsageLineChart, type UsageDataPoint } from '@/components/charts/UsageLineChart'
 import { Users, Building2, FileText, Key } from 'lucide-react'
 import { formatNumber } from '@/lib/format'
 import { useTranslation } from '@/lib/i18n'
+import { cn } from '@/lib/utils'
+
+const USAGE_WINDOW_OPTIONS = [7, 15, 30] as const
+type UsageWindow = (typeof USAGE_WINDOW_OPTIONS)[number]
 
 interface Totals {
   users: number
@@ -16,10 +21,20 @@ interface Totals {
 interface Props {
   totals: Totals
   usageTrend: UsageDataPoint[]
+  usageWindowDays: UsageWindow
 }
 
-export default function AdminDashboard({ totals, usageTrend }: Props) {
+export default function AdminDashboard({ totals, usageTrend, usageWindowDays }: Props) {
   const { t } = useTranslation()
+
+  const onWindowChange = (value: UsageWindow) => {
+    if (value === usageWindowDays) return
+    router.get(
+      '/admin/dashboard',
+      { days: value },
+      { replace: true, preserveScroll: true },
+    )
+  }
 
   return (
     <AdminLayout>
@@ -63,7 +78,29 @@ export default function AdminDashboard({ totals, usageTrend }: Props) {
         <UsageLineChart
           data={usageTrend}
           title={t('ui.admin.dashboard.usageTrendTitle')}
-          emptyMessage={t('ui.admin.dashboard.usageTrendEmpty')}
+          emptyMessage={t('ui.admin.dashboard.usageTrendEmpty', { days: usageWindowDays })}
+          headerRight={
+            <div className="inline-flex rounded-lg border border-border bg-muted/30 p-1">
+              {USAGE_WINDOW_OPTIONS.map((option) => {
+                const active = usageWindowDays === option
+                return (
+                  <Button
+                    key={option}
+                    type="button"
+                    variant={active ? 'secondary' : 'ghost'}
+                    size="sm"
+                    className={cn(
+                      'min-w-14 rounded-md px-3',
+                      active ? 'shadow-sm' : 'text-muted-foreground',
+                    )}
+                    onClick={() => onWindowChange(option)}
+                  >
+                    {t('ui.admin.dashboard.usageWindowDays', { days: option })}
+                  </Button>
+                )
+              })}
+            </div>
+          }
         />
       </div>
     </AdminLayout>

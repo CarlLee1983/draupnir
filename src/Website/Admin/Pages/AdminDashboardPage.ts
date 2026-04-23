@@ -6,6 +6,16 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
+const DEFAULT_ADMIN_USAGE_WINDOW: 7 | 15 | 30 = 15
+
+function parseAdminUsageWindowDays(ctx: IHttpContext): 7 | 15 | 30 {
+  const raw = ctx.getQuery('days')
+  if (raw === undefined) return DEFAULT_ADMIN_USAGE_WINDOW
+  const n = parseInt(raw, 10)
+  if (n === 7 || n === 15 || n === 30) return n
+  return DEFAULT_ADMIN_USAGE_WINDOW
+}
+
 /**
  * Admin home: aggregate counts for users, organizations, and contracts (`Admin/Dashboard/Index`).
  */
@@ -24,12 +34,13 @@ export class AdminDashboardPage {
    */
   async handle(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
+    const usageWindowDays = parseAdminUsageWindowDays(ctx)
 
     const [usersResult, orgsResult, contractsResult, usageTrendResult] = await Promise.all([
       this.listUsersService.execute({ page: 1, limit: 1 }),
       this.listOrgsService.execute(1, 1),
       this.listAdminContractsService.execute({ callerRole: auth.role, page: 1, limit: 1 }),
-      this.adminUsageTrendService.execute(),
+      this.adminUsageTrendService.execute(usageWindowDays),
     ])
 
     const totals = {
@@ -50,6 +61,7 @@ export class AdminDashboardPage {
     return this.inertia.render(ctx, 'Admin/Dashboard/Index', {
       totals,
       usageTrend,
+      usageWindowDays,
     })
   }
 }

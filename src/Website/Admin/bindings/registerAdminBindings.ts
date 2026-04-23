@@ -177,7 +177,7 @@ export function registerAdminBindings(container: IContainer): void {
       new AdminReportTemplatePage(
         c.make(i) as InertiaService,
         c.make('reportRepository') as IReportRepository,
-        c.make('drizzleUsageRepository') as IUsageRepository,
+        c.make('atlasUsageRepository') as IUsageRepository,
       ),
   )
 }

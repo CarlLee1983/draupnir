@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import {
   CartesianGrid,
   Legend,
@@ -25,6 +26,8 @@ interface UsageLineChartProps {
   title?: string
   /** 未傳入時使用 `ui.member.usage.empty`。 */
   emptyMessage?: string
+  /** 標題列右側（例：天數切換） */
+  headerRight?: ReactNode
   timeZone?: string
   isAnimationActive?: boolean
 }
@@ -33,6 +36,7 @@ export function UsageLineChart({
   data,
   title,
   emptyMessage,
+  headerRight,
   timeZone,
   isAnimationActive = true,
 }: UsageLineChartProps) {
@@ -44,13 +48,20 @@ export function UsageLineChart({
     timeZone ? formatDateInTimeZone(value, timeZone) : formatDate(value)
 
   if (data.length === 0) {
-    return <EmptyChart title={resolvedTitle} message={resolvedEmpty} />
+    return (
+      <EmptyChart
+        title={resolvedTitle}
+        message={resolvedEmpty}
+        headerRight={headerRight}
+      />
+    )
   }
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <CardTitle>{resolvedTitle}</CardTitle>
+        {headerRight}
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
