@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Head, router, usePage, Link } from '@inertiajs/react'
 import { ManagerLayout } from '@/layouts/ManagerLayout'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
@@ -38,6 +38,16 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
   const [period, setPeriod] = useState<'7d' | '30d'>('30d')
   const [assignee, setAssignee] = useState<string>('')
   const [copied, setCopied] = useState(false)
+
+  /** After successful create, Inertia updates `newKeyValue` but local state persists; clear the form for the next key. */
+  useEffect(() => {
+    if (!newKeyValue) return
+    setLabel('')
+    setQuota('')
+    setPeriod('30d')
+    setAssignee('')
+    setCopied(false)
+  }, [newKeyValue])
 
   const copyKey = () => {
     if (!newKeyValue) return
