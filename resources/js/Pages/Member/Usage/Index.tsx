@@ -64,7 +64,11 @@ export default function MemberUsage({ totals, chartData, error }: Props) {
           </Card>
         </div>
 
-        <UsageLineChart data={chartData} title={t('ui.member.usage.trendTitle')} />
+        <UsageLineChart 
+          data={chartData} 
+          title={t('ui.member.usage.trendTitle')} 
+          description={t('ui.member.usage.trendDescription')}
+        />
       </div>
     </MemberLayout>
   )

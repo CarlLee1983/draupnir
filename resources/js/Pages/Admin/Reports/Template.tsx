@@ -107,6 +107,7 @@ export default function ReportTemplate({ report, isAnimationActive }: Props) {
             <UsageLineChart
               data={usageData as any}
               title=""
+              description="Daily aggregation of requests and token usage for the selected period."
               timeZone={report.timezone}
               isAnimationActive={isAnimationActive}
             />

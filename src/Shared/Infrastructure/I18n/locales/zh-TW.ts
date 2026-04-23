@@ -376,6 +376,7 @@ export const zhTWMessages = {
   'ui.member.usage.heading': '用量分析',
   'ui.member.usage.empty': '尚無用量資料',
   'ui.member.usage.trendTitle': '用量趨勢',
+  'ui.member.usage.trendDescription': '該組織在選定期間內的 API 請求量與 Token 消耗趨勢。',
   'ui.member.usage.totalRequests': '總請求數',
   'ui.member.usage.totalTokens': '總 Token 消耗',
   // Member — Contracts (quota-focused; route unchanged)
@@ -605,6 +606,7 @@ export const zhTWMessages = {
   'ui.admin.dashboard.metricContracts': '合約總數',
   'ui.admin.dashboard.metricApiKeys': 'API Keys',
   'ui.admin.dashboard.usageTrendTitle': '全系統用量趨勢',
+  'ui.admin.dashboard.usageTrendDescription': '跨所有組織與合約的請求量與 Token 消耗彙總分析。',
   'ui.admin.dashboard.usageWindowDays': '{days} 天',
   'ui.admin.dashboard.usageTrendEmpty': '此期間尚無同步的用量紀錄（近 {days} 日）。',
   'ui.admin.dashboard.subtitle': '系統運行概況與關鍵指標。',

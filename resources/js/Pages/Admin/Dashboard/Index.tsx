@@ -78,6 +78,7 @@ export default function AdminDashboard({ totals, usageTrend, usageWindowDays }: 
         <UsageLineChart
           data={usageTrend}
           title={t('ui.admin.dashboard.usageTrendTitle')}
+          description={t('ui.admin.dashboard.usageTrendDescription')}
           emptyMessage={t('ui.admin.dashboard.usageTrendEmpty', { days: usageWindowDays })}
           headerRight={
             <div className="inline-flex rounded-lg border border-border bg-muted/30 p-1">
@@ -120,13 +121,13 @@ function StatCard({
 }) {
   return (
     <Link href={href}>
-      <Card className="transition-colors hover:bg-accent">
+      <Card className="transition-all hover:bg-accent hover:shadow-md border-border/50">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium">{title}</CardTitle>
+          <CardTitle className="text-xs font-mono uppercase tracking-widest text-muted-foreground">{title}</CardTitle>
           {icon}
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{value}</div>
+          <div className="text-2xl font-bold font-mono tracking-tight">{value}</div>
         </CardContent>
       </Card>
     </Link>
