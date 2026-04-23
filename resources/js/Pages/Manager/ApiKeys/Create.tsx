@@ -49,10 +49,12 @@ export default function ManagerApiKeyCreate({ assignees, newKeyValue, contractQu
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
+    const withBudget =
+      typeof quota === 'number' && Number.isFinite(quota) && quota > 0
     router.post('/manager/api-keys', {
       label,
-      ...(quota !== ''
-        ? { quotaAllocated: Number(quota), budgetResetPeriod: period }
+      ...(withBudget
+        ? { quotaAllocated: quota, budgetResetPeriod: period }
         : {}),
       assigneeUserId: assignee === '' ? null : assignee,
     })

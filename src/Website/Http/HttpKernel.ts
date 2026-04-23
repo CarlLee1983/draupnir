@@ -11,6 +11,7 @@ import { createOrganizationMemberLookupCacheMiddleware } from '@/Shared/Infrastr
 import { createRequestIdMiddleware } from '@/Shared/Infrastructure/Middleware/RequestIdMiddleware'
 import { createRequestLoggerMiddleware } from '@/Shared/Infrastructure/Middleware/RequestLoggerMiddleware'
 import { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
+import { createInertiaFormValidationResponseMiddleware } from '@/Shared/Infrastructure/Middleware/InertiaFormValidationResponseMiddleware'
 import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 import { requireManager } from '@/Website/Manager/middleware/requireManager'
@@ -107,9 +108,20 @@ export const HttpKernel = {
    */
   groups: {
     /** 公開頁面（login、register 等），無 role check */
-    web: (): Middleware[] => [...webBase(), injectSharedDataMiddleware(), pendingCookiesMiddleware()],
+    web: (): Middleware[] => [
+      ...webBase(),
+      injectSharedDataMiddleware(),
+      pendingCookiesMiddleware(),
+      createInertiaFormValidationResponseMiddleware(),
+    ],
     /** Admin 區域：web 基底 + admin role 驗證 */
-    admin: (): Middleware[] => [...webBase(), requireAdminMiddleware(), injectSharedDataMiddleware(), pendingCookiesMiddleware()],
+    admin: (): Middleware[] => [
+      ...webBase(),
+      requireAdminMiddleware(),
+      injectSharedDataMiddleware(),
+      pendingCookiesMiddleware(),
+      createInertiaFormValidationResponseMiddleware(),
+    ],
     /** Manager 區域：web 基底 + manager role 驗證 */
     manager: (): Middleware[] => [
       ...webBase(),
@@ -117,6 +129,7 @@ export const HttpKernel = {
       requireOrganizationContext(),
       injectSharedDataMiddleware(),
       pendingCookiesMiddleware(),
+      createInertiaFormValidationResponseMiddleware(),
     ],
     /** Member 區域：web 基底 + 登入驗證 */
     member: (): Middleware[] => [
@@ -124,6 +137,7 @@ export const HttpKernel = {
       requireMemberMiddleware(),
       injectSharedDataMiddleware(),
       pendingCookiesMiddleware(),
+      createInertiaFormValidationResponseMiddleware(),
     ],
   },
 } as const

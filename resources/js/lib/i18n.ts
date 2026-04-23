@@ -46,6 +46,7 @@ const frontendCatalog = {
   'member.usage.loadFailed': true,
   'member.usage.selectOrg': true,
   'manager.members.cannotRemoveSelf': true,
+  'common.validationFailed': true,
   'manager.apiKeys.createFailed': true,
   'manager.apiKeys.quotaExceedsAvailable': true,
   'ui.manager.dashboard.orgBalance': true,

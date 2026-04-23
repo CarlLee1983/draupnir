@@ -7,7 +7,11 @@ import { FormRequest, z } from '@gravito/impulse'
 export class ManagerCreateApiKeyRequest extends FormRequest {
   schema = z.object({
     label: z.string().min(1, 'Key label is required'),
-    quotaAllocated: z.coerce.number().positive().optional(),
+    /** Treat 0 as unset (unlimited); require a positive number when a cap is sent */
+    quotaAllocated: z.preprocess(
+      (v) => (v === 0 || v === '0' ? undefined : v),
+      z.coerce.number().positive().optional(),
+    ),
     budgetResetPeriod: z.enum(['7d', '30d']).optional(),
     assigneeUserId: z.union([z.string().min(1), z.null()]).optional(),
   })
