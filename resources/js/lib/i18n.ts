@@ -210,6 +210,7 @@ const frontendCatalog = {
   // Charts — UsageLineChart
   'ui.charts.usageLine.legendRequests': true,
   'ui.charts.usageLine.legendTokens': true,
+  'ui.charts.demoBadge': true,
   // Charts — shared & dashboards
   'ui.charts.empty.subtitle': true,
   'ui.charts.costTrend.description': true,
@@ -456,6 +457,7 @@ const frontendCatalog = {
   'ui.member.usage.heading': true,
   'ui.member.usage.empty': true,
   'ui.member.usage.trendTitle': true,
+  'ui.member.usage.trendDescription': true,
   'ui.member.usage.totalRequests': true,
   'ui.member.usage.totalTokens': true,
   // Member — Contracts
@@ -699,6 +701,7 @@ const frontendCatalog = {
   'ui.admin.dashboard.metricContracts': true,
   'ui.admin.dashboard.metricApiKeys': true,
   'ui.admin.dashboard.usageTrendTitle': true,
+  'ui.admin.dashboard.usageTrendDescription': true,
   'ui.admin.dashboard.usageWindowDays': true,
   'ui.admin.dashboard.usageTrendEmpty': true,
   'ui.admin.dashboard.subtitle': true,
