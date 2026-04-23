@@ -762,4 +762,7 @@ export const enMessages = {
   'ui.charts.credit.defaultTitle': 'Credit usage',
   'ui.charts.credit.topup': 'Top-up',
   'ui.charts.credit.consumed': 'Consumed',
+  'ui.layout.topBar.language': 'Language',
+  'ui.common.lang.zh-TW': '繁體中文',
+  'ui.common.lang.en': 'English',
 } as const satisfies Record<MessageKey, string>

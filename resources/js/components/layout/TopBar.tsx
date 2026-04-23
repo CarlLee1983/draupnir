@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react'
+import { Link, router } from '@inertiajs/react'
 import { useAuth } from '@/hooks/use-auth'
 import {
   DropdownMenu,
@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Menu } from 'lucide-react'
+import { Menu, Languages } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/lib/i18n'
 
@@ -18,7 +18,7 @@ interface TopBarProps {
 
 export function TopBar({ onToggleSidebar }: TopBarProps) {
   const { user } = useAuth()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
 
   const getInitials = (email: string, name?: string) => {
     if (name) {
@@ -52,6 +52,36 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
       <div className="hidden flex-1 lg:block" />
       <div className="flex-1 lg:hidden" />
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-none border border-border bg-muted/30"
+            aria-label={t('ui.layout.topBar.language')}
+          >
+            <Languages className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="rounded-none border-border bg-background font-mono text-[11px] uppercase tracking-widest"
+        >
+          <DropdownMenuItem
+            className="cursor-pointer focus:bg-primary focus:text-primary-foreground"
+            onClick={() => router.post('/lang', { locale: 'zh-TW' }, { preserveScroll: true })}
+          >
+            <span className={locale === 'zh-TW' ? 'font-bold text-primary' : ''}>{t('ui.common.lang.zh-TW')}</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="cursor-pointer focus:bg-primary focus:text-primary-foreground"
+            onClick={() => router.post('/lang', { locale: 'en' }, { preserveScroll: true })}
+          >
+            <span className={locale === 'en' ? 'font-bold text-primary' : ''}>{t('ui.common.lang.en')}</span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

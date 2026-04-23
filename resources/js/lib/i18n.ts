@@ -312,6 +312,9 @@ const frontendCatalog = {
   'ui.charts.credit.defaultTitle': true,
   'ui.charts.credit.topup': true,
   'ui.charts.credit.consumed': true,
+  'ui.layout.topBar.language': true,
+  'ui.common.lang.zh-TW': true,
+  'ui.common.lang.en': true,
   // Auth — Login
 
   'ui.auth.login.title': true,

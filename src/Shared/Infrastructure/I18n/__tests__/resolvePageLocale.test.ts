@@ -42,4 +42,46 @@ describe('resolvePageLocale', () => {
     })
     expect(resolvePageLocale(ctx)).toBe('en')
   })
+
+  test('prioritizes draupnir_locale cookie over Accept-Language', () => {
+    const ctx = createMockContext({
+      getHeader: (name: string) => {
+        if (name.toLowerCase() === 'accept-language') return 'zh-TW'
+        return undefined
+      },
+      headers: { 'accept-language': 'zh-TW' },
+      getCookie: (name: string) => {
+        if (name === 'draupnir_locale') return 'en'
+        return undefined
+      },
+    })
+    expect(resolvePageLocale(ctx)).toBe('en')
+  })
+
+  test('falls back to Accept-Language when draupnir_locale cookie is missing', () => {
+    const ctx = createMockContext({
+      getHeader: (name: string) => {
+        if (name.toLowerCase() === 'accept-language') return 'en'
+        return undefined
+      },
+      headers: { 'accept-language': 'en' },
+      getCookie: () => undefined,
+    })
+    expect(resolvePageLocale(ctx)).toBe('en')
+  })
+
+  test('falls back to Accept-Language when draupnir_locale cookie is invalid', () => {
+    const ctx = createMockContext({
+      getHeader: (name: string) => {
+        if (name.toLowerCase() === 'accept-language') return 'en'
+        return undefined
+      },
+      headers: { 'accept-language': 'en' },
+      getCookie: (name: string) => {
+        if (name === 'draupnir_locale') return 'fr'
+        return undefined
+      },
+    })
+    expect(resolvePageLocale(ctx)).toBe('en')
+  })
 })

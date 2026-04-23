@@ -758,6 +758,9 @@ export const zhTWMessages = {
   'ui.charts.credit.defaultTitle': 'Credit 使用狀況',
   'ui.charts.credit.topup': '充值',
   'ui.charts.credit.consumed': '消耗',
+  'ui.layout.topBar.language': '語系',
+  'ui.common.lang.zh-TW': '繁體中文',
+  'ui.common.lang.en': 'English',
 } as const
 
 export type MessageKey = keyof typeof zhTWMessages
