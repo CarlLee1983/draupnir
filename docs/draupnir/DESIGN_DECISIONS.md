@@ -17,7 +17,7 @@
 |------|------|------|
 | **執行時** | Bun | 相較典型 Node.js 啟動與執行效能佳，原生 TypeScript，開發迴圈快 |
 | **Web 框架** | Gravito DDD 2.0 | 內建 DDD 分層，與 gravito-impulse 等模組一致 |
-| **ORM** | Drizzle | 型別安全、輕量，與 Bun 生態相容 |
+| **ORM** | Atlas | 型別安全、輕量，原生支援 Gravito 生態與 Bun |
 | **資料庫** | PostgreSQL | ACID、JSON 支援，生產環境成熟度佳 |
 | **快取** | Redis | 工作階段、用量快取、發佈／訂閱 |
 | **認證** | JWT + HttpOnly Cookie | 安全與無狀態擴充性的平衡 |

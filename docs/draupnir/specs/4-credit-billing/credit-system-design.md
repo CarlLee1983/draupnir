@@ -193,8 +193,8 @@ HandleCreditToppedUpService:
 ```
 src/Modules/Dashboard/
 ├── Infrastructure/Services/BifrostSyncService.ts
-├── Infrastructure/Repositories/DrizzleUsageRepository.ts
-├── Infrastructure/Repositories/DrizzleSyncCursorRepository.ts
+├── Infrastructure/Repositories/AtlasUsageRepository.ts
+├── Infrastructure/Repositories/AtlasSyncCursorRepository.ts
 ├── Domain/Events/BifrostSyncCompletedEvent.ts
 └── …
 

@@ -434,7 +434,7 @@ export { OrganizationServiceProvider } from './Infrastructure/Providers/Organiza
 
 **Rules**:
 - Only export public domain concepts (Aggregates, DTOs, Repository interfaces, ServiceProvider)
-- Never export implementation details (Drizzle repositories, internal services)
+- Never export implementation details (Atlas repositories, internal services)
 - Never export Presentation layer (Controllers, Routes) from module index
 - All cross-module imports go through barrel exports
 

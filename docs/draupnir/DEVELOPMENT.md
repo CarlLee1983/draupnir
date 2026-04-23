@@ -53,18 +53,18 @@ Server-driven Inertia routes, per-page DI bindings, and Vite assets live under `
 - Dedicated server for features: `bun run test:feature:server`.
 - Against an already running API: `bun run test:feature:existing`.
 - Feature tests include OpenAPI contract checks where applicable.
-- **E2E (Playwright)**: `bun run test:e2e` (dev server on port **3001** with `ORM=memory` per script); smoke subset: `bun run test:e2e:smoke` (used in CI with Drizzle + migrations).
+- **E2E (Playwright)**: `bun run test:e2e` (dev server on port **3001** with `ORM=memory` per script); smoke subset: `bun run test:e2e:smoke` (used in CI with Atlas + migrations).
 - Deeper testing guidance: [`knowledge/`](./knowledge/) and [`VERIFICATION_CHECKLIST.md`](./VERIFICATION_CHECKLIST.md).
 
 ## Key environment variables
 
-Defaults below match **runtime fallbacks** and [`.env.example`](../../.env.example). Adjust for staging/production (e.g. `ORM=drizzle`, `DATABASE_URL`, `ENABLE_DB=true`).
+Defaults below match **runtime fallbacks** and [`.env.example`](../../.env.example). Adjust for staging/production (e.g. `ORM=atlas`, `DATABASE_URL`, `ENABLE_DB=true`).
 
 | Variable | Purpose | Typical local / default |
 |----------|---------|-------------------------|
-| `ORM` | Persistence backend (`memory` / `drizzle` / `atlas` / `prisma`) | `memory` if unset (`getCurrentORM()`) |
+| `ORM` | Persistence backend (`memory` / `atlas` / `prisma`) | `memory` if unset (`getCurrentORM()`) |
 | `ENABLE_DB` | Atlas / DB-related toggles | `false` in `.env.example` |
-| `DATABASE_URL` | Postgres (or other) when using Drizzle-backed CI or prod | unset in example; set for real DB |
+| `DATABASE_URL` | Postgres (or other) when using Atlas-backed CI or prod | unset in example; set for real DB |
 | `DB_CONNECTION` | Driver hint for shared config (`config/database.ts`) | `sqlite` if unset |
 | `BIFROST_API_URL` | Bifrost gateway base URL | required for gateway sync paths |
 | `BIFROST_MASTER_KEY` | Bifrost auth | required outside trivial local mocks |

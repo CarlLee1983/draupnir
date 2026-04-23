@@ -48,7 +48,7 @@
 |---|---|
 | `ILLMGatewayClient` | 外部原始資料來源 |
 | `BifrostSyncService` | 同步、映射、落庫、發事件 |
-| `DrizzleUsageRepository` | 本地 usage read model |
+| `AtlasUsageRepository` | 本地 usage read model |
 | `ApplyUsageChargesService` | 同步完成後扣款 |
 | `EvaluateThresholdsService` | 同步完成後評估告警 |
 | `AdminReportTemplatePage` | 報表資料組裝與 render |

@@ -1,6 +1,6 @@
 # Entity-Relationship 概覽
 
-本頁以 **`database/migrations/`** 套用後的實際表結構為準，並以 **Drizzle schema**（[`schema.ts`](../../../src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts)）為程式碼側對照；兩者應保持一致。型別在 SQLite（開發）與 PostgreSQL（CI／部署）之間可能不同（例如時間戳、數值），欄位語意以 migration 為準。登入／JWT／撤銷流程見 [`auth-flow-diagrams.md`](./auth-flow-diagrams.md)。
+本頁以 **`database/migrations/`** 套用後的實際表結構為準，並以 **Drizzle schema**（[`schema.ts`](../../../src/Shared/Infrastructure/Database/schema.ts)）為程式碼側對照；兩者應保持一致。型別在 SQLite（開發）與 PostgreSQL（CI／部署）之間可能不同（例如時間戳、數值），欄位語意以 migration 為準。登入／JWT／撤銷流程見 [`auth-flow-diagrams.md`](./auth-flow-diagrams.md)。
 
 **未持久化／缺口：**`module_subscriptions` 表尚未建立（無對應 migration，`schema.ts` 亦無），`ModuleSubscriptionRepository` 仍指向該表名—實作前勿視為已上線。可選用專案內 **dbcli**（`.dbcli/config.json`）對連線資料庫執行 `dbcli schema` 與本頁交叉驗證。
 
@@ -487,6 +487,6 @@ CREATE INDEX idx_password_reset_tokens_email ON password_reset_tokens(email);
 
 - [`auth-flow-diagrams.md`](./auth-flow-diagrams.md) — 登入／JWT／撤銷
 - [`ddd-layered-architecture.md`](./ddd-layered-architecture.md) — 四層架構
-- `src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts` — 表結構單一來源
+- `src/Shared/Infrastructure/Database/schema.ts` — 表結構單一來源
 - `src/Modules/*/Domain/Aggregates/`、`Entities/` — 各模組模型
 - `database/migrations/` — 遷移歷史

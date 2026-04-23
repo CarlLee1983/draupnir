@@ -62,7 +62,7 @@
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
 │        Infrastructure Layer (Repos & Adapters)               │
-│  ├─ Repositories (Drizzle ORM + PostgreSQL)                  │
+│  ├─ Repositories (Atlas ORM + PostgreSQL)                    │
 │  ├─ Bifrost Client (API 代理與同步)                          │
 │  ├─ Mailer (Email 交付) / Webhook Dispatcher                 │
 │  └─ PDF Generator (Chromium/Puppeteer)                       │
@@ -70,7 +70,7 @@
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
 │         Foundation Layer (共享基礎設施)                       │
-│  ├─ Database (Drizzle ORM / PostgreSQL)                      │
+│  ├─ Database (Atlas ORM / PostgreSQL)                        │
 │  ├─ Redis (Cache & Pub/Sub)                                  │
 │  ├─ Security (JWT / HMAC / AES-256)                          │
 │  └─ Monitoring (Health Checks / Logger)                      │
@@ -184,8 +184,8 @@ Phase 18 引入的 `IScheduler` 提供標準化的後台任務管理，確保報
 
 ## 數據持久化規範
 
-專案全面採用 **Drizzle ORM**。
-- **Schema**: 集中定義於 `src/Foundation/Infrastructure/Database/schema.ts`。
+專案全面採用 **Gravito Atlas ORM**。
+- **Schema**: 定義於 `src/Modules/*/Infrastructure/Database/schema.ts`（模組化定義）或基礎設施層。
 - **Migrations**: 位於 `database/migrations/`，通過 `bun orbit` 或 `migrate.ts` 執行。
 - **Repository**: 每個模組在 `Infrastructure/Repositories` 下實現對應的接口。
 
@@ -196,7 +196,7 @@ Phase 18 引入的 `IScheduler` 提供標準化的後台任務管理，確保報
 ### 新增功能模組的推薦路徑：
 1. **Domain**: 定義核心邏輯、驗證規則和事件。
 2. **Application**: 編寫 Service 處理業務流程，定義 DTO。
-3. **Infrastructure**: 實現 Drizzle Repository 和外部服務 Adapter。
+3. **Infrastructure**: 實現 Atlas Repository 和外部服務 Adapter。
 4. **Presentation**: 編寫 Controller 和路由，使用 `Inertia::render` 或 `Response::json`。
 5. **ServiceProvider**: 在模組的 `Infrastructure/Providers` 下註冊 DI 綁定，並在 `AppModule` 中註冊模組信息。
 

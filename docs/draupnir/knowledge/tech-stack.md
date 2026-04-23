@@ -37,6 +37,7 @@ Complete reference for all languages, runtimes, frameworks, dependencies, config
 | Framework | Version | Purpose | Layer |
 |-----------|---------|---------|-------|
 | **Gravito DDD** | 3.0.1 | Application framework (DDD pattern) | Foundation/Application |
+| **Gravito Atlas** | 2.0.0 | Primary ORM and Query Builder | Infrastructure |
 | **React** | 19.2.5 | UI component library | Presentation/Frontend |
 | **Inertia.js** | 3.0.3 | Server-side rendering bridge | Frontend |
 | **Biome** | 2.4.11 | Linter + formatter (replaces ESLint + Prettier) | Tooling |
@@ -49,9 +50,10 @@ Complete reference for all languages, runtimes, frameworks, dependencies, config
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| `drizzle-orm` | 0.45.1 | Type-safe ORM layer |
+| `@gravito/atlas` | 2.0.0 | Primary Type-safe ORM & Query Builder |
+| `drizzle-orm` | 0.45.1 | Legacy ORM layer (being replaced) |
 | `@libsql/client` | 0.17.0 | LibSQL/Turso database driver |
-| **Schema location**: `src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts` |
+| **Schema location**: `src/Shared/Infrastructure/Database/Adapters/Atlas/schema.ts` |
 
 **Database**: SQLite-compatible (Turso/LibSQL for remote, `file:local.db` for local)
 

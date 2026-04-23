@@ -25,13 +25,14 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 - ✓ Usage alerts foundation, webhook alerts CRUD/history/resend, and signed delivery persistence — v1.3
 - ✓ Per-key/per-model cost breakdown with token efficiency metrics — v1.3
 - ✓ Scheduled server-side PDF usage reports via Croner + Playwright — v1.3
-- ✓ ORM-agnostic `UsageRepository` with declarative `AggregateSpec` and `IQueryBuilder.aggregate` — v1.3
+- ✓ ORM-agnostic `UsageRepository` with declarative `AggregateSpec` and `IQueryBuilder.aggregate` (Atlas-ready) — v1.3
 - ✓ Unified `IScheduler` + Croner adapter; scheduled work registered via `registerJobs()` — v1.4
-- ✓ Alerts repositories and services decoupled from Drizzle; `IAlertNotifier` / in-memory fixtures — v1.4
+- ✓ Alerts repositories and services migrated to Atlas; `IAlertNotifier` / in-memory fixtures — v1.4
 - ✓ CI pipeline: parallel guardrail jobs (typecheck, lint/format, tests+coverage, drift, routes, DI, E2E smoke, commitlint) — v1.4
 
 ### Active
 
+- [ ] Complete full migration of all legacy Drizzle repositories to Gravito Atlas (v2)
 - [ ] Implement `OpenRouterGatewayAdapter` (v2)
 - [ ] Extend `ILLMGatewayClient` to cover raw chat-completion proxying (v2)
 
@@ -51,7 +52,7 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 | Cached aggregation (SQLite local reads) | Avoids 500ms-5s Bifrost API latency; enables sub-100ms UI | ✅ Completed |
 | PDF export via `window.print()` | Simplest implementation with high visual fidelity; no new deps | ✅ Completed |
 | HMAC-SHA256 Webhook Signing | Standard industry pattern for message integrity and authenticity | ✅ Completed |
-| Declarative `AggregateSpec` | Decouples repository logic from ORM-specific syntax (Drizzle/Atlas) | ✅ Completed |
+| Declarative `AggregateSpec` | Decouples repository logic from ORM-specific syntax (now using Atlas) | ✅ Completed |
 | Playwright for Server-side PDF | Native headless browser support; consistent layout with dashboard | ✅ Completed |
 | `IScheduler` port + CronerScheduler | Single lifecycle for cron/interval work; retry/backoff; test `FakeScheduler` | ✅ Completed |
 | Alerts ORM-agnostic + `IAlertNotifier` | Same pattern as Usage; email/webhook strategies; DI-less tests | ✅ Completed |
@@ -76,12 +77,12 @@ Draupnir is an existing TypeScript + Bun + DDD service that currently speaks dir
 - **Alerting System:** Multi-tier thresholds (80%/100%) with deduplicated email and signed webhook notifications.
 - **Analytics Depth:** Per-key cost attribution, token efficiency tracking, and model-level distribution charts.
 - **Automated Reports:** Server-side PDF generation and scheduled delivery via internal mailer.
-- **Storage Evolution:** ORM-agnostic aggregation engine allows testing without SQLite dependencies.
+- **Storage Evolution:** ORM-agnostic aggregation engine allows testing without SQLite dependencies. Primary implementation: Atlas.
 
 ### v1.4: Hardening & Refinement ✓
 **Completed 2026-04-13**
 - **Scheduling:** `IScheduler` abstraction; Bifrost sync and report schedules registered in one place.
-- **Alerts:** Full ORM-agnostic data access; notifier strategies; slimmer cross-module surface.
+- **Alerts:** Full Atlas-backed data access; notifier strategies; slimmer cross-module surface.
 - **CI:** Eight-job workflow plus scripts for coverage, migration drift, routes, and DI binding audits.
 
 ## Current milestone

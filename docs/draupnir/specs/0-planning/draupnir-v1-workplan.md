@@ -425,9 +425,9 @@ interface PricingRule {
 |------|------|------|
 | Credit 充值／扣款／退款 | **通過** | `TopUpCreditService`、`DeductCreditService`、`RefundCreditService` + 帳戶／交易領域邏輯；見 `src/Modules/Credit/__tests__/`。 |
 | 餘額阻擋／恢復 Bifrost Key | **通過（範圍內）** | 餘額**耗盡**（扣款後 ≤ 0）時派發 `BalanceDepleted` → `HandleBalanceDepletedService`；充值派發 `CreditToppedUp` → `HandleCreditToppedUpService`。註：領域上扣款可將餘額扣至負數（見 `Balance` 測試），與「耗盡後阻擋」語意不同。 |
-| Bifrost 用量拉取 + Cursor + 排程 | **通過** | `src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts`：拉取用量、寫入 `usage_records`、冪等鍵 `bifrost_log_id`、`DrizzleSyncCursorRepository`；`DashboardServiceProvider.registerJobs()` 向 `scheduler` 註冊 `bifrost-sync`（cron 來自 `config/app` 之 `bifrostSyncCron`，`runOnInit: true`）。同步完成後派發 `BifrostSyncCompletedEvent`（`bifrost.sync.completed`）。 |
+| Bifrost 用量拉取 + Cursor + 排程 | **通過** | `src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts`：拉取用量、寫入 `usage_records`、冪等鍵 `bifrost_log_id`、`AtlasSyncCursorRepository`；`DashboardServiceProvider.registerJobs()` 向 `scheduler` 註冊 `bifrost-sync`（cron 來自 `config/app` 之 `bifrostSyncCron`，`runOnInit: true`）。同步完成後派發 `BifrostSyncCompletedEvent`（`bifrost.sync.completed`）。 |
 | 用量 → Credit 扣款 | **通過** | `CreditServiceProvider.boot` 訂閱 `bifrost.sync.completed`，呼叫 `ApplyUsageChargesService`：依 `usage_records` 對尚未關聯扣款之紀錄執行 `deductCredit`（`referenceType: usage_record`）。 |
-| 定價規則可配置 | **未達原規格** | 寫入 `usage_records.credit_cost` 時目前使用 Bifrost log 的 `cost`（見 `BifrostSyncService`）；資料庫另有 `pricing_rules` 表（Drizzle schema），**尚未**接軌 `UsagePricingCalculator`／管理 API／依模型規則重算。 |
+| 定價規則可配置 | **未達原規格** | 寫入 `usage_records.credit_cost` 時目前使用 Bifrost log 的 `cost`（見 `BifrostSyncService`）；資料庫另有 `pricing_rules` 表（Atlas schema），**尚未**接軌 `UsagePricingCalculator`／管理 API／依模型規則重算。 |
 | 用量異常告警 | **未驗收** | 仍無 `DetectUsageAnomalyService`／`UsageAnomalyDetected` 等實作與測試。 |
 | Phase 4 覆蓋率 ≥ 80% | **以 CI 為準** | 全專案門檻見 `bunfig.toml`；CI `unit-coverage` 執行 `bun test --coverage`。 |
 

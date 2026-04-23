@@ -27,9 +27,9 @@ flowchart LR
     Gateway[Bifrost / LLM Gateway<br/>usage logs]
     Sync[BifrostSyncService<br/>cron / backfill]
     ApiKey[ApiKey Repository<br/>virtualKeyId → apiKeyId]
-    UsageRepo[DrizzleUsageRepository<br/>usage_records]
+    UsageRepo[AtlasUsageRepository<br/>usage_records]
     Quarantine[quarantined_logs]
-    Cursor[sync_cursors]
+    SyncCursorRepo[AtlasSyncCursorRepository<br/>sync_cursors]
     Event[BifrostSyncCompletedEvent]
     Credit[Credit Module<br/>ApplyUsageChargesService]
     Alerts[Alerts Module<br/>EvaluateThresholdsService]
@@ -108,7 +108,7 @@ sequenceDiagram
 - 推進 cursor
 - 發送同步完成事件
 
-#### `DrizzleUsageRepository`
+#### `AtlasUsageRepository`
 負責：
 - 將 usage log 寫進本地 `usage_records`
 - 提供聚合查詢給 Dashboard / Reports / Alerts
@@ -192,7 +192,7 @@ Alerts 也會消費 `BifrostSyncCompletedEvent`，再評估閾值並投遞通知
 | cron 定時同步 | 已實作 | `DashboardServiceProvider.registerJobs()` |
 | gateway 拉取 usage logs | 已實作 | `ILLMGatewayClient.getUsageLogs(...)` |
 | 對應本地 API key | 已實作 | `findByBifrostVirtualKeyId(...)` |
-| 寫入 `usage_records` | 已實作 | `DrizzleUsageRepository.upsert(...)` |
+| 寫入 `usage_records` | 已實作 | `AtlasUsageRepository.upsert(...)` |
 | quarantine 不可辨識 log | 已實作 | `quarantined_logs` |
 | sync cursor 推進 | 已實作 | `sync_cursors` |
 | sync 完成事件 | 已實作 | `BifrostSyncCompletedEvent` |
@@ -229,7 +229,7 @@ Alerts 也會消費 `BifrostSyncCompletedEvent`，再評估閾值並投遞通知
 |---|---|
 | `src/Modules/Dashboard/Infrastructure/Services/BifrostSyncService.ts` | 同步主流程 |
 | `src/Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider.ts` | 排程註冊 |
-| `src/Modules/Dashboard/Infrastructure/Repositories/DrizzleUsageRepository.ts` | usage read model 寫入 / 查詢 |
+| `src/Modules/Dashboard/Infrastructure/Repositories/AtlasUsageRepository.ts` | usage read model 寫入 / 查詢 |
 | `src/Modules/Dashboard/Application/Ports/IUsageRepository.ts` | usage read model 介面 |
 | `src/Modules/Dashboard/Application/DTOs/UsageLogDTO.ts` | gateway log 的對應型別說明 |
 | `src/Modules/Dashboard/Domain/Events/BifrostSyncCompletedEvent.ts` | 同步完成事件 |

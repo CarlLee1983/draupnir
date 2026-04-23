@@ -93,6 +93,8 @@ bun run tinker                 # Gravito REPL
 ```bash
 bun run setup                  # install + git hooks + verify
 bun run setup:hooks            # scripts/setup-hooks.sh only
+bun run check:commit           # single commit-check entrypoint (imports + i18n)
+bun run check:i18n             # verify i18n locale registry and catalog fallback
 bun run troubleshoot           # scripts/troubleshoot.sh
 bun run backfill:alert-deliveries   # One-off Alerts script (see module path in package.json)
 ```

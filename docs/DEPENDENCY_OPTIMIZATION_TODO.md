@@ -1,24 +1,23 @@
 # Draupnir 依賴優化 - 待辦事項清單
 
-**更新日期** 2026-04-10  
+**更新日期** 2026-04-23  
 **項目** NPM 依賴替換和 Bun 原生 API 遷移  
-**狀態** 進行中  
+**狀態** 進行中（核心遷移與防回退已落地；#5 / #8 / 部分文檔與發布項仍待辦）  
 
 ---
 
 ## 📊 項目概覽
 
 ```
-完成度：3/12 (25%)
-├─ 已完成（開發工作）: 3/3 ✅
-├─ 待實施（優先）: 2/9 🔴
-├─ 待實施（計畫中）: 3/9 🟡
-├─ 待評估（中期）: 2/9 🔵
-├─ 待評估（長期）: 1/9 🟢
-└─ 追蹤管理: 1/9 📊
+完成度（概估）：7/12 全完成 + 2/12 部分 + 3/12 未開始
+├─ 全完成: #1–#3 開發、#4 報告、#6 文獻評估、#10 腳本+CI+文檔、#12 本表
+├─ 部分: #9（INDEX / QUICKREF / SNIPPETS / REPORT 等，見 Task #9） 
+├─ 部分: #11（本地 tag `bun-optimization-complete`；原草案的 CHANGELOG 專節、GitHub Release 仍缺）
+├─ 阻斷/待辦: #5 權限與受限密碼學檔案
+├─ 中期: #8 Bun 生態監控（文件與執行節律）
+└─ 長期: #7 readFileSync 全異步化（觸發條件式）
 
-預期投入時間: 13.5 小時
-優先級排序: 本周 2.5h → 本月 6h → 中期 3h → 長期 2h
+預期投入時間: 13.5 小時（歷史估時；剩餘以當前排程為準）
 ```
 
 ---
@@ -119,55 +118,28 @@ readFileSync 保留理由：
 ### Task #10: 建立自動化檢查（防止回退）
 **優先級** 🔴 立即  
 **預期時間** 2-3 小時  
-**狀態** 📋 PENDING  
-**負責人** [待指定]  
-**截止日期** 2026-04-11  
+**狀態** ✅ COMPLETED（實作路徑與初版草案不同，見下）  
+**負責人** 已落地於 repo（腳本 + CI + 文檔）  
+**完成** 2026-04-10 起陸續併入  
 
 **任務描述**
 防止未來在代碼中引入已棄用的依賴或模組
 
-**交付物清單**
-- [ ] **Pre-commit Hook** (`.husky/pre-commit`)
-  - [ ] 檢查：不允許新增 `from 'uuid'` import
-  - [ ] 檢查：不允許新增 `from 'node:crypto'` import（除外：PasswordHasher, WebhookSecret）
-  - [ ] 檢查：不允許新增 `from 'node:path'` import
-  - [ ] 警告：readFileSync 新增使用
-
-- [ ] **ESLint 規則** (`.eslintrc.json`)
-  ```json
-  {
-    "rules": {
-      "no-restricted-imports": [
-        "error",
-        {
-          "name": "uuid",
-          "message": "Use crypto.randomUUID() instead"
-        },
-        {
-          "name": "node:path",
-          "message": "Use joinPath() function instead"
-        }
-      ]
-    }
-  }
-  ```
-
-- [ ] **GitHub Actions 工作流** (`.github/workflows/dependency-check.yml`)
-  - [ ] 觸發：每個 PR
-  - [ ] npm audit 掃描
-  - [ ] 禁止依賴列表驗證
-  - [ ] 代碼導入規則檢查
-
-- [ ] **文檔** (`docs/banned-imports.md`)
-  - [ ] 禁止清單
-  - [ ] 例外情況
-  - [ ] 替代方案
+**實際交付物（與原草案差異）**
+- [x] **Pre-commit Hook**（非 Husky）：`scripts/setup-hooks.sh` 安裝至 **`.git/hooks/pre-commit`**，呼叫 `scripts/check-commit.sh`。
+- [x] **禁用 import 檢查**：`scripts/check-banned-imports.sh` — 阻擋 `uuid`、`node:path`、非白名單的 `node:crypto` 新增行；`node:crypto` 白名單含 `PasswordHasher.ts`、`WebhookSecret.ts`（及 `scripts/gen-hash.ts`）；**警告** `readFileSync` 新增使用。
+- [x] **提交入口與 i18n**：`check-commit.sh` 同時執行 banned-imports 與 `bun scripts/check-i18n-locales.ts`。
+- [x] **CI**：`.github/workflows/ci.yml` 的 `unit-coverage` job 執行 **`bun run check:commit`**（針對變更差異檢查），**未**新增獨立 `dependency-check.yml`；專案一般靜態分析採 **Biome**，**未**加入 ESLint `no-restricted-imports`（以 shell 實作取代）。
+- [x] **文檔** `docs/banned-imports.md` — 禁止清單、例外、替代方案、Hook 說明。
 
 **驗收標準**
-- [ ] Pre-commit hook 可成功執行
-- [ ] ESLint 規則正確應用
-- [ ] GitHub Actions 工作流可部署
-- [ ] 文檔完整清晰
+- [x] Pre-commit 路徑可執行（`bun run check:commit` 與本機 `setup:hooks`）
+- [x] 禁用 import 規則在 CI 上對 PR 變更生效
+- [x] 文檔完整
+
+**可選後續增強**（非阻塞）
+- [ ] 專屬 workflow：`npm audit` 或 `bun audit` 定期／PR 掃描（與本項 import 防回退分屬不同面向）
+- [ ] 若未來導入 ESLint 或 Biome 支援等價「禁止匯入」規則，可雙軌遷移後逐步淘汰 grep
 
 **依賴關係** 無
 
@@ -273,117 +245,65 @@ readFileSync 保留理由：
 
 ### Task #9: 建立 Bun 依賴替換知識庫
 **優先級** 🟡 中  
-**預期時間** 3-4 小時  
-**狀態** 📋 PENDING  
-**負責人** [待指定]  
-**截止日期** 2026-04-30  
+**預期時間** 3-4 小時（初版已併入 docs；可選擇是否再拆專屬目錄）  
+**狀態** 🟡 部分完成（內容已寫在 `docs/DEPENDENCY_OPTIMIZATION_*.md`，非初版目錄結構）  
+**負責人** 已併入 repo 文檔集  
+**截止日期** 可關閉或改為「增量維護」  
 
 **任務描述**
 文檔化 Bun NPM 依賴替換的最佳實踐，供團隊參考
 
-**交付物**
-1. **技術對照表** (`docs/guides/bun-npm-replacement.md`)
-   - [ ] 常見 NPM 依賴 vs Bun 替代方案
-   - [ ] 代碼示例
-   - [ ] 適用場景
+**已落地（實際路徑）**
+- [x] 索引與導航：`docs/DEPENDENCY_OPTIMIZATION_INDEX.md`
+- [x] 快速參考：`docs/DEPENDENCY_OPTIMIZATION_QUICKREF.md`
+- [x] 完整報告 / 遷移脈絡：`docs/DEPENDENCY_OPTIMIZATION_REPORT.md`
+- [x] 可複用片段與遷移檢查：`docs/DEPENDENCY_OPTIMIZATION_SNIPPETS.md`
+- [x] 禁用匯入規則：`docs/banned-imports.md`（與 `scripts/check-banned-imports.sh` 一致）
 
-2. **案例研究** (`docs/cases/draupnir-optimization.md`)
-   - [ ] Draupnir 完整遷移過程
-   - [ ] 問題和解決方案
-   - [ ] 性能指標
+**初版草案中尚未建立的獨立檔案**（可選，低優先）
+1. `docs/guides/bun-npm-replacement.md` — 內容多已涵蓋於 QUICKREF / REPORT
+2. `docs/cases/draupnir-optimization.md` — 內容多已涵蓋於 REPORT
+3. `docs/guidelines/when-to-migrate.md` — 見 REPORT 決策段與 JOSE 評估
+4. `docs/snippets/*.ts` — 片段以 `DEPENDENCY_OPTIMIZATION_SNIPPETS.md` 內聯代碼為主；未拆獨立 `.ts` 檔
 
-3. **決策指南** (`docs/guidelines/when-to-migrate.md`)
-   - [ ] 何時值得遷移（成本效益）
-   - [ ] 何時應保留（例如：readFileSync）
-   - [ ] 風險評估框架
-
-4. **代碼片段庫** (`docs/snippets/`)
-   - [ ] `sha256.ts` - 加密雜湊實現
-   - [ ] `joinPath.ts` - 路徑操作
-   - [ ] `normalizePath.ts` - 路徑驗證
-   - [ ] 使用說明和注意事項
-
-5. **執行記錄** (`docs/reports/`)
-   - [ ] 2026-04-10 完整執行報告
-   - [ ] 提交紀錄連結
-   - [ ] 驗證結果
-
-**質量標準**
-- [ ] 文檔清晰易懂
-- [ ] 包含實際代碼示例
-- [ ] 包含決策理由
-- [ ] 可被新成員使用
+**質量標準**（針對已併入文檔集）
+- [x] 文檔可讀、有示例與決策依據（以 INDEX/REPORT 為準持續維護）
+- [ ] 若產品化要求「單一 guides/ 目錄」，可再從上列檔案摘出重發布
 
 ---
 
 ### Task #11: 建立 Git 標籤和里程碑
 **優先級** 🟡 中  
-**預期時間** 0.5 小時  
-**狀態** 📋 PENDING  
-**負責人** [待指定]  
-**截止日期** 2026-04-15  
+**預期時間** 0.5 小時（剩餘主要為遠端發布與變更日誌）  
+**狀態** 🟡 部分完成（本地有語意化 tag；**未**驗證遠端 / Release）  
+**負責人** [待補]  
+**截止日期** 彈性  
 
 **任務描述**
 記錄本次優化的完成點，建立版本里程碑
 
-**交付物**
-- [ ] Git 標籤：`v1.0.0-bun-optimized`
-  ```bash
-  git tag -a v1.0.0-bun-optimized -m "Draupnir: NPM 依賴 Bun 優化完成"
-  git push origin v1.0.0-bun-optimized
-  ```
+**實際狀態**
+- [x] **Git 標籤（本地）**：`bun-optimization-complete`（`git tag -l` 可見）
+- [ ] **草案中的標籤** `v1.0.0-bun-optimized`：未在 repo 中採用；若需與語意化版本對齊，可另議命名
+- [ ] **push 到 origin**：需維護者在有權遠端執行
+- [ ] **GitHub Release 頁面**（內容草案見舊版 TODO 列表）
+- [ ] **GitHub Milestone**（內部流程）
+- [ ] **package.json** 本專案當前版本為 `0.1.0`；**未**因本優化而 bump
+- [ ] **CHANGELOG.md**：當前僅有 `[0.0.1.0] - 2026-04-11` 等條目，**未**含「1.0.0-bun-optimized」專段；若需可追溯敘述，可補一則 *Added* / *Changed* 子項（非技術阻斷）
 
-- [ ] GitHub Release 頁面
-  - [ ] 標題：Draupnir v1.0.0 - Bun 依賴優化
-  - [ ] 概述（2-3 句）
-  - [ ] 主要改進列表
-  - [ ] 提交列表連結
-  - [ ] 驗證結果
-  - [ ] 已知限制
-
-- [ ] 里程碑
-  - [ ] 創建 GitHub Milestone
-  - [ ] 標題：Draupnir 1.0.0 - Bun 優化
-  - [ ] 標記為 100% 完成
-
-- [ ] 版本號更新
-  - [ ] `package.json`: 評估是否更新版本號
-
-- [ ] CHANGELOG 更新 (`CHANGELOG.md`)
-  ```markdown
-  ## [1.0.0-bun-optimized] - 2026-04-10
-  ### Changed
-  - Replaced npm 'uuid' with crypto.randomUUID()
-  - Migrated crypto.createHash() to crypto.subtle.digest()
-  - Removed node:path dependency
-  - Implemented joinPath() and normalizePath() utilities
-  
-  ### Performance
-  - Reduced npm dependencies by 1
-  - Improved Bun native API usage
-  
-  ### Known Issues
-  - PasswordHasher.ts, WebhookSecret.ts pending permission for full migration
-  ```
-
-**驗收標準**
-- [ ] 標籤已發布到 GitHub
-- [ ] Release 頁面信息完整
-- [ ] CHANGELOG 已更新
-- [ ] 里程碑標記為完成
+**驗收標準**（可分期）
+- [x] 至少有本地標記可指向優化完成節點
+- [ ] 遠端 tag + Release + CHANGELOG 專段（團隊決定是否要做）
 
 ---
 
 ## 🔵 中期評估（Q2-Q3 2026）
 
-### Task #6: 評估 jsonwebtoken 遷移
-**優先級** 🔵 中期  
-**預期時間** 2-3 小時  
-**狀態** ⏳ PENDING  
-**評估截止** 2026-06-30  
-**決策截止** 2026-07-31  
+### 複查節點：jsonwebtoken / jose（與「計畫中」區塊的 Task #6 同一主題）
 
-**詳見上方 Task #6 完整描述**
+文獻評估 **已完成**（見上方 **Task #6: 評估 jsonwebtoken 到 jose 的遷移可行性** 與 `docs/JOSE_MIGRATION_EVALUATION.md`）。下表週期意在 **屆時重審**（CVE、需求變更、Bun 生態），**不是**「評估工作尚未做」。
+
+**建議重審** 2026-06-30 / 觸發條件同 Task #6「觸發重啟條件」。
 
 ---
 
@@ -489,17 +409,18 @@ readFileSync 保留理由：
 | 2 | 路徑依賴優化 | - | ✅ | 100% | 完成 | Claude | 2026-04-10 |
 | 3 | 後續評估 | - | ✅ | 100% | 完成 | Claude | 2026-04-10 |
 | 4 | 執行報告 | 🔴 | ✅ | 100% | 2h | Claude | 2026-04-10 |
-| 10 | 自動化檢查 | 🔴 | ✅ | 100% | 2h | Claude | 2026-04-10 |
+| 10 | 自動化檢查 | 🔴 | ✅ | 100% | 2-3h | 腳本+CI | 2026-04 |
 | 5 | 權限申請 & 受限檔案 | 🟡 | ⏳ | 0% | 待批准 | [待指定] | TBD |
 | 6 | Jose 遷移評估 | 🟡 | ✅ | 100% | 1h | Claude | 2026-04-10 |
-| 9 | 知識庫建立 | 🟡 | 📋 | 0% | 3-4h | [待指定] | 2026-04-30 |
-| 11 | Git 標籤里程碑 | 🟡 | ✅ | 100% | 0.2h | Claude | 2026-04-10 |
+| 9 | 知識庫建立 | 🟡 | 🟡 | 約 75% | 3-4h | 文檔已併入 | 增量 |
+| 11 | Git 標籤里程碑 | 🟡 | 🟡 | 部分 | 0.5h | 本地 tag | 遠端待定 |
 | 8 | Bun 監控計畫 | 🔵 | 📋 | 0% | 1h | [技術主管] | 2026-05-01 |
 | 7 | ReadFileSync 轉換 | 🟢 | 📋 | 0% | 2-3h | [待指定] | Q4 2026+ |
 | 12 | 待辦總表 | 📊 | ✅ | 100% | 持續 | 項目管理 | 持續 |
 
 **圖例**
 - ✅ COMPLETED（已完成）
+- 🟡 部分完成（內容已併入或僅部分交付物就緒）
 - 📋 PENDING（待執行）
 - ⏳ BLOCKED（被阻塞）
 - 🔴 立即優先（本周）
@@ -518,30 +439,30 @@ readFileSync 保留理由：
 | **待辦清單** | `docs/DEPENDENCY_OPTIMIZATION_TODO.md` | 本文檔 |
 | **禁用 imports** | `docs/banned-imports.md` | 自動化防回退規則（Task #10 產出）|
 | **Jose 評估** | `docs/JOSE_MIGRATION_EVALUATION.md` | 決策文檔（Task #6 產出）|
-| **快速指南** | `docs/guides/bun-npm-replacement.md` | 待建立（Task #9）|
-| **案例研究** | `docs/cases/draupnir-optimization.md` | 待建立（Task #9）|
-| **代碼片段** | `docs/snippets/` | 待建立（Task #9）|
-| **Git 標籤** | `bun-optimization-complete`（本地）| Task #11 已建立 |
+| **快速參考** | `docs/DEPENDENCY_OPTIMIZATION_QUICKREF.md` | Task #9 內容載體之一 |
+| **文檔索引** | `docs/DEPENDENCY_OPTIMIZATION_INDEX.md` | 導航與讀者路徑 |
+| **可複用片段** | `docs/DEPENDENCY_OPTIMIZATION_SNIPPETS.md` | 取代原 `docs/snippets/*.ts` 草案 |
+| **案例／深度** | `docs/DEPENDENCY_OPTIMIZATION_REPORT.md` | 等同原「案例研究」定位 |
+| **Git 標籤** | `bun-optimization-complete` | Task #11 本地標記；遠端可選 |
 
 ---
 
 ## 🎯 成功標準
 
-完成所有項目的定義：
+完成所有項目的定義（依 2026-04-23 實況盤點）：
 
-- [x] 所有開發工作完成（#1-#3）✅
-- [ ] 所有立即優先任務完成（#4, #10）⏳
-- [ ] 所有計畫中任務完成（#5, #6, #9, #11）⏳
-- [ ] 中期任務按時進行（#8）⏳
-- [ ] 長期任務準備就緒（#7）⏳
-- [ ] 所有文檔完整清晰✅
-- [ ] 代碼覆蓋率 > 80%✅
-- [ ] 所有 CI/CD 檢查通過✅
-- [ ] 自動化檢查部署到主分支⏳
-- [ ] 版本標籤和 Release 發布⏳
+- [x] 所有開發工作完成（#1–#3）✅
+- [x] 立即優先任務 #4、#10（報告 + 防回退腳本與 CI）✅
+- [ ] 計畫中／阻塞：#5 未解；#6 文獻評估已完成、遷移本體未做；#9 以 **DEPENDENCY_OPTIMIZATION_*** 文檔集**達可用水準**；#11 **遠端 Release/CHANGELOG 專段** 仍屬團隊可選
+- [ ] 中期任務按節律進行（#8 監控計畫文件與執行）⏳
+- [ ] 長期任務觸發時再評估（#7）⏳
+- [x] 核心文檔可讀且互相鏈接（INDEX / REPORT / QUICKREF / SNIPPETS / banned-imports）
+- [x] 例行驗證以 CI 為準（`bun run typecheck` / `lint` / `check:commit` / 測試作業，見 `ci.yml`）
+- [x] 主線 CI 已包含 `check:commit`（禁用 import 防回退）
+- [ ] 可選：遠端語意化 tag、GitHub Release、CHANGELOG 專節敘述 Bun 優化
 
 ---
 
-**最後更新** 2026-04-10  
+**最後更新** 2026-04-23  
 **維護人** 項目管理團隊  
-**狀態** 進行中 - 歡迎更新和反饋
+**狀態** 進行中；與實作不一致處以本表「實際交付物」敘述為準
