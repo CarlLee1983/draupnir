@@ -18,7 +18,7 @@ export class WebhookDispatcher implements IWebhookDispatcher {
     }
 
     const body = JSON.stringify(webhookPayload)
-    const signature = request.secret.sign(body)
+    const signature = await request.secret.sign(body)
 
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {

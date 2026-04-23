@@ -34,7 +34,7 @@ fi
 # 使用相對於 repo root 的路徑。
 CRYPTO_ALLOWLIST=(
   "src/Modules/Auth/Infrastructure/Services/PasswordHasher.ts"
-  "src/Modules/DevPortal/Domain/ValueObjects/WebhookSecret.ts"
+  "src/Foundation/Infrastructure/Services/Webhook/WebhookSecret.ts"
   "scripts/gen-hash.ts"
 )
 

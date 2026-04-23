@@ -46,7 +46,7 @@ describe('WebhookDispatcher', () => {
 
     const body = callOptions.body as string
     const signature = (callOptions.headers as Record<string, string>)['X-Webhook-Signature']
-    expect(secret.verify(body, signature)).toBe(true)
+    expect(await secret.verify(body, signature)).toBe(true)
   })
 
   it('應在 HTTP 失敗時重試（最多 3 次）', async () => {

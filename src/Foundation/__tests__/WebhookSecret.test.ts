@@ -17,29 +17,29 @@ describe('WebhookSecret', () => {
     expect(() => WebhookSecret.fromExisting('')).toThrow('Webhook Secret cannot be empty')
   })
 
-  it('應正確計算 HMAC-SHA256 簽名', () => {
+  it('應正確計算 HMAC-SHA256 簽名', async () => {
     const secret = WebhookSecret.fromExisting('whsec_test_secret_key')
     const payload = '{"event":"key.revoked","data":{"keyId":"k-1"}}'
-    const signature = secret.sign(payload)
+    const signature = await secret.sign(payload)
     expect(signature).toBeTruthy()
     expect(typeof signature).toBe('string')
-    const signature2 = secret.sign(payload)
+    const signature2 = await secret.sign(payload)
     expect(signature).toBe(signature2)
   })
 
-  it('不同 payload 應產生不同簽名', () => {
+  it('不同 payload 應產生不同簽名', async () => {
     const secret = WebhookSecret.fromExisting('whsec_test_secret_key')
-    const sig1 = secret.sign('payload-1')
-    const sig2 = secret.sign('payload-2')
+    const sig1 = await secret.sign('payload-1')
+    const sig2 = await secret.sign('payload-2')
     expect(sig1).not.toBe(sig2)
   })
 
-  it('verify 應驗證簽名正確性', () => {
+  it('verify 應驗證簽名正確性', async () => {
     const secret = WebhookSecret.fromExisting('whsec_test_secret_key')
     const payload = '{"event":"key.revoked"}'
-    const signature = secret.sign(payload)
-    expect(secret.verify(payload, signature)).toBe(true)
-    expect(secret.verify(payload, 'wrong-signature')).toBe(false)
-    expect(secret.verify('tampered-payload', signature)).toBe(false)
+    const signature = await secret.sign(payload)
+    expect(await secret.verify(payload, signature)).toBe(true)
+    expect(await secret.verify(payload, 'wrong-signature')).toBe(false)
+    expect(await secret.verify('tampered-payload', signature)).toBe(false)
   })
 })

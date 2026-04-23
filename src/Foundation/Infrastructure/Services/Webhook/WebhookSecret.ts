@@ -1,10 +1,12 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
+import { timingSafeEqual } from 'node:crypto'
 
 export class WebhookSecret {
   private constructor(private readonly value: string) {}
 
   static generate(): WebhookSecret {
-    const raw = randomBytes(32).toString('hex')
+    const bytes = new Uint8Array(32)
+    crypto.getRandomValues(bytes)
+    const raw = Buffer.from(bytes).toString('hex')
     return new WebhookSecret(`whsec_${raw}`)
   }
 
@@ -19,12 +21,24 @@ export class WebhookSecret {
     return this.value
   }
 
-  sign(payload: string): string {
-    return createHmac('sha256', this.value).update(payload).digest('hex')
+  private async hmacKey(): Promise<CryptoKey> {
+    return crypto.subtle.importKey(
+      'raw',
+      new TextEncoder().encode(this.value),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign'],
+    )
   }
 
-  verify(payload: string, signature: string): boolean {
-    const expected = this.sign(payload)
+  async sign(payload: string): Promise<string> {
+    const key = await this.hmacKey()
+    const signature = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload))
+    return Buffer.from(signature).toString('hex')
+  }
+
+  async verify(payload: string, signature: string): Promise<boolean> {
+    const expected = await this.sign(payload)
     if (expected.length !== signature.length) return false
     try {
       return timingSafeEqual(Buffer.from(expected, 'hex'), Buffer.from(signature, 'hex'))

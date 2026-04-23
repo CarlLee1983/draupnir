@@ -92,7 +92,7 @@ const bytes = crypto.getRandomValues(new Uint8Array(16))
 | 檔案 | 用途 | 理由 |
 |------|------|------|
 | `src/Modules/Auth/Infrastructure/Services/PasswordHasher.ts` | 密碼雜湊（scryptSync） | Web Crypto 目前無同步 scrypt，需等待遷移審批 |
-| `src/Modules/DevPortal/Domain/ValueObjects/WebhookSecret.ts` | Webhook HMAC 簽章 | 待與 Web Crypto HMAC 對照相容性測試後遷移 |
+| `src/Foundation/Infrastructure/Services/Webhook/WebhookSecret.ts` | 簽名已用 Web Crypto HMAC；**仍**需 `timingSafeEqual` 做常時比對 | Web 標準無等價 API |
 | `scripts/gen-hash.ts` | 密碼雜湊工具 | 需使用 `scryptSync` 以確保與生產環境一致 |
 
 > 這兩個檔案的遷移列於 `docs/DEPENDENCY_OPTIMIZATION_TODO.md` 的 **Task #5**，需要先取得編輯權限並完成安全性驗證。

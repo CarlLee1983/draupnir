@@ -173,13 +173,13 @@ readFileSync 保留理由：
   - [x] 測試：已執行 `bun test src/Modules/Auth/__tests__/PasswordHasher.test.ts` 及相關 Auth 測試通過；全專案 `bun run test` 仍有既有未通過用例（與本步驟無關）
   - [x] 提交代碼
 
-- [ ] 第 4 步：WebhookSecret.ts 優化
-  - [ ] 替換 `createHmac()` → `crypto.subtle.sign('HMAC', ...)`
-  - [ ] 替換 `randomBytes(32)` → `crypto.getRandomValues()`
-  - [ ] 保留 `timingSafeEqual`
-  - [ ] 移除 `import { ... } from 'node:crypto'`
-  - [ ] 執行相關測試
-  - [ ] 提交代碼
+- [x] 第 4 步：WebhookSecret.ts 優化（`src/Foundation/Infrastructure/Services/Webhook/WebhookSecret.ts`；2026-04-23 確認）
+  - [x] 替換 `createHmac()` → `crypto.subtle.sign('HMAC', ...)`；`sign` / `verify` 改為 `async`（`subtle` 非同步）
+  - [x] 替換 `randomBytes(32)` → `crypto.getRandomValues()`（32 bytes → hex，格式與舊版相容）
+  - [x] 保留 `timingSafeEqual`
+  - [x] 最小化 `node:crypto`：已移除 `createHmac` / `randomBytes`；**仍**匯入 `timingSafeEqual`（`subtle` 無等價常時比對 API）
+  - [x] 測試：已執行 `bun test`（`WebhookSecret` / `WebhookDispatcher` 相關用例通過）
+  - [x] 提交代碼
 
 - [ ] 第 5 步：驗證
   - [ ] `bun run build` 成功
