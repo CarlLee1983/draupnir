@@ -1,6 +1,6 @@
 {
   "name": "draupnir",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Draupnir - AI Service Management Platform built on Bifrost AI Gateway",
   "type": "module",
   "workspaces": [
