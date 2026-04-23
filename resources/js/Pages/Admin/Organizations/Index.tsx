@@ -25,7 +25,7 @@ export default function OrganizationsIndex({ organizations, error }: Props) {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.organizations.title')}</h1>
             <p className="text-muted-foreground mt-1">
-              管理系統中的所有組織及其相關資訊。
+              {t('ui.admin.organizations.pageDescription')}
             </p>
           </div>
         </div>
@@ -40,9 +40,9 @@ export default function OrganizationsIndex({ organizations, error }: Props) {
           <CardHeader className="pb-3 border-b border-muted/40">
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-primary" />
-              <CardTitle>組織清單</CardTitle>
+              <CardTitle>{t('ui.admin.organizations.cardTitle')}</CardTitle>
             </div>
-            <CardDescription>管理系統中的組織基本資料。</CardDescription>
+            <CardDescription>{t('ui.admin.organizations.cardDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <DataTable

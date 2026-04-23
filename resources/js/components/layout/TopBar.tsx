@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Menu, Languages } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTranslation } from '@/lib/i18n'
+import { ThemeToggle } from '@/components/ThemeToggle'
 
 interface TopBarProps {
   onToggleSidebar: () => void
@@ -52,6 +53,8 @@ export function TopBar({ onToggleSidebar }: TopBarProps) {
 
       <div className="hidden flex-1 lg:block" />
       <div className="flex-1 lg:hidden" />
+
+      <ThemeToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

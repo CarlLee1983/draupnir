@@ -19,7 +19,7 @@ export default function UsersIndex({ users, filters, error }: Props) {
   const columns = createUserColumns(t)
 
   const roles = [
-    { value: '', label: '全部角色' },
+    { value: '', label: t('ui.admin.users.filterRoleAll') },
     { value: 'admin', label: t('ui.common.role.admin') },
     { value: 'manager', label: t('ui.common.role.manager') },
     { value: 'member', label: t('ui.common.role.member') },
@@ -41,7 +41,7 @@ export default function UsersIndex({ users, filters, error }: Props) {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.users.title')}</h1>
             <p className="text-muted-foreground mt-1">
-              管理系統中的所有使用者及其權限角色與狀態。
+              {t('ui.admin.users.pageDescription')}
             </p>
           </div>
         </div>
@@ -56,9 +56,9 @@ export default function UsersIndex({ users, filters, error }: Props) {
           <CardHeader className="pb-3 border-b border-muted/40">
             <div className="flex items-center gap-2">
               <Shield className="h-5 w-5 text-primary" />
-              <CardTitle>使用者清單</CardTitle>
+              <CardTitle>{t('ui.admin.users.cardTitle')}</CardTitle>
             </div>
-            <CardDescription>管理系統中的帳號存取權限。</CardDescription>
+            <CardDescription>{t('ui.admin.users.cardDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 p-4 sm:p-6">
             <div className="flex flex-wrap gap-2 rounded-2xl bg-muted/50 p-2 w-fit">

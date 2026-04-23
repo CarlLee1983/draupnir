@@ -26,7 +26,7 @@ export default function ModulesIndex({ modules, error }: Props) {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('ui.admin.modules.title')}</h1>
             <p className="text-muted-foreground mt-1">
-              管理系統中可供訂閱的模組功能。
+              {t('ui.admin.modules.pageDescription')}
             </p>
           </div>
           <Button asChild size="lg" className="gap-2 shadow-sm transition-all active:scale-95">
@@ -47,9 +47,9 @@ export default function ModulesIndex({ modules, error }: Props) {
           <CardHeader className="pb-3 border-b border-muted/40">
             <div className="flex items-center gap-2">
               <Puzzle className="h-5 w-5 text-primary" />
-              <CardTitle>模組清單</CardTitle>
+              <CardTitle>{t('ui.admin.modules.cardTitle')}</CardTitle>
             </div>
-            <CardDescription>目前已註冊的系統模組。</CardDescription>
+            <CardDescription>{t('ui.admin.modules.cardDescription')}</CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6">
             <DataTable

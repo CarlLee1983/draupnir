@@ -85,7 +85,7 @@ export default function OrganizationShow({ organization, members, error, contrac
               <CardTitle>{t('ui.admin.organizations.detailTitle')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Row label="Slug" value={<code className="text-xs">{organization.slug}</code>} icon={<Globe className="h-4 w-4" />} />
+              <Row label={t('ui.common.slug')} value={<code className="text-xs">{organization.slug}</code>} icon={<Globe className="h-4 w-4" />} />
               <Row label={t('ui.common.status')} value={<StatusBadge status={organization.status} t={t} />} />
               <Row label={t('ui.common.createdAt')} value={formatDateTime(organization.createdAt)} icon={<Calendar className="h-4 w-4" />} />
             </CardContent>

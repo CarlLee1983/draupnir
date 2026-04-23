@@ -11,6 +11,7 @@ import { joinPath, normalizePath } from '@/Website/Http/Routing/routePath'
 import { registerManagerRoutes } from '@/Website/Manager/routes/registerManagerRoutes'
 import { registerMemberRoutes } from '@/Website/Member/routes/registerMemberRoutes'
 import { LocaleController } from '@/Shared/Infrastructure/I18n/LocaleController'
+import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
@@ -79,7 +80,7 @@ const WEBSITE_ROUTE_REGISTRATIONS: readonly WebsiteRouteRegistration[] = [
  */
 export function registerWebsiteRoutes(router: IModuleRouter, container: IContainer): void {
   const localeController = new LocaleController()
-  router.post('/lang', (ctx) => localeController.switchLocale(ctx))
+  router.post('/lang', withInertiaPageHandler((ctx) => localeController.switchLocale(ctx)))
 
   for (const { register } of WEBSITE_ROUTE_REGISTRATIONS) {
     register(router, container)

@@ -82,7 +82,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('ui.member.apiKeys.title')}</h1>
             <p className="text-muted-foreground mt-1">
-              管理供成員呼叫 LLM Gateway 使用的 API 金鑰。
+              {t('ui.manager.apiKeys.pageDescription')}
             </p>
           </div>
           <Link href="/manager/api-keys/create">
@@ -161,7 +161,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                             </Button>
                           </div>
                         ) : (
-                          <span className="text-muted-foreground text-xs italic">隱藏</span>
+                          <span className="text-muted-foreground text-xs italic">{t('ui.common.hidden')}</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right font-mono font-medium">

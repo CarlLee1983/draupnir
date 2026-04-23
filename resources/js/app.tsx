@@ -3,6 +3,7 @@ import { createInertiaApp } from '@inertiajs/react'
 import { createRoot } from 'react-dom/client'
 import type { ComponentType } from 'react'
 import { Toaster } from '@/components/ui/toaster'
+import { ThemeProvider } from '@/components/ThemeProvider'
 import '../css/app.css'
 
 createInertiaApp({
@@ -25,10 +26,10 @@ createInertiaApp({
   },
   setup({ el, App, props }) {
     createRoot(el).render(
-      <>
+      <ThemeProvider defaultTheme="system" storageKey="draupnir-theme">
         <App {...props} />
         <Toaster />
-      </>,
+      </ThemeProvider>,
     )
   },
 })

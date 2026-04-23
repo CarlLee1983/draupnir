@@ -18,6 +18,6 @@ export class LocaleController {
     }
 
     const referer = ctx.getHeader('referer') || '/'
-    return ctx.redirect(referer)
+    return ctx.redirect(referer, 303)
   }
 }
