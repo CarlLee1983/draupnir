@@ -83,6 +83,7 @@
 | [`knowledge/coding-conventions.md`](./knowledge/coding-conventions.md) | 命名、Biome、TypeScript strict、錯誤處理、Function Design |
 | [`knowledge/tech-stack.md`](./knowledge/tech-stack.md) | 技術棧版本、設定與環境變數 |
 | [`knowledge/jsdoc-standards.md`](./knowledge/jsdoc-standards.md) | JSDoc／註解規範 |
+| [`knowledge/scheduler-guide.md`](./knowledge/scheduler-guide.md) | **排程系統使用指南**（設定、註冊與擴充） |
 | [`architecture/website-inertia-layer.md`](./architecture/website-inertia-layer.md) | Website（`src/Website`）Inertia 架構與擴充檢查；舊連結 [`knowledge/pages-inertia-architecture.md`](./knowledge/pages-inertia-architecture.md) 仍指向此主題 |
 
 ## 審查紀錄（`reviews/`）

@@ -6,7 +6,7 @@ import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IAp
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { getCurrentORM } from '@/wiring/RepositoryFactory'
-import appConfig from '../../../../../config/app'
+import { schedule } from '../../../../../config/index'
 import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 import type { IScheduler } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorRepository'
@@ -117,8 +117,8 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
     scheduler.schedule(
       {
         name: 'bifrost-sync',
-        cron: appConfig.bifrostSyncCron,
-        runOnInit: true,
+        cron: schedule.bifrostSync.cron,
+        runOnInit: schedule.bifrostSync.runOnInit,
         maxRetries: 2,
         backoffMs: 2000,
       },

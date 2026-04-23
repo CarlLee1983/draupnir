@@ -11,11 +11,13 @@ import appConfig from './app'
 import cacheConfig from './cache'
 import databaseConfig from './database'
 import redisConfig from './redis'
+import scheduleConfig from './schedule'
 
 export { default as app } from './app'
 export { default as cache } from './cache'
 export { default as database } from './database'
 export { default as redis } from './redis'
+export { default as schedule } from './schedule'
 export { getOrbits } from './orbits'
 
 export type { AppConfig } from './types'
@@ -37,6 +39,7 @@ export function buildConfig(portOverride?: number) {
 		...(useDatabase && { database: databaseConfig }),
 		cache: cacheConfig,
 		redis: redisConfig,
+		schedule: scheduleConfig,
 	}
 }
 
