@@ -123,7 +123,7 @@ describe('LoginPage', () => {
     expect(response.headers.get('location')).toBe('/manager/dashboard')
   })
 
-  test('should redirect member to /member/dashboard', async () => {
+  test('should redirect member to /member/api-keys', async () => {
     const memberLoginService = {
       execute: mock(async () => ({
         success: true,
@@ -144,7 +144,7 @@ describe('LoginPage', () => {
     const response = await page.store(ctx)
 
     expect(response.status).toBe(302)
-    expect(response.headers.get('location')).toBe('/member/dashboard')
+    expect(response.headers.get('location')).toBe('/member/api-keys')
   })
 
   test('GET /login with manager auth redirects to /manager/dashboard', async () => {

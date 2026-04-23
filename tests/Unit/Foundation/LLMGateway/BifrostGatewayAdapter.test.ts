@@ -66,7 +66,7 @@ describe('BifrostGatewayAdapter', () => {
         message: 'created',
         team: { id: 'team-2', name: 'org-2', customer_id: 'cust-2' },
       }
-      globalThis.fetch = mock((url: string, init: RequestInit) => {
+      globalThis.fetch = mock((_url: string, init: RequestInit) => {
         if (init.method === 'GET') return Promise.resolve(mockFetchResponse(200, listResponse))
         if (init.method === 'POST') return Promise.resolve(mockFetchResponse(200, createResponse))
         throw new Error(`unexpected method: ${init.method}`)

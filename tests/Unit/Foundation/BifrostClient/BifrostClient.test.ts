@@ -4,6 +4,8 @@ import type {
   BifrostLogsResponse,
   BifrostLogsStats,
   BifrostModelsResponse,
+  TeamListResponse,
+  TeamResponse,
   VirtualKeyListResponse,
   VirtualKeyResponse,
 } from '@draupnir/bifrost-sdk'
@@ -259,7 +261,7 @@ describe('BifrostClient', () => {
         message: 'updated',
         team: { id: 'team-1', name: 'org-1-updated' },
       }
-      globalThis.fetch = mock((url: string, init: RequestInit) => {
+      globalThis.fetch = mock((_url: string, init: RequestInit) => {
         if (init.method === 'GET') return Promise.resolve(mockFetchResponse(200, getResponse))
         if (init.method === 'PUT') return Promise.resolve(mockFetchResponse(200, updateResponse))
         throw new Error(`unexpected method: ${init.method}`)

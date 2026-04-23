@@ -137,6 +137,7 @@ describe('AdminModuleCreatePage', () => {
       description: 'Test module',
       type: 'free',
     })
+    ctx.set('validated', { name: 'test-module', description: 'Test module', type: 'free' })
     const response = await page.store(ctx as IHttpContext)
 
     expect(response.status).toBe(302)
@@ -155,6 +156,7 @@ describe('AdminModuleCreatePage', () => {
       description: 'Test module',
       type: 'free',
     })
+    ctx.set('validated', { name: 'test-module', description: 'Test module', type: 'free' })
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Modules/Create')

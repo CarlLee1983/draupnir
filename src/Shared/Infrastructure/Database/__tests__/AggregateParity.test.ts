@@ -217,14 +217,14 @@ describe('Aggregate parity across Atlas and Memory adapters', () => {
 
   it('empty table produces same output', async () => {
     // Clear both
-    await drizzleDb.delete(schema.usageRecords)
+    await atlasDb.delete(schema.usageRecords)
     const memAccess = new MemoryDatabaseAccess() // New instance is empty
 
     const spec: AggregateSpec = {
       select: { total: sum('credit_cost'), cnt: count('*') },
     }
 
-    const dRows = await drizzleAccess.table('usageRecords').aggregate(spec)
+    const dRows = await atlasAccess.table('usageRecords').aggregate(spec)
     const mRows = await memAccess.table('usageRecords').aggregate(spec)
 
     expect(mRows).toEqual(dRows)

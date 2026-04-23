@@ -132,7 +132,7 @@ describe('AdminContractCreatePage', () => {
     }
 
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
-    const ctx = createAdminContextWithBody({
+    const body = {
       targetType: 'organization',
       targetId: 'org-abc',
       terms: {
@@ -141,7 +141,9 @@ describe('AdminContractCreatePage', () => {
         rateLimit: { rpm: 60, tpm: 10000 },
         validityPeriod: { startDate: '2026-01-01', endDate: '2026-12-31' },
       },
-    })
+    }
+    const ctx = createAdminContextWithBody(body)
+    ctx.set('validated', body)
     const response = await page.store(ctx as IHttpContext)
 
     expect(response.status).toBe(302)
@@ -155,7 +157,7 @@ describe('AdminContractCreatePage', () => {
     }
 
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
-    const ctx = createAdminContextWithBody({
+    const body = {
       targetType: 'organization',
       targetId: 'org-abc',
       terms: {
@@ -164,7 +166,9 @@ describe('AdminContractCreatePage', () => {
         rateLimit: { rpm: 60, tpm: 10000 },
         validityPeriod: { startDate: '2026-01-01', endDate: '2026-12-31' },
       },
-    })
+    }
+    const ctx = createAdminContextWithBody(body)
+    ctx.set('validated', body)
     await page.store(ctx as IHttpContext)
 
     expect(captured.lastCall?.component).toBe('Admin/Contracts/Create')

@@ -4,7 +4,7 @@ import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { requireAdmin } from '../Admin/middleware/requireAdmin'
 
 describe('requireAdmin', () => {
-  test('returns a localized 403 body', async () => {
+  test('non-admin is redirected to their dashboard (member → /member/dashboard)', async () => {
     const store = new Map<string, unknown>()
     // 注入 auth（AuthMiddleware.getAuthContext 使用 ctx.get('auth')）
     store.set('auth', { userId: 'u1', email: 'u1@e.com', role: 'member' })
@@ -39,8 +39,7 @@ describe('requireAdmin', () => {
     const result = requireAdmin(ctx)
 
     expect(result.ok).toBe(false)
-    expect(result.response?.status).toBe(403)
-    const text = await result.response!.text()
-    expect(text).toContain('Admin access required')
+    expect(result.response?.status).toBe(302)
+    expect(result.response?.headers.get('location')).toBe('/member/dashboard')
   })
 })

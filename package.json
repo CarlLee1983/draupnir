@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "dev:debug": "NODE_OPTIONS='--inspect-brk' bun run src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --format esm --target bun --external @gravito/atlas",
+    "build": "bun build src/index.ts --outdir dist --format esm --target bun --external @gravito/atlas --external playwright --external playwright-core --external chromium-bidi --external electron",
     "start": "bun dist/index.js",
     "test": "bun test src tests/Unit packages",
     "test:watch": "bun test src tests/Unit packages --watch",

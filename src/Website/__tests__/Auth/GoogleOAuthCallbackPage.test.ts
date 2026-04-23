@@ -51,7 +51,7 @@ describe('GoogleOAuthCallbackPage', () => {
     await page.handle(ctx)
 
     expect(exchange).toHaveBeenCalledWith('test-code')
-    expect(ctx.redirect).toHaveBeenCalledWith('/member/dashboard', 302)
+    expect(ctx.redirect).toHaveBeenCalledWith('/member/api-keys', 302)
   })
 
   test('should redirect to admin dashboard when role is admin', async () => {

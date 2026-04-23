@@ -42,10 +42,10 @@ describe('HomePage', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/manager/dashboard')
   })
 
-  test('member redirects to /member/dashboard', async () => {
+  test('member redirects to /member/api-keys', async () => {
     const page = new HomePage()
     const ctx = makeCtx({ userId: 'u', email: 'u@x', role: 'member' })
     await page.handle(ctx)
-    expect(ctx.redirect).toHaveBeenCalledWith('/member/dashboard')
+    expect(ctx.redirect).toHaveBeenCalledWith('/member/api-keys')
   })
 })
