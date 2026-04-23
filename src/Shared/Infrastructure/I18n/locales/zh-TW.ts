@@ -97,6 +97,7 @@ export const zhTWMessages = {
   // Charts — UsageLineChart
   'ui.charts.usageLine.legendRequests': '請求數',
   'ui.charts.usageLine.legendTokens': 'Token 用量',
+  'ui.charts.demoBadge': '範例數據',
   // Auth — Login
   'ui.auth.login.title': '登入',
   'ui.auth.login.description': '輸入您的帳號和密碼',

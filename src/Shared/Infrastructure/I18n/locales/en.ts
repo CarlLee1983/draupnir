@@ -102,6 +102,7 @@ export const enMessages = {
   // Charts — UsageLineChart
   'ui.charts.usageLine.legendRequests': 'Requests',
   'ui.charts.usageLine.legendTokens': 'Token usage',
+  'ui.charts.demoBadge': 'Demo Data',
   // Auth
   'ui.auth.login.title': 'Login',
   'ui.auth.login.description': 'Enter your account and password',

@@ -33,6 +33,7 @@ interface UsageLineChartProps {
   headerRight?: ReactNode
   timeZone?: string
   isAnimationActive?: boolean
+  isDemo?: boolean
 }
 
 export function UsageLineChart({
@@ -43,6 +44,7 @@ export function UsageLineChart({
   headerRight,
   timeZone,
   isAnimationActive = true,
+  isDemo = false,
 }: UsageLineChartProps) {
   const { t } = useTranslation()
   const resolvedTitle = title === undefined ? t('ui.member.usage.trendTitle') : title
@@ -51,7 +53,7 @@ export function UsageLineChart({
   const formatLabel = (value: string): string =>
     timeZone ? formatDateInTimeZone(value, timeZone) : formatDate(value)
 
-  if (data.length === 0) {
+  if (data.length === 0 && !isDemo) {
     return (
       <EmptyChart
         title={resolvedTitle}
@@ -65,7 +67,14 @@ export function UsageLineChart({
     <Card className="overflow-hidden border-border rounded-lg shadow-indigo-500/5 shadow-sm">
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <CardTitle className="text-base font-bold tracking-tight">{resolvedTitle}</CardTitle>
+          <div className="flex items-center gap-2">
+            <CardTitle className="text-base font-bold tracking-tight">{resolvedTitle}</CardTitle>
+            {isDemo && (
+              <span className="px-1.5 py-0.5 rounded border border-border bg-muted text-[10px] font-mono font-medium text-muted-foreground uppercase tracking-wider leading-none">
+                {t('ui.charts.demoBadge')}
+              </span>
+            )}
+          </div>
           {description && <CardDescription className="text-xs mt-1">{description}</CardDescription>}
         </div>
         {headerRight}

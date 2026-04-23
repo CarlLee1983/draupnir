@@ -22,9 +22,10 @@ interface Props {
   totals: Totals
   usageTrend: UsageDataPoint[]
   usageWindowDays: UsageWindow
+  isUsageTrendDemo: boolean
 }
 
-export default function AdminDashboard({ totals, usageTrend, usageWindowDays }: Props) {
+export default function AdminDashboard({ totals, usageTrend, usageWindowDays, isUsageTrendDemo }: Props) {
   const { t } = useTranslation()
 
   const onWindowChange = (value: UsageWindow) => {
@@ -77,6 +78,7 @@ export default function AdminDashboard({ totals, usageTrend, usageWindowDays }: 
 
         <UsageLineChart
           data={usageTrend}
+          isDemo={isUsageTrendDemo}
           title={t('ui.admin.dashboard.usageTrendTitle')}
           description={t('ui.admin.dashboard.usageTrendDescription')}
           emptyMessage={t('ui.admin.dashboard.usageTrendEmpty', { days: usageWindowDays })}
