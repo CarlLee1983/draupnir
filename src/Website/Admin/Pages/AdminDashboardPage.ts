@@ -49,7 +49,10 @@ export class AdminDashboardPage {
       contracts: contractsResult.success ? (contractsResult.data?.meta?.total ?? 0) : 0,
     }
 
-    const usageTrend =
+    const isAllZeros = usageTrendResult.success && 
+      usageTrendResult.data.points.every(p => p.requests === 0 && p.tokens === 0);
+
+    let usageTrend =
       usageTrendResult.success
         ? usageTrendResult.data.points.map((p) => ({
             date: p.date,
@@ -58,10 +61,24 @@ export class AdminDashboardPage {
           }))
         : []
 
+    let isUsageTrendDemo = false
+
+    if (usageTrend.length > 0 && isAllZeros) {
+      isUsageTrendDemo = true
+      usageTrend = usageTrend.map((p, index) => {
+        const dayFactor = 1 + (index / usageTrend.length) * 0.3 // 30% upward trend
+        const randomFactor = 0.9 + Math.random() * 0.2 // 20% variance
+        const requests = Math.floor((500 + Math.random() * 1000) * dayFactor * randomFactor)
+        const tokens = Math.floor(requests * (200 + Math.random() * 100))
+        return { ...p, requests, tokens }
+      })
+    }
+
     return this.inertia.render(ctx, 'Admin/Dashboard/Index', {
       totals,
       usageTrend,
       usageWindowDays,
+      isUsageTrendDemo,
     })
   }
 }

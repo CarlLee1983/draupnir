@@ -164,4 +164,44 @@ describe('AdminDashboardPage', () => {
     expect(captured.lastCall?.props.usageWindowDays).toBe(30)
     expect(mockAdminUsageTrendService.execute).toHaveBeenCalledWith(30)
   })
+
+  test('generates demo usage trend data when all real data points are zero', async () => {
+    const { inertia, captured } = createMockInertia()
+    const mockListUsersService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
+    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
+    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
+    
+    // Return a trend where all points are 0
+    const mockAdminUsageTrendService = {
+      execute: mock(() =>
+        Promise.resolve({
+          success: true,
+          data: {
+            points: [
+              { date: '2026-04-20T12:00:00.000Z', requests: 0, tokens: 0 },
+              { date: '2026-04-21T12:00:00.000Z', requests: 0, tokens: 0 },
+            ],
+          },
+        }),
+      ),
+    }
+
+    const page = new AdminDashboardPage(
+      inertia,
+      mockListUsersService as any,
+      mockListOrgsService as any,
+      mockListAdminContractsService as any,
+      mockAdminUsageTrendService as any,
+    )
+
+    const ctx = createAdminContext()
+    await page.handle(ctx)
+
+    const props = captured.lastCall?.props as any
+    expect(props.isUsageTrendDemo).toBe(true)
+    expect(props.usageTrend.length).toBe(2)
+    expect(props.usageTrend[0].requests).toBeGreaterThan(0)
+    expect(props.usageTrend[0].tokens).toBeGreaterThan(0)
+    expect(props.usageTrend[0].date).toBe('2026-04-20T12:00:00.000Z')
+  })
 })
