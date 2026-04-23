@@ -26,7 +26,7 @@ createInertiaApp({
   },
   setup({ el, App, props }) {
     createRoot(el).render(
-      <ThemeProvider defaultTheme="system" storageKey="draupnir-theme">
+      <ThemeProvider defaultTheme="dark" storageKey="draupnir-theme">
         <App {...props} />
         <Toaster />
       </ThemeProvider>,
