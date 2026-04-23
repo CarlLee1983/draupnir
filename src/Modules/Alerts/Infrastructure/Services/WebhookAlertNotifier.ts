@@ -50,7 +50,7 @@ export class WebhookAlertNotifier implements IAlertNotifier {
       let failures = 0
       for (const r of results) {
         if (r.status === 'fulfilled') {
-          if (r.value === 'sent') {
+          if (r.value === 'sent' || r.value === 'queued') {
             successes++
           } else if (r.value === 'failed') {
             failures++
@@ -88,7 +88,7 @@ export class WebhookAlertNotifier implements IAlertNotifier {
   private async dispatchOne(
     payload: AlertPayload,
     endpoint: WebhookEndpoint,
-  ): Promise<'skipped' | 'sent' | 'failed'> {
+  ): Promise<'skipped' | 'sent' | 'failed' | 'queued'> {
     const deduped = await this.deps.deliveryRepo.existsSent({
       orgId: payload.orgId,
       month: payload.month,
@@ -101,7 +101,9 @@ export class WebhookAlertNotifier implements IAlertNotifier {
     }
 
     const final = await this.runDispatch(payload, endpoint)
-    return final.status === 'sent' ? 'sent' : 'failed'
+    if (final.status === 'sent') return 'sent'
+    if (final.status === 'pending') return 'queued'
+    return 'failed'
   }
 
   private async runDispatch(
@@ -127,6 +129,11 @@ export class WebhookAlertNotifier implements IAlertNotifier {
         eventType: 'alert.threshold.breached',
         payload: buildWebhookPayload(payload),
       })
+
+      if (result.enqueued) {
+        await this.deps.deliveryRepo.save(base)
+        return base
+      }
 
       const deliveredAt = new Date().toISOString()
       const nextEndpoint = result.success

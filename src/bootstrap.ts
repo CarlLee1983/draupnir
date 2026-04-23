@@ -28,6 +28,8 @@ import databaseConfig from '../config/database'
 import { buildConfig, useDatabase } from '../config/index'
 import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
+import type { IQueueRegistrar } from './Foundation/Infrastructure/Ports/Queue/IQueueRegistrar'
+import type { IQueue } from './Foundation/Infrastructure/Ports/Queue/IQueue'
 import { FoundationServiceProvider } from './Foundation/Infrastructure/Providers/FoundationServiceProvider'
 import { AlertsServiceProvider } from './Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
 import { ApiKeyServiceProvider } from './Modules/ApiKey/Infrastructure/Providers/ApiKeyServiceProvider'
@@ -66,6 +68,17 @@ function isJobRegistrar(value: unknown): value is IJobRegistrar {
     typeof value === 'object' &&
     value !== null &&
     typeof (value as IJobRegistrar).registerJobs === 'function'
+  )
+}
+
+/**
+ * Narrows an unknown module instance to {@link IQueueRegistrar}.
+ */
+function isQueueRegistrar(value: unknown): value is IQueueRegistrar {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as IQueueRegistrar).registerQueueHandlers === 'function'
   )
 }
 
@@ -144,6 +157,13 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
   for (const module of modules) {
     if (isJobRegistrar(module)) {
       await module.registerJobs(scheduler)
+    }
+  }
+
+  const queue = core.container.make('queue') as IQueue
+  for (const module of modules) {
+    if (isQueueRegistrar(module)) {
+      await module.registerQueueHandlers(queue)
     }
   }
 

@@ -47,4 +47,24 @@ export interface IRedisService {
 
   /** 關閉 Redis 連線（用於 graceful shutdown）。 */
   disconnect(): Promise<void>
+
+  /**
+   * Redis Stream: XADD
+   */
+  xadd(key: string, data: Record<string, string>, maxlen?: number): Promise<string>
+
+  /**
+   * Redis Stream: XREADGROUP
+   */
+  xreadgroup(group: string, consumer: string, streams: Record<string, string>, count?: number, block?: number): Promise<any>
+
+  /**
+   * Redis Stream: XACK
+   */
+  xack(key: string, group: string, ...ids: string[]): Promise<number>
+
+  /**
+   * Redis Stream: XGROUP CREATE
+   */
+  xgroupCreate(key: string, group: string, id?: string, mkstream?: boolean): Promise<boolean>
 }

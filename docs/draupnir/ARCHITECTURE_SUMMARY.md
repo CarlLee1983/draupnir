@@ -71,7 +71,7 @@
 ┌──────────────────────▼──────────────────────────────────────┐
 │         Foundation Layer (共享基礎設施)                       │
 │  ├─ Database (Atlas ORM / PostgreSQL)                        │
-│  ├─ Redis (Cache & Pub/Sub)                                  │
+│  ├─ Redis (Cache, Pub/Sub & Streams MQ)                      │
 │  ├─ Security (JWT / HMAC / AES-256)                          │
 │  └─ Monitoring (Health Checks / Logger)                      │
 └──────────────────────────────────────────────────────────────┘
@@ -178,7 +178,13 @@ Application 層定義 Port（接口），Infrastructure 層注入具體實現（
 - `BifrostSyncCompletedEvent` -> 觸發告警評估。
 
 ### 3. 統一調度 (IScheduler)
-Phase 18 引入的 `IScheduler` 提供標準化的後台任務管理，確保報表、合約到期掃描等任務在分佈式環境下安全運行。
+Phase 18 引入的 `IScheduler` 提供標準化的後台任務管理，確保報表、合約到期掃描等定時任務在分佈式環境下安全運行。
+
+### 4. 背景隊列任務 (IQueue)
+Phase 19 引入的基於 **Redis Streams** 的輕量級隊列系統，用於處理高併發下的耗時任務（如 Webhook 發送）。
+- **解耦**：業務邏輯僅依賴 `IQueue` Port，不直接操作 Redis。
+- **可靠性**：支持 Consumer Group 與 ACK 機制，確保任務不遺失。
+- **優雅停機**：整合 `MessageQueueShutdownHook`，確保應用關閉時任務處理能正確結束。
 
 ---
 

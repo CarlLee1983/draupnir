@@ -20,6 +20,7 @@ import { WebhookShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/
 import { closeDrizzleConnection } from './Shared/Infrastructure/Database/Adapters/Drizzle/config'
 import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import type { IRedisService } from './Shared/Infrastructure/IRedisService'
+import type { IQueue } from './Foundation/Infrastructure/Ports/Queue/IQueue'
 
 /**
  * 應用啟動並顯示歡迎訊息
@@ -37,6 +38,7 @@ async function start() {
 
   // ─── Graceful Shutdown ────────────────────────────────────────────────────
   const scheduler = core.container.make('scheduler') as IScheduler
+  const queue = core.container.make('queue') as IQueue
   const redis = (() => {
     try {
       return core.container.make('redis') as IRedisService
@@ -47,7 +49,7 @@ async function start() {
 
   const shutdown = new GracefulShutdown(drainTimeoutMs)
     .register(new BunServerShutdownHook(server))
-    .register(new MessageQueueShutdownHook())
+    .register(new MessageQueueShutdownHook(queue))
     .register(new SchedulerShutdownHook(scheduler))
     .register(new WebhookShutdownHook())
 

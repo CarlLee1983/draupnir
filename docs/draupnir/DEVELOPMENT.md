@@ -80,3 +80,10 @@ Defaults below match **runtime fallbacks** and [`.env.example`](../../.env.examp
 5. **Aggregates** (when you have a rich domain): prefer factory + persistence mapping helpers (`createDefault`, `fromDatabase`, `toDTO`, `toDatabaseRow` or equivalent) for consistency with existing aggregates.
 
 For **cross-module dependencies**, follow [`knowledge/context-dependency-map.md`](./knowledge/context-dependency-map.md) and avoid sharing ORM entities across modules.
+
+## Adding a background queue task
+
+1. **Payload**: Define the task name and payload interface in the module's Application layer.
+2. **Worker**: Implement `IQueueRegistrar` in your module's `ServiceProvider` and use `registerQueueHandlers(queue)` to define the processing logic.
+3. **Producer**: Resolve `IQueue` from the container and use `queue.push(taskName, payload)` to enqueue tasks.
+4. **Docs**: Refer to **[`knowledge/queue-system.md`](./knowledge/queue-system.md)** for detailed implementation patterns and Redis Streams specifics.

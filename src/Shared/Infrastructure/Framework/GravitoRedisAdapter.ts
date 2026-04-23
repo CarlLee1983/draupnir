@@ -40,4 +40,32 @@ export class GravitoRedisAdapter implements IRedisService {
     // 因 @gravito/plasma 型別未宣告 quit()，使用窄型別轉換代替 as any。
     await (this.redis as { quit?: () => Promise<void> }).quit?.()
   }
+
+  async xadd(key: string, data: Record<string, string>, maxlen?: number): Promise<string> {
+    return (this.redis as any).xadd(key, data, maxlen ? { maxlen, approximate: true } : undefined)
+  }
+
+  async xreadgroup(
+    group: string,
+    consumer: string,
+    streams: Record<string, string>,
+    count?: number,
+    block?: number
+  ): Promise<any> {
+    return (this.redis as any).xreadgroup(group, consumer, streams, { count, block })
+  }
+
+  async xack(key: string, group: string, ...ids: string[]): Promise<number> {
+    return (this.redis as any).xack(key, group, ...ids)
+  }
+
+  async xgroupCreate(key: string, group: string, id = '$', mkstream = true): Promise<boolean> {
+    try {
+      await (this.redis as any).xgroup('CREATE', key, group, id, mkstream)
+      return true
+    } catch (err: any) {
+      if (err.message?.includes('BUSYGROUP')) return true // Group already exists
+      throw err
+    }
+  }
 }

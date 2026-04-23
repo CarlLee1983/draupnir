@@ -13,6 +13,8 @@ export interface WebhookDispatchResult {
   readonly error?: string
   readonly attempts: number
   readonly webhookId: string
+  /** True when the job was accepted into a background queue but not yet delivered. */
+  readonly enqueued?: boolean
 }
 
 export interface IWebhookDispatcher {
