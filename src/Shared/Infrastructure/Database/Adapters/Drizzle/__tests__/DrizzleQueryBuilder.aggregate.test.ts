@@ -5,7 +5,7 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { add, avg, coalesce, col, count, dateTrunc, max, min, sum } from '../../../AggregateSpec'
 import * as config from '../config'
 import { createDrizzleDatabaseAccess } from '../DrizzleDatabaseAdapter'
-import * as schema from '../schema'
+import * as schema from '../../../schema'
 
 describe('DrizzleQueryBuilder.aggregate', () => {
   let db: IDatabaseAccess

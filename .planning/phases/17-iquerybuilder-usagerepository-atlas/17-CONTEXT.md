@@ -1,4 +1,4 @@
-# Phase 17: 擴充 IQueryBuilder 聚合原語並重構 UsageRepository 去除 Drizzle 直接依賴 — Context
+# Phase 17: 擴充 IQueryBuilder 聚合原語並重構 UsageRepository 使用 Atlas ORM — Context
 
 **Gathered:** 2026-04-12
 **Status:** Ready for planning
@@ -6,9 +6,9 @@
 <domain>
 ## Phase Boundary
 
-Extend `IQueryBuilder` (src/Shared/Infrastructure/IDatabaseAccess.ts) with aggregation primitives (SUM/COUNT/AVG/MIN/MAX, GROUP BY, dateTrunc, coalesce, add) so `DrizzleUsageRepository` can be refactored to stop importing `drizzle-orm` directly. Scope covers the ~5 aggregation methods in `src/Modules/Dashboard/Infrastructure/Repositories/DrizzleUsageRepository.ts` plus the `MemoryDatabaseAccess` test adapter. Also bundles the `credit_cost` column migration from TEXT to REAL so aggregations no longer need CAST.
+Extend `IQueryBuilder` (src/Shared/Infrastructure/IDatabaseAccess.ts) with aggregation primitives (SUM/COUNT/AVG/MIN/MAX, GROUP BY, dateTrunc, coalesce, add) so `AtlasUsageRepository` can be implemented without importing `drizzle-orm` directly. Scope covers the ~5 aggregation methods in `src/Modules/Dashboard/Infrastructure/Repositories/AtlasUsageRepository.ts` plus the `MemoryDatabaseAccess` test adapter. Also bundles the `credit_cost` column migration from TEXT to REAL so aggregations no longer need CAST.
 
-Out of scope: Alerts module repos (`DrizzleWebhookEndpointRepository`, `DrizzleAlertDeliveryRepository`, `DrizzleAlertEventRepository`) — they only use simple `eq/and` and can be cleaned up in a dedicated follow-up phase once the new primitives are proven.
+Out of scope: Alerts module repos (`AtlasWebhookEndpointRepository`, `AtlasAlertDeliveryRepository`, `AtlasAlertEventRepository`) — they only use simple `eq/and` and can be cleaned up in a dedicated follow-up phase once the new primitives are proven.
 
 </domain>
 
@@ -24,18 +24,18 @@ Out of scope: Alerts module repos (`DrizzleWebhookEndpointRepository`, `DrizzleA
 - **D-04:** No raw-SQL escape hatch in this phase. If a future query needs a primitive outside this closed set, extend the spec in a new phase rather than adding `.raw()`.
 
 ### Persistence
-- **D-05:** Migrate `usage_records.credit_cost` from TEXT to REAL in this phase. Includes Drizzle migration + data backfill (`CAST(credit_cost AS REAL)`). After migration, `CAST` disappears from every aggregation query — so no `.cast()` primitive is needed on the builder.
+- **D-05:** Migrate `usage_records.credit_cost` from TEXT to REAL in this phase. Includes Atlas migration + data backfill (`CAST(credit_cost AS REAL)`). After migration, `CAST` disappears from every aggregation query — so no `.cast()` primitive is needed on the builder.
 
 ### Scope
-- **D-06:** Refactor only `DrizzleUsageRepository`. `schema.ts` remains the single module that imports `drizzle-orm` for table definitions (acceptable — it's the ORM binding layer). Alerts repos stay as-is; deferred to a follow-up phase.
+- **D-06:** Refactor only `AtlasUsageRepository`. `schema.ts` remains the single module that imports `atlas` for table definitions (acceptable — it's the ORM binding layer). Alerts repos stay as-is; deferred to a follow-up phase.
 
 ### Test substitutability
-- **D-07:** `MemoryDatabaseAccess` must implement `aggregate()` with full parity to the Drizzle adapter (all primitives in D-03). Unit tests for `GetKpiSummaryService`, `GetCostTrendsService`, `GetModelComparisonService`, `GetPerKeyCostService` must pass against the Memory adapter without touching SQLite.
+- **D-07:** `MemoryDatabaseAccess` must implement `aggregate()` with full parity to the Atlas adapter (all primitives in D-03). Unit tests for `GetKpiSummaryService`, `GetCostTrendsService`, `GetModelComparisonService`, `GetPerKeyCostService` must pass against the Memory adapter without touching SQLite.
 
 ### Implementation notes (Claude's Discretion)
 - Exact TypeScript shape of the `spec` object (object literal vs. discriminated union vs. builder functions like `sum('col')`) — planner decides, as long as D-01/D-02/D-03 are satisfied and it's ergonomic for the existing UsageRepository call sites.
 - Whether `dateTrunc` accepts additional units (`'hour'`, `'week'`, `'month'`) — only `'day'` is required today; add more only if trivial.
-- How the Drizzle adapter renders `dateTrunc` on SQLite (`strftime('%Y-%m-%d', col)` vs. `DATE(col)`) — planner decides; must preserve current output format (`YYYY-MM-DD`).
+- How the Atlas adapter renders `dateTrunc` on SQLite (`strftime('%Y-%m-%d', col)` vs. `DATE(col)`) — planner decides; must preserve current output format (`YYYY-MM-DD`).
 - Migration strategy for `credit_cost` (single migration with backfill SQL vs. two-step rename) — planner decides; must preserve all existing rows' numeric values.
 
 </decisions>
@@ -51,19 +51,19 @@ Out of scope: Alerts module repos (`DrizzleWebhookEndpointRepository`, `DrizzleA
 - `docs/ABSTRACTION_RULES.md` — Abstraction rules referenced from `IDatabaseAccess.ts` header (if present)
 
 ### Code to refactor
-- `src/Modules/Dashboard/Infrastructure/Repositories/DrizzleUsageRepository.ts` — Target of the refactor; contains all 5 aggregation queries and the sole non-schema `drizzle-orm` import in the Dashboard module
+- `src/Modules/Dashboard/Infrastructure/Repositories/AtlasUsageRepository.ts` — Target of the refactor; contains all 5 aggregation queries and the sole non-schema `atlas` import in the Dashboard module
 - `src/Modules/Dashboard/Application/Ports/IUsageRepository.ts` — Contract the repository must continue to satisfy (DTOs, method signatures)
-- `src/Shared/Infrastructure/Database/Adapters/Drizzle/DrizzleQueryBuilder.ts` — Current fluent CRUD adapter; aggregate() adapter lives alongside
+- `src/Shared/Infrastructure/Database/Adapters/Atlas/AtlasQueryBuilder.ts` — Current fluent CRUD adapter; aggregate() adapter lives alongside
 - `src/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess.ts` — Must gain aggregate() parity (D-07)
-- `src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts` — `usageRecords` table definition; `credit_cost` column type must change REAL (D-05)
+- `src/Shared/Infrastructure/Database/Adapters/Atlas/schema.ts` — `usageRecords` table definition; `credit_cost` column type must change REAL (D-05)
 - `src/Shared/Infrastructure/Database/Adapters/Atlas/AtlasQueryBuilder.ts` — Reference sibling adapter; check whether it also needs aggregate() or is unused for this path
 
 ### Architecture
-- `.planning/codebase/ARCHITECTURE.md` — DDD four-layer rules; Infrastructure depends on `IDatabaseAccess`, never on drizzle-orm (Application/Domain already comply)
+- `.planning/codebase/ARCHITECTURE.md` — DDD four-layer rules; Infrastructure depends on `IDatabaseAccess`, never on atlas (Application/Domain already comply)
 - `.planning/codebase/CONVENTIONS.md` — Repository naming/method conventions
 
 ### Tests
-- `src/Modules/Dashboard/__tests__/DrizzleUsageRepository.test.ts` — Existing test coverage; must stay green after refactor and now also run against MemoryDatabaseAccess
+- `src/Modules/Dashboard/__tests__/AtlasUsageRepository.test.ts` — Existing test coverage; must stay green after refactor and now also run against MemoryDatabaseAccess
 - `tests/Unit/Adapters/AtlasDatabaseAdapter.test.ts` — Adapter test pattern reference
 
 </canonical_refs>
@@ -73,12 +73,12 @@ Out of scope: Alerts module repos (`DrizzleWebhookEndpointRepository`, `DrizzleA
 
 ### Reusable Assets
 - `IQueryBuilder` already defines CRUD + where/whereBetween/orderBy/limit/offset/count — `aggregate()` slots in alongside without disturbing existing callers
-- `DrizzleQueryBuilder` already wraps `getDrizzleInstance()` and table schema — aggregate() implementation reuses this plumbing
-- Drizzle schema `usageRecords` is well-defined; only `credit_cost` needs a type change
-- Migration infrastructure exists (Drizzle migrations folder) — D-05 follows the established pattern
+- `AtlasQueryBuilder` already wraps `getDB()` and table schema — aggregate() implementation reuses this plumbing
+- Atlas schema `usageRecords` is well-defined; only `credit_cost` needs a type change
+- Migration infrastructure exists (Atlas migrations folder) — D-05 follows the established pattern
 
 ### Established Patterns
-- Repositories accept `IDatabaseAccess` via constructor; `DrizzleUsageRepository` currently violates this by taking `_db: any` and calling `getDrizzleInstance()` directly. Refactor should also fix that (accept `IDatabaseAccess` properly).
+- Repositories accept `IDatabaseAccess` via constructor; `AtlasUsageRepository` currently violates this by taking `_db: any` and calling `getDB()` directly. Refactor should also fix that (accept `IDatabaseAccess` properly).
 - Service-level tests use Memory adapter — `GetKpiSummaryService` etc. will benefit immediately from D-07
 - Aggregation results are always mapped to DTOs (`DailyCostBucket`, `ModelUsageBucket`, etc.) in the repo — this maps cleanly onto `aggregate<T>()`
 
@@ -109,15 +109,15 @@ Out of scope: Alerts module repos (`DrizzleWebhookEndpointRepository`, `DrizzleA
   ```
   (Exact shape is planner's call; this illustrates the intent.)
 - Output format of dateTrunc('day') must stay `YYYY-MM-DD` to preserve existing API responses
-- After this phase, `grep "from 'drizzle-orm'" src/` should return only `schema.ts` and the two files under `src/Shared/Infrastructure/Database/Adapters/Drizzle/` (adapter internals are the sanctioned exception)
+- After this phase, `grep "from '@gravito/atlas'"` should be the primary pattern for data access adapters.
 
 </specifics>
 
 <deferred>
 ## Deferred Ideas
 
-- **Alerts module refactor** — `DrizzleWebhookEndpointRepository`, `DrizzleAlertDeliveryRepository`, `DrizzleAlertEventRepository` still import `drizzle-orm` directly for `eq`/`and`. Low complexity (no aggregations), separate phase once Phase 17 lands.
-- **Atlas adapter aggregate() parity** — Only required if Atlas is a supported production path for these queries; verify during planning and split out if scope grows.
+- **Alerts module refactor** — `AtlasWebhookEndpointRepository`, `AtlasAlertDeliveryRepository`, `AtlasAlertEventRepository` now use `atlas` directly. Low complexity (no aggregations), separate phase once Phase 17 lands.
+- **Atlas adapter aggregate() parity** — Primary required path for these queries.
 - **Additional dateTrunc units** (`hour`, `week`, `month`) — add only when a feature needs them
 - **Raw SQL escape hatch** — explicitly rejected here (D-04); reopen only if the closed set proves insufficient and a principled extension isn't possible
 - **Pre-computed `total_tokens` stored column** — performance optimization if aggregation profiling shows `add` expression is hot
@@ -126,5 +126,5 @@ Out of scope: Alerts module repos (`DrizzleWebhookEndpointRepository`, `DrizzleA
 
 ---
 
-*Phase: 17-iquerybuilder-usagerepository-drizzle*
+*Phase: 17-iquerybuilder-usagerepository-atlas*
 *Context gathered: 2026-04-12*

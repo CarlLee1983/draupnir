@@ -1,8 +1,10 @@
 /**
- * Drizzle ORM 適配器公開 API
+ * Drizzle ORM 適配器公開 API (Legacy)
  *
  * 此模組提供 Drizzle ORM 的適配實現，隱藏具體 ORM 細節
  * 暴露為 IDatabaseAccess 等公開介面
+ *
+ * @deprecated 專案已遷移至 Gravito Atlas ORM，此適配器僅保留供相容性參考
  *
  * @public - 匯出公開的工廠函數
  * @internal - 實現細節對外隱藏

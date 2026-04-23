@@ -4,7 +4,7 @@ import type {
   SyncCursor,
 } from '../../Application/Ports/ISyncCursorRepository'
 
-export class DrizzleSyncCursorRepository implements ISyncCursorRepository {
+export class AtlasSyncCursorRepository implements ISyncCursorRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async get(cursorType: string): Promise<SyncCursor | null> {

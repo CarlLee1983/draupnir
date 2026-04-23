@@ -2,7 +2,7 @@
  * IUsageRepository — Dashboard Read Model Port
  *
  * Application-layer port for local usage_records queries.
- * Implemented by DrizzleUsageRepository in Infrastructure.
+ * Implemented by AtlasUsageRepository in Infrastructure.
  * Used by Phase 10 chart services instead of live Bifrost API calls.
  *
  * Constraint: All fields readonly (immutability rule).

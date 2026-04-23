@@ -18,7 +18,7 @@ import type {
   UsageStats,
 } from '../../Application/Ports/IUsageRepository'
 
-export class DrizzleUsageRepository implements IUsageRepository {
+export class AtlasUsageRepository implements IUsageRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async queryDailyCostPlatform(range: DateRange): Promise<readonly DailyCostBucket[]> {

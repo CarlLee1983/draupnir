@@ -6,7 +6,7 @@
 
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
-import * as schema from './schema'
+import * as schema from '../../schema'
 
 let db: ReturnType<typeof drizzle> | null = null
 let libsqlClient: ReturnType<typeof createClient> | null = null

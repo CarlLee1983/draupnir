@@ -106,7 +106,7 @@ export class AlertsServiceProvider extends ModuleServiceProvider implements IRou
     }))
     container.bind('evaluateThresholdsService', (c: IContainer) => new EvaluateThresholdsService({
       configRepo: c.make('alertConfigRepository') as IAlertConfigRepository,
-      usageRepo: c.make('drizzleUsageRepository') as IUsageRepository,
+      usageRepo: c.make('atlasUsageRepository') as IUsageRepository,
       apiKeyRepo: c.make('apiKeyRepository') as IApiKeyRepository,
       sendAlertService: c.make('sendAlertService') as SendAlertService,
     }))

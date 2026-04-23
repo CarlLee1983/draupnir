@@ -4,7 +4,7 @@
  * Tracks the high-water mark for incremental Bifrost log sync.
  * The cursor_type 'bifrost_logs' is the primary cursor used by BifrostSyncService.
  *
- * Implemented by DrizzleSyncCursorRepository in Infrastructure.
+ * Implemented by AtlasSyncCursorRepository in Infrastructure.
  */
 
 export interface SyncCursor {

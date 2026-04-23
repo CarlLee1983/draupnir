@@ -2,7 +2,7 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { ReportSchedule, type ReportType } from '../../Domain/Aggregates/ReportSchedule'
 import type { IReportRepository } from '../../Domain/Repositories/IReportRepository'
 
-export class DrizzleReportRepository implements IReportRepository {
+export class AtlasReportRepository implements IReportRepository {
   constructor(private readonly db: IDatabaseAccess) {}
 
   async save(schedule: ReportSchedule): Promise<void> {

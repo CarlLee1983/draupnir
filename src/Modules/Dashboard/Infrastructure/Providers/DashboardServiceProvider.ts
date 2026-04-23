@@ -18,8 +18,8 @@ import { GetKpiSummaryService } from '../../Application/Services/GetKpiSummarySe
 import { GetModelComparisonService } from '../../Application/Services/GetModelComparisonService'
 import { GetPerKeyCostService } from '../../Application/Services/GetPerKeyCostService'
 import { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
-import { DrizzleSyncCursorRepository } from '../Repositories/DrizzleSyncCursorRepository'
-import { DrizzleUsageRepository } from '../Repositories/DrizzleUsageRepository'
+import { AtlasSyncCursorRepository } from '../Repositories/AtlasSyncCursorRepository'
+import { AtlasUsageRepository } from '../Repositories/AtlasUsageRepository'
 import { BifrostSyncService } from '../Services/BifrostSyncService'
 import { DatabaseUsageAggregator } from '../Services/DatabaseUsageAggregator'
 import { UsageAggregator } from '../Services/UsageAggregator'
@@ -33,23 +33,23 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
   protected override registerRepositories(container: IContainer): void {
     this.container = container
     container.singleton('syncCursorRepository', (c: IContainer) =>
-      new DrizzleSyncCursorRepository(c.make('database') as IDatabaseAccess)
+      new AtlasSyncCursorRepository(c.make('database') as IDatabaseAccess)
     )
-    container.singleton('drizzleUsageRepository', (c: IContainer) =>
-      new DrizzleUsageRepository(c.make('database') as IDatabaseAccess)
+    container.singleton('atlasUsageRepository', (c: IContainer) =>
+      new AtlasUsageRepository(c.make('database') as IDatabaseAccess)
     )
   }
 
   protected override registerInfraServices(container: IContainer): void {
     container.singleton('usageAggregator', (c: IContainer) => {
-      if (getCurrentORM() === 'drizzle') {
-        return new DatabaseUsageAggregator(c.make('drizzleUsageRepository') as IUsageRepository)
+      if (getCurrentORM() === 'atlas') {
+        return new DatabaseUsageAggregator(c.make('atlasUsageRepository') as IUsageRepository)
       }
       return new UsageAggregator(c.make('llmGatewayClient') as ILLMGatewayClient)
     })
     container.singleton('bifrostSyncService', (c: IContainer) => new BifrostSyncService(
       c.make('llmGatewayClient') as ILLMGatewayClient,
-      c.make('drizzleUsageRepository') as IUsageRepository,
+      c.make('atlasUsageRepository') as IUsageRepository,
       c.make('syncCursorRepository') as ISyncCursorRepository,
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('database') as IDatabaseAccess,
@@ -70,28 +70,28 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
     container.bind('getKpiSummaryService', (c: IContainer) => new GetKpiSummaryService(
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('drizzleUsageRepository') as IUsageRepository,
+      c.make('atlasUsageRepository') as IUsageRepository,
       c.make('syncCursorRepository') as ISyncCursorRepository,
     ))
     container.bind('getCostTrendsService', (c: IContainer) => new GetCostTrendsService(
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('drizzleUsageRepository') as IUsageRepository,
+      c.make('atlasUsageRepository') as IUsageRepository,
     ))
     container.bind('getModelComparisonService', (c: IContainer) => new GetModelComparisonService(
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('drizzleUsageRepository') as IUsageRepository,
+      c.make('atlasUsageRepository') as IUsageRepository,
     ))
     container.bind('getPerKeyCostService', (c: IContainer) => new GetPerKeyCostService(
       c.make('apiKeyRepository') as IApiKeyRepository,
       c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('drizzleUsageRepository') as IUsageRepository,
+      c.make('atlasUsageRepository') as IUsageRepository,
     ))
     container.bind(
       'getAdminPlatformUsageTrendService',
       (c: IContainer) =>
-        new GetAdminPlatformUsageTrendService(c.make('drizzleUsageRepository') as IUsageRepository),
+        new GetAdminPlatformUsageTrendService(c.make('atlasUsageRepository') as IUsageRepository),
     )
   }
 

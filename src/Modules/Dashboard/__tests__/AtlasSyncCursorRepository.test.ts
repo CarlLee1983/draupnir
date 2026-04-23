@@ -1,14 +1,14 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
-import { DrizzleSyncCursorRepository } from '../Infrastructure/Repositories/DrizzleSyncCursorRepository'
+import { AtlasSyncCursorRepository } from '../Infrastructure/Repositories/AtlasSyncCursorRepository'
 
-describe('DrizzleSyncCursorRepository', () => {
+describe('AtlasSyncCursorRepository', () => {
   let db: MemoryDatabaseAccess
-  let repo: DrizzleSyncCursorRepository
+  let repo: AtlasSyncCursorRepository
 
   beforeEach(() => {
     db = new MemoryDatabaseAccess()
-    repo = new DrizzleSyncCursorRepository(db)
+    repo = new AtlasSyncCursorRepository(db)
   })
 
   it('get returns null when sync_cursors is empty', async () => {

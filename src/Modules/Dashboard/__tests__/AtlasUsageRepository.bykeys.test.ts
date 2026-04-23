@@ -3,11 +3,11 @@ import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import * as config from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
 import { createDrizzleDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/DrizzleDatabaseAdapter'
-import * as schema from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
-import { DrizzleUsageRepository } from '@/Modules/Dashboard/Infrastructure/Repositories/DrizzleUsageRepository'
+import * as schema from '@/Shared/Infrastructure/Database/schema'
+import { AtlasUsageRepository } from '@/Modules/Dashboard/Infrastructure/Repositories/AtlasUsageRepository'
 
-describe('DrizzleUsageRepository - ByKeys variants (IN operator)', () => {
-  let repo: DrizzleUsageRepository
+describe('AtlasUsageRepository - ByKeys variants (IN operator)', () => {
+  let repo: AtlasUsageRepository
   let drizzleDb: any
   let configSpy: any
 
@@ -35,7 +35,7 @@ describe('DrizzleUsageRepository - ByKeys variants (IN operator)', () => {
     `)
 
     const db = createDrizzleDatabaseAccess()
-    repo = new DrizzleUsageRepository(db)
+    repo = new AtlasUsageRepository(db)
 
     await repo.upsert({ id: 'r1', bifrostLogId: 'l1', apiKeyId: 'key-a', orgId: 'org-1', model: 'gpt-4o', provider: 'openai', inputTokens: 10, outputTokens: 20, creditCost: 1.5, latencyMs: 100, status: 'success', occurredAt: '2026-04-11T10:00:00Z', createdAt: '2026-04-11T10:00:01Z' })
     await repo.upsert({ id: 'r2', bifrostLogId: 'l2', apiKeyId: 'key-b', orgId: 'org-1', model: 'claude-3', provider: 'anthropic', inputTokens: 30, outputTokens: 40, creditCost: 2.5, latencyMs: 200, status: 'success', occurredAt: '2026-04-11T11:00:00Z', createdAt: '2026-04-11T11:00:01Z' })

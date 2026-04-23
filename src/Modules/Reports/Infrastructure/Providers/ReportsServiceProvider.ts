@@ -11,7 +11,7 @@ import { SendReportEmailService } from '../../Application/Services/SendReportEma
 import type { IReportRepository } from '../../Domain/Repositories/IReportRepository'
 import { ReportController } from '../../Presentation/Controllers/ReportController'
 import { registerReportRoutes } from '../../Presentation/Routes/report.routes'
-import { DrizzleReportRepository } from '../Repositories/DrizzleReportRepository'
+import { AtlasReportRepository } from '../Repositories/AtlasReportRepository'
 
 export class ReportsServiceProvider extends ModuleServiceProvider implements IJobRegistrar, IRouteRegistrar {
   private container!: IContainer
@@ -19,7 +19,7 @@ export class ReportsServiceProvider extends ModuleServiceProvider implements IJo
   protected override registerRepositories(container: IContainer): void {
     this.container = container
     container.singleton('reportRepository', (c: IContainer) =>
-      new DrizzleReportRepository(c.make('database') as IDatabaseAccess)
+      new AtlasReportRepository(c.make('database') as IDatabaseAccess)
     )
   }
 

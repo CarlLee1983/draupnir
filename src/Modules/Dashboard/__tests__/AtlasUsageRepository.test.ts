@@ -3,14 +3,14 @@ import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
 import * as config from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
 import { createDrizzleDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/DrizzleDatabaseAdapter'
-import * as schema from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
+import * as schema from '@/Shared/Infrastructure/Database/schema'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { UsageRecordInsert } from '../Application/Ports/IUsageRepository'
-import { DrizzleUsageRepository } from '../Infrastructure/Repositories/DrizzleUsageRepository'
+import { AtlasUsageRepository } from '../Infrastructure/Repositories/AtlasUsageRepository'
 
-describe('DrizzleUsageRepository', () => {
+describe('AtlasUsageRepository', () => {
   let db: IDatabaseAccess
-  let repository: DrizzleUsageRepository
+  let repository: AtlasUsageRepository
   let drizzleDb: any
   let configSpy: any
 
@@ -39,7 +39,7 @@ describe('DrizzleUsageRepository', () => {
     `)
 
     db = createDrizzleDatabaseAccess()
-    repository = new DrizzleUsageRepository(db)
+    repository = new AtlasUsageRepository(db)
   })
 
   afterAll(() => {

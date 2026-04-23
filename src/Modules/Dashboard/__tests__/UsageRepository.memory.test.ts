@@ -1,15 +1,15 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import type { UsageRecordInsert } from '../Application/Ports/IUsageRepository'
-import { DrizzleUsageRepository } from '../Infrastructure/Repositories/DrizzleUsageRepository'
+import { AtlasUsageRepository } from '../Infrastructure/Repositories/AtlasUsageRepository'
 
-describe('DrizzleUsageRepository (Memory Adapter Parity)', () => {
+describe('AtlasUsageRepository (Memory Adapter Parity)', () => {
   let db: MemoryDatabaseAccess
-  let repository: DrizzleUsageRepository
+  let repository: AtlasUsageRepository
 
   beforeEach(async () => {
     db = new MemoryDatabaseAccess()
-    repository = new DrizzleUsageRepository(db)
+    repository = new AtlasUsageRepository(db)
   })
 
   async function seedRecord(overrides: Partial<UsageRecordInsert> = {}) {

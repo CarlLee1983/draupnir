@@ -4,7 +4,7 @@ import { getCurrentORM, getDatabaseAccess } from '../RepositoryFactory'
 describe('RepositoryFactory', () => {
   it('should return a valid ORM type', () => {
     const orm = getCurrentORM()
-    expect(['memory', 'drizzle', 'atlas', 'prisma']).toContain(orm)
+    expect(['memory', 'atlas', 'drizzle', 'prisma']).toContain(orm)
   })
 
   it('should return undefined for memory ORM', () => {
@@ -13,6 +13,14 @@ describe('RepositoryFactory', () => {
     process.env.ORM = 'memory'
     const db = getDatabaseAccess()
     expect(db).toBeUndefined()
+    process.env.ORM = originalORM
+  })
+
+  it('should return database access for atlas ORM', () => {
+    const originalORM = process.env.ORM
+    process.env.ORM = 'atlas'
+    const db = getDatabaseAccess()
+    expect(db).toBeDefined()
     process.env.ORM = originalORM
   })
 

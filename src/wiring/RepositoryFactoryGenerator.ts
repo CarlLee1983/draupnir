@@ -27,8 +27,8 @@
  * ```typescript
  * const userFactory = createRepositoryFactory({
  *   memory: () => new UserRepository(),
- *   drizzle: (db) => new DrizzleUserRepository(db!),
  *   atlas: (db) => new AtlasUserRepository(db!),
+ *   drizzle: (db) => new DrizzleUserRepository(db!),
  *   prisma: (db) => new PrismaUserRepository(db!),
  * })
  *
@@ -139,7 +139,7 @@ export function registerRepositoriesInBatch(
  * export function registerUserRepositories(): void {
  *   const factory = createRepositoryFactory({
  *     memory: () => new UserRepository(),
- *     drizzle: (db) => new DrizzleUserRepository(db!),
+ *     atlas: (db) => new AtlasUserRepository(db!),
  *   })
  *   getRegistry().register('user', factory)
  * }
@@ -153,11 +153,11 @@ export function registerRepositoriesInBatch(
  * registerRepositoriesInBatch({
  *   user: {
  *     memory: () => new UserRepository(),
- *     drizzle: (db) => new DrizzleUserRepository(db!),
+ *     atlas: (db) => new AtlasUserRepository(db!),
  *   },
  *   post: {
  *     memory: () => new PostRepository(),
- *     drizzle: (db) => new DrizzlePostRepository(db!),
+ *     atlas: (db) => new AtlasPostRepository(db!),
  *   },
  * })
  * ```

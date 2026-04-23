@@ -4,7 +4,7 @@ import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
 import * as config from '../Adapters/Drizzle/config'
 import { createDrizzleDatabaseAccess } from '../Adapters/Drizzle/DrizzleDatabaseAdapter'
-import * as schema from '../Adapters/Drizzle/schema'
+import * as schema from '../schema'
 import { MemoryDatabaseAccess } from '../Adapters/Memory/MemoryDatabaseAccess'
 import { type AggregateSpec, add, avg, coalesce, count, dateTrunc, sum } from '../AggregateSpec'
 
@@ -71,17 +71,17 @@ const seedRows = [
   },
 ]
 
-describe('Aggregate parity across Drizzle and Memory adapters', () => {
-  let drizzleAccess: IDatabaseAccess
+describe('Aggregate parity across Atlas and Memory adapters', () => {
+  let atlasAccess: IDatabaseAccess
   let memoryAccess: IDatabaseAccess
-  let drizzleDb: any
+  let atlasDb: any
   let configSpy: any
 
   beforeAll(async () => {
-    // Setup Drizzle
+    // Setup Atlas (using Drizzle internal for parity check)
     const client = createClient({ url: 'file::memory:' })
-    drizzleDb = drizzle(client, { schema })
-    configSpy = spyOn(config, 'getDrizzleInstance').mockReturnValue(drizzleDb)
+    atlasDb = drizzle(client, { schema })
+    configSpy = spyOn(config, 'getDrizzleInstance').mockReturnValue(atlasDb)
 
     await client.execute(`
       CREATE TABLE usage_records (
@@ -101,11 +101,11 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
       )
     `)
 
-    drizzleAccess = createDrizzleDatabaseAccess()
+    atlasAccess = createDrizzleDatabaseAccess()
     memoryAccess = new MemoryDatabaseAccess()
 
     // Seed both
-    await drizzleDb.insert(schema.usageRecords).values(seedRows)
+    await atlasDb.insert(schema.usageRecords).values(seedRows)
     for (const row of seedRows) {
       await memoryAccess.table('usageRecords').insert(row)
     }
@@ -120,9 +120,9 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
     spec: AggregateSpec,
     chain: (qb: IQueryBuilder) => IQueryBuilder = (qb) => qb,
   ): Promise<[readonly T[], readonly T[]]> {
-    const dRows = await chain(drizzleAccess.table('usageRecords')).aggregate<T>(spec)
+    const aRows = await chain(atlasAccess.table('usageRecords')).aggregate<T>(spec)
     const mRows = await chain(memoryAccess.table('usageRecords')).aggregate<T>(spec)
-    return [dRows, mRows]
+    return [aRows, mRows]
   }
 
   it('queryDailyCost spec produces identical rows', async () => {
@@ -137,7 +137,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
       groupBy: ['date'],
       orderBy: [{ column: 'date', direction: 'ASC' }],
     }
-    const [drizzle, memory] = await runOnBoth(spec, (qb) =>
+    const [atlas, memory] = await runOnBoth(spec, (qb) =>
       qb
         .where('org_id', '=', 'org-1')
         .whereBetween('occurred_at', [
@@ -145,7 +145,7 @@ describe('Aggregate parity across Drizzle and Memory adapters', () => {
           new Date('2026-04-11T23:59:59Z'),
         ]),
     )
-    expect(memory).toEqual(drizzle)
+    expect(memory).toEqual(atlas)
     expect(memory).toHaveLength(2)
     expect(memory[0]).toEqual({
       date: '2026-04-10',

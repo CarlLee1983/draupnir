@@ -55,7 +55,12 @@ async function start() {
     shutdown.register(new RedisShutdownHook(redis))
   }
 
-  shutdown.register(new DatabaseShutdownHook(closeDrizzleConnection))
+  const orm = process.env.ORM || 'memory'
+  if (orm === 'drizzle') {
+    shutdown.register(new DatabaseShutdownHook(closeDrizzleConnection))
+  }
+  // Atlas ORM handles its own connections or doesn't require explicit close for now.
+  
   shutdown.listen()
   // ─────────────────────────────────────────────────────────────────────────
 

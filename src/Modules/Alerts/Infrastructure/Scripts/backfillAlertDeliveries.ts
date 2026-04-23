@@ -2,7 +2,7 @@ import { getDrizzleInstance } from '@/Shared/Infrastructure/Database/Adapters/Dr
 import {
   alertDeliveries,
   alertEvents,
-} from '@/Shared/Infrastructure/Database/Adapters/Drizzle/schema'
+} from '@/Shared/Infrastructure/Database/schema'
 
 type RecipientDeliveryRow = {
   alert_event_id: string

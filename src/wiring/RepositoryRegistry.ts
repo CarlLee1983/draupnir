@@ -48,7 +48,7 @@ export class RepositoryRegistry {
    * @example
    * registry.register('user', (orm, db) => {
    *   if (orm === 'memory') return new UserRepository()
-   *   if (orm === 'drizzle') return new DrizzleUserRepository(db!)
+   *   if (orm === 'atlas') return new AtlasUserRepository(db!)
    * })
    */
   register(type: string, factory: RepositoryFactory): void {

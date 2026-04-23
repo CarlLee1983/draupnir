@@ -92,7 +92,7 @@ export class DatabaseAccessBuilder {
    * 列出支援的 ORM
    */
   static listSupportedORMs(): ORMType[] {
-    return ['memory', 'drizzle', 'atlas', 'prisma']
+    return ['memory', 'atlas', 'drizzle', 'prisma']
   }
 }
 
@@ -100,7 +100,7 @@ export class DatabaseAccessBuilder {
  * 便利方法：快速構建 DatabaseAccessBuilder 並取得 IDatabaseAccess
  *
  * @example
- * const db = createDatabaseAccess('drizzle')
+ * const db = createDatabaseAccess('atlas')
  * registerUserRepositories(db)
  */
 export function createDatabaseAccess(orm: ORMType): IDatabaseAccess {

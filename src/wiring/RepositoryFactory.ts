@@ -20,13 +20,14 @@
  *
  * @example
  * // ORM=memory bun run dev  → 所有模組使用 in-memory Repository
- * // ORM=drizzle bun run dev → 所有模組使用 Drizzle Repository
+ * // ORM=atlas  bun run dev  → 所有模組使用 Gravito Atlas ORM
+ * // ORM=drizzle bun run dev → 舊版 Drizzle Repository（相容模式）
  */
 
 /**
  * 支援的 ORM 類型
  */
-export type ORMType = 'memory' | 'drizzle' | 'atlas' | 'prisma'
+export type ORMType = 'memory' | 'atlas' | 'drizzle' | 'prisma'
 
 /**
  * 從環境變數讀取 ORM 設定
@@ -37,11 +38,11 @@ export type ORMType = 'memory' | 'drizzle' | 'atlas' | 'prisma'
  * @returns 當前選擇的 ORM 類型
  *
  * @example
- * const orm = getCurrentORM()  // 'memory' | 'drizzle' | ...
+ * const orm = getCurrentORM()  // 'memory' | 'atlas' | ...
  */
 export function getCurrentORM(): ORMType {
   const orm = process.env.ORM || 'memory'
-  const validORMs: ORMType[] = ['memory', 'drizzle', 'atlas', 'prisma']
+  const validORMs: ORMType[] = ['memory', 'atlas', 'drizzle', 'prisma']
 
   if (!validORMs.includes(orm as ORMType)) {
     console.warn(`❌ 不支援的 ORM: "${orm}"，使用預設 "memory"`)
@@ -59,8 +60,8 @@ export function getCurrentORM(): ORMType {
  *
  * 設計：
  * - ORM=memory → 返回 undefined（無需資料庫）
- * - ORM=drizzle → 返回 DrizzleDatabaseAccess（SQLite）
- * - ORM=atlas → 未來實現
+ * - ORM=atlas → 返回 AtlasDatabaseAccess (Gravito Atlas ORM)
+ * - ORM=drizzle → 返回 DrizzleDatabaseAccess (Legacy)
  * - ORM=prisma → 未來實現
  *
  * @returns IDatabaseAccess | undefined
@@ -78,16 +79,16 @@ export function getDatabaseAccess() {
     return undefined
   }
 
+  if (orm === 'atlas') {
+    const { createAtlasDatabaseAccess } = require('@/Shared/Infrastructure/Database/Adapters/Atlas')
+    return createAtlasDatabaseAccess()
+  }
+
   if (orm === 'drizzle') {
     const {
       createDrizzleDatabaseAccess,
     } = require('@/Shared/Infrastructure/Database/Adapters/Drizzle')
     return createDrizzleDatabaseAccess()
-  }
-
-  if (orm === 'atlas') {
-    const { createAtlasDatabaseAccess } = require('@/Shared/Infrastructure/Database/Adapters/Atlas')
-    return createAtlasDatabaseAccess()
   }
 
   if (orm === 'prisma') {
