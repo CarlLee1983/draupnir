@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { Check, Copy } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDateTime, maskApiKey } from '@/lib/format'
 import type { Translator } from '@/lib/i18n'
+import { StatusBadge } from '@/components/badges'
 
 export interface ApiKeyRow {
   id: string
@@ -51,17 +51,6 @@ function KeyCopyCell({ row, t }: { row: ApiKeyRow; t: Translator }) {
   )
 }
 
-function statusBadge(status: ApiKeyRow['status'], t: Translator) {
-  switch (status) {
-    case 'active':
-      return <Badge className="bg-green-500 hover:bg-green-600">{t('ui.common.status.active')}</Badge>
-    case 'revoked':
-      return <Badge variant="destructive">{t('ui.common.status.revoked')}</Badge>
-    case 'suspended_no_credit':
-      return <Badge variant="outline">{t('ui.common.status.insufficientCredit')}</Badge>
-  }
-}
-
 export function createApiKeyColumns(t: Translator): ColumnDef<ApiKeyRow>[] {
   return [
     {
@@ -76,7 +65,7 @@ export function createApiKeyColumns(t: Translator): ColumnDef<ApiKeyRow>[] {
     {
       accessorKey: 'status',
       header: t('ui.common.status'),
-      cell: ({ row }) => statusBadge(row.original.status, t),
+      cell: ({ row }) => <StatusBadge status={row.original.status} t={t} />,
     },
     {
       accessorKey: 'createdAt',

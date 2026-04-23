@@ -2,12 +2,12 @@ import { Head, Link } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ArrowLeft, Building2, Calendar, Globe, Users } from 'lucide-react'
 import { formatDateTime } from '@/lib/format'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
+import { StatusBadge, RoleBadge } from '@/components/badges'
 
 interface MemberRow {
   userId: string
@@ -86,7 +86,7 @@ export default function OrganizationShow({ organization, members, error, contrac
             </CardHeader>
             <CardContent className="space-y-4">
               <Row label="Slug" value={<code className="text-xs">{organization.slug}</code>} icon={<Globe className="h-4 w-4" />} />
-              <Row label={t('ui.common.status')} value={<Badge>{organization.status}</Badge>} />
+              <Row label={t('ui.common.status')} value={<StatusBadge status={organization.status} t={t} />} />
               <Row label={t('ui.common.createdAt')} value={formatDateTime(organization.createdAt)} icon={<Calendar className="h-4 w-4" />} />
             </CardContent>
           </Card>
@@ -110,7 +110,7 @@ export default function OrganizationShow({ organization, members, error, contrac
                       <TableCell>
                         <span className="text-sm">{m.email || m.userId}</span>
                       </TableCell>
-                      <TableCell><Badge variant="outline">{m.role}</Badge></TableCell>
+                      <TableCell><RoleBadge role={m.role} t={t} /></TableCell>
                       <TableCell className="text-sm text-muted-foreground">{formatDateTime(m.joinedAt)}</TableCell>
                     </TableRow>
                   ))}

@@ -182,6 +182,8 @@ const frontendCatalog = {
   'ui.common.failed': true,
   'ui.common.status.active': true,
   'ui.common.status.inactive': true,
+  'ui.common.status.enabled': true,
+  'ui.common.status.disabled': true,
   'ui.common.status.suspended': true,
   'ui.common.status.draft': true,
   'ui.common.status.expired': true,

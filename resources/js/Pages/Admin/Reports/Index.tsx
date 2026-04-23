@@ -2,13 +2,13 @@ import { Head, Link } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Plus, Mail, Calendar, Clock, Globe, Trash2, Edit, ExternalLink } from 'lucide-react'
 import { useState } from 'react'
 import { ReportForm } from './Components/ReportForm'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useTranslation } from '@/lib/i18n'
+import { StatusBadge, TagBadge } from '@/components/badges'
 
 interface ReportScheduleRow {
   id: string
@@ -143,20 +143,17 @@ export default function ReportsIndex({ orgId, schedules }: Props) {
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {schedule.recipients.map((email) => (
-                            <Badge key={email} variant="outline" className="font-normal">
+                            <TagBadge key={email} variant="outline" className="font-normal">
                               {email}
-                            </Badge>
+                            </TagBadge>
                           ))}
                         </div>
                       </TableCell>
                       <TableCell>
-                        {schedule.enabled ? (
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400">
-                            {t('ui.admin.reports.statusEnabled')}
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">{t('ui.admin.reports.statusDisabled')}</Badge>
-                        )}
+                        <StatusBadge 
+                          status={schedule.enabled ? 'enabled' : 'disabled'} 
+                          t={t} 
+                        />
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">

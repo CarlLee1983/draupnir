@@ -3,7 +3,23 @@ import { Building2, Calendar } from 'lucide-react'
 import { UsageLineChart } from '@/components/charts/UsageLineChart'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCredit, formatDateTime, formatNumber } from '@/lib/format'
-import type { ReportSnapshot } from '@/Modules/Reports/Application/Services/ReportSnapshot'
+
+interface ReportSnapshot {
+  orgId: string
+  generatedAt: string
+  reportType: 'weekly' | 'monthly'
+  timezone: string
+  summary: {
+    totalRequests: number
+    totalTokens: number
+    totalCost: number
+  }
+  dailyTrend: {
+    date: string
+    requests: number
+    tokens: number
+  }[]
+}
 
 interface Props {
   report: ReportSnapshot
@@ -89,7 +105,7 @@ export default function ReportTemplate({ report, isAnimationActive }: Props) {
           <h2 className="text-xl font-bold text-slate-800">{title}</h2>
           <div className="border rounded-xl p-4 bg-slate-50/50">
             <UsageLineChart
-              data={usageData}
+              data={usageData as any}
               title=""
               timeZone={report.timezone}
               isAnimationActive={isAnimationActive}

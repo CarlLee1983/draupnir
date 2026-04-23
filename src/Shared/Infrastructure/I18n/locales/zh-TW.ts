@@ -69,6 +69,8 @@ export const zhTWMessages = {
   'ui.common.failed': '失敗',
   'ui.common.status.active': '作用中',
   'ui.common.status.inactive': '停用',
+  'ui.common.status.enabled': '已啟用',
+  'ui.common.status.disabled': '已停用',
   'ui.common.status.suspended': '暫停',
   'ui.common.status.draft': '草稿',
   'ui.common.status.expired': '已過期',

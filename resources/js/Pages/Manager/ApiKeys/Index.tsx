@@ -11,7 +11,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,12 +27,11 @@ import {
   Check, 
   Trash2, 
   UserCircle, 
-  AlertCircle,
-  ShieldCheck,
-  ShieldAlert
+  AlertCircle
 } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
 import type { SharedProps } from '@/types/inertia'
+import { StatusBadge } from '@/components/badges'
 
 interface KeyRow {
   id: string
@@ -74,44 +72,6 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
       setCopiedId(id)
       setTimeout(() => setCopiedId(null), 2000)
     })
-  }
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return (
-          <Badge className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20">
-            <ShieldCheck className="h-3 w-3" />
-            {t('ui.common.status.active')}
-          </Badge>
-        )
-      case 'pending':
-        return (
-          <Badge variant="secondary" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
-            {t('ui.common.status.pending')}
-          </Badge>
-        )
-      case 'revoked':
-        return (
-          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
-            <ShieldAlert className="h-3 w-3" />
-            {t('ui.common.status.revoked')}
-          </Badge>
-        )
-      case 'suspended_no_credit':
-        return (
-          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
-            <ShieldAlert className="h-3 w-3" />
-            {t('ui.common.status.suspendedNoCredit')}
-          </Badge>
-        )
-      default:
-        return (
-          <Badge variant="outline" className="px-2.5 py-0.5 rounded-md shadow-sm">
-            {status}
-          </Badge>
-        )
-    }
   }
 
   return (
@@ -208,7 +168,7 @@ export default function ManagerApiKeysIndex({ keys, assignees, error }: Props) {
                         {k.quotaAllocated.toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        {getStatusBadge(k.status)}
+                        <StatusBadge status={k.status} t={t} />
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">

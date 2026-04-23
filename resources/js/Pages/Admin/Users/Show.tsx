@@ -2,12 +2,12 @@ import { Head, Link, router } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, User, Mail, Calendar, Shield, Activity } from 'lucide-react'
 import { formatDateTime } from '@/lib/format'
 import { useToast } from '@/hooks/use-toast'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
+import { RoleBadge, StatusBadge } from '@/components/badges'
 
 interface UserDetail {
   id: string
@@ -92,16 +92,10 @@ export default function UserShow({ user, error }: Props) {
             <CardContent className="space-y-4">
               <Field label={t('ui.common.email')} value={user.email} icon={<Mail className="h-4 w-4" />} />
               <Field label={t('ui.common.name')} value={user.name || '—'} />
-              <Field label={t('ui.common.role')} value={<Badge>{user.role}</Badge>} icon={<Shield className="h-4 w-4" />} />
+              <Field label={t('ui.common.role')} value={<RoleBadge role={user.role} t={t} />} icon={<Shield className="h-4 w-4" />} />
               <Field
                 label={t('ui.common.status')}
-                value={
-                  user.status === 'active' ? (
-                    <Badge className="bg-green-500">{t('ui.common.status.active')}</Badge>
-                  ) : (
-                    <Badge variant="destructive">{t('ui.common.status.inactive')}</Badge>
-                  )
-                }
+                value={<StatusBadge status={user.status} t={t} />}
                 icon={<Activity className="h-4 w-4" />}
               />
               <Field label={t('ui.common.createdAt')} value={formatDateTime(user.createdAt)} icon={<Calendar className="h-4 w-4" />} />

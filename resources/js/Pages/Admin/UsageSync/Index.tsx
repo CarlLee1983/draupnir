@@ -1,11 +1,11 @@
 import { Head } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { formatDateTime, formatNumber } from '@/lib/format'
-import { CheckCircle2, XCircle, Clock, Database, AlertTriangle } from 'lucide-react'
+import { Clock, Database, AlertTriangle } from 'lucide-react'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
+import { StatusBadge } from '@/components/badges'
 
 interface UsageSyncStatus {
   enabled: boolean
@@ -29,17 +29,10 @@ export default function UsageSyncIndex({ status, error }: Props) {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">{t('ui.admin.usageSync.title')}</h1>
-          {status.enabled ? (
-            <Badge className="bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-400">
-              <CheckCircle2 className="mr-1 h-3 w-3" />
-              {t('ui.admin.usageSync.running')}
-            </Badge>
-          ) : (
-            <Badge variant="secondary">
-              <XCircle className="mr-1 h-3 w-3" />
-              {t('ui.common.status.inactive')}
-            </Badge>
-          )}
+          <StatusBadge 
+            status={status.enabled ? 'running' : 'inactive'} 
+            t={t} 
+          />
         </div>
 
         {error && (

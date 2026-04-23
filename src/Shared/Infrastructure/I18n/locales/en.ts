@@ -74,6 +74,8 @@ export const enMessages = {
   'ui.common.failed': 'Failed',
   'ui.common.status.active': 'Active',
   'ui.common.status.inactive': 'Inactive',
+  'ui.common.status.enabled': 'Enabled',
+  'ui.common.status.disabled': 'Disabled',
   'ui.common.status.suspended': 'Suspended',
   'ui.common.status.draft': 'Draft',
   'ui.common.status.expired': 'Expired',

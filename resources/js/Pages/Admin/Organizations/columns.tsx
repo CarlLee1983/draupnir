@@ -1,10 +1,9 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Link } from '@inertiajs/react'
 import { formatDateTime } from '@/lib/format'
 import type { Translator } from '@/lib/i18n'
-import { ShieldCheck, ShieldAlert } from 'lucide-react'
+import { StatusBadge } from '@/components/badges'
 
 export interface OrgRow {
   id: string
@@ -28,25 +27,7 @@ export const createOrgColumns = (t: Translator): ColumnDef<OrgRow>[] => [
   {
     accessorKey: 'status',
     header: t('ui.common.status'),
-    cell: ({ row }) => {
-      if (row.original.status === 'active') {
-        return (
-          <Badge className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20">
-            <ShieldCheck className="h-3 w-3" />
-            {t('ui.common.status.active')}
-          </Badge>
-        )
-      }
-      return (
-        <Badge
-          variant="destructive"
-          className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm"
-        >
-          <ShieldAlert className="h-3 w-3" />
-          {t('ui.common.status.suspended')}
-        </Badge>
-      )
-    },
+    cell: ({ row }) => <StatusBadge status={row.original.status} t={t} />,
   },
   {
     accessorKey: 'memberCount',

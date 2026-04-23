@@ -3,18 +3,18 @@ import { Head, Link, router } from '@inertiajs/react'
 import { AdminLayout } from '@/layouts/AdminLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, FileText, Calendar, Clock, Shield, Tag } from 'lucide-react'
 import { formatDateTime, formatDate } from '@/lib/format'
 import { useToast } from '@/hooks/use-toast'
 import type { I18nMessage } from '@/lib/i18n'
 import { useTranslation } from '@/lib/i18n'
 import { QuotaAdjustModal, type QuotaKeyRow } from './QuotaAdjustModal'
+import { StatusBadge, TagBadge } from '@/components/badges'
 
 interface ContractDetail {
   id: string
   name: string
-  status: 'draft' | 'active' | 'expired' | 'terminated'
+  status: string
   targetType: 'organization' | 'user'
   targetId: string | null
   terms: {
@@ -107,7 +107,7 @@ export default function ContractShow({ contract, error, quotaKeys }: Props) {
               <CardTitle>{t('ui.admin.users.basicInfo')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Field label={t('ui.common.status')} value={<Badge>{contract.status}</Badge>} icon={<Shield className="h-4 w-4" />} />
+              <Field label={t('ui.common.status')} value={<StatusBadge status={contract.status} t={t} />} icon={<Shield className="h-4 w-4" />} />
               <Field label={t('ui.admin.contracts.create.targetTypeLabel')} value={contract.targetType} icon={<Tag className="h-4 w-4" />} />
               <Field label={t('ui.admin.contracts.create.targetIdLabel')} value={contract.targetId ?? '—'} />
               <Field
@@ -133,9 +133,7 @@ export default function ContractShow({ contract, error, quotaKeys }: Props) {
                 <div className="mb-2 text-muted-foreground">{t('ui.admin.contracts.allowedModules')}</div>
                 <div className="flex flex-wrap gap-2">
                   {contract.terms.allowedModules.map((m) => (
-                    <Badge key={m} variant="secondary">
-                      {m}
-                    </Badge>
+                    <TagBadge key={m}>{m}</TagBadge>
                   ))}
                 </div>
               </div>

@@ -9,10 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { ShieldCheck, ShieldAlert } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n'
+import { StatusBadge } from '@/components/badges'
 
 interface KeyRow {
   id: string
@@ -52,44 +51,6 @@ export default function ManagerDashboardIndex({
   error,
 }: Props) {
   const { t } = useTranslation()
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return (
-          <Badge className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm bg-green-500/10 text-green-700 border-green-200/50 hover:bg-green-500/20">
-            <ShieldCheck className="h-3 w-3" />
-            {t('ui.common.status.active')}
-          </Badge>
-        )
-      case 'pending':
-        return (
-          <Badge variant="secondary" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
-            {t('ui.common.status.pending')}
-          </Badge>
-        )
-      case 'revoked':
-        return (
-          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
-            <ShieldAlert className="h-3 w-3" />
-            {t('ui.common.status.revoked')}
-          </Badge>
-        )
-      case 'suspended_no_credit':
-        return (
-          <Badge variant="destructive" className="gap-1.5 px-2.5 py-0.5 rounded-md font-medium capitalize shadow-sm">
-            <ShieldAlert className="h-3 w-3" />
-            {t('ui.common.status.suspendedNoCredit')}
-          </Badge>
-        )
-      default:
-        return (
-          <Badge variant="outline" className="px-2.5 py-0.5 rounded-md shadow-sm">
-            {status}
-          </Badge>
-        )
-    }
-  }
 
   return (
     <ManagerLayout>
@@ -158,7 +119,9 @@ export default function ManagerDashboardIndex({
                     return (
                       <TableRow key={k.id}>
                         <TableCell className="font-medium">{k.label}</TableCell>
-                        <TableCell className="text-center">{getStatusBadge(k.status)}</TableCell>
+                        <TableCell className="text-center">
+                          <StatusBadge status={k.status} t={t} />
+                        </TableCell>
                         <TableCell className="text-right">{formatNumber(k.quotaAllocated)}</TableCell>
                         <TableCell className="text-right">{formatNumber(k.usageCurrent)}</TableCell>
                         <TableCell className="text-right">
@@ -173,13 +136,10 @@ export default function ManagerDashboardIndex({
                           </span>
                         </TableCell>
                         <TableCell className="text-center">
-                          {k.assignedMemberId ? (
-                            <Badge variant="secondary">{t('ui.common.assigned')}</Badge>
-                          ) : (
-                            <Badge variant="outline" className="text-muted-foreground">
-                              {t('ui.common.notAssigned')}
-                            </Badge>
-                          )}
+                          <StatusBadge 
+                            status={k.assignedMemberId ? 'assigned' : 'unassigned'} 
+                            t={t} 
+                          />
                         </TableCell>
                       </TableRow>
                     )
