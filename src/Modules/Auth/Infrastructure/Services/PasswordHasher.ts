@@ -1,8 +1,12 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto'
+import { scrypt, timingSafeEqual } from 'node:crypto'
+import { promisify } from 'node:util'
 import type { IPasswordHasher } from '../../Application/Ports/IPasswordHasher'
+
+const scryptAsync = promisify(scrypt)
 
 /**
  * Service for secure password hashing using the scrypt algorithm.
+ * Salt: Web Crypto `getRandomValues` (16 bytes, hex). KDF: Node async `scrypt` (same defaults as former `scryptSync`).
  */
 export class ScryptPasswordHasher implements IPasswordHasher {
   /**
@@ -11,8 +15,8 @@ export class ScryptPasswordHasher implements IPasswordHasher {
   async hash(plainPassword: string): Promise<string> {
     this.assertStrongPassword(plainPassword)
 
-    const salt = randomBytes(16).toString('hex')
-    const derivedKey = scryptSync(plainPassword, salt, 64)
+    const salt = this.randomSaltHex()
+    const derivedKey = await this.deriveKey(plainPassword, salt)
     return `${salt}:${derivedKey.toString('hex')}`
   }
 
@@ -25,13 +29,23 @@ export class ScryptPasswordHasher implements IPasswordHasher {
       return false
     }
 
-    const derivedKey = scryptSync(plainPassword, salt, 64)
+    const derivedKey = await this.deriveKey(plainPassword, salt)
     const storedBuffer = Buffer.from(storedHash, 'hex')
     if (derivedKey.length !== storedBuffer.length) {
       return false
     }
 
     return timingSafeEqual(derivedKey, storedBuffer)
+  }
+
+  private randomSaltHex(): string {
+    const bytes = new Uint8Array(16)
+    globalThis.crypto.getRandomValues(bytes)
+    return Buffer.from(bytes).toString('hex')
+  }
+
+  private async deriveKey(plainPassword: string, salt: string): Promise<Buffer> {
+    return (await scryptAsync(plainPassword, salt, 64)) as Buffer
   }
 
   /**
