@@ -7,6 +7,7 @@
  */
 
 import type { FormRequestClass } from '@gravito/core'
+import { ChangePasswordRequest } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
 import { UpdateProfileRequest } from '@/Modules/Profile/Presentation/Requests/UpdateProfileRequest'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -27,6 +28,7 @@ type MemberPageInstance = {
   handle(ctx: IHttpContext): Promise<Response>
   store?(ctx: IHttpContext): Promise<Response>
   update?(ctx: IHttpContext): Promise<Response>
+  changePassword?(ctx: IHttpContext): Promise<Response>
   revokeAllSessions?(ctx: IHttpContext): Promise<Response>
 }
 
@@ -96,6 +98,14 @@ const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
     action: 'update',
     formRequest: UpdateProfileRequest,
     name: 'pages.member.settings.update',
+  },
+  {
+    method: 'post',
+    path: '/member/settings/password',
+    page: MEMBER_PAGE_KEYS.settings,
+    action: 'changePassword',
+    formRequest: ChangePasswordRequest,
+    name: 'pages.member.settings.password',
   },
   {
     method: 'post',

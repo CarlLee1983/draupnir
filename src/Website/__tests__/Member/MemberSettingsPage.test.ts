@@ -121,6 +121,7 @@ describe('MemberSettingsPage', () => {
         inertia,
         mockGetProfileService as any,
         {} as any,
+        {} as any,
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
@@ -129,6 +130,7 @@ describe('MemberSettingsPage', () => {
       expect(captured.lastCall?.component).toBe('Member/Settings/Index')
       expect(captured.lastCall?.props.user).toMatchObject({ name: 'Test User', role: 'member' })
       expect(captured.lastCall?.props.error).toBe(null)
+      expect(captured.lastCall?.props.passwordRequirements).toBeDefined()
     })
 
     test('uses refreshedAuthTokenHash from ctx when set by silent refresh', async () => {
@@ -147,6 +149,7 @@ describe('MemberSettingsPage', () => {
             Promise.resolve({ success: true, data: { displayName: 'x', email: 'x' } }),
           ),
         } as any,
+        {} as any,
         {} as any,
         { execute: listSessions } as any,
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
@@ -173,6 +176,7 @@ describe('MemberSettingsPage', () => {
         inertia,
         mockGetProfileService as any,
         {} as any,
+        {} as any,
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
@@ -198,6 +202,7 @@ describe('MemberSettingsPage', () => {
         inertia,
         { execute: mock() } as any,
         mockUpdateProfileService as any,
+        {} as any,
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
@@ -225,6 +230,7 @@ describe('MemberSettingsPage', () => {
         inertia,
         { execute: mock() } as any,
         mockUpdateProfileService as any,
+        {} as any,
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )

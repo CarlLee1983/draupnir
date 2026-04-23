@@ -10,6 +10,7 @@ import type { GetBalanceService } from '@/Modules/Credit/Application/Services/Ge
 import type { GetPendingInvitationsService } from '@/Modules/Organization/Application/Services/GetPendingInvitationsService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { GetUsageChartService } from '@/Modules/Dashboard/Application/Services/GetUsageChartService'
+import type { ChangePasswordService } from '@/Modules/Auth/Application/Services/ChangePasswordService'
 import type { ListSessionsService } from '@/Modules/Auth/Application/Services/ListSessionsService'
 import type { RevokeAllSessionsService } from '@/Modules/Auth/Application/Services/RevokeAllSessionsService'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
@@ -76,6 +77,7 @@ export function registerMemberBindings(container: IContainer): void {
         c.make(i) as InertiaService,
         c.make('getProfileService') as GetProfileService,
         c.make('updateProfileService') as UpdateProfileService,
+        c.make('changePasswordService') as ChangePasswordService,
         c.make('listSessionsService') as ListSessionsService,
         c.make('revokeAllSessionsService') as RevokeAllSessionsService,
       ),

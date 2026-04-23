@@ -1,12 +1,18 @@
+import type { ChangePasswordService } from '@/Modules/Auth/Application/Services/ChangePasswordService'
 import type { ListSessionsService } from '@/Modules/Auth/Application/Services/ListSessionsService'
 import type { RevokeAllSessionsService } from '@/Modules/Auth/Application/Services/RevokeAllSessionsService'
 import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
-import type { UpdateProfileParams } from '@/Modules/Profile/Presentation/Requests/UpdateProfileRequest'
+import { PASSWORD_REQUIREMENTS } from '@/Modules/Auth/Presentation/passwordRequirements'
+import type { ChangePasswordParams } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
+import type { UpdateProfileParams } from '@/Modules/Profile/Presentation/Requests/UpdateProfileRequest'
+import {
+  AuthMiddleware,
+  extractRawAuthToken,
+} from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware, extractRawAuthToken } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { REFRESHED_AUTH_TOKEN_HASH_KEY } from '@/Website/Http/Middleware/TokenRefreshMiddleware'
 
@@ -14,6 +20,7 @@ import { REFRESHED_AUTH_TOKEN_HASH_KEY } from '@/Website/Http/Middleware/TokenRe
  * Page handler for member profile settings.
  *
  * Path: `/member/settings`
+ * - POST `/member/settings/password` — change password (same flow as manager settings)
  * React Page: `Member/Settings/Index`
  */
 export class MemberSettingsPage {
@@ -21,6 +28,7 @@ export class MemberSettingsPage {
     private readonly inertia: InertiaService,
     private readonly getProfileService: GetProfileService,
     private readonly updateProfileService: UpdateProfileService,
+    private readonly changePasswordService: ChangePasswordService,
     private readonly listSessionsService: ListSessionsService,
     private readonly revokeAllSessionsService: RevokeAllSessionsService,
   ) {}
@@ -48,6 +56,7 @@ export class MemberSettingsPage {
       },
       profile: result.success ? (result.data ?? null) : null,
       error: result.success ? null : { key: 'member.settings.loadFailed' },
+      passwordRequirements: PASSWORD_REQUIREMENTS,
       sessions,
       ...extras,
     })
@@ -80,6 +89,29 @@ export class MemberSettingsPage {
     return ctx.redirect('/member/settings')
   }
 
+  async changePassword(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)!
+    const validated = ctx.get('validated') as ChangePasswordParams | undefined
+    if (!validated) {
+      return this.renderSettings(ctx, { passwordChangeError: '請求資料無效' })
+    }
+
+    const result = await this.changePasswordService.execute(
+      auth.userId,
+      validated.currentPassword,
+      validated.password,
+    )
+
+    if (!result.success) {
+      return this.renderSettings(ctx, { passwordChangeError: result.message })
+    }
+
+    ctx.setCookie('auth_token', '', { path: '/', maxAge: 0, sameSite: 'Lax' })
+    ctx.setCookie('refresh_token', '', { path: '/', maxAge: 0, sameSite: 'Lax' })
+    setFlash(ctx, 'success', { key: 'ui.manager.settings.passwordChangedReauth' })
+    return ctx.redirect('/login')
+  }
+
   async revokeAllSessions(ctx: IHttpContext): Promise<Response> {
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const result = await this.revokeAllSessionsService.execute(auth.userId)
@@ -92,4 +124,3 @@ export class MemberSettingsPage {
     return ctx.redirect('/login')
   }
 }
-
