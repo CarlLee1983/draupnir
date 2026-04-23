@@ -103,6 +103,7 @@ export const enMessages = {
   'ui.charts.usageLine.legendRequests': 'Requests',
   'ui.charts.usageLine.legendTokens': 'Token usage',
   'ui.charts.demoBadge': 'Demo Data',
+  'ui.charts.demoBanner': 'Currently showing demo data. No synced records found; simulated trends generated for reference.',
   // Auth
   'ui.auth.login.title': 'Login',
   'ui.auth.login.description': 'Enter your account and password',

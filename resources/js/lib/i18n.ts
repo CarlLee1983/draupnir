@@ -211,6 +211,7 @@ const frontendCatalog = {
   'ui.charts.usageLine.legendRequests': true,
   'ui.charts.usageLine.legendTokens': true,
   'ui.charts.demoBadge': true,
+  'ui.charts.demoBanner': true,
   // Charts — shared & dashboards
   'ui.charts.empty.subtitle': true,
   'ui.charts.costTrend.description': true,

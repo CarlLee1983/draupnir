@@ -14,6 +14,7 @@ import { formatDate, formatDateInTimeZone, formatNumber } from '@/lib/format'
 import { useTranslation } from '@/lib/i18n'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card'
 import { EmptyChart } from './EmptyChart'
+import { AlertCircle } from 'lucide-react'
 
 export interface UsageDataPoint {
   date: string
@@ -65,6 +66,14 @@ export function UsageLineChart({
 
   return (
     <Card className="overflow-hidden border-border rounded-lg shadow-indigo-500/5 shadow-sm">
+      {isDemo && (
+        <div className="bg-amber-50/50 border-b border-amber-100/50 px-4 py-2 flex items-center gap-2">
+          <AlertCircle className="h-3.5 w-3.5 text-amber-500" />
+          <span className="text-[11px] font-medium text-amber-800">
+            {t('ui.charts.demoBanner')}
+          </span>
+        </div>
+      )}
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
           <div className="flex items-center gap-2">

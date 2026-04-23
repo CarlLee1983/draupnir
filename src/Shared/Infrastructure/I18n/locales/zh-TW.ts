@@ -98,6 +98,7 @@ export const zhTWMessages = {
   'ui.charts.usageLine.legendRequests': '請求數',
   'ui.charts.usageLine.legendTokens': 'Token 用量',
   'ui.charts.demoBadge': '範例數據',
+  'ui.charts.demoBanner': '目前顯示為範例數據。系統尚無同步紀錄，已自動生成模擬趨勢以供參考。',
   // Auth — Login
   'ui.auth.login.title': '登入',
   'ui.auth.login.description': '輸入您的帳號和密碼',
