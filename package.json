@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "description": "Draupnir - AI Service Management Platform built on Bifrost AI Gateway",
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
@@ -37,6 +39,8 @@
     "setup": "bun install && bash scripts/setup-hooks.sh && bun run verify",
     "troubleshoot": "bash scripts/troubleshoot.sh",
     "generate:module": "bun scripts/generate-module.ts",
+    "check:commit": "bash scripts/check-commit.sh",
+    "check:i18n": "bun scripts/check-i18n-locales.ts",
     "setup:hooks": "bash scripts/setup-hooks.sh",
     "migrate": "bun scripts/migrate.ts",
     "migrate:rollback": "bun orbit migrate:rollback",

@@ -2,8 +2,8 @@
 #
 # check-banned-imports.sh
 # ------------------------
-# 檢查 staged 的 TypeScript/JavaScript 檔案中是否引入已禁用的依賴。
-# 此腳本會在 pre-commit 階段執行，阻擋回退 Bun 優化成果。
+# 檢查提交範圍內的 TypeScript/JavaScript 檔案中是否引入已禁用的依賴。
+# 此腳本會在提交檢查階段執行，阻擋回退 Bun 優化成果。
 #
 # 禁止清單：
 #   - uuid              → 使用 crypto.randomUUID()
@@ -48,11 +48,29 @@ is_crypto_allowlisted() {
   return 1
 }
 
-# ---- 取得 staged 檔案（只處理新增的行） ------------------------------
-# --diff-filter=ACMR: Added / Copied / Modified / Renamed
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' 2>/dev/null || true)
+# ---- 決定檢查範圍 -----------------------------------------------------
+# staged: 僅檢查已暫存變更（pre-commit）
+# changed: 檢查指定 base 與 HEAD 之間的變更（CI / PR 驗證）
+CHECK_SCOPE="${CHECK_BANNED_IMPORTS_SCOPE:-staged}"
 
-if [ -z "$STAGED_FILES" ]; then
+case "$CHECK_SCOPE" in
+  staged)
+    TARGET_FILES=$(git diff --cached --name-only --diff-filter=ACMR -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' 2>/dev/null || true)
+    ;;
+  changed)
+    if [ -z "${CHECK_BANNED_IMPORTS_BASE:-}" ]; then
+      echo "missing CHECK_BANNED_IMPORTS_BASE for changed scope" >&2
+      exit 1
+    fi
+    TARGET_FILES=$(git diff --name-only --diff-filter=ACMR "$CHECK_BANNED_IMPORTS_BASE" HEAD -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' 2>/dev/null || true)
+    ;;
+  *)
+    echo "unknown CHECK_BANNED_IMPORTS_SCOPE: $CHECK_SCOPE" >&2
+    exit 1
+    ;;
+esac
+
+if [ -z "$TARGET_FILES" ]; then
   exit 0
 fi
 
@@ -75,10 +93,15 @@ append_warn() {
 check_file() {
   local file="$1"
 
-  # 只檢查「新增的行」（git diff 輸出以 + 開頭，但排除 +++ header）
-  # --unified=0 讓 context 為 0，避免誤報現存程式碼
   local added_lines
-  added_lines=$(git diff --cached --unified=0 -- "$file" 2>/dev/null | grep -E '^\+[^+]' || true)
+
+  if [ "$CHECK_SCOPE" = "changed" ]; then
+    added_lines=$(git diff --unified=0 "$CHECK_BANNED_IMPORTS_BASE" HEAD -- "$file" 2>/dev/null | grep -E '^\+[^+]' || true)
+  else
+    # 只檢查「新增的行」（git diff 輸出以 + 開頭，但排除 +++ header）
+    # --unified=0 讓 context 為 0，避免誤報現存程式碼
+    added_lines=$(git diff --cached --unified=0 -- "$file" 2>/dev/null | grep -E '^\+[^+]' || true)
+  fi
 
   if [ -z "$added_lines" ]; then
     return
@@ -118,7 +141,7 @@ while IFS= read -r file; do
   [ -z "$file" ] && continue
   [ ! -f "$file" ] && continue
   check_file "$file"
-done <<< "$STAGED_FILES"
+done <<< "$TARGET_FILES"
 
 # ---- 報告結果 ---------------------------------------------------------
 if [ $ERRORS -gt 0 ] || [ $WARNINGS -gt 0 ]; then

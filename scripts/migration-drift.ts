@@ -67,7 +67,7 @@ function escapeSqlString(value: string): string {
   return value.replaceAll("'", "''")
 }
 
-function getDrizzleTableName(table: unknown): string | null {
+function getTableNameFromSchema(table: unknown): string | null {
   if (!table || typeof table !== 'object') return null
   for (const symbol of Object.getOwnPropertySymbols(table)) {
     if (symbol.toString() === 'Symbol(drizzle:Name)') {
@@ -77,7 +77,7 @@ function getDrizzleTableName(table: unknown): string | null {
   return null
 }
 
-function getDrizzleColumns(table: unknown): SchemaColumn[] {
+function getColumnsFromSchema(table: unknown): SchemaColumn[] {
   if (!table || typeof table !== 'object') return []
   const columnsSymbol = Object.getOwnPropertySymbols(table).find(
     (symbol) => symbol.toString() === 'Symbol(drizzle:Columns)',
@@ -97,17 +97,17 @@ function getDrizzleColumns(table: unknown): SchemaColumn[] {
   })
 }
 
-async function loadDrizzleSchema(): Promise<SchemaTable[]> {
-  const schemaModule = await import('../src/Shared/Infrastructure/Database/Adapters/Drizzle/schema.ts')
+async function loadExpectedSchema(): Promise<SchemaTable[]> {
+  const schemaModule = await import('../src/Shared/Infrastructure/Database/schema.ts')
   return Object.entries(schemaModule)
     .map(([name, table]) => {
-      const tableName = getDrizzleTableName(table)
+      const tableName = getTableNameFromSchema(table)
       if (!tableName || MIGRATION_TABLE_NAMES.has(tableName)) {
         return null
       }
       return {
         name: tableName,
-        columns: getDrizzleColumns(table),
+        columns: getColumnsFromSchema(table),
       }
     })
     .filter((table): table is SchemaTable => Boolean(table))
@@ -315,7 +315,7 @@ async function main(): Promise<void> {
   const connectionName = DB.getDefaultConnection()
   await applyMigrations(connectionName)
 
-  const expected = await loadDrizzleSchema()
+  const expected = await loadExpectedSchema()
   const actual = await loadActualSchema(connectionName)
   const diffs = diffSchemas(expected, actual)
 
@@ -328,7 +328,7 @@ async function main(): Promise<void> {
     return
   }
 
-  console.log('✅ Schema drift check passed — Drizzle schema matches the live database')
+  console.log('✅ Schema drift check passed — Schema matches the live database')
 }
 
 main().catch((error) => {

@@ -60,6 +60,8 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+      - name: Run commit checks
+        run: bun run check:commit
       - name: Run tests with coverage threshold (from bunfig.toml)
         run: bun test --coverage
         env:

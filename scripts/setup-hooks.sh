@@ -2,7 +2,7 @@
 #
 # setup-hooks.sh
 # ---------------
-# 安裝 git pre-commit hook，用於檢查禁用的 NPM 依賴。
+# 安裝 git pre-commit hook，用於檢查禁用的 NPM 依賴與 i18n locale 契約。
 # 可重複執行 — 若 hook 已存在會覆寫為最新版本。
 #
 # 使用方式：
@@ -32,16 +32,30 @@ fi
 
 HOOKS_DIR="$REPO_ROOT/.git/hooks"
 PRE_COMMIT="$HOOKS_DIR/pre-commit"
-CHECK_SCRIPT="scripts/check-banned-imports.sh"
+DEPENDENCY_CHECK_SCRIPT="scripts/check-banned-imports.sh"
+I18N_CHECK_SCRIPT="scripts/check-i18n-locales.ts"
+COMMIT_CHECK_SCRIPT="scripts/check-commit.sh"
 
 # ---- 驗證檢查腳本存在 -------------------------------------------------
-if [ ! -f "$REPO_ROOT/$CHECK_SCRIPT" ]; then
-  echo "${RED}錯誤：找不到 $CHECK_SCRIPT${RESET}" >&2
+if [ ! -f "$REPO_ROOT/$DEPENDENCY_CHECK_SCRIPT" ]; then
+  echo "${RED}錯誤：找不到 $DEPENDENCY_CHECK_SCRIPT${RESET}" >&2
+  exit 1
+fi
+
+if [ ! -f "$REPO_ROOT/$I18N_CHECK_SCRIPT" ]; then
+  echo "${RED}錯誤：找不到 $I18N_CHECK_SCRIPT${RESET}" >&2
+  exit 1
+fi
+
+if [ ! -f "$REPO_ROOT/$COMMIT_CHECK_SCRIPT" ]; then
+  echo "${RED}錯誤：找不到 $COMMIT_CHECK_SCRIPT${RESET}" >&2
   exit 1
 fi
 
 # 確保檢查腳本可執行
-chmod +x "$REPO_ROOT/$CHECK_SCRIPT"
+chmod +x "$REPO_ROOT/$DEPENDENCY_CHECK_SCRIPT"
+chmod +x "$REPO_ROOT/$I18N_CHECK_SCRIPT"
+chmod +x "$REPO_ROOT/$COMMIT_CHECK_SCRIPT"
 
 # ---- 備份現有 hook ----------------------------------------------------
 if [ -f "$PRE_COMMIT" ]; then
@@ -62,21 +76,21 @@ cat > "$PRE_COMMIT" <<'HOOK_EOF'
 #!/usr/bin/env bash
 # DRAUPNIR_HOOK_MARKER - 由 scripts/setup-hooks.sh 安裝，請勿手動編輯
 #
-# 此 hook 執行依賴檢查，防止回退 Bun 原生 API 優化。
+# 此 hook 執行單一提交檢查入口，防止回退 Bun 原生 API 優化與語系設定缺漏。
 # 完整規則：docs/banned-imports.md
 # 重新安裝：bun run setup:hooks
 
 set -e
 
 REPO_ROOT=$(git rev-parse --show-toplevel)
-CHECK_SCRIPT="$REPO_ROOT/scripts/check-banned-imports.sh"
+COMMIT_CHECK_SCRIPT="$REPO_ROOT/scripts/check-commit.sh"
 
-if [ ! -x "$CHECK_SCRIPT" ]; then
-  echo "warning: $CHECK_SCRIPT 不存在或不可執行，跳過依賴檢查" >&2
+if [ ! -x "$COMMIT_CHECK_SCRIPT" ]; then
+  echo "warning: $COMMIT_CHECK_SCRIPT 不存在或不可執行，跳過提交檢查" >&2
   exit 0
 fi
 
-"$CHECK_SCRIPT"
+bash "$COMMIT_CHECK_SCRIPT"
 HOOK_EOF
 
 chmod +x "$PRE_COMMIT"
@@ -86,7 +100,7 @@ echo ""
 echo "${BOLD}${GREEN}✓ pre-commit hook 已安裝${RESET}"
 echo ""
 echo "  ${CYAN}位置:${RESET} .git/hooks/pre-commit"
-echo "  ${CYAN}檢查腳本:${RESET} $CHECK_SCRIPT"
+echo "  ${CYAN}檢查腳本:${RESET} $COMMIT_CHECK_SCRIPT"
 echo "  ${CYAN}規則文檔:${RESET} docs/banned-imports.md"
 echo ""
 echo "  ${BOLD}功能:${RESET}"
@@ -94,6 +108,9 @@ echo "    • 阻擋 'uuid' 套件引入"
 echo "    • 阻擋 'node:path' 引入（請用 joinPath）"
 echo "    • 阻擋 'node:crypto' 引入（白名單除外）"
 echo "    • 警告 readFileSync 新增使用"
+echo "    • 檢查 locale 檔案與 supportedLocales 是否一致"
+echo "    • 檢查每個 locale 都能載入 catalog 並保留 missing-key fallback"
 echo ""
-echo "${CYAN}手動測試:${RESET} bash scripts/check-banned-imports.sh"
+echo "${CYAN}手動測試:${RESET} bun run check:commit"
+echo "${CYAN}            ${RESET} bun run check:i18n"
 echo ""
