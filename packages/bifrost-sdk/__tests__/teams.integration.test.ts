@@ -10,16 +10,21 @@
  * 不接受任意字串（會回 500 "failed to create team"）。
  * 故本測試只用 name 識別，並由後端回傳的 Team.id 來連動後續 virtual key。
  *
- * 僅在 BIFROST_API_URL 設定時執行；否則自動 skip。
- * 執行：`bun test __tests__/teams.integration.test.ts`
+ * 僅在 BIFROST_INTEGRATION_TEST=1 時執行；否則自動 skip。
+ *
+ * 注意：BIFROST_API_URL 會被應用程式本身在 `.env` 設定，不能用來當作
+ * live-server 整合測試的開關，否則 `bun run check` 會在沒有實際 Gateway
+ * 在跑時誤觸發連線失敗。執行前請確認 Bifrost Gateway 已啟動。
+ *
+ * 執行：`BIFROST_INTEGRATION_TEST=1 bun test __tests__/teams.integration.test.ts`
  */
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import { BifrostClient, createBifrostClientConfig } from '../src'
 
-const hasEnv = Boolean(process.env.BIFROST_API_URL)
+const isIntegrationEnabled = process.env.BIFROST_INTEGRATION_TEST === '1'
 
-describe.skipIf(!hasEnv)('Bifrost Teams 整合測試（模擬組織建立）', () => {
+describe.skipIf(!isIntegrationEnabled)('Bifrost Teams 整合測試（模擬組織建立）', () => {
   let client: BifrostClient
   // 使用時間戳 + random 構成唯一 org_id，避免多次執行撞名
   const orgId = `it-org-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`

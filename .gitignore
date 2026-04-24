@@ -60,3 +60,4 @@ draupnir_ci-shm
 
 # Superpowers
 .superpowers/
+.npm_cache
