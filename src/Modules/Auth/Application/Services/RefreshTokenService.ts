@@ -131,6 +131,7 @@ export class RefreshTokenService {
           expiresIn: Math.floor(timeToExpire / 1000),
         },
       }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return {
         success: false,

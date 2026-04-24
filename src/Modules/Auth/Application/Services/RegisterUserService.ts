@@ -83,6 +83,7 @@ export class RegisterUserService {
           role: user.role.getValue(),
         },
       }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return {
         success: false,
@@ -99,11 +100,11 @@ export class RegisterUserService {
     isValid: boolean
     error?: string
   } {
-    if (!request.email || !request.email.trim()) {
+    if (!request.email?.trim()) {
       return { isValid: false, error: 'Email is required' }
     }
 
-    if (!request.password || !request.password.trim()) {
+    if (!request.password?.trim()) {
       return { isValid: false, error: 'Password is required' }
     }
 

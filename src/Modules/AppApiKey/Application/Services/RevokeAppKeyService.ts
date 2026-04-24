@@ -1,10 +1,6 @@
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
-import {
-  AppApiKeyPresenter,
-  type AppApiKeyResponse,
-  type RevokeAppKeyRequest,
-} from '../DTOs/AppApiKeyDTO'
+import { type AppApiKeyResponse, fromEntity, type RevokeAppKeyRequest } from '../DTOs/AppApiKeyDTO'
 import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
 
 export class RevokeAppKeyService {
@@ -45,7 +41,7 @@ export class RevokeAppKeyService {
       return {
         success: true,
         message: 'App Key revoked successfully',
-        data: AppApiKeyPresenter.fromEntity(revoked),
+        data: fromEntity(revoked),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Revoke failed'

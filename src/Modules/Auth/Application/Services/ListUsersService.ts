@@ -119,6 +119,7 @@ export class ListUsersService {
           },
         },
       }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return {
         success: false,

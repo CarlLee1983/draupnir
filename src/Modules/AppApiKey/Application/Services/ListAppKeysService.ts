@@ -1,6 +1,6 @@
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
-import { AppApiKeyPresenter, type ListAppApiKeysResponse } from '../DTOs/AppApiKeyDTO'
+import { fromEntity, type ListAppApiKeysResponse } from '../DTOs/AppApiKeyDTO'
 
 export class ListAppKeysService {
   constructor(
@@ -39,7 +39,7 @@ export class ListAppKeysService {
         success: true,
         message: 'Query successful',
         data: {
-          keys: keys.map((k) => AppApiKeyPresenter.fromEntity(k)),
+          keys: keys.map((k) => fromEntity(k)),
           meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
         },
       }

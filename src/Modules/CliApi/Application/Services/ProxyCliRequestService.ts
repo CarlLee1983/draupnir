@@ -22,7 +22,7 @@ export class ProxyCliRequestService {
 
   async execute(request: ProxyRequest): Promise<ProxyResponse> {
     try {
-      if (!request.body.model || !request.body.model.trim()) {
+      if (!request.body.model?.trim()) {
         return { success: false, message: 'Model name is required', error: 'MODEL_REQUIRED' }
       }
 

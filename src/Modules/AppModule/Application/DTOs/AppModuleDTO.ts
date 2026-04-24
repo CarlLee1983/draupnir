@@ -4,8 +4,8 @@ import type { AppModule } from '../../Domain/Aggregates/AppModule'
 import type { ModuleSubscription } from '../../Domain/Entities/ModuleSubscription'
 import type { ModuleTypeValue } from '../../Domain/ValueObjects/ModuleType'
 
-export class AppModulePresenter {
-  static fromEntity(entity: AppModule): Record<string, unknown> {
+export const AppModulePresenter = {
+  fromEntity(entity: AppModule): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -14,11 +14,11 @@ export class AppModulePresenter {
       status: entity.status,
       createdAt: entity.createdAt.toISOString(),
     }
-  }
+  },
 }
 
-export class ModuleSubscriptionPresenter {
-  static fromEntity(entity: ModuleSubscription): Record<string, unknown> {
+export const ModuleSubscriptionPresenter = {
+  fromEntity(entity: ModuleSubscription): Record<string, unknown> {
     return {
       id: entity.id,
       orgId: entity.orgId,
@@ -27,7 +27,7 @@ export class ModuleSubscriptionPresenter {
       subscribedAt: entity.subscribedAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }
 
 export interface RegisterModuleRequest {

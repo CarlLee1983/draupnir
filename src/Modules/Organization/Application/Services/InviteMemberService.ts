@@ -32,7 +32,7 @@ export class InviteMemberService {
         return { success: false, message: 'Insufficient permissions', error: authResult.error }
       }
 
-      if (!request.email || !request.email.trim()) {
+      if (!request.email?.trim()) {
         return { success: false, message: 'Missing email', error: 'EMAIL_REQUIRED' }
       }
 

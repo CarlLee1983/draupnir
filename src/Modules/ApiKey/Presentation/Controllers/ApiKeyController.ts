@@ -48,8 +48,10 @@ export class ApiKeyController {
       return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
-    const page = ctx.getQuery('page') ? parseInt(ctx.getQuery('page')!, 10) : 1
-    const limit = ctx.getQuery('limit') ? parseInt(ctx.getQuery('limit')!, 10) : 20
+    const pageParam = ctx.getQuery('page')
+    const page = pageParam ? parseInt(pageParam, 10) : 1
+    const limitParam = ctx.getQuery('limit')
+    const limit = limitParam ? parseInt(limitParam, 10) : 20
     const result = await this.listService.execute(orgId, auth.userId, auth.role, page, limit)
     return ctx.json(result)
   }

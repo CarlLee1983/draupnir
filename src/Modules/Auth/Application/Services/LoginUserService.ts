@@ -139,6 +139,7 @@ export class LoginUserService {
           },
         },
       }
+    // biome-ignore lint/suspicious/noExplicitAny: legacy
     } catch (error: any) {
       return {
         success: false,
@@ -155,11 +156,11 @@ export class LoginUserService {
     isValid: boolean
     error?: string
   } {
-    if (!request.email || !request.email.trim()) {
+    if (!request.email?.trim()) {
       return { isValid: false, error: 'Email is required' }
     }
 
-    if (!request.password || !request.password.trim()) {
+    if (!request.password?.trim()) {
       return { isValid: false, error: 'Password is required' }
     }
 

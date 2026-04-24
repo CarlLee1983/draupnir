@@ -42,7 +42,7 @@ export class CreateOrganizationService {
    */
   async execute(request: CreateOrganizationRequest): Promise<OrganizationResponse> {
     try {
-      if (!request.name || !request.name.trim()) {
+      if (!request.name?.trim()) {
         return { success: false, message: 'Organization name is required', error: 'NAME_REQUIRED' }
       }
 

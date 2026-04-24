@@ -15,7 +15,7 @@ export class RegisterAppService {
 
   async execute(request: RegisterAppRequest): Promise<RegisterAppResponse> {
     try {
-      if (!request.name || !request.name.trim()) {
+      if (!request.name?.trim()) {
         return { success: false, message: 'Application name is required', error: 'NAME_REQUIRED' }
       }
 

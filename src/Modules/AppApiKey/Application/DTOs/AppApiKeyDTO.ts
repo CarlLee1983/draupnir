@@ -1,25 +1,23 @@
 import type { AppApiKey } from '../../Domain/Aggregates/AppApiKey'
 
-export class AppApiKeyPresenter {
-  static fromEntity(entity: AppApiKey): Record<string, unknown> {
-    return {
-      id: entity.id,
-      orgId: entity.orgId,
-      issuedByUserId: entity.issuedByUserId,
-      label: entity.label,
-      keyPrefix: `drp_app_...${entity.keyHashValue.slice(-8)}`,
-      gatewayKeyId: entity.gatewayKeyId,
-      status: entity.status,
-      scope: entity.appKeyScope.getValue(),
-      rotationPolicy: entity.rotationPolicy.toJSON(),
-      boundModules: entity.boundModules.toJSON(),
-      isInGracePeriod: entity.gracePeriodEndsAt != null,
-      gracePeriodEndsAt: entity.gracePeriodEndsAt?.toISOString() ?? null,
-      expiresAt: entity.expiresAt?.toISOString() ?? null,
-      revokedAt: entity.revokedAt?.toISOString() ?? null,
-      createdAt: entity.createdAt.toISOString(),
-      updatedAt: entity.updatedAt.toISOString(),
-    }
+export function fromEntity(entity: AppApiKey): Record<string, unknown> {
+  return {
+    id: entity.id,
+    orgId: entity.orgId,
+    issuedByUserId: entity.issuedByUserId,
+    label: entity.label,
+    keyPrefix: `drp_app_...${entity.keyHashValue.slice(-8)}`,
+    gatewayKeyId: entity.gatewayKeyId,
+    status: entity.status,
+    scope: entity.appKeyScope.getValue(),
+    rotationPolicy: entity.rotationPolicy.toJSON(),
+    boundModules: entity.boundModules.toJSON(),
+    isInGracePeriod: entity.gracePeriodEndsAt != null,
+    gracePeriodEndsAt: entity.gracePeriodEndsAt?.toISOString() ?? null,
+    expiresAt: entity.expiresAt?.toISOString() ?? null,
+    revokedAt: entity.revokedAt?.toISOString() ?? null,
+    createdAt: entity.createdAt.toISOString(),
+    updatedAt: entity.updatedAt.toISOString(),
   }
 }
 

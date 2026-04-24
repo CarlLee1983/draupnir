@@ -3,28 +3,26 @@ import type { ApiKey } from '../../Domain/Aggregates/ApiKey'
 /** Bifrost budget reset window for member-facing spend caps (maps to `reset_duration`). */
 export type KeyBudgetResetPeriod = '7d' | '30d'
 
-export class ApiKeyPresenter {
-  static fromEntity(entity: ApiKey): Record<string, unknown> {
-    return {
-      id: entity.id,
-      orgId: entity.orgId,
-      createdByUserId: entity.createdByUserId,
-      label: entity.label,
-      keyPrefix: `drp_sk_...${entity.keyHashValue.slice(-8)}`,
-      gatewayKeyId: entity.gatewayKeyId,
-      /** Bifrost secret (`bifrost_key_value`); use as Bearer for gateway LLM calls. */
-      gatewayKeyValue: entity.gatewayKeyValue,
-      status: entity.status,
-      scope: entity.scope.toJSON(),
-      suspensionReason: entity.suspensionReason,
-      suspendedAt: entity.suspendedAt?.toISOString() ?? null,
-      expiresAt: entity.expiresAt?.toISOString() ?? null,
-      revokedAt: entity.revokedAt?.toISOString() ?? null,
-      createdAt: entity.createdAt.toISOString(),
-      updatedAt: entity.updatedAt.toISOString(),
-      quotaAllocated: entity.quotaAllocated,
-      assignedMemberId: entity.assignedMemberId,
-    }
+export function fromEntity(entity: ApiKey): Record<string, unknown> {
+  return {
+    id: entity.id,
+    orgId: entity.orgId,
+    createdByUserId: entity.createdByUserId,
+    label: entity.label,
+    keyPrefix: `drp_sk_...${entity.keyHashValue.slice(-8)}`,
+    gatewayKeyId: entity.gatewayKeyId,
+    /** Bifrost secret (`bifrost_key_value`); use as Bearer for gateway LLM calls. */
+    gatewayKeyValue: entity.gatewayKeyValue,
+    status: entity.status,
+    scope: entity.scope.toJSON(),
+    suspensionReason: entity.suspensionReason,
+    suspendedAt: entity.suspendedAt?.toISOString() ?? null,
+    expiresAt: entity.expiresAt?.toISOString() ?? null,
+    revokedAt: entity.revokedAt?.toISOString() ?? null,
+    createdAt: entity.createdAt.toISOString(),
+    updatedAt: entity.updatedAt.toISOString(),
+    quotaAllocated: entity.quotaAllocated,
+    assignedMemberId: entity.assignedMemberId,
   }
 }
 

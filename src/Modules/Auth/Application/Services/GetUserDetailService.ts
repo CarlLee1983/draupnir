@@ -46,6 +46,7 @@ export class GetUserDetailService {
           updatedAt: user.updatedAt.toISOString(),
         },
       }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return { success: false, message: error.message || 'Failed to load user' }
     }

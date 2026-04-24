@@ -28,6 +28,7 @@ export class GetProfileService {
         return { success: false, message: 'Profile not found', error: 'PROFILE_NOT_FOUND' }
       }
       return { success: true, message: 'Profile retrieved', data: profileToDTO(profile) }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return { success: false, message: error.message || 'Retrieval failed', error: error.message }
     }

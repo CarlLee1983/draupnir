@@ -51,7 +51,7 @@ export class SubscribeModuleService {
         request.orgId,
         request.moduleId,
       )
-      if (existing && existing.isActive()) {
+      if (existing?.isActive()) {
         return {
           success: false,
           message: 'Already subscribed to this module',

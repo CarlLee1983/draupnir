@@ -17,7 +17,7 @@ export class DeclineInvitationService {
       }
 
       const invitation = await this.invitationRepository.findById(invitationId)
-      if (!invitation || !invitation.isPending()) {
+      if (!invitation?.isPending()) {
         return {
           success: false,
           message: 'Invalid or expired invitation',

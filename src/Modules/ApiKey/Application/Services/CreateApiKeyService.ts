@@ -22,8 +22,8 @@ import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyReposit
 import { KeyScope } from '../../Domain/ValueObjects/KeyScope'
 import {
   type ApiKeyCreatedResponse,
-  ApiKeyPresenter,
   type CreateApiKeyRequest,
+  fromEntity,
   type KeyBudgetResetPeriod,
 } from '../DTOs/ApiKeyDTO'
 import type { CreateVirtualKeyOptions, IBifrostKeySync } from '../Ports/IBifrostKeySync'
@@ -49,6 +49,7 @@ function parseBudgetForCreate(
       message: 'Budget cap and reset period must both be set, or both omitted',
     }
   }
+  // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
   const max = request.budgetMaxLimit!
   if (!Number.isFinite(max) || max <= 0) {
     return { ok: false, error: 'BUDGET_INVALID', message: 'Budget cap must be a positive number' }
@@ -86,11 +87,11 @@ export class CreateApiKeyService {
    * Runs the full create workflow end-to-end.
    *
    * @param request - Org, acting user, label, optional scope, expiry, and optional paired budget fields
-   * @returns On success, `data` merges {@link ApiKeyPresenter.fromEntity} with `rawKey` (Bifrost secret). On failure, `error` carries a machine-oriented code when validation failed, or the exception message for unexpected errors.
+   * @returns On success, `data` merges {@link fromEntity} (ApiKey DTO) with `rawKey` (Bifrost secret). On failure, `error` carries a machine-oriented code when validation failed, or the exception message for unexpected errors.
    */
   async execute(request: CreateApiKeyRequest): Promise<ApiKeyCreatedResponse> {
     try {
-      if (!request.label || !request.label.trim()) {
+      if (!request.label?.trim()) {
         return { success: false, message: 'Key label is required', error: 'LABEL_REQUIRED' }
       }
 
@@ -175,7 +176,7 @@ export class CreateApiKeyService {
           success: true,
           message:
             'API Key established successfully (Please record the key now, it cannot be retrieved again)',
-          data: { ...ApiKeyPresenter.fromEntity(finalKey), rawKey: gatewayKeyValue },
+          data: { ...fromEntity(finalKey), rawKey: gatewayKeyValue },
         }
       } catch (bifrostError: unknown) {
         const activatedEntry = await this.apiKeyRepository.findById(keyId)

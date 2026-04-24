@@ -34,7 +34,7 @@ export class HealthController {
 
   async history(ctx: IHttpContext): Promise<Response> {
     try {
-      const limit = parseInt(ctx.query.limit || '10')
+      const limit = parseInt(ctx.query.limit || '10', 10)
       const validLimit = Math.min(Math.max(limit, 1), 100)
 
       const records = await this.service.getHistory(validLimit)

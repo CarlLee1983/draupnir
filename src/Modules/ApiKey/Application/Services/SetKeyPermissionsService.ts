@@ -1,11 +1,7 @@
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
 import { KeyScope } from '../../Domain/ValueObjects/KeyScope'
-import {
-  ApiKeyPresenter,
-  type ApiKeyResponse,
-  type SetKeyPermissionsRequest,
-} from '../DTOs/ApiKeyDTO'
+import { type ApiKeyResponse, fromEntity, type SetKeyPermissionsRequest } from '../DTOs/ApiKeyDTO'
 import type { IBifrostKeySync } from '../Ports/IBifrostKeySync'
 
 export class SetKeyPermissionsService {
@@ -48,7 +44,7 @@ export class SetKeyPermissionsService {
       return {
         success: true,
         message: 'Permissions updated successfully',
-        data: ApiKeyPresenter.fromEntity(updated),
+        data: fromEntity(updated),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Update failed'

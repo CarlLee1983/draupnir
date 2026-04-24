@@ -20,7 +20,7 @@ export class CheckModuleAccessService {
 
   async execute(orgId: string, moduleName: string): Promise<ModuleAccessResult> {
     const module = await this.moduleRepo.findByName(moduleName)
-    if (!module || !module.isActive()) {
+    if (!module?.isActive()) {
       return { allowed: false, reason: `Module ${moduleName} does not exist or is disabled` }
     }
 
@@ -31,7 +31,7 @@ export class CheckModuleAccessService {
     }
 
     const subscription = await this.subscriptionRepo.findByOrgAndModule(orgId, module.id)
-    if (!subscription || !subscription.isActive()) {
+    if (!subscription?.isActive()) {
       return { allowed: false, reason: `Organization has not subscribed to module ${moduleName}` }
     }
 

@@ -107,6 +107,7 @@ export class AuthController {
     if (!AuthMiddleware.isAuthenticated(ctx)) {
       return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const authContext = AuthMiddleware.getAuthContext(ctx)!
 
     const raw = extractRawAuthToken(ctx)
@@ -126,6 +127,7 @@ export class AuthController {
     if (!AuthMiddleware.isAuthenticated(ctx)) {
       return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     }
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const authContext = AuthMiddleware.getAuthContext(ctx)!
 
     const result = await this.revokeAllSessionsService.execute(authContext.userId)

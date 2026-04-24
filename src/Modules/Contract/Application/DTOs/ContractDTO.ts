@@ -5,9 +5,9 @@ import type { ContractTermProps } from '../../Domain/Entities/ContractTerm'
 import type { ContractTargetType } from '../../Domain/ValueObjects/ContractTarget'
 
 /** Maps domain contracts into JSON-friendly records for HTTP responses. */
-export class ContractPresenter {
+export const ContractPresenter = {
   /** Serializes aggregate fields and ISO timestamps for APIs. */
-  static fromEntity(entity: Contract): Record<string, unknown> {
+  fromEntity(entity: Contract): Record<string, unknown> {
     return {
       id: entity.id,
       targetType: entity.targetType,
@@ -18,7 +18,7 @@ export class ContractPresenter {
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }
 
 /** Application-layer input for creating a contract (includes caller context). */

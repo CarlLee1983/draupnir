@@ -65,6 +65,7 @@ export class LogoutUserService {
         success: true,
         message: 'Logged out successfully',
       }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return {
         success: false,
@@ -85,6 +86,7 @@ export class LogoutUserService {
         success: true,
         message: 'Logged out from all devices',
       }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return {
         success: false,

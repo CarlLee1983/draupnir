@@ -2,8 +2,8 @@ import type { Organization } from '../../Domain/Aggregates/Organization'
 import type { OrganizationInvitation } from '../../Domain/Entities/OrganizationInvitation'
 import type { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 
-export class OrganizationPresenter {
-  static fromEntity(entity: Organization): Record<string, unknown> {
+export const OrganizationPresenter = {
+  fromEntity(entity: Organization): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -14,11 +14,11 @@ export class OrganizationPresenter {
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }
 
-export class OrganizationMemberPresenter {
-  static fromEntity(entity: OrganizationMember): Record<string, unknown> {
+export const OrganizationMemberPresenter = {
+  fromEntity(entity: OrganizationMember): Record<string, unknown> {
     return {
       id: entity.id,
       organizationId: entity.organizationId,
@@ -26,11 +26,11 @@ export class OrganizationMemberPresenter {
       role: entity.role.getValue(),
       joinedAt: entity.joinedAt.toISOString(),
     }
-  }
+  },
 }
 
-export class OrganizationInvitationPresenter {
-  static fromEntity(entity: OrganizationInvitation): Record<string, unknown> {
+export const OrganizationInvitationPresenter = {
+  fromEntity(entity: OrganizationInvitation): Record<string, unknown> {
     return {
       id: entity.id,
       organizationId: entity.organizationId,
@@ -40,5 +40,5 @@ export class OrganizationInvitationPresenter {
       expiresAt: entity.expiresAt.toISOString(),
       createdAt: entity.createdAt.toISOString(),
     }
-  }
+  },
 }

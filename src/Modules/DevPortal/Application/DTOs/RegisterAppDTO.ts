@@ -1,7 +1,7 @@
 import type { Application } from '../../Domain/Aggregates/Application'
 
-export class ApplicationPresenter {
-  static fromEntity(entity: Application): Record<string, unknown> {
+export const ApplicationPresenter = {
+  fromEntity(entity: Application): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -14,7 +14,7 @@ export class ApplicationPresenter {
       createdAt: entity.createdAt.toISOString(),
       updatedAt: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }
 
 export interface RegisterAppRequest {

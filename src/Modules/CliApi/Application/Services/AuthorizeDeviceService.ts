@@ -14,7 +14,7 @@ export class AuthorizeDeviceService {
 
   async execute(request: AuthorizeDeviceRequest): Promise<AuthorizeDeviceResponse> {
     try {
-      if (!request.userCode || !request.userCode.trim()) {
+      if (!request.userCode?.trim()) {
         return { success: false, message: 'User code is required', error: 'USER_CODE_REQUIRED' }
       }
 

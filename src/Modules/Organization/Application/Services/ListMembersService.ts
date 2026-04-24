@@ -30,6 +30,7 @@ export class ListMembersService {
       const users = await Promise.all(uniqueUserIds.map((id) => this.authRepository.findById(id)))
       const emailByUserId = new Map<string, string>()
       for (let i = 0; i < uniqueUserIds.length; i++) {
+        // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
         const uid = uniqueUserIds[i]!
         const user = users[i]
         if (user) emailByUserId.set(uid, user.emailValue)

@@ -19,7 +19,7 @@ import { BoundModules } from '../../Domain/ValueObjects/BoundModules'
 import { KeyRotationPolicy } from '../../Domain/ValueObjects/KeyRotationPolicy'
 import {
   type AppApiKeyCreatedResponse,
-  AppApiKeyPresenter,
+  fromEntity,
   type IssueAppKeyRequest,
 } from '../DTOs/AppApiKeyDTO'
 import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
@@ -113,7 +113,7 @@ export class IssueAppKeyService {
           success: true,
           message:
             'App API Key issued successfully (Please record the rawKey now, it cannot be retrieved again)',
-          data: { ...AppApiKeyPresenter.fromEntity(finalKey), rawKey },
+          data: { ...fromEntity(finalKey), rawKey },
         }
       } catch (bifrostError: unknown) {
         await this.appApiKeyRepository.delete(keyId)

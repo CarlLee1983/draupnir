@@ -41,6 +41,7 @@ export class UpdateProfileService {
       await dispatcher.dispatchAll(updated.domainEvents)
 
       return { success: true, message: 'Update successful', data: profileToDTO(updated) }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return {
         success: false,

@@ -59,8 +59,11 @@ export class ExchangeDeviceCodeService {
       }
 
       // Status is AUTHORIZED -- issue tokens
-      const userId = deviceCode.userId!
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
+            const userId = deviceCode.userId!
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
       const email = deviceCode.userEmail!
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
       const role = deviceCode.userRole!
 
       const accessTokenObj = this.jwtService.signAccessToken({

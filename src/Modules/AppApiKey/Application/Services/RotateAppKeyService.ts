@@ -3,7 +3,7 @@ import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingServic
 import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyRepository'
 import {
   type AppApiKeyCreatedResponse,
-  AppApiKeyPresenter,
+  fromEntity,
   type RotateAppKeyRequest,
 } from '../DTOs/AppApiKeyDTO'
 import type { IAppKeyBifrostSync } from '../Ports/IAppKeyBifrostSync'
@@ -50,7 +50,7 @@ export class RotateAppKeyService {
       return {
         success: true,
         message: 'Key rotated successfully, old key remains valid during grace period',
-        data: { ...AppApiKeyPresenter.fromEntity(rotated), rawKey: newRawKey },
+        data: { ...fromEntity(rotated), rawKey: newRawKey },
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Rotation failed'

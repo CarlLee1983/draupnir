@@ -8,7 +8,7 @@ export class EmailVerificationService {
   ): Promise<{ success: boolean; message: string; redirectUrl?: string }> {
     const record = await this.emailVerificationRepository.findByToken(token)
 
-    if (!record || !record.isValid()) {
+    if (!record?.isValid()) {
       return { success: false, message: '驗證連結無效或已過期' }
     }
 

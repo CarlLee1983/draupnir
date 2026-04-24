@@ -3,8 +3,8 @@ import type { IAppApiKeyRepository } from '../../Domain/Repositories/IAppApiKeyR
 import { AppKeyScope } from '../../Domain/ValueObjects/AppKeyScope'
 import { BoundModules } from '../../Domain/ValueObjects/BoundModules'
 import {
-  AppApiKeyPresenter,
   type AppApiKeyResponse,
+  fromEntity,
   type SetAppKeyScopeRequest,
 } from '../DTOs/AppApiKeyDTO'
 
@@ -47,7 +47,7 @@ export class SetAppKeyScopeService {
       return {
         success: true,
         message: 'Scope updated successfully',
-        data: AppApiKeyPresenter.fromEntity(updated),
+        data: fromEntity(updated),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Update failed'

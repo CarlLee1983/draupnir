@@ -47,6 +47,7 @@ export class ChangeUserStatusService {
           updatedAt: updated.updatedAt.toISOString(),
         },
       }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       return { success: false, message: error.message || 'Operation failed', error: error.message }
     }

@@ -7,8 +7,8 @@ import type { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
  * - Org `manager`: all org keys.
  * - Org `member` (and any other org role): only keys created by the caller.
  */
-export class DashboardKeyScopeResolver {
-  static resolveVisibleKeys(
+export const DashboardKeyScopeResolver = {
+  resolveVisibleKeys(
     orgKeys: readonly ApiKey[],
     params: {
       callerUserId: string
@@ -27,5 +27,5 @@ export class DashboardKeyScopeResolver {
     }
 
     return orgKeys.filter((k) => k.createdByUserId === callerUserId)
-  }
+  },
 }

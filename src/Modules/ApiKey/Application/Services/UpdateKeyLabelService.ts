@@ -1,6 +1,6 @@
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
-import { ApiKeyPresenter, type ApiKeyResponse, type UpdateKeyLabelRequest } from '../DTOs/ApiKeyDTO'
+import { type ApiKeyResponse, fromEntity, type UpdateKeyLabelRequest } from '../DTOs/ApiKeyDTO'
 
 export class UpdateKeyLabelService {
   constructor(
@@ -34,7 +34,7 @@ export class UpdateKeyLabelService {
       return {
         success: true,
         message: 'Label updated successfully',
-        data: ApiKeyPresenter.fromEntity(updated),
+        data: fromEntity(updated),
       }
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Update failed'

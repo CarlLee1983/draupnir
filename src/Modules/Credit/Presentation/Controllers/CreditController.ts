@@ -41,7 +41,9 @@ export class CreditController {
       return ctx.json({ success: false, message: 'Unauthorized', error: 'UNAUTHORIZED' }, 401)
     const orgId = ctx.getParam('orgId')
     if (!orgId) return ctx.json({ success: false, message: 'Missing orgId' }, 400)
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const page = ctx.getQuery('page') ? parseInt(ctx.getQuery('page')!, 10) : 1
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const limit = ctx.getQuery('limit') ? parseInt(ctx.getQuery('limit')!, 10) : 20
     const result = await this.getTransactionHistoryService.execute(
       orgId,

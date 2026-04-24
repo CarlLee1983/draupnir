@@ -1,8 +1,8 @@
 // src/Modules/Credit/Application/DTOs/CreditDTO.ts
 import type { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
 
-export class CreditTransactionPresenter {
-  static fromEntity(entity: CreditTransaction): Record<string, unknown> {
+export const CreditTransactionPresenter = {
+  fromEntity(entity: CreditTransaction): Record<string, unknown> {
     return {
       id: entity.id,
       creditAccountId: entity.creditAccountId,
@@ -14,7 +14,7 @@ export class CreditTransactionPresenter {
       description: entity.description,
       createdAt: entity.createdAt.toISOString(),
     }
-  }
+  },
 }
 
 export interface TopUpRequest {

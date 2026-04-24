@@ -4,7 +4,7 @@
 
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
-import { ApiKeyPresenter, type ListApiKeysResponse } from '../DTOs/ApiKeyDTO'
+import { fromEntity, type ListApiKeysResponse } from '../DTOs/ApiKeyDTO'
 
 export interface ListApiKeysFilter {
   /** 限縮到被指派給某 user 的 key（Member portal 使用）。 */
@@ -40,28 +40,32 @@ export class ListApiKeysService {
       }
 
       const offset = (page - 1) * limit
-      const useAssignedFilter =
+      const assignedId =
         typeof filter?.assignedMemberId === 'string' && filter.assignedMemberId.length > 0
+          ? filter.assignedMemberId
+          : null
 
-      const [keys, total] = await Promise.all([
-        useAssignedFilter
-          ? this.apiKeyRepository.findByOrgAndAssignedMember(
-              orgId,
-              filter!.assignedMemberId!,
-              limit,
-              offset,
-            )
-          : this.apiKeyRepository.findByOrgId(orgId, limit, offset),
-        useAssignedFilter
-          ? this.apiKeyRepository.countByOrgAndAssignedMember(orgId, filter!.assignedMemberId!)
-          : this.apiKeyRepository.countByOrgId(orgId),
-      ])
+      const [keys, total] =
+        assignedId !== null
+          ? await Promise.all([
+              this.apiKeyRepository.findByOrgAndAssignedMember(
+                orgId,
+                assignedId,
+                limit,
+                offset,
+              ),
+              this.apiKeyRepository.countByOrgAndAssignedMember(orgId, assignedId),
+            ])
+          : await Promise.all([
+              this.apiKeyRepository.findByOrgId(orgId, limit, offset),
+              this.apiKeyRepository.countByOrgId(orgId),
+            ])
 
       return {
         success: true,
         message: 'Query successful',
         data: {
-          keys: keys.map((k) => ApiKeyPresenter.fromEntity(k)),
+          keys: keys.map((k) => fromEntity(k)),
           meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
         },
       }

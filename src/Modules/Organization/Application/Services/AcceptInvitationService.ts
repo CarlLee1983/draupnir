@@ -29,14 +29,14 @@ export class AcceptInvitationService {
 
   async execute(userId: string, request: AcceptInvitationRequest): Promise<OrganizationResponse> {
     try {
-      if (!request.token || !request.token.trim()) {
+      if (!request.token?.trim()) {
         return { success: false, message: 'Missing token', error: 'TOKEN_REQUIRED' }
       }
 
       const tokenHash = await sha256(request.token)
       const invitation = await this.invitationRepository.findByTokenHash(tokenHash)
 
-      if (!invitation || !invitation.isPending()) {
+      if (!invitation?.isPending()) {
         return {
           success: false,
           message: 'Invalid or expired invitation',
