@@ -1,3 +1,10 @@
+/**
+ * AppApiKey module public surface.
+ *
+ * Provides specialized API key management for system-to-system integrations,
+ * including rotation policies and module-level permission bindings.
+ */
+
 export { GetAppKeyUsageService } from './Application/Services/GetAppKeyUsageService'
 export { IssueAppKeyService } from './Application/Services/IssueAppKeyService'
 export { ListAppKeysService } from './Application/Services/ListAppKeysService'

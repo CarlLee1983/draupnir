@@ -110,8 +110,10 @@ make(name: string): any
  */
 export abstract class ModuleServiceProvider {
   /**
-   * Sealed：固定呼叫四個 hook，不可 override。
-   * readonly arrow function property — 子類宣告同名 method 會產生 TypeScript 編譯錯誤。
+   * Sealed: Automatically calls the four registration hooks in a fixed order.
+   * This method cannot be overridden.
+   *
+   * @param container - The framework-agnostic DI container.
    */
   readonly register: (container: IContainer) => void = (container) => {
     this.registerRepositories(container)
@@ -120,22 +122,44 @@ export abstract class ModuleServiceProvider {
     this.registerControllers(container)
   }
 
-  /** Layer 1：Repository 實作（infrastructure → domain port 綁定） */
+  /**
+   * Layer 1: Register repository implementations.
+   * (Maps infrastructure implementations to domain port names).
+   *
+   * @param _container - The DI container.
+   */
   protected registerRepositories(_container: IContainer): void {}
 
-  /** Layer 2：技術 adapter（JWT / Email / OAuth / Queue / Dispatcher 等） */
+  /**
+   * Layer 2: Register technical infrastructure services.
+   * (JWT, Email, OAuth, Queue, Event Dispatcher, etc.).
+   *
+   * @param _container - The DI container.
+   */
   protected registerInfraServices(_container: IContainer): void {}
 
-  /** Layer 3：Application Services（use-case services） */
+  /**
+   * Layer 3: Register application layer services (Use Cases).
+   *
+   * @param _container - The DI container.
+   */
   protected registerApplicationServices(_container: IContainer): void {}
 
-  /** Layer 4：Controllers（登記至容器，供 registerRoutes 取用） */
+  /**
+   * Layer 4: Register presentation layer controllers.
+   * Controllers are registered here so they can be resolved by registerRoutes.
+   *
+   * @param _container - The DI container.
+   */
   protected registerControllers(_container: IContainer): void {}
 
   /**
-   * Boot hook：初始化用途（event 訂閱 / warmup / middleware 設定）。
-   * 禁止在此做 DI 註冊（container.singleton / container.bind）。
-   * 解包責任在 framework adapter，此處永遠收到 IContainer。
+   * Boot hook: Initialization logic executed after all modules are registered.
+   *
+   * Suitable for: Event subscriptions, cache warmup, global middleware setup.
+   * NOTE: Do not perform DI registrations (singleton/bind) in this method.
+   *
+   * @param _container - The DI container.
    */
   boot(_container: IContainer): void {}
 }

@@ -3,11 +3,31 @@ import type {
   WebhookDispatchRequest,
   WebhookDispatchResult,
 } from '../../Ports/IWebhookDispatcher'
+
+/**
+ * Synchronous HTTP webhook dispatcher with retry logic.
+ *
+ * @remarks
+ * This implementation performs the actual HTTP POST request to the target URL.
+ * It supports signing the payload with a secret and automatically retrying failures
+ * with exponential backoff.
+ */
 export class WebhookDispatcher implements IWebhookDispatcher {
   private readonly baseDelayMs = 100
 
+  /**
+   * Initializes the dispatcher.
+   *
+   * @param maxRetries - Maximum number of attempts for a single dispatch (defaults to 3)
+   */
   constructor(private readonly maxRetries = 3) {}
 
+  /**
+   * Dispatches a webhook request to the target URL.
+   *
+   * @param request - The webhook dispatch parameters
+   * @returns The result of the dispatch attempt, including status code or error
+   */
   async dispatch(request: WebhookDispatchRequest): Promise<WebhookDispatchResult> {
     const webhookId = crypto.randomUUID()
     const webhookPayload = {
@@ -76,6 +96,11 @@ export class WebhookDispatcher implements IWebhookDispatcher {
     }
   }
 
+  /**
+   * Internal delay function for exponential backoff.
+   *
+   * @param attempt - The current attempt number
+   */
   private delay(attempt: number): Promise<void> {
     const ms = this.baseDelayMs * 2 ** (attempt - 1)
     return new Promise((resolve) => setTimeout(resolve, ms))

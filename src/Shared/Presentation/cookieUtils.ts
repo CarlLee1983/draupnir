@@ -2,6 +2,11 @@ import type { CookieOptions, PendingCookie } from './IHttpContext'
 
 /**
  * Builds a Set-Cookie header string from name, value, and options.
+ *
+ * @param name - The cookie name.
+ * @param value - The cookie value.
+ * @param options - Cookie attributes (Path, Max-Age, HttpOnly, etc.).
+ * @returns A formatted 'Set-Cookie' header value.
  */
 export function buildCookieString(name: string, value: string, options: CookieOptions): string {
   const parts: string[] = [`${name}=${value}`]
@@ -25,8 +30,15 @@ export function buildCookieString(name: string, value: string, options: CookieOp
 }
 
 /**
- * Applies pending cookies from ctx.__pending_cookies__ to a Response.
- * Returns the original response unchanged if no cookies are pending.
+ * Applies pending cookies from the context queue to a Response.
+ *
+ * If the response is an instance of Response, it creates a new Response with
+ * additional 'Set-Cookie' headers. Returns the original response unchanged
+ * if no cookies are pending.
+ *
+ * @param response - The original response.
+ * @param pendingCookies - The array of cookies to apply.
+ * @returns A new response with cookies applied, or the original response.
  */
 export function applyPendingCookies(response: Response, pendingCookies: PendingCookie[]): Response {
   if (pendingCookies.length === 0) return response

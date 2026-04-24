@@ -53,18 +53,33 @@ interface CreateAppApiKeyParams {
 
 /**
  * AppApiKey Aggregate Root
- * Handles business logic for application-specific API keys with rotation support.
+ * Represents a secure authentication key for system-to-system or application-to-application access.
+ *
+ * Responsibilities:
+ * - Manage identity and credentials for non-human actors.
+ * - Orchestrate a secure rotation lifecycle with parallel support for old/new keys (grace period).
+ * - Enforce binding to specific modules to limit lateral movement.
+ * - Track operational status and temporal constraints.
  */
 export class AppApiKey {
+  /** Internal state of the application API key. */
   private readonly props: AppApiKeyProps
 
+  /**
+   * Internal constructor for the AppApiKey aggregate.
+   * Use static factory methods like `create` or `fromDatabase` instead.
+   *
+   * @param props The initial properties for the aggregate.
+   */
   private constructor(props: AppApiKeyProps) {
     this.props = props
   }
 
   /**
-   * Creates a new pending application API key from a pre-computed hash.
-   * Callers must hash the raw key via IKeyHashingService before calling this.
+   * Creates a new application API key in PENDING status.
+   *
+   * @param params Creation parameters including identifiers, labels, and security hashes.
+   * @returns A new AppApiKey instance.
    */
   static create(params: CreateAppApiKeyParams): AppApiKey {
     return new AppApiKey({
@@ -89,7 +104,10 @@ export class AppApiKey {
   }
 
   /**
-   * Reconstitutes an application API key from database record.
+   * Reconstitutes an application API key instance from a database record.
+   *
+   * @param row The raw database record.
+   * @returns A reconstituted AppApiKey instance.
    */
   static fromDatabase(row: Record<string, unknown>): AppApiKey {
     const rotationPolicyJson: KeyRotationPolicyJSON =
@@ -125,7 +143,12 @@ export class AppApiKey {
     })
   }
 
-  /** Activates a pending key. */
+  /**
+   * Transitions a PENDING key to ACTIVE status (immutable pattern).
+   *
+   * @throws Error if the key is not in PENDING status.
+   * @returns A new AppApiKey instance with ACTIVE status.
+   */
   activate(): AppApiKey {
     if (!this.props.status.isPending()) {
       throw new Error('Only pending keys can be activated')
@@ -137,7 +160,12 @@ export class AppApiKey {
     })
   }
 
-  /** Revokes the key permanently. */
+  /**
+   * Permanently revokes the application API key (immutable pattern).
+   *
+   * @throws Error if the key is already revoked or still pending.
+   * @returns A new AppApiKey instance with REVOKED status.
+   */
   revoke(): AppApiKey {
     if (this.props.status.isRevoked()) {
       throw new Error('Key is already revoked')
@@ -154,9 +182,13 @@ export class AppApiKey {
   }
 
   /**
-   * Rotates the key material using a pre-computed hash and setting a grace period
-   * for the previous key.
-   * Callers must hash the new raw key via IKeyHashingService before calling this.
+   * Rotates the key material, promoting the current key to 'previous' status with 
+   * a grace period and setting the new material as 'active' (immutable pattern).
+   *
+   * @param newKeyHash Secure hash of the new raw key.
+   * @param newGatewayKeyId Identifier for the new key in the gateway.
+   * @throws Error if the key is not currently ACTIVE.
+   * @returns A new AppApiKey instance with rotated material and an active grace period.
    */
   rotate(newKeyHash: string, newGatewayKeyId: string): AppApiKey {
     if (!this.props.status.isActive()) {
@@ -176,7 +208,12 @@ export class AppApiKey {
     })
   }
 
-  /** Finalizes rotation by clearing the previous key and grace period. */
+  /**
+   * Finalizes the rotation process by clearing previous key material and 
+   * ending the grace period (immutable pattern).
+   *
+   * @returns A new AppApiKey instance with only the current key material.
+   */
   completeRotation(): AppApiKey {
     return new AppApiKey({
       ...this.props,
@@ -187,7 +224,13 @@ export class AppApiKey {
     })
   }
 
-  /** Updates the functional scope of the key. */
+  /**
+   * Updates the functional functional scope of the key (immutable pattern).
+   *
+   * @param newScope The new functional scope.
+   * @throws Error if the key is revoked.
+   * @returns A new AppApiKey instance with the updated scope.
+   */
   updateScope(newScope: AppKeyScope): AppApiKey {
     if (this.props.status.isRevoked()) {
       throw new Error('Cannot update scope of a revoked key')
@@ -199,7 +242,13 @@ export class AppApiKey {
     })
   }
 
-  /** Updates the set of modules this key is authorized to access. */
+  /**
+   * Updates the authorized module bindings for this key (immutable pattern).
+   *
+   * @param newModules The new set of authorized modules.
+   * @throws Error if the key is revoked.
+   * @returns A new AppApiKey instance with the updated bindings.
+   */
   updateBoundModules(newModules: BoundModules): AppApiKey {
     if (this.props.status.isRevoked()) {
       throw new Error('Cannot update bound modules of a revoked key')

@@ -1,5 +1,9 @@
-// src/Modules/Profile/index.ts
-// Domain Events
+/**
+ * Profile module public surface.
+ *
+ * Manages user identities, personal preferences, and profile metadata
+ * including localization and notification settings.
+ */
 
 // Application
 export type {

@@ -16,10 +16,35 @@ export interface JobSpec {
   readonly backoffMs?: number
 }
 
+/**
+ * Interface for the centralized task scheduler.
+ */
 export interface IScheduler {
+  /**
+   * Schedules a job for periodic execution.
+   *
+   * @param spec - The job specification
+   * @param handler - The function to execute according to the schedule
+   */
   schedule(spec: JobSpec, handler: () => Promise<void>): void
+
+  /**
+   * Removes a job from the scheduler.
+   *
+   * @param name - The unique name of the job to unschedule
+   */
   unschedule(name: string): void
+
+  /**
+   * Checks if a job with the given name is currently scheduled.
+   *
+   * @param name - The job name to check
+   * @returns True if the job exists, false otherwise
+   */
   has(name: string): boolean
-  /** 停止所有已排程的 job（用於 graceful shutdown）。 */
+
+  /**
+   * Stops all scheduled jobs (used for graceful shutdown).
+   */
   stopAll(): void
 }

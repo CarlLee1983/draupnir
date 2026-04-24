@@ -64,6 +64,9 @@ export class AuthMiddleware {
    * This covers both the success path (auth set) and failure paths
    * (expired, revoked, or malformed token) so the Atlas N+1 detector is
    * not triggered by either case.
+   *
+   * @param ctx - The HTTP context.
+   * @returns A promise that resolves when verification is complete.
    */
   async handle(ctx: IHttpContext): Promise<void> {
     // Idempotency guard: skip if JWT parsing was already attempted this request.
@@ -124,27 +127,39 @@ export class AuthMiddleware {
   /**
    * Extracts Token from Header.
    * Expected format: Authorization: Bearer <token>
+   *
+   * @param ctx - The HTTP context.
+   * @returns The raw token string or null.
    */
   private extractToken(ctx: IHttpContext): string | null {
     return extractRawAuthToken(ctx)
   }
 
   /**
-   * Checks if the user is authenticated.
+   * Checks if the user is authenticated in the current request context.
+   *
+   * @param ctx - The HTTP context.
+   * @returns True if 'auth' context is present.
    */
   static isAuthenticated(ctx: IHttpContext): boolean {
     return !!ctx.get<AuthContext>('auth')
   }
 
   /**
-   * Retrieves the authentication context.
+   * Retrieves the authentication context from the request.
+   *
+   * @param ctx - The HTTP context.
+   * @returns The AuthContext or null.
    */
   static getAuthContext(ctx: IHttpContext): AuthContext | null {
     return ctx.get<AuthContext>('auth') || null
   }
 
   /**
-   * Retrieves the authentication error.
+   * Retrieves the authentication error message if verification failed.
+   *
+   * @param ctx - The HTTP context.
+   * @returns The error code/message or null.
    */
   static getAuthError(ctx: IHttpContext): string | null {
     return ctx.get<string>('authError') || null
@@ -153,6 +168,9 @@ export class AuthMiddleware {
   /**
    * Returns true if JWT parsing has already been attempted on this request,
    * regardless of whether authentication succeeded.
+   *
+   * @param ctx - The HTTP context.
+   * @returns True if already parsed.
    */
   static hasParsed(ctx: IHttpContext): boolean {
     return ctx.get<boolean>('jwtParsed') === true
@@ -161,13 +179,18 @@ export class AuthMiddleware {
   /**
    * Marks this request context as having undergone JWT parsing.
    * Called at the very start of handle() before any DB work.
+   *
+   * @param ctx - The HTTP context.
    */
   static markParsed(ctx: IHttpContext): void {
     ctx.set('jwtParsed', true)
   }
 
   /**
-   * Calculates Token Hash.
+   * Calculates Token Hash for revocation checks.
+   *
+   * @param token - The raw JWT token.
+   * @returns The SHA-256 hash of the token.
    */
   private async hashToken(token: string): Promise<string> {
     return sha256(token)

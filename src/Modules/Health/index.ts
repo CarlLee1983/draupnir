@@ -1,20 +1,24 @@
 /**
- * Health Module
- * 系統健康檢查模組的公開 API
+ * Health module public surface.
+ *
+ * Provides system health monitoring, diagnostic checks for infrastructure
+ * dependencies (Database, Redis, etc.), and health check history.
  */
 
-export { HealthCheckDTO, type HealthCheckJSONData } from './Application/DTOs/HealthCheckDTO'
 // Application
+export { HealthCheckDTO, type HealthCheckJSONData } from './Application/DTOs/HealthCheckDTO'
 export { PerformHealthCheckService } from './Application/Services/PerformHealthCheckService'
+
+// Domain
 export { HealthCheck, type HealthCheckProps } from './Domain/Aggregates/HealthCheck'
 export type { ISystemHealthChecker } from './Domain/Ports/ISystemHealthChecker'
 export type { IHealthCheckRepository } from './Domain/Repositories/IHealthCheckRepository'
 export { HealthCheckService, type SystemChecks } from './Domain/Services/HealthCheckService'
-// Domain
 export { HealthStatus, type HealthStatusType } from './Domain/ValueObjects/HealthStatus'
+
+// Infrastructure
 export { HealthCheckMapper } from './Infrastructure/Mappers/HealthCheckMapper'
 export { HealthServiceProvider } from './Infrastructure/Providers/HealthServiceProvider'
-// Infrastructure
 export { MemoryHealthCheckRepository } from './Infrastructure/Repositories/MemoryHealthCheckRepository'
 export { SystemHealthChecker } from './Infrastructure/Services/SystemHealthChecker'
 

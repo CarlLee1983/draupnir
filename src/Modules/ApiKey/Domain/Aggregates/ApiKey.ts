@@ -1,68 +1,105 @@
-/**
- * ApiKey
- * Domain Aggregate: represents a secure authentication key for API access.
- *
- * Responsibilities:
- * - Define identity and hashed credentials
- * - Manage status lifecycle (active, pending, revoked, suspended)
- * - Handle scope and permissions
- * - Manage temporal constraints (expiration, revocation)
- */
-
 import { KeyHash } from '../ValueObjects/KeyHash'
 import { KeyLabel } from '../ValueObjects/KeyLabel'
 import { KeyScope, type KeyScopeJSON } from '../ValueObjects/KeyScope'
 import { KeyStatus } from '../ValueObjects/KeyStatus'
 
-/** Properties defining an ApiKey's state. */
+/**
+ * Properties defining an ApiKey's state.
+ */
 interface ApiKeyProps {
+  /** Unique identifier for the API key. */
   readonly id: string
+  /** ID of the organization this key belongs to. */
   readonly orgId: string
+  /** ID of the user who created this key. */
   readonly createdByUserId: string
+  /** Human-readable label for the key. */
   readonly label: KeyLabel
+  /** Secure cryptographic hash of the raw API key. */
   readonly keyHash: KeyHash
+  /** Identifier for the key in the downstream gateway (e.g., Bifrost). */
   readonly gatewayKeyId: string
+  /** The raw key value from the gateway, only available immediately after creation. */
   readonly gatewayKeyValue: string | null
+  /** Current operational status of the key. */
   readonly status: KeyStatus
+  /** Permissions and model access constraints for the key. */
   readonly scope: KeyScope
+  /** Amount of credit quota allocated to this specific key. */
   readonly quotaAllocated: number
+  /** ID of the organization member this key is assigned to, if any. */
   readonly assignedMemberId: string | null
+  /** Reason for the key's current suspension, if applicable. */
   readonly suspensionReason: string | null
+  /** Snapshot of rate limits (RPM/TPM) stored before the key was frozen due to credit exhaustion. */
   readonly preFreezeRateLimit: string | null // JSON string
+  /** Timestamp when the key was suspended. */
   readonly suspendedAt: Date | null
+  /** Optional timestamp when the key will automatically expire. */
   readonly expiresAt: Date | null
+  /** Timestamp when the key was manually revoked. */
   readonly revokedAt: Date | null
+  /** Timestamp when the record was created. */
   readonly createdAt: Date
+  /** Timestamp when the record was last updated. */
   readonly updatedAt: Date
 }
 
-/** Parameters for creating a new ApiKey. */
+/**
+ * Parameters for creating a new ApiKey instance.
+ */
 interface CreateApiKeyParams {
+  /** Unique identifier for the new key. */
   id: string
+  /** Organization ID. */
   orgId: string
+  /** Creator's user ID. */
   createdByUserId: string
+  /** Initial human-readable label. */
   label: string
+  /** Downstream gateway key ID. */
   gatewayKeyId: string
+  /** Optional raw gateway key value (for one-time display). */
   gatewayKeyValue?: string | null
+  /** Pre-computed cryptographic hash of the key. */
   keyHash: string
+  /** Optional access scope; defaults to unrestricted. */
   scope?: KeyScope
+  /** Optional expiration date. */
   expiresAt?: Date | null
 }
 
 /**
  * ApiKey Aggregate Root
  * Handles business logic for API key management and security.
+ *
+ * Responsibilities:
+ * - Manage identity and credentials through secure hashing.
+ * - Track lifecycle status (Pending -> Active -> Revoked/Suspended).
+ * - Enforce scope-based permission constraints.
+ * - Manage assignment of keys to specific organization members.
+ * - Handle quota allocation for credit management.
  */
 export class ApiKey {
+  /** Internal state of the API key. */
   private readonly props: ApiKeyProps
 
+  /**
+   * Internal constructor for the ApiKey aggregate.
+   * Use static factory methods like `create` or `fromDatabase` instead.
+   *
+   * @param props The initial properties for the aggregate.
+   */
   private constructor(props: ApiKeyProps) {
     this.props = props
   }
 
   /**
-   * Creates a new pending API key from a pre-computed hash.
-   * Callers must hash the raw key via IKeyHashingService before calling this.
+   * Creates a new API key in PENDING status.
+   * Callers must ensure the raw key is securely generated and hashed before creation.
+   *
+   * @param params Creation parameters including identifiers, labels, and security hashes.
+   * @returns A new ApiKey instance.
    */
   static create(params: CreateApiKeyParams): ApiKey {
     return new ApiKey({
@@ -88,7 +125,10 @@ export class ApiKey {
   }
 
   /**
-   * Reconstitutes an API key from database row.
+   * Reconstitutes an API key instance from a database record.
+   *
+   * @param row The raw database record.
+   * @returns A reconstituted ApiKey instance.
    */
   static fromDatabase(row: Record<string, unknown>): ApiKey {
     const scopeJson: KeyScopeJSON =
@@ -116,7 +156,12 @@ export class ApiKey {
     })
   }
 
-  /** Activates a pending key. */
+  /**
+   * Transitions a PENDING key to ACTIVE status (immutable pattern).
+   *
+   * @throws Error if the key is not in PENDING status.
+   * @returns A new ApiKey instance with ACTIVE status.
+   */
   activate(): ApiKey {
     if (!this.props.status.isPending()) {
       throw new Error('Only pending keys can be activated')
@@ -128,7 +173,13 @@ export class ApiKey {
     })
   }
 
-  /** Revokes the key permanently. */
+  /**
+   * Permanently revokes the API key (immutable pattern).
+   * Revocation is terminal and cannot be undone.
+   *
+   * @throws Error if the key is already revoked or still pending.
+   * @returns A new ApiKey instance with REVOKED status.
+   */
   revoke(): ApiKey {
     if (this.props.status.isRevoked()) {
       throw new Error('Key is already revoked')
@@ -144,7 +195,13 @@ export class ApiKey {
     })
   }
 
-  /** Suspends the key for credit reasons. */
+  /**
+   * Suspends the key, typically due to organization credit exhaustion (immutable pattern).
+   *
+   * @param reason The technical or business reason for suspension.
+   * @param currentRateLimit Snapshot of current rate limits to restore later.
+   * @returns A new ApiKey instance with SUSPENDED_NO_CREDIT status.
+   */
   suspend(reason: string, currentRateLimit: { rpm: number | null; tpm: number | null }): ApiKey {
     if (this.props.status.isSuspendedNoCredit()) return this
     return new ApiKey({
@@ -157,7 +214,11 @@ export class ApiKey {
     })
   }
 
-  /** Restores a previously credit-suspended key to active status. */
+  /**
+   * Restores a credit-suspended key to ACTIVE status (immutable pattern).
+   *
+   * @returns A new ApiKey instance with ACTIVE status if it was suspended; otherwise the same instance.
+   */
   unsuspend(): ApiKey {
     if (!this.props.status.isSuspendedNoCredit()) return this
     return new ApiKey({
@@ -170,7 +231,12 @@ export class ApiKey {
     })
   }
 
-  /** Updates the human-readable key label. */
+  /**
+   * Updates the human-readable label of the key (immutable pattern).
+   *
+   * @param newLabel The new label string.
+   * @returns A new ApiKey instance with the updated label.
+   */
   updateLabel(newLabel: string): ApiKey {
     return new ApiKey({
       ...this.props,
@@ -179,7 +245,13 @@ export class ApiKey {
     })
   }
 
-  /** Updates key permissions and constraints. */
+  /**
+   * Updates the access scope and permissions of the key (immutable pattern).
+   *
+   * @param newScope The new KeyScope definition.
+   * @throws Error if the key is already revoked.
+   * @returns A new ApiKey instance with the updated scope.
+   */
   updateScope(newScope: KeyScope): ApiKey {
     if (this.props.status.isRevoked()) {
       throw new Error('Cannot update scope of a revoked key')
@@ -191,7 +263,13 @@ export class ApiKey {
     })
   }
 
-  /** Returns a copy with adjusted quota allocation (admin only). */
+  /**
+   * Adjusts the credit quota allocated to this specific key (immutable pattern).
+   *
+   * @param newAllocation The new numeric quota value.
+   * @throws Error if the allocation is negative.
+   * @returns A new ApiKey instance with the updated quota.
+   */
   adjustQuotaAllocated(newAllocation: number): ApiKey {
     if (newAllocation < 0) {
       throw new Error('Quota allocation cannot be negative')
@@ -203,7 +281,13 @@ export class ApiKey {
     })
   }
 
-  /** 將 key 指派給某位組織成員（僅 Manager 呼叫；跨組織驗證由 Application layer 負責）。 */
+  /**
+   * Assigns the API key to a specific organization member (immutable pattern).
+   *
+   * @param memberUserId The user ID of the member to assign this key to.
+   * @throws Error if the member ID is empty or the key is revoked.
+   * @returns A new ApiKey instance with the updated assignment.
+   */
   assignTo(memberUserId: string): ApiKey {
     if (!memberUserId || memberUserId.trim() === '') {
       throw new Error('assignTo: memberUserId cannot be empty')
@@ -218,7 +302,11 @@ export class ApiKey {
     })
   }
 
-  /** 取消指派。 */
+  /**
+   * Removes any existing member assignment from the key (immutable pattern).
+   *
+   * @returns A new ApiKey instance with no assignment.
+   */
   unassign(): ApiKey {
     return new ApiKey({
       ...this.props,
@@ -227,82 +315,98 @@ export class ApiKey {
     })
   }
 
-  /** 目前被指派的 member user_id；NULL 代表未指派。 */
+  /** Gets the ID of the assigned member user, or null if unassigned. */
   get assignedMemberId(): string | null {
     return this.props.assignedMemberId
   }
 
-  /** Current quota allocated to this key (in contract credit units). */
+  /** Gets the current credit quota allocated to this key. */
   get quotaAllocated(): number {
     return this.props.quotaAllocated
   }
 
-  /** Unique identifier. */
+  /** Gets the unique identifier of the key. */
   get id(): string {
     return this.props.id
   }
-  /** Associated organization. */
+
+  /** Gets the ID of the organization that owns this key. */
   get orgId(): string {
     return this.props.orgId
   }
-  /** ID of the creating user. */
+
+  /** Gets the ID of the user who created this key. */
   get createdByUserId(): string {
     return this.props.createdByUserId
   }
-  /** Human-readable label. */
+
+  /** Gets the string value of the human-readable label. */
   get label(): string {
     return this.props.label.getValue()
   }
-  /** Securely stored key hash. */
+
+  /** Gets the string value of the secure key hash. */
   get keyHashValue(): string {
     return this.props.keyHash.getValue()
   }
-  /** Gateway-specific key identifier. */
+
+  /** Gets the gateway-specific identifier for the key. */
   get gatewayKeyId(): string {
     return this.props.gatewayKeyId
   }
-  /** Gateway key value (sk-bf-... string, stored once at creation). */
+
+  /** Gets the raw gateway key value, if available (typically only after creation). */
   get gatewayKeyValue(): string | null {
     return this.props.gatewayKeyValue
   }
-  /** Current status (active, pending, etc). */
+
+  /** Gets the string representation of the key's current status. */
   get status(): string {
     return this.props.status.getValue()
   }
-  /** Key constraints and model access. */
+
+  /** Gets the access scope object for the key. */
   get scope(): KeyScope {
     return this.props.scope
   }
-  /** Snapshot of limits before credit-suspension. */
+
+  /** Gets a structured snapshot of rate limits before credit-suspension. */
   get preFreezeRateLimit(): { rpm: number | null; tpm: number | null } | null {
     if (!this.props.preFreezeRateLimit) return null
     return JSON.parse(this.props.preFreezeRateLimit)
   }
-  /** Raw JSON string of limits snapshot before credit-suspension. */
+
+  /** Gets the raw JSON string of rate limits snapshot before credit-suspension. */
   get preFreezeRateLimitRaw(): string | null {
     return this.props.preFreezeRateLimit
   }
-  /** Formal reason for current suspension. */
+
+  /** Gets the reason string for current suspension, if any. */
   get suspensionReason(): string | null {
     return this.props.suspensionReason
   }
-  /** Date when the key was suspended. */
+
+  /** Gets the timestamp when the key was suspended, or null. */
   get suspendedAt(): Date | null {
     return this.props.suspendedAt
   }
-  /** Date when the key naturally expires. */
+
+  /** Gets the timestamp when the key will expire, or null. */
   get expiresAt(): Date | null {
     return this.props.expiresAt
   }
-  /** Date when the key was manualy revoked. */
+
+  /** Gets the timestamp when the key was revoked, or null. */
   get revokedAt(): Date | null {
     return this.props.revokedAt
   }
-  /** Record creation date. */
+
+  /** Gets the timestamp when the key record was created. */
   get createdAt(): Date {
     return this.props.createdAt
   }
-  /** Record last modification date. */
+
+  /** Gets the timestamp when the key record was last updated. */
   get updatedAt(): Date {
     return this.props.updatedAt
   }

@@ -7,28 +7,67 @@ import type { ISyncCursorRepository } from '../../Application/Ports/ISyncCursorR
 import type { IUsageRepository } from '../../Application/Ports/IUsageRepository'
 import { BifrostSyncCompletedEvent } from '../../Domain/Events/BifrostSyncCompletedEvent'
 
+/**
+ * Represents the results of a synchronization run.
+ */
 export interface SyncResult {
+  /** Number of logs successfully synchronized and persisted. */
   readonly synced: number
+  /** Number of logs that could not be matched to a local API key and were quarantined. */
   readonly quarantined: number
+  /** List of organization IDs that had usage logs synced in this run. */
   readonly affectedOrgIds: readonly string[]
 }
 
+/**
+ * Request payload for backfilling usage logs for a specific time range.
+ */
 export interface BackfillSyncRequest {
+  /** ISO timestamp for the start of the backfill window. */
   readonly startTime: string
+  /** ISO timestamp for the end of the backfill window. */
   readonly endTime: string
 }
 
+/**
+ * Internal request for a specific synchronization run.
+ */
 interface SyncRunRequest {
+  /** ISO timestamp to start fetching logs from. */
   readonly startTime: string
+  /** Optional ISO timestamp to stop fetching logs at. */
   readonly endTime?: string
+  /** Whether to update the persistent sync cursor after completion. */
   readonly advanceCursor: boolean
+  /** The log ID from the previous cursor, used for deduplication if necessary. */
   readonly previousCursorLogId?: string
 }
 
 const LOG_PAGE_SIZE = 500
 const MAX_SYNC_PAGES = 50
 
+/**
+ * Infrastructure service responsible for synchronizing usage logs from the Bifrost gateway.
+ *
+ * Responsibilities:
+ * - Fetch usage logs from the LLM gateway (Bifrost) in paginated batches.
+ * - Map gateway keys to local ApiKey aggregates.
+ * - Persist normalized usage records in the local usage repository.
+ * - Manage a persistent 'cursor' to track synchronization progress and avoid duplicates.
+ * - Quarantine logs that cannot be mapped to a known organization.
+ * - Dispatch domain events when synchronization completes for downstream processing (e.g., credit deduction).
+ * - Enforce timeouts and handle network resilience.
+ */
 export class BifrostSyncService {
+  /**
+   * Initializes the service with required gateway clients and repositories.
+   *
+   * @param gatewayClient Client for interacting with the LLM gateway API.
+   * @param usageRepo Repository for persisting normalized usage logs.
+   * @param cursorRepo Repository for tracking the sync progress (last timestamp/ID).
+   * @param apiKeyRepo Repository for resolving gateway key IDs to local aggregates.
+   * @param db Database access for inserting quarantined logs.
+   */
   constructor(
     private readonly gatewayClient: ILLMGatewayClient,
     private readonly usageRepo: IUsageRepository,
@@ -37,6 +76,11 @@ export class BifrostSyncService {
     private readonly db: IDatabaseAccess,
   ) {}
 
+  /**
+   * Performs an incremental synchronization using the persisted cursor.
+   *
+   * @returns A promise resolving to the results of the sync run.
+   */
   async sync(): Promise<SyncResult> {
     const cursor = await this.cursorRepo.get('bifrost_logs')
     return this.runWithTimeout(() =>
@@ -48,6 +92,13 @@ export class BifrostSyncService {
     )
   }
 
+  /**
+   * Performs a one-off synchronization for a specific historical time range.
+   * Does not advance the main synchronization cursor.
+   *
+   * @param request The time range to backfill.
+   * @returns A promise resolving to the results of the backfill run.
+   */
   async backfill(request: BackfillSyncRequest): Promise<SyncResult> {
     return this.runWithTimeout(() =>
       this.syncInternal({
@@ -58,6 +109,12 @@ export class BifrostSyncService {
     )
   }
 
+  /**
+   * Wraps a sync task with a 30-second timeout and basic error logging.
+   *
+   * @param task The async sync function to execute.
+   * @returns A promise resolving to the sync results or an empty result on failure.
+   */
   private async runWithTimeout(task: () => Promise<SyncResult>): Promise<SyncResult> {
     const TIMEOUT_MS = 30_000
     let timeoutId: ReturnType<typeof setTimeout> | undefined
@@ -81,6 +138,12 @@ export class BifrostSyncService {
     }
   }
 
+  /**
+   * Core logic for fetching, mapping, and persisting logs.
+   *
+   * @param request Parameters for the sync run (window, cursor behavior).
+   * @returns A promise resolving to the sync results.
+   */
   private async syncInternal(request: SyncRunRequest): Promise<SyncResult> {
     let synced = 0
     let quarantined = 0
@@ -166,6 +229,12 @@ export class BifrostSyncService {
     return { synced, quarantined, affectedOrgIds: [...affectedOrgIds] }
   }
 
+  /**
+   * Persists a log that could not be processed into a separate table for manual inspection.
+   *
+   * @param log The raw log data from the gateway.
+   * @param reason The reason why the log was quarantined.
+   */
   private async quarantineLog(
     log: {
       readonly logId?: string

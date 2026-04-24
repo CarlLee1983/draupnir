@@ -12,11 +12,16 @@ export abstract class ValueObject {
   /**
    * Compares two value objects for equality.
    * Subclasses should override this method to compare all their attributes.
+   *
+   * @param other - The other value object to compare with.
+   * @returns True if all values are identical, false otherwise.
    */
   abstract equals(other: ValueObject): boolean
 
   /**
-   * String representation of the value object.
+   * Returns a string representation of the value object.
+   *
+   * @returns A string representation of the internal value.
    */
   abstract toString(): string
 }

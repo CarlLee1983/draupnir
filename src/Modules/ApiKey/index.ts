@@ -1,3 +1,10 @@
+/**
+ * ApiKey module public surface.
+ *
+ * Manages secure authentication keys for organizational API access, 
+ * including lifecycle management and gateway synchronization.
+ */
+
 export { CreateApiKeyService } from './Application/Services/CreateApiKeyService'
 export { ListApiKeysService } from './Application/Services/ListApiKeysService'
 export { RevokeApiKeyService } from './Application/Services/RevokeApiKeyService'

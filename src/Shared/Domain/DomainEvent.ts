@@ -24,6 +24,15 @@ export abstract class DomainEvent {
   readonly version: number
   readonly data: Record<string, unknown>
 
+  /**
+   * Initializes a new domain event.
+   *
+   * @param aggregateId - The ID of the aggregate root that emitted the event.
+   * @param eventType - The type of event (e.g., 'UserCreated').
+   * @param data - The event payload.
+   * @param version - The version of the event schema.
+   * @param occurredAt - Optional timestamp of when the event occurred.
+   */
   constructor(
     aggregateId: string,
     eventType: string,
@@ -47,6 +56,8 @@ export abstract class DomainEvent {
    *
    * Default implementation: Direct mapping of version number to semantic version.
    * Subclasses can override this for custom mapping.
+   *
+   * @returns The semantic version string.
    */
   getSchemaVersion(): string {
     const versions: Record<number, string> = {
@@ -60,6 +71,8 @@ export abstract class DomainEvent {
 
   /**
    * Serializes the event to a JSON object.
+   *
+   * @returns A plain object representation of the event.
    */
   abstract toJSON(): Record<string, unknown>
 }

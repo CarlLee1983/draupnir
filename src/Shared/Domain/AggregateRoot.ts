@@ -23,6 +23,8 @@ export abstract class AggregateRoot extends BaseEntity {
   /**
    * Generates a domain event: first applies the state change,
    * then adds it to the uncommitted list.
+   *
+   * @param event - The domain event to raise.
    */
   protected raiseEvent(event: DomainEvent): void {
     this.applyEvent(event)
@@ -32,12 +34,16 @@ export abstract class AggregateRoot extends BaseEntity {
 
   /**
    * Subclass implementation: defines how a single event affects the aggregate state.
+   *
+   * @param event - The domain event to apply.
    */
   abstract applyEvent(event: DomainEvent): void
 
   /**
    * Reconstructs the aggregate state from an event stream (rehydration).
    * Only calls applyEvent, does not add to uncommitted events.
+   *
+   * @param events - The event stream to load from.
    */
   loadFromEvents(events: readonly DomainEvent[]): void {
     for (const event of events) {
@@ -48,6 +54,8 @@ export abstract class AggregateRoot extends BaseEntity {
 
   /**
    * Returns uncommitted domain events (returns a read-only copy).
+   *
+   * @returns A read-only array of uncommitted domain events.
    */
   getUncommittedEvents(): ReadonlyArray<DomainEvent> {
     return [...this.uncommittedEvents]
@@ -62,6 +70,8 @@ export abstract class AggregateRoot extends BaseEntity {
 
   /**
    * Returns the aggregate version (total count of applied events).
+   *
+   * @returns The current version of the aggregate.
    */
   getVersion(): number {
     return this.appliedEventCount

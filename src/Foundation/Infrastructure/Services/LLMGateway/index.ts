@@ -2,10 +2,8 @@
  * Public API surface for the LLMGateway abstraction layer.
  *
  * @remarks
- * MockGatewayClient is exported from this barrel for discoverability.
- * However, runtime src/ code MUST NOT import MockGatewayClient — tests only.
- * Enforced by CI grep check: grep -r "MockGatewayClient" src/ --include="*.ts"
- * must return zero matches in non-test files (files outside __tests__/).
+ * Provides a gateway-neutral interface for managing virtual keys and tracking usage.
+ * MockGatewayClient is exported for testing purposes only.
  */
 
 export type { GatewayErrorCode } from './errors'

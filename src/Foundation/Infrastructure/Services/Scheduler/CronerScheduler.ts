@@ -6,10 +6,23 @@ type PendingRetry = {
   resolve: () => void
 }
 
+/**
+ * Implementation of IScheduler using the Croner library.
+ *
+ * @remarks
+ * Supports standard cron expressions, timezones, and automatic retries with exponential backoff.
+ */
 export class CronerScheduler implements IScheduler {
   private readonly registry = new Map<string, Cron>()
   private readonly pendingRetries = new Map<string, Set<PendingRetry>>()
 
+  /**
+   * Schedules a function for periodic execution.
+   *
+   * @param spec - The job specification including cron pattern and retry policy
+   * @param handler - The async function to execute
+   * @throws Error if a job with the same name already exists
+   */
   schedule(spec: JobSpec, handler: () => Promise<void>): void {
     if (this.registry.has(spec.name)) {
       throw new Error(`duplicate job name: ${spec.name}`)
@@ -33,6 +46,11 @@ export class CronerScheduler implements IScheduler {
     }
   }
 
+  /**
+   * Stops and removes a job from the scheduler.
+   *
+   * @param name - The unique name of the job
+   */
   unschedule(name: string): void {
     this.registry.get(name)?.stop()
     this.registry.delete(name)
@@ -49,16 +67,31 @@ export class CronerScheduler implements IScheduler {
     this.pendingRetries.delete(name)
   }
 
+  /**
+   * Checks if a job is currently registered.
+   *
+   * @param name - The job name
+   * @returns True if registered
+   */
   has(name: string): boolean {
     return this.registry.has(name)
   }
 
+  /**
+   * Stops all scheduled jobs and cancels pending retries.
+   */
   stopAll(): void {
     for (const name of [...this.registry.keys()]) {
       this.unschedule(name)
     }
   }
 
+  /**
+   * Internal execution wrapper that handles retries and backoff.
+   *
+   * @param spec - Job specification
+   * @param handler - Function to execute
+   */
   private async execute(spec: JobSpec, handler: () => Promise<void>): Promise<void> {
     const name = spec.name
     const maxRetries = Math.max(0, spec.maxRetries ?? 0)

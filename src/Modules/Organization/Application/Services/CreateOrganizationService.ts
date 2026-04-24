@@ -39,6 +39,20 @@ export class CreateOrganizationService {
 
   /**
    * Executes the organization establishment process.
+   * 
+   * @param request - Parameters including organization name, description, and the designated manager's user ID.
+   * @returns A promise resolving to an OrganizationResponse indicating success or failure.
+   * 
+   * @remarks
+   * The process involves:
+   * 1. Validating that the designated manager exists and is not a system administrator.
+   * 2. Enforcing the 'v1' constraint: a user can only be a member of one organization at a time.
+   * 3. Ensuring the organization slug (derived from name or provided) is unique.
+   * 4. Performing an atomic transaction to:
+   *    - Persist the new Organization aggregate.
+   *    - Create the initial OrganizationMember record for the manager.
+   *    - Update the user's system-level role to 'manager'.
+   * 5. Post-transaction provisioning of default resources (idempotent setup).
    */
   async execute(request: CreateOrganizationRequest): Promise<OrganizationResponse> {
     try {

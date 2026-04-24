@@ -60,18 +60,35 @@ export interface UpdateProfileFields {
 
 /**
  * UserProfile Aggregate Root
- * Represents a user's profile information and handles business logic for updates.
+ * Represents a user's identity, preferences, and contact information.
+ *
+ * Responsibilities:
+ * - Define user display information and language/time settings.
+ * - Manage notification delivery preferences.
+ * - Enforce data integrity through value objects (e.g., Phone, Timezone).
+ * - Collect domain events for reactive downstream systems (e.g., profile completion tracking).
  */
 export class UserProfile {
+  /** Internal state of the user profile. */
   private readonly props: UserProfileProps
 
+  /**
+   * Internal constructor for the UserProfile aggregate.
+   * Use static factory methods like `createDefault` or `reconstitute` instead.
+   *
+   * @param props The initial properties for the aggregate.
+   */
   private constructor(props: UserProfileProps) {
     this.props = props
   }
 
   /**
-   * Creates a new UserProfile with default settings.
-   * Sets a UserProfileCreated domain event.
+   * Creates a new UserProfile with default settings for a new user.
+   * Dispatches a UserProfileCreated event.
+   *
+   * @param userId The unique identifier of the user.
+   * @param email The user's email, used as the initial display name.
+   * @returns A new UserProfile instance.
    */
   static createDefault(userId: string, email: string): UserProfile {
     const id = crypto.randomUUID()
@@ -93,8 +110,11 @@ export class UserProfile {
   }
 
   /**
-   * Reconstitutes a UserProfile from existing data (e.g. from DB via Mapper).
-   * Accepts plain string fields and wraps them into Value Objects internally.
+   * Reconstitutes a UserProfile aggregate from existing data.
+   * Wraps raw string values into their respective value objects.
+   *
+   * @param props The raw properties from a persistence layer.
+   * @returns A reconstituted UserProfile instance.
    */
   static reconstitute(props: ReconstitutionProps): UserProfile {
     return new UserProfile({

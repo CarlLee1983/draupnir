@@ -1,3 +1,11 @@
+/**
+ * Organization module public surface.
+ *
+ * Re-exports application services, domain aggregates/entities, and 
+ * infrastructure providers to facilitate cross-module communication 
+ * and define the module's public boundary.
+ */
+
 export { AcceptInvitationService } from './Application/Services/AcceptInvitationService'
 export { CancelInvitationService } from './Application/Services/CancelInvitationService'
 export { ChangeOrgMemberRoleService } from './Application/Services/ChangeOrgMemberRoleService'

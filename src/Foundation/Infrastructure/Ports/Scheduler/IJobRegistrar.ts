@@ -1,10 +1,14 @@
 import type { IScheduler } from './IScheduler'
 
 /**
- * Structural hook for providers that own scheduled jobs.
- *
- * Bootstrap can duck-type this method and skip providers that do not implement it.
+ * Interface for service providers that own scheduled jobs.
  */
 export interface IJobRegistrar {
+  /**
+   * Hook called during bootstrap to register module-specific scheduled jobs.
+   *
+   * @param scheduler - The centralized scheduler service.
+   * @returns A promise that resolves when registration is complete, or void.
+   */
   registerJobs(scheduler: IScheduler): void | Promise<void>
 }

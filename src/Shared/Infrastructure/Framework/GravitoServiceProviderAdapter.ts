@@ -39,6 +39,9 @@ class GravitoContainerAdapter implements IContainer {
 /**
  * Factory: wraps a Gravito Container in the framework-agnostic IContainer adapter.
  * Kept as a factory so GravitoContainerAdapter stays private.
+ *
+ * @param gravitoContainer - The native Gravito container.
+ * @returns An implementation of IContainer.
  */
 export function adaptGravitoContainer(gravitoContainer: GravitoContainer): IContainer {
   return new GravitoContainerAdapter(gravitoContainer)
@@ -46,12 +49,20 @@ export function adaptGravitoContainer(gravitoContainer: GravitoContainer): ICont
 
 /**
  * Adapts framework-agnostic ModuleServiceProvider to Gravito's ServiceProvider.
+ *
+ * This bridge allows modules to be registered with the Gravito framework while
+ * remaining decoupled from its specific DI container API.
  */
 export class GravitoServiceProviderAdapter extends ServiceProvider {
   constructor(private moduleProvider: ModuleServiceProvider) {
     super()
   }
 
+  /**
+   * Registers module services into the Gravito container.
+   *
+   * @param container - The native Gravito container.
+   */
   override register(container: GravitoContainer): void {
     // Adapt Gravito's Container to framework-agnostic IContainer
     const adaptedContainer = new GravitoContainerAdapter(container)
@@ -60,6 +71,11 @@ export class GravitoServiceProviderAdapter extends ServiceProvider {
     this.moduleProvider.register(adaptedContainer)
   }
 
+  /**
+   * Boots the module.
+   *
+   * @param core - The Gravito PlanetCore instance.
+   */
   override boot(core: PlanetCore): void {
     // Wrap core.container in our adapter so moduleProvider.boot receives an IContainer
     const adaptedContainer = new GravitoContainerAdapter(core.container)
@@ -68,7 +84,7 @@ export class GravitoServiceProviderAdapter extends ServiceProvider {
 }
 
 /**
- * Factory function: creates an adapter.
+ * Factory function: creates a Gravito-compatible ServiceProvider from a ModuleServiceProvider.
  *
  * @param moduleProvider - Framework-agnostic module service provider.
  * @returns Gravito framework ServiceProvider.
@@ -83,15 +99,24 @@ export function createGravitoServiceProvider(
 }
 
 /**
- * 可選介面：模組實作此介面以自我管理路由。
- * 刻意放在 Gravito 適配層而非 IServiceProvider.ts，保持 ModuleServiceProvider 框架無關。
+ * Optional interface: modules implement this to self-manage route registration.
+ *
+ * Kept in the adapter layer to maintain ModuleServiceProvider's framework independence.
  */
 export interface IRouteRegistrar {
+  /**
+   * Registers HTTP routes for the module.
+   *
+   * @param context - The route registration context (router + container).
+   */
   registerRoutes(context: IRouteContext): void | Promise<void>
 }
 
 /**
- * 型別守衛：判斷 ModuleServiceProvider 是否實作了 IRouteRegistrar。
+ * Type guard: determines if a provider implements IRouteRegistrar.
+ *
+ * @param value - The object to check.
+ * @returns True if the object implements registerRoutes.
  */
 export function isRouteRegistrar(value: unknown): value is IRouteRegistrar {
   return (

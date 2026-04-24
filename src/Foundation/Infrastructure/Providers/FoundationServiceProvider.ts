@@ -27,12 +27,25 @@ type QueueWebhookPayload = {
   readonly payload: Record<string, unknown>
 }
 
+/**
+ * Service provider for foundation-level infrastructure services.
+ *
+ * @remarks
+ * Registers core services like the LLM gateway client, mailers, webhook dispatchers,
+ * schedulers, and queues. This provider also handles the registration of
+ * the webhook dispatch worker.
+ */
 export class FoundationServiceProvider
   extends ModuleServiceProvider
   implements IRouteRegistrar, IQueueRegistrar
 {
   private container?: IContainer
 
+  /**
+   * Registers infrastructure services into the container.
+   *
+   * @param container - The application service container
+   */
   protected override registerInfraServices(container: IContainer): void {
     container.singleton('bifrostConfig', () => {
       return createBifrostClientConfig()
@@ -75,6 +88,11 @@ export class FoundationServiceProvider
     })
   }
 
+  /**
+   * Registers HTTP routes for the foundation module.
+   *
+   * @param context - The route registration context
+   */
   async registerRoutes(context: IRouteContext): Promise<void> {
     context.router.get(
       '/api',
@@ -84,11 +102,22 @@ export class FoundationServiceProvider
     await registerDocsWithGravito(context)
   }
 
+  /**
+   * Boots the service provider.
+   *
+   * @param container - The application service container
+   */
   override boot(container: IContainer): void {
     this.container = container
     console.log('🏗️  [Foundation] Module loaded')
   }
 
+  /**
+   * Registers queue handlers for foundation tasks.
+   *
+   * @param queue - The queue service
+   * @throws Error if the provider has not been booted
+   */
   async registerQueueHandlers(queue: IQueue): Promise<void> {
     const container = this.container
     if (!container) {

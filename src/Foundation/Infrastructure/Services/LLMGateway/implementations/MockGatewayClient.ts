@@ -51,6 +51,9 @@ interface CallLog {
   }[]
 }
 
+/**
+ * Stateful in-memory test double for ILLMGatewayClient.
+ */
 export class MockGatewayClient implements ILLMGatewayClient {
   private readonly keys: Map<string, StoredKey> = new Map()
   private idCounter = 0
@@ -102,6 +105,8 @@ export class MockGatewayClient implements ILLMGatewayClient {
   /**
    * Queue a single-shot failure. The next interface call will throw this error,
    * then the queue entry is consumed. Multiple calls to failNext drain FIFO.
+   *
+   * @param error - The error to throw on the next call
    */
   failNext(error: GatewayError): void {
     this.failQueue.push(error)
@@ -110,6 +115,8 @@ export class MockGatewayClient implements ILLMGatewayClient {
   /**
    * Configure the UsageStats to be returned by getUsageStats().
    * Replaces previous seeded value.
+   *
+   * @param stats - The usage statistics to return
    */
   seedUsageStats(stats: UsageStats): void {
     this.seededStats = stats
@@ -118,6 +125,8 @@ export class MockGatewayClient implements ILLMGatewayClient {
   /**
    * Configure the LogEntry array to be returned by getUsageLogs().
    * Replaces previous seeded value.
+   *
+   * @param logs - The log entries to return
    */
   seedUsageLogs(logs: readonly LogEntry[]): void {
     this.seededLogs = logs
@@ -151,10 +160,15 @@ export class MockGatewayClient implements ILLMGatewayClient {
 
   private maybeThrow(): void {
     if (this.failQueue.length > 0) {
-      throw this.failQueue.shift()
+      const error = this.failQueue.shift()
+      if (error) throw error
     }
   }
 
+  /**
+   * Simulates team creation in the mock gateway.
+   * @param request - Team creation parameters
+   */
   async createTeam(request: CreateTeamRequest): Promise<TeamResponse> {
     this.maybeThrow()
     this._calls.createTeam.push(request)
@@ -170,6 +184,10 @@ export class MockGatewayClient implements ILLMGatewayClient {
     return team
   }
 
+  /**
+   * Simulates idempotent team lookup/creation.
+   * @param request - Team creation parameters
+   */
   async ensureTeam(request: CreateTeamRequest): Promise<TeamResponse> {
     this.maybeThrow()
     this._calls.ensureTeam.push(request)
@@ -179,6 +197,10 @@ export class MockGatewayClient implements ILLMGatewayClient {
     return this.createTeam(request)
   }
 
+  /**
+   * Simulates virtual key creation.
+   * @param request - Virtual key creation parameters
+   */
   async createKey(request: CreateKeyRequest): Promise<KeyResponse> {
     this.maybeThrow()
     this._calls.createKey.push(request)
@@ -200,6 +222,11 @@ export class MockGatewayClient implements ILLMGatewayClient {
     }
   }
 
+  /**
+   * Simulates updating an existing key.
+   * @param keyId - The key identifier
+   * @param request - Update parameters
+   */
   async updateKey(keyId: string, request: UpdateKeyRequest): Promise<KeyResponse> {
     this.maybeThrow()
     this._calls.updateKey.push({ keyId, request })
@@ -222,18 +249,32 @@ export class MockGatewayClient implements ILLMGatewayClient {
     }
   }
 
+  /**
+   * Simulates deleting a key.
+   * @param keyId - The key identifier
+   */
   async deleteKey(keyId: string): Promise<void> {
     this.maybeThrow()
     this._calls.deleteKey.push(keyId)
     this.keys.delete(keyId)
   }
 
+  /**
+   * Simulates fetching usage statistics.
+   * @param keyIds - Key identifiers
+   * @param query - Optional usage query
+   */
   async getUsageStats(keyIds: readonly string[], query?: UsageQuery): Promise<UsageStats> {
     this.maybeThrow()
     this._calls.getUsageStats.push({ keyIds, query })
     return { ...this.seededStats }
   }
 
+  /**
+   * Simulates fetching individual log entries.
+   * @param keyIds - Key identifiers
+   * @param query - Optional usage query
+   */
   async getUsageLogs(keyIds: readonly string[], query?: UsageQuery): Promise<readonly LogEntry[]> {
     this.maybeThrow()
     this._calls.getUsageLogs.push({ keyIds, query })

@@ -16,10 +16,22 @@ export type Messages = Record<MessageKey, string>
 
 /** Structured translation payload passed over the wire (server → client). */
 export interface I18nMessage {
+  /** The unique key for the translated message. */
   key: MessageKey
+  /** Optional interpolation parameters. */
   params?: Record<string, string | number>
 }
 
+/**
+ * Loads translation messages for a given locale, optionally with overrides.
+ *
+ * Returns a Proxy object that falls back to the key itself if a property
+ * is missing from the catalog, preventing blank text in the UI.
+ *
+ * @param locale - The target locale code.
+ * @param overrides - Optional map of keys to override or delete.
+ * @returns A translation map (Proxy).
+ */
 export function loadMessages(
   locale: LocaleCode,
   overrides?: Record<string, string | undefined>,

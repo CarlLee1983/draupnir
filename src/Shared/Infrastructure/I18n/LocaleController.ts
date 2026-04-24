@@ -5,6 +5,9 @@ export class LocaleController {
   /**
    * POST /lang
    * Handles locale switching.
+   *
+   * @param ctx - The HTTP context.
+   * @returns A redirect response back to the referer.
    */
   public async switchLocale(ctx: IHttpContext): Promise<Response> {
     const { locale } = await ctx.getJsonBody<{ locale: string }>()

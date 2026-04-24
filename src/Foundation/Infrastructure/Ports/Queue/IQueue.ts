@@ -1,9 +1,6 @@
 /**
- * Queue Service Interface (Port)
- *
- * Defines the contract for producer/consumer operations.
+ * Configuration options for background jobs.
  */
-
 export interface JobOptions {
   /** Optional job name for logging/debugging. */
   jobName?: string
@@ -21,6 +18,11 @@ export interface JobOptions {
   removeOnFail?: boolean | number
 }
 
+/**
+ * Queue Service Interface (Port)
+ *
+ * Defines the contract for producer/consumer operations.
+ */
 export interface IQueue {
   /**
    * Push a job into the queue (Producer).
@@ -41,12 +43,18 @@ export interface IQueue {
    */
   process(name: string, handler: (payload: unknown) => Promise<void>, concurrency?: number): void
 
-  /** Pause workers from picking up new jobs. */
+  /**
+   * Pause workers from picking up new jobs.
+   */
   pause(): Promise<void>
 
-  /** Resume workers. */
+  /**
+   * Resume workers.
+   */
   resume(): Promise<void>
 
-  /** Fully stop and disconnect all queue resources. */
+  /**
+   * Fully stop and disconnect all queue resources.
+   */
   close(): Promise<void>
 }

@@ -24,19 +24,52 @@ export type ModuleRouteOptions = {
  */
 export interface IModuleRouter {
   // === GET ===
+
+  /**
+   * Registers a GET route.
+   *
+   * @param path - URL pattern.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   get(path: string, handler: RouteHandler, options?: ModuleRouteOptions): void
+  /**
+   * Registers a GET route with middleware.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   get(
     path: string,
     middlewares: Middleware[],
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a GET route with a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   get(
     path: string,
     formRequest: FormRequestClass,
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a GET route with middleware and a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   get(
     path: string,
     middlewares: Middleware[],
@@ -46,19 +79,52 @@ export interface IModuleRouter {
   ): void
 
   // === POST ===
+
+  /**
+   * Registers a POST route.
+   *
+   * @param path - URL pattern.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   post(path: string, handler: RouteHandler, options?: ModuleRouteOptions): void
+  /**
+   * Registers a POST route with middleware.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   post(
     path: string,
     middlewares: Middleware[],
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a POST route with a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   post(
     path: string,
     formRequest: FormRequestClass,
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a POST route with middleware and a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   post(
     path: string,
     middlewares: Middleware[],
@@ -68,19 +134,52 @@ export interface IModuleRouter {
   ): void
 
   // === PUT ===
+
+  /**
+   * Registers a PUT route.
+   *
+   * @param path - URL pattern.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   put(path: string, handler: RouteHandler, options?: ModuleRouteOptions): void
+  /**
+   * Registers a PUT route with middleware.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   put(
     path: string,
     middlewares: Middleware[],
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a PUT route with a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   put(
     path: string,
     formRequest: FormRequestClass,
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a PUT route with middleware and a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   put(
     path: string,
     middlewares: Middleware[],
@@ -90,19 +189,52 @@ export interface IModuleRouter {
   ): void
 
   // === PATCH ===
+
+  /**
+   * Registers a PATCH route.
+   *
+   * @param path - URL pattern.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   patch(path: string, handler: RouteHandler, options?: ModuleRouteOptions): void
+  /**
+   * Registers a PATCH route with middleware.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   patch(
     path: string,
     middlewares: Middleware[],
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a PATCH route with a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   patch(
     path: string,
     formRequest: FormRequestClass,
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a PATCH route with middleware and a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   patch(
     path: string,
     middlewares: Middleware[],
@@ -112,19 +244,52 @@ export interface IModuleRouter {
   ): void
 
   // === DELETE ===
+
+  /**
+   * Registers a DELETE route.
+   *
+   * @param path - URL pattern.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   delete(path: string, handler: RouteHandler, options?: ModuleRouteOptions): void
+  /**
+   * Registers a DELETE route with middleware.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   delete(
     path: string,
     middlewares: Middleware[],
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a DELETE route with a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   delete(
     path: string,
     formRequest: FormRequestClass,
     handler: RouteHandler,
     options?: ModuleRouteOptions,
   ): void
+  /**
+   * Registers a DELETE route with middleware and a FormRequest validator.
+   *
+   * @param path - URL pattern.
+   * @param middlewares - Sequential middleware pipeline.
+   * @param formRequest - Gravito FormRequest validator class.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   delete(
     path: string,
     middlewares: Middleware[],
@@ -134,10 +299,32 @@ export interface IModuleRouter {
   ): void
 
   // === HEAD ===
+
+  /**
+   * Registers a HEAD route.
+   *
+   * @param path - URL pattern.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   head(path: string, handler: RouteHandler, options?: ModuleRouteOptions): void
 
   // === OPTIONS ===
+
+  /**
+   * Registers an OPTIONS route.
+   *
+   * @param path - URL pattern.
+   * @param handler - Final request handler.
+   * @param options - Registration options.
+   */
   options(path: string, handler: RouteHandler, options?: ModuleRouteOptions): void
 
+  /**
+   * Groups routes under a common prefix.
+   *
+   * @param prefix - The path prefix.
+   * @param fn - A callback that receives a scoped router instance.
+   */
   group(prefix: string, fn: (router: IModuleRouter) => void): void
 }

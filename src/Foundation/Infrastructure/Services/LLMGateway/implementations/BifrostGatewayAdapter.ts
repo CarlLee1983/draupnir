@@ -21,13 +21,22 @@ import type {
   UsageStats,
 } from '../types'
 
+/**
+ * Adapts BifrostClient to the ILLMGatewayClient interface.
+ */
 export class BifrostGatewayAdapter implements ILLMGatewayClient {
+  /**
+   * Initializes the adapter with a Bifrost client instance.
+   * @param bifrostClient - The underlying Bifrost SDK client
+   */
   constructor(private readonly bifrostClient: BifrostClient) {}
 
   /**
-   * Idempotent Team create: returns the existing Team matching `name` (Bifrost
-   * rejects arbitrary customer_id values). Used during org provisioning so a
-   * partial failure on first attempt can be healed by re-running provisioning.
+   * Idempotent Team create: returns the existing Team matching `name`.
+   *
+   * @param request - Team creation parameters
+   * @returns The existing or newly created team metadata
+   * @throws GatewayError if the gateway request fails
    */
   async ensureTeam(request: CreateTeamRequest): Promise<TeamResponse> {
     try {
@@ -50,6 +59,10 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
   /**
    * Create a new Team in Bifrost.
    * Maps camelCase CreateTeamRequest to Bifrost's snake_case CreateTeamRequest.
+   *
+   * @param request - Team creation parameters
+   * @returns The created team metadata
+   * @throws GatewayError if the gateway request fails
    */
   async createTeam(request: CreateTeamRequest): Promise<TeamResponse> {
     try {
@@ -80,6 +93,10 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
   /**
    * Create a new virtual key in Bifrost.
    * Maps camelCase CreateKeyRequest to Bifrost's snake_case CreateVirtualKeyRequest.
+   *
+   * @param request - Virtual key creation parameters
+   * @returns Created key metadata including the raw key value
+   * @throws GatewayError if the gateway request fails
    */
   async createKey(request: CreateKeyRequest): Promise<KeyResponse> {
     try {
@@ -126,6 +143,11 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
   /**
    * Update an existing virtual key in Bifrost.
    * Only defined fields are sent — undefined fields are excluded via conditional spread.
+   *
+   * @param keyId - The unique identifier of the key to update
+   * @param request - Fields to update
+   * @returns The updated key metadata
+   * @throws GatewayError if the gateway request fails
    */
   async updateKey(keyId: string, request: UpdateKeyRequest): Promise<KeyResponse> {
     try {
@@ -168,6 +190,9 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
 
   /**
    * Delete a virtual key from Bifrost.
+   *
+   * @param keyId - The unique identifier of the key to delete
+   * @throws GatewayError if the gateway request fails
    */
   async deleteKey(keyId: string): Promise<void> {
     try {
@@ -179,7 +204,11 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
 
   /**
    * Fetch aggregated usage statistics from Bifrost logs stats endpoint.
+   *
    * @param keyIds - Join with comma for Bifrost virtual_key_ids query param.
+   * @param query - Optional usage query filters
+   * @returns Aggregated usage statistics
+   * @throws GatewayError if the gateway request fails
    */
   async getUsageStats(keyIds: readonly string[], query?: UsageQuery): Promise<UsageStats> {
     try {
@@ -205,6 +234,11 @@ export class BifrostGatewayAdapter implements ILLMGatewayClient {
   /**
    * Fetch individual log entries from Bifrost logs endpoint.
    * Maps BifrostLogEntry's snake_case fields to camelCase LogEntry.
+   *
+   * @param keyIds - Join with comma for Bifrost virtual_key_ids query param.
+   * @param query - Optional usage query filters
+   * @returns Individual log entries
+   * @throws GatewayError if the gateway request fails
    */
   async getUsageLogs(keyIds: readonly string[], query?: UsageQuery): Promise<readonly LogEntry[]> {
     try {

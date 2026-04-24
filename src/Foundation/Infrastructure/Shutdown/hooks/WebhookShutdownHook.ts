@@ -1,15 +1,22 @@
 import type { IShutdownHook } from '../IShutdownHook'
 
 /**
- * Webhook long-lived connection 關閉 hook（占位）。
+ * Shutdown hook for webhook delivery components.
  *
- * WebhookDispatcher 目前為無狀態 fetch client，無持久連線需關閉。
- * 未來若引入 WebSocket 或持久連線，在此實作關閉邏輯。
+ * @remarks
+ * WebhookDispatcher is currently a stateless fetch client with no persistent
+ * connections to close. This hook serves as a placeholder for future long-lived
+ * resources (e.g., connection pools or WebSockets).
  */
 export class WebhookShutdownHook implements IShutdownHook {
+  /** Resource name. */
   readonly name = 'WebhookClient'
 
+  /**
+   * Performs any necessary cleanup for the webhook client.
+   * @returns A promise that resolves when cleanup is finished
+   */
   async shutdown(): Promise<void> {
-    // 占位：WebhookDispatcher 無持久連線，直接結束
+    // Currently no persistent connections to close.
   }
 }

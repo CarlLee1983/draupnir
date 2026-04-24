@@ -17,6 +17,19 @@ const ERROR_CODE_MAP: Partial<Record<string, MessageKey>> = {
   KEY_NOT_FOUND: 'member.apiKeys.createFailed',
 }
 
+/**
+ * Maps a service error code or raw message string to an I18nMessage.
+ * Used in page handlers to convert service result errors to structured format.
+ *
+ * If `codeOrMessage` matches a known error code in ERROR_CODE_MAP, the
+ * corresponding MessageKey is used. Otherwise it is cast directly as a MessageKey
+ * (handles cases where services already return catalog keys as error codes).
+ *
+ * @param codeOrMessage - The error code or message to map.
+ * @param fallbackKey - Key to use if mapping fails and codeOrMessage is empty.
+ * @param params - Optional interpolation parameters for the message.
+ * @returns A structured I18nMessage object.
+ */
 export function toI18nMessage(
   codeOrMessage: string | null | undefined,
   fallbackKey?: MessageKey,

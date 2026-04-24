@@ -60,6 +60,16 @@ function wrapHandler(handler: RouteHandler) {
   return (ctx: any) => handler(fromGravitoContext(ctx))
 }
 
+/**
+ * Adapts the Gravito core router to the IModuleRouter interface.
+ *
+ * This allows modules to register routes without a direct dependency on the
+ * Gravito framework instance, facilitating testing and future migrations.
+ *
+ * @param core - The Gravito PlanetCore instance.
+ * @param prefix - Optional URL prefix for all routes in this router.
+ * @returns An implementation of IModuleRouter.
+ */
 export function createGravitoModuleRouter(core: PlanetCore, prefix = ''): IModuleRouter {
   function register(method: 'get' | 'post' | 'put' | 'patch' | 'delete') {
     return (path: string, ...args: unknown[]) => {
