@@ -7,14 +7,18 @@ import { adaptGravitoContainer } from '@/Shared/Infrastructure/Framework/Gravito
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { configureAuthMiddleware } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import { joinPath } from '@/Website/Http/Routing/routePath'
+import { createLastResultStore, type LastResultStore } from './lastResult'
+import { InProcessHttpClient } from './http/InProcessHttpClient'
+import { TestAuth } from './http/TestAuth'
+import { TestSeed } from './seeds'
 import { ManualQueue } from './fakes/ManualQueue'
 import { ManualScheduler } from './fakes/ManualScheduler'
 import { runAcceptanceMigrations } from './db/migrate'
 import { truncateAcceptanceTables } from './db/truncate'
 import { TestClock } from './TestClock'
 
-/** Captured DomainEvent snapshot — tests can assert ordering and payload. */
 export interface CapturedEvent {
   readonly eventType: string
   readonly data: Record<string, unknown>
@@ -23,9 +27,6 @@ export interface CapturedEvent {
 
 const INITIAL_CLOCK_ISO = '2026-01-01T00:00:00.000Z'
 
-/**
- * Acceptance-layer test harness. One instance per vitest test file.
- */
 export class TestApp {
   readonly container: IContainer
   readonly clock: TestClock
@@ -33,6 +34,10 @@ export class TestApp {
   readonly scheduler: ManualScheduler
   readonly queue: ManualQueue
   readonly events: CapturedEvent[]
+  readonly http: InProcessHttpClient
+  readonly auth: TestAuth
+  readonly seed: TestSeed
+  readonly lastResult: LastResultStore
 
   private readonly core: PlanetCore
   private readonly dbPath: string
@@ -46,6 +51,10 @@ export class TestApp {
     scheduler: ManualScheduler
     queue: ManualQueue
     events: CapturedEvent[]
+    http: InProcessHttpClient
+    auth: TestAuth
+    seed: TestSeed
+    lastResult: LastResultStore
     dbPath: string
     unsubscribeObserver: () => void
   }) {
@@ -56,6 +65,10 @@ export class TestApp {
     this.scheduler = params.scheduler
     this.queue = params.queue
     this.events = params.events
+    this.http = params.http
+    this.auth = params.auth
+    this.seed = params.seed
+    this.lastResult = params.lastResult
     this.dbPath = params.dbPath
     this.unsubscribeObserver = params.unsubscribeObserver
   }
@@ -109,7 +122,31 @@ export class TestApp {
       },
     })
 
+    configureAuthMiddleware({
+      async save() {},
+      async findByHash() {
+        return null
+      },
+      async findByUserId() {
+        return []
+      },
+      async findRevokedByUserId() {
+        return []
+      },
+      async revoke() {},
+      async isRevoked() {
+        return false
+      },
+      async revokeAllByUserId() {},
+      async cleanupExpired() {},
+      async delete() {},
+    })
+
     const container = adaptGravitoContainer(core.container)
+    const http = new InProcessHttpClient(core)
+    const auth = new TestAuth(container)
+    const seed = new TestSeed(() => container.make('database') as IDatabaseAccess, gateway)
+    const lastResult = createLastResultStore()
 
     const events: CapturedEvent[] = []
     const dispatcher = DomainEventDispatcher.getInstance()
@@ -129,18 +166,21 @@ export class TestApp {
       scheduler,
       queue,
       events,
+      http,
+      auth,
+      seed,
+      lastResult,
       dbPath,
       unsubscribeObserver,
     })
   }
 
-  /** Raw DB handle — use for state assertions. */
   get db(): IDatabaseAccess {
     return this.container.make('database') as IDatabaseAccess
   }
 
-  /** Per-test cleanup. */
   async reset(): Promise<void> {
+    this.lastResult.clear()
     await truncateAcceptanceTables(this.db)
     this.gateway.reset()
     this.scheduler.stopAll()
@@ -149,7 +189,6 @@ export class TestApp {
     this.clock.setNow(new Date(INITIAL_CLOCK_ISO))
   }
 
-  /** Per-file cleanup. */
   async shutdown(): Promise<void> {
     this.unsubscribeObserver()
     DomainEventDispatcher.resetForTesting()
