@@ -81,7 +81,9 @@ describe('AdminApiKeysPage', () => {
 
     const page = new AdminApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListKeysService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListOrgsService as any,
     )
     const ctx = createAdminContext()
@@ -103,7 +105,9 @@ describe('AdminApiKeysPage', () => {
 
     const page = new AdminApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListKeysService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListOrgsService as any,
     )
     const ctx = createAdminContext()

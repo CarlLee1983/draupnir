@@ -90,6 +90,7 @@ describe('SdkApi Integration', () => {
         status: 'active',
       }),
     }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const queryBalance = new QueryBalance(mockCreditRepo as any)
 
     controller = new SdkApiController(proxyModelCall, queryUsage, queryBalance)

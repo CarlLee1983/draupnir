@@ -11,7 +11,9 @@ import { AtlasUsageRepository } from '../Infrastructure/Repositories/AtlasUsageR
 describe('AtlasUsageRepository', () => {
   let db: IDatabaseAccess
   let repository: AtlasUsageRepository
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let drizzleDb: any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let configSpy: any
 
   beforeAll(async () => {

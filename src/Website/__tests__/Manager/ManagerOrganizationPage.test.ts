@@ -55,6 +55,7 @@ function mkInertia() {
         captured.lastCall = { component, props }
         return new Response(JSON.stringify({ component, props }))
       },
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any,
     captured,
   }
@@ -65,9 +66,13 @@ describe('ManagerOrganizationPage', () => {
     const { inertia } = mkInertia()
     const page = new ManagerOrganizationPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve(null)) } as any,
     )
     const res = await page.handle(makeCtx())
@@ -87,6 +92,7 @@ describe('ManagerOrganizationPage', () => {
             data: { id: 'org-A', name: 'Org', description: 'D', slug: 'o' },
           }),
         ),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       } as any,
       {
         execute: mock(() =>
@@ -96,15 +102,20 @@ describe('ManagerOrganizationPage', () => {
             data: [{ id: 'c1', status: 'active', terms: { creditQuota: 1000 } }],
           }),
         ),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       } as any,
     )
     await page.handle(makeCtx())
     expect(captured.lastCall?.component).toBe('Manager/Organization/Index')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props as any).organization.id).toBe('org-A')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props as any).contracts.length).toBe(1)
   })
 
@@ -118,11 +129,15 @@ describe('ManagerOrganizationPage', () => {
     })
     const page = new ManagerOrganizationPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       updateSvc as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       } as any,
     )
     const res = await page.update(ctx)

@@ -41,7 +41,9 @@ function makeUser(email = 'member@example.com') {
 describe('DeclineInvitationService', () => {
   it('應成功拒絕 pending 邀請', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(makePendingInvitation())
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.update as any).mockResolvedValue(undefined)
 
     const authRepo = {
@@ -52,12 +54,14 @@ describe('DeclineInvitationService', () => {
     const result = await service.execute('inv-1', 'user-1')
 
     expect(result.success).toBe(true)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const updatedArg = (invitationRepo.update as any).mock.calls[0][0]
     expect(updatedArg.status.getValue()).toBe('cancelled')
   })
 
   it('邀請不存在應回傳 INVALID_INVITATION', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(null)
 
     const authRepo = {
@@ -86,6 +90,7 @@ describe('DeclineInvitationService', () => {
 
   it('email 不匹配應回傳 EMAIL_MISMATCH', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(makePendingInvitation('other@example.com'))
 
     const authRepo = {
@@ -114,6 +119,7 @@ describe('DeclineInvitationService', () => {
     })
 
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(expiredInv)
 
     const authRepo = {

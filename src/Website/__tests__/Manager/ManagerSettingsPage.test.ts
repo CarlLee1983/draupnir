@@ -54,6 +54,7 @@ describe('ManagerSettingsPage', () => {
         captured.p = p
         return new Response()
       },
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const get = {
       execute: mock(() =>
@@ -66,29 +67,42 @@ describe('ManagerSettingsPage', () => {
     }
     const page = new ManagerSettingsPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       get as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
     )
     await page.handle(makeCtx())
     expect(captured.c).toBe('Manager/Settings/Index')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.p as any).profile.displayName).toBe('Mgr')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.p as any).passwordRequirements.minLength).toBe(8)
   })
 
   test('handle: 使用 refreshedAuthTokenHash 作為 currentHash（silent refresh 後）', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const inertia = { render: () => new Response() } as any
     const listSessions = mock((_userId: string, hash?: string | null) =>
       Promise.resolve({ success: true, sessions: [], _hash: hash }),
     )
     const page = new ManagerSettingsPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, data: null })) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: listSessions } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
     )
 
@@ -100,14 +114,20 @@ describe('ManagerSettingsPage', () => {
   })
 
   test('update: 呼叫 UpdateProfileService 並導回 /manager/settings', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const inertia = { render: mock() } as any
     const update = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
     const page = new ManagerSettingsPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       update as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
     )
     const res = await page.update(makeCtx({ displayName: 'N' }))
@@ -116,16 +136,22 @@ describe('ManagerSettingsPage', () => {
   })
 
   test('changePassword: 成功後導向 /login', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const inertia = { render: mock() } as any
     const changePw = {
       execute: mock(() => Promise.resolve({ success: true, message: 'OK' })),
     }
     const page = new ManagerSettingsPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       changePw as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
     )
     const res = await page.changePassword(

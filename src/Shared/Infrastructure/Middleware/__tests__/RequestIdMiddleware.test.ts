@@ -49,7 +49,7 @@ describe('RequestIdMiddleware', () => {
     const id = ctx.get<string>('requestId')
     expect(id).toBeDefined()
     expect(typeof id).toBe('string')
-    expect(id!.length).toBeGreaterThan(0)
+    expect(id?.length).toBeGreaterThan(0)
     expect(response.headers.get('x-request-id')).toBe(id)
   })
 

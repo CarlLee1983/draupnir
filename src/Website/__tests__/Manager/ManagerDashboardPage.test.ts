@@ -54,6 +54,7 @@ function mkInertia() {
         captured.lastCall = { component, props }
         return new Response(JSON.stringify({ component, props }))
       },
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any,
     captured,
   }
@@ -66,9 +67,13 @@ describe('ManagerDashboardPage', () => {
     const membershipService = { execute: mock(() => Promise.resolve(null)) }
     const page = new ManagerDashboardPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       membershipService as any,
     )
     const res = await page.handle(ctx)
@@ -122,16 +127,24 @@ describe('ManagerDashboardPage', () => {
     }
     const page = new ManagerDashboardPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       orgQuota as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       sumAllocated as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       listKeys as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       membershipService as any,
     )
     await page.handle(ctx)
     expect(captured.lastCall?.component).toBe('Manager/Dashboard/Index')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props as any).orgId).toBe('org-A')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props as any).contractQuota).toBe(500)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props as any).totalAllocated).toBe(120)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props as any).keys?.length).toBe(1)
   })
 })

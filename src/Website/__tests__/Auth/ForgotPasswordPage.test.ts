@@ -41,6 +41,7 @@ describe('ForgotPasswordPage', () => {
   test('should render forgot password form on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new ForgotPasswordPage(inertia, mockForgotService as any)
     const ctx = createMockContext()
 

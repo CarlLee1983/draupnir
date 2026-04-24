@@ -89,7 +89,10 @@ describe('SetKeyPermissionsService', () => {
 
   it('已撤銷的 Key 應回傳錯誤', async () => {
     const key = await apiKeyRepo.findById('key-1')
-    const revoked = key!.revoke()
+    if (!key) {
+      throw new Error('key-1 should exist from beforeEach seeding')
+    }
+    const revoked = key.revoke()
     await apiKeyRepo.update(revoked)
 
     const result = await service.execute({

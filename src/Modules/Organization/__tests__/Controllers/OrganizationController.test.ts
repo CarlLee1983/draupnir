@@ -136,19 +136,33 @@ function makeController(
     },
   )
   const controller = new OrganizationController(
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     { execute: createOrgExecute } as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     passThrough as any,
     overrides.jwt ?? jwt,
     overrides.authTokenRepo ?? authTokenRepo,
@@ -200,6 +214,7 @@ describe('OrganizationController.create', () => {
 
     // Cookie: auth_token only, with correct options
     expect(cookies.length).toBe(1)
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const authCookie = cookies[0]!
     expect(authCookie.name).toBe('auth_token')
     expect(authCookie.value).toBe('new-access-token-abc')
@@ -211,7 +226,7 @@ describe('OrganizationController.create', () => {
     // Response shape
     expect(response.status).toBe(201)
     expect(jsonCalls.length).toBe(1)
-    const body = jsonCalls[0]!.body as {
+    const body = jsonCalls[0]?.body as {
       success: boolean
       data?: { redirectTo?: string; id?: string }
     }
@@ -245,7 +260,7 @@ describe('OrganizationController.create', () => {
     expect(saveTokenRecord).not.toHaveBeenCalled()
     expect(cookies.length).toBe(0)
     expect(response.status).toBe(400)
-    const body = jsonCalls[0]!.body as { success: boolean; error?: string; data?: unknown }
+    const body = jsonCalls[0]?.body as { success: boolean; error?: string; data?: unknown }
     expect(body.success).toBe(false)
     expect(body.error).toBe('NAME_REQUIRED')
     // No redirectTo on failure
@@ -274,7 +289,7 @@ describe('OrganizationController.create', () => {
     expect(saveTokenRecord).not.toHaveBeenCalled()
     expect(cookies.length).toBe(0)
     expect(response.status).toBe(400)
-    const body = jsonCalls[0]!.body as { error?: string }
+    const body = jsonCalls[0]?.body as { error?: string }
     expect(body.error).toBe('ALREADY_HAS_ORGANIZATION')
   })
 
@@ -289,7 +304,7 @@ describe('OrganizationController.create', () => {
     expect(saveTokenRecord).not.toHaveBeenCalled()
     expect(cookies.length).toBe(0)
     expect(response.status).toBe(401)
-    const body = jsonCalls[0]!.body as { success: boolean; error?: string }
+    const body = jsonCalls[0]?.body as { success: boolean; error?: string }
     expect(body.success).toBe(false)
     expect(body.error).toBe('UNAUTHORIZED')
   })

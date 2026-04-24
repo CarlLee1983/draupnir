@@ -3,6 +3,7 @@ import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 import { toGravitoMiddleware } from '../GravitoKernelAdapter'
 
 /** Minimal GravitoContext mock matching what fromGravitoContext needs */
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
 function createMockGravitoContext(opts: { method?: string } = {}): any {
   const state: Record<string, unknown> = {}
   return {

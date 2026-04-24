@@ -71,6 +71,7 @@ describe('GetTransactionHistoryService', () => {
   })
 
   it('非組織成員應拒絕存取', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgAuth.requireOrgMembership as any).mockResolvedValue({ authorized: false })
 
     const result = await service.execute('org-1', 'outsider', 'member')

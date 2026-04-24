@@ -3,6 +3,7 @@ import { AtlasQueryBuilder } from '../AtlasQueryBuilder'
 
 describe('AtlasQueryBuilder (Mocked)', () => {
   const createMockQuery = () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const query: any = {}
     query.get = mock(() => Promise.resolve([]))
     query.first = mock(() => Promise.resolve(null))
@@ -19,6 +20,7 @@ describe('AtlasQueryBuilder (Mocked)', () => {
     return query
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   const createMockConnection = (query: any) => ({
     table: mock(() => query),
     raw: mock(() => Promise.resolve([])),

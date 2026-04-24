@@ -1,14 +1,15 @@
 import { beforeAll, beforeEach, describe, expect, it } from 'bun:test'
-import { resolve } from 'path'
 import { ensureAuth, resetAuth } from './lib/auth-helper'
 import { extractValue, resolveRefs } from './lib/jsonpath'
 import { buildValidRequest } from './lib/request-builder'
-import { validateSchema } from './lib/schema-validator'
-import { type Operation, parseOpenAPI } from './lib/spec-parser'
+import { validateResponse } from './lib/schema-validator'
+import { parseOpenAPI } from './lib/spec-parser'
 import { TestClient } from './lib/test-client'
 import { getBaseURL, setupTestServerFor } from './lib/test-server'
 
-const SPEC_PATH = resolve(import.meta.dir, '../../docs/openapi.yaml')
+const joinPath = (...parts: string[]) => parts.join('/').replace(/\/+/g, '/')
+const SPEC_PATH = joinPath(import.meta.dir, '../../docs/openapi.yaml')
+
 
 setupTestServerFor('api-spec')
 

@@ -52,13 +52,13 @@ describe('InviteMemberService', () => {
       email: 'manager@example.com',
       password: 'StrongPass123',
     })
-    managerId = userResult.data!.id
+    managerId = userResult.data?.id as string
 
     const orgResult = await createOrgService.execute({
       name: 'Test Org',
       managerUserId: managerId,
     })
-    orgId = orgResult.data!.id as string
+    orgId = orgResult.data?.id as string
   })
 
   it('應成功產生邀請連結', async () => {

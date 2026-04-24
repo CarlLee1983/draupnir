@@ -25,16 +25,19 @@ describe('ResetPasswordService', () => {
     new Date(Date.now() + 3600000),
     true,
   )
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   const mockUpdatedUser = { id: 'user-1', emailValue: 'user@example.com' } as any
   const mockUser = {
     id: 'user-1',
     emailValue: 'user@example.com',
     withPassword: mock(() => mockUpdatedUser),
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   } as any
 
   function makeTokenRepo(): IAuthTokenRepository {
     return {
       revokeAllByUserId: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
   }
 
@@ -42,13 +45,16 @@ describe('ResetPasswordService', () => {
     const resetRepo: IPasswordResetRepository = {
       findByToken: mock(async () => validToken),
       markUsed: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const authRepo: IAuthRepository = {
       findByEmail: mock(async () => mockUser),
       save: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const hasher: IPasswordHasher = {
       hash: mock(async () => 'hashed-new-password'),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const tokenRepo = makeTokenRepo()
 
@@ -65,13 +71,16 @@ describe('ResetPasswordService', () => {
     const resetRepo: IPasswordResetRepository = {
       findByToken: mock(async () => validToken),
       markUsed: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const authRepo: IAuthRepository = {
       findByEmail: mock(async () => mockUser),
       save: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const hasher: IPasswordHasher = {
       hash: mock(async () => 'hashed-new-password'),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const tokenRepo = makeTokenRepo()
 
@@ -84,9 +93,11 @@ describe('ResetPasswordService', () => {
   test('does NOT revoke tokens when the token is expired', async () => {
     const resetRepo: IPasswordResetRepository = {
       findByToken: mock(async () => expiredToken),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const tokenRepo = makeTokenRepo()
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const service = new ResetPasswordService(resetRepo, {} as any, {} as any, tokenRepo)
     const result = await service.execute('expired-token', 'NewPassword123!')
 
@@ -97,8 +108,10 @@ describe('ResetPasswordService', () => {
   test('rejects expired token', async () => {
     const resetRepo: IPasswordResetRepository = {
       findByToken: mock(async () => expiredToken),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const service = new ResetPasswordService(resetRepo, {} as any, {} as any, makeTokenRepo())
     const result = await service.execute('expired-token', 'NewPassword123!')
 
@@ -109,8 +122,10 @@ describe('ResetPasswordService', () => {
   test('rejects already-used token', async () => {
     const resetRepo: IPasswordResetRepository = {
       findByToken: mock(async () => usedToken),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const service = new ResetPasswordService(resetRepo, {} as any, {} as any, makeTokenRepo())
     const result = await service.execute('used-token', 'NewPassword123!')
 
@@ -120,8 +135,10 @@ describe('ResetPasswordService', () => {
   test('returns error for unknown token', async () => {
     const resetRepo: IPasswordResetRepository = {
       findByToken: mock(async () => null),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const service = new ResetPasswordService(resetRepo, {} as any, {} as any, makeTokenRepo())
     const result = await service.execute('unknown', 'NewPassword123!')
 
@@ -131,8 +148,10 @@ describe('ResetPasswordService', () => {
   test('validateToken returns valid:true for valid token', async () => {
     const resetRepo: IPasswordResetRepository = {
       findByToken: mock(async () => validToken),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const service = new ResetPasswordService(resetRepo, {} as any, {} as any, makeTokenRepo())
     const result = await service.validateToken('valid-token-abc')
 

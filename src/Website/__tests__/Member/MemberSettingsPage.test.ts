@@ -119,10 +119,15 @@ describe('MemberSettingsPage', () => {
 
       const page = new MemberSettingsPage(
         inertia,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         mockGetProfileService as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
       await page.handle(ctx)
@@ -148,10 +153,15 @@ describe('MemberSettingsPage', () => {
           execute: mock(() =>
             Promise.resolve({ success: true, data: { displayName: 'x', email: 'x' } }),
           ),
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: listSessions } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
       await page.handle(ctx)
@@ -174,10 +184,15 @@ describe('MemberSettingsPage', () => {
 
       const page = new MemberSettingsPage(
         inertia,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         mockGetProfileService as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
       await page.handle(ctx)
@@ -200,10 +215,15 @@ describe('MemberSettingsPage', () => {
 
       const page = new MemberSettingsPage(
         inertia,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock() } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         mockUpdateProfileService as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
       const res = await page.update(ctx)
@@ -230,10 +250,15 @@ describe('MemberSettingsPage', () => {
 
       const page = new MemberSettingsPage(
         inertia,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock() } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         mockUpdateProfileService as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         {} as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, sessions: [] })) } as any,
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) } as any,
       )
       const res = await page.update(ctx)

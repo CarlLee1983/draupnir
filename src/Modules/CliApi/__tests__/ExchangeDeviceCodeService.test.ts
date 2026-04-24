@@ -59,10 +59,10 @@ describe('ExchangeDeviceCodeService', () => {
     const result = await service.execute({ deviceCode: 'dc-auth' })
     expect(result.success).toBe(true)
     expect(result.data).toBeDefined()
-    expect(result.data!.accessToken).toBeTruthy()
-    expect(result.data!.refreshToken).toBeTruthy()
-    expect(result.data!.user.id).toBe('user-1')
-    expect(result.data!.user.email).toBe('user@example.com')
+    expect(result.data?.accessToken).toBeTruthy()
+    expect(result.data?.refreshToken).toBeTruthy()
+    expect(result.data?.user.id).toBe('user-1')
+    expect(result.data?.user.email).toBe('user@example.com')
   })
 
   it('should consume the device code after token exchange', async () => {
@@ -78,7 +78,7 @@ describe('ExchangeDeviceCodeService', () => {
 
     await service.execute({ deviceCode: 'dc-consume' })
     const afterExchange = await store.findByDeviceCode('dc-consume')
-    expect(afterExchange!.status).toBe('consumed')
+    expect(afterExchange?.status).toBe('consumed')
   })
 
   it('should reject invalid device code', async () => {

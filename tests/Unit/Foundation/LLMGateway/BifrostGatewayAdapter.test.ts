@@ -47,6 +47,7 @@ describe('BifrostGatewayAdapter', () => {
       const listResponse: TeamListResponse = {
         teams: [{ id: 'team-1', name: 'org-1', customer_id: 'cust-1', budget_id: 'budget-1' }],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, listResponse))) as any
 
       const team = await adapter.ensureTeam({ name: 'org-1' })
@@ -57,6 +58,7 @@ describe('BifrostGatewayAdapter', () => {
         customerId: 'cust-1',
         budgetId: 'budget-1',
       })
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       expect((globalThis.fetch as any).mock.calls).toHaveLength(1)
     })
 
@@ -70,6 +72,7 @@ describe('BifrostGatewayAdapter', () => {
         if (init.method === 'GET') return Promise.resolve(mockFetchResponse(200, listResponse))
         if (init.method === 'POST') return Promise.resolve(mockFetchResponse(200, createResponse))
         throw new Error(`unexpected method: ${init.method}`)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       }) as any
 
       const team = await adapter.ensureTeam({
@@ -80,7 +83,9 @@ describe('BifrostGatewayAdapter', () => {
 
       expect(team.id).toBe('team-2')
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const postCall = (globalThis.fetch as any).mock.calls.find(
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         (call: any[]) => call[1]?.method === 'POST',
       )
       const body = JSON.parse(postCall[1].body)
@@ -108,6 +113,7 @@ describe('BifrostGatewayAdapter', () => {
           provider_configs: [],
         },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       await adapter.createKey({
@@ -119,6 +125,7 @@ describe('BifrostGatewayAdapter', () => {
         providerConfigs: [{ provider: '*', allowedModels: ['gpt-4'] }],
       })
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.name).toBe('test')
@@ -144,6 +151,7 @@ describe('BifrostGatewayAdapter', () => {
           provider_configs: [],
         },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await adapter.createKey({ name: 'test' })
@@ -159,10 +167,12 @@ describe('BifrostGatewayAdapter', () => {
         message: 'created',
         virtual_key: { id: 'vk-1', name: 'test', is_active: true, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       await adapter.createKey({ name: 'test' })
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.name).toBe('test')
@@ -185,10 +195,12 @@ describe('BifrostGatewayAdapter', () => {
         message: 'updated',
         virtual_key: { id: 'vk-1', name: 'test', is_active: true, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       await adapter.updateKey('vk-1', { isActive: true })
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.is_active).toBe(true)
@@ -202,12 +214,14 @@ describe('BifrostGatewayAdapter', () => {
         message: 'updated',
         virtual_key: { id: 'vk-1', name: 'test', is_active: true, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       await adapter.updateKey('vk-1', {
         budget: { maxLimit: 50, resetDuration: '720h' },
       })
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.budget).toEqual({ max_limit: 50, reset_duration: '720h' })
@@ -222,10 +236,12 @@ describe('BifrostGatewayAdapter', () => {
         message: 'updated',
         virtual_key: { id: 'vk-1', name: 'test', is_active: true, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       await adapter.updateKey('vk-1', { rateLimit: { tokenMaxLimit: 500 } })
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.rate_limit).toBeDefined()
@@ -240,6 +256,7 @@ describe('BifrostGatewayAdapter', () => {
         message: 'updated',
         virtual_key: { id: 'vk-1', name: 'updated', is_active: false, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await adapter.updateKey('vk-1', { isActive: false })
@@ -253,12 +270,14 @@ describe('BifrostGatewayAdapter', () => {
         message: 'updated',
         virtual_key: { id: 'vk-1', name: 'updated', is_active: false, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       await adapter.updateKey('vk-1', {
         providerConfigs: [{ provider: 'openai', allowedModels: ['gpt-4', 'gpt-4o'] }],
       })
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       const body = JSON.parse(fetchCall[1].body)
       expect(body.provider_configs).toEqual([
@@ -275,10 +294,12 @@ describe('BifrostGatewayAdapter', () => {
     it('should call deleteVirtualKey with the given keyId', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(200, { message: 'deleted' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       await adapter.deleteKey('vk-1')
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       expect(fetchCall[0]).toContain('/vk-1')
       expect(fetchCall[1].method).toBe('DELETE')
@@ -297,6 +318,7 @@ describe('BifrostGatewayAdapter', () => {
         total_tokens: 50000,
         avg_latency: 200,
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockStats))) as any
 
       await adapter.getUsageStats(['vk-1', 'vk-2'], {
@@ -304,6 +326,7 @@ describe('BifrostGatewayAdapter', () => {
         endTime: '2024-12-31',
       })
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toContain('virtual_key_ids=vk-1%2Cvk-2')
       expect(url).toContain('start_time=2024-01-01')
@@ -317,6 +340,7 @@ describe('BifrostGatewayAdapter', () => {
         total_tokens: 50000,
         avg_latency: 200,
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockStats))) as any
 
       const result = await adapter.getUsageStats(['vk-1'])
@@ -334,10 +358,12 @@ describe('BifrostGatewayAdapter', () => {
         total_tokens: 0,
         avg_latency: 0,
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockStats))) as any
 
       await adapter.getUsageStats(['vk-1'])
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).not.toContain('start_time')
       expect(url).not.toContain('end_time')
@@ -368,10 +394,12 @@ describe('BifrostGatewayAdapter', () => {
           },
         ],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await adapter.getUsageLogs(['vk-1'])
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toContain('virtual_key_ids=vk-1')
       expect(result).toHaveLength(1)
@@ -403,6 +431,7 @@ describe('BifrostGatewayAdapter', () => {
           },
         ],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await adapter.getUsageLogs(['vk-1'])
@@ -425,6 +454,7 @@ describe('BifrostGatewayAdapter', () => {
           },
         ],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await adapter.getUsageLogs(['vk-1'])
@@ -448,6 +478,7 @@ describe('BifrostGatewayAdapter', () => {
           },
         ],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await adapter.getUsageLogs(['vk-1'])
@@ -466,6 +497,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 404 to GatewayError NOT_FOUND (retryable: false)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(404, { error: 'not found' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -482,6 +514,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 401 to GatewayError UNAUTHORIZED (retryable: false)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(401, { error: 'unauthorized' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -497,6 +530,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 403 to GatewayError UNAUTHORIZED (retryable: false)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(403, { error: 'forbidden' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -512,6 +546,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 422 to GatewayError VALIDATION (retryable: false)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(422, { error: 'validation error' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -527,6 +562,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 400 to GatewayError VALIDATION (retryable: false)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(400, { error: 'bad request' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -542,6 +578,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 429 to GatewayError RATE_LIMITED (retryable: true)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(429, { error: 'too many requests' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -557,6 +594,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 502 to GatewayError NETWORK (retryable: true)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(502, { error: 'bad gateway' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -572,6 +610,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 503 to GatewayError NETWORK (retryable: true)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(503, { error: 'service unavailable' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -587,6 +626,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should translate BifrostApiError 504 to GatewayError NETWORK (retryable: true)', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(504, { error: 'gateway timeout' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -600,6 +640,7 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate TypeError (fetch failure) to GatewayError NETWORK (retryable: true)', async () => {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.reject(new TypeError('fetch failed'))) as any
 
       try {
@@ -613,6 +654,7 @@ describe('BifrostGatewayAdapter', () => {
     })
 
     it('should translate unknown error to GatewayError UNKNOWN (retryable: false)', async () => {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.reject(new Error('unknown failure'))) as any
 
       try {
@@ -628,6 +670,7 @@ describe('BifrostGatewayAdapter', () => {
     it('should preserve originalError in GatewayError', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(404, { error: 'not found' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {

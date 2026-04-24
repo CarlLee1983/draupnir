@@ -11,6 +11,7 @@ describe('ChangePasswordService', () => {
     id: 'u1',
     password: Password.fromHashed(hashedOld),
     withPassword: mock((h: string) => ({ id: 'u1', savedHash: h })),
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   } as any
 
   test('rejects wrong current password', async () => {
@@ -18,6 +19,7 @@ describe('ChangePasswordService', () => {
     const authRepo: IAuthRepository = {
       findById: mock(async () => mockUser),
       save,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const hasher: IPasswordHasher = {
       hash: mock(async () => 'new-hash'),
@@ -25,6 +27,7 @@ describe('ChangePasswordService', () => {
     }
     const tokenRepo: IAuthTokenRepository = {
       revokeAllByUserId: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
     const svc = new ChangePasswordService(authRepo, hasher, tokenRepo)
@@ -41,6 +44,7 @@ describe('ChangePasswordService', () => {
     const authRepo: IAuthRepository = {
       findById: mock(async () => mockUser),
       save,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const hasher: IPasswordHasher = {
       hash: mock(async () => 'new-hash'),
@@ -48,6 +52,7 @@ describe('ChangePasswordService', () => {
     }
     const tokenRepo: IAuthTokenRepository = {
       revokeAllByUserId: revoke,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
     const svc = new ChangePasswordService(authRepo, hasher, tokenRepo)

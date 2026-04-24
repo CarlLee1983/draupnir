@@ -114,9 +114,13 @@ describe('AdminContractDetailPage', () => {
     const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockActivateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockTerminateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdjustQuotaService as any,
     )
     const ctx = createAdminContext()
@@ -139,9 +143,13 @@ describe('AdminContractDetailPage', () => {
     const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockActivateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockTerminateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdjustQuotaService as any,
     )
     const ctx = createAdminContext()
@@ -159,9 +167,13 @@ describe('AdminContractDetailPage', () => {
     const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockActivateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockTerminateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdjustQuotaService as any,
     )
     const ctx = createAdminContextWithBody(
@@ -186,9 +198,13 @@ describe('AdminContractDetailPage', () => {
     const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockActivateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockTerminateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdjustQuotaService as any,
     )
     const ctx = createAdminContextWithBody(
@@ -213,9 +229,13 @@ describe('AdminContractDetailPage', () => {
     const mockAdjustQuotaService = { execute: mock(() => Promise.resolve({ success: true })) }
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockActivateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockTerminateService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdjustQuotaService as any,
     )
     const ctx = createAdminContextWithBody(

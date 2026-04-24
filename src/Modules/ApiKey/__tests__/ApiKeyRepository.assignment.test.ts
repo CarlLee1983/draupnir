@@ -37,7 +37,7 @@ describe('ApiKeyRepository.findByOrgAndAssignedMember', () => {
       createdByUserId: 'creator-1',
       label: 'Key 1',
       gatewayKeyId: 'bfr-vk-assign-k1',
-      keyHash: hashes['drp_sk_assign_k1'],
+      keyHash: hashes.drp_sk_assign_k1,
     }).assignTo('user-1')
 
     // k2: org-A, user-2 (different member — must not appear)
@@ -47,7 +47,7 @@ describe('ApiKeyRepository.findByOrgAndAssignedMember', () => {
       createdByUserId: 'creator-1',
       label: 'Key 2',
       gatewayKeyId: 'bfr-vk-assign-k2',
-      keyHash: hashes['drp_sk_assign_k2'],
+      keyHash: hashes.drp_sk_assign_k2,
     }).assignTo('user-2')
 
     // k3: org-B, user-1 (cross-org — must not appear)
@@ -57,7 +57,7 @@ describe('ApiKeyRepository.findByOrgAndAssignedMember', () => {
       createdByUserId: 'creator-1',
       label: 'Key 3',
       gatewayKeyId: 'bfr-vk-assign-k3',
-      keyHash: hashes['drp_sk_assign_k3'],
+      keyHash: hashes.drp_sk_assign_k3,
     }).assignTo('user-1')
 
     // k4: org-A, unassigned (must not appear)
@@ -67,7 +67,7 @@ describe('ApiKeyRepository.findByOrgAndAssignedMember', () => {
       createdByUserId: 'creator-1',
       label: 'Key 4',
       gatewayKeyId: 'bfr-vk-assign-k4',
-      keyHash: hashes['drp_sk_assign_k4'],
+      keyHash: hashes.drp_sk_assign_k4,
     })
 
     await repo.save(k1)
@@ -93,7 +93,7 @@ describe('ApiKeyRepository.countByOrgAndAssignedMember', () => {
       createdByUserId: 'creator-1',
       label: 'Count A1',
       gatewayKeyId: 'bfr-vk-count-a1',
-      keyHash: hashes['drp_sk_count_a1'],
+      keyHash: hashes.drp_sk_count_a1,
     }).assignTo('user-1')
 
     const a2 = ApiKey.create({
@@ -102,7 +102,7 @@ describe('ApiKeyRepository.countByOrgAndAssignedMember', () => {
       createdByUserId: 'creator-1',
       label: 'Count A2',
       gatewayKeyId: 'bfr-vk-count-a2',
-      keyHash: hashes['drp_sk_count_a2'],
+      keyHash: hashes.drp_sk_count_a2,
     }).assignTo('user-1')
 
     const a3 = ApiKey.create({
@@ -111,7 +111,7 @@ describe('ApiKeyRepository.countByOrgAndAssignedMember', () => {
       createdByUserId: 'creator-1',
       label: 'Count A3',
       gatewayKeyId: 'bfr-vk-count-a3',
-      keyHash: hashes['drp_sk_count_a3'],
+      keyHash: hashes.drp_sk_count_a3,
     }).assignTo('user-2')
 
     await repo.save(a1)
@@ -137,7 +137,7 @@ describe('ApiKeyRepository.clearAssignmentsForMember', () => {
       createdByUserId: 'creator-1',
       label: 'Clear Test',
       gatewayKeyId: 'bfr-vk-clear-1',
-      keyHash: hashes['drp_sk_clear_1'],
+      keyHash: hashes.drp_sk_clear_1,
     }).assignTo('user-1')
 
     await repo.save(key)

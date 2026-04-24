@@ -49,6 +49,7 @@ describe('LoginPage', () => {
   test('should render login form on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new LoginPage(inertia, mockLoginService as any)
     const ctx = createMockContext()
 
@@ -65,6 +66,7 @@ describe('LoginPage', () => {
   test('should process login form on POST', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new LoginPage(inertia, mockLoginService as any)
     const ctx = createMockContext()
     ctx.set('validated', { email: 'user@example.com', password: 'password123' })
@@ -89,6 +91,7 @@ describe('LoginPage', () => {
     }
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new LoginPage(inertia, adminLoginService as any)
     const ctx = createMockContext()
     ctx.set('validated', { email: 'admin@example.com', password: 'password123' })
@@ -113,6 +116,7 @@ describe('LoginPage', () => {
     }
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new LoginPage(inertia, managerLoginService as any)
     const ctx = createMockContext()
     ctx.set('validated', { email: 'manager@example.com', password: 'password123' })
@@ -137,6 +141,7 @@ describe('LoginPage', () => {
     }
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new LoginPage(inertia, memberLoginService as any)
     const ctx = createMockContext()
     ctx.set('validated', { email: 'user@example.com', password: 'password123' })
@@ -150,6 +155,7 @@ describe('LoginPage', () => {
   test('GET /login with manager auth redirects to /manager/dashboard', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new LoginPage(inertia, mockLoginService as any)
     const ctx = createMockContext()
     ctx.set('auth', {
@@ -169,6 +175,7 @@ describe('LoginPage', () => {
   test('GET /login with admin auth redirects to /admin/dashboard', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new LoginPage(inertia, mockLoginService as any)
     const ctx = createMockContext()
     ctx.set('auth', {

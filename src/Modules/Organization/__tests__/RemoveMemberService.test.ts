@@ -65,23 +65,23 @@ describe('RemoveMemberService', () => {
       email: 'manager@example.com',
       password: 'StrongPass123',
     })
-    managerId = managerResult.data!.id
+    managerId = managerResult.data?.id as string
 
     const orgResult = await createOrgService.execute({
       name: 'Test Org',
       managerUserId: managerId,
     })
-    orgId = orgResult.data!.id as string
+    orgId = orgResult.data?.id as string
 
     const memberResult = await registerService.execute({
       email: 'member@example.com',
       password: 'StrongPass123',
     })
-    memberId = memberResult.data!.id
+    memberId = memberResult.data?.id as string
     const inviteResult = await inviteService.execute(orgId, managerId, 'user', {
       email: 'member@example.com',
     })
-    await acceptService.execute(memberId, { token: inviteResult.data!.token as string })
+    await acceptService.execute(memberId, { token: inviteResult.data?.token as string })
   })
 
   it('應成功移除成員', async () => {
@@ -109,7 +109,7 @@ describe('RemoveMemberService', () => {
     await removeService.execute(orgId, managerId, memberId, 'user')
 
     const user = await authRepo.findById(managerId)
-    expect(user!.role.getValue()).toBe(RoleType.MEMBER)
+    expect(user?.role.getValue()).toBe(RoleType.MEMBER)
   })
 
   it('移除成員後其仍有其他組織的 manager 角色時系統角色不變', async () => {
@@ -117,7 +117,7 @@ describe('RemoveMemberService', () => {
     const before = await authRepo.findById(memberId)
     await removeService.execute(orgId, memberId, managerId, 'user')
     const after = await authRepo.findById(memberId)
-    expect(after!.role.getValue()).toBe(before!.role.getValue())
+    expect(after?.role.getValue()).toBe(before?.role.getValue())
   })
 
   it('移除成員時會清除該組織下被指派給該成員的 key', async () => {
@@ -142,7 +142,7 @@ describe('RemoveMemberService', () => {
     // 確認 key 的 assigned_member_id 已被清除
     const updatedKey = await apiKeyRepo.findById(key.id)
     expect(updatedKey).not.toBeNull()
-    expect(updatedKey!.assignedMemberId).toBeNull()
+    expect(updatedKey?.assignedMemberId).toBeNull()
   })
 
   it('移除 global admin 成員時不應降低其系統角色', async () => {
@@ -154,7 +154,7 @@ describe('RemoveMemberService', () => {
         password: 'StrongPass123',
       },
     )
-    const adminUserId = adminResult.data!.id
+    const adminUserId = adminResult.data?.id as string
     await authRepo.updateRole(adminUserId, RoleType.ADMIN)
 
     // 以 invitation 讓 admin 加入組織
@@ -163,13 +163,13 @@ describe('RemoveMemberService', () => {
     const inv = await inviteService.execute(orgId, managerId, 'user', {
       email: 'admin@example.com',
     })
-    await acceptService.execute(adminUserId, { token: inv.data!.token as string })
+    await acceptService.execute(adminUserId, { token: inv.data?.token as string })
 
     // 移除這位 admin
     await removeService.execute(orgId, adminUserId, managerId, 'user')
 
     // admin 系統角色應維持 admin
     const user = await authRepo.findById(adminUserId)
-    expect(user!.role.getValue()).toBe(RoleType.ADMIN)
+    expect(user?.role.getValue()).toBe(RoleType.ADMIN)
   })
 })

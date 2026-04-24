@@ -42,7 +42,9 @@ describe('ChangeOrgStatusService', () => {
   })
 
   it('應成功暫停組織', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.findById as any).mockResolvedValue(makeOrg())
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.update as any).mockResolvedValue()
 
     const result = await service.execute('org-1', 'suspended', 'user-1', 'user')
@@ -52,7 +54,9 @@ describe('ChangeOrgStatusService', () => {
 
   it('應成功啟用組織', async () => {
     const suspendedOrg = makeOrg().suspend()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.findById as any).mockResolvedValue(suspendedOrg)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.update as any).mockResolvedValue()
 
     const result = await service.execute('org-1', 'active', 'user-1', 'user')
@@ -67,6 +71,7 @@ describe('ChangeOrgStatusService', () => {
   })
 
   it('組織不存在應回傳 ORG_NOT_FOUND', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.findById as any).mockResolvedValue(null)
 
     const result = await service.execute('org-1', 'suspended', 'user-1', 'user')

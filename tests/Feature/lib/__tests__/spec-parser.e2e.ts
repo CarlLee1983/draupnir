@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'bun:test'
-import { resolve } from 'path'
 import { parseOpenAPI } from '../spec-parser'
 
-const SPEC_PATH = resolve(import.meta.dir, '../../../../docs/openapi.yaml')
+const joinPath = (...parts: string[]) => parts.join('/').replace(/\/+/g, '/')
+const SPEC_PATH = joinPath(import.meta.dir, '../../../../docs/openapi.yaml')
 
 describe('parseOpenAPI', () => {
   it('parses the spec file without errors', () => {
@@ -68,6 +68,6 @@ describe('parseOpenAPI', () => {
   it('extracts component schemas for $ref resolution', () => {
     const spec = parseOpenAPI(SPEC_PATH)
     expect(spec.componentSchemas).toBeDefined()
-    expect(spec.componentSchemas['RegisterRequest']).toBeDefined()
+    expect(spec.componentSchemas.RegisterRequest).toBeDefined()
   })
 })

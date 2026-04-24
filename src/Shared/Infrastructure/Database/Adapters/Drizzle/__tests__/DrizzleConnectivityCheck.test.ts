@@ -13,6 +13,7 @@ describe('DrizzleConnectivityCheck', () => {
       execute: async () => [{ '1': 1 }],
       run: async () => ({}),
     }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const spy = spyOn(config, 'getDrizzleInstance').mockReturnValue(mockDb as any)
 
     const check = createDrizzleConnectivityCheck()
@@ -28,6 +29,7 @@ describe('DrizzleConnectivityCheck', () => {
         throw new Error('Connection failed')
       },
     }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const spy = spyOn(config, 'getDrizzleInstance').mockReturnValue(mockDb as any)
 
     const check = createDrizzleConnectivityCheck()

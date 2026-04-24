@@ -102,6 +102,7 @@ describe('AdminContractCreatePage', () => {
     const { inertia, captured } = createMockInertia()
     const mockCreateContractService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
     const ctx = createAdminContext()
     await page.handle(ctx)
@@ -114,6 +115,7 @@ describe('AdminContractCreatePage', () => {
     const { inertia, captured } = createMockInertia()
     const mockCreateContractService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
     const ctx = createAdminContextWithBody({
       targetType: 'organization',
@@ -131,6 +133,7 @@ describe('AdminContractCreatePage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: { id: 'contract-new-1' } })),
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
     const body = {
       targetType: 'organization',
@@ -156,6 +159,7 @@ describe('AdminContractCreatePage', () => {
       execute: mock(() => Promise.resolve({ success: false, message: 'Service error' })),
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminContractCreatePage(inertia, mockCreateContractService as any)
     const body = {
       targetType: 'organization',

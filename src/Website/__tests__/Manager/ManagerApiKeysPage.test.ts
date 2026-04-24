@@ -55,6 +55,7 @@ function mkInertia() {
         captured.lastCall = { component, props }
         return new Response(JSON.stringify({ component, props }))
       },
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any,
     captured,
   }
@@ -111,17 +112,24 @@ describe('ManagerApiKeysPage', () => {
     }
     const page = new ManagerApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       listKeys as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       listMembers as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       } as any,
     )
     await page.handle(makeCtx())
     expect(captured.lastCall?.component).toBe('Manager/ApiKeys/Index')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props as any).keys.length).toBe(1)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const assignees = (captured.lastCall?.props as any).assignees as Array<{
       userId: string
       email: string
@@ -150,16 +158,22 @@ describe('ManagerApiKeysPage', () => {
     const { inertia } = mkInertia()
     const page = new ManagerApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       assign as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       } as any,
     )
     const res = await page.assign(ctx)
     expect(res.headers.get('location')).toBe('/manager/api-keys')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const args = (assign.execute as any).mock.calls[0][0]
     expect(args.orgId).toBe('org-A')
     expect(args.keyId).toBe('k-1')
@@ -172,12 +186,17 @@ describe('ManagerApiKeysPage', () => {
     const { inertia } = mkInertia()
     const page = new ManagerApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock() } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       revoke as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       } as any,
     )
     const res = await page.revoke(ctx)

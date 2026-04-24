@@ -66,7 +66,7 @@ describe('VerifyDevicePage integration', () => {
 
     registerAuthPageBindings(container)
     expect(factory).toBeDefined()
-    const instance = factory!(container)
+    const instance = factory?.(container)
     expect(instance).toBeInstanceOf(VerifyDevicePage)
   })
 

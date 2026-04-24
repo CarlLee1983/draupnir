@@ -1,9 +1,9 @@
 import { describe, it } from 'bun:test'
-import { resolve } from 'path'
 import { extractRoutesFromSource } from './lib/route-extractor'
 import { parseOpenAPI } from './lib/spec-parser'
 
-const SPEC_PATH = resolve(import.meta.dir, '../../docs/openapi.yaml')
+const joinPath = (...parts: string[]) => parts.join('/').replace(/\/+/g, '/')
+const SPEC_PATH = joinPath(import.meta.dir, '../../docs/openapi.yaml')
 
 describe('OpenAPI Spec / Route 一致性', () => {
   const spec = parseOpenAPI(SPEC_PATH)

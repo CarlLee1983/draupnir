@@ -80,6 +80,7 @@ function makeMockDb(): IDatabaseAccess {
 describe('AcceptInvitationByIdService', () => {
   it('應成功接受邀請並建立 membership', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(makePendingInvitation())
 
     const memberRepo = makeMockMemberRepo()
@@ -96,6 +97,7 @@ describe('AcceptInvitationByIdService', () => {
 
   it('邀請不存在應回傳 INVALID_INVITATION', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(null)
 
     const memberRepo = makeMockMemberRepo()
@@ -113,6 +115,7 @@ describe('AcceptInvitationByIdService', () => {
 
   it('user 不存在應回傳 USER_NOT_FOUND', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(makePendingInvitation())
 
     const memberRepo = makeMockMemberRepo()
@@ -130,6 +133,7 @@ describe('AcceptInvitationByIdService', () => {
 
   it('email 不匹配應回傳 EMAIL_MISMATCH', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(makePendingInvitation('other@example.com'))
 
     const memberRepo = makeMockMemberRepo()
@@ -147,9 +151,11 @@ describe('AcceptInvitationByIdService', () => {
 
   it('已是成員時應回傳 USER_ALREADY_IN_ORG', async () => {
     const invitationRepo = makeMockInvitationRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(makePendingInvitation())
 
     const memberRepo = makeMockMemberRepo()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue({ userId: 'user-1' })
 
     const authRepo = {

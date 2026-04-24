@@ -27,8 +27,11 @@ function createService(
 
   return {
     service: new GetModelComparisonService(
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       apiKeyRepository as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       orgAuth as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       usageRepository as any,
     ),
     apiKeyRepository,

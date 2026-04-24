@@ -12,7 +12,9 @@ const testItems = sqliteTable('test_items', {
 })
 
 describe('DrizzleQueryBuilder CRUD (Isolated)', () => {
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let client: any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let drizzleDb: any
   let qb: DrizzleQueryBuilder
 

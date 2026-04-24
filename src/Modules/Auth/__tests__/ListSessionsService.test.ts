@@ -28,8 +28,8 @@ describe('ListSessionsService', () => {
     expect(result.success).toBe(true)
     if (!result.success) return
     expect(result.sessions).toHaveLength(1)
-    expect(result.sessions[0]!.id).toBe('a1')
-    expect(result.sessions[0]!.isCurrent).toBe(true)
+    expect(result.sessions[0]?.id).toBe('a1')
+    expect(result.sessions[0]?.isCurrent).toBe(true)
   })
 
   test('marks isCurrent false when no current hash', async () => {
@@ -43,6 +43,6 @@ describe('ListSessionsService', () => {
 
     expect(result.success).toBe(true)
     if (!result.success) return
-    expect(result.sessions[0]!.isCurrent).toBe(false)
+    expect(result.sessions[0]?.isCurrent).toBe(false)
   })
 })

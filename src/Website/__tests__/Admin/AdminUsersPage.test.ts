@@ -81,6 +81,7 @@ describe('AdminUsersPage', () => {
       ),
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminUsersPage(inertia, mockListService as any)
     const ctx = createAdminContext()
     await page.handle(ctx)

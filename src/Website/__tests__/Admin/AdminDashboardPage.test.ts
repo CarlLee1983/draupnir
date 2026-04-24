@@ -109,9 +109,13 @@ describe('AdminDashboardPage', () => {
 
     const page = new AdminDashboardPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListUsersService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListOrgsService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListAdminContractsService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdminUsageTrendService as any,
     )
 
@@ -155,9 +159,13 @@ describe('AdminDashboardPage', () => {
 
     const page = new AdminDashboardPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListUsersService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListOrgsService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListAdminContractsService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdminUsageTrendService as any,
     )
 
@@ -201,15 +209,20 @@ describe('AdminDashboardPage', () => {
 
     const page = new AdminDashboardPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListUsersService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListOrgsService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListAdminContractsService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockAdminUsageTrendService as any,
     )
 
     const ctx = createAdminContext()
     await page.handle(ctx)
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const props = captured.lastCall?.props as any
     expect(props.isUsageTrendDemo).toBe(true)
     expect(props.usageTrend.length).toBe(2)

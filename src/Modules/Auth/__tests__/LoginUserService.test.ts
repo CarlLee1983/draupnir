@@ -58,7 +58,7 @@ describe('LoginUserService Integration Test', () => {
     expect(result.data?.user.email).toBe('user@example.com')
     expect(result.data?.user.role).toBe(RoleType.MEMBER)
 
-    const payload = jwtTokenService.verify(result.data!.accessToken)
+    const payload = jwtTokenService.verify(result.data?.accessToken as string)
     expect(payload?.role).toBe(RoleType.MEMBER)
   })
 

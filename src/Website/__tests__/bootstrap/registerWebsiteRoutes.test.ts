@@ -140,7 +140,7 @@ describe('registerPageRoutes consolidation', () => {
         failedLabel = label
         register({} as IModuleRouter, {} as IContainer)
       }
-    } catch (error) {
+    } catch (_error) {
       errorWasThrown = true
       // At this point, failedLabel contains exactly which registration failed
       expect(failedLabel).toContain('Admin')

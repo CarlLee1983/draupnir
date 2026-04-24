@@ -56,25 +56,25 @@ describe('AcceptInvitationService', () => {
       email: 'manager@example.com',
       password: 'StrongPass123',
     })
-    managerId = managerResult.data!.id
+    managerId = managerResult.data?.id as string
     const orgResult = await createOrgService.execute({
       name: 'Test Org',
       managerUserId: managerId,
     })
-    orgId = orgResult.data!.id as string
+    orgId = orgResult.data?.id as string
 
     const newUserResult = await registerService.execute({
       email: 'new@example.com',
       password: 'StrongPass123',
     })
-    newUserId = newUserResult.data!.id
+    newUserId = newUserResult.data?.id as string
   })
 
   it('已註冊使用者應成功加入組織', async () => {
     const inviteResult = await inviteService.execute(orgId, managerId, 'user', {
       email: 'new@example.com',
     })
-    const token = inviteResult.data!.token as string
+    const token = inviteResult.data?.token as string
 
     const result = await acceptService.execute(newUserId, { token })
     expect(result.success).toBe(true)
@@ -84,7 +84,7 @@ describe('AcceptInvitationService', () => {
     const inviteResult = await inviteService.execute(orgId, managerId, 'user', {
       email: 'manager@example.com',
     })
-    const token = inviteResult.data!.token as string
+    const token = inviteResult.data?.token as string
 
     const result = await acceptService.execute(managerId, { token })
     expect(result.success).toBe(false)
@@ -95,13 +95,13 @@ describe('AcceptInvitationService', () => {
     const inviteResult = await inviteService.execute(orgId, managerId, 'user', {
       email: 'new@example.com',
     })
-    const token = inviteResult.data!.token as string
+    const token = inviteResult.data?.token as string
 
     const otherResult = await registerService.execute({
       email: 'other@example.com',
       password: 'StrongPass123',
     })
-    const otherUserId = otherResult.data!.id
+    const otherUserId = otherResult.data?.id as string
 
     const result = await acceptService.execute(otherUserId, { token })
     expect(result.success).toBe(false)

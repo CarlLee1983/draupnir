@@ -9,7 +9,9 @@ import { createDrizzleDatabaseAccess } from '../DrizzleDatabaseAdapter'
 
 describe('DrizzleQueryBuilder.aggregate', () => {
   let db: IDatabaseAccess
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let drizzleDb: any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let configSpy: any
 
   beforeAll(async () => {

@@ -8,7 +8,9 @@ import * as schema from '@/Shared/Infrastructure/Database/schema'
 
 describe('AtlasUsageRepository - ByKeys variants (IN operator)', () => {
   let repo: AtlasUsageRepository
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let drizzleDb: any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let configSpy: any
 
   beforeAll(async () => {

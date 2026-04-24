@@ -47,7 +47,7 @@ describe('CreateOrganizationService', () => {
       email: 'manager@example.com',
       password: 'StrongPass123',
     })
-    managerId = result.data!.id
+    managerId = result.data?.id as string
   })
 
   it('應成功建立 Organization 並指定 Manager', async () => {
@@ -89,7 +89,7 @@ describe('CreateOrganizationService', () => {
     const result = await service.execute({
       name: 'CMG',
       slug: 'cmg',
-      managerUserId: result2.data!.id,
+      managerUserId: result2.data?.id as string,
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('SLUG_EXISTS')
@@ -104,7 +104,7 @@ describe('CreateOrganizationService', () => {
       email: 'admin@example.com',
       password: 'StrongPass123',
     })
-    const adminId = registerResult.data!.id
+    const adminId = registerResult.data?.id as string
     await authRepo.updateRole(adminId, RoleType.ADMIN)
 
     const result = await service.execute({ name: 'Test Org', managerUserId: adminId })
@@ -125,7 +125,7 @@ describe('CreateOrganizationService', () => {
     await service.execute({ name: 'Promo Org', managerUserId: managerId })
 
     const user = await authRepo.findById(managerId)
-    expect(user!.role.getValue()).toBe(RoleType.MANAGER)
+    expect(user?.role.getValue()).toBe(RoleType.MANAGER)
   })
 
   describe('spec §2：已具 membership 的使用者禁止建立新組織', () => {

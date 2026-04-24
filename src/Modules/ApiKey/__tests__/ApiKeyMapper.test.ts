@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { ApiKey } from '../Domain/Aggregates/ApiKey'
-import { ApiKeyMapper } from '../Infrastructure/Mappers/ApiKeyMapper'
+import { toDatabaseRow } from '../Infrastructure/Mappers/ApiKeyMapper'
 
 function makeKey(): ApiKey {
   return ApiKey.create({
@@ -13,25 +13,25 @@ function makeKey(): ApiKey {
   })
 }
 
-describe('ApiKeyMapper.toDatabaseRow', () => {
+describe('toDatabaseRow (ApiKey)', () => {
   test('未指派時 assigned_member_id 為 null', () => {
-    const row = ApiKeyMapper.toDatabaseRow(makeKey())
+    const row = toDatabaseRow(makeKey())
     expect(row.assigned_member_id).toBe(null)
   })
 
   test('指派後寫入 assigned_member_id', () => {
-    const row = ApiKeyMapper.toDatabaseRow(makeKey().assignTo('user-42'))
+    const row = toDatabaseRow(makeKey().assignTo('user-42'))
     expect(row.assigned_member_id).toBe('user-42')
   })
 
   test('quota_allocated 預設為 0 並可被調整', () => {
-    expect(ApiKeyMapper.toDatabaseRow(makeKey()).quota_allocated).toBe(0)
+    expect(toDatabaseRow(makeKey()).quota_allocated).toBe(0)
     const adjusted = makeKey().adjustQuotaAllocated(100)
-    expect(ApiKeyMapper.toDatabaseRow(adjusted).quota_allocated).toBe(100)
+    expect(toDatabaseRow(adjusted).quota_allocated).toBe(100)
   })
 
   test('未傳入 gatewayKeyValue 時 bifrost_key_value 為 null', () => {
-    const row = ApiKeyMapper.toDatabaseRow(makeKey())
+    const row = toDatabaseRow(makeKey())
     expect(row.bifrost_key_value).toBe(null)
   })
 
@@ -45,7 +45,7 @@ describe('ApiKeyMapper.toDatabaseRow', () => {
       gatewayKeyValue: 'sk-bf-04b9f808-6d4f-44dc-a247-1d73ecf4cbcb',
       keyHash: 'h'.repeat(64),
     })
-    const row = ApiKeyMapper.toDatabaseRow(key)
+    const row = toDatabaseRow(key)
     expect(row.bifrost_key_value).toBe('sk-bf-04b9f808-6d4f-44dc-a247-1d73ecf4cbcb')
     expect(row.bifrost_virtual_key_id).toBe('gw-uuid-123')
   })

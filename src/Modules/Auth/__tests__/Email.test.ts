@@ -37,7 +37,7 @@ describe('Email Value Object', () => {
   })
 
   it('應該拒絕過長的電子郵件', () => {
-    const longEmail = 'a'.repeat(250) + '@example.com'
+    const longEmail = `${'a'.repeat(250)}@example.com`
     expect(() => new Email(longEmail)).toThrow()
   })
 })

@@ -41,7 +41,7 @@ describe('requireManager', () => {
     const ctx = makeCtx(null, redirects)
     const r = requireManager(ctx)
     expect(r.ok).toBe(false)
-    expect(redirects.calls[0]!.url).toBe('/login')
+    expect(redirects.calls[0]?.url).toBe('/login')
   })
 
   test('admin → redirect /admin/dashboard', () => {
@@ -52,7 +52,7 @@ describe('requireManager', () => {
     )
     const r = requireManager(ctx)
     expect(r.ok).toBe(false)
-    expect(redirects.calls[0]!.url).toBe('/admin/dashboard')
+    expect(redirects.calls[0]?.url).toBe('/admin/dashboard')
   })
 
   test('member → redirect /member/dashboard', () => {
@@ -63,7 +63,7 @@ describe('requireManager', () => {
     )
     const r = requireManager(ctx)
     expect(r.ok).toBe(false)
-    expect(redirects.calls[0]!.url).toBe('/member/dashboard')
+    expect(redirects.calls[0]?.url).toBe('/member/dashboard')
   })
 
   test('manager → ok', () => {

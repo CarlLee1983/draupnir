@@ -41,7 +41,8 @@ describe('ProvisionOrganizationDefaultsService', () => {
     const dash = await moduleRepo.findByName('dashboard')
     expect(dash).not.toBeNull()
 
-    const sub = await subRepo.findByOrgAndModule('org-new', dash!.id)
+    if (!dash) throw new Error('dashboard module expected')
+    const sub = await subRepo.findByOrgAndModule('org-new', dash.id)
     expect(sub?.isActive()).toBe(true)
 
     expect(gateway.calls.ensureTeam).toHaveLength(1)

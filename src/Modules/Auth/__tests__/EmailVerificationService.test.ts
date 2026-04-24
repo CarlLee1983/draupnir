@@ -21,6 +21,7 @@ describe('EmailVerificationService', () => {
     const repo: IEmailVerificationRepository = {
       findByToken: mock(async () => validToken),
       markUsed: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
     const service = new EmailVerificationService(repo)
@@ -34,6 +35,7 @@ describe('EmailVerificationService', () => {
   test('rejects expired token', async () => {
     const repo: IEmailVerificationRepository = {
       findByToken: mock(async () => expiredToken),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
     const service = new EmailVerificationService(repo)
@@ -45,6 +47,7 @@ describe('EmailVerificationService', () => {
   test('rejects unknown token', async () => {
     const repo: IEmailVerificationRepository = {
       findByToken: mock(async () => null),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
     const service = new EmailVerificationService(repo)

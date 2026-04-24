@@ -71,7 +71,7 @@ describe('Contract Lifecycle', () => {
       callerUserId: 'admin-1',
       callerSystemRole: 'admin',
     })
-    const contractId = created.data!.id as string
+    const contractId = created.data?.id as string
 
     const activated = await activateService.execute(contractId, 'admin')
     expect(activated.success).toBe(true)
@@ -90,18 +90,19 @@ describe('Contract Lifecycle', () => {
       callerUserId: 'admin-1',
       callerSystemRole: 'admin',
     })
-    const contractId = created.data!.id as string
+    const contractId = created.data?.id as string
     await activateService.execute(contractId, 'admin')
 
     const newTerms = { ...validTerms, creditQuota: 20000 }
     const renewed = await renewService.execute(contractId, newTerms, 'admin-1', 'admin')
     expect(renewed.success).toBe(true)
     expect(renewed.data?.status).toBe('active')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((renewed.data?.terms as any).creditQuota).toBe(20000)
 
     // 舊合約應為 expired
     const old = await repo.findById(contractId)
-    expect(old!.status).toBe('expired')
+    expect(old?.status).toBe('expired')
   })
 
   test('不存在的合約回傳 NOT_FOUND', async () => {

@@ -102,6 +102,7 @@ describe('AdminModuleCreatePage', () => {
     const { inertia, captured } = createMockInertia()
     const mockRegisterModuleService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminModuleCreatePage(inertia, mockRegisterModuleService as any)
     const ctx = createAdminContext()
     await page.handle(ctx)
@@ -114,6 +115,7 @@ describe('AdminModuleCreatePage', () => {
     const { inertia, captured } = createMockInertia()
     const mockRegisterModuleService = { execute: mock(() => Promise.resolve({ success: true })) }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminModuleCreatePage(inertia, mockRegisterModuleService as any)
     const ctx = createAdminContextWithBody({
       name: '',
@@ -131,6 +133,7 @@ describe('AdminModuleCreatePage', () => {
       execute: mock(() => Promise.resolve({ success: true, data: { id: 'module-1' } })),
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminModuleCreatePage(inertia, mockRegisterModuleService as any)
     const ctx = createAdminContextWithBody({
       name: 'test-module',
@@ -150,6 +153,7 @@ describe('AdminModuleCreatePage', () => {
       execute: mock(() => Promise.resolve({ success: false, message: 'Module already exists' })),
     }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminModuleCreatePage(inertia, mockRegisterModuleService as any)
     const ctx = createAdminContextWithBody({
       name: 'test-module',

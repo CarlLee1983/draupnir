@@ -48,6 +48,7 @@ describe('RegisterPage', () => {
   test('should render registration form on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new RegisterPage(inertia, mockRegisterService as any, mockLoginService as any)
     const ctx = createMockContext()
 
@@ -65,6 +66,7 @@ describe('RegisterPage', () => {
   test('should auto-login and redirect to dashboard after successful registration', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new RegisterPage(inertia, mockRegisterService as any, mockLoginService as any)
     const ctx = createMockContext()
     ctx.set('validated', {

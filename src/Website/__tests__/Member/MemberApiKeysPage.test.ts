@@ -112,9 +112,13 @@ describe('MemberApiKeysPage', () => {
     const mockMembershipService = { execute: mock(() => Promise.resolve({ orgId: 'org-123' })) }
     const page = new MemberApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockMembershipService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockBalanceService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockPendingInvitationsService as any,
     )
     await page.handle(ctx)
@@ -143,9 +147,13 @@ describe('MemberApiKeysPage', () => {
 
     const page = new MemberApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockMembershipService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockBalanceService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockInvitesService as any,
     )
     await page.handle(ctx)
@@ -175,9 +183,13 @@ describe('MemberApiKeysPage', () => {
     const mockMembershipService = { execute: mock(() => Promise.resolve({ orgId: 'org-123' })) }
     const page = new MemberApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockMembershipService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockBalanceService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockPendingInvitationsService as any,
     )
     await page.handle(ctx)
@@ -201,13 +213,18 @@ describe('MemberApiKeysPage', () => {
     }
     const page = new MemberApiKeysPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockMembershipService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockBalanceService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockPendingInvitationsService as any,
     )
     await page.handle(ctx)
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const args = (mockListService.execute as any).mock.calls[0]
     expect(args[0]).toBe('org-A') // orgId
     expect(args[1]).toBe('member-1') // callerUserId

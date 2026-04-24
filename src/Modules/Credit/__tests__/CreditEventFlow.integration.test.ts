@@ -98,6 +98,7 @@ describe('Credit Event Flow 整合測試', () => {
       }),
     })
     const activeKey = mockKey.activate()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findActiveByOrgId as any).mockResolvedValue([activeKey])
 
     // Step 1: 扣光餘額 → 應觸發 BalanceDepleted → 自動封鎖 Key
@@ -121,6 +122,7 @@ describe('Credit Event Flow 整合測試', () => {
 
     // 準備 suspended key（模擬封鎖後的狀態）
     const suspendedKey = activeKey.suspend('CREDIT_DEPLETED', { rpm: 60, tpm: 100000 })
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findSuspendedByOrgId as any).mockResolvedValue([suspendedKey])
 
     // Step 2: 充值 → 應觸發 CreditToppedUp → 自動恢復 Key
@@ -139,6 +141,7 @@ describe('Credit Event Flow 整合測試', () => {
   })
 
   it('餘額低於閾值但未耗盡時不應封鎖 Key', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findActiveByOrgId as any).mockResolvedValue([])
 
     const result = await deductionService.execute({

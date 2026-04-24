@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync } from 'node:fs'
 import { parse as parseYAML } from 'yaml'
 
 export interface Operation {
@@ -121,6 +121,7 @@ function resolveSchema(
   if (!schema) return {}
 
   if (schema.$ref && typeof schema.$ref === 'string') {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const name = schema.$ref.split('/').pop()!
     const resolved = componentSchemas[name]
     if (resolved) {

@@ -41,6 +41,7 @@ function resolveIfRef(
   componentSchemas: Record<string, Record<string, unknown>>,
 ): Record<string, unknown> {
   if (schema.$ref && typeof schema.$ref === 'string') {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const name = (schema.$ref as string).split('/').pop()!
     return componentSchemas[name] ?? schema
   }

@@ -42,6 +42,7 @@ function generateValue(fieldName: string, prop: PropertySchema): unknown {
   if (prop.type === 'boolean') return true
   if (prop.type === 'integer' || prop.type === 'number') return 1
   if (prop.type === 'array') {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const items = (prop as any).items as PropertySchema | undefined
     if (items) return [generateValue('item', items)]
     return ['default']

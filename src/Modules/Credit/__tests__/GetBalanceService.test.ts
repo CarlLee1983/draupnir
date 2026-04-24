@@ -39,6 +39,7 @@ describe('GetBalanceService', () => {
   })
 
   it('非組織成員應被拒絕', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgAuth.requireOrgMembership as any).mockResolvedValueOnce({ authorized: false })
     const result = await service.execute('org-1', 'stranger-1', 'user')
     expect(result.success).toBe(false)

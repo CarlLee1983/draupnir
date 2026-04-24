@@ -70,7 +70,7 @@ describe('QueryBalance', () => {
     const result = await useCase.execute(authContext)
 
     expect(result.success).toBe(true)
-    expect(result.data!.balance).toBe('0')
+    expect(result.data?.balance).toBe('0')
   })
 
   it('scope 為 read 應允許查詢餘額', async () => {

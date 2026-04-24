@@ -1,5 +1,4 @@
 import { beforeAll, beforeEach, describe, it } from 'bun:test'
-import { resolve } from 'path'
 import { ensureAuth, resetAuth } from './lib/auth-helper'
 import { assertBody } from './lib/flow-assertions'
 import { extractValue, resolveRef, resolveRefs } from './lib/jsonpath'
@@ -7,7 +6,8 @@ import { parseOpenAPI } from './lib/spec-parser'
 import { TestClient } from './lib/test-client'
 import { getBaseURL, setupTestServerFor } from './lib/test-server'
 
-const SPEC_PATH = resolve(import.meta.dir, '../../docs/openapi.yaml')
+const joinPath = (...parts: string[]) => parts.join('/').replace(/\/+/g, '/')
+const SPEC_PATH = joinPath(import.meta.dir, '../../docs/openapi.yaml')
 
 setupTestServerFor('api-flows')
 

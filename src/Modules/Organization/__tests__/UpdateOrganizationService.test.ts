@@ -42,7 +42,9 @@ describe('UpdateOrganizationService', () => {
   })
 
   it('應成功更新名稱和描述', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.findById as any).mockResolvedValue(makeOrg())
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.update as any).mockResolvedValue()
 
     const result = await service.execute(
@@ -57,6 +59,7 @@ describe('UpdateOrganizationService', () => {
   })
 
   it('組織不存在應回傳 ORG_NOT_FOUND', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(orgRepo.findById as any).mockResolvedValue(null)
 
     const result = await service.execute('org-1', { name: '新名稱' }, 'user-1', 'user')

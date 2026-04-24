@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
-import { AppApiKeyPresenter } from '../Application/DTOs/AppApiKeyDTO'
+import { fromEntity } from '../Application/DTOs/AppApiKeyDTO'
 import { AppApiKey } from '../Domain/Aggregates/AppApiKey'
 import { AppKeyScope } from '../Domain/ValueObjects/AppKeyScope'
 import { BoundModules } from '../Domain/ValueObjects/BoundModules'
@@ -160,9 +160,9 @@ describe('AppApiKey', () => {
     expect(rebuilt.appKeyScope.getValue()).toBe('read')
   })
 
-  it('AppApiKeyPresenter 應使用 camelCase 且隱藏 hash', () => {
+  it('fromEntity 應使用 camelCase 且隱藏 hash', () => {
     const key = makeDefault()
-    const dto = AppApiKeyPresenter.fromEntity(key)
+    const dto = fromEntity(key)
     expect(dto.id).toBe('appkey-1')
     expect(dto.orgId).toBe('org-1')
     expect(dto.keyPrefix).toMatch(/^drp_app_\.\.\./)

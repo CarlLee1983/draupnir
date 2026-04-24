@@ -42,6 +42,7 @@ describe('EmailVerificationPage', () => {
   test('should render email verification result on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new EmailVerificationPage(inertia, mockEmailVerificationService as any)
     const ctx = createMockContext()
 

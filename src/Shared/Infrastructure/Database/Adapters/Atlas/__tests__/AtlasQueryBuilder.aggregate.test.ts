@@ -3,6 +3,7 @@ import { AtlasQueryBuilder } from '../AtlasQueryBuilder'
 
 describe('AtlasQueryBuilder Aggregates', () => {
   const createMockConnection = () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const rawResult: any = { rows: [{ total_value: 100 }] }
     return {
       table: mock(() => ({})),
@@ -25,6 +26,7 @@ describe('AtlasQueryBuilder Aggregates', () => {
       limit: 5,
     })
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const [sql, bindings] = (conn.raw as any).mock.calls[0]
 
     expect(sql).toContain('SELECT SUM("amount") AS "total_value"')
@@ -44,6 +46,7 @@ describe('AtlasQueryBuilder Aggregates', () => {
 
     await qb
       .where('api_key_id', 'in', ['key-a', 'key-b'])
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       .whereBetween('occurred_at', ['2026-04-01T00:00:00Z', '2026-04-15T23:59:59Z'] as any)
       .aggregate({
         select: {
@@ -51,6 +54,7 @@ describe('AtlasQueryBuilder Aggregates', () => {
         },
       })
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const [sql, bindings] = (conn.raw as any).mock.calls[0]
 
     expect(sql).toContain('"api_key_id" IN ($1, $2)')
@@ -67,6 +71,7 @@ describe('AtlasQueryBuilder Aggregates', () => {
       select: { total: { kind: 'count', column: '*' } },
     })
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const [sql] = (conn.raw as any).mock.calls[0]
     expect(sql).toContain('WHERE 1 = 0')
   })

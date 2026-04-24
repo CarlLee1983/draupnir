@@ -62,8 +62,11 @@ describe('ChangeOrgMemberRoleService', () => {
 
   it('應成功將 member 升級為 manager', async () => {
     const member = makeMember('member')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(member)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(1)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.update as any).mockResolvedValue()
 
     const result = await service.execute('org-1', 'user-mem-1', 'manager')
@@ -72,6 +75,7 @@ describe('ChangeOrgMemberRoleService', () => {
   })
 
   it('成員不存在時應回傳 MEMBER_NOT_FOUND', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(null)
 
     const result = await service.execute('org-1', 'unknown-user', 'member')
@@ -81,7 +85,9 @@ describe('ChangeOrgMemberRoleService', () => {
 
   it('降級最後一位 manager 應回傳錯誤', async () => {
     const manager = makeMember('manager')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(manager)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(1)
 
     const result = await service.execute('org-1', 'user-mem-1', 'member')
@@ -110,13 +116,18 @@ describe('ChangeOrgMemberRoleService — 降級邏輯', () => {
 
   it('將 manager 降為 member 後應呼叫 authRepository.updateRole', async () => {
     const manager = makeMember('manager')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(manager)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(2)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.update as any).mockResolvedValue(undefined)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.isOrgManagerInAnyOrg as any).mockResolvedValue(false)
 
     // 模擬 target 是一般 non-admin 使用者
     const normalUser = { role: { isAdmin: () => false } }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(authRepo.findById as any).mockResolvedValue(normalUser)
 
     await service.execute('org-1', 'user-mem-1', 'member')
@@ -126,8 +137,11 @@ describe('ChangeOrgMemberRoleService — 降級邏輯', () => {
 
   it('仍為 manager 時不應呼叫 authRepository.updateRole', async () => {
     const member = makeMember('member')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(member)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.update as any).mockResolvedValue(undefined)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.isOrgManagerInAnyOrg as any).mockResolvedValue(true)
 
     await service.execute('org-1', 'user-mem-1', 'manager')
@@ -137,13 +151,18 @@ describe('ChangeOrgMemberRoleService — 降級邏輯', () => {
 
   it('target 為 global admin 時不應呼叫 authRepository.updateRole', async () => {
     const member = makeMember('manager')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(member)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(2)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.update as any).mockResolvedValue(undefined)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(memberRepo.isOrgManagerInAnyOrg as any).mockResolvedValue(false)
 
     // 模擬 target 是 admin
     const adminUser = { role: { isAdmin: () => true } }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(authRepo.findById as any).mockResolvedValue(adminUser)
 
     await service.execute('org-1', 'user-mem-1', 'member')

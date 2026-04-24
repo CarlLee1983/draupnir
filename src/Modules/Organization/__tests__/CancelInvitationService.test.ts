@@ -56,18 +56,23 @@ describe('CancelInvitationService', () => {
 
   it('應成功取消 pending 邀請', async () => {
     const invitation = makePendingInvitation()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(invitation)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.update as any).mockResolvedValue()
 
     const result = await service.execute('org-1', 'inv-1', 'user-manager', 'user')
     expect(result.success).toBe(true)
     // 驗證 update() 被呼叫且傳入 cancelled invitation
-    expect(invitationRepo.update as any).toHaveBeenCalledTimes(1)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+        expect(invitationRepo.update as any).toHaveBeenCalledTimes(1)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const updatedArg = (invitationRepo.update as any).mock.calls[0][0]
     expect(updatedArg.status.getValue()).toBe('cancelled')
   })
 
   it('邀請不存在應回傳 INVITATION_NOT_FOUND', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(null)
 
     const result = await service.execute('org-1', 'unknown-inv', 'user-manager', 'user')
@@ -77,6 +82,7 @@ describe('CancelInvitationService', () => {
 
   it('邀請屬於不同組織應回傳 INVITATION_NOT_FOUND', async () => {
     const invitation = makePendingInvitation('other-org')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(invitationRepo.findById as any).mockResolvedValue(invitation)
 
     const result = await service.execute('org-1', 'inv-1', 'user-manager', 'user')

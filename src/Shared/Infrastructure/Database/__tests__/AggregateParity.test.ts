@@ -74,7 +74,9 @@ const seedRows = [
 describe('Aggregate parity across Atlas and Memory adapters', () => {
   let atlasAccess: IDatabaseAccess
   let memoryAccess: IDatabaseAccess
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let atlasDb: any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   let configSpy: any
 
   beforeAll(async () => {
@@ -171,7 +173,9 @@ describe('Aggregate parity across Atlas and Memory adapters', () => {
     // gpt-4: (100 + 0) / 2 = 50
     // claude-3: (200 + 0) / 2 = 100
     // Since both have totalCost 3.5, order might be either.
-    const gpt4 = memory.find((r: any) => r.model === 'gpt-4')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+                const gpt4 = memory.find((r: any) => r.model === 'gpt-4')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const claude3 = memory.find((r: any) => r.model === 'claude-3')
     expect(gpt4).toMatchObject({ avgLatency: 50, totalCost: 3.5 })
     expect(claude3).toMatchObject({ avgLatency: 100, totalCost: 3.5 })

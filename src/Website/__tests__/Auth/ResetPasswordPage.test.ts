@@ -42,6 +42,7 @@ describe('ResetPasswordPage', () => {
   test('should render reset password form with token on GET', async () => {
     const render = mock(() => new Response())
     const inertia = { render } as unknown as InertiaService
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new ResetPasswordPage(inertia, mockResetPasswordService as any)
     const ctx = createMockContext()
 

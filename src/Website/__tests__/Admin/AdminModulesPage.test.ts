@@ -74,6 +74,7 @@ describe('AdminModulesPage', () => {
     const { inertia, captured } = createMockInertia()
     const mockListService = { execute: mock(() => Promise.resolve({ success: true, data: [] })) }
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const page = new AdminModulesPage(inertia, mockListService as any)
     const ctx = createAdminContext()
     await page.handle(ctx)

@@ -100,7 +100,7 @@ describe('CliApiController', () => {
       }),
     )
     const initJson = (await initiate.json()) as { data?: { deviceCode: string } }
-    const deviceCode = initJson.data!.deviceCode
+    const deviceCode = initJson.data?.deviceCode
 
     const res = await controller.exchangeToken(
       minimalCtx({
@@ -122,6 +122,7 @@ describe('CliApiController', () => {
     const initJson = (await initiate.json()) as {
       data?: { deviceCode: string; userCode: string }
     }
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const { deviceCode, userCode } = initJson.data!
 
     vi.spyOn(AuthMiddleware, 'getAuthContext').mockReturnValue({

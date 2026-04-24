@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { readFileSync } from 'node:fs'
 
 /**
  * Extract registered routes from *.routes.ts source files.

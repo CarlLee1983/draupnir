@@ -78,8 +78,11 @@ describe('AdminContractDetailPage.postQuota', () => {
     const adjustQuotaService = makeMockAdjustQuotaService()
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => ({ success: true, data: null })) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => {}) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => {}) } as any,
       adjustQuotaService,
     )
@@ -102,8 +105,11 @@ describe('AdminContractDetailPage.postQuota', () => {
     const adjustQuotaService = makeMockAdjustQuotaService()
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => ({ success: true, data: null })) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => {}) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => {}) } as any,
       adjustQuotaService,
     )
@@ -122,8 +128,11 @@ describe('AdminContractDetailPage.postQuota', () => {
     const adjustQuotaService = makeMockAdjustQuotaService()
     const page = new AdminContractDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => ({ success: true, data: null })) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => {}) } as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       { execute: mock(async () => {}) } as any,
       adjustQuotaService,
     )

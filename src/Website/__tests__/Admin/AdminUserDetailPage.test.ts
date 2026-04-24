@@ -125,8 +125,11 @@ describe('AdminUserDetailPage', () => {
 
     const page = new AdminUserDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetProfileService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetUserDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockChangeUserStatusService as any,
     )
     const ctx = createAdminContext()
@@ -148,8 +151,11 @@ describe('AdminUserDetailPage', () => {
 
     const page = new AdminUserDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetProfileService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetUserDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockChangeUserStatusService as any,
     )
     const ctx = createAdminContextWithBody(
@@ -172,8 +178,11 @@ describe('AdminUserDetailPage', () => {
 
     const page = new AdminUserDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetProfileService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetUserDetailService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockChangeUserStatusService as any,
     )
     const ctx = createAdminContextWithBody(

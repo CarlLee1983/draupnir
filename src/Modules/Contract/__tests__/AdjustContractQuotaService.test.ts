@@ -131,12 +131,12 @@ describe('AdjustContractQuotaService', () => {
     expect(result.data?.changes).toHaveLength(2)
 
     // 兩個 key 各 50%，總和應等於 400
-    const totalNew = result.data!.changes.reduce((s, c) => s + c.newAllocated, 0)
+    const totalNew = result.data?.changes.reduce((s, c) => s + c.newAllocated, 0)
     expect(totalNew).toBe(400)
 
     // 每個 key 應分得 200
-    expect(result.data!.changes[0].newAllocated).toBe(200)
-    expect(result.data!.changes[1].newAllocated).toBe(200)
+    expect(result.data?.changes[0].newAllocated).toBe(200)
+    expect(result.data?.changes[1].newAllocated).toBe(200)
 
     expect(contractRepo.update).toHaveBeenCalledTimes(1)
     expect(keyRepo.update).toHaveBeenCalledTimes(2)
@@ -159,6 +159,7 @@ describe('AdjustContractQuotaService', () => {
   it('QUOTA-05: newCap 為負數應回傳 INVALID_INPUT', async () => {
     const contractRepo = { findById: mock(() => Promise.resolve(null)), update: mock() }
     const keyRepo = { findActiveByOrgId: mock(() => Promise.resolve([])), update: mock() }
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const svc = new AdjustContractQuotaService(contractRepo as any, keyRepo as any)
 
     const result = await svc.execute({ contractId: 'contract-1', newCap: -1, callerRole: 'admin' })

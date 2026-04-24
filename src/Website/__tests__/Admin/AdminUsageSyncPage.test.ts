@@ -66,6 +66,7 @@ describe('AdminUsageSyncPage', () => {
 
     expect(captured.lastCall?.component).toBe('Admin/UsageSync/Index')
     expect(captured.lastCall?.props.status).toBeDefined()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((captured.lastCall?.props.status as any).enabled).toBe(false)
   })
 })

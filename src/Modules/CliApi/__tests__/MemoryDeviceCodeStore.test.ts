@@ -20,7 +20,7 @@ describe('MemoryDeviceCodeStore', () => {
     await store.save(dc)
     const found = await store.findByDeviceCode('dc-1')
     expect(found).not.toBeNull()
-    expect(found!.deviceCode).toBe('dc-1')
+    expect(found?.deviceCode).toBe('dc-1')
   })
 
   it('should retrieve by user code', async () => {
@@ -33,7 +33,7 @@ describe('MemoryDeviceCodeStore', () => {
     await store.save(dc)
     const found = await store.findByUserCode('WXYZ5678')
     expect(found).not.toBeNull()
-    expect(found!.deviceCode).toBe('dc-2')
+    expect(found?.deviceCode).toBe('dc-2')
   })
 
   it('should return null for non-existent code', async () => {
@@ -54,8 +54,8 @@ describe('MemoryDeviceCodeStore', () => {
     await store.update(authorized)
 
     const found = await store.findByDeviceCode('dc-3')
-    expect(found!.status).toBe('authorized')
-    expect(found!.userId).toBe('user-1')
+    expect(found?.status).toBe('authorized')
+    expect(found?.userId).toBe('user-1')
   })
 
   it('should delete by device code', async () => {
@@ -81,7 +81,7 @@ describe('MemoryDeviceCodeStore', () => {
     await store.save(dc)
     const found = await store.findByDeviceCode('dc-5')
     expect(found).not.toBeNull()
-    expect(found!.isExpired()).toBe(true)
+    expect(found?.isExpired()).toBe(true)
   })
 
   it('should clean up expired entries on cleanup()', async () => {

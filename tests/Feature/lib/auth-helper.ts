@@ -21,6 +21,7 @@ export async function ensureAuth(
   client: TestClient,
   role: AuthRole = 'user',
 ): Promise<AuthIdentity> {
+  // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
   if (identities[role]) return identities[role]!
 
   const email = `test-${role}-${crypto.randomUUID().slice(0, 8)}@feature.test`

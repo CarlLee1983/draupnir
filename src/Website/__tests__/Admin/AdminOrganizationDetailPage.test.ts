@@ -101,9 +101,13 @@ describe('AdminOrganizationDetailPage', () => {
 
     const page = new AdminOrganizationDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetOrgService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListMembersService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockContractQuotaService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockSumAllocatedService as any,
     )
     const ctx = createAdminContext()
@@ -133,9 +137,13 @@ describe('AdminOrganizationDetailPage', () => {
 
     const page = new AdminOrganizationDetailPage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockGetOrgService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockListMembersService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockContractQuotaService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockSumAllocatedService as any,
     )
     const ctx = createAdminContext()

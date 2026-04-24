@@ -39,11 +39,11 @@ describe('AuthenticateApp', () => {
     const result = await useCase.execute(rawKey)
     expect(result.success).toBe(true)
     expect(result.context).toBeDefined()
-    expect(result.context!.appKeyId).toBe('appkey-auth-1')
-    expect(result.context!.orgId).toBe('org-1')
-    expect(result.context!.gatewayKeyId).toBe('bfr-vk-app-1')
-    expect(result.context!.scope).toBe('write')
-    expect(result.context!.boundModuleIds).toEqual(['mod-1', 'mod-2'])
+    expect(result.context?.appKeyId).toBe('appkey-auth-1')
+    expect(result.context?.orgId).toBe('org-1')
+    expect(result.context?.gatewayKeyId).toBe('bfr-vk-app-1')
+    expect(result.context?.scope).toBe('write')
+    expect(result.context?.boundModuleIds).toEqual(['mod-1', 'mod-2'])
   })
 
   it('無效的 Key 應認證失敗', async () => {
@@ -60,7 +60,10 @@ describe('AuthenticateApp', () => {
 
   it('已撤銷的 Key 應認證失敗', async () => {
     const key = await repo.findById('appkey-auth-1')
-    const revoked = key!.revoke()
+    if (!key) {
+      throw new Error('appkey-auth-1 fixture expected')
+    }
+    const revoked = key.revoke()
     await repo.update(revoked)
 
     const result = await useCase.execute(rawKey)
@@ -92,11 +95,14 @@ describe('AuthenticateApp', () => {
     const newRawKey = 'drp_app_newkeyrotated'
     const newHashedKey = await hashingService.hash(newRawKey)
     const key = await repo.findById('appkey-auth-1')
-    const rotated = key!.rotate(newHashedKey, 'bfr-vk-new')
+    if (!key) {
+      throw new Error('appkey-auth-1 fixture expected')
+    }
+    const rotated = key.rotate(newHashedKey, 'bfr-vk-new')
     await repo.update(rotated)
 
     const result = await useCase.execute(rawKey)
     expect(result.success).toBe(true)
-    expect(result.context!.appKeyId).toBe('appkey-auth-1')
+    expect(result.context?.appKeyId).toBe('appkey-auth-1')
   })
 })

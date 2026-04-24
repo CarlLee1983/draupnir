@@ -11,15 +11,19 @@ function makeToken(email: string) {
 
 describe('ForgotPasswordService', () => {
   test('sends reset email when user exists', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const mockUser = { emailValue: 'user@example.com' } as any
     const authRepo: IAuthRepository = {
       findByEmail: mock(async () => mockUser),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const resetRepo: IPasswordResetRepository = {
       create: mock(async (email: string) => makeToken(email)),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const emailService: IEmailService = {
       sendPasswordReset: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
     const service = new ForgotPasswordService(
@@ -37,12 +41,15 @@ describe('ForgotPasswordService', () => {
   test('returns success even when user does not exist (anti-enumeration)', async () => {
     const authRepo: IAuthRepository = {
       findByEmail: mock(async () => null),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const resetRepo: IPasswordResetRepository = {
       create: mock(async (email: string) => makeToken(email)),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
     const emailService: IEmailService = {
       sendPasswordReset: mock(async () => {}),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } as any
 
     const service = new ForgotPasswordService(

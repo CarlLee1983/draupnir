@@ -33,8 +33,8 @@ describe('AuthorizeDeviceService', () => {
     expect(result.message).toContain('authorized successfully')
 
     const updated = await store.findByDeviceCode('dc-1')
-    expect(updated!.status).toBe('authorized')
-    expect(updated!.userId).toBe('user-1')
+    expect(updated?.status).toBe('authorized')
+    expect(updated?.userId).toBe('user-1')
   })
 
   it('should reject invalid user code', async () => {

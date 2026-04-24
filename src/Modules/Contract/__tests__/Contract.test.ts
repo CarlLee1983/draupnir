@@ -147,6 +147,7 @@ describe('Contract', () => {
     const dto = ContractPresenter.fromEntity(contract)
     expect(dto.targetType).toBe('organization')
     expect(dto.status).toBe('draft')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     expect((dto.terms as any).allowedModules).toEqual(['chat', 'embedding'])
   })
 

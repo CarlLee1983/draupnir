@@ -87,8 +87,8 @@ describe('CreateContractService', () => {
       callerUserId: 'admin-1',
       callerSystemRole: 'admin',
     })
-    const saved = await repo.findById(result.data!.id as string)
+    const saved = await repo.findById(result.data?.id as string)
     expect(saved).not.toBeNull()
-    expect(saved!.targetId).toBe('org-1')
+    expect(saved?.targetId).toBe('org-1')
   })
 })

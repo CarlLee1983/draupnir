@@ -56,6 +56,7 @@ describe('HandleBalanceDepletedService', () => {
     })
     const activeKey = mockKey.activate()
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findActiveByOrgId as any).mockResolvedValue([activeKey])
 
     const result = await service.execute('org-1')
@@ -78,6 +79,7 @@ describe('HandleBalanceDepletedService', () => {
     })
     const activeKey = mockKey.activate()
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findActiveByOrgId as any).mockResolvedValue([activeKey])
     mock.failNext(new GatewayError('rate limited', 'RATE_LIMITED', 429, true))
 
@@ -98,6 +100,7 @@ describe('HandleBalanceDepletedService', () => {
     })
     const activeKey = mockKey.activate()
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findActiveByOrgId as any).mockResolvedValue([activeKey])
     mock.failNext(new GatewayError('not found', 'NOT_FOUND', 404, false))
 

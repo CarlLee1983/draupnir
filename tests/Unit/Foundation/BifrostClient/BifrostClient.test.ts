@@ -52,6 +52,7 @@ describe('BifrostClient', () => {
           provider_configs: [],
         },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.createVirtualKey({ name: 'test-key' })
@@ -60,10 +61,11 @@ describe('BifrostClient', () => {
       expect(result.name).toBe('test-key')
       expect(result.value).toBe('bifrost_vk_xxx')
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       expect(fetchCall[0]).toBe('https://bifrost.test/api/governance/virtual-keys')
       expect(fetchCall[1].method).toBe('POST')
-      expect(fetchCall[1].headers['Authorization']).toBe('Bearer test-master-key')
+      expect(fetchCall[1].headers.Authorization).toBe('Bearer test-master-key')
     })
   })
 
@@ -75,6 +77,7 @@ describe('BifrostClient', () => {
           { id: 'vk-2', name: 'key-2', is_active: false, provider_configs: [] },
         ],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.listVirtualKeys()
@@ -90,11 +93,13 @@ describe('BifrostClient', () => {
         message: 'ok',
         virtual_key: { id: 'vk-1', name: 'key-1', is_active: true, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.getVirtualKey('vk-1')
 
       expect(result.id).toBe('vk-1')
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       expect(fetchCall[0]).toBe('https://bifrost.test/api/governance/virtual-keys/vk-1')
     })
@@ -102,6 +107,7 @@ describe('BifrostClient', () => {
     it('should throw BifrostApiError on 404', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(404, { error: 'not found' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       try {
@@ -120,11 +126,13 @@ describe('BifrostClient', () => {
         message: 'updated',
         virtual_key: { id: 'vk-1', name: 'updated-key', is_active: true, provider_configs: [] },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.updateVirtualKey('vk-1', { name: 'updated-key' })
 
       expect(result.name).toBe('updated-key')
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       expect(fetchCall[1].method).toBe('PUT')
     })
@@ -134,10 +142,12 @@ describe('BifrostClient', () => {
     it('should delete a virtual key', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(200, { message: 'deleted' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       await client.deleteVirtualKey('vk-1')
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       expect(fetchCall[1].method).toBe('DELETE')
       expect(fetchCall[0]).toBe('https://bifrost.test/api/governance/virtual-keys/vk-1')
@@ -160,11 +170,13 @@ describe('BifrostClient', () => {
           },
         ],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.getLogs({ virtual_key_ids: 'vk-1', limit: 100 })
 
       expect(result.logs).toHaveLength(1)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toContain('virtual_key_ids=vk-1')
       expect(url).toContain('limit=100')
@@ -179,12 +191,14 @@ describe('BifrostClient', () => {
         total_tokens: 50000,
         avg_latency: 0.8,
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.getLogsStats({ virtual_key_ids: 'vk-1' })
 
       expect(result.total_requests).toBe(150)
       expect(result.total_cost).toBe(3.45)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toContain('/api/logs/stats')
       expect(url).toContain('virtual_key_ids=vk-1')
@@ -199,6 +213,7 @@ describe('BifrostClient', () => {
           { id: 'anthropic/claude-3', name: 'Claude 3', context_length: 200000 },
         ],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.listModels()
@@ -214,11 +229,13 @@ describe('BifrostClient', () => {
         message: 'created',
         team: { id: 'team-1', name: 'org-1' },
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.createTeam({ name: 'org-1' })
 
       expect(result.id).toBe('team-1')
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       expect(fetchCall[0]).toBe('https://bifrost.test/api/governance/teams')
       expect(fetchCall[1].method).toBe('POST')
@@ -228,11 +245,13 @@ describe('BifrostClient', () => {
       const mockResponse: TeamListResponse = {
         teams: [{ id: 'team-1', name: 'org-1' }],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.listTeams({ customer_id: 'cust-1', from_memory: true })
 
       expect(result).toHaveLength(1)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toContain('/api/governance/teams?')
       expect(url).toContain('customer_id=cust-1')
@@ -243,11 +262,13 @@ describe('BifrostClient', () => {
       const mockResponse: TeamListResponse = {
         teams: [{ id: 'team-1', name: 'org-1' }],
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, mockResponse))) as any
 
       const result = await client.listTeams()
 
       expect(result).toHaveLength(1)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const url = (globalThis.fetch as any).mock.calls[0][0] as string
       expect(url).toBe('https://bifrost.test/api/governance/teams')
     })
@@ -265,6 +286,7 @@ describe('BifrostClient', () => {
         if (init.method === 'GET') return Promise.resolve(mockFetchResponse(200, getResponse))
         if (init.method === 'PUT') return Promise.resolve(mockFetchResponse(200, updateResponse))
         throw new Error(`unexpected method: ${init.method}`)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       }) as any
 
       const team = await client.getTeam('team-1')
@@ -277,10 +299,12 @@ describe('BifrostClient', () => {
     it('should delete a team', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(200, { message: 'ok' })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       await client.deleteTeam('team-1')
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
       expect(fetchCall[1].method).toBe('DELETE')
       expect(fetchCall[0]).toBe('https://bifrost.test/api/governance/teams/team-1')
@@ -291,12 +315,14 @@ describe('BifrostClient', () => {
     it('should include Authorization and Content-Type headers', async () => {
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(200, { virtual_keys: [] })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       await client.listVirtualKeys()
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
-      expect(fetchCall[1].headers['Authorization']).toBe('Bearer test-master-key')
+      expect(fetchCall[1].headers.Authorization).toBe('Bearer test-master-key')
       expect(fetchCall[1].headers['Content-Type']).toBe('application/json')
     })
 
@@ -310,12 +336,14 @@ describe('BifrostClient', () => {
       })
       globalThis.fetch = mock(() =>
         Promise.resolve(mockFetchResponse(200, { virtual_keys: [] })),
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       ) as any
 
       await noAuthClient.listVirtualKeys()
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const fetchCall = (globalThis.fetch as any).mock.calls[0]
-      expect(fetchCall[1].headers['Authorization']).toBeUndefined()
+      expect(fetchCall[1].headers.Authorization).toBeUndefined()
       expect(fetchCall[1].headers['Content-Type']).toBe('application/json')
     })
   })

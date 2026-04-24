@@ -54,6 +54,7 @@ describe('HandleCreditToppedUpService', () => {
     })
     const suspended = mockKey.activate().suspend('CREDIT_DEPLETED', { rpm: 60, tpm: 100000 })
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findSuspendedByOrgId as any).mockResolvedValue([suspended])
 
     const result = await service.execute('org-1')
@@ -65,6 +66,7 @@ describe('HandleCreditToppedUpService', () => {
   })
 
   it('無凍結 keys 時應直接回傳零', async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findSuspendedByOrgId as any).mockResolvedValue([])
 
     const result = await service.execute('org-1')
@@ -90,6 +92,7 @@ describe('HandleCreditToppedUpService', () => {
     })
     const suspended = mockKey.activate().suspend('CREDIT_DEPLETED', { rpm: 60, tpm: 100000 })
 
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     ;(apiKeyRepo.findSuspendedByOrgId as any).mockResolvedValue([suspended])
     const GatewayErrorClass = (await import('@/Foundation/Infrastructure/Services/LLMGateway'))
       .GatewayError

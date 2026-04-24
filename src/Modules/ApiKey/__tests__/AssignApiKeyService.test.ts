@@ -3,6 +3,9 @@ import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/Organ
 import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
 import { AssignApiKeyService } from '../Application/Services/AssignApiKeyService'
 import { ApiKey } from '../Domain/Aggregates/ApiKey'
+import type { IApiKeyRepository } from '../Domain/Repositories/IApiKeyRepository'
+import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
+import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
 
 function makeKey(orgId = 'org-A') {
   return ApiKey.create({
@@ -30,18 +33,18 @@ describe('AssignApiKeyService', () => {
   const okAuth = { authorized: true as const }
   const orgAuth = {
     requireOrgManager: mock(() => Promise.resolve(okAuth)),
-  }
+  } as unknown as OrgAuthorizationHelper
 
   test('指派目標非該組織成員 → INVALID_ASSIGNEE', async () => {
     const key = makeKey('org-A')
     const repo = {
       findById: mock(() => Promise.resolve(key)),
       update: mock(() => Promise.resolve()),
-    }
+    } as unknown as IApiKeyRepository
     const memberRepo = {
       findByUserAndOrgId: mock(() => Promise.resolve(null)),
-    }
-    const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
+    } as unknown as IOrganizationMemberRepository
+    const svc = new AssignApiKeyService(repo, memberRepo, orgAuth)
     const result = await svc.execute({
       keyId: 'k-1',
       orgId: 'org-A',
@@ -58,11 +61,11 @@ describe('AssignApiKeyService', () => {
     const repo = {
       findById: mock(() => Promise.resolve(key)),
       update: mock(() => Promise.resolve()),
-    }
+    } as unknown as IApiKeyRepository
     const memberRepo = {
       findByUserAndOrgId: mock(() => Promise.resolve(memberOf('org-A', 'u-2', 'manager'))),
-    }
-    const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
+    } as unknown as IOrganizationMemberRepository
+    const svc = new AssignApiKeyService(repo, memberRepo, orgAuth)
     const result = await svc.execute({
       keyId: 'k-1',
       orgId: 'org-A',
@@ -76,14 +79,15 @@ describe('AssignApiKeyService', () => {
 
   test('指派給合法 member → 呼叫 ApiKey.assignTo 與 repo.update', async () => {
     const key = makeKey('org-A')
+    const update = mock((_: ApiKey) => Promise.resolve())
     const repo = {
       findById: mock(() => Promise.resolve(key)),
-      update: mock(() => Promise.resolve()),
-    }
+      update,
+    } as unknown as IApiKeyRepository
     const memberRepo = {
       findByUserAndOrgId: mock(() => Promise.resolve(memberOf('org-A', 'u-7', 'member'))),
-    }
-    const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
+    } as unknown as IOrganizationMemberRepository
+    const svc = new AssignApiKeyService(repo, memberRepo, orgAuth)
     const result = await svc.execute({
       keyId: 'k-1',
       orgId: 'org-A',
@@ -92,19 +96,26 @@ describe('AssignApiKeyService', () => {
       callerSystemRole: 'manager',
     })
     expect(result.success).toBe(true)
-    expect(repo.update).toHaveBeenCalledTimes(1)
-    const saved = (repo.update as any).mock.calls[0][0] as ApiKey
+    expect(update).toHaveBeenCalledTimes(1)
+    const firstUpdate = update.mock.calls[0] as [ApiKey] | undefined
+    if (firstUpdate === undefined) {
+      throw new Error('expected repo.update to have been called')
+    }
+    const saved = firstUpdate[0]
     expect(saved.assignedMemberId).toBe('u-7')
   })
 
   test('assigneeUserId = null → 取消指派', async () => {
     const key = makeKey('org-A').assignTo('u-7')
+    const update = mock((_: ApiKey) => Promise.resolve())
     const repo = {
       findById: mock(() => Promise.resolve(key)),
-      update: mock(() => Promise.resolve()),
-    }
-    const memberRepo = { findByUserAndOrgId: mock(() => Promise.resolve(null)) }
-    const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
+      update,
+    } as unknown as IApiKeyRepository
+    const memberRepo = {
+      findByUserAndOrgId: mock(() => Promise.resolve(null)),
+    } as unknown as IOrganizationMemberRepository
+    const svc = new AssignApiKeyService(repo, memberRepo, orgAuth)
     const result = await svc.execute({
       keyId: 'k-1',
       orgId: 'org-A',
@@ -113,7 +124,11 @@ describe('AssignApiKeyService', () => {
       callerSystemRole: 'manager',
     })
     expect(result.success).toBe(true)
-    const saved = (repo.update as any).mock.calls[0][0] as ApiKey
+    const firstUpdate = update.mock.calls[0] as [ApiKey] | undefined
+    if (firstUpdate === undefined) {
+      throw new Error('expected repo.update to have been called')
+    }
+    const saved = firstUpdate[0]
     expect(saved.assignedMemberId).toBe(null)
   })
 
@@ -126,7 +141,11 @@ describe('AssignApiKeyService', () => {
     const memberRepo = {
       findByUserAndOrgId: mock(() => Promise.resolve(memberOf('org-A', 'u-7', 'member'))),
     }
-    const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
+    const svc = new AssignApiKeyService(
+      repo as unknown as IApiKeyRepository,
+      memberRepo as unknown as IOrganizationMemberRepository,
+      orgAuth,
+    )
     const result = await svc.execute({
       keyId: 'k-1',
       orgId: 'org-A',
@@ -151,7 +170,11 @@ describe('AssignApiKeyService', () => {
     const memberRepo = {
       findByUserAndOrgId: mock(() => Promise.resolve(memberOf('org-A', 'u-7', 'member'))),
     }
-    const svc = new AssignApiKeyService(repo as any, memberRepo as any, deniedAuth as any)
+    const svc = new AssignApiKeyService(
+      repo as unknown as IApiKeyRepository,
+      memberRepo as unknown as IOrganizationMemberRepository,
+      deniedAuth as unknown as OrgAuthorizationHelper,
+    )
     const result = await svc.execute({
       keyId: 'k-1',
       orgId: 'org-A',

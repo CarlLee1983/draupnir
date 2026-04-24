@@ -38,6 +38,7 @@ export function resolveRefs(
     if (typeof value === 'string' && value.startsWith('$.')) {
       result[key] = resolveRef(value, context)
     } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
       result[key] = resolveRefs(value as Record<string, unknown>, context)!
     } else {
       result[key] = value

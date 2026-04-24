@@ -3,7 +3,7 @@ import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
 import { ApiKey } from '../Domain/Aggregates/ApiKey'
 import { KeyScope } from '../Domain/ValueObjects/KeyScope'
-import { ApiKeyMapper } from '../Infrastructure/Mappers/ApiKeyMapper'
+import { toDatabaseRow } from '../Infrastructure/Mappers/ApiKeyMapper'
 import { ApiKeyRepository } from '../Infrastructure/Repositories/ApiKeyRepository'
 
 const hashingService = new KeyHashingService()
@@ -40,7 +40,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'My Test Key',
       gatewayKeyId: 'bfr-vk-1',
-      keyHash: hashes['drp_sk_test123'],
+      keyHash: hashes.drp_sk_test123,
     })
     expect(result.id).toBe('key-1')
     expect(result.orgId).toBe('org-1')
@@ -59,7 +59,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Pending Key',
       gatewayKeyId: 'bfr-vk-1a',
-      keyHash: hashes['drp_sk_pending'],
+      keyHash: hashes.drp_sk_pending,
     })
     expect(key.status).toBe('pending')
     const activated = key.activate()
@@ -73,7 +73,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Active Key',
       gatewayKeyId: 'bfr-vk-1b',
-      keyHash: hashes['drp_sk_act'],
+      keyHash: hashes.drp_sk_act,
     })
     const activated = key.activate()
     expect(() => activated.activate()).toThrow()
@@ -86,7 +86,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Restricted Key',
       gatewayKeyId: 'bfr-vk-2',
-      keyHash: hashes['drp_sk_restricted'],
+      keyHash: hashes.drp_sk_restricted,
       scope: KeyScope.create({ allowedModels: ['gpt-4'], rateLimitRpm: 60 }),
     })
     expect(result.scope.getAllowedModels()).toEqual(['gpt-4'])
@@ -100,7 +100,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'To Revoke',
       gatewayKeyId: 'bfr-vk-3',
-      keyHash: hashes['drp_sk_revoke'],
+      keyHash: hashes.drp_sk_revoke,
     })
     const active = key.activate()
     const revoked = active.revoke()
@@ -115,7 +115,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Already Revoked',
       gatewayKeyId: 'bfr-vk-4',
-      keyHash: hashes['drp_sk_already'],
+      keyHash: hashes.drp_sk_already,
     })
     const revoked = key.activate().revoke()
     expect(() => revoked.revoke()).toThrow()
@@ -128,7 +128,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Pending No Revoke',
       gatewayKeyId: 'bfr-vk-4b',
-      keyHash: hashes['drp_sk_pnr'],
+      keyHash: hashes.drp_sk_pnr,
     })
     expect(() => key.revoke()).toThrow()
   })
@@ -140,7 +140,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Old Label',
       gatewayKeyId: 'bfr-vk-5',
-      keyHash: hashes['drp_sk_label'],
+      keyHash: hashes.drp_sk_label,
     })
     const updated = key.updateLabel('New Label')
     expect(updated.label).toBe('New Label')
@@ -153,7 +153,7 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Scope Test',
       gatewayKeyId: 'bfr-vk-6',
-      keyHash: hashes['drp_sk_scope'],
+      keyHash: hashes.drp_sk_scope,
     })
     const newScope = KeyScope.create({ rateLimitRpm: 120 })
     const updated = key.updateScope(newScope)
@@ -167,22 +167,22 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Revoked Scope',
       gatewayKeyId: 'bfr-vk-7',
-      keyHash: hashes['drp_sk_rs'],
+      keyHash: hashes.drp_sk_rs,
     })
     const revoked = key.activate().revoke()
     expect(() => revoked.updateScope(KeyScope.unrestricted())).toThrow()
   })
 
-  it('ApiKeyMapper.toDatabaseRow 應正確轉換', () => {
+  it('toDatabaseRow 應正確轉換', () => {
     const key = ApiKey.create({
       id: 'key-8',
       orgId: 'org-1',
       createdByUserId: 'user-1',
       label: 'DB Test',
       gatewayKeyId: 'bfr-vk-8',
-      keyHash: hashes['drp_sk_db'],
+      keyHash: hashes.drp_sk_db,
     })
-    const row = ApiKeyMapper.toDatabaseRow(key)
+    const row = toDatabaseRow(key)
     expect(row.id).toBe('key-8')
     expect(row.org_id).toBe('org-1')
     expect(row.created_by_user_id).toBe('user-1')
@@ -200,9 +200,9 @@ describe('ApiKey', () => {
       createdByUserId: 'user-1',
       label: 'Rebuild',
       gatewayKeyId: 'bfr-vk-9',
-      keyHash: hashes['drp_sk_rebuild'],
+      keyHash: hashes.drp_sk_rebuild,
     })
-    const row = ApiKeyMapper.toDatabaseRow(key)
+    const row = toDatabaseRow(key)
     const rebuilt = ApiKey.fromDatabase(row)
     expect(rebuilt.id).toBe('key-9')
     expect(rebuilt.label).toBe('Rebuild')
@@ -220,7 +220,7 @@ describe('ApiKeyRepository.findByBifrostVirtualKeyId', () => {
       createdByUserId: 'user-1',
       label: 'Lookup Key',
       gatewayKeyId: 'bfr-vk-test-1',
-      keyHash: hashes['drp_sk_db'],
+      keyHash: hashes.drp_sk_db,
     })
     await repo.save(key)
 

@@ -95,7 +95,9 @@ describe('MemberUsagePage', () => {
     const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
     const page = new MemberUsagePage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockUsageChartService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockMembershipService as any,
     )
     await page.handle(ctx)
@@ -120,7 +122,9 @@ describe('MemberUsagePage', () => {
     const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
     const page = new MemberUsagePage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockUsageChartService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockMembershipService as any,
     )
     await page.handle(ctx)
@@ -150,7 +154,9 @@ describe('MemberUsagePage', () => {
     const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
     const page = new MemberUsagePage(
       inertia,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockUsageChartService as any,
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       mockMembershipService as any,
     )
     await page.handle(ctx)

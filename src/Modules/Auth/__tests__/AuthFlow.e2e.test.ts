@@ -39,6 +39,7 @@ describe('認證流程 E2E 測試', () => {
 
   // Mock HttpContext
   const createMockContext = (): IHttpContext => {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const state: Record<string, any> = {}
     return {
       getBodyText: async () => '',
@@ -98,8 +99,8 @@ describe('認證流程 E2E 測試', () => {
     expect(loginResult.data?.refreshToken).toBeTruthy()
     expect(loginResult.data?.user.role).toBe(RoleType.MEMBER)
 
-    const accessToken = loginResult.data!.accessToken
-    const refreshToken = loginResult.data!.refreshToken
+    const accessToken = loginResult.data?.accessToken as string
+    const refreshToken = loginResult.data?.refreshToken as string
 
     // 步驟 3：驗證 Access Token
     const payload = jwtService.verify(accessToken)
@@ -125,7 +126,7 @@ describe('認證流程 E2E 測試', () => {
     expect(refreshResult.success).toBe(true)
     expect(refreshResult.data?.accessToken).toBeTruthy()
 
-    const newAccessToken = refreshResult.data!.accessToken
+    const newAccessToken = refreshResult.data?.accessToken as string
     const newPayload = jwtService.verify(newAccessToken)
     expect(newPayload?.type).toBe('access')
 
@@ -191,14 +192,14 @@ describe('認證流程 E2E 測試', () => {
       email: 'user@example.com',
       password: 'SecurePassword123',
     })
-    const token1 = login1.data!.accessToken
+    const token1 = login1.data?.accessToken
 
     // 第二次登入（模擬在另一個設備）
     const login2 = await loginService.execute({
       email: 'user@example.com',
       password: 'SecurePassword123',
     })
-    const token2 = login2.data!.accessToken
+    const token2 = login2.data?.accessToken
 
     // 兩個 Token 都應該有效
     let ctx1 = createMockContext()
@@ -212,7 +213,7 @@ describe('認證流程 E2E 測試', () => {
     expect(AuthMiddleware.isAuthenticated(ctx2)).toBe(true)
 
     // 登出所有設備
-    const logoutResult = await logoutService.logoutAllDevices(login1.data!.user.id)
+    const logoutResult = await logoutService.logoutAllDevices(login1.data?.user.id as string)
     expect(logoutResult.success).toBe(true)
 
     // 登出所有設備成功
@@ -268,7 +269,7 @@ describe('認證流程 E2E 測試', () => {
       password: 'SecurePassword123',
     })
 
-    const accessToken = loginResult.data!.accessToken
+    const accessToken = loginResult.data?.accessToken as string
 
     // 登出
     await logoutService.execute({ token: accessToken })
