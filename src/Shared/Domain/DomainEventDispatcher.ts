@@ -2,6 +2,7 @@
 import type { DomainEvent } from './DomainEvent'
 
 type EventHandler = (event: DomainEvent) => Promise<void>
+type EventObserver = (event: DomainEvent) => void | Promise<void>
 
 /**
  * Synchronous Domain Event Dispatcher (Singleton).
@@ -13,6 +14,7 @@ type EventHandler = (event: DomainEvent) => Promise<void>
 export class DomainEventDispatcher {
   private static instance: DomainEventDispatcher | null = null
   private readonly handlers = new Map<string, EventHandler[]>()
+  private observers: EventObserver[] = []
 
   private constructor() {}
 
@@ -48,6 +50,22 @@ export class DomainEventDispatcher {
     this.handlers.set(eventType, [...existing, handler])
   }
 
+  /** Register an observer that receives every dispatched event. */
+  addObserver(observer: EventObserver): () => void {
+    this.observers = [...this.observers, observer]
+    return () => this.removeObserver(observer)
+  }
+
+  /** Remove one previously registered observer. */
+  removeObserver(observer: EventObserver): void {
+    this.observers = this.observers.filter((candidate) => candidate !== observer)
+  }
+
+  /** Remove all observers. */
+  clearObservers(): void {
+    this.observers = []
+  }
+
   /**
    * Dispatches a domain event to all registered handlers.
    *
@@ -57,6 +75,14 @@ export class DomainEventDispatcher {
    * @returns A promise that resolves when all handlers have completed.
    */
   async dispatch(event: DomainEvent): Promise<void> {
+    for (const observer of this.observers) {
+      try {
+        await observer(event)
+      } catch (error: unknown) {
+        console.error(`Event observer failed [${event.eventType}]:`, error)
+      }
+    }
+
     const handlers = this.handlers.get(event.eventType) ?? []
     for (const handler of handlers) {
       try {

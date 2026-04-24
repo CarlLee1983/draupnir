@@ -5,6 +5,7 @@ import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
+import { SystemClock } from '@/Shared/Infrastructure/Services/SystemClock'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import { ApplyUsageChargesService } from '../../Application/Services/ApplyUsageChargesService'
 import { DeductCreditService } from '../../Application/Services/DeductCreditService'
@@ -26,6 +27,10 @@ export class CreditServiceProvider extends ModuleServiceProvider implements IRou
     const db = getCurrentDatabaseAccess()
     container.singleton('creditAccountRepository', () => new CreditAccountRepository(db))
     container.singleton('creditTransactionRepository', () => new CreditTransactionRepository(db))
+  }
+
+  protected override registerInfraServices(container: IContainer): void {
+    container.singleton('clock', () => new SystemClock())
   }
 
   protected override registerApplicationServices(container: IContainer): void {
