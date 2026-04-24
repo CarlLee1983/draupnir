@@ -38,6 +38,7 @@ import type { getDrizzleInstance } from './config'
  * 將 Drizzle 的查詢 API 轉換為標準的 IQueryBuilder 介面
  */
 export class DrizzleQueryBuilder implements IQueryBuilder {
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   private whereConditions: any[] = []
   private orderByConfig: { column: string; direction: 'ASC' | 'DESC' } | null = null
   private limitValue: number | null = null
@@ -47,6 +48,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
   constructor(
     private db: ReturnType<typeof getDrizzleInstance>,
     private tableName: string,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     private tableSchema: any,
   ) {}
 
@@ -89,6 +91,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
         this.whereConditions.push(like(col, value as string))
         break
       case 'in':
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         this.whereConditions.push(inArray(col, value as any[]))
         break
       default:
@@ -105,6 +108,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
    */
   async first(): Promise<Record<string, unknown> | null> {
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       let query: any = (this.db as any).select().from(this.tableSchema)
 
       if (this.whereConditions.length > 0) {
@@ -133,6 +137,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
    */
   async select(): Promise<Record<string, unknown>[]> {
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       let query: any = (this.db as any).select().from(this.tableSchema)
 
       if (this.whereConditions.length > 0) {
@@ -170,6 +175,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
    */
   async insert(data: Record<string, unknown>): Promise<void> {
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       await (this.db as any).insert(this.tableSchema).values(data)
     } catch (error) {
       console.error(`Error in insert(): ${error}`)
@@ -186,9 +192,11 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
         ? conflictTarget.map((c) => this.resolveColumn(c))
         : [this.resolveColumn(conflictTarget as string)]
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       await (this.db as any)
         .insert(this.tableSchema)
         .values(data)
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         .onConflictDoNothing({ target: targets as any })
     } catch (error) {
       console.error(`Error in insertOrIgnore(): ${error}`)
@@ -203,6 +211,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
    */
   async update(data: Record<string, unknown>): Promise<void> {
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       let query: any = (this.db as any).update(this.tableSchema).set(data)
 
       if (this.whereConditions.length > 0) {
@@ -221,6 +230,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
    */
   async delete(): Promise<void> {
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       let query: any = (this.db as any).delete(this.tableSchema)
 
       if (this.whereConditions.length > 0) {
@@ -278,6 +288,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
     try {
       const col = this.tableSchema.id
 
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       let query: any = (this.db as any).select({ count: countDistinct(col) }).from(this.tableSchema)
 
       if (this.whereConditions.length > 0) {
@@ -338,7 +349,8 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
       }
 
       // 2. 建立查詢並加入累積的 where 條件
-      let query: any = (this.db as any).select(selectShape).from(this.tableSchema)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+            let query: any = (this.db as any).select(selectShape).from(this.tableSchema)
 
       if (this.whereConditions.length > 0) {
         query = query.where(and(...this.whereConditions))
@@ -359,6 +371,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
             selectShape[o.column] !== undefined
               ? selectShape[o.column]
               : this.resolveColumn(o.column)
+          // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
           return o.direction === 'DESC' ? desc(base as any) : asc(base as any)
         })
         query = query.orderBy(...orderExprs)
@@ -390,6 +403,7 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
       case 'sum':
         return (
           typeof expr.column === 'string'
+            // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
             ? drizzleSum(this.resolveColumn(expr.column) as any)
             : drizzleSum(this.translateExpression(expr.column))
         ).mapWith(Number)
@@ -397,23 +411,27 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
         return (
           expr.column === '*'
             ? drizzleCount()
+            // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
             : drizzleCount(this.resolveColumn(expr.column) as any)
         ).mapWith(Number)
       case 'avg':
         return (
           typeof expr.column === 'string'
+            // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
             ? drizzleAvg(this.resolveColumn(expr.column) as any)
             : drizzleAvg(this.translateExpression(expr.column))
         ).mapWith(Number)
       case 'min':
         return (
           typeof expr.column === 'string'
+            // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
             ? drizzleMin(this.resolveColumn(expr.column) as any)
             : drizzleMin(this.translateExpression(expr.column))
         ).mapWith(Number)
       case 'max':
         return (
           typeof expr.column === 'string'
+            // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
             ? drizzleMax(this.resolveColumn(expr.column) as any)
             : drizzleMax(this.translateExpression(expr.column))
         ).mapWith(Number)

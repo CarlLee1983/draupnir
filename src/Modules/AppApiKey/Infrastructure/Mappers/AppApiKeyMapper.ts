@@ -1,7 +1,7 @@
 import type { AppApiKey } from '../../Domain/Aggregates/AppApiKey'
 
-export class AppApiKeyMapper {
-  static toDatabaseRow(entity: AppApiKey): Record<string, unknown> {
+export const AppApiKeyMapper = {
+  toDatabaseRow(entity: AppApiKey): Record<string, unknown> {
     return {
       id: entity.id,
       org_id: entity.orgId,
@@ -21,5 +21,5 @@ export class AppApiKeyMapper {
       created_at: entity.createdAt.toISOString(),
       updated_at: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }

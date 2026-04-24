@@ -1,9 +1,9 @@
 import type { Contract } from '../../Domain/Aggregates/Contract'
 
 /** Maps contract aggregates to `contracts` table row shape (JSON-serialized terms). */
-export class ContractMapper {
+export const ContractMapper = {
   /** Flattens an aggregate into columns for insert/update. */
-  static toDatabaseRow(entity: Contract): Record<string, unknown> {
+  toDatabaseRow(entity: Contract): Record<string, unknown> {
     return {
       id: entity.id,
       target_type: entity.targetType,
@@ -14,5 +14,5 @@ export class ContractMapper {
       created_at: entity.createdAt.toISOString(),
       updated_at: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }

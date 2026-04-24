@@ -40,7 +40,9 @@ export interface IContainer {
    * @param name - Service registration name.
    * @param factory - Factory function that receives the container and returns the service instance.
    */
-  singleton(name: string, factory: (container: IContainer) => any): void
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+singleton(name: string, factory: (container: IContainer) => any): void
 
   /**
    * Registers a factory service (creates a new instance every time it is resolved).
@@ -50,7 +52,9 @@ export interface IContainer {
    * @param name - Service registration name.
    * @param factory - Factory function, executed every time make() is called.
    */
-  bind(name: string, factory: (container: IContainer) => any): void
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+bind(name: string, factory: (container: IContainer) => any): void
 
   /**
    * Resolves a service from the container.
@@ -59,7 +63,9 @@ export interface IContainer {
    * @returns The resolved service instance.
    * @throws Should throw a clear error message if the service is not registered.
    */
-  make(name: string): any
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+make(name: string): any
 }
 
 /**

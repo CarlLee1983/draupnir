@@ -1,7 +1,7 @@
 import type { Application } from '../../Domain/Aggregates/Application'
 
-export class ApplicationMapper {
-  static toDatabaseRow(entity: Application): Record<string, unknown> {
+export const ApplicationMapper = {
+  toDatabaseRow(entity: Application): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -15,5 +15,5 @@ export class ApplicationMapper {
       created_at: entity.createdAt.toISOString(),
       updated_at: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }

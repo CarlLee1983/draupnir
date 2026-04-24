@@ -1,7 +1,7 @@
 import type { HealthCheck } from '../../Domain/Aggregates/HealthCheck'
 
-export class HealthCheckMapper {
-  static toDatabaseRow(entity: HealthCheck): Record<string, unknown> {
+export const HealthCheckMapper = {
+  toDatabaseRow(entity: HealthCheck): Record<string, unknown> {
     return {
       id: entity.id,
       timestamp: entity.timestamp,
@@ -9,5 +9,5 @@ export class HealthCheckMapper {
       checks: JSON.stringify(entity.checks),
       message: entity.message,
     }
-  }
+  },
 }

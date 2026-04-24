@@ -11,6 +11,7 @@ const FORM_REQUEST_SYMBOL = Symbol.for('gravito.formRequest')
 
 function isFormRequestClass(value: unknown): value is FormRequestClass {
   if (typeof value !== 'function') return false
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   if ((value as any)[FORM_REQUEST_SYMBOL] === true) return true
   if (value.prototype && typeof value.prototype.validate === 'function') return true
   return false
@@ -55,6 +56,7 @@ function runPipeline(middlewares: Middleware[], handler: RouteHandler): RouteHan
 }
 
 function wrapHandler(handler: RouteHandler) {
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   return (ctx: any) => handler(fromGravitoContext(ctx))
 }
 
@@ -87,6 +89,7 @@ export function createGravitoModuleRouter(core: PlanetCore, prefix = ''): IModul
               resolve(handler(ctx))
             }),
         )
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         const route = core.router[method](fullPath, formRequest, (ctx: any) =>
           pipeline(fromGravitoContext(ctx)),
         )
@@ -96,6 +99,7 @@ export function createGravitoModuleRouter(core: PlanetCore, prefix = ''): IModul
 
       const middlewares = raw.length > 1 ? (raw[0] as Middleware[]) : []
       const pipeline = runPipeline(middlewares, handler)
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const route = core.router[method](fullPath, (ctx: any) => pipeline(fromGravitoContext(ctx)))
       applyRouteName(route, options)
     }
@@ -109,16 +113,20 @@ export function createGravitoModuleRouter(core: PlanetCore, prefix = ''): IModul
     delete: register('delete') as IModuleRouter['delete'],
     head: (path, handler, options) => {
       const fullPath = prefix + path
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const route = core.router.get(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
       applyRouteName(route, options)
     },
     options: (path, handler, options) => {
       const fullPath = prefix + path
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const r = core.router as any
       let route: unknown
       if (r.options && typeof r.options === 'function') {
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         route = r.options(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
       } else {
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         route = r.get(fullPath, (ctx: any) => handler(fromGravitoContext(ctx)))
       }
       applyRouteName(route, options)

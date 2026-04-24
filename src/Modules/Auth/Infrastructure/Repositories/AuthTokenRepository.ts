@@ -141,7 +141,9 @@ export class AuthTokenRepository implements IAuthTokenRepository {
   /**
    * Maps a raw database row to a TokenRecord structure.
    */
-  private mapToRecord(row: any): TokenRecord {
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+private  mapToRecord(row: any): TokenRecord {
     return {
       id: row.id,
       userId: row.user_id,

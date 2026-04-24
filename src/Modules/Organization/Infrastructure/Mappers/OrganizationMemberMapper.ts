@@ -5,14 +5,14 @@ function toDate(value: unknown): Date {
   if (value instanceof Date) return value
   if (typeof value === 'string' || typeof value === 'number') {
     const d = new Date(value)
-    if (!isNaN(d.getTime())) return d
+    if (!Number.isNaN(d.getTime())) return d
   }
   return new Date()
 }
 
-export class OrganizationMemberMapper {
+export const OrganizationMemberMapper = {
   /** 將資料庫 row 映射為 OrganizationMember Entity。 */
-  static toEntity(row: Record<string, unknown>): OrganizationMember {
+  toEntity(row: Record<string, unknown>): OrganizationMember {
     return OrganizationMember.reconstitute({
       id: String(row.id),
       organizationId: String(row.organization_id),
@@ -21,9 +21,9 @@ export class OrganizationMemberMapper {
       joinedAt: toDate(row.joined_at),
       createdAt: toDate(row.created_at),
     })
-  }
+  },
 
-  static toDatabaseRow(entity: OrganizationMember): Record<string, unknown> {
+  toDatabaseRow(entity: OrganizationMember): Record<string, unknown> {
     return {
       id: entity.id,
       organization_id: entity.organizationId,
@@ -32,5 +32,5 @@ export class OrganizationMemberMapper {
       joined_at: entity.joinedAt.toISOString(),
       created_at: entity.createdAt.toISOString(),
     }
-  }
+  },
 }

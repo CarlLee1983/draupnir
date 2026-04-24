@@ -114,6 +114,7 @@ export class AuthMiddleware {
         email: payload.email,
         role: payload.role,
       })
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (error: any) {
       // Middlewares should not throw exceptions; set status only
       ctx.set('authError', error.message)

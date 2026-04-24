@@ -13,7 +13,9 @@ import type {
 } from '@/Shared/Infrastructure/Database/AggregateSpec'
 import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
 
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
 let dbInstance: any = null
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
 async function getDB(): Promise<any> {
   if (!dbInstance) {
     dbInstance = (await import('@gravito/atlas')).DB
@@ -35,6 +37,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
 
   constructor(
     private tableName: string,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     private connection?: any,
   ) {}
 
@@ -282,6 +285,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
     const StaticDB = await getDB()
     let isPostgres = true
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       const config: any = StaticDB.getConnectionConfig?.()
       const driver: string = config?.driver ?? config?.write?.driver ?? ''
       if (driver) {
@@ -407,7 +411,9 @@ export class AtlasQueryBuilder implements IQueryBuilder {
    * 應用單個 WHERE 條件到查詢物件
    * @private
    */
-  private applyWhere(query: any, cond: { column: string; operator: string; value: unknown }): any {
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+private  applyWhere(query: any, cond: { column: string; operator: string; value: unknown }): any {
     switch (cond.operator) {
       case '=':
         return query.where(cond.column, '=', cond.value)
@@ -425,6 +431,7 @@ export class AtlasQueryBuilder implements IQueryBuilder {
       case 'like':
         return query.where(cond.column, 'like', cond.value)
       case 'in':
+        // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
         return query.whereIn(cond.column, cond.value as any[])
       case 'between':
         return query.whereBetween(cond.column, cond.value as [Date, Date])

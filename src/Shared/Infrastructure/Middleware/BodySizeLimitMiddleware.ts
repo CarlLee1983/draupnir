@@ -28,7 +28,7 @@ export function createBodySizeLimitMiddleware(maxBytes: number): Middleware {
 
     if (contentLength !== undefined) {
       const size = parseInt(contentLength, 10)
-      if (!isNaN(size)) {
+      if (!Number.isNaN(size)) {
         if (size > maxBytes) return tooLargeResponse()
         return next()
       }

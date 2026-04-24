@@ -62,6 +62,7 @@ export interface IRedisService {
     streams: Record<string, string>,
     count?: number,
     block?: number,
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   ): Promise<any>
 
   /**

@@ -10,6 +10,7 @@ export class AppException extends Error {
     public readonly code: string,
     public override readonly message: string,
     public readonly statusCode: number = 400,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     public readonly details?: Record<string, any>,
   ) {
     super(message)

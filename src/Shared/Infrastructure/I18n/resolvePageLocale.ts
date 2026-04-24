@@ -3,6 +3,7 @@ import { type LocaleCode, supportedLocales } from './loadMessages'
 
 export function resolvePageLocale(ctx: IHttpContext): LocaleCode {
   const cookieLocale = ctx.getCookie('draupnir_locale')
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   if (supportedLocales.includes(cookieLocale as any)) {
     return cookieLocale as LocaleCode
   }

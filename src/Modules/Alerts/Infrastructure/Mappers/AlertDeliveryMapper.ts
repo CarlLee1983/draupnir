@@ -18,8 +18,8 @@ export interface AlertDeliveriesInsert {
   tier: string
 }
 
-export class AlertDeliveryMapper {
-  static toDomain(row: Record<string, unknown>): AlertDelivery {
+export const AlertDeliveryMapper = {
+  toDomain(row: Record<string, unknown>): AlertDelivery {
     const orgId = row.org_id
     const month = row.month
     const tier = row.tier
@@ -58,9 +58,9 @@ export class AlertDeliveryMapper {
       month: String(month),
       tier: String(tier),
     } satisfies AlertDeliveryProps)
-  }
+  },
 
-  static toPersistence(delivery: AlertDelivery): AlertDeliveriesInsert {
+  toPersistence(delivery: AlertDelivery): AlertDeliveriesInsert {
     return {
       id: delivery.id,
       alert_event_id: delivery.alertEventId,
@@ -78,5 +78,5 @@ export class AlertDeliveryMapper {
       month: delivery.month,
       tier: delivery.tier,
     }
-  }
+  },
 }

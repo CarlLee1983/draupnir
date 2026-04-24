@@ -60,6 +60,7 @@ class MemoryQueryBuilder implements IQueryBuilder {
     if (!this.store.has(this.tableName)) {
       this.store.set(this.tableName, [])
     }
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     return this.store.get(this.tableName)!
   }
 
@@ -101,7 +102,9 @@ class MemoryQueryBuilder implements IQueryBuilder {
     }
     if (this.orderByColumn != null) {
       result = [...result].sort((a, b) => {
+        // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
         const aVal = a[this.orderByColumn!] as string | number
+        // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
         const bVal = b[this.orderByColumn!] as string | number
         const cmp = aVal < bVal ? -1 : aVal > bVal ? 1 : 0
         return this.orderByDirection === 'DESC' ? -cmp : cmp
@@ -201,7 +204,7 @@ class MemoryQueryBuilder implements IQueryBuilder {
                 })
                 .join('\x1f')
         if (!groups.has(key)) groups.set(key, [])
-        groups.get(key)!.push(row)
+        groups.get(key)?.push(row)
       }
     }
 
@@ -218,6 +221,7 @@ class MemoryQueryBuilder implements IQueryBuilder {
     // 3. orderBy
     if (spec.orderBy && spec.orderBy.length > 0) {
       result.sort((a, b) => {
+        // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
         for (const o of spec.orderBy!) {
           const av = a[o.column]
           const bv = b[o.column]
@@ -345,7 +349,8 @@ function reduceAggregate(
       return evalExpression(rows[0], expr)
     default: {
       const _exhaustive: never = expr
-      throw new Error(`Unhandled expression kind: ${(_exhaustive as any).kind}`)
+      throw new Error(`Unhandled expression kind: ${// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+(_exhaustive as any).kind}`)
     }
   }
 }

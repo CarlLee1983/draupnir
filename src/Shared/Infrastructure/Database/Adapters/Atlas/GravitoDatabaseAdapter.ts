@@ -7,7 +7,9 @@ const toSnakeCase = (name: string): string =>
   name.replace(/([A-Z])/g, (_, c: string) => `_${c.toLowerCase()}`)
 
 /** ESM: `require('@gravito/atlas')` fails under Bun + `"type": "module"`; align with AtlasQueryBuilder. */
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
 let atlasDbSingleton: any = null
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
 async function getAtlasDB(): Promise<any> {
   if (!atlasDbSingleton) {
     atlasDbSingleton = (await import('@gravito/atlas')).DB
@@ -41,6 +43,7 @@ class AtlasDatabaseAccess implements IDatabaseAccess {
 
   async transaction<T>(fn: (tx: IDatabaseAccess) => Promise<T>): Promise<T> {
     const db = await getAtlasDB()
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     return db.transaction(async (connection: any) => {
       const txAccess = new AtlasTransactionAccess(connection)
       return fn(txAccess)
@@ -57,6 +60,7 @@ class AtlasDatabaseAccess implements IDatabaseAccess {
  * @internal
  */
 class AtlasTransactionAccess implements IDatabaseAccess {
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   constructor(private readonly connection: any) {}
 
   table(name: string): IQueryBuilder {

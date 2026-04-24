@@ -4,14 +4,14 @@ function toDate(value: unknown): Date {
   if (value instanceof Date) return value
   if (typeof value === 'string' || typeof value === 'number') {
     const d = new Date(value)
-    if (!isNaN(d.getTime())) return d
+    if (!Number.isNaN(d.getTime())) return d
   }
   return new Date()
 }
 
-export class OrganizationMapper {
+export const OrganizationMapper = {
   /** 將資料庫 row 映射為 Organization Aggregate。 */
-  static toEntity(row: Record<string, unknown>): Organization {
+  toEntity(row: Record<string, unknown>): Organization {
     return Organization.reconstitute({
       id: String(row.id),
       name: String(row.name),
@@ -22,9 +22,9 @@ export class OrganizationMapper {
       createdAt: toDate(row.created_at),
       updatedAt: toDate(row.updated_at),
     })
-  }
+  },
 
-  static toDatabaseRow(entity: Organization): Record<string, unknown> {
+  toDatabaseRow(entity: Organization): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -35,5 +35,5 @@ export class OrganizationMapper {
       created_at: entity.createdAt.toISOString(),
       updated_at: entity.updatedAt.toISOString(),
     }
-  }
+  },
 }

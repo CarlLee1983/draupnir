@@ -28,8 +28,10 @@ export class GravitoRedisAdapter implements IRedisService {
   }
 
   async incr(key: string, ttlSeconds: number): Promise<number> {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     const count = await (this.redis as any).incr(key)
     if (count === 1) {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       await (this.redis as any).expire(key, ttlSeconds)
     }
     return count
@@ -42,6 +44,7 @@ export class GravitoRedisAdapter implements IRedisService {
   }
 
   async xadd(key: string, data: Record<string, string>, maxlen?: number): Promise<string> {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     return (this.redis as any).xadd(key, data, maxlen ? { maxlen, approximate: true } : undefined)
   }
 
@@ -51,18 +54,23 @@ export class GravitoRedisAdapter implements IRedisService {
     streams: Record<string, string>,
     count?: number,
     block?: number,
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   ): Promise<any> {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     return (this.redis as any).xreadgroup(group, consumer, streams, { count, block })
   }
 
   async xack(key: string, group: string, ...ids: string[]): Promise<number> {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     return (this.redis as any).xack(key, group, ...ids)
   }
 
   async xgroupCreate(key: string, group: string, id = '$', mkstream = true): Promise<boolean> {
     try {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       await (this.redis as any).xgroup('CREATE', key, group, id, mkstream)
       return true
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     } catch (err: any) {
       if (err.message?.includes('BUSYGROUP')) return true // Group already exists
       throw err

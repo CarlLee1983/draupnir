@@ -2,7 +2,7 @@ import { coalesce, sum } from '@/Shared/Infrastructure/Database/AggregateSpec'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { ApiKey } from '../../Domain/Aggregates/ApiKey'
 import type { IApiKeyRepository } from '../../Domain/Repositories/IApiKeyRepository'
-import { ApiKeyMapper } from '../Mappers/ApiKeyMapper'
+import { toDatabaseRow } from '../Mappers/ApiKeyMapper'
 
 export class ApiKeyRepository implements IApiKeyRepository {
   constructor(private readonly db: IDatabaseAccess) {}
@@ -49,14 +49,14 @@ export class ApiKeyRepository implements IApiKeyRepository {
   }
 
   async save(apiKey: ApiKey): Promise<void> {
-    await this.db.table('api_keys').insert(ApiKeyMapper.toDatabaseRow(apiKey))
+    await this.db.table('api_keys').insert(toDatabaseRow(apiKey))
   }
 
   async update(apiKey: ApiKey): Promise<void> {
     await this.db
       .table('api_keys')
       .where('id', '=', apiKey.id)
-      .update(ApiKeyMapper.toDatabaseRow(apiKey))
+      .update(toDatabaseRow(apiKey))
   }
 
   async countByOrgId(orgId: string): Promise<number> {

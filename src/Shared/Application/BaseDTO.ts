@@ -18,7 +18,9 @@ export class BaseDTO {
    *
    * @returns {Record<string, any>} A plain object containing the DTO data.
    */
-  toJSON(): Record<string, any> {
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+toJSON(): Record<string, any> {
     return { ...this }
   }
 }

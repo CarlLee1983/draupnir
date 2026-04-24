@@ -12,8 +12,8 @@ export interface WebhookEndpointsInsert {
   last_failure_at: string | null
 }
 
-export class WebhookEndpointMapper {
-  static toDomain(row: Record<string, unknown>): WebhookEndpoint {
+export const WebhookEndpointMapper = {
+  toDomain(row: Record<string, unknown>): WebhookEndpoint {
     return WebhookEndpoint.rehydrate({
       id: String(row.id),
       orgId: String(row.org_id),
@@ -32,9 +32,9 @@ export class WebhookEndpointMapper {
           ? null
           : String(row.last_failure_at),
     } satisfies WebhookEndpointProps)
-  }
+  },
 
-  static toPersistence(endpoint: WebhookEndpoint): WebhookEndpointsInsert {
+  toPersistence(endpoint: WebhookEndpoint): WebhookEndpointsInsert {
     return {
       id: endpoint.id,
       org_id: endpoint.orgId,
@@ -46,5 +46,5 @@ export class WebhookEndpointMapper {
       last_success_at: endpoint.lastSuccessAt,
       last_failure_at: endpoint.lastFailureAt,
     }
-  }
+  },
 }

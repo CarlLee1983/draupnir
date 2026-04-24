@@ -41,11 +41,14 @@ class DrizzleDatabaseAccess implements IDatabaseAccess {
     return new DrizzleQueryBuilder(db, name, tableSchema)
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   private resolveSchema(name: string): any {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     if ((schema as any)[name]) return (schema as any)[name]
 
     // Convert snake_case to camelCase
     const camelName = name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     return (schema as any)[camelName]
   }
 
@@ -63,6 +66,7 @@ class DrizzleDatabaseAccess implements IDatabaseAccess {
  * @internal
  */
 class DrizzleTransactionAccess implements IDatabaseAccess {
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   constructor(private readonly txDb: any) {}
 
   table(name: string): IQueryBuilder {
@@ -75,9 +79,12 @@ class DrizzleTransactionAccess implements IDatabaseAccess {
     return new DrizzleQueryBuilder(this.txDb, name, tableSchema)
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   private resolveSchema(name: string): any {
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     if ((schema as any)[name]) return (schema as any)[name]
     const camelName = name.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     return (schema as any)[camelName]
   }
 

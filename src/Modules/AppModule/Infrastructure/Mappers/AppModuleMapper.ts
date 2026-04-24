@@ -1,8 +1,8 @@
 // src/Modules/AppModule/Infrastructure/Mappers/AppModuleMapper.ts
 import type { AppModule } from '../../Domain/Aggregates/AppModule'
 
-export class AppModuleMapper {
-  static toDatabaseRow(entity: AppModule): Record<string, unknown> {
+export const AppModuleMapper = {
+  toDatabaseRow(entity: AppModule): Record<string, unknown> {
     return {
       id: entity.id,
       name: entity.name,
@@ -11,5 +11,5 @@ export class AppModuleMapper {
       status: entity.status,
       created_at: entity.createdAt.toISOString(),
     }
-  }
+  },
 }

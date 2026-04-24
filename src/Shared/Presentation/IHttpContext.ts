@@ -215,10 +215,15 @@ export function fromGravitoContext(ctx: GravitoContext): IHttpContext {
     params: Object.keys(routeParams).length > 0 ? routeParams : legacyParams,
     query,
     headers,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     json: (data, statusCode) => ctx.json(data, statusCode as any),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     text: (content, statusCode) => ctx.text(content, statusCode as any),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     redirect: (url, statusCode = 302) => ctx.redirect(url, statusCode as any),
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     get: <T>(key: string) => ctx.get(key as any) as T | undefined,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     set: (key, value) => ctx.set(key as any, value),
     getCookie: (name: string) => {
       const cookieHeader = (ctx.req.header('Cookie') ?? ctx.req.header('cookie')) as

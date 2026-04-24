@@ -15,12 +15,14 @@ import type { IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/
 class GravitoContainerAdapter implements IContainer {
   constructor(private gravitoContainer: GravitoContainer) {}
 
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   singleton(name: string, factory: (container: IContainer) => any): void {
     this.gravitoContainer.singleton(name, (c: GravitoContainer) => {
       return factory(new GravitoContainerAdapter(c))
     })
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   bind(name: string, factory: (container: IContainer) => any): void {
     // bind implementation in Gravito creates a new instance each time
     this.gravitoContainer.bind(name, (c: GravitoContainer) => {
@@ -28,6 +30,7 @@ class GravitoContainerAdapter implements IContainer {
     })
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   make(name: string): any {
     return this.gravitoContainer.make(name)
   }

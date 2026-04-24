@@ -1,8 +1,8 @@
 // src/Modules/Credit/Infrastructure/Mappers/CreditTransactionMapper.ts
 import type { CreditTransaction } from '../../Domain/Entities/CreditTransaction'
 
-export class CreditTransactionMapper {
-  static toDatabaseRow(entity: CreditTransaction): Record<string, unknown> {
+export const CreditTransactionMapper = {
+  toDatabaseRow(entity: CreditTransaction): Record<string, unknown> {
     return {
       id: entity.id,
       credit_account_id: entity.creditAccountId,
@@ -14,5 +14,5 @@ export class CreditTransactionMapper {
       description: entity.description,
       created_at: entity.createdAt.toISOString(),
     }
-  }
+  },
 }

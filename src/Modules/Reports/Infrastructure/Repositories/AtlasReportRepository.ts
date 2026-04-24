@@ -55,6 +55,7 @@ export class AtlasReportRepository implements IReportRepository {
     await this.db.table('report_schedules').where('id', '=', id).delete()
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   private mapToAggregate(row: any): ReportSchedule {
     return ReportSchedule.create({
       id: row.id,

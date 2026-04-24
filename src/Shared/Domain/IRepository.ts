@@ -101,7 +101,9 @@ export interface IRepository<T extends BaseEntity> {
    * @param params[key] - Other filter conditions (defined by concrete implementation).
    * @returns An array of matching entities.
    */
-  findAll(params?: { limit?: number; offset?: number; [key: string]: any }): Promise<T[]>
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+findAll(params?: { limit?: number; offset?: number; [key: string]: any }): Promise<T[]>
 
   /**
    * Counts the total number of entities matching conditions.
@@ -111,5 +113,7 @@ export interface IRepository<T extends BaseEntity> {
    * @param params - Filter conditions (must match findAll).
    * @returns Total number of matching entities.
    */
-  count(params?: { [key: string]: any }): Promise<number>
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+count(params?: { [key: string]: any }): Promise<number>
 }
