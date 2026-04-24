@@ -15,7 +15,7 @@
     "test": "bun test src tests/Unit packages",
     "test:watch": "bun test src tests/Unit packages --watch",
     "test:coverage": "bun test src tests/Unit packages --coverage",
-    "test:acceptance": "mkdir -p .omx/logs && bun test tests/Acceptance --reporter=dots --coverage-reporter=lcov > .omx/logs/test-acceptance.log 2>&1",
+    "test:acceptance": "bun test tests/Acceptance --reporter=dots --coverage-reporter=lcov",
     "test:acceptance:watch": "bun test tests/Acceptance --watch",
     "test:e2e:smoke": "playwright test --grep @smoke",
     "test:unit": "bun test tests/Unit/",
