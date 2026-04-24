@@ -21,6 +21,8 @@ import {
   gt,
   gte,
   inArray,
+  isNotNull,
+  isNull,
   like,
   lt,
   lte,
@@ -322,6 +324,20 @@ export class DrizzleQueryBuilder implements IQueryBuilder {
     const end = range[1] instanceof Date ? range[1].toISOString() : range[1]
 
     this.whereConditions.push(between(col, start, end))
+    return this
+  }
+
+  whereNull(column: string): IQueryBuilder {
+    const col = this.tableSchema[column]
+    if (!col) throw new Error(`Column "${column}" not found in table "${this.tableName}"`)
+    this.whereConditions.push(isNull(col))
+    return this
+  }
+
+  whereNotNull(column: string): IQueryBuilder {
+    const col = this.tableSchema[column]
+    if (!col) throw new Error(`Column "${column}" not found in table "${this.tableName}"`)
+    this.whereConditions.push(isNotNull(col))
     return this
   }
 

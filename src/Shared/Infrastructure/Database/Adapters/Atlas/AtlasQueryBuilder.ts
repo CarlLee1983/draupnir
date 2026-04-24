@@ -395,6 +395,16 @@ export class AtlasQueryBuilder implements IQueryBuilder {
     return this
   }
 
+  whereNull(column: string): IQueryBuilder {
+    this.whereConditions.push({ column, operator: 'is null', value: null })
+    return this
+  }
+
+  whereNotNull(column: string): IQueryBuilder {
+    this.whereConditions.push({ column, operator: 'is not null', value: null })
+    return this
+  }
+
   /**
    * Row-level lock (SELECT ... FOR UPDATE). Must be invoked inside a transaction.
    *
@@ -435,6 +445,10 @@ private  applyWhere(query: any, cond: { column: string; operator: string; value:
         return query.whereIn(cond.column, cond.value as any[])
       case 'between':
         return query.whereBetween(cond.column, cond.value as [Date, Date])
+      case 'is null':
+        return query.whereNull(cond.column)
+      case 'is not null':
+        return query.whereNotNull(cond.column)
       default:
         throw new Error(`Unsupported operator: ${cond.operator}`)
     }
