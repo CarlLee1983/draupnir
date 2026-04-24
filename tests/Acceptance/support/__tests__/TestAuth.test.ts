@@ -36,8 +36,8 @@ describe('TestAuth', () => {
     expect(payload?.email).toBe('user-1@example.com')
   })
 
-  it('bearerHeaderFor 回傳 { Authorization: "Bearer <token>" }', () => {
-    const headers = app.auth.bearerHeaderFor({
+  it('bearerHeaderFor 回傳 { Authorization: "Bearer <token>" }', async () => {
+    const headers = await app.auth.bearerHeaderFor({
       userId: 'user-2',
       email: 'u2@example.com',
       role: 'admin',
