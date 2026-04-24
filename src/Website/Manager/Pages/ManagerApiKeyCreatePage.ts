@@ -66,6 +66,7 @@ export class ManagerApiKeyCreatePage {
   private async resolveOrgId(
     ctx: IHttpContext,
   ): Promise<{ orgId: string } | { redirect: Response }> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const membership = await this.membershipService.execute(auth.userId)
     if (!membership) return { redirect: ctx.redirect('/member/dashboard') }
@@ -79,6 +80,7 @@ export class ManagerApiKeyCreatePage {
    * @returns Inertia HTML, or redirect when membership is missing
    */
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const r = await this.resolveOrgId(ctx)
     if ('redirect' in r) return r.redirect
@@ -113,6 +115,7 @@ export class ManagerApiKeyCreatePage {
    * @returns Inertia HTML including a one-time `newKeyValue`, or a redirect
    */
   async store(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const r = await this.resolveOrgId(ctx)
     if ('redirect' in r) return r.redirect

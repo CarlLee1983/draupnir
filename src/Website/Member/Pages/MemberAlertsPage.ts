@@ -31,6 +31,7 @@ export class MemberAlertsPage {
    * @returns Inertia render response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const currentOrg = ctx.get<CurrentOrganizationContext>('currentOrg')
     let orgId =

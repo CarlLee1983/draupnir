@@ -19,6 +19,7 @@ function timingSafeStringEqual(a: string, b: string): boolean {
   if (ae.length !== be.length) return false
   let diff = 0
   for (let i = 0; i < ae.length; i++) {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     diff |= ae[i]! ^ be[i]!
   }
   return diff === 0

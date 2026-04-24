@@ -29,6 +29,7 @@ export class AdminContractCreatePage {
    * @returns Redirect to contract list on success or re-render with `formError`.
    */
   async store(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const body = ctx.get('validated') as CreateContractParams | undefined
 

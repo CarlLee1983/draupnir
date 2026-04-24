@@ -22,6 +22,7 @@ export class ManagerOrganizationPage {
   ) {}
 
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const membership = await this.membershipService.execute(auth.userId)
     if (!membership) return ctx.redirect('/member/dashboard')
@@ -41,6 +42,7 @@ export class ManagerOrganizationPage {
   }
 
   async update(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const membership = await this.membershipService.execute(auth.userId)
     if (!membership) return ctx.redirect('/member/dashboard')

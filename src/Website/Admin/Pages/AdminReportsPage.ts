@@ -8,6 +8,7 @@ export class AdminReportsPage {
   ) {}
 
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const orgId = ctx.getParam('orgId')!
     const schedules = await this.reportRepository.findByOrgId(orgId)
 

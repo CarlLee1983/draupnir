@@ -16,7 +16,7 @@ export function composePageHandler(
 ): RouteHandler {
   return (ctx) => {
     const run = (i: number): Promise<Response> =>
-      i >= middlewares.length ? handler(ctx) : middlewares[i]!(ctx, () => run(i + 1))
+      i >= middlewares.length ? handler(ctx) : middlewares[i]?.(ctx, () => run(i + 1))
     return run(0)
   }
 }

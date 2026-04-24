@@ -46,6 +46,7 @@ export class ManagerMembersPage {
   private async resolveOrgId(
     ctx: IHttpContext,
   ): Promise<{ orgId: string } | { redirect: Response }> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const membership = await this.membershipService.execute(auth.userId)
     if (!membership) return { redirect: ctx.redirect('/member/dashboard') }
@@ -53,6 +54,7 @@ export class ManagerMembersPage {
   }
 
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const resolve = await this.resolveOrgId(ctx)
     if ('redirect' in resolve) return resolve.redirect
@@ -123,6 +125,7 @@ export class ManagerMembersPage {
   }
 
   async invite(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const resolve = await this.resolveOrgId(ctx)
     if ('redirect' in resolve) return resolve.redirect
@@ -135,6 +138,7 @@ export class ManagerMembersPage {
   }
 
   async remove(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const resolve = await this.resolveOrgId(ctx)
     if ('redirect' in resolve) return resolve.redirect

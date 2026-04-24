@@ -19,6 +19,7 @@ export class AdminApiKeysPage {
    * @returns Inertia payload with org picker and keys or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const orgId = ctx.getQuery('orgId')

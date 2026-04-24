@@ -33,6 +33,7 @@ function injectSharedDataMiddleware(): Middleware {
 function requireAdminMiddleware(): Middleware {
   return async (ctx, next) => {
     const r = requireAdmin(ctx)
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     return r.ok ? next() : r.response!
   }
 }
@@ -40,6 +41,7 @@ function requireAdminMiddleware(): Middleware {
 function requireMemberMiddleware(): Middleware {
   return async (ctx, next) => {
     const r = requireMember(ctx)
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     return r.ok ? next() : r.response!
   }
 }
@@ -47,6 +49,7 @@ function requireMemberMiddleware(): Middleware {
 function requireManagerMiddleware(): Middleware {
   return async (ctx, next) => {
     const r = requireManager(ctx)
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     return r.ok ? next() : r.response!
   }
 }

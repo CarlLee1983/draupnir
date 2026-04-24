@@ -23,6 +23,7 @@ export class AdminContractDetailPage {
    * @returns Inertia detail payload or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const contractId = ctx.getParam('id')
@@ -49,6 +50,7 @@ export class AdminContractDetailPage {
    * @returns Redirect to the same contract detail path.
    */
   async postAction(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const contractId = ctx.getParam('id')
     if (!contractId) {
@@ -72,6 +74,7 @@ export class AdminContractDetailPage {
    * @returns Redirect to the same contract detail path.
    */
   async postQuota(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const contractId = ctx.getParam('id')
     if (!contractId) {

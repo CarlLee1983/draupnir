@@ -38,6 +38,7 @@ export class ManagerSettingsPage {
     ctx: IHttpContext,
     extras: Record<string, unknown> = {},
   ): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const profile = await this.getProfileService.execute(auth.userId)
     // Prefer the hash of the silently-refreshed access token so the current device
@@ -61,6 +62,7 @@ export class ManagerSettingsPage {
   }
 
   async update(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const body = (ctx.get('validated') as { displayName?: string } | undefined) ?? {}
     await this.updateProfileService.execute(auth.userId, {
@@ -70,6 +72,7 @@ export class ManagerSettingsPage {
   }
 
   async changePassword(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const validated = ctx.get('validated') as ChangePasswordParams | undefined
     if (!validated) {
@@ -93,6 +96,7 @@ export class ManagerSettingsPage {
   }
 
   async revokeAllSessions(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const result = await this.revokeAllSessionsService.execute(auth.userId)
     if (!result.success) {

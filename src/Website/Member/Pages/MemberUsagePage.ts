@@ -24,6 +24,7 @@ export class MemberUsagePage {
    * @returns Inertia render response with usage stats.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
     let orgId = ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null

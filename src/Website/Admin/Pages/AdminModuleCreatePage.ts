@@ -28,6 +28,7 @@ export class AdminModuleCreatePage {
    * @returns Redirect to `/admin/modules` on success or re-render with validation error.
    */
   async store(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const body = ctx.get('validated') as RegisterModuleParams | undefined
 

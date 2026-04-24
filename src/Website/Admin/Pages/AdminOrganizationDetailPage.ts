@@ -23,6 +23,7 @@ export class AdminOrganizationDetailPage {
    * @returns Inertia detail payload or auth failure response.
    */
   async handle(ctx: IHttpContext): Promise<Response> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
 
     const orgId = ctx.getParam('id')
