@@ -37,7 +37,7 @@
     "lint:fix": "biome lint src tests packages --fix",
     "format": "biome format --write src tests packages",
     "format:check": "biome check src tests packages",
-    "check": "bun run typecheck && bun run lint && bun run test",
+    "check": "bun run typecheck && bun run lint && bun run test && bun run test:acceptance",
     "verify": "bun run check && echo '✅ All checks passed!' && echo '' && echo '📊 Coverage report generated in ./coverage'",
     "setup": "bun install && bash scripts/setup-hooks.sh && bun run verify",
     "troubleshoot": "bash scripts/troubleshoot.sh",
