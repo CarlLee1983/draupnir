@@ -76,6 +76,25 @@ async login(ctx: IHttpContext) {
 
 ---
 
+### [驗收測試層（Acceptance Layer）](./acceptance-layer.md)
+
+**目標**：在單元測試與 Playwright E2E 之間建立「真實 DI wiring + 真實 SQLite + 真實 DomainEventDispatcher」的切片，以業務情境組織 spec，覆蓋跨模組 saga 與 DI 綁定。
+
+**核心決策**：
+- 分兩層：Use Case（Given-When-Then DSL）+ API Contract（樸素 describe/it）
+- Per-worker SQLite tmp file + 真實 Atlas migrations（非 memory adapter）
+- 外部 port（clock / gateway / scheduler / queue）可 rebind 為 fakes；Domain / Repository / Event dispatcher 絕對不 mock
+- 對應設計文件：[`docs/superpowers/specs/2026-04-24-ddd-acceptance-testing-design.md`](../../../superpowers/specs/2026-04-24-ddd-acceptance-testing-design.md)
+
+**實作 PR**：
+- PR-1：harness + `IClock` 基礎建設
+- PR-2：Credit pilot（9 支 Use Case + 3 endpoint × 3 場景的 API Contract）
+- PR-3：舊 integration 測試清理、方法論文件、`check` 與 CI 整合
+
+**涵蓋範圍**：目前 Credit 模組（pilot）；後續模組見 [`acceptance-layer.md`](./acceptance-layer.md) §9 推廣路線。
+
+---
+
 ## 🏗️ 實現狀態
 
 ### ✅ 表單驗證整合 — 已完成
@@ -96,6 +115,22 @@ src/Modules/*/Requests/
 ├── TopUpCreditRequest.ts
 ├── params.ts (路由參數 schema)
 └── index.ts (barrel export)
+```
+
+### ✅ 驗收測試層（Acceptance Layer）— 已完成 Credit pilot
+
+- ✅ PR-1：harness（TestApp / TestClock / ManualScheduler / ManualQueue / migrate / truncate / scenario runner 骨架）
+- ✅ PR-2：Credit pilot specs（9 支 Use Case + 1 支 API Contract × 3 endpoints × 3 場景）+ DSL helpers
+- ✅ PR-3：舊 CreditEventFlow integration 刪除、方法論文件、`bun run check` 串接 `test:acceptance`、CI acceptance job
+
+詳細規範與貢獻者指南 → [`acceptance-layer.md`](./acceptance-layer.md)
+
+**相關目錄**：
+```
+tests/Acceptance/
+├── UseCases/Credit/           # pilot
+├── ApiContract/               # pilot
+└── support/                   # harness + DSL helpers
 ```
 
 ### 🟡 API 功能性測試框架 — 待實現
@@ -224,5 +259,5 @@ bun test Feature/api-flows.test.ts
 
 ---
 
-**狀態**：✅ 表單驗證完成 / 🟡 API 測試框架待實現  
-**最後更新**：2026-04-10
+**狀態**：✅ 表單驗證完成 / 🟡 API 功能性測試框架待實現 / ✅ 驗收測試層 Credit pilot 完成
+**最後更新**：2026-04-25
