@@ -321,6 +321,10 @@ export class AtlasQueryBuilder implements IQueryBuilder {
           whereParts.push(`"${cond.column}" IN (${placeholders})`)
           bindings.push(...values)
         }
+      } else if (cond.operator === 'is null') {
+        whereParts.push(`"${cond.column}" IS NULL`)
+      } else if (cond.operator === 'is not null') {
+        whereParts.push(`"${cond.column}" IS NOT NULL`)
       } else {
         whereParts.push(`"${cond.column}" ${cond.operator} ${nextPlaceholder()}`)
         bindings.push(cond.value)
