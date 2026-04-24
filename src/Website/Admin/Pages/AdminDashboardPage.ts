@@ -8,6 +8,12 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 
 const DEFAULT_ADMIN_USAGE_WINDOW: 7 | 15 | 30 = 15
 
+/**
+ * Parses the usage trend window (days) from the request query.
+ *
+ * @param ctx - HTTP context.
+ * @returns 7, 15, or 30 days.
+ */
 function parseAdminUsageWindowDays(ctx: IHttpContext): 7 | 15 | 30 {
   const raw = ctx.getQuery('days')
   if (raw === undefined) return DEFAULT_ADMIN_USAGE_WINDOW

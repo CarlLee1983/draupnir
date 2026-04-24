@@ -21,6 +21,9 @@ type WebsiteRouteRegistration = {
   register: (router: IModuleRouter, container: IContainer) => void
 }
 
+/**
+ * Safely decodes a URL pathname, falling back to raw value on error.
+ */
 function safeDecodePathname(pathname: string): string {
   try {
     return decodeURIComponent(pathname)
@@ -29,6 +32,10 @@ function safeDecodePathname(pathname: string): string {
   }
 }
 
+/**
+ * Registers routes to serve built frontend assets from the public/build directory.
+ * Only active when useBuiltFrontendAssets() is true.
+ */
 function registerStaticAssets(router: Pick<IModuleRouter, 'get'>): void {
   // biome-ignore lint/correctness/useHookAtTopLevel: false positive
   if (!useBuiltFrontendAssets()) {

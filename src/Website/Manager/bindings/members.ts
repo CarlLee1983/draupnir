@@ -1,3 +1,6 @@
+/**
+ * Members page bindings for the Manager module.
+ */
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { InviteMemberService } from '@/Modules/Organization/Application/Services/InviteMemberService'
@@ -10,6 +13,11 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { MANAGER_PAGE_KEYS } from '../keys'
 import { ManagerMembersPage } from '../Pages/ManagerMembersPage'
 
+/**
+ * Registers the manager members page in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerMembersBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MANAGER_PAGE_KEYS

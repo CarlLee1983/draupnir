@@ -188,6 +188,16 @@ const ADMIN_PAGE_ROUTES: readonly AdminRouteDef[] = [
   },
 ]
 
+/**
+ * Registers a single admin HTTP route on the router.
+ *
+ * @param router - The module router.
+ * @param method - HTTP method.
+ * @param path - URL path.
+ * @param handler - The route handler.
+ * @param routeOptions - Optional route configuration.
+ * @param formRequest - Optional form request validation class.
+ */
 function registerAdminHttpRoute(
   router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   method: 'get' | 'post' | 'put',

@@ -1,3 +1,6 @@
+/**
+ * Contracts page bindings for the Admin module.
+ */
 import type { ActivateContractService } from '@/Modules/Contract/Application/Services/ActivateContractService'
 import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
@@ -12,6 +15,11 @@ import { AdminContractCreatePage } from '../Pages/AdminContractCreatePage'
 import { AdminContractDetailPage } from '../Pages/AdminContractDetailPage'
 import { AdminContractsPage } from '../Pages/AdminContractsPage'
 
+/**
+ * Registers admin contracts-related pages in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerContractsBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = ADMIN_PAGE_KEYS

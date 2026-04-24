@@ -1,3 +1,6 @@
+/**
+ * Reports page bindings for the Admin module.
+ */
 import type { IUsageRepository } from '@/Modules/Dashboard/Application/Ports/IUsageRepository'
 import type { IReportRepository } from '@/Modules/Reports/Domain/Repositories/IReportRepository'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
@@ -7,6 +10,11 @@ import { ADMIN_PAGE_KEYS } from '../keys'
 import { AdminReportsPage } from '../Pages/AdminReportsPage'
 import { AdminReportTemplatePage } from '../Pages/AdminReportTemplatePage'
 
+/**
+ * Registers admin reports-related pages in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerReportsBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = ADMIN_PAGE_KEYS

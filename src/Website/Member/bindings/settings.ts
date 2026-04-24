@@ -1,3 +1,6 @@
+/**
+ * Settings page bindings for the Member module.
+ */
 import type { ChangePasswordService } from '@/Modules/Auth/Application/Services/ChangePasswordService'
 import type { ListSessionsService } from '@/Modules/Auth/Application/Services/ListSessionsService'
 import type { RevokeAllSessionsService } from '@/Modules/Auth/Application/Services/RevokeAllSessionsService'
@@ -9,6 +12,11 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { MEMBER_PAGE_KEYS } from '../keys'
 import { MemberSettingsPage } from '../Pages/MemberSettingsPage'
 
+/**
+ * Registers the member settings page in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerSettingsBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MEMBER_PAGE_KEYS

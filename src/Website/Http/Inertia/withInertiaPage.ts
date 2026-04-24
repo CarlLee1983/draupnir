@@ -1,3 +1,6 @@
+/**
+ * Helpers to wrap Inertia page handlers with the correct middleware groups.
+ */
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { Middleware, RouteHandler } from '@/Shared/Presentation/IModuleRouter'
 import { HttpKernel } from '../HttpKernel'
@@ -9,6 +12,10 @@ import { HttpKernel } from '../HttpKernel'
  * 每個 middleware 可在 next() 前後執行代碼（before/after hook）。
  *
  * Exported for testing.
+ *
+ * @param middlewares - Array of middleware to apply.
+ * @param handler - The final page handler.
+ * @returns A composed RouteHandler.
  */
 export function composePageHandler(
   middlewares: Middleware[],
@@ -24,6 +31,9 @@ export function composePageHandler(
 /**
  * 公開頁面 wrapper（login、register 等）。
  * Chain：attachJwt → attachWebCsrf → injectSharedData → applyPendingCookies → handler
+ *
+ * @param handler - The page handler.
+ * @returns Wrapped RouteHandler.
  */
 export function withInertiaPageHandler(
   handler: (ctx: IHttpContext) => Promise<Response>,
@@ -34,6 +44,9 @@ export function withInertiaPageHandler(
 /**
  * Admin 區域 wrapper。
  * Chain：attachJwt → attachWebCsrf → injectSharedData → requireAdmin → applyPendingCookies → handler
+ *
+ * @param handler - The page handler.
+ * @returns Wrapped RouteHandler.
  */
 export function withAdminInertiaPageHandler(
   handler: (ctx: IHttpContext) => Promise<Response>,
@@ -44,6 +57,9 @@ export function withAdminInertiaPageHandler(
 /**
  * Manager 區域 wrapper。
  * Chain：attachJwt → attachWebCsrf → injectSharedData → requireManager → applyPendingCookies → handler
+ *
+ * @param handler - The page handler.
+ * @returns Wrapped RouteHandler.
  */
 export function withManagerInertiaPageHandler(
   handler: (ctx: IHttpContext) => Promise<Response>,
@@ -54,6 +70,9 @@ export function withManagerInertiaPageHandler(
 /**
  * Member 區域 wrapper。
  * Chain：attachJwt → attachWebCsrf → injectSharedData → requireMember → applyPendingCookies → handler
+ *
+ * @param handler - The page handler.
+ * @returns Wrapped RouteHandler.
  */
 export function withMemberInertiaPageHandler(
   handler: (ctx: IHttpContext) => Promise<Response>,

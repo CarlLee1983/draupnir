@@ -163,6 +163,17 @@ const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
   },
 ]
 
+/**
+ * Registers a single auth HTTP route on the router.
+ *
+ * @param router - The module router.
+ * @param method - HTTP method.
+ * @param path - URL path.
+ * @param handler - The route handler.
+ * @param formRequest - Optional form request validation class.
+ * @param middlewares - Optional route-level middleware.
+ * @param routeOptions - Optional route configuration.
+ */
 function registerAuthHttpRoute(
   router: Pick<IModuleRouter, 'get' | 'post'>,
   method: 'get' | 'post',

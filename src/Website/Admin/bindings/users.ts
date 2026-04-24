@@ -1,3 +1,6 @@
+/**
+ * Users page bindings for the Admin module.
+ */
 import type { ChangeUserStatusService } from '@/Modules/Auth/Application/Services/ChangeUserStatusService'
 import type { GetUserDetailService } from '@/Modules/Auth/Application/Services/GetUserDetailService'
 import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
@@ -9,6 +12,11 @@ import { ADMIN_PAGE_KEYS } from '../keys'
 import { AdminUserDetailPage } from '../Pages/AdminUserDetailPage'
 import { AdminUsersPage } from '../Pages/AdminUsersPage'
 
+/**
+ * Registers admin users-related pages in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerUsersBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = ADMIN_PAGE_KEYS

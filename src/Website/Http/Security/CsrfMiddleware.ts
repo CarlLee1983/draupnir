@@ -7,12 +7,18 @@ export const WEB_CSRF_COOKIE_NAME = 'XSRF-TOKEN' as const
 
 const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE'])
 
+/**
+ * Generates a random cryptographically strong CSRF token.
+ */
 function randomCsrfToken(): string {
   const bytes = new Uint8Array(32)
   crypto.getRandomValues(bytes)
   return Buffer.from(bytes).toString('base64url')
 }
 
+/**
+ * Constant-time string comparison to prevent timing attacks.
+ */
 function timingSafeStringEqual(a: string, b: string): boolean {
   const ae = new TextEncoder().encode(a)
   const be = new TextEncoder().encode(b)
@@ -25,6 +31,9 @@ function timingSafeStringEqual(a: string, b: string): boolean {
   return diff === 0
 }
 
+/**
+ * Safely decodes a cookie value.
+ */
 function decodeCookieValue(raw: string): string {
   try {
     return decodeURIComponent(raw)
@@ -33,12 +42,18 @@ function decodeCookieValue(raw: string): string {
   }
 }
 
+/**
+ * Reads the CSRF token from the client's cookie.
+ */
 function readCookieCsrf(ctx: IHttpContext): string {
   const raw = ctx.getCookie(WEB_CSRF_COOKIE_NAME)
   if (!raw) return ''
   return decodeCookieValue(raw)
 }
 
+/**
+ * Reads the CSRF token from common request headers.
+ */
 function readHeaderCsrf(ctx: IHttpContext): string {
   const candidates = [
     ctx.getHeader('X-XSRF-TOKEN'),
@@ -78,6 +93,9 @@ export function issueWebCsrfToken(ctx: IHttpContext): void {
   })
 }
 
+/**
+ * Checks if the request is an Inertia.js XHR request.
+ */
 function isInertiaRequest(ctx: IHttpContext): boolean {
   const h = ctx.getHeader('x-inertia') ?? ctx.getHeader('X-Inertia')
   return h === 'true' || h === '1'

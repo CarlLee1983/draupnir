@@ -1,3 +1,6 @@
+/**
+ * Alerts page bindings for the Member module.
+ */
 import type { GetAlertHistoryService } from '@/Modules/Alerts/Application/Services/GetAlertHistoryService'
 import type { GetBudgetService } from '@/Modules/Alerts/Application/Services/GetBudgetService'
 import type { ListWebhookEndpointsService } from '@/Modules/Alerts/Application/Services/ListWebhookEndpointsService'
@@ -8,6 +11,11 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { MEMBER_PAGE_KEYS } from '../keys'
 import { MemberAlertsPage } from '../Pages/MemberAlertsPage'
 
+/**
+ * Registers the member alerts page in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerAlertsBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MEMBER_PAGE_KEYS

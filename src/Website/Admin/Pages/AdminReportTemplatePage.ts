@@ -4,6 +4,9 @@ import type { IReportRepository } from '@/Modules/Reports/Domain/Repositories/IR
 import { ReportToken } from '@/Modules/Reports/Domain/ValueObjects/ReportToken'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+/**
+ * Inertia page controller for rendering report templates in the Admin area.
+ */
 export class AdminReportTemplatePage {
   constructor(
     private readonly inertia: InertiaService,
@@ -11,6 +14,12 @@ export class AdminReportTemplatePage {
     private readonly usageRepository: IUsageRepository,
   ) {}
 
+  /**
+   * Renders a report template based on a secure token.
+   *
+   * @param ctx - HTTP context.
+   * @returns Inertia response with report data or an error page.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     const tokenStr = ctx.query.token as string
     if (!tokenStr) {

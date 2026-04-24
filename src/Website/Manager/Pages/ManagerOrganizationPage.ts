@@ -21,6 +21,12 @@ export class ManagerOrganizationPage {
     private readonly membershipService: GetUserMembershipService,
   ) {}
 
+  /**
+   * Renders the organization details and contracts page.
+   *
+   * @param ctx - HTTP context.
+   * @returns Inertia response with organization and contract data.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -41,6 +47,12 @@ export class ManagerOrganizationPage {
     })
   }
 
+  /**
+   * Updates the organization's information (name, description).
+   *
+   * @param ctx - HTTP context with JSON body containing name and description.
+   * @returns Redirect back to the organization page.
+   */
   async update(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!

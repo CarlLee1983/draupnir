@@ -1,3 +1,6 @@
+/**
+ * Dashboard page bindings for the Manager module.
+ */
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
 import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
@@ -8,6 +11,11 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { MANAGER_PAGE_KEYS } from '../keys'
 import { ManagerDashboardPage } from '../Pages/ManagerDashboardPage'
 
+/**
+ * Registers the manager dashboard page in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerDashboardBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MANAGER_PAGE_KEYS

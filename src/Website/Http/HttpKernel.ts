@@ -23,6 +23,9 @@ import { attachWebCsrf } from './Security/CsrfMiddleware'
 
 // ─── 內部 middleware 包裝 ──────────────────────────────────────────────────────
 
+/**
+ * Injects Inertia shared data (auth, flash, etc.) into the context.
+ */
 function injectSharedDataMiddleware(): Middleware {
   return async (ctx, next) => {
     injectSharedData(ctx)
@@ -30,6 +33,9 @@ function injectSharedDataMiddleware(): Middleware {
   }
 }
 
+/**
+ * Middleware that requires the user to have the 'admin' role.
+ */
 function requireAdminMiddleware(): Middleware {
   return async (ctx, next) => {
     const r = requireAdmin(ctx)
@@ -38,6 +44,9 @@ function requireAdminMiddleware(): Middleware {
   }
 }
 
+/**
+ * Middleware that requires the user to have a 'member' role (any valid login).
+ */
 function requireMemberMiddleware(): Middleware {
   return async (ctx, next) => {
     const r = requireMember(ctx)
@@ -46,6 +55,9 @@ function requireMemberMiddleware(): Middleware {
   }
 }
 
+/**
+ * Middleware that requires the user to have the 'manager' role.
+ */
 function requireManagerMiddleware(): Middleware {
   return async (ctx, next) => {
     const r = requireManager(ctx)
@@ -54,6 +66,9 @@ function requireManagerMiddleware(): Middleware {
   }
 }
 
+/**
+ * Middleware that applies pending cookies to the final Response.
+ */
 export function pendingCookiesMiddleware(): Middleware {
   return async (ctx, next) => {
     const response = await next()
@@ -85,7 +100,9 @@ export const HttpKernel = {
    * 掛載順序：BodySizeLimit → GlobalError → RequestId → OrgMemberLookupCache → RequestLogger → SecurityHeaders → CORS（有設定時）
    *
    * BodySizeLimit 必須排第一：413 拒絕不需要進入 error wrapper，
-   *且避免讀取超大 body 對後續 middleware 造成記憶體壓力。
+   * 且避免讀取超大 body 對後續 middleware 造成記憶體壓力。
+   *
+   * @returns Array of global middleware.
    */
   global: (): Middleware[] => {
     const corsOrigins = parseCorsAllowedOrigins()
@@ -106,14 +123,22 @@ export const HttpKernel = {
    * 層二：Page middleware groups — 依 Inertia 存取區域套用。
    */
   groups: {
-    /** 公開頁面（login、register 等），無 role check */
+    /**
+     * 公開頁面（login、register 等），無 role check。
+     *
+     * @returns Array of web middleware.
+     */
     web: (): Middleware[] => [
       ...webBase(),
       injectSharedDataMiddleware(),
       pendingCookiesMiddleware(),
       createInertiaFormValidationResponseMiddleware(),
     ],
-    /** Admin 區域：web 基底 + admin role 驗證 */
+    /**
+     * Admin 區域：web 基底 + admin role 驗證。
+     *
+     * @returns Array of admin middleware.
+     */
     admin: (): Middleware[] => [
       ...webBase(),
       requireAdminMiddleware(),
@@ -121,7 +146,11 @@ export const HttpKernel = {
       pendingCookiesMiddleware(),
       createInertiaFormValidationResponseMiddleware(),
     ],
-    /** Manager 區域：web 基底 + manager role 驗證 */
+    /**
+     * Manager 區域：web 基底 + manager role 驗證。
+     *
+     * @returns Array of manager middleware.
+     */
     manager: (): Middleware[] => [
       ...webBase(),
       requireManagerMiddleware(),
@@ -130,7 +159,11 @@ export const HttpKernel = {
       pendingCookiesMiddleware(),
       createInertiaFormValidationResponseMiddleware(),
     ],
-    /** Member 區域：web 基底 + 登入驗證 */
+    /**
+     * Member 區域：web 基底 + 登入驗證。
+     *
+     * @returns Array of member middleware.
+     */
     member: (): Middleware[] => [
       ...webBase(),
       requireMemberMiddleware(),

@@ -1,3 +1,6 @@
+/**
+ * Organizations page bindings for the Admin module.
+ */
 import type { SumQuotaAllocatedForOrgService } from '@/Modules/ApiKey/Application/Services/SumQuotaAllocatedForOrgService'
 import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
@@ -10,6 +13,11 @@ import { ADMIN_PAGE_KEYS } from '../keys'
 import { AdminOrganizationDetailPage } from '../Pages/AdminOrganizationDetailPage'
 import { AdminOrganizationsPage } from '../Pages/AdminOrganizationsPage'
 
+/**
+ * Registers admin organizations-related pages in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerOrganizationsBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = ADMIN_PAGE_KEYS

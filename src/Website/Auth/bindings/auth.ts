@@ -1,3 +1,6 @@
+/**
+ * Core authentication page bindings for the Auth module.
+ */
 import type { EmailVerificationService } from '@/Modules/Auth/Application/Services/EmailVerificationService'
 import type { ForgotPasswordService } from '@/Modules/Auth/Application/Services/ForgotPasswordService'
 import type { GoogleOAuthService } from '@/Modules/Auth/Application/Services/GoogleOAuthService'
@@ -17,6 +20,11 @@ import { LogoutPage } from '../Pages/LogoutPage'
 import { RegisterPage } from '../Pages/RegisterPage'
 import { ResetPasswordPage } from '../Pages/ResetPasswordPage'
 
+/**
+ * Registers authentication pages (login, register, forgot password, etc.) in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerAuthPagesBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = AUTH_PAGE_KEYS

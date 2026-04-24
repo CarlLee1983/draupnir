@@ -1,3 +1,6 @@
+/**
+ * Orchestrates DI binding registration for all Website sub-modules.
+ */
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { registerAdminBindings } from '@/Website/Admin/bindings/registerAdminBindings'
 import { registerAuthBindings } from '@/Website/Auth/bindings/registerAuthBindings'

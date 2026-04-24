@@ -33,6 +33,9 @@ export class MemberSettingsPage {
     private readonly revokeAllSessionsService: RevokeAllSessionsService,
   ) {}
 
+  /**
+   * Helper to render the profile settings page with data.
+   */
   private async renderSettings(
     ctx: IHttpContext,
     extras: Record<string, unknown> = {},
@@ -91,6 +94,9 @@ export class MemberSettingsPage {
     return ctx.redirect('/member/settings')
   }
 
+  /**
+   * Processes a password change request.
+   */
   async changePassword(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -115,6 +121,9 @@ export class MemberSettingsPage {
     return ctx.redirect('/login')
   }
 
+  /**
+   * Revokes all active sessions for the current user.
+   */
   async revokeAllSessions(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!

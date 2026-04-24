@@ -115,6 +115,16 @@ const MEMBER_PAGE_ROUTES: readonly MemberRouteDef[] = [
   },
 ]
 
+/**
+ * Registers a single member HTTP route on the router.
+ *
+ * @param router - The module router.
+ * @param method - HTTP method.
+ * @param path - URL path.
+ * @param handler - The route handler.
+ * @param routeOptions - Optional route configuration.
+ * @param formRequest - Optional form request validation class.
+ */
 function registerMemberHttpRoute(
   router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   method: 'get' | 'post' | 'put',

@@ -1,12 +1,21 @@
 import type { IReportRepository } from '@/Modules/Reports/Domain/Repositories/IReportRepository'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+/**
+ * Inertia page controller for managing reports in the Admin area.
+ */
 export class AdminReportsPage {
   constructor(
     private readonly inertia: InertiaService,
     private readonly reportRepository: IReportRepository,
   ) {}
 
+  /**
+   * Renders the reports list for a specific organization.
+   *
+   * @param ctx - HTTP context.
+   * @returns Inertia response with report schedules.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const orgId = ctx.getParam('orgId')!

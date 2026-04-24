@@ -153,6 +153,16 @@ const MANAGER_PAGE_ROUTES: readonly ManagerRouteDef[] = [
   },
 ]
 
+/**
+ * Registers a single manager HTTP route on the router.
+ *
+ * @param router - The module router.
+ * @param method - HTTP method.
+ * @param path - URL path.
+ * @param handler - The route handler.
+ * @param routeOptions - Optional route configuration.
+ * @param formRequest - Optional form request validation class.
+ */
 function registerManagerHttpRoute(
   router: Pick<IModuleRouter, 'get' | 'post' | 'put'>,
   method: 'get' | 'post' | 'put',

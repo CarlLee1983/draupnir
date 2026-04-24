@@ -20,5 +20,10 @@ export { createRedisRateLimit } from '@/Shared/Infrastructure/Middleware/RedisRa
 
 import { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
 
-// Body size limit（用於需要覆寫預設大小的路由，例如未來的檔案上傳）
+/**
+ * Body size limit middleware factory (used for routes that need to override default limits).
+ *
+ * @param maxBytes - Maximum allowed body size in bytes.
+ * @returns Middleware that enforces the body size limit.
+ */
 export const bodyLimit = (maxBytes: number) => createBodySizeLimitMiddleware(maxBytes)

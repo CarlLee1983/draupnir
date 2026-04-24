@@ -1,3 +1,6 @@
+/**
+ * API keys page bindings for the Manager module.
+ */
 import type { AssignApiKeyService } from '@/Modules/ApiKey/Application/Services/AssignApiKeyService'
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
@@ -13,6 +16,11 @@ import { MANAGER_PAGE_KEYS } from '../keys'
 import { ManagerApiKeyCreatePage } from '../Pages/ManagerApiKeyCreatePage'
 import { ManagerApiKeysPage } from '../Pages/ManagerApiKeysPage'
 
+/**
+ * Registers manager API keys-related pages in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerApiKeysBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MANAGER_PAGE_KEYS

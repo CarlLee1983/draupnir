@@ -1,3 +1,6 @@
+/**
+ * Service provider that integrates the Website module into the Gravito framework.
+ */
 import type { RefreshTokenService } from '@/Modules/Auth/Application/Services/RefreshTokenService'
 import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'

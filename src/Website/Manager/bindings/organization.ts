@@ -1,3 +1,6 @@
+/**
+ * Organization page bindings for the Manager module.
+ */
 import type { ListContractsService } from '@/Modules/Contract/Application/Services/ListContractsService'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
@@ -8,6 +11,11 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { MANAGER_PAGE_KEYS } from '../keys'
 import { ManagerOrganizationPage } from '../Pages/ManagerOrganizationPage'
 
+/**
+ * Registers the manager organization page in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerOrganizationBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = MANAGER_PAGE_KEYS

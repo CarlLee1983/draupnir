@@ -1,3 +1,6 @@
+/**
+ * Routing utility to bind Inertia page actions to route handlers using DI.
+ */
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 

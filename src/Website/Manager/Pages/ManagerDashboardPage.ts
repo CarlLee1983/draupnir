@@ -24,6 +24,12 @@ export class ManagerDashboardPage {
     private readonly membershipService: GetUserMembershipService,
   ) {}
 
+  /**
+   * Renders the manager dashboard.
+   *
+   * @param ctx - HTTP context.
+   * @returns Inertia response with organization quota and API keys.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!

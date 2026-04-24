@@ -24,6 +24,12 @@ export class ManagerApiKeysPage {
     private readonly membershipService: GetUserMembershipService,
   ) {}
 
+  /**
+   * Resolves the organization ID for the current manager session.
+   *
+   * @param ctx - HTTP context.
+   * @returns Object with orgId or a redirect response if no membership found.
+   */
   private async resolveOrgId(
     ctx: IHttpContext,
   ): Promise<{ orgId: string } | { redirect: Response }> {
@@ -34,6 +40,12 @@ export class ManagerApiKeysPage {
     return { orgId: membership.orgId }
   }
 
+  /**
+   * Renders the API keys listing page for the organization.
+   *
+   * @param ctx - HTTP context.
+   * @returns Inertia response with keys and member list for assignment.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -62,6 +74,12 @@ export class ManagerApiKeysPage {
     })
   }
 
+  /**
+   * Re-assigns an API key to a different member.
+   *
+   * @param ctx - HTTP context with keyId param and assigneeUserId in validated body.
+   * @returns Redirect back to the API keys list.
+   */
   async assign(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -79,6 +97,12 @@ export class ManagerApiKeysPage {
     return ctx.redirect('/manager/api-keys')
   }
 
+  /**
+   * Revokes an API key.
+   *
+   * @param ctx - HTTP context with keyId param.
+   * @returns Redirect back to the API keys list.
+   */
   async revoke(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!

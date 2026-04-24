@@ -15,6 +15,11 @@ export const PAGE_CONTAINER_KEYS = {
 
 let inertiaServiceSingleton: InertiaService | undefined
 
+/**
+ * Attempts to load the Vite manifest from standard build locations.
+ *
+ * @returns Parsed manifest or undefined if not found.
+ */
 async function loadViteManifest(): Promise<ViteManifest | undefined> {
   const root = process.cwd()
   const candidates = [

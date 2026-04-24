@@ -43,6 +43,12 @@ export class ManagerMembersPage {
     private readonly listInvitationsService: ListInvitationsService,
   ) {}
 
+  /**
+   * Resolves the organization ID for the current manager session.
+   *
+   * @param ctx - HTTP context.
+   * @returns Object with orgId or a redirect response if no membership found.
+   */
   private async resolveOrgId(
     ctx: IHttpContext,
   ): Promise<{ orgId: string } | { redirect: Response }> {
@@ -53,6 +59,12 @@ export class ManagerMembersPage {
     return { orgId: membership.orgId }
   }
 
+  /**
+   * Renders the members management page.
+   *
+   * @param ctx - HTTP context.
+   * @returns Inertia response with members and pending invitations.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -124,6 +136,12 @@ export class ManagerMembersPage {
     })
   }
 
+  /**
+   * Sends an invitation to a new member.
+   *
+   * @param ctx - HTTP context with validated email and role.
+   * @returns Redirect back to the members list.
+   */
   async invite(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -137,6 +155,12 @@ export class ManagerMembersPage {
     return ctx.redirect('/manager/members')
   }
 
+  /**
+   * Removes a member from the organization.
+   *
+   * @param ctx - HTTP context with userId param.
+   * @returns Redirect back to the members list.
+   */
   async remove(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!

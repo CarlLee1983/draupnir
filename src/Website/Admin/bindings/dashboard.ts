@@ -1,3 +1,6 @@
+/**
+ * Dashboard page bindings for the Admin module.
+ */
 import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListUsersService'
 import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
 import type { GetAdminPlatformUsageTrendService } from '@/Modules/Dashboard/Application/Services/GetAdminPlatformUsageTrendService'
@@ -8,6 +11,11 @@ import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandle
 import { ADMIN_PAGE_KEYS } from '../keys'
 import { AdminDashboardPage } from '../Pages/AdminDashboardPage'
 
+/**
+ * Registers the admin dashboard page in the DI container.
+ *
+ * @param container - Application container.
+ */
 export function registerDashboardBindings(container: IContainer): void {
   const i = PAGE_CONTAINER_KEYS.inertiaService
   const k = ADMIN_PAGE_KEYS

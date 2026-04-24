@@ -34,6 +34,9 @@ export class ManagerSettingsPage {
     private readonly revokeAllSessionsService: RevokeAllSessionsService,
   ) {}
 
+  /**
+   * Helper to render the settings page with profile and session data.
+   */
   private async renderSettings(
     ctx: IHttpContext,
     extras: Record<string, unknown> = {},
@@ -57,10 +60,16 @@ export class ManagerSettingsPage {
     })
   }
 
+  /**
+   * Renders the profile settings page.
+   */
   async handle(ctx: IHttpContext): Promise<Response> {
     return this.renderSettings(ctx)
   }
 
+  /**
+   * Updates the manager's profile information.
+   */
   async update(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -71,6 +80,9 @@ export class ManagerSettingsPage {
     return ctx.redirect('/manager/settings')
   }
 
+  /**
+   * Processes a password change request.
+   */
   async changePassword(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
@@ -95,6 +107,9 @@ export class ManagerSettingsPage {
     return ctx.redirect('/login')
   }
 
+  /**
+   * Revokes all active sessions for the current user.
+   */
   async revokeAllSessions(ctx: IHttpContext): Promise<Response> {
     // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const auth = AuthMiddleware.getAuthContext(ctx)!
