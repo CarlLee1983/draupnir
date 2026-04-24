@@ -1,9 +1,10 @@
+import type { ErrorObject } from 'ajv'
 import { beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { ensureAuth, resetAuth } from './lib/auth-helper'
 import { extractValue, resolveRefs } from './lib/jsonpath'
 import { buildValidRequest } from './lib/request-builder'
-import { validateResponse } from './lib/schema-validator'
-import { parseOpenAPI } from './lib/spec-parser'
+import { validateSchema } from './lib/schema-validator'
+import { type Operation, parseOpenAPI } from './lib/spec-parser'
 import { TestClient } from './lib/test-client'
 import { getBaseURL, setupTestServerFor } from './lib/test-server'
 
@@ -99,7 +100,7 @@ async function runSetup(op: Operation): Promise<Record<string, unknown>> {
 
     if (step.extract) {
       for (const [key, jp] of Object.entries(step.extract)) {
-        const v = extractValue(res.json, jp)
+        const v = extractValue(res.json, jp as string)
         if (v === undefined) {
           throw new Error(`Setup extract "${key}" via "${jp}" failed: ${JSON.stringify(res.json)}`)
         }
@@ -222,7 +223,7 @@ for (const op of spec.operations) {
         )
         if (!validation.valid) {
           throw new Error(
-            `Schema validation failed:\n${validation.errors.map((e) => `  - ${e.instancePath}: ${e.message}`).join('\n')}`,
+            `Schema validation failed:\n${validation.errors.map((e: ErrorObject) => `  - ${e.instancePath}: ${e.message}`).join('\n')}`,
           )
         }
       })
