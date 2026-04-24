@@ -1,14 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createRequestLoggerMiddleware } from '../RequestLoggerMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { createRequestLoggerMiddleware } from '../RequestLoggerMiddleware'
 
-const createMockContext = (opts: {
-  method?: string
-  path?: string
-  requestId?: string
-  ip?: string
-  userAgent?: string
-} = {}): IHttpContext => {
+const createMockContext = (
+  opts: {
+    method?: string
+    path?: string
+    requestId?: string
+    ip?: string
+    userAgent?: string
+  } = {},
+): IHttpContext => {
   const state: Record<string, unknown> = {
     requestId: opts.requestId ?? 'test-id',
   }
@@ -153,7 +155,9 @@ describe('RequestLoggerMiddleware', () => {
     const ctx = createMockContext({ path: '/broken' })
     const err = new Error('DB exploded')
     await expect(
-      mw(ctx, async () => { throw err }),
+      mw(ctx, async () => {
+        throw err
+      }),
     ).rejects.toThrow('DB exploded')
     expect(consoleSpy).toHaveBeenCalledOnce()
     const logged = JSON.parse(consoleSpy.mock.calls[0][0] as string)

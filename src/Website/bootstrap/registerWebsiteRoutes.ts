@@ -4,17 +4,18 @@
  *
  * Expects `WebsiteServiceProvider` to have registered page bindings on `container`.
  */
-import { registerAdminRoutes } from '@/Website/Admin/routes/registerAdminRoutes'
-import { registerAuthRoutes } from '@/Website/Auth/routes/registerAuthRoutes'
-import { useBuiltFrontendAssets } from '@/Website/Http/Inertia/createInertiaRequestHandler'
-import { joinPath, normalizePath } from '@/Website/Http/Routing/routePath'
-import { registerManagerRoutes } from '@/Website/Manager/routes/registerManagerRoutes'
-import { registerMemberRoutes } from '@/Website/Member/routes/registerMemberRoutes'
+
 import { LocaleController } from '@/Shared/Infrastructure/I18n/LocaleController'
-import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
+import { registerAdminRoutes } from '@/Website/Admin/routes/registerAdminRoutes'
+import { registerAuthRoutes } from '@/Website/Auth/routes/registerAuthRoutes'
+import { useBuiltFrontendAssets } from '@/Website/Http/Inertia/createInertiaRequestHandler'
+import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
+import { joinPath, normalizePath } from '@/Website/Http/Routing/routePath'
+import { registerManagerRoutes } from '@/Website/Manager/routes/registerManagerRoutes'
+import { registerMemberRoutes } from '@/Website/Member/routes/registerMemberRoutes'
 
 type WebsiteRouteRegistration = {
   register: (router: IModuleRouter, container: IContainer) => void
@@ -29,6 +30,7 @@ function safeDecodePathname(pathname: string): string {
 }
 
 function registerStaticAssets(router: Pick<IModuleRouter, 'get'>): void {
+  // biome-ignore lint/correctness/useHookAtTopLevel: false positive
   if (!useBuiltFrontendAssets()) {
     return
   }
@@ -80,7 +82,10 @@ const WEBSITE_ROUTE_REGISTRATIONS: readonly WebsiteRouteRegistration[] = [
  */
 export function registerWebsiteRoutes(router: IModuleRouter, container: IContainer): void {
   const localeController = new LocaleController()
-  router.post('/lang', withInertiaPageHandler((ctx) => localeController.switchLocale(ctx)))
+  router.post(
+    '/lang',
+    withInertiaPageHandler((ctx) => localeController.switchLocale(ctx)),
+  )
 
   for (const { register } of WEBSITE_ROUTE_REGISTRATIONS) {
     register(router, container)

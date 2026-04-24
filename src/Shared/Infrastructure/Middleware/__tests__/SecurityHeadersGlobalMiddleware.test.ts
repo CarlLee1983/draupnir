@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { createSecurityHeadersMiddleware } from '../SecurityHeadersGlobalMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { createSecurityHeadersMiddleware } from '../SecurityHeadersGlobalMiddleware'
 
 const createMockContext = (): IHttpContext => {
   const state: Record<string, unknown> = {}
@@ -18,9 +18,12 @@ const createMockContext = (): IHttpContext => {
     headers: {},
     json: <T>(data: T, status = 200) => new Response(JSON.stringify(data), { status }),
     text: (content: string, status = 200) => new Response(content, { status }),
-    redirect: (url: string, status = 302) => new Response(null, { status, headers: { Location: url } }),
+    redirect: (url: string, status = 302) =>
+      new Response(null, { status, headers: { Location: url } }),
     get: <T>(key: string): T | undefined => state[key] as T,
-    set: (key: string, value: unknown) => { state[key] = value },
+    set: (key: string, value: unknown) => {
+      state[key] = value
+    },
     getCookie: () => undefined,
     setCookie: () => {},
   } as IHttpContext
@@ -48,8 +51,9 @@ describe('SecurityHeadersGlobalMiddleware', () => {
   it('保留原始 response 既有的 headers', async () => {
     const mw = createSecurityHeadersMiddleware()
     const ctx = createMockContext()
-    const response = await mw(ctx, async () =>
-      new Response('ok', { headers: { 'Content-Type': 'application/json' } }),
+    const response = await mw(
+      ctx,
+      async () => new Response('ok', { headers: { 'Content-Type': 'application/json' } }),
     )
     expect(response.headers.get('Content-Type')).toBe('application/json')
   })

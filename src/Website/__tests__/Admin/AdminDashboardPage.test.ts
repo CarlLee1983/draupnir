@@ -27,7 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),
@@ -140,8 +140,12 @@ describe('AdminDashboardPage', () => {
 
   test('uses days=30 from query for usage trend', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockListUsersService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
+    const mockListUsersService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })),
+    }
+    const mockListOrgsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })),
+    }
     const mockListAdminContractsService = {
       execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })),
     }
@@ -158,7 +162,10 @@ describe('AdminDashboardPage', () => {
     )
 
     const ctx = createAdminContext()
-    const withDays = { ...ctx, getQuery: (key: string) => (key === 'days' ? '30' : undefined) } as IHttpContext
+    const withDays = {
+      ...ctx,
+      getQuery: (key: string) => (key === 'days' ? '30' : undefined),
+    } as IHttpContext
     await page.handle(withDays)
 
     expect(captured.lastCall?.props.usageWindowDays).toBe(30)
@@ -167,10 +174,16 @@ describe('AdminDashboardPage', () => {
 
   test('generates demo usage trend data when all real data points are zero', async () => {
     const { inertia, captured } = createMockInertia()
-    const mockListUsersService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
-    const mockListOrgsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
-    const mockListAdminContractsService = { execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })) }
-    
+    const mockListUsersService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })),
+    }
+    const mockListOrgsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })),
+    }
+    const mockListAdminContractsService = {
+      execute: mock(() => Promise.resolve({ success: true, data: { meta: { total: 0 } } })),
+    }
+
     // Return a trend where all points are 0
     const mockAdminUsageTrendService = {
       execute: mock(() =>

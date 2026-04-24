@@ -27,7 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),
@@ -52,7 +52,7 @@ function createMemberContext(overrides: Partial<IHttpContext> = {}): IHttpContex
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
   })
@@ -209,7 +209,9 @@ describe('MemberSettingsPage', () => {
       const res = await page.update(ctx)
 
       expect(res.headers.get('location')).toBe('/member/settings')
-      expect(mockUpdateProfileService.execute).toHaveBeenCalledWith('member-1', { displayName: 'New Name' })
+      expect(mockUpdateProfileService.execute).toHaveBeenCalledWith('member-1', {
+        displayName: 'New Name',
+      })
     })
 
     test('update still redirects when UpdateProfileService reports failure (page does not branch)', async () => {

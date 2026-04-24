@@ -47,10 +47,18 @@ function makeCtx(body?: unknown, overrides: Partial<IHttpContext> = {}): IHttpCo
 }
 
 const makeQuotaSvc = () => ({
-  execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { contractQuota: 5000, contractId: 'c-1' } })),
+  execute: mock(() =>
+    Promise.resolve({
+      success: true,
+      message: 'OK',
+      data: { contractQuota: 5000, contractId: 'c-1' },
+    }),
+  ),
 })
 const makeAllocatedSvc = () => ({
-  execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { totalAllocated: 1000 } })),
+  execute: mock(() =>
+    Promise.resolve({ success: true, message: 'OK', data: { totalAllocated: 1000 } }),
+  ),
 })
 
 describe('ManagerApiKeyCreatePage', () => {
@@ -74,7 +82,9 @@ describe('ManagerApiKeyCreatePage', () => {
             success: true,
             message: 'OK',
             data: {
-              members: [{ userId: 'u-1', role: 'member', email: 'm@example.com', joinedAt: '2026-01-01' }],
+              members: [
+                { userId: 'u-1', role: 'member', email: 'm@example.com', joinedAt: '2026-01-01' },
+              ],
             },
           }),
         ),
@@ -95,7 +105,11 @@ describe('ManagerApiKeyCreatePage', () => {
   test('store: create 成功 + assignee 非空 → 呼叫 assign 並 render 頁面含 newKeyValue', async () => {
     const createSvc = {
       execute: mock(() =>
-        Promise.resolve({ success: true, message: 'OK', data: { id: 'k-1', rawKey: 'sk-bf-test' } }),
+        Promise.resolve({
+          success: true,
+          message: 'OK',
+          data: { id: 'k-1', rawKey: 'sk-bf-test' },
+        }),
       ),
     }
     const assignSvc = { execute: mock(() => Promise.resolve({ success: true, message: 'OK' })) }
@@ -253,21 +267,42 @@ describe('ManagerApiKeyCreatePage', () => {
       inertia,
       createSvc as any,
       { execute: mock() } as any,
-      { execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { members: [] } })) } as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({ success: true, message: 'OK', data: { members: [] } }),
+        ),
+      } as any,
       { execute: mock(() => Promise.resolve({ orgId: 'org-A' })) } as any,
-      { execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { contractQuota: 5000, contractId: 'c-1' } })) } as any,
-      { execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { totalAllocated: 4500 } })) } as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({
+            success: true,
+            message: 'OK',
+            data: { contractQuota: 5000, contractId: 'c-1' },
+          }),
+        ),
+      } as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({ success: true, message: 'OK', data: { totalAllocated: 4500 } }),
+        ),
+      } as any,
     )
     const res = await page.store(
       makeCtx(body, {
-        setCookie: (name: string, value: string) => { setCookieCalls.push({ name, value }) },
+        setCookie: (name: string, value: string) => {
+          setCookieCalls.push({ name, value })
+        },
       }),
     )
     expect(res.headers.get('location')).toBe('/manager/api-keys/create')
     expect(createSvc.execute).not.toHaveBeenCalled()
     const flashCookie = setCookieCalls.find((c) => c.name === 'flash:error')
     expect(flashCookie).toBeDefined()
-    const parsed = JSON.parse(decodeURIComponent(flashCookie!.value)) as { key: string; params?: Record<string, string> }
+    const parsed = JSON.parse(decodeURIComponent(flashCookie!.value)) as {
+      key: string
+      params?: Record<string, string>
+    }
     expect(parsed.key).toBe('manager.apiKeys.quotaExceedsAvailable')
     expect(parsed.params?.available).toBe('500')
   })

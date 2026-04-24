@@ -138,11 +138,9 @@ export class BifrostClient {
    */
   async createTeam(request: CreateTeamRequest): Promise<BifrostTeam> {
     // retry: false — a 5xx from a retried POST could double-create upstream.
-    const response = await this.post<TeamResponse>(
-      '/api/governance/teams',
-      request,
-      { retry: false },
-    )
+    const response = await this.post<TeamResponse>('/api/governance/teams', request, {
+      retry: false,
+    })
     return response.team
   }
 

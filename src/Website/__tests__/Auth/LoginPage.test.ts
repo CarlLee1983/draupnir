@@ -26,7 +26,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: mock((_name: string, _value: string, _opts?: unknown) => {}),
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),

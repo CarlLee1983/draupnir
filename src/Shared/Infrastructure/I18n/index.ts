@@ -1,3 +1,3 @@
-export type { LocaleCode, MessageKey, Messages, I18nMessage } from './loadMessages'
+export type { I18nMessage, LocaleCode, MessageKey, Messages } from './loadMessages'
 export { loadMessages } from './loadMessages'
 export { resolvePageLocale } from './resolvePageLocale'

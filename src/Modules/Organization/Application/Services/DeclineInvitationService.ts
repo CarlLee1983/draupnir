@@ -18,13 +18,21 @@ export class DeclineInvitationService {
 
       const invitation = await this.invitationRepository.findById(invitationId)
       if (!invitation || !invitation.isPending()) {
-        return { success: false, message: 'Invalid or expired invitation', error: 'INVALID_INVITATION' }
+        return {
+          success: false,
+          message: 'Invalid or expired invitation',
+          error: 'INVALID_INVITATION',
+        }
       }
 
       try {
         OrgInvitationRules.assertEmailMatches(invitation, user.emailValue)
       } catch {
-        return { success: false, message: 'This invitation was not sent to you', error: 'EMAIL_MISMATCH' }
+        return {
+          success: false,
+          message: 'This invitation was not sent to you',
+          error: 'EMAIL_MISMATCH',
+        }
       }
 
       const cancelled = invitation.cancel()

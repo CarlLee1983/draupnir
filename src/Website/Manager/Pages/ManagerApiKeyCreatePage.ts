@@ -2,12 +2,12 @@ import type { AssignApiKeyService } from '@/Modules/ApiKey/Application/Services/
 import type { CreateApiKeyService } from '@/Modules/ApiKey/Application/Services/CreateApiKeyService'
 import type { SumQuotaAllocatedForOrgService } from '@/Modules/ApiKey/Application/Services/SumQuotaAllocatedForOrgService'
 import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
-import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
+import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 
 /**
  * Shape of the validated POST body for creating an API key, set on `ctx` by `ManagerCreateApiKeyRequest`.
@@ -99,7 +99,9 @@ export class ManagerApiKeyCreatePage {
       orgId: r.orgId,
       assignees,
       contractQuota: quotaResult.success ? (quotaResult.data?.contractQuota ?? null) : null,
-      totalAllocated: allocatedResult.success ? (allocatedResult.data?.totalAllocated ?? null) : null,
+      totalAllocated: allocatedResult.success
+        ? (allocatedResult.data?.totalAllocated ?? null)
+        : null,
     })
   }
 
@@ -191,7 +193,9 @@ export class ManagerApiKeyCreatePage {
       orgId: r.orgId,
       assignees,
       contractQuota: quotaResult.success ? (quotaResult.data?.contractQuota ?? null) : null,
-      totalAllocated: allocatedResult.success ? (allocatedResult.data?.totalAllocated ?? null) : null,
+      totalAllocated: allocatedResult.success
+        ? (allocatedResult.data?.totalAllocated ?? null)
+        : null,
       newKeyValue,
     })
   }

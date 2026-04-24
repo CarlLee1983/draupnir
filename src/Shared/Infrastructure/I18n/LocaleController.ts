@@ -1,5 +1,5 @@
-import { supportedLocales } from './loadMessages'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { supportedLocales } from './loadMessages'
 
 export class LocaleController {
   /**

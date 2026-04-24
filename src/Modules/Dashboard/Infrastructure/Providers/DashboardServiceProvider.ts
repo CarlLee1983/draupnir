@@ -1,10 +1,10 @@
-import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
-import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
 import type { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
+import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentORM } from '@/wiring/RepositoryFactory'
 import { schedule } from '../../../../../config/index'
 import type { IJobRegistrar } from '../../../../Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
@@ -18,25 +18,30 @@ import { GetKpiSummaryService } from '../../Application/Services/GetKpiSummarySe
 import { GetModelComparisonService } from '../../Application/Services/GetModelComparisonService'
 import { GetPerKeyCostService } from '../../Application/Services/GetPerKeyCostService'
 import { GetUsageChartService } from '../../Application/Services/GetUsageChartService'
+import { DashboardController } from '../../Presentation/Controllers/DashboardController'
+import { registerDashboardRoutes } from '../../Presentation/Routes/dashboard.routes'
 import { AtlasSyncCursorRepository } from '../Repositories/AtlasSyncCursorRepository'
 import { AtlasUsageRepository } from '../Repositories/AtlasUsageRepository'
 import { BifrostSyncService } from '../Services/BifrostSyncService'
 import { DatabaseUsageAggregator } from '../Services/DatabaseUsageAggregator'
 import { UsageAggregator } from '../Services/UsageAggregator'
-import { DashboardController } from '../../Presentation/Controllers/DashboardController'
-import { registerDashboardRoutes } from '../../Presentation/Routes/dashboard.routes'
 
-export class DashboardServiceProvider extends ModuleServiceProvider implements IJobRegistrar, IRouteRegistrar {
+export class DashboardServiceProvider
+  extends ModuleServiceProvider
+  implements IJobRegistrar, IRouteRegistrar
+{
   // 保留供 registerJobs() 使用（IJobRegistrar 介面需要）
   private container!: IContainer
 
   protected override registerRepositories(container: IContainer): void {
     this.container = container
-    container.singleton('syncCursorRepository', (c: IContainer) =>
-      new AtlasSyncCursorRepository(c.make('database') as IDatabaseAccess)
+    container.singleton(
+      'syncCursorRepository',
+      (c: IContainer) => new AtlasSyncCursorRepository(c.make('database') as IDatabaseAccess),
     )
-    container.singleton('atlasUsageRepository', (c: IContainer) =>
-      new AtlasUsageRepository(c.make('database') as IDatabaseAccess)
+    container.singleton(
+      'atlasUsageRepository',
+      (c: IContainer) => new AtlasUsageRepository(c.make('database') as IDatabaseAccess),
     )
   }
 
@@ -47,47 +52,75 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
       }
       return new UsageAggregator(c.make('llmGatewayClient') as ILLMGatewayClient)
     })
-    container.singleton('bifrostSyncService', (c: IContainer) => new BifrostSyncService(
-      c.make('llmGatewayClient') as ILLMGatewayClient,
-      c.make('atlasUsageRepository') as IUsageRepository,
-      c.make('syncCursorRepository') as ISyncCursorRepository,
-      c.make('apiKeyRepository') as IApiKeyRepository,
-      c.make('database') as IDatabaseAccess,
-    ))
+    container.singleton(
+      'bifrostSyncService',
+      (c: IContainer) =>
+        new BifrostSyncService(
+          c.make('llmGatewayClient') as ILLMGatewayClient,
+          c.make('atlasUsageRepository') as IUsageRepository,
+          c.make('syncCursorRepository') as ISyncCursorRepository,
+          c.make('apiKeyRepository') as IApiKeyRepository,
+          c.make('database') as IDatabaseAccess,
+        ),
+    )
   }
 
   protected override registerApplicationServices(container: IContainer): void {
-    container.bind('getDashboardSummaryService', (c: IContainer) => new GetDashboardSummaryService(
-      c.make('apiKeyRepository') as IApiKeyRepository,
-      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('usageAggregator') as UsageAggregator,
-    ))
-    container.bind('getUsageChartService', (c: IContainer) => new GetUsageChartService(
-      c.make('apiKeyRepository') as IApiKeyRepository,
-      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('usageAggregator') as UsageAggregator,
-    ))
-    container.bind('getKpiSummaryService', (c: IContainer) => new GetKpiSummaryService(
-      c.make('apiKeyRepository') as IApiKeyRepository,
-      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('atlasUsageRepository') as IUsageRepository,
-      c.make('syncCursorRepository') as ISyncCursorRepository,
-    ))
-    container.bind('getCostTrendsService', (c: IContainer) => new GetCostTrendsService(
-      c.make('apiKeyRepository') as IApiKeyRepository,
-      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('atlasUsageRepository') as IUsageRepository,
-    ))
-    container.bind('getModelComparisonService', (c: IContainer) => new GetModelComparisonService(
-      c.make('apiKeyRepository') as IApiKeyRepository,
-      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('atlasUsageRepository') as IUsageRepository,
-    ))
-    container.bind('getPerKeyCostService', (c: IContainer) => new GetPerKeyCostService(
-      c.make('apiKeyRepository') as IApiKeyRepository,
-      c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
-      c.make('atlasUsageRepository') as IUsageRepository,
-    ))
+    container.bind(
+      'getDashboardSummaryService',
+      (c: IContainer) =>
+        new GetDashboardSummaryService(
+          c.make('apiKeyRepository') as IApiKeyRepository,
+          c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+          c.make('usageAggregator') as UsageAggregator,
+        ),
+    )
+    container.bind(
+      'getUsageChartService',
+      (c: IContainer) =>
+        new GetUsageChartService(
+          c.make('apiKeyRepository') as IApiKeyRepository,
+          c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+          c.make('usageAggregator') as UsageAggregator,
+        ),
+    )
+    container.bind(
+      'getKpiSummaryService',
+      (c: IContainer) =>
+        new GetKpiSummaryService(
+          c.make('apiKeyRepository') as IApiKeyRepository,
+          c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+          c.make('atlasUsageRepository') as IUsageRepository,
+          c.make('syncCursorRepository') as ISyncCursorRepository,
+        ),
+    )
+    container.bind(
+      'getCostTrendsService',
+      (c: IContainer) =>
+        new GetCostTrendsService(
+          c.make('apiKeyRepository') as IApiKeyRepository,
+          c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+          c.make('atlasUsageRepository') as IUsageRepository,
+        ),
+    )
+    container.bind(
+      'getModelComparisonService',
+      (c: IContainer) =>
+        new GetModelComparisonService(
+          c.make('apiKeyRepository') as IApiKeyRepository,
+          c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+          c.make('atlasUsageRepository') as IUsageRepository,
+        ),
+    )
+    container.bind(
+      'getPerKeyCostService',
+      (c: IContainer) =>
+        new GetPerKeyCostService(
+          c.make('apiKeyRepository') as IApiKeyRepository,
+          c.make('orgAuthorizationHelper') as OrgAuthorizationHelper,
+          c.make('atlasUsageRepository') as IUsageRepository,
+        ),
+    )
     container.bind(
       'getAdminPlatformUsageTrendService',
       (c: IContainer) =>
@@ -96,15 +129,19 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
   }
 
   protected override registerControllers(container: IContainer): void {
-    container.bind('dashboardController', (c: IContainer) => new DashboardController(
-      c.make('getDashboardSummaryService') as GetDashboardSummaryService,
-      c.make('getUsageChartService') as GetUsageChartService,
-      c.make('getKpiSummaryService') as GetKpiSummaryService,
-      c.make('getCostTrendsService') as GetCostTrendsService,
-      c.make('getModelComparisonService') as GetModelComparisonService,
-      c.make('getPerKeyCostService') as GetPerKeyCostService,
-      c.make('bifrostSyncService') as BifrostSyncService,
-    ))
+    container.bind(
+      'dashboardController',
+      (c: IContainer) =>
+        new DashboardController(
+          c.make('getDashboardSummaryService') as GetDashboardSummaryService,
+          c.make('getUsageChartService') as GetUsageChartService,
+          c.make('getKpiSummaryService') as GetKpiSummaryService,
+          c.make('getCostTrendsService') as GetCostTrendsService,
+          c.make('getModelComparisonService') as GetModelComparisonService,
+          c.make('getPerKeyCostService') as GetPerKeyCostService,
+          c.make('bifrostSyncService') as BifrostSyncService,
+        ),
+    )
   }
 
   registerRoutes(context: IRouteContext): void {
@@ -125,7 +162,9 @@ export class DashboardServiceProvider extends ModuleServiceProvider implements I
       async () => {
         const result = await syncService.sync()
         if (result.synced > 0 || result.quarantined > 0) {
-          console.log(`[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`)
+          console.log(
+            `[BifrostSync] Synced ${result.synced} records, quarantined ${result.quarantined}`,
+          )
         }
       },
     )

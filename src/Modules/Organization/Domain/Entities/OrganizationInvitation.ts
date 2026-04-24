@@ -1,5 +1,5 @@
 import { InvitationStatus } from '../ValueObjects/InvitationStatus'
-import { OrgMemberRole } from '../ValueObjects/OrgMemberRole'
+import type { OrgMemberRole } from '../ValueObjects/OrgMemberRole'
 
 const EXPIRY_DAYS = 7
 

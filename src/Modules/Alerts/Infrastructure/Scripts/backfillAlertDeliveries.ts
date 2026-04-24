@@ -1,8 +1,5 @@
 import { getDrizzleInstance } from '@/Shared/Infrastructure/Database/Adapters/Drizzle/config'
-import {
-  alertDeliveries,
-  alertEvents,
-} from '@/Shared/Infrastructure/Database/schema'
+import { alertDeliveries, alertEvents } from '@/Shared/Infrastructure/Database/schema'
 
 type RecipientDeliveryRow = {
   alert_event_id: string

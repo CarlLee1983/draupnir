@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import type { IHttpContext, CookieOptions } from '@/Shared/Presentation/IHttpContext'
 import type {
   IJwtTokenService,
   TokenSignPayload,
@@ -9,6 +8,7 @@ import type {
   TokenRecord,
 } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import { AuthToken, TokenType } from '@/Modules/Auth/Domain/ValueObjects/AuthToken'
+import type { CookieOptions, IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { OrganizationController } from '../../Presentation/Controllers/OrganizationController'
 
 interface CookieCall {
@@ -72,11 +72,7 @@ function createMockContext(authContext?: {
 
 function makeJwtMock(tokenValue = 'new-access-token-abc') {
   const signAccessToken = mock((_payload: TokenSignPayload) => {
-    return new AuthToken(
-      tokenValue,
-      new Date(Date.now() + 900 * 1000),
-      TokenType.ACCESS,
-    )
+    return new AuthToken(tokenValue, new Date(Date.now() + 900 * 1000), TokenType.ACCESS)
   })
   const signRefreshToken = mock((_payload: TokenSignPayload) => {
     throw new Error('signRefreshToken should not be called during create org')
@@ -109,11 +105,13 @@ function makeAuthTokenRepoMock() {
   return { repo, save }
 }
 
-function makeController(overrides: {
-  createOrgExecute?: ReturnType<typeof mock>
-  jwt?: IJwtTokenService
-  authTokenRepo?: IAuthTokenRepository
-} = {}): {
+function makeController(
+  overrides: {
+    createOrgExecute?: ReturnType<typeof mock>
+    jwt?: IJwtTokenService
+    authTokenRepo?: IAuthTokenRepository
+  } = {},
+): {
   controller: OrganizationController
   createOrgExecute: ReturnType<typeof mock>
   signAccessToken: ReturnType<typeof mock>
@@ -164,13 +162,8 @@ describe('OrganizationController.create', () => {
   })
 
   test('success: signs new access token with role=manager, sets auth_token cookie, returns redirectTo', async () => {
-    const {
-      controller,
-      createOrgExecute,
-      signAccessToken,
-      signRefreshToken,
-      saveTokenRecord,
-    } = makeController()
+    const { controller, createOrgExecute, signAccessToken, signRefreshToken, saveTokenRecord } =
+      makeController()
     const { ctx, cookies, jsonCalls } = createMockContext({
       userId: 'u-1',
       email: 'member@example.com',
@@ -256,9 +249,7 @@ describe('OrganizationController.create', () => {
     expect(body.success).toBe(false)
     expect(body.error).toBe('NAME_REQUIRED')
     // No redirectTo on failure
-    expect(
-      (body.data as { redirectTo?: string } | undefined)?.redirectTo,
-    ).toBeUndefined()
+    expect((body.data as { redirectTo?: string } | undefined)?.redirectTo).toBeUndefined()
   })
 
   test('failure (ALREADY_HAS_ORGANIZATION): skips token + cookie, returns 400', async () => {

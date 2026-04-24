@@ -1,13 +1,13 @@
 import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/ListApiKeysService'
+import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import type { InviteMemberService } from '@/Modules/Organization/Application/Services/InviteMemberService'
 import type { ListInvitationsService } from '@/Modules/Organization/Application/Services/ListInvitationsService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
 import type { RemoveMemberService } from '@/Modules/Organization/Application/Services/RemoveMemberService'
-import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 
 interface MemberRow {
   userId: string
@@ -77,12 +77,14 @@ export class ManagerMembersPage {
     }
 
     const members: MemberRow[] = listResult.success
-      ? ((listResult.data?.members ?? []) as Array<{
-          userId: string
-          email?: string
-          role: string
-          joinedAt: string
-        }>).map((m) => ({
+      ? (
+          (listResult.data?.members ?? []) as Array<{
+            userId: string
+            email?: string
+            role: string
+            joinedAt: string
+          }>
+        ).map((m) => ({
           userId: m.userId,
           email: typeof m.email === 'string' ? m.email : '',
           role: m.role,

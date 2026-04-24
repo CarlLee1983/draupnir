@@ -86,7 +86,9 @@ describe('InviteMemberService', () => {
     const email = 'repeat@example.com'
     const first = await inviteService.execute(orgId, managerId, 'user', { email })
     expect(first.success).toBe(true)
-    const second = await inviteService.execute(orgId, managerId, 'user', { email: `  ${email.toUpperCase()}  ` })
+    const second = await inviteService.execute(orgId, managerId, 'user', {
+      email: `  ${email.toUpperCase()}  `,
+    })
     expect(second.success).toBe(true)
 
     const all = await invitationRepo.findByOrgId(orgId)

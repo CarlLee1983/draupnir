@@ -1,9 +1,9 @@
 import { describe, expect, mock, test } from 'bun:test'
+import type { IJwtTokenService } from '../Application/Ports/IJwtTokenService'
 import { RefreshTokenService } from '../Application/Services/RefreshTokenService'
 import { sha256 } from '../Application/Utils/sha256'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import type { IAuthTokenRepository, TokenRecord } from '../Domain/Repositories/IAuthTokenRepository'
-import type { IJwtTokenService } from '../Application/Ports/IJwtTokenService'
 
 function makeJwtService(overrides: Partial<IJwtTokenService> = {}): IJwtTokenService {
   return {

@@ -1,5 +1,5 @@
-import type { KeyBudgetResetPeriod } from '../DTOs/ApiKeyDTO'
 import type { KeyScope } from '../../Domain/ValueObjects/KeyScope'
+import type { KeyBudgetResetPeriod } from '../DTOs/ApiKeyDTO'
 
 /**
  * Return value from {@link IBifrostKeySync.createVirtualKey}: stable gateway identifier and the secret value

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { composePageHandler } from '../Inertia/withInertiaPage'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
+import { composePageHandler } from '../Inertia/withInertiaPage'
 
 const createMockContext = (): IHttpContext => {
   const state: Record<string, unknown> = {}
@@ -19,9 +19,12 @@ const createMockContext = (): IHttpContext => {
     headers: {},
     json: <T>(data: T, status = 200) => new Response(JSON.stringify(data), { status }),
     text: (content: string, status = 200) => new Response(content, { status }),
-    redirect: (url: string, status = 302) => new Response(null, { status, headers: { Location: url } }),
+    redirect: (url: string, status = 302) =>
+      new Response(null, { status, headers: { Location: url } }),
     get: <T>(key: string): T | undefined => state[key] as T,
-    set: (key: string, value: unknown) => { state[key] = value },
+    set: (key: string, value: unknown) => {
+      state[key] = value
+    },
     getCookie: () => undefined,
     setCookie: () => {},
   } as IHttpContext

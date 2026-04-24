@@ -27,11 +27,9 @@ export function toGravitoMiddleware(mw: Middleware): GravitoMiddleware {
  * registerGlobalMiddlewares(core, HttpKernel.global())
  * ```
  */
-export function registerGlobalMiddlewares(
-  core: PlanetCore,
-  middlewares: Middleware[],
-): void {
+export function registerGlobalMiddlewares(core: PlanetCore, middlewares: Middleware[]): void {
   for (const mw of middlewares) {
+    // biome-ignore lint/correctness/useHookAtTopLevel: false positive, useGlobal is not a React Hook
     core.adapter.useGlobal(toGravitoMiddleware(mw))
   }
 }

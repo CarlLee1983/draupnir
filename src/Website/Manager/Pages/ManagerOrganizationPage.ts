@@ -36,8 +36,7 @@ export class ManagerOrganizationPage {
       orgId,
       organization: org.success ? (org.data ?? null) : null,
       contracts: contracts.success ? (contracts.data ?? []) : [],
-      error:
-        org.success && contracts.success ? null : { key: 'manager.organization.loadFailed' },
+      error: org.success && contracts.success ? null : { key: 'manager.organization.loadFailed' },
     })
   }
 
@@ -46,7 +45,9 @@ export class ManagerOrganizationPage {
     const membership = await this.membershipService.execute(auth.userId)
     if (!membership) return ctx.redirect('/member/dashboard')
 
-    const body = await ctx.getJsonBody<{ name?: string; description?: string }>().catch(() => undefined)
+    const body = await ctx
+      .getJsonBody<{ name?: string; description?: string }>()
+      .catch(() => undefined)
     const result = await this.updateOrganizationService.execute(
       membership.orgId,
       { name: body?.name ?? '', description: body?.description ?? '' },

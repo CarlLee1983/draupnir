@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { createInMemoryRateLimit } from '../InMemoryRateLimitMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { createInMemoryRateLimit } from '../InMemoryRateLimitMiddleware'
 
 const createMockContext = (ip?: string): IHttpContext => {
   const state: Record<string, unknown> = {}
@@ -24,7 +24,9 @@ const createMockContext = (ip?: string): IHttpContext => {
     redirect: (url: string, status = 302) =>
       new Response(null, { status, headers: { Location: url } }),
     get: <T>(key: string): T | undefined => state[key] as T,
-    set: (key: string, value: unknown) => { state[key] = value },
+    set: (key: string, value: unknown) => {
+      state[key] = value
+    },
     getCookie: () => undefined,
     setCookie: () => {},
   } as IHttpContext
@@ -68,7 +70,7 @@ describe('InMemoryRateLimitMiddleware', () => {
     const ctx = createMockContext('1.2.3.4')
     await mw(ctx, async () => new Response('ok'))
     // 等窗口過期
-    await new Promise(r => setTimeout(r, 60))
+    await new Promise((r) => setTimeout(r, 60))
     const response = await mw(ctx, async () => new Response('ok', { status: 200 }))
     expect(response.status).toBe(200)
   })

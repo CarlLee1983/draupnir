@@ -1,11 +1,11 @@
 // src/Modules/Contract/__tests__/AdjustContractQuotaService.test.ts
 
-import { describe, it, expect, mock, beforeEach } from 'bun:test'
-import { AdjustContractQuotaService } from '../Application/Services/AdjustContractQuotaService'
-import type { IContractRepository } from '../Domain/Repositories/IContractRepository'
-import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
-import { Contract } from '../Domain/Aggregates/Contract'
+import { beforeEach, describe, expect, it, mock } from 'bun:test'
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
+import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import { AdjustContractQuotaService } from '../Application/Services/AdjustContractQuotaService'
+import { Contract } from '../Domain/Aggregates/Contract'
+import type { IContractRepository } from '../Domain/Repositories/IContractRepository'
 
 // 建立測試用的 Contract（ACTIVE 狀態）
 function makeContract(id: string, creditQuota: number, targetId: string): Contract {
@@ -94,7 +94,6 @@ describe('AdjustContractQuotaService', () => {
     const key1 = makeApiKey('key-1', 'org-2', 300)
     const key2 = makeApiKey('key-2', 'org-2', 200)
     // sumAllocated = 500
-
     ;(contractRepo.findById as ReturnType<typeof mock>).mockResolvedValue(contract)
     ;(keyRepo.findActiveByOrgId as ReturnType<typeof mock>).mockResolvedValue([key1, key2])
 
@@ -118,7 +117,6 @@ describe('AdjustContractQuotaService', () => {
     const key1 = makeApiKey('key-3a', 'org-3', 500)
     const key2 = makeApiKey('key-3b', 'org-3', 500)
     // sumAllocated = 1000，newCap = 400 < 1000
-
     ;(contractRepo.findById as ReturnType<typeof mock>).mockResolvedValue(contract)
     ;(keyRepo.findActiveByOrgId as ReturnType<typeof mock>).mockResolvedValue([key1, key2])
 

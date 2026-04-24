@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, spyOn } from 'bun:test'
-import { createDrizzleConnectivityCheck } from '../DrizzleConnectivityCheck'
 import * as config from '../config'
+import { createDrizzleConnectivityCheck } from '../DrizzleConnectivityCheck'
 
 describe('DrizzleConnectivityCheck', () => {
   afterEach(() => {

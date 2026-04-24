@@ -275,7 +275,9 @@ describe('BifrostClient', () => {
     })
 
     it('should delete a team', async () => {
-      globalThis.fetch = mock(() => Promise.resolve(mockFetchResponse(200, { message: 'ok' }))) as any
+      globalThis.fetch = mock(() =>
+        Promise.resolve(mockFetchResponse(200, { message: 'ok' })),
+      ) as any
 
       await client.deleteTeam('team-1')
 

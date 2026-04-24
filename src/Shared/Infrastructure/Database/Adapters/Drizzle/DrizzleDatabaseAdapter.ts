@@ -8,9 +8,9 @@
  */
 
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
+import * as schema from '../../schema'
 import { getDrizzleInstance } from './config'
 import { DrizzleQueryBuilder } from './DrizzleQueryBuilder'
-import * as schema from '../../schema'
 
 /**
  * Drizzle DatabaseAccess 實現

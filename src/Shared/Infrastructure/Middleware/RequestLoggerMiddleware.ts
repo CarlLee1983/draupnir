@@ -64,8 +64,7 @@ export function createRequestLoggerMiddleware(): Middleware {
     const method = ctx.getMethod()
     const path = ctx.getPathname()
     const requestId = ctx.get<string>('requestId') ?? 'unknown'
-    const ip =
-      ctx.getHeader('x-forwarded-for') ?? ctx.getHeader('x-real-ip') ?? 'unknown'
+    const ip = ctx.getHeader('x-forwarded-for') ?? ctx.getHeader('x-real-ip') ?? 'unknown'
     const userAgent = ctx.getHeader('user-agent') ?? 'unknown'
     const env = process.env.NODE_ENV ?? 'development'
 
@@ -78,9 +77,7 @@ export function createRequestLoggerMiddleware(): Middleware {
       if (configuredLevel === 'debug') {
         // Colored text for local development
         const arrow = status >= 400 ? '\x1b[31m←\x1b[0m' : '\x1b[32m←\x1b[0m'
-        console.log(
-          `\x1b[36m→\x1b[0m ${method} ${path}\n${arrow} ${status}  ${durationMs}ms`,
-        )
+        console.log(`\x1b[36m→\x1b[0m ${method} ${path}\n${arrow} ${status}  ${durationMs}ms`)
         return
       }
 

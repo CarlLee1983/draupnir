@@ -27,7 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),
@@ -93,7 +93,11 @@ describe('MemberUsagePage', () => {
     }
 
     const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
-    const page = new MemberUsagePage(inertia, mockUsageChartService as any, mockMembershipService as any)
+    const page = new MemberUsagePage(
+      inertia,
+      mockUsageChartService as any,
+      mockMembershipService as any,
+    )
     await page.handle(ctx)
 
     expect(captured.lastCall).not.toBe(null)
@@ -114,7 +118,11 @@ describe('MemberUsagePage', () => {
     }
 
     const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
-    const page = new MemberUsagePage(inertia, mockUsageChartService as any, mockMembershipService as any)
+    const page = new MemberUsagePage(
+      inertia,
+      mockUsageChartService as any,
+      mockMembershipService as any,
+    )
     await page.handle(ctx)
 
     expect(captured.lastCall?.component).toBe('Member/Usage/Index')
@@ -140,7 +148,11 @@ describe('MemberUsagePage', () => {
     }
 
     const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
-    const page = new MemberUsagePage(inertia, mockUsageChartService as any, mockMembershipService as any)
+    const page = new MemberUsagePage(
+      inertia,
+      mockUsageChartService as any,
+      mockMembershipService as any,
+    )
     await page.handle(ctx)
 
     expect(captured.lastCall?.props.error).toEqual({ key: 'member.usage.loadFailed' })

@@ -4,9 +4,8 @@ import { CronerScheduler } from '../CronerScheduler'
 describe('CronerScheduler.stopAll()', () => {
   it('stopAll() 停止所有已排程的 job', () => {
     const scheduler = new CronerScheduler()
-    let called = 0
-    scheduler.schedule({ name: 'job-a', cron: '* * * * *' }, async () => { called++ })
-    scheduler.schedule({ name: 'job-b', cron: '* * * * *' }, async () => { called++ })
+    scheduler.schedule({ name: 'job-a', cron: '* * * * *' }, async () => {})
+    scheduler.schedule({ name: 'job-b', cron: '* * * * *' }, async () => {})
 
     expect(scheduler.has('job-a')).toBe(true)
     expect(scheduler.has('job-b')).toBe(true)
@@ -27,13 +26,17 @@ describe('CronerScheduler.stopAll()', () => {
     // schedule with retry — handler always throws
     scheduler.schedule(
       { name: 'failing-job', cron: '* * * * *', maxRetries: 5, backoffMs: 10_000 },
-      async () => { throw new Error('always fails') },
+      async () => {
+        throw new Error('always fails')
+      },
     )
     // trigger one execution to put a retry timer in flight
     // (runOnInit puts it on a microtask)
     scheduler.schedule(
       { name: 'init-job', cron: '* * * * *', runOnInit: true, maxRetries: 3, backoffMs: 10_000 },
-      async () => { throw new Error('fail on init') },
+      async () => {
+        throw new Error('fail on init')
+      },
     )
     // Give runOnInit a tick to fire
     await new Promise((r) => setTimeout(r, 0))

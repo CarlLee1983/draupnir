@@ -31,8 +31,7 @@ describe('ProvisionOrganizationDefaultsService', () => {
   }
 
   test('為組織建立啟用中合約、內建模組訂閱與 Bifrost Team，並寫回 gatewayTeamId', async () => {
-    const { service, moduleRepo, contractRepo, subRepo, orgRepo, gateway } =
-      await setup('org-new')
+    const { service, moduleRepo, contractRepo, subRepo, orgRepo, gateway } = await setup('org-new')
     await service.execute('org-new', 'user-1')
 
     const active = await contractRepo.findActiveByTargetId('org-new')

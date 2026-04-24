@@ -19,11 +19,11 @@
  * (section: web access token silent refresh / `TokenRefreshMiddleware`).
  */
 
-import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
-import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
-import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { RefreshTokenService } from '@/Modules/Auth/Application/Services/RefreshTokenService'
+import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
+import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
+import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 
 /**

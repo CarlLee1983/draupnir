@@ -86,9 +86,7 @@ async function runSetup(op: Operation): Promise<Record<string, unknown>> {
     }
 
     const stepAuth =
-      step.operation === 'post-/api/organizations'
-        ? (context.authToken as string)
-        : adminAuth
+      step.operation === 'post-/api/organizations' ? (context.authToken as string) : adminAuth
 
     const res = await client.request(
       { method, path },

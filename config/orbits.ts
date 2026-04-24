@@ -8,7 +8,11 @@
 
 import type { GravitoOrbit } from '@gravito/core'
 import { OrbitAtlas } from '@gravito/atlas'
+import * as PlasmaModule from '@gravito/plasma'
+import { OrbitPrism } from '@gravito/prism'
 import type { RedisManagerConfig } from '@gravito/plasma'
+
+const OrbitPlasma = (PlasmaModule as any).OrbitPlasma
 
 export type OrbitRegistrationOptions = {
 	/** 是否啟用資料庫（OrbitAtlas） */
@@ -26,13 +30,13 @@ export function getOrbits(options: OrbitRegistrationOptions): GravitoOrbit[] {
 
 	return [
 		// --- 核心：視圖、SSG
-		// OrbitPrism,
+		new OrbitPrism(),
 
 		// --- 資料：DB（可選）
 		...(useDatabase ? [OrbitAtlas as unknown as GravitoOrbit] : []),
 
 		// --- 資料：Redis + Cache
-		// new OrbitPlasma({ ...redis, autoConnect: true }) as any,
+		new OrbitPlasma({ ...options.redis, autoConnect: true }) as any,
 		// OrbitStasis,
 
 		// --- 應用：事件 / 郵件等

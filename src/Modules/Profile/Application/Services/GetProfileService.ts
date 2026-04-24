@@ -9,8 +9,8 @@
  */
 
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
-import { profileToDTO } from '../DTOs/UserProfileDTO'
 import type { UserProfileResponse } from '../DTOs/UserProfileDTO'
+import { profileToDTO } from '../DTOs/UserProfileDTO'
 
 /**
  * Service for retrieving a user profile.

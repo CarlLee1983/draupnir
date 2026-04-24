@@ -1,7 +1,7 @@
-import { describe, expect, it, beforeAll, beforeEach } from 'bun:test'
+import { beforeAll, beforeEach, describe, expect, it } from 'bun:test'
 import { createClient } from '@libsql/client'
 import { drizzle } from 'drizzle-orm/libsql'
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { DrizzleQueryBuilder } from '../DrizzleQueryBuilder'
 
 // 定義一個專用於測試的簡單 Schema

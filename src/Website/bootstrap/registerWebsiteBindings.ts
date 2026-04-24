@@ -1,12 +1,12 @@
+import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { registerAdminBindings } from '@/Website/Admin/bindings/registerAdminBindings'
 import { registerAuthBindings } from '@/Website/Auth/bindings/registerAuthBindings'
 import {
-  PAGE_CONTAINER_KEYS,
   getInertiaServiceSingleton,
+  PAGE_CONTAINER_KEYS,
 } from '@/Website/Http/Inertia/createInertiaRequestHandler'
 import { registerManagerBindings } from '@/Website/Manager/bindings/registerManagerBindings'
 import { registerMemberBindings } from '@/Website/Member/bindings/registerMemberBindings'
-import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 
 /**
  * Registers all Website DI bindings: Inertia runtime + all slice page handlers.

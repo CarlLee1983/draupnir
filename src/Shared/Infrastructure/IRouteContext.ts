@@ -8,8 +8,9 @@
  * its concrete core/app instance (e.g. Gravito PlanetCore) before invoking
  * `registerRoutes`. Modules must only interact with IContainer + IModuleRouter.
  */
-import type { IContainer } from './IServiceProvider'
+
 import type { IModuleRouter } from '@/Shared/Presentation/IModuleRouter'
+import type { IContainer } from './IServiceProvider'
 
 export interface IRouteContext {
   /** Framework-agnostic DI container for resolving already-registered services. */

@@ -3,8 +3,8 @@ import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGatew
 import { ApiKey } from '@/Modules/ApiKey/Domain/Aggregates/ApiKey'
 import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { OrgAuthorizationHelper } from '@/Modules/Organization/Application/Services/OrgAuthorizationHelper'
-import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
+import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
 import { OrganizationMemberRepository } from '@/Modules/Organization/Infrastructure/Repositories/OrganizationMemberRepository'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { KeyHashingService } from '@/Shared/Infrastructure/Services/KeyHashingService'
@@ -47,7 +47,12 @@ describe('GetDashboardSummaryService', () => {
     const aggregator = createMockAggregator()
     service = new GetDashboardSummaryService(apiKeyRepo, orgAuth, aggregator)
 
-    const member = OrganizationMember.create('mem-1', 'org-1', 'user-1', new OrgMemberRole('manager'))
+    const member = OrganizationMember.create(
+      'mem-1',
+      'org-1',
+      'user-1',
+      new OrgMemberRole('manager'),
+    )
     await memberRepo.save(member)
 
     const key1 = ApiKey.create({
@@ -91,7 +96,12 @@ describe('GetDashboardSummaryService', () => {
   })
 
   it('org member 僅統計自己建立的 API keys', async () => {
-    const member = OrganizationMember.create('mem-2', 'org-1', 'user-member', new OrgMemberRole('member'))
+    const member = OrganizationMember.create(
+      'mem-2',
+      'org-1',
+      'user-member',
+      new OrgMemberRole('member'),
+    )
     await memberRepo.save(member)
 
     const keyOther = ApiKey.create({
@@ -137,7 +147,9 @@ describe('GetDashboardSummaryService', () => {
       const aggregator = createMockAggregator()
       service = new GetDashboardSummaryService(apiKeyRepo, orgAuth, aggregator)
 
-      await memberRepo.save(OrganizationMember.create('mem-a', 'org-m', 'alice', new OrgMemberRole('member')))
+      await memberRepo.save(
+        OrganizationMember.create('mem-a', 'org-m', 'alice', new OrgMemberRole('member')),
+      )
 
       const aliceKey = ApiKey.create({
         id: 'key-alice',

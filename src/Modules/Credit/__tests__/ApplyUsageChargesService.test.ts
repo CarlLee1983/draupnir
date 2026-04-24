@@ -22,15 +22,17 @@ describe('ApplyUsageChargesService', () => {
     deductCreditService = new DeductCreditService(accountRepo, txRepo, db)
     service = new ApplyUsageChargesService(accountRepo, txRepo, deductCreditService, db)
 
-    await accountRepo.save(CreditAccount.fromDatabase({
-      id: 'acc-1',
-      org_id: 'org-1',
-      balance: '1000',
-      low_balance_threshold: '100',
-      status: 'active',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    }))
+    await accountRepo.save(
+      CreditAccount.fromDatabase({
+        id: 'acc-1',
+        org_id: 'org-1',
+        balance: '1000',
+        low_balance_threshold: '100',
+        status: 'active',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }),
+    )
 
     await db.table('usage_records').insert({
       id: 'usage-1',

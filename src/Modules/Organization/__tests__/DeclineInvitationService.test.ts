@@ -1,10 +1,10 @@
 import { describe, expect, it, mock } from 'bun:test'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
-import type { IOrganizationInvitationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationInvitationRepository'
+import { DeclineInvitationService } from '@/Modules/Organization/Application/Services/DeclineInvitationService'
 import { OrganizationInvitation } from '@/Modules/Organization/Domain/Entities/OrganizationInvitation'
+import type { IOrganizationInvitationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationInvitationRepository'
 import { InvitationStatus } from '@/Modules/Organization/Domain/ValueObjects/InvitationStatus'
 import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
-import { DeclineInvitationService } from '@/Modules/Organization/Application/Services/DeclineInvitationService'
 
 function makePendingInvitation(email = 'member@example.com'): OrganizationInvitation {
   return OrganizationInvitation.reconstitute({

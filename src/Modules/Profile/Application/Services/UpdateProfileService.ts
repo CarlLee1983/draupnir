@@ -11,8 +11,8 @@
 
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'
-import { profileToDTO } from '../DTOs/UserProfileDTO'
 import type { UpdateUserProfileRequest, UserProfileResponse } from '../DTOs/UserProfileDTO'
+import { profileToDTO } from '../DTOs/UserProfileDTO'
 
 /**
  * Service for updating a user profile.

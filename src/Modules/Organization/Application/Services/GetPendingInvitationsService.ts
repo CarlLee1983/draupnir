@@ -1,6 +1,6 @@
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
-import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
+import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 
 export interface PendingInvitationDTO {
   id: string

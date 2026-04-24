@@ -1,8 +1,8 @@
 // src/Modules/Credit/__tests__/DeductCreditService.test.ts
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { DeductCreditService } from '../Application/Services/DeductCreditService'
 import { CreditAccount } from '../Domain/Aggregates/CreditAccount'
 import type { CreditTransaction } from '../Domain/Entities/CreditTransaction'

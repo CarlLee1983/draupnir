@@ -1,12 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createGlobalErrorMiddleware } from '../GlobalErrorMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { createGlobalErrorMiddleware } from '../GlobalErrorMiddleware'
 
-const createMockContext = (opts: {
-  isInertia?: boolean
-  acceptJson?: boolean
-  requestId?: string
-} = {}): IHttpContext => {
+const createMockContext = (
+  opts: { isInertia?: boolean; acceptJson?: boolean; requestId?: string } = {},
+): IHttpContext => {
   const state: Record<string, unknown> = {
     requestId: opts.requestId ?? 'test-id',
   }
@@ -66,16 +64,20 @@ describe('GlobalErrorMiddleware', () => {
     const mw = createGlobalErrorMiddleware()
     const ctx = createMockContext()
     const thrown = new Response('custom', { status: 422 })
-    const response = await mw(ctx, async () => { throw thrown })
+    const response = await mw(ctx, async () => {
+      throw thrown
+    })
     expect(response.status).toBe(422)
   })
 
   it('JSON 請求 throw Error → JSON 500，不含 stack trace', async () => {
     const mw = createGlobalErrorMiddleware()
     const ctx = createMockContext({ acceptJson: true })
-    const response = await mw(ctx, async () => { throw new Error('DB failed') })
+    const response = await mw(ctx, async () => {
+      throw new Error('DB failed')
+    })
     expect(response.status).toBe(500)
-    const body = await response.json() as Record<string, unknown>
+    const body = (await response.json()) as Record<string, unknown>
     expect(body.success).toBe(false)
     expect(body.error).toBe('INTERNAL_ERROR')
     expect(JSON.stringify(body)).not.toContain('DB failed')
@@ -85,9 +87,11 @@ describe('GlobalErrorMiddleware', () => {
   it('Inertia 請求 throw Error → Inertia 格式 JSON 500', async () => {
     const mw = createGlobalErrorMiddleware()
     const ctx = createMockContext({ isInertia: true })
-    const response = await mw(ctx, async () => { throw new Error('crash') })
+    const response = await mw(ctx, async () => {
+      throw new Error('crash')
+    })
     expect(response.status).toBe(500)
-    const body = await response.json() as Record<string, unknown>
+    const body = (await response.json()) as Record<string, unknown>
     expect(body.component).toBeDefined()
     expect(JSON.stringify(body)).not.toContain('crash')
     expect(JSON.stringify(body)).not.toContain('stack')
@@ -96,7 +100,9 @@ describe('GlobalErrorMiddleware', () => {
   it('一般 HTML 請求 throw Error → 500 text/html', async () => {
     const mw = createGlobalErrorMiddleware()
     const ctx = createMockContext()
-    const response = await mw(ctx, async () => { throw new Error('boom') })
+    const response = await mw(ctx, async () => {
+      throw new Error('boom')
+    })
     expect(response.status).toBe(500)
     expect(response.headers.get('content-type')).toContain('text/html')
     const text = await response.text()
@@ -108,7 +114,9 @@ describe('GlobalErrorMiddleware', () => {
     const errorSpy = vi.spyOn(console, 'error')
     const mw = createGlobalErrorMiddleware()
     const ctx = createMockContext({ requestId: 'req-xyz', acceptJson: true })
-    await mw(ctx, async () => { throw new Error('something') })
+    await mw(ctx, async () => {
+      throw new Error('something')
+    })
     expect(errorSpy).toHaveBeenCalled()
     const logArg = JSON.stringify(errorSpy.mock.calls[0])
     expect(logArg).toContain('req-xyz')

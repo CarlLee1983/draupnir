@@ -2,9 +2,9 @@ import type { SumQuotaAllocatedForOrgService } from '@/Modules/ApiKey/Applicatio
 import type { GetActiveOrgContractQuotaService } from '@/Modules/Contract/Application/Services/GetActiveOrgContractQuotaService'
 import type { GetOrganizationService } from '@/Modules/Organization/Application/Services/GetOrganizationService'
 import type { ListMembersService } from '@/Modules/Organization/Application/Services/ListMembersService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin organization detail with member list (`Admin/Organizations/Show`).
@@ -75,14 +75,15 @@ export class AdminOrganizationDetailPage {
       organization,
       members,
       error: orgResult.success ? null : { key: 'admin.organizations.loadFailed' },
-      contractSummary: contractCap !== null
-        ? {
-            contractId,
-            contractCap,
-            sumAllocated,
-            unallocated,
-          }
-        : null,
+      contractSummary:
+        contractCap !== null
+          ? {
+              contractId,
+              contractCap,
+              sumAllocated,
+              unallocated,
+            }
+          : null,
     })
   }
 }

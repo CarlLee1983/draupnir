@@ -1,7 +1,7 @@
 // src/Modules/Contract/Application/Services/AdjustContractQuotaService.ts
 
-import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 import type { IApiKeyRepository } from '@/Modules/ApiKey/Domain/Repositories/IApiKeyRepository'
+import type { IContractRepository } from '../../Domain/Repositories/IContractRepository'
 
 export interface QuotaChangeEntry {
   keyId: string
@@ -99,9 +99,8 @@ export class AdjustContractQuotaService {
             // 尾差補足，確保總和精確等於 newCap
             newAlloc = newCap - runningSum
           } else {
-            newAlloc = sumAllocated > 0
-              ? Math.round((key.quotaAllocated / sumAllocated) * newCap)
-              : 0
+            newAlloc =
+              sumAllocated > 0 ? Math.round((key.quotaAllocated / sumAllocated) * newCap) : 0
           }
 
           runningSum += newAlloc

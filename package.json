@@ -31,6 +31,7 @@
     "lint:commits": "commitlint --from HEAD~1 --to HEAD --verbose",
     "typecheck": "tsc --noEmit",
     "lint": "biome lint src tests packages",
+    "bun:lint": "bun ./node_modules/.bin/biome lint src tests packages",
     "lint:fix": "biome lint src tests packages --fix",
     "format": "biome format --write src tests packages",
     "format:check": "biome check src tests packages",

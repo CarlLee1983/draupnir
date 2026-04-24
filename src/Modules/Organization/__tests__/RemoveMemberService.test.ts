@@ -1,21 +1,21 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Application/Services/ProvisionOrganizationDefaultsService'
 import { AppModuleRepository } from '@/Modules/AppModule/Infrastructure/Repositories/AppModuleRepository'
 import { ModuleSubscriptionRepository } from '@/Modules/AppModule/Infrastructure/Repositories/ModuleSubscriptionRepository'
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
+import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
-import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
-import { ApiKeyRepository } from '@/Modules/ApiKey/Infrastructure/Repositories/ApiKeyRepository'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { AcceptInvitationService } from '../Application/Services/AcceptInvitationService'
+import { ChangeOrgMemberRoleService } from '../Application/Services/ChangeOrgMemberRoleService'
 import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
 import { InviteMemberService } from '../Application/Services/InviteMemberService'
 import { OrgAuthorizationHelper } from '../Application/Services/OrgAuthorizationHelper'
-import { ChangeOrgMemberRoleService } from '../Application/Services/ChangeOrgMemberRoleService'
 import { RemoveMemberService } from '../Application/Services/RemoveMemberService'
 import { OrganizationInvitationRepository } from '../Infrastructure/Repositories/OrganizationInvitationRepository'
 import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
@@ -148,17 +148,21 @@ describe('RemoveMemberService', () => {
   it('移除 global admin 成員時不應降低其系統角色', async () => {
     const authRepo = new AuthRepository(db)
     // 建立一個 admin 使用者並加入組織（以 member 身份）
-    const adminResult = await new RegisterUserService(authRepo, new ScryptPasswordHasher()).execute({
-      email: 'admin@example.com',
-      password: 'StrongPass123',
-    })
+    const adminResult = await new RegisterUserService(authRepo, new ScryptPasswordHasher()).execute(
+      {
+        email: 'admin@example.com',
+        password: 'StrongPass123',
+      },
+    )
     const adminUserId = adminResult.data!.id
     await authRepo.updateRole(adminUserId, RoleType.ADMIN)
 
     // 以 invitation 讓 admin 加入組織
     const inviteService = new InviteMemberService(orgRepo, invitationRepo, orgAuth)
     const acceptService = new AcceptInvitationService(invitationRepo, memberRepo, authRepo, db)
-    const inv = await inviteService.execute(orgId, managerId, 'user', { email: 'admin@example.com' })
+    const inv = await inviteService.execute(orgId, managerId, 'user', {
+      email: 'admin@example.com',
+    })
     await acceptService.execute(adminUserId, { token: inv.data!.token as string })
 
     // 移除這位 admin

@@ -9,7 +9,7 @@ export class RedisStreamQueueAdapter implements IQueue {
   private readonly consumerName = `worker-${crypto.randomUUID().slice(0, 8)}`
   private readonly workers = new Map<
     string,
-    { handler: (payload: any) => Promise<void>; running: boolean }
+    { handler: (payload: unknown) => Promise<void>; running: boolean }
   >()
   private isPaused = false
   private isClosed = false
@@ -18,7 +18,7 @@ export class RedisStreamQueueAdapter implements IQueue {
 
   constructor(private readonly redis: IRedisService) {}
 
-  async push(name: string, payload: any, options?: JobOptions): Promise<string> {
+  async push(name: string, payload: unknown, options?: JobOptions): Promise<string> {
     const streamKey = this.getStreamKey(name)
 
     // Ensure group exists
@@ -33,7 +33,7 @@ export class RedisStreamQueueAdapter implements IQueue {
     return this.redis.xadd(streamKey, data)
   }
 
-  process(name: string, handler: (payload: any) => Promise<void>, _concurrency = 1): void {
+  process(name: string, handler: (payload: unknown) => Promise<void>, _concurrency = 1): void {
     if (this.workers.has(name)) {
       throw new Error(`Worker for task '${name}' is already registered.`)
     }
@@ -69,7 +69,7 @@ export class RedisStreamQueueAdapter implements IQueue {
           for (const [id, fields] of entries) {
             const payloadIndex = fields.indexOf('payload')
             if (payloadIndex !== -1) {
-              const payload = JSON.parse(fields[payloadIndex + 1])
+              const payload: unknown = JSON.parse(fields[payloadIndex + 1] as string)
               const worker = this.workers.get(name)
 
               if (worker) {
@@ -82,7 +82,9 @@ export class RedisStreamQueueAdapter implements IQueue {
                 } finally {
                   this.activeHandlers--
                   if (this.isClosed && this.activeHandlers === 0) {
-                    this.drainResolvers.forEach((r) => r())
+                    this.drainResolvers.forEach((r) => {
+                      r()
+                    })
                     this.drainResolvers = []
                   }
                 }

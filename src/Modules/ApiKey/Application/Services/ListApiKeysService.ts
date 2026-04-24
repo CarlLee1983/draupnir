@@ -45,7 +45,12 @@ export class ListApiKeysService {
 
       const [keys, total] = await Promise.all([
         useAssignedFilter
-          ? this.apiKeyRepository.findByOrgAndAssignedMember(orgId, filter!.assignedMemberId!, limit, offset)
+          ? this.apiKeyRepository.findByOrgAndAssignedMember(
+              orgId,
+              filter!.assignedMemberId!,
+              limit,
+              offset,
+            )
           : this.apiKeyRepository.findByOrgId(orgId, limit, offset),
         useAssignedFilter
           ? this.apiKeyRepository.countByOrgAndAssignedMember(orgId, filter!.assignedMemberId!)

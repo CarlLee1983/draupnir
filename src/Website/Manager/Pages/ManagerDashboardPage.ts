@@ -43,7 +43,9 @@ export class ManagerDashboardPage {
     return this.inertia.render(ctx, 'Manager/Dashboard/Index', {
       orgId,
       contractQuota: quotaResult.success ? (quotaResult.data?.contractQuota ?? null) : null,
-      totalAllocated: allocatedResult.success ? (allocatedResult.data?.totalAllocated ?? null) : null,
+      totalAllocated: allocatedResult.success
+        ? (allocatedResult.data?.totalAllocated ?? null)
+        : null,
       keys: listResult.success ? (listResult.data?.keys ?? []) : [],
       error: allOk ? null : { key: 'manager.dashboard.loadFailed' },
     })

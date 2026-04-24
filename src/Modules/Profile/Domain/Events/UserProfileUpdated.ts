@@ -8,9 +8,15 @@ export class UserProfileUpdated extends DomainEvent {
     super(profileId, 'profile.user_profile_updated', { profileId, userId, fields })
   }
 
-  get profileId(): string { return this.data.profileId as string }
-  get userId(): string { return this.data.userId as string }
-  get fields(): string[] { return this.data.fields as string[] }
+  get profileId(): string {
+    return this.data.profileId as string
+  }
+  get userId(): string {
+    return this.data.userId as string
+  }
+  get fields(): string[] {
+    return this.data.fields as string[]
+  }
 
   toJSON(): Record<string, unknown> {
     return {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { createRequestIdMiddleware } from '../RequestIdMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { createRequestIdMiddleware } from '../RequestIdMiddleware'
 
 const createMockContext = (opts: { requestId?: string } = {}): IHttpContext => {
   const state: Record<string, unknown> = {}
@@ -64,8 +64,9 @@ describe('RequestIdMiddleware', () => {
 
   it('response header x-request-id 保留原有 response headers', async () => {
     const ctx = createMockContext()
-    const response = await mw(ctx, async () =>
-      new Response('ok', { headers: { 'content-type': 'application/json' } }),
+    const response = await mw(
+      ctx,
+      async () => new Response('ok', { headers: { 'content-type': 'application/json' } }),
     )
     expect(response.headers.get('content-type')).toBe('application/json')
     expect(response.headers.get('x-request-id')).toBeTruthy()

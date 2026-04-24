@@ -21,9 +21,7 @@ function makeMockOrgAuth(authorized = true): OrgAuthorizationHelper {
   return {
     requireOrgMembership: mock().mockResolvedValue({ authorized }),
     requireOrgManager: mock().mockResolvedValue(
-      authorized
-        ? { authorized: true }
-        : { authorized: false, error: 'NOT_ORG_MANAGER' },
+      authorized ? { authorized: true } : { authorized: false, error: 'NOT_ORG_MANAGER' },
     ),
   } as unknown as OrgAuthorizationHelper
 }

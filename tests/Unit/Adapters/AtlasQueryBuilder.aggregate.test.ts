@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'bun:test'
+import { AtlasQueryBuilder } from '@/Shared/Infrastructure/Database/Adapters/Atlas/AtlasQueryBuilder'
 import {
   add,
   avg,
@@ -10,7 +11,6 @@ import {
   min,
   sum,
 } from '@/Shared/Infrastructure/Database/AggregateSpec'
-import { AtlasQueryBuilder } from '@/Shared/Infrastructure/Database/Adapters/Atlas/AtlasQueryBuilder'
 
 describe('AtlasQueryBuilder aggregate()', () => {
   it('compiles an AggregateSpec to SQL and executes via raw()', async () => {
@@ -70,4 +70,3 @@ describe('AtlasQueryBuilder aggregate()', () => {
     expect(rows).toEqual([{ k: 'v' }])
   })
 })
-

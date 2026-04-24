@@ -50,7 +50,7 @@ export class GravitoRedisAdapter implements IRedisService {
     consumer: string,
     streams: Record<string, string>,
     count?: number,
-    block?: number
+    block?: number,
   ): Promise<any> {
     return (this.redis as any).xreadgroup(group, consumer, streams, { count, block })
   }

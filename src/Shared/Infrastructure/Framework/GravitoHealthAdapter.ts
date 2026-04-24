@@ -4,8 +4,8 @@ import { PerformHealthCheckService } from '@/Modules/Health/Application/Services
 import { MemoryHealthCheckRepository } from '@/Modules/Health/Infrastructure/Repositories/MemoryHealthCheckRepository'
 import { SystemHealthChecker } from '@/Modules/Health/Infrastructure/Services/SystemHealthChecker'
 import { HealthController } from '@/Modules/Health/Presentation/Controllers/HealthController'
-import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
+import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { createGravitoDatabaseConnectivityCheck } from '../Database/Adapters/Atlas'
 import { GravitoCacheAdapter } from './GravitoCacheAdapter'
 import { GravitoRedisAdapter } from './GravitoRedisAdapter'
@@ -53,5 +53,7 @@ export function registerHealthWithGravito(context: IRouteContext): void {
 
   // Register routes via IModuleRouter
   context.router.get('/health', (ctx) => controller.check(ctx), { name: 'health.check' })
-  context.router.get('/health/history', (ctx) => controller.history(ctx), { name: 'health.history' })
+  context.router.get('/health/history', (ctx) => controller.history(ctx), {
+    name: 'health.history',
+  })
 }

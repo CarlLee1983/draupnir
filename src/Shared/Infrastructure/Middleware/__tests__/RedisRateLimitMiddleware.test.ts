@@ -1,21 +1,22 @@
 import { describe, expect, it, vi } from 'vitest'
-import { createRedisRateLimit } from '../RedisRateLimitMiddleware'
 import type { IRedisService } from '@/Shared/Infrastructure/IRedisService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { createRedisRateLimit } from '../RedisRateLimitMiddleware'
 
-const createMockRedis = (incrReturn: number | Error = 1): IRedisService => ({
-  ping: vi.fn(),
-  get: vi.fn(),
-  set: vi.fn(),
-  del: vi.fn(),
-  exists: vi.fn(),
-  incr: vi.fn().mockImplementation(() =>
-    incrReturn instanceof Error
-      ? Promise.reject(incrReturn)
-      : Promise.resolve(incrReturn),
-  ),
-  disconnect: vi.fn(),
-}) as unknown as IRedisService
+const createMockRedis = (incrReturn: number | Error = 1): IRedisService =>
+  ({
+    ping: vi.fn(),
+    get: vi.fn(),
+    set: vi.fn(),
+    del: vi.fn(),
+    exists: vi.fn(),
+    incr: vi
+      .fn()
+      .mockImplementation(() =>
+        incrReturn instanceof Error ? Promise.reject(incrReturn) : Promise.resolve(incrReturn),
+      ),
+    disconnect: vi.fn(),
+  }) as unknown as IRedisService
 
 const createMockContext = (ip = '1.2.3.4'): IHttpContext => {
   const state: Record<string, unknown> = {}
@@ -39,7 +40,9 @@ const createMockContext = (ip = '1.2.3.4'): IHttpContext => {
     redirect: (url: string, status = 302) =>
       new Response(null, { status, headers: { Location: url } }),
     get: <T>(key: string): T | undefined => state[key] as T,
-    set: (key: string, value: unknown) => { state[key] = value },
+    set: (key: string, value: unknown) => {
+      state[key] = value
+    },
     getCookie: () => undefined,
     setCookie: () => {},
   } as IHttpContext
@@ -97,10 +100,7 @@ describe('RedisRateLimitMiddleware', () => {
       expect.stringContaining('auth:login'),
       expect.any(Number),
     )
-    expect(redis.incr).toHaveBeenCalledWith(
-      expect.stringContaining('10.0.0.1'),
-      expect.any(Number),
-    )
+    expect(redis.incr).toHaveBeenCalledWith(expect.stringContaining('10.0.0.1'), expect.any(Number))
   })
 
   it('count 等於 max（邊界值）→ next() 執行', async () => {

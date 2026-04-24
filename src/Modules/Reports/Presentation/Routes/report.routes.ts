@@ -13,8 +13,10 @@ export const registerReportRoutes = (router: IModuleRouter, controller: ReportCo
   router.post('/v1/org/:orgId/reports', [requireOrganizationManager()], (ctx: IHttpContext) =>
     controller.store(ctx),
   )
-  router.put('/v1/org/:orgId/reports/:reportId', [requireOrganizationManager()], (ctx: IHttpContext) =>
-    controller.update(ctx),
+  router.put(
+    '/v1/org/:orgId/reports/:reportId',
+    [requireOrganizationManager()],
+    (ctx: IHttpContext) => controller.update(ctx),
   )
   router.delete(
     '/v1/org/:orgId/reports/:reportId',

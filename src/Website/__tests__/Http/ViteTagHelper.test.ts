@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'bun:test'
-import { joinPath } from '../../Http/Routing/routePath'
 import { ViteTagHelper } from '../../Http/Assets/ViteTagHelper'
+import { joinPath } from '../../Http/Routing/routePath'
 
 describe('ViteTagHelper', () => {
   const originalEnv = process.env.NODE_ENV
@@ -54,7 +54,9 @@ describe('ViteTagHelper', () => {
   })
 
   test('loadManifest returns undefined for missing file', async () => {
-    const m = await ViteTagHelper.loadManifest(joinPath(import.meta.dir, '../fixtures', 'nope.json'))
+    const m = await ViteTagHelper.loadManifest(
+      joinPath(import.meta.dir, '../fixtures', 'nope.json'),
+    )
     expect(m).toBeUndefined()
   })
 })

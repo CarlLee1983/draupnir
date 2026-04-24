@@ -13,6 +13,7 @@ import { RegisterRequest } from '@/Modules/Auth/Presentation/Requests/RegisterRe
 import { ResetPasswordRequest } from '@/Modules/Auth/Presentation/Requests/ResetPasswordRequest'
 import { VerifyDeviceRequest } from '@/Modules/Auth/Presentation/Requests/VerifyDeviceRequest'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
+import { createInMemoryRateLimit } from '@/Shared/Infrastructure/Middleware/InMemoryRateLimitMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type {
   IModuleRouter,
@@ -20,11 +21,9 @@ import type {
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
-import { createInMemoryRateLimit } from '@/Shared/Infrastructure/Middleware/InMemoryRateLimitMiddleware'
-
-import { AUTH_PAGE_KEYS } from '../keys'
-import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
 import { withInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
+import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
+import { AUTH_PAGE_KEYS } from '../keys'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -44,8 +43,16 @@ type AuthRouteDef = {
   readonly name?: string
 }
 
-const loginRateLimit = createInMemoryRateLimit({ scope: 'auth:login', max: 10, windowMs: 10 * 60 * 1000 })
-const forgotPasswordRateLimit = createInMemoryRateLimit({ scope: 'auth:forgot', max: 5, windowMs: 60 * 60 * 1000 })
+const loginRateLimit = createInMemoryRateLimit({
+  scope: 'auth:login',
+  max: 10,
+  windowMs: 10 * 60 * 1000,
+})
+const forgotPasswordRateLimit = createInMemoryRateLimit({
+  scope: 'auth:forgot',
+  max: 5,
+  windowMs: 60 * 60 * 1000,
+})
 
 const AUTH_PAGE_ROUTES: readonly AuthRouteDef[] = [
   {
@@ -188,6 +195,14 @@ export function registerAuthRoutes(
   for (const { method, path, page, action, formRequest, middlewares, name } of AUTH_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerAuthHttpRoute(router, method, path, withInertiaPageHandler(inner), formRequest, middlewares, opts)
+    registerAuthHttpRoute(
+      router,
+      method,
+      path,
+      withInertiaPageHandler(inner),
+      formRequest,
+      middlewares,
+      opts,
+    )
   }
 }

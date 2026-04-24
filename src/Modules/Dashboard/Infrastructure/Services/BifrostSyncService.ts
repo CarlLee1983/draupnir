@@ -39,19 +39,23 @@ export class BifrostSyncService {
 
   async sync(): Promise<SyncResult> {
     const cursor = await this.cursorRepo.get('bifrost_logs')
-    return this.runWithTimeout(() => this.syncInternal({
-      startTime: cursor?.lastSyncedAt ?? new Date(0).toISOString(),
-      advanceCursor: true,
-      previousCursorLogId: cursor?.lastBifrostLogId ?? undefined,
-    }))
+    return this.runWithTimeout(() =>
+      this.syncInternal({
+        startTime: cursor?.lastSyncedAt ?? new Date(0).toISOString(),
+        advanceCursor: true,
+        previousCursorLogId: cursor?.lastBifrostLogId ?? undefined,
+      }),
+    )
   }
 
   async backfill(request: BackfillSyncRequest): Promise<SyncResult> {
-    return this.runWithTimeout(() => this.syncInternal({
-      startTime: request.startTime,
-      endTime: request.endTime,
-      advanceCursor: false,
-    }))
+    return this.runWithTimeout(() =>
+      this.syncInternal({
+        startTime: request.startTime,
+        endTime: request.endTime,
+        advanceCursor: false,
+      }),
+    )
   }
 
   private async runWithTimeout(task: () => Promise<SyncResult>): Promise<SyncResult> {

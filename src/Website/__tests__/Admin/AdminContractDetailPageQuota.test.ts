@@ -1,9 +1,9 @@
 import { describe, expect, mock, test } from 'bun:test'
+import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 import { loadMessages } from '@/Shared/Infrastructure/I18n'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { AdminContractDetailPage } from '../../Admin/Pages/AdminContractDetailPage'
 import type { InertiaService } from '../../Http/Inertia/InertiaRequestHandler'
-import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 
 // Helper: 建立 store
 function makeStore(auth = { userId: 'admin-1', email: 'admin@test.com', role: 'admin' }) {

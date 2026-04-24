@@ -56,7 +56,13 @@ export interface IRedisService {
   /**
    * Redis Stream: XREADGROUP
    */
-  xreadgroup(group: string, consumer: string, streams: Record<string, string>, count?: number, block?: number): Promise<any>
+  xreadgroup(
+    group: string,
+    consumer: string,
+    streams: Record<string, string>,
+    count?: number,
+    block?: number,
+  ): Promise<any>
 
   /**
    * Redis Stream: XACK

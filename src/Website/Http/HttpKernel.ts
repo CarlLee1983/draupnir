@@ -1,25 +1,25 @@
-import type { PendingCookie } from '@/Shared/Presentation/IHttpContext'
-import { applyPendingCookies } from '@/Shared/Presentation/cookieUtils'
-import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
+import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
+import { requireOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
+import { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
 import {
   createCorsMiddleware,
   parseCorsAllowedOrigins,
 } from '@/Shared/Infrastructure/Middleware/CorsGlobalMiddleware'
-import { createSecurityHeadersMiddleware } from '@/Shared/Infrastructure/Middleware/SecurityHeadersGlobalMiddleware'
 import { createGlobalErrorMiddleware } from '@/Shared/Infrastructure/Middleware/GlobalErrorMiddleware'
+import { createInertiaFormValidationResponseMiddleware } from '@/Shared/Infrastructure/Middleware/InertiaFormValidationResponseMiddleware'
 import { createOrganizationMemberLookupCacheMiddleware } from '@/Shared/Infrastructure/Middleware/OrganizationMemberLookupCacheMiddleware'
 import { createRequestIdMiddleware } from '@/Shared/Infrastructure/Middleware/RequestIdMiddleware'
 import { createRequestLoggerMiddleware } from '@/Shared/Infrastructure/Middleware/RequestLoggerMiddleware'
-import { createBodySizeLimitMiddleware } from '@/Shared/Infrastructure/Middleware/BodySizeLimitMiddleware'
-import { createInertiaFormValidationResponseMiddleware } from '@/Shared/Infrastructure/Middleware/InertiaFormValidationResponseMiddleware'
-import { attachJwt } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
+import { createSecurityHeadersMiddleware } from '@/Shared/Infrastructure/Middleware/SecurityHeadersGlobalMiddleware'
+import { applyPendingCookies } from '@/Shared/Presentation/cookieUtils'
+import type { PendingCookie } from '@/Shared/Presentation/IHttpContext'
+import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 import { requireAdmin } from '@/Website/Admin/middleware/requireAdmin'
 import { requireManager } from '@/Website/Manager/middleware/requireManager'
 import { requireMember } from '@/Website/Member/middleware/requireMember'
-import { requireOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'
-import { attachWebCsrf } from './Security/CsrfMiddleware'
 import { injectSharedData } from './Inertia/SharedPropsBuilder'
 import { createTokenRefreshMiddleware } from './Middleware/TokenRefreshMiddleware'
+import { attachWebCsrf } from './Security/CsrfMiddleware'
 
 // ─── 內部 middleware 包裝 ──────────────────────────────────────────────────────
 
@@ -62,11 +62,7 @@ export function pendingCookiesMiddleware(): Middleware {
 // ─── HttpKernel ────────────────────────────────────────────────────────────────
 
 /** 所有 page group 共用的基底 middleware 鏈 */
-const webBase = (): Middleware[] => [
-  attachJwt(),
-  createTokenRefreshMiddleware(),
-  attachWebCsrf(),
-]
+const webBase = (): Middleware[] => [attachJwt(), createTokenRefreshMiddleware(), attachWebCsrf()]
 
 /**
  * 集中式 middleware 定義。

@@ -20,16 +20,21 @@
 import { DB } from '@gravito/atlas'
 import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
-import { OrbitPrism } from '@gravito/prism'
-import { adaptGravitoContainer, createGravitoServiceProvider, isRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { createGravitoModuleRouter } from '@/Shared/Infrastructure/Framework/GravitoModuleRouter'
+import {
+  adaptGravitoContainer,
+  createGravitoServiceProvider,
+  isRouteRegistrar,
+} from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import databaseConfig from '../config/database'
 import { buildConfig, useDatabase } from '../config/index'
+import { getOrbits } from '../config/orbits'
+import redisConfig from '../config/redis'
+import type { IQueue } from './Foundation/Infrastructure/Ports/Queue/IQueue'
+import type { IQueueRegistrar } from './Foundation/Infrastructure/Ports/Queue/IQueueRegistrar'
 import type { IJobRegistrar } from './Foundation/Infrastructure/Ports/Scheduler/IJobRegistrar'
 import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
-import type { IQueueRegistrar } from './Foundation/Infrastructure/Ports/Queue/IQueueRegistrar'
-import type { IQueue } from './Foundation/Infrastructure/Ports/Queue/IQueue'
 import { FoundationServiceProvider } from './Foundation/Infrastructure/Providers/FoundationServiceProvider'
 import { AlertsServiceProvider } from './Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
 import { ApiKeyServiceProvider } from './Modules/ApiKey/Infrastructure/Providers/ApiKeyServiceProvider'
@@ -48,9 +53,9 @@ import { ProfileServiceProvider } from './Modules/Profile/Infrastructure/Provide
 import { ReportsServiceProvider } from './Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { SdkApiServiceProvider } from './Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
 import { WebsiteServiceProvider } from './Website/bootstrap/WebsiteServiceProvider'
-import { warmInertiaService } from './Website/Http/Inertia/createInertiaRequestHandler'
-import { HttpKernel } from './Website/Http/HttpKernel'
 import { registerGlobalMiddlewares } from './Website/Http/GravitoKernelAdapter'
+import { HttpKernel } from './Website/Http/HttpKernel'
+import { warmInertiaService } from './Website/Http/Inertia/createInertiaRequestHandler'
 import { setCurrentContainer } from './wiring/CurrentContainer'
 import { setCurrentDatabaseAccess } from './wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
@@ -107,7 +112,14 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
 
   core.container.singleton('database', () => db)
 
-  await core.orbit(new OrbitPrism())
+  const orbits = getOrbits({
+    useDatabase,
+    redis: redisConfig as any,
+  })
+
+  for (const orbit of orbits) {
+    await core.orbit(orbit)
+  }
 
   const modules = [
     new HealthServiceProvider(),

@@ -1,4 +1,4 @@
-import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IMailer } from '../../../../Foundation/Infrastructure/Ports/IMailer'
@@ -13,37 +13,50 @@ import { ReportController } from '../../Presentation/Controllers/ReportControlle
 import { registerReportRoutes } from '../../Presentation/Routes/report.routes'
 import { AtlasReportRepository } from '../Repositories/AtlasReportRepository'
 
-export class ReportsServiceProvider extends ModuleServiceProvider implements IJobRegistrar, IRouteRegistrar {
+export class ReportsServiceProvider
+  extends ModuleServiceProvider
+  implements IJobRegistrar, IRouteRegistrar
+{
   private container!: IContainer
 
   protected override registerRepositories(container: IContainer): void {
     this.container = container
-    container.singleton('reportRepository', (c: IContainer) =>
-      new AtlasReportRepository(c.make('database') as IDatabaseAccess)
+    container.singleton(
+      'reportRepository',
+      (c: IContainer) => new AtlasReportRepository(c.make('database') as IDatabaseAccess),
     )
   }
 
   protected override registerInfraServices(container: IContainer): void {
     container.singleton('generatePdfService', () => new GeneratePdfService())
-    container.singleton('sendReportEmailService', (c: IContainer) =>
-      new SendReportEmailService(c.make('mailer') as IMailer)
+    container.singleton(
+      'sendReportEmailService',
+      (c: IContainer) => new SendReportEmailService(c.make('mailer') as IMailer),
     )
   }
 
   protected override registerApplicationServices(container: IContainer): void {
-    container.singleton('scheduleReportService', (c: IContainer) => new ScheduleReportService(
-      c.make('reportRepository') as IReportRepository,
-      c.make('generatePdfService') as GeneratePdfService,
-      c.make('sendReportEmailService') as SendReportEmailService,
-      c.make('scheduler') as IScheduler,
-    ))
+    container.singleton(
+      'scheduleReportService',
+      (c: IContainer) =>
+        new ScheduleReportService(
+          c.make('reportRepository') as IReportRepository,
+          c.make('generatePdfService') as GeneratePdfService,
+          c.make('sendReportEmailService') as SendReportEmailService,
+          c.make('scheduler') as IScheduler,
+        ),
+    )
   }
 
   protected override registerControllers(container: IContainer): void {
-    container.bind('reportController', (c: IContainer) => new ReportController(
-      c.make('reportRepository') as IReportRepository,
-      c.make('scheduleReportService') as ScheduleReportService,
-    ))
+    container.bind(
+      'reportController',
+      (c: IContainer) =>
+        new ReportController(
+          c.make('reportRepository') as IReportRepository,
+          c.make('scheduleReportService') as ScheduleReportService,
+        ),
+    )
   }
 
   registerRoutes(context: IRouteContext): void {

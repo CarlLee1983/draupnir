@@ -8,7 +8,10 @@
  * - Map results to HTTP responses
  */
 
-import { AuthMiddleware, extractRawAuthToken } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import {
+  AuthMiddleware,
+  extractRawAuthToken,
+} from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { ListSessionsService } from '../../Application/Services/ListSessionsService'
 import type { LoginUserService } from '../../Application/Services/LoginUserService'

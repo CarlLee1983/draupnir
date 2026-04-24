@@ -121,7 +121,7 @@ describe('attachWebCsrf — Inertia CSRF failure behaviour', () => {
     const ctx = createCtx({ getMethod: () => 'POST' })
     const res = await mw(ctx, async () => new Response('should-not-run'))
     expect(res.status).toBe(419)
-    const body = await res.json() as { error: string }
+    const body = (await res.json()) as { error: string }
     expect(body.error).toBe('CSRF_MISMATCH')
   })
 })

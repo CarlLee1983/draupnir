@@ -16,11 +16,10 @@ import type {
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
-
+import { withMemberInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
 import type { MemberPageBindingKey } from '../keys'
 import { MEMBER_PAGE_KEYS } from '../keys'
-import { withMemberInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
 
 type InertiaHandler = (ctx: IHttpContext) => Promise<Response>
 
@@ -152,6 +151,13 @@ export function registerMemberRoutes(
   for (const { method, path, page, action, name, formRequest } of MEMBER_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerMemberHttpRoute(router, method, path, withMemberInertiaPageHandler(inner), opts, formRequest)
+    registerMemberHttpRoute(
+      router,
+      method,
+      path,
+      withMemberInertiaPageHandler(inner),
+      opts,
+      formRequest,
+    )
   }
 }

@@ -105,7 +105,8 @@ export const enMessages = {
   'ui.charts.usageLine.legendRequests': 'Requests',
   'ui.charts.usageLine.legendTokens': 'Token usage',
   'ui.charts.demoBadge': 'Demo Data',
-  'ui.charts.demoBanner': 'Currently showing demo data. No synced records found; simulated trends generated for reference.',
+  'ui.charts.demoBanner':
+    'Currently showing demo data. No synced records found; simulated trends generated for reference.',
   // Auth
   'ui.auth.login.title': 'Login',
   'ui.auth.login.description': 'Enter your account and password',
@@ -393,7 +394,8 @@ export const enMessages = {
   'ui.member.usage.heading': 'Usage Analytics',
   'ui.member.usage.empty': 'No usage data yet',
   'ui.member.usage.trendTitle': 'Usage Trend',
-  'ui.member.usage.trendDescription': 'Trend analysis of API requests and token consumption for the organization during the selected period.',
+  'ui.member.usage.trendDescription':
+    'Trend analysis of API requests and token consumption for the organization during the selected period.',
   'ui.member.usage.totalRequests': 'Total Requests',
   'ui.member.usage.totalTokens': 'Total Tokens',
   'ui.member.contracts.title': 'Quota',
@@ -590,7 +592,8 @@ export const enMessages = {
   'ui.admin.modules.cardTitle': 'Module List',
   'ui.admin.modules.cardDescription': 'Currently registered system modules.',
   'ui.admin.organizations.title': 'Organization Management',
-  'ui.admin.organizations.pageDescription': 'Manage all organizations and their related information in the system.',
+  'ui.admin.organizations.pageDescription':
+    'Manage all organizations and their related information in the system.',
   'ui.admin.organizations.searchPlaceholder': 'Search organizations…',
   'ui.admin.organizations.detailTitle': 'Organization Detail',
   'ui.admin.organizations.cardTitle': 'Organization List',
@@ -629,7 +632,8 @@ export const enMessages = {
   'ui.admin.dashboard.metricContracts': 'Total Contracts',
   'ui.admin.dashboard.metricApiKeys': 'API Keys',
   'ui.admin.dashboard.usageTrendTitle': 'System-wide Usage Trend',
-  'ui.admin.dashboard.usageTrendDescription': 'Aggregated request volume and token consumption analysis across all organizations and contracts.',
+  'ui.admin.dashboard.usageTrendDescription':
+    'Aggregated request volume and token consumption analysis across all organizations and contracts.',
   'ui.admin.dashboard.usageWindowDays': '{days}d',
   'ui.admin.dashboard.usageTrendEmpty': 'No synced usage for this window (last {days} days).',
   'ui.admin.dashboard.subtitle': 'System health overview and key metrics.',

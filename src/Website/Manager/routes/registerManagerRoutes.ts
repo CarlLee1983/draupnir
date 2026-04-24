@@ -3,8 +3,8 @@
  * 個別路由於 Phase F–K 填入。
  */
 import type { FormRequestClass } from '@gravito/core'
-import { ChangePasswordRequest } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
 import { ManagerCreateApiKeyRequest } from '@/Modules/ApiKey/Presentation/Requests/ManagerCreateApiKeyRequest'
+import { ChangePasswordRequest } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
 import { InviteMemberRequest } from '@/Modules/Organization/Presentation/Requests/InviteMemberRequest'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -13,9 +13,8 @@ import type {
   ModuleRouteOptions,
   RouteHandler,
 } from '@/Shared/Presentation/IModuleRouter'
-
-import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
 import { withManagerInertiaPageHandler } from '@/Website/Http/Inertia/withInertiaPage'
+import { bindPageAction } from '@/Website/Http/Routing/bindPageAction'
 import type { ManagerPageBindingKey } from '../keys'
 import { MANAGER_PAGE_KEYS } from '../keys'
 
@@ -190,6 +189,13 @@ export function registerManagerRoutes(
   for (const { method, path, page, action, name, formRequest } of MANAGER_PAGE_ROUTES) {
     const inner = bindPageAction(container, page, action) as InertiaHandler
     const opts = name !== undefined ? { name } : undefined
-    registerManagerHttpRoute(router, method, path, withManagerInertiaPageHandler(inner), opts, formRequest)
+    registerManagerHttpRoute(
+      router,
+      method,
+      path,
+      withManagerInertiaPageHandler(inner),
+      opts,
+      formRequest,
+    )
   }
 }

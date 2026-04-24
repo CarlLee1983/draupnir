@@ -12,10 +12,18 @@ describe('ModuleServiceProvider', () => {
   it('register() 以固定順序呼叫四個 hooks', () => {
     const callOrder: string[] = []
     class TestProvider extends ModuleServiceProvider {
-      protected override registerRepositories() { callOrder.push('repos') }
-      protected override registerInfraServices() { callOrder.push('infra') }
-      protected override registerApplicationServices() { callOrder.push('services') }
-      protected override registerControllers() { callOrder.push('controllers') }
+      protected override registerRepositories() {
+        callOrder.push('repos')
+      }
+      protected override registerInfraServices() {
+        callOrder.push('infra')
+      }
+      protected override registerApplicationServices() {
+        callOrder.push('services')
+      }
+      protected override registerControllers() {
+        callOrder.push('controllers')
+      }
     }
     const provider = new TestProvider()
     provider.register(mockContainer())

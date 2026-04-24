@@ -1,7 +1,5 @@
 // src/Modules/Profile/index.ts
 // Domain Events
-export { UserProfileCreated } from './Domain/Events/UserProfileCreated'
-export { UserProfileUpdated } from './Domain/Events/UserProfileUpdated'
 
 // Application
 export type {
@@ -13,6 +11,8 @@ export { GetProfileService } from './Application/Services/GetProfileService'
 export { UpdateProfileService } from './Application/Services/UpdateProfileService'
 export type { UpdateProfileFields } from './Domain/Aggregates/UserProfile'
 export { UserProfile } from './Domain/Aggregates/UserProfile'
+export { UserProfileCreated } from './Domain/Events/UserProfileCreated'
+export { UserProfileUpdated } from './Domain/Events/UserProfileUpdated'
 export type {
   IUserProfileRepository,
   UserProfileFilters,

@@ -64,16 +64,17 @@ export class ApplyUsageChargesService {
         }
       }
 
-      const rows: UsageRecordRow[] = (await query.orderBy('occurred_at', 'ASC').select()).map((row) => ({
-        id: String(row.id),
-        bifrost_log_id:
-          typeof row.bifrost_log_id === 'string' ? row.bifrost_log_id : undefined,
-        credit_cost:
-          typeof row.credit_cost === 'number' || typeof row.credit_cost === 'string'
-            ? row.credit_cost
-            : '0',
-        occurred_at: String(row.occurred_at),
-      }))
+      const rows: UsageRecordRow[] = (await query.orderBy('occurred_at', 'ASC').select()).map(
+        (row) => ({
+          id: String(row.id),
+          bifrost_log_id: typeof row.bifrost_log_id === 'string' ? row.bifrost_log_id : undefined,
+          credit_cost:
+            typeof row.credit_cost === 'number' || typeof row.credit_cost === 'string'
+              ? row.credit_cost
+              : '0',
+          occurred_at: String(row.occurred_at),
+        }),
+      )
 
       for (const row of rows) {
         if (chargedUsageIds.has(row.id)) {

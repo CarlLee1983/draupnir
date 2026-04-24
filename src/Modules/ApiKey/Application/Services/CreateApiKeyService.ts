@@ -34,9 +34,9 @@ import type { CreateVirtualKeyOptions, IBifrostKeySync } from '../Ports/IBifrost
  * @param request - Incoming create payload; reads `budgetMaxLimit` / `budgetResetPeriod`
  * @returns Either gateway-ready `CreateVirtualKeyOptions`, or structured validation errors (`BUDGET_*` codes)
  */
-function parseBudgetForCreate(request: CreateApiKeyRequest):
-  | { ok: true; options?: CreateVirtualKeyOptions }
-  | { ok: false; error: string; message: string } {
+function parseBudgetForCreate(
+  request: CreateApiKeyRequest,
+): { ok: true; options?: CreateVirtualKeyOptions } | { ok: false; error: string; message: string } {
   const hasLimit = request.budgetMaxLimit != null
   const hasPeriod = request.budgetResetPeriod != null
   if (!hasLimit && !hasPeriod) {

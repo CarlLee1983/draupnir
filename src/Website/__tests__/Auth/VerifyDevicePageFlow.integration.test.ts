@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { AuthorizeDeviceService } from '@/Modules/CliApi/Application/Services/AuthorizeDeviceService'
-import { PAGE_CONTAINER_KEYS } from '../../Http/Inertia/createInertiaRequestHandler'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { VerifyDevicePage } from '../../Auth/Pages/VerifyDevicePage'
-import type { InertiaService } from '../../Http/Inertia/InertiaRequestHandler'
-import { AUTH_PAGE_KEYS } from '../../Auth/keys'
 import { registerAuthBindings as registerAuthPageBindings } from '../../Auth/bindings/registerAuthBindings'
+import { AUTH_PAGE_KEYS } from '../../Auth/keys'
+import { VerifyDevicePage } from '../../Auth/Pages/VerifyDevicePage'
+import { PAGE_CONTAINER_KEYS } from '../../Http/Inertia/createInertiaRequestHandler'
+import type { InertiaService } from '../../Http/Inertia/InertiaRequestHandler'
 
 describe('VerifyDevicePage integration', () => {
   let mockInertia: InertiaService

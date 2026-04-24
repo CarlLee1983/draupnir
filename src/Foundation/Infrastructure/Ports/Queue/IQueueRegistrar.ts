@@ -1,4 +1,4 @@
-import type { IQueue } from './IQueue';
+import type { IQueue } from './IQueue'
 
 /**
  * Side-interface for ServiceProviders to register their queue consumers.
@@ -9,5 +9,5 @@ export interface IQueueRegistrar {
    *
    * @param queue - The centralized queue service.
    */
-  registerQueueHandlers(queue: IQueue): void | Promise<void>;
+  registerQueueHandlers(queue: IQueue): void | Promise<void>
 }

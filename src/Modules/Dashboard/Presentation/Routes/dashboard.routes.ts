@@ -29,7 +29,10 @@ export function registerDashboardRoutes(
   router.get('/api/organizations/:orgId/dashboard/per-key-cost', moduleAuth, (ctx) =>
     controller.perKeyCost(ctx),
   )
-  router.post('/api/dashboard/bifrost-sync/backfill', adminAuth, BackfillBifrostSyncRequest, (ctx) =>
-    controller.backfillSync(ctx),
+  router.post(
+    '/api/dashboard/bifrost-sync/backfill',
+    adminAuth,
+    BackfillBifrostSyncRequest,
+    (ctx) => controller.backfillSync(ctx),
   )
 }

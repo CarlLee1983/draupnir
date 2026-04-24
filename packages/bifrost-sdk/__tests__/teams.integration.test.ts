@@ -53,9 +53,11 @@ describe.skipIf(!hasEnv)('Bifrost Teams 整合測試（模擬組織建立）', (
   })
 
   test('getTeam 以 team_id 取回單一 Team', async () => {
-    expect(createdTeamId).toBeTruthy()
-    const team = await client.getTeam(createdTeamId!)
-    expect(team.id).toBe(createdTeamId!)
+    if (!createdTeamId) {
+      throw new Error('expected createdTeamId from prior test')
+    }
+    const team = await client.getTeam(createdTeamId)
+    expect(team.id).toBe(createdTeamId)
     expect(team.name).toBe(orgId)
   })
 
@@ -74,12 +76,14 @@ describe.skipIf(!hasEnv)('Bifrost Teams 整合測試（模擬組織建立）', (
   })
 
   test('建立 virtual key 時附帶 team_id 可綁定到該 Team', async () => {
-    expect(createdTeamId).toBeTruthy()
+    if (!createdTeamId) {
+      throw new Error('expected createdTeamId from prior test')
+    }
     // 模擬實際 flow：組織已完成 provisioning → ApiKeyBifrostSync 建立 virtual key
     // 並帶入 org.gatewayTeamId 作為 team_id。
     const vk = await client.createVirtualKey({
       name: `it-key-${orgId}`,
-      team_id: createdTeamId!,
+      team_id: createdTeamId,
       key_ids: ['*'],
     })
     try {
@@ -94,8 +98,10 @@ describe.skipIf(!hasEnv)('Bifrost Teams 整合測試（模擬組織建立）', (
   })
 
   test('deleteTeam 後再 list 應找不到該 Team', async () => {
-    expect(createdTeamId).toBeTruthy()
-    await client.deleteTeam(createdTeamId!)
+    if (!createdTeamId) {
+      throw new Error('expected createdTeamId from prior test')
+    }
+    await client.deleteTeam(createdTeamId)
 
     const teams = await client.listTeams()
     const match = teams.find((t) => t.id === createdTeamId)

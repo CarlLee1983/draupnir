@@ -10,13 +10,17 @@ const makeHook = (name: string, impl?: () => Promise<void>): IShutdownHook => ({
 describe('GracefulShutdown', () => {
   it('execute() 依序呼叫所有 hook', async () => {
     const order: string[] = []
-    const a = makeHook('A', async () => { order.push('A') })
-    const b = makeHook('B', async () => { order.push('B') })
+    const a = makeHook('A', async () => {
+      order.push('A')
+    })
+    const b = makeHook('B', async () => {
+      order.push('B')
+    })
 
     const shutdown = new GracefulShutdown(5000)
     shutdown.register(a, b)
 
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any)
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as typeof process.exit)
     await shutdown.execute('SIGTERM')
 
     expect(order).toEqual(['A', 'B'])
@@ -26,13 +30,17 @@ describe('GracefulShutdown', () => {
 
   it('單一 hook 失敗不中斷後續 hook', async () => {
     const order: string[] = []
-    const bad = makeHook('BAD', async () => { throw new Error('boom') })
-    const good = makeHook('GOOD', async () => { order.push('GOOD') })
+    const bad = makeHook('BAD', async () => {
+      throw new Error('boom')
+    })
+    const good = makeHook('GOOD', async () => {
+      order.push('GOOD')
+    })
 
     const shutdown = new GracefulShutdown(5000)
     shutdown.register(bad, good)
 
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any)
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as typeof process.exit)
     await shutdown.execute('SIGTERM')
 
     expect(order).toEqual(['GOOD'])
@@ -43,12 +51,14 @@ describe('GracefulShutdown', () => {
   it('hook 超時時不等待，繼續執行下一個 hook', async () => {
     const order: string[] = []
     const slow = makeHook('SLOW', () => new Promise(() => {})) // 永不 resolve
-    const fast = makeHook('FAST', async () => { order.push('FAST') })
+    const fast = makeHook('FAST', async () => {
+      order.push('FAST')
+    })
 
     const shutdown = new GracefulShutdown(50) // 50ms timeout
     shutdown.register(slow, fast)
 
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as any)
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation((() => {}) as typeof process.exit)
     await shutdown.execute('SIGTERM')
 
     expect(order).toEqual(['FAST'])

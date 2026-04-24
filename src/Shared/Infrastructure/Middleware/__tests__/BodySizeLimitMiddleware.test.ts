@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { createBodySizeLimitMiddleware } from '../BodySizeLimitMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
+import { createBodySizeLimitMiddleware } from '../BodySizeLimitMiddleware'
 
-const createMockContext = (opts: {
-  headers?: Record<string, string | undefined>
-  bodyText?: string
-} = {}): IHttpContext => {
+const createMockContext = (
+  opts: { headers?: Record<string, string | undefined>; bodyText?: string } = {},
+): IHttpContext => {
   const state: Record<string, unknown> = {}
   const headers = opts.headers ?? {}
   const bodyText = opts.bodyText ?? ''
@@ -26,7 +25,9 @@ const createMockContext = (opts: {
     redirect: (url: string, status = 302) =>
       new Response(null, { status, headers: { Location: url } }),
     get: <T>(key: string): T | undefined => state[key] as T,
-    set: (key: string, value: unknown) => { state[key] = value },
+    set: (key: string, value: unknown) => {
+      state[key] = value
+    },
     getCookie: () => undefined,
     setCookie: () => {},
   } as IHttpContext
@@ -131,7 +132,7 @@ describe('BodySizeLimitMiddleware', () => {
       const limit = 10
       const mw = createBodySizeLimitMiddleware(limit)
       // 中文字符「你」佔 3 bytes
-      const body = '你你'  // 6 bytes
+      const body = '你你' // 6 bytes
       const ctx = createMockContext({ bodyText: body })
       const response = await mw(ctx, async () => new Response('ok', { status: 200 }))
       expect(response.status).toBe(200)

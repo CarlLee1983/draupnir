@@ -1,5 +1,5 @@
-import type { IShutdownHook } from '../IShutdownHook'
 import type { IQueue } from '../../Ports/Queue/IQueue'
+import type { IShutdownHook } from '../IShutdownHook'
 
 /**
  * Message Queue drain hook.

@@ -1,5 +1,5 @@
-import type { IShutdownHook } from '../IShutdownHook'
 import type { IScheduler } from '@/Foundation/Infrastructure/Ports/Scheduler/IScheduler'
+import type { IShutdownHook } from '../IShutdownHook'
 
 export class SchedulerShutdownHook implements IShutdownHook {
   readonly name = 'Scheduler'

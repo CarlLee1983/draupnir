@@ -1,5 +1,5 @@
-import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 import type { IRedisService } from '@/Shared/Infrastructure/IRedisService'
+import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 import type { RateLimitConfig } from './InMemoryRateLimitMiddleware'
 
 const RATE_LIMITED_BODY = JSON.stringify({

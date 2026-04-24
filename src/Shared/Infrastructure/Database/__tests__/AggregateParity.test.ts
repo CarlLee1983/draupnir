@@ -4,9 +4,9 @@ import { drizzle } from 'drizzle-orm/libsql'
 import type { IDatabaseAccess, IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
 import * as config from '../Adapters/Drizzle/config'
 import { createDrizzleDatabaseAccess } from '../Adapters/Drizzle/DrizzleDatabaseAdapter'
-import * as schema from '../schema'
 import { MemoryDatabaseAccess } from '../Adapters/Memory/MemoryDatabaseAccess'
 import { type AggregateSpec, add, avg, coalesce, count, dateTrunc, sum } from '../AggregateSpec'
+import * as schema from '../schema'
 
 const seedRows = [
   {

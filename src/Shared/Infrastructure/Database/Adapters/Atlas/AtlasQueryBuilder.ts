@@ -13,12 +13,12 @@ import type {
 } from '@/Shared/Infrastructure/Database/AggregateSpec'
 import type { IQueryBuilder } from '@/Shared/Infrastructure/IDatabaseAccess'
 
-let dbInstance: any = null;
+let dbInstance: any = null
 async function getDB(): Promise<any> {
   if (!dbInstance) {
-    dbInstance = (await import('@gravito/atlas')).DB;
+    dbInstance = (await import('@gravito/atlas')).DB
   }
-  return dbInstance;
+  return dbInstance
 }
 
 /**

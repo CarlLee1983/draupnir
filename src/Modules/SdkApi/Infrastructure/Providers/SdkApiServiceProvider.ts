@@ -1,49 +1,61 @@
-import { type IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
-import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
-import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import type { BifrostClientConfig } from '@draupnir/bifrost-sdk'
 import type { ILLMGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway'
 import type { IAppApiKeyRepository } from '@/Modules/AppApiKey/Domain/Repositories/IAppApiKeyRepository'
 import type { ICreditAccountRepository } from '@/Modules/Credit/Domain/Repositories/ICreditAccountRepository'
 import type { IKeyHashingService } from '@/Shared/Domain/Ports/IKeyHashingService'
+import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
+import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { AuthenticateApp } from '../../Application/UseCases/AuthenticateApp'
 import { ProxyModelCall } from '../../Application/UseCases/ProxyModelCall'
 import { QueryBalance } from '../../Application/UseCases/QueryBalance'
 import { QueryUsage } from '../../Application/UseCases/QueryUsage'
-import { AppAuthMiddleware } from '../Middleware/AppAuthMiddleware'
 import { SdkApiController } from '../../Presentation/Controllers/SdkApiController'
 import { registerSdkApiRoutes } from '../../Presentation/Routes/sdkApi.routes'
+import { AppAuthMiddleware } from '../Middleware/AppAuthMiddleware'
 
 export class SdkApiServiceProvider extends ModuleServiceProvider implements IRouteRegistrar {
   protected override registerInfraServices(container: IContainer): void {
-    container.singleton('appAuthMiddleware', (c: IContainer) =>
-      new AppAuthMiddleware(c.make('authenticateApp') as AuthenticateApp)
+    container.singleton(
+      'appAuthMiddleware',
+      (c: IContainer) => new AppAuthMiddleware(c.make('authenticateApp') as AuthenticateApp),
     )
   }
 
   protected override registerApplicationServices(container: IContainer): void {
-    container.singleton('authenticateApp', (c: IContainer) => new AuthenticateApp(
-      c.make('appApiKeyRepository') as IAppApiKeyRepository,
-      c.make('keyHashingService') as IKeyHashingService,
-    ))
+    container.singleton(
+      'authenticateApp',
+      (c: IContainer) =>
+        new AuthenticateApp(
+          c.make('appApiKeyRepository') as IAppApiKeyRepository,
+          c.make('keyHashingService') as IKeyHashingService,
+        ),
+    )
     container.bind('proxyModelCall', (c: IContainer) => {
       const config = c.make('bifrostConfig') as BifrostClientConfig
       return new ProxyModelCall(config.proxyBaseUrl)
     })
-    container.bind('queryUsage', (c: IContainer) =>
-      new QueryUsage(c.make('llmGatewayClient') as ILLMGatewayClient)
+    container.bind(
+      'queryUsage',
+      (c: IContainer) => new QueryUsage(c.make('llmGatewayClient') as ILLMGatewayClient),
     )
-    container.bind('queryBalance', (c: IContainer) =>
-      new QueryBalance(c.make('creditAccountRepository') as ICreditAccountRepository)
+    container.bind(
+      'queryBalance',
+      (c: IContainer) =>
+        new QueryBalance(c.make('creditAccountRepository') as ICreditAccountRepository),
     )
   }
 
   protected override registerControllers(container: IContainer): void {
-    container.bind('sdkApiController', (c: IContainer) => new SdkApiController(
-      c.make('proxyModelCall') as ProxyModelCall,
-      c.make('queryUsage') as QueryUsage,
-      c.make('queryBalance') as QueryBalance,
-    ))
+    container.bind(
+      'sdkApiController',
+      (c: IContainer) =>
+        new SdkApiController(
+          c.make('proxyModelCall') as ProxyModelCall,
+          c.make('queryUsage') as QueryUsage,
+          c.make('queryBalance') as QueryBalance,
+        ),
+    )
   }
 
   registerRoutes(context: IRouteContext): void {

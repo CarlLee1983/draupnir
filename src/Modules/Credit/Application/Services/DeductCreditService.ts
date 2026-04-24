@@ -76,15 +76,14 @@ export class DeductCreditService {
   }
 }
 
-function isUsageDeductionDuplicateError(
-  error: unknown,
-  request: DeductCreditRequest,
-): boolean {
+function isUsageDeductionDuplicateError(error: unknown, request: DeductCreditRequest): boolean {
   if (request.referenceType !== 'usage_record' || !request.referenceId) {
     return false
   }
 
   const message = error instanceof Error ? error.message : String(error)
-  return message.includes('uniq_credit_usage_deduction')
-    || (message.includes('UNIQUE constraint failed') && message.includes('credit_transactions'))
+  return (
+    message.includes('uniq_credit_usage_deduction') ||
+    (message.includes('UNIQUE constraint failed') && message.includes('credit_transactions'))
+  )
 }

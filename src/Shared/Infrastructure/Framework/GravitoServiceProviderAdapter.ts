@@ -6,8 +6,8 @@
  */
 
 import { type Container as GravitoContainer, type PlanetCore, ServiceProvider } from '@gravito/core'
-import type { IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
+import type { IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 
 /**
  * 將 Gravito 的 Container 適配為框架無關的 IContainer

@@ -59,7 +59,8 @@ describe('injectSharedData', () => {
 
   test('puts csrfToken on inertia:shared from XSRF-TOKEN cookie when ctx has no csrfToken', () => {
     const ctx = createMockContext({
-      getCookie: (name: string) => (name === 'XSRF-TOKEN' ? encodeURIComponent('cookie-val') : undefined),
+      getCookie: (name: string) =>
+        name === 'XSRF-TOKEN' ? encodeURIComponent('cookie-val') : undefined,
     })
     injectSharedData(ctx)
     const shared = ctx.get('inertia:shared') as { csrfToken: string }

@@ -16,8 +16,8 @@ import { defineConfig, PlanetCore } from '@gravito/core'
 import { SchemaCache, ZodValidator } from '@gravito/impulse'
 import { OrbitPrism } from '@gravito/prism'
 import { buildConfig } from '../config/index'
-import { createGravitoServiceProvider } from '../src/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import { FoundationServiceProvider } from '../src/Foundation/Infrastructure/Providers/FoundationServiceProvider'
+import { AlertsServiceProvider } from '../src/Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
 import { ApiKeyServiceProvider } from '../src/Modules/ApiKey/Infrastructure/Providers/ApiKeyServiceProvider'
 import { AppApiKeyServiceProvider } from '../src/Modules/AppApiKey'
 import { AppModuleServiceProvider } from '../src/Modules/AppModule/Infrastructure/Providers/AppModuleServiceProvider'
@@ -26,16 +26,16 @@ import { CliApiServiceProvider } from '../src/Modules/CliApi/Infrastructure/Prov
 import { ContractServiceProvider } from '../src/Modules/Contract/Infrastructure/Providers/ContractServiceProvider'
 import { CreditServiceProvider } from '../src/Modules/Credit/Infrastructure/Providers/CreditServiceProvider'
 import { DashboardServiceProvider } from '../src/Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
-import { AlertsServiceProvider } from '../src/Modules/Alerts/Infrastructure/Providers/AlertsServiceProvider'
-import { ReportsServiceProvider } from '../src/Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { DevPortalServiceProvider } from '../src/Modules/DevPortal/Infrastructure/Providers/DevPortalServiceProvider'
 import { HealthServiceProvider } from '../src/Modules/Health/Infrastructure/Providers/HealthServiceProvider'
 import { OrganizationServiceProvider } from '../src/Modules/Organization/Infrastructure/Providers/OrganizationServiceProvider'
 import { ProfileServiceProvider } from '../src/Modules/Profile/Infrastructure/Providers/ProfileServiceProvider'
+import { ReportsServiceProvider } from '../src/Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
 import { SdkApiServiceProvider } from '../src/Modules/SdkApi/Infrastructure/Providers/SdkApiServiceProvider'
-import { PagesServiceProvider } from '../src/Pages/Infrastructure/Providers/PagesServiceProvider'
-import { joinPath } from '../src/Pages/routing/pathUtils'
-import { warmInertiaService } from '../src/Pages/routing/inertiaFactory'
+import { createGravitoServiceProvider } from '../src/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
+import { WebsiteServiceProvider } from '../src/Website/bootstrap/WebsiteServiceProvider'
+import { warmInertiaService } from '../src/Website/Http/Inertia/createInertiaRequestHandler'
+import { joinPath } from '../src/Website/Http/Routing/routePath'
 import { setCurrentDatabaseAccess } from '../src/wiring/CurrentDatabaseAccess'
 import { DatabaseAccessBuilder } from '../src/wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from '../src/wiring/RepositoryFactory'
@@ -49,8 +49,10 @@ interface AuditFailure {
   message: string
 }
 
-const REGISTER_PATTERN = /\b(?:container|core\.container)\.(?:bind|singleton|scoped|instance)\(\s*['"`]([^'"`]+)['"`]/g
-const INLINE_PATTERN = /\b(?:container|core\.container)\.singletonInline\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]/g
+const REGISTER_PATTERN =
+  /\b(?:container|core\.container)\.(?:bind|singleton|scoped|instance)\(\s*['"`]([^'"`]+)['"`]/g
+const INLINE_PATTERN =
+  /\b(?:container|core\.container)\.singletonInline\(\s*['"`]([^'"`]+)['"`]\s*,\s*['"`]([^'"`]+)['"`]/g
 const SKIP_DIRS = new Set(['__tests__', 'tests', 'dist', 'node_modules', '.planning'])
 
 function walkTsFiles(rootDir: string): string[] {
@@ -72,9 +74,13 @@ function isBindingSource(file: string): boolean {
   const normalized = file.replaceAll('\\', '/')
   return (
     normalized.endsWith('/src/bootstrap.ts') ||
-    (normalized.includes('/src/Modules/') && normalized.includes('/Infrastructure/Providers/') && normalized.endsWith('ServiceProvider.ts')) ||
-    (normalized.includes('/src/Pages/Infrastructure/Providers/') && normalized.endsWith('ServiceProvider.ts')) ||
-    (normalized.includes('/src/Pages/routing/') && normalized.includes('register') && normalized.endsWith('Bindings.ts'))
+    (normalized.includes('/src/Modules/') &&
+      normalized.includes('/Infrastructure/Providers/') &&
+      normalized.endsWith('ServiceProvider.ts')) ||
+    (normalized.includes('/src/Website/bootstrap/') && normalized.endsWith('ServiceProvider.ts')) ||
+    (normalized.includes('/src/Website/bootstrap/') &&
+      normalized.includes('register') &&
+      normalized.endsWith('Bindings.ts'))
   )
 }
 
@@ -106,7 +112,9 @@ function collectRuntimeTokens(container: unknown): string[] {
 function classifyFailure(error: unknown): FailureCategory {
   const message = error instanceof Error ? error.message : String(error)
   if (/circular/i.test(message)) return 'circular'
-  if (/not found|not bound|unknown service|unknown token|missing binding|no binding/i.test(message)) {
+  if (
+    /not found|not bound|unknown service|unknown token|missing binding|no binding/i.test(message)
+  ) {
     return 'missing'
   }
   return 'factory-failed'
@@ -149,7 +157,7 @@ async function main(): Promise<void> {
     new DevPortalServiceProvider(),
     new SdkApiServiceProvider(),
     new CliApiServiceProvider(),
-    new PagesServiceProvider(),
+    new WebsiteServiceProvider(),
   ]
 
   for (const module of modules) {

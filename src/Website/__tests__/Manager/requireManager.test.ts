@@ -2,7 +2,10 @@ import { describe, expect, test } from 'bun:test'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import { requireManager } from '../../Manager/middleware/requireManager'
 
-function makeCtx(auth: unknown, redirects: { calls: { url: string; status?: number }[] }): IHttpContext {
+function makeCtx(
+  auth: unknown,
+  redirects: { calls: { url: string; status?: number }[] },
+): IHttpContext {
   const store = new Map<string, unknown>()
   if (auth) store.set('auth', auth)
   return {

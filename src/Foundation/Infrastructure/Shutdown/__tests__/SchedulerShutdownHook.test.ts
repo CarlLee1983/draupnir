@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
-import { SchedulerShutdownHook } from '../hooks/SchedulerShutdownHook'
 import type { IScheduler } from '@/Foundation/Infrastructure/Ports/Scheduler/IScheduler'
+import { SchedulerShutdownHook } from '../hooks/SchedulerShutdownHook'
 
 const makeScheduler = (): IScheduler => ({
   schedule: vi.fn(),

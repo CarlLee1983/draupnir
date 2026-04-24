@@ -1,7 +1,7 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import type { Organization } from '../../Domain/Aggregates/Organization'
 import type { IOrganizationRepository } from '../../Domain/Repositories/IOrganizationRepository'
 import { OrganizationMapper } from '../Mappers/OrganizationMapper'
-import type { Organization } from '../../Domain/Aggregates/Organization'
 
 export class OrganizationRepository implements IOrganizationRepository {
   constructor(private readonly db: IDatabaseAccess) {}

@@ -20,9 +20,7 @@ export function setCurrentContainer(container: IContainer): void {
  */
 export function getCurrentContainer(): IContainer {
   if (current === null) {
-    throw new Error(
-      'IContainer 尚未設定。請在 bootstrap 中呼叫 setCurrentContainer(container)。',
-    )
+    throw new Error('IContainer 尚未設定。請在 bootstrap 中呼叫 setCurrentContainer(container)。')
   }
   return current
 }

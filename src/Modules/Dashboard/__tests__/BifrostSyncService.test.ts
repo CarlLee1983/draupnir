@@ -63,12 +63,12 @@ function makeCursorRepo(): {
     repo: {
       get: async (cursorType: string) =>
         stored
-           ? {
-               cursorType,
-               lastSyncedAt: stored.lastSyncedAt,
-               lastBifrostLogId: stored.lastBifrostLogId ?? null,
-             }
-           : null,
+          ? {
+              cursorType,
+              lastSyncedAt: stored.lastSyncedAt,
+              lastBifrostLogId: stored.lastBifrostLogId ?? null,
+            }
+          : null,
       advance: async (
         _: string,
         update: { readonly lastSyncedAt: string; readonly lastBifrostLogId?: string },
@@ -305,10 +305,10 @@ describe('BifrostSyncService', () => {
 
     await service.sync()
     const cursorAfterFirst = getCursorState()?.lastSyncedAt
-    
+
     gateway.seedUsageLogs([])
     await service.sync()
-    
+
     // The second call should use the cursor advanced by the first call
     expect(gateway.calls.getUsageLogs[1]?.query?.startTime).toBe(cursorAfterFirst)
   })
@@ -439,15 +439,16 @@ describe('BifrostSyncService', () => {
     let timeoutCb: (() => void) | undefined
     const originalSetTimeout = globalThis.setTimeout
     const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
-    const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(
-      ((cb: SetTimeoutCallback, ms?: number) => {
-        if (ms === 30000) {
-          timeoutCb = typeof cb === 'function' ? cb : undefined
-          return 123 as unknown as ReturnType<typeof setTimeout>
-        }
-        return originalSetTimeout(cb, ms)
-      }) as typeof setTimeout,
-    )
+    const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(((
+      cb: SetTimeoutCallback,
+      ms?: number,
+    ) => {
+      if (ms === 30000) {
+        timeoutCb = typeof cb === 'function' ? cb : undefined
+        return 123 as unknown as ReturnType<typeof setTimeout>
+      }
+      return originalSetTimeout(cb, ms)
+    }) as typeof setTimeout)
 
     try {
       class HangingGateway extends MockGatewayClient {
@@ -475,15 +476,16 @@ describe('BifrostSyncService', () => {
     let timeoutCb: (() => void) | undefined
     const originalSetTimeout = globalThis.setTimeout
     const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
-    const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(
-      ((cb: SetTimeoutCallback, ms?: number) => {
-        if (ms === 30000) {
-          timeoutCb = typeof cb === 'function' ? cb : undefined
-          return 123 as unknown as ReturnType<typeof setTimeout>
-        }
-        return originalSetTimeout(cb, ms)
-      }) as typeof setTimeout,
-    )
+    const setTimeoutSpy = spyOn(globalThis, 'setTimeout').mockImplementation(((
+      cb: SetTimeoutCallback,
+      ms?: number,
+    ) => {
+      if (ms === 30000) {
+        timeoutCb = typeof cb === 'function' ? cb : undefined
+        return 123 as unknown as ReturnType<typeof setTimeout>
+      }
+      return originalSetTimeout(cb, ms)
+    }) as typeof setTimeout)
 
     try {
       class HangingGateway extends MockGatewayClient {
@@ -493,7 +495,7 @@ describe('BifrostSyncService', () => {
       }
       service = new BifrostSyncService(new HangingGateway(), usageRepo, cursorRepo, apiKeyRepo, db)
       const syncPromise = service.sync()
-      
+
       await new Promise((r) => originalSetTimeout(r, 0))
       if (timeoutCb) timeoutCb()
 

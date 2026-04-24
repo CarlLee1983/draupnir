@@ -2,9 +2,9 @@ import type { ListUsersService } from '@/Modules/Auth/Application/Services/ListU
 import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
 import type { GetAdminPlatformUsageTrendService } from '@/Modules/Dashboard/Application/Services/GetAdminPlatformUsageTrendService'
 import type { ListOrganizationsService } from '@/Modules/Organization/Application/Services/ListOrganizationsService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 const DEFAULT_ADMIN_USAGE_WINDOW: 7 | 15 | 30 = 15
 
@@ -49,17 +49,17 @@ export class AdminDashboardPage {
       contracts: contractsResult.success ? (contractsResult.data?.meta?.total ?? 0) : 0,
     }
 
-    const isAllZeros = usageTrendResult.success && 
-      usageTrendResult.data.points.every(p => p.requests === 0 && p.tokens === 0);
+    const isAllZeros =
+      usageTrendResult.success &&
+      usageTrendResult.data.points.every((p) => p.requests === 0 && p.tokens === 0)
 
-    let usageTrend =
-      usageTrendResult.success
-        ? usageTrendResult.data.points.map((p) => ({
-            date: p.date,
-            requests: p.requests,
-            tokens: p.tokens,
-          }))
-        : []
+    let usageTrend = usageTrendResult.success
+      ? usageTrendResult.data.points.map((p) => ({
+          date: p.date,
+          requests: p.requests,
+          tokens: p.tokens,
+        }))
+      : []
 
     let isUsageTrendDemo = false
 

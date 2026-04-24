@@ -1,8 +1,8 @@
-import type { RegisterModuleParams } from '@/Modules/AppModule/Presentation/Requests/RegisterModuleRequest'
 import type { RegisterModuleService } from '@/Modules/AppModule/Application/Services/RegisterModuleService'
+import type { RegisterModuleParams } from '@/Modules/AppModule/Presentation/Requests/RegisterModuleRequest'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin module registration form and submit (`Admin/Modules/Create`).

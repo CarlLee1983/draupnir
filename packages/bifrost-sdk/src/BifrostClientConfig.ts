@@ -47,9 +47,7 @@ export function createBifrostClientConfig(
   const baseUrl = overrides?.baseUrl ?? process.env.BIFROST_API_URL
   const rawMasterKey = overrides?.masterKey ?? process.env.BIFROST_MASTER_KEY
   const masterKey =
-    typeof rawMasterKey === 'string' && rawMasterKey.trim() !== ''
-      ? rawMasterKey.trim()
-      : undefined
+    typeof rawMasterKey === 'string' && rawMasterKey.trim() !== '' ? rawMasterKey.trim() : undefined
 
   if (!baseUrl) {
     throw new Error('BIFROST_API_URL is required. Set it in .env or pass baseUrl in config.')

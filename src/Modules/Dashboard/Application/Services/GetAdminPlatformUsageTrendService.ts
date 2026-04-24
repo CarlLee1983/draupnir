@@ -53,9 +53,7 @@ export class GetAdminPlatformUsageTrendService {
         const key = toUtcDateKey(d)
         const b = byDay.get(key)
         const requests = b ? Number(b.totalRequests) : 0
-        const tokens = b
-          ? Number(b.totalInputTokens) + Number(b.totalOutputTokens)
-          : 0
+        const tokens = b ? Number(b.totalInputTokens) + Number(b.totalOutputTokens) : 0
         points.push({ date: `${key}T12:00:00.000Z`, requests, tokens })
       }
 

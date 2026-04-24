@@ -1,10 +1,10 @@
 /**
  * Factory for `InertiaService`: chooses dev-server vs built asset tags and Inertia asset version.
  */
-import { InertiaService } from './InertiaRequestHandler'
-import { type ViteManifest, ViteTagHelper } from '../Assets/ViteTagHelper'
 
+import { type ViteManifest, ViteTagHelper } from '../Assets/ViteTagHelper'
 import { joinPath } from '../Routing/routePath'
+import { InertiaService } from './InertiaRequestHandler'
 
 /**
  * DI container keys for the Inertia presentation shell.
@@ -65,6 +65,7 @@ export function useBuiltFrontendAssets(): boolean {
 export async function createInertiaService(): Promise<InertiaService> {
   const nodeEnv = process.env.NODE_ENV ?? 'development'
   const devServerUrl = process.env.VITE_DEV_SERVER ?? 'http://localhost:5173'
+  // biome-ignore lint/correctness/useHookAtTopLevel: false positive
   const useBuild = useBuiltFrontendAssets()
 
   let manifest: ViteManifest | undefined

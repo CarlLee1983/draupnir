@@ -1,5 +1,5 @@
 import type { UserProfileDTO } from '../../Application/DTOs/UserProfileDTO'
-import { UserProfile, type ReconstitutionProps } from '../../Domain/Aggregates/UserProfile'
+import { type ReconstitutionProps, UserProfile } from '../../Domain/Aggregates/UserProfile'
 
 /**
  * Parses notification preferences from unknown database format.

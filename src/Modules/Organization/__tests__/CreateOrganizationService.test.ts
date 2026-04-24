@@ -4,17 +4,17 @@ import { ProvisionOrganizationDefaultsService } from '@/Modules/AppModule/Applic
 import { AppModuleRepository } from '@/Modules/AppModule/Infrastructure/Repositories/AppModuleRepository'
 import { ModuleSubscriptionRepository } from '@/Modules/AppModule/Infrastructure/Repositories/ModuleSubscriptionRepository'
 import { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
+import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import { AuthRepository } from '@/Modules/Auth/Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '@/Modules/Auth/Infrastructure/Services/PasswordHasher'
-import { RoleType } from '@/Modules/Auth/Domain/ValueObjects/Role'
 import { ContractRepository } from '@/Modules/Contract/Infrastructure/Repositories/ContractRepository'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { CreateOrganizationService } from '../Application/Services/CreateOrganizationService'
-import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
-import { OrganizationRepository } from '../Infrastructure/Repositories/OrganizationRepository'
 import { OrganizationMember } from '../Domain/Entities/OrganizationMember'
 import { OrgMemberRole } from '../Domain/ValueObjects/OrgMemberRole'
+import { OrganizationMemberRepository } from '../Infrastructure/Repositories/OrganizationMemberRepository'
+import { OrganizationRepository } from '../Infrastructure/Repositories/OrganizationRepository'
 
 describe('CreateOrganizationService', () => {
   let service: CreateOrganizationService
@@ -97,7 +97,10 @@ describe('CreateOrganizationService', () => {
 
   it('admin 呼叫時應回傳 ADMIN_CANNOT_CREATE_ORG', async () => {
     const authRepo = new AuthRepository(db)
-    const registerResult = await new RegisterUserService(authRepo, new ScryptPasswordHasher()).execute({
+    const registerResult = await new RegisterUserService(
+      authRepo,
+      new ScryptPasswordHasher(),
+    ).execute({
       email: 'admin@example.com',
       password: 'StrongPass123',
     })

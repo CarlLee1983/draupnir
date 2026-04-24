@@ -2,9 +2,9 @@ import type { ActivateContractService } from '@/Modules/Contract/Application/Ser
 import type { AdjustContractQuotaService } from '@/Modules/Contract/Application/Services/AdjustContractQuotaService'
 import type { GetContractDetailService } from '@/Modules/Contract/Application/Services/GetContractDetailService'
 import type { TerminateContractService } from '@/Modules/Contract/Application/Services/TerminateContractService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin contract detail with activate/terminate actions (`Admin/Contracts/Show`).
@@ -38,7 +38,7 @@ export class AdminContractDetailPage {
     return this.inertia.render(ctx, 'Admin/Contracts/Show', {
       contract: result.success ? (result.data as Record<string, unknown>) : null,
       error: result.success ? null : { key: 'admin.contracts.loadFailed' },
-      quotaKeys: [],  // placeholder；未來可換成真實資料
+      quotaKeys: [], // placeholder；未來可換成真實資料
     })
   }
 

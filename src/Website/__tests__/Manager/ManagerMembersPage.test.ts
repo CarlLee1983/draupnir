@@ -95,7 +95,13 @@ describe('ManagerMembersPage', () => {
       { execute: mock() } as any,
       {
         execute: mock(() =>
-          Promise.resolve({ success: true, data: { keys: [{ id: 'k-1', label: 'Prod', assignedMemberId: 'u-1' }], meta: { total: 1, page: 1, limit: 1000, totalPages: 1 } } }),
+          Promise.resolve({
+            success: true,
+            data: {
+              keys: [{ id: 'k-1', label: 'Prod', assignedMemberId: 'u-1' }],
+              meta: { total: 1, page: 1, limit: 1000, totalPages: 1 },
+            },
+          }),
         ),
       } as any,
       {
@@ -164,7 +170,14 @@ describe('ManagerMembersPage', () => {
       { execute: mock() } as any,
       inviteSvc as any,
       { execute: mock() } as any,
-      { execute: mock(() => Promise.resolve({ success: true, data: { keys: [], meta: { total: 0, page: 1, limit: 1000, totalPages: 0 } } })) } as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({
+            success: true,
+            data: { keys: [], meta: { total: 0, page: 1, limit: 1000, totalPages: 0 } },
+          }),
+        ),
+      } as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
@@ -186,7 +199,14 @@ describe('ManagerMembersPage', () => {
       { execute: mock() } as any,
       { execute: mock() } as any,
       removeSvc as any,
-      { execute: mock(() => Promise.resolve({ success: true, data: { keys: [], meta: { total: 0, page: 1, limit: 1000, totalPages: 0 } } })) } as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({
+            success: true,
+            data: { keys: [], meta: { total: 0, page: 1, limit: 1000, totalPages: 0 } },
+          }),
+        ),
+      } as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,
@@ -207,7 +227,14 @@ describe('ManagerMembersPage', () => {
       { execute: mock() } as any,
       { execute: mock() } as any,
       removeSvc as any,
-      { execute: mock(() => Promise.resolve({ success: true, data: { keys: [], meta: { total: 0, page: 1, limit: 1000, totalPages: 0 } } })) } as any,
+      {
+        execute: mock(() =>
+          Promise.resolve({
+            success: true,
+            data: { keys: [], meta: { total: 0, page: 1, limit: 1000, totalPages: 0 } },
+          }),
+        ),
+      } as any,
       {
         execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
       } as any,

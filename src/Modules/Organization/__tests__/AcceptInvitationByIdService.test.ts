@@ -1,14 +1,17 @@
 import { describe, expect, it, mock } from 'bun:test'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
+import { AcceptInvitationByIdService } from '@/Modules/Organization/Application/Services/AcceptInvitationByIdService'
+import { OrganizationInvitation } from '@/Modules/Organization/Domain/Entities/OrganizationInvitation'
 import type { IOrganizationInvitationRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationInvitationRepository'
 import type { IOrganizationMemberRepository } from '@/Modules/Organization/Domain/Repositories/IOrganizationMemberRepository'
-import { OrganizationInvitation } from '@/Modules/Organization/Domain/Entities/OrganizationInvitation'
 import { InvitationStatus } from '@/Modules/Organization/Domain/ValueObjects/InvitationStatus'
 import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
-import { AcceptInvitationByIdService } from '@/Modules/Organization/Application/Services/AcceptInvitationByIdService'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 
-function makePendingInvitation(email = 'member@example.com', orgId = 'org-1'): OrganizationInvitation {
+function makePendingInvitation(
+  email = 'member@example.com',
+  orgId = 'org-1',
+): OrganizationInvitation {
   return OrganizationInvitation.reconstitute({
     id: 'inv-1',
     organizationId: orgId,

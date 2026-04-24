@@ -2,14 +2,17 @@ import type { ChangePasswordService } from '@/Modules/Auth/Application/Services/
 import type { ListSessionsService } from '@/Modules/Auth/Application/Services/ListSessionsService'
 import type { RevokeAllSessionsService } from '@/Modules/Auth/Application/Services/RevokeAllSessionsService'
 import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
-import type { ChangePasswordParams } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
 import { PASSWORD_REQUIREMENTS } from '@/Modules/Auth/Presentation/passwordRequirements'
+import type { ChangePasswordParams } from '@/Modules/Auth/Presentation/Requests/ChangePasswordRequest'
 import type { GetProfileService } from '@/Modules/Profile/Application/Services/GetProfileService'
 import type { UpdateProfileService } from '@/Modules/Profile/Application/Services/UpdateProfileService'
-import { AuthMiddleware, extractRawAuthToken } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
+import {
+  AuthMiddleware,
+  extractRawAuthToken,
+} from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
-import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import { REFRESHED_AUTH_TOKEN_HASH_KEY } from '@/Website/Http/Middleware/TokenRefreshMiddleware'
 
 /**

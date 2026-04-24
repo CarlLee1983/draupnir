@@ -6,19 +6,19 @@
 
 export interface JobOptions {
   /** Optional job name for logging/debugging. */
-  jobName?: string;
+  jobName?: string
   /** Maximum number of retry attempts. */
-  attempts?: number;
+  attempts?: number
   /** Delay before the first attempt (ms). */
-  delay?: number;
+  delay?: number
   /** Backoff delay for retries (ms). */
-  backoffMs?: number;
+  backoffMs?: number
   /** Priority of the job (lower is higher). */
-  priority?: number;
+  priority?: number
   /** Whether to remove the job from Redis on success. */
-  removeOnComplete?: boolean | number;
+  removeOnComplete?: boolean | number
   /** Whether to remove the job from Redis on failure. */
-  removeOnFail?: boolean | number;
+  removeOnFail?: boolean | number
 }
 
 export interface IQueue {
@@ -30,7 +30,7 @@ export interface IQueue {
    * @param options - Execution options.
    * @returns The generated job ID.
    */
-  push(name: string, payload: any, options?: JobOptions): Promise<string>;
+  push(name: string, payload: unknown, options?: JobOptions): Promise<string>
 
   /**
    * Register a task handler (Consumer/Worker).
@@ -39,14 +39,14 @@ export interface IQueue {
    * @param handler - Function to process the payload.
    * @param concurrency - Number of concurrent jobs to process.
    */
-  process(name: string, handler: (payload: any) => Promise<void>, concurrency?: number): void;
+  process(name: string, handler: (payload: unknown) => Promise<void>, concurrency?: number): void
 
   /** Pause workers from picking up new jobs. */
-  pause(): Promise<void>;
+  pause(): Promise<void>
 
   /** Resume workers. */
-  resume(): Promise<void>;
+  resume(): Promise<void>
 
   /** Fully stop and disconnect all queue resources. */
-  close(): Promise<void>;
+  close(): Promise<void>
 }

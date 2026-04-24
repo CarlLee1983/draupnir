@@ -1,8 +1,8 @@
-import type { CreateContractParams } from '@/Modules/Contract/Presentation/Requests/CreateContractRequest'
 import type { CreateContractService } from '@/Modules/Contract/Application/Services/CreateContractService'
+import type { CreateContractParams } from '@/Modules/Contract/Presentation/Requests/CreateContractRequest'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin contract creation form and submit handler (`Admin/Contracts/Create`).

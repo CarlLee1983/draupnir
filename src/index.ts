@@ -10,17 +10,16 @@
  */
 
 import { createApp } from './app'
+import type { IQueue } from './Foundation/Infrastructure/Ports/Queue/IQueue'
+import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
 import { GracefulShutdown } from './Foundation/Infrastructure/Shutdown/GracefulShutdown'
 import { BunServerShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/BunServerShutdownHook'
-import { SchedulerShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/SchedulerShutdownHook'
-import { RedisShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/RedisShutdownHook'
 import { DatabaseShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/DatabaseShutdownHook'
 import { MessageQueueShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/MessageQueueShutdownHook'
+import { RedisShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/RedisShutdownHook'
+import { SchedulerShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/SchedulerShutdownHook'
 import { WebhookShutdownHook } from './Foundation/Infrastructure/Shutdown/hooks/WebhookShutdownHook'
 import { closeDrizzleConnection } from './Shared/Infrastructure/Database/Adapters/Drizzle/config'
-import type { IScheduler } from './Foundation/Infrastructure/Ports/Scheduler/IScheduler'
-import type { IRedisService } from './Shared/Infrastructure/IRedisService'
-import type { IQueue } from './Foundation/Infrastructure/Ports/Queue/IQueue'
 
 /**
  * 應用啟動並顯示歡迎訊息
@@ -33,15 +32,19 @@ async function start() {
   const port = Number(core.config.get('PORT') ?? 3000)
   const drainTimeoutMs = Number(process.env.DRAIN_TIMEOUT_MS ?? 25_000)
   const baseUrl = `http://localhost:${port}`
-  const { core: _liftoffCore, ...serveConfig } = core.liftoff(port)
-  const server = Bun.serve(serveConfig as any)
+  const liftoffConfig = core.liftoff(port) as { core: unknown } & Bun.Serve.Options<undefined>
+  const { core: _liftoffCore, ...serveConfig } = liftoffConfig
+  const server = Bun.serve(serveConfig)
 
   // ─── Graceful Shutdown ────────────────────────────────────────────────────
   const scheduler = core.container.make('scheduler') as IScheduler
   const queue = core.container.make('queue') as IQueue
   const redis = (() => {
     try {
-      return core.container.make('redis') as IRedisService
+      return core.container.make('redis') as {
+        disconnect?: () => Promise<void> | void
+        quit?: () => Promise<void> | void
+      }
     } catch {
       return undefined
     }
@@ -62,7 +65,7 @@ async function start() {
     shutdown.register(new DatabaseShutdownHook(closeDrizzleConnection))
   }
   // Atlas ORM handles its own connections or doesn't require explicit close for now.
-  
+
   shutdown.listen()
   // ─────────────────────────────────────────────────────────────────────────
 

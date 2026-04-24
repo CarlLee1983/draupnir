@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { toGravitoMiddleware } from '../GravitoKernelAdapter'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
+import { toGravitoMiddleware } from '../GravitoKernelAdapter'
 
 /** Minimal GravitoContext mock matching what fromGravitoContext needs */
 function createMockGravitoContext(opts: { method?: string } = {}): any {
@@ -16,9 +16,10 @@ function createMockGravitoContext(opts: { method?: string } = {}): any {
     },
     res: undefined as Response | undefined,
     get: (key: string) => state[key],
-    set: (key: string, value: unknown) => { state[key] = value },
-    json: (data: unknown, status = 200) =>
-      new Response(JSON.stringify(data), { status }),
+    set: (key: string, value: unknown) => {
+      state[key] = value
+    },
+    json: (data: unknown, status = 200) => new Response(JSON.stringify(data), { status }),
     text: (content: string, status = 200) => new Response(content, { status }),
     redirect: (url: string, status = 302) =>
       new Response(null, { status, headers: { Location: url } }),
@@ -41,8 +42,7 @@ describe('GravitoKernelAdapter', () => {
     })
 
     it('middleware 可短路回傳，不呼叫 next', async () => {
-      const mw: Middleware = async (_ctx, _next) =>
-        new Response('short-circuit', { status: 403 })
+      const mw: Middleware = async (_ctx, _next) => new Response('short-circuit', { status: 403 })
       const wrapped = toGravitoMiddleware(mw)
       const gravitoCtx = createMockGravitoContext()
 

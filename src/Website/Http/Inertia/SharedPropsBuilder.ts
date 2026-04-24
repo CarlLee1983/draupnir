@@ -122,14 +122,16 @@ function readFlash(ctx: IHttpContext, key: string): I18nMessage | undefined {
  * @param ctx - Current request context.
  */
 export function getInertiaShared(ctx: IHttpContext): InertiaSharedData {
-  return (ctx.get('inertia:shared') as InertiaSharedData | undefined) ?? {
-    csrfToken: '',
-    auth: { user: null },
-    currentOrgId: null,
-    locale: 'zh-TW' as LocaleCode,
-    messages: {},
-    flash: {},
-  }
+  return (
+    (ctx.get('inertia:shared') as InertiaSharedData | undefined) ?? {
+      csrfToken: '',
+      auth: { user: null },
+      currentOrgId: null,
+      locale: 'zh-TW' as LocaleCode,
+      messages: {},
+      flash: {},
+    }
+  )
 }
 
 import type { CurrentOrganizationContext } from '@/Modules/Organization/Presentation/Middleware/OrganizationMiddleware'

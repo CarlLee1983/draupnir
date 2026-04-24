@@ -1,5 +1,10 @@
-import { describe, expect, it, beforeEach, afterEach } from 'bun:test'
-import { initializeDrizzle, getDrizzleInstance, resetDrizzleForTest, closeDrizzleConnection } from '../config'
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import {
+  closeDrizzleConnection,
+  getDrizzleInstance,
+  initializeDrizzle,
+  resetDrizzleForTest,
+} from '../config'
 
 describe('Drizzle Config', () => {
   let originalDatabaseUrl: string | undefined

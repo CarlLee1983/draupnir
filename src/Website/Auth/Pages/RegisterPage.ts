@@ -1,10 +1,10 @@
-import type { RegisterParams } from '@/Modules/Auth/Presentation/Requests/RegisterRequest'
-import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import type { LoginUserService } from '@/Modules/Auth/Application/Services/LoginUserService'
+import type { RegisterUserService } from '@/Modules/Auth/Application/Services/RegisterUserService'
 import { PASSWORD_REQUIREMENTS } from '@/Modules/Auth/Presentation/passwordRequirements'
+import type { RegisterParams } from '@/Modules/Auth/Presentation/Requests/RegisterRequest'
+import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
 
 /**
  * Inertia page controller for the registration view.

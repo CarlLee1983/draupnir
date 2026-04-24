@@ -1,6 +1,6 @@
 import type { LoginUserService } from '@/Modules/Auth/Application/Services/LoginUserService'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import { isSecureRequest } from '@/Shared/Infrastructure/Http/isSecureRequest'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
 import { dashboardPathForWebRole } from '../dashboardPathForWebRole'

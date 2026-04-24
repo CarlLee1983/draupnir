@@ -111,9 +111,7 @@ describe('ManagerOrganizationPage', () => {
   test('update: 更新名稱後重導回 /manager/organization', async () => {
     const { inertia } = mkInertia()
     const updateSvc = {
-      execute: mock(() =>
-        Promise.resolve({ success: true, message: 'OK', data: { id: 'org-A' } }),
-      ),
+      execute: mock(() => Promise.resolve({ success: true, message: 'OK', data: { id: 'org-A' } })),
     }
     const ctx = makeCtx({
       getJsonBody: async <T>() => ({ name: 'NewName', description: 'nd' }) as T,

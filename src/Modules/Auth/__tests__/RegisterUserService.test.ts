@@ -4,12 +4,12 @@
 
 import { beforeEach, describe, expect, it } from 'vitest'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
+import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 import { RegisterUserService } from '../Application/Services/RegisterUserService'
 import type { IAuthRepository } from '../Domain/Repositories/IAuthRepository'
 import { RoleType } from '../Domain/ValueObjects/Role'
 import { AuthRepository } from '../Infrastructure/Repositories/AuthRepository'
 import { ScryptPasswordHasher } from '../Infrastructure/Services/PasswordHasher'
-import { MemoryDatabaseAccess } from '@/Shared/Infrastructure/Database/Adapters/Memory/MemoryDatabaseAccess'
 
 describe('RegisterUserService Integration Test', () => {
   let service: RegisterUserService

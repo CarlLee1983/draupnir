@@ -3,12 +3,12 @@
  * Domain Aggregate: represents a user's identity and preferences within the system.
  */
 
-import { DomainEvent } from '@/Shared/Domain/DomainEvent'
+import type { DomainEvent } from '@/Shared/Domain/DomainEvent'
+import { UserProfileCreated } from '../Events/UserProfileCreated'
+import { UserProfileUpdated } from '../Events/UserProfileUpdated'
 import { Locale } from '../ValueObjects/Locale'
 import { Phone } from '../ValueObjects/Phone'
 import { Timezone } from '../ValueObjects/Timezone'
-import { UserProfileCreated } from '../Events/UserProfileCreated'
-import { UserProfileUpdated } from '../Events/UserProfileUpdated'
 
 /**
  * Properties required to initialize a UserProfile (internal, using VOs).
@@ -115,9 +115,7 @@ export class UserProfile {
     const event = new UserProfileUpdated(
       this.props.id,
       this.props.userId,
-      Object.keys(fields).filter(
-        (k) => fields[k as keyof UpdateProfileFields] !== undefined,
-      ),
+      Object.keys(fields).filter((k) => fields[k as keyof UpdateProfileFields] !== undefined),
     )
     return new UserProfile({
       ...this.props,

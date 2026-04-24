@@ -2,9 +2,9 @@ import type { ListApiKeysService } from '@/Modules/ApiKey/Application/Services/L
 import type { GetBalanceService } from '@/Modules/Credit/Application/Services/GetBalanceService'
 import type { GetPendingInvitationsService } from '@/Modules/Organization/Application/Services/GetPendingInvitationsService'
 import type { GetUserMembershipService } from '@/Modules/Organization/Application/Services/GetUserMembershipService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Page handler for listing API keys.
@@ -86,7 +86,8 @@ export class MemberApiKeysPage {
       meta: result.success
         ? (result.data?.meta ?? { total: 0, page: 1, limit: 20, totalPages: 0 })
         : { total: 0, page: 1, limit: 20, totalPages: 0 },
-      error: (balanceResult.success && result.success) ? null : { key: 'member.dashboard.loadFailed' },
+      error:
+        balanceResult.success && result.success ? null : { key: 'member.dashboard.loadFailed' },
     })
   }
 }

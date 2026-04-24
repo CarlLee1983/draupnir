@@ -1,5 +1,5 @@
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IAuthRepository } from '@/Modules/Auth/Domain/Repositories/IAuthRepository'
+import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { OrganizationMember } from '../../Domain/Entities/OrganizationMember'
 import type { IOrganizationInvitationRepository } from '../../Domain/Repositories/IOrganizationInvitationRepository'
 import type { IOrganizationMemberRepository } from '../../Domain/Repositories/IOrganizationMemberRepository'
@@ -24,20 +24,35 @@ export class AcceptInvitationByIdService {
 
       const invitation = await this.invitationRepository.findById(invitationId)
       if (!invitation || !invitation.isPending()) {
-        return { success: false, message: 'Invalid or expired invitation', error: 'INVALID_INVITATION' }
+        return {
+          success: false,
+          message: 'Invalid or expired invitation',
+          error: 'INVALID_INVITATION',
+        }
       }
 
       try {
         OrgInvitationRules.assertEmailMatches(invitation, user.emailValue)
       } catch {
-        return { success: false, message: 'This invitation was not sent to you', error: 'EMAIL_MISMATCH' }
+        return {
+          success: false,
+          message: 'This invitation was not sent to you',
+          error: 'EMAIL_MISMATCH',
+        }
       }
 
-      const existingMembership = await this.memberRepository.findByUserAndOrgId(userId, invitation.organizationId)
+      const existingMembership = await this.memberRepository.findByUserAndOrgId(
+        userId,
+        invitation.organizationId,
+      )
       try {
         OrgInvitationRules.assertNotAlreadyMember(existingMembership)
       } catch {
-        return { success: false, message: 'Already a member of this organization', error: 'USER_ALREADY_IN_ORG' }
+        return {
+          success: false,
+          message: 'Already a member of this organization',
+          error: 'USER_ALREADY_IN_ORG',
+        }
       }
 
       const member = OrganizationMember.create(

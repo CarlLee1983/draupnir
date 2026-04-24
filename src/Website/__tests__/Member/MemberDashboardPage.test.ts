@@ -60,9 +60,9 @@ describe('MemberDashboardPage', () => {
   test('handle redirects to api-keys page', async () => {
     const ctx = createMemberContext()
     const page = new MemberDashboardPage()
-    
+
     const response = await page.handle(ctx)
-    
+
     expect(response.status).toBe(302)
     expect(response.headers.get('Location')).toBe('/member/api-keys')
   })

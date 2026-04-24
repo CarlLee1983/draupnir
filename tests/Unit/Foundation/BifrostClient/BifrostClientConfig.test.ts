@@ -44,4 +44,3 @@ describe('createBifrostClientConfig', () => {
     expect(config.masterKey).toBeUndefined()
   })
 })
-

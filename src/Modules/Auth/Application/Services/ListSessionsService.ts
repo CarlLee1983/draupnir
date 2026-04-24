@@ -20,7 +20,10 @@ export type ListSessionsResult =
 export class ListSessionsService {
   constructor(private readonly authTokenRepository: IAuthTokenRepository) {}
 
-  async execute(userId: string, currentAccessTokenHash?: string | null): Promise<ListSessionsResult> {
+  async execute(
+    userId: string,
+    currentAccessTokenHash?: string | null,
+  ): Promise<ListSessionsResult> {
     try {
       const rows = await this.authTokenRepository.findByUserId(userId)
       const accessOnly = rows.filter((r) => r.type === 'access')

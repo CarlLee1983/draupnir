@@ -1,5 +1,6 @@
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
+
 /** Placeholder sync metrics until UsageSync is fully implemented. */
 interface SyncStatus {
   enabled: boolean

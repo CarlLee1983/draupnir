@@ -27,7 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),
@@ -75,10 +75,10 @@ function createMockInertia(): { inertia: InertiaService; captured: { lastCall: I
 
 describe('MemberApiKeysPage', () => {
   const mockBalanceService = {
-    execute: mock(() => Promise.resolve({ success: true, data: { balance: '100.00' } }))
+    execute: mock(() => Promise.resolve({ success: true, data: { balance: '100.00' } })),
   }
   const mockPendingInvitationsService = {
-    execute: mock(() => Promise.resolve([]))
+    execute: mock(() => Promise.resolve([])),
   }
 
   test('authenticated member request renders correct Inertia component', async () => {
@@ -111,11 +111,11 @@ describe('MemberApiKeysPage', () => {
 
     const mockMembershipService = { execute: mock(() => Promise.resolve({ orgId: 'org-123' })) }
     const page = new MemberApiKeysPage(
-      inertia, 
-      mockListService as any, 
+      inertia,
+      mockListService as any,
       mockMembershipService as any,
       mockBalanceService as any,
-      mockPendingInvitationsService as any
+      mockPendingInvitationsService as any,
     )
     await page.handle(ctx)
 
@@ -138,15 +138,15 @@ describe('MemberApiKeysPage', () => {
     const mockListService = { execute: mock(() => Promise.resolve({ success: true, data: null })) }
     const mockMembershipService = { execute: mock(() => Promise.resolve(null)) }
     const mockInvitesService = {
-      execute: mock(() => Promise.resolve([{ id: 'inv-1', orgName: 'Test Org' }]))
+      execute: mock(() => Promise.resolve([{ id: 'inv-1', orgName: 'Test Org' }])),
     }
 
     const page = new MemberApiKeysPage(
-      inertia, 
-      mockListService as any, 
+      inertia,
+      mockListService as any,
       mockMembershipService as any,
       mockBalanceService as any,
-      mockInvitesService as any
+      mockInvitesService as any,
     )
     await page.handle(ctx)
 
@@ -174,11 +174,11 @@ describe('MemberApiKeysPage', () => {
 
     const mockMembershipService = { execute: mock(() => Promise.resolve({ orgId: 'org-123' })) }
     const page = new MemberApiKeysPage(
-      inertia, 
-      mockListService as any, 
+      inertia,
+      mockListService as any,
       mockMembershipService as any,
       mockBalanceService as any,
-      mockPendingInvitationsService as any
+      mockPendingInvitationsService as any,
     )
     await page.handle(ctx)
 
@@ -200,11 +200,11 @@ describe('MemberApiKeysPage', () => {
       execute: mock(() => Promise.resolve({ orgId: 'org-A' })),
     }
     const page = new MemberApiKeysPage(
-      inertia, 
-      mockListService as any, 
+      inertia,
+      mockListService as any,
       mockMembershipService as any,
       mockBalanceService as any,
-      mockPendingInvitationsService as any
+      mockPendingInvitationsService as any,
     )
     await page.handle(ctx)
 

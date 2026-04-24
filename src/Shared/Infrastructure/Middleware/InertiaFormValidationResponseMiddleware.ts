@@ -1,6 +1,6 @@
-import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
+import { setFlash } from '@/Website/Http/Inertia/SharedPropsBuilder'
 
 type ValidationDetail = { field?: string; message?: string; code?: string }
 type GravitoValidationErrorBody = {

@@ -3,7 +3,7 @@
  * Domain Entity: represents the relationship between a User and an Organization.
  */
 
-import { OrgMemberRole } from '../ValueObjects/OrgMemberRole'
+import type { OrgMemberRole } from '../ValueObjects/OrgMemberRole'
 
 /** Properties defining an OrganizationMember's state. */
 interface OrganizationMemberProps {

@@ -1,21 +1,28 @@
-import { describe, expect, test, mock } from 'bun:test'
-import { AssignApiKeyService } from '../Application/Services/AssignApiKeyService'
-import { ApiKey } from '../Domain/Aggregates/ApiKey'
+import { describe, expect, mock, test } from 'bun:test'
 import { OrganizationMember } from '@/Modules/Organization/Domain/Entities/OrganizationMember'
 import { OrgMemberRole } from '@/Modules/Organization/Domain/ValueObjects/OrgMemberRole'
+import { AssignApiKeyService } from '../Application/Services/AssignApiKeyService'
+import { ApiKey } from '../Domain/Aggregates/ApiKey'
 
 function makeKey(orgId = 'org-A') {
   return ApiKey.create({
-    id: 'k-1', orgId, createdByUserId: 'mgr',
-    label: 'L', gatewayKeyId: 'gw', keyHash: 'h'.repeat(64),
+    id: 'k-1',
+    orgId,
+    createdByUserId: 'mgr',
+    label: 'L',
+    gatewayKeyId: 'gw',
+    keyHash: 'h'.repeat(64),
   })
 }
 
 function memberOf(orgId: string, userId: string, role: 'manager' | 'member') {
   return OrganizationMember.reconstitute({
-    id: `m-${userId}`, organizationId: orgId, userId,
+    id: `m-${userId}`,
+    organizationId: orgId,
+    userId,
     role: new OrgMemberRole(role),
-    joinedAt: new Date(), createdAt: new Date(),
+    joinedAt: new Date(),
+    createdAt: new Date(),
   })
 }
 
@@ -36,9 +43,11 @@ describe('AssignApiKeyService', () => {
     }
     const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
     const result = await svc.execute({
-      keyId: 'k-1', orgId: 'org-A',
+      keyId: 'k-1',
+      orgId: 'org-A',
       assigneeUserId: 'u-99',
-      callerUserId: 'mgr', callerSystemRole: 'manager',
+      callerUserId: 'mgr',
+      callerSystemRole: 'manager',
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('INVALID_ASSIGNEE')
@@ -55,8 +64,11 @@ describe('AssignApiKeyService', () => {
     }
     const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
     const result = await svc.execute({
-      keyId: 'k-1', orgId: 'org-A', assigneeUserId: 'u-2',
-      callerUserId: 'mgr', callerSystemRole: 'manager',
+      keyId: 'k-1',
+      orgId: 'org-A',
+      assigneeUserId: 'u-2',
+      callerUserId: 'mgr',
+      callerSystemRole: 'manager',
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('INVALID_ASSIGNEE_ROLE')
@@ -73,8 +85,11 @@ describe('AssignApiKeyService', () => {
     }
     const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
     const result = await svc.execute({
-      keyId: 'k-1', orgId: 'org-A', assigneeUserId: 'u-7',
-      callerUserId: 'mgr', callerSystemRole: 'manager',
+      keyId: 'k-1',
+      orgId: 'org-A',
+      assigneeUserId: 'u-7',
+      callerUserId: 'mgr',
+      callerSystemRole: 'manager',
     })
     expect(result.success).toBe(true)
     expect(repo.update).toHaveBeenCalledTimes(1)
@@ -91,8 +106,11 @@ describe('AssignApiKeyService', () => {
     const memberRepo = { findByUserAndOrgId: mock(() => Promise.resolve(null)) }
     const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
     const result = await svc.execute({
-      keyId: 'k-1', orgId: 'org-A', assigneeUserId: null,
-      callerUserId: 'mgr', callerSystemRole: 'manager',
+      keyId: 'k-1',
+      orgId: 'org-A',
+      assigneeUserId: null,
+      callerUserId: 'mgr',
+      callerSystemRole: 'manager',
     })
     expect(result.success).toBe(true)
     const saved = (repo.update as any).mock.calls[0][0] as ApiKey
@@ -110,8 +128,11 @@ describe('AssignApiKeyService', () => {
     }
     const svc = new AssignApiKeyService(repo as any, memberRepo as any, orgAuth as any)
     const result = await svc.execute({
-      keyId: 'k-1', orgId: 'org-A', assigneeUserId: 'u-7',
-      callerUserId: 'mgr', callerSystemRole: 'manager',
+      keyId: 'k-1',
+      orgId: 'org-A',
+      assigneeUserId: 'u-7',
+      callerUserId: 'mgr',
+      callerSystemRole: 'manager',
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('CROSS_ORG_ASSIGNMENT')
@@ -119,14 +140,24 @@ describe('AssignApiKeyService', () => {
 
   test('呼叫者非 org manager → 拒絕', async () => {
     const deniedAuth = {
-      requireOrgManager: mock(() => Promise.resolve({ authorized: false, error: 'NOT_ORG_MANAGER' })),
+      requireOrgManager: mock(() =>
+        Promise.resolve({ authorized: false, error: 'NOT_ORG_MANAGER' }),
+      ),
     }
-    const repo = { findById: mock(() => Promise.resolve(makeKey())), update: mock(() => Promise.resolve()) }
-    const memberRepo = { findByUserAndOrgId: mock(() => Promise.resolve(memberOf('org-A', 'u-7', 'member'))) }
+    const repo = {
+      findById: mock(() => Promise.resolve(makeKey())),
+      update: mock(() => Promise.resolve()),
+    }
+    const memberRepo = {
+      findByUserAndOrgId: mock(() => Promise.resolve(memberOf('org-A', 'u-7', 'member'))),
+    }
     const svc = new AssignApiKeyService(repo as any, memberRepo as any, deniedAuth as any)
     const result = await svc.execute({
-      keyId: 'k-1', orgId: 'org-A', assigneeUserId: 'u-7',
-      callerUserId: 'mgr', callerSystemRole: 'member',
+      keyId: 'k-1',
+      orgId: 'org-A',
+      assigneeUserId: 'u-7',
+      callerUserId: 'mgr',
+      callerSystemRole: 'member',
     })
     expect(result.success).toBe(false)
     expect(result.error).toBe('NOT_ORG_MANAGER')

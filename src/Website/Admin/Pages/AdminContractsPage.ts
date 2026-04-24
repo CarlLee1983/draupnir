@@ -1,7 +1,7 @@
 import type { ListAdminContractsService } from '@/Modules/Contract/Application/Services/ListAdminContractsService'
+import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
 import type { InertiaService } from '@/Website/Http/Inertia/InertiaRequestHandler'
-import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 
 /**
  * Admin contract directory with status filter (`Admin/Contracts/Index`).

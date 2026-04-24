@@ -27,7 +27,7 @@ function createMockContext(overrides: Partial<IHttpContext> = {}): IHttpContext 
       store.set(key, value)
     },
     getCookie: (_name: string) => undefined,
-    
+
     setCookie: (_name: string, _value: string, _options?: unknown) => {},
     ...overrides,
     getMethod: overrides.getMethod ?? (() => 'GET'),
@@ -91,7 +91,9 @@ describe('AdminOrganizationDetailPage', () => {
     }
 
     const mockContractQuotaService = {
-      execute: mock(() => Promise.resolve({ success: true, data: { contractQuota: 0, contractId: null } })),
+      execute: mock(() =>
+        Promise.resolve({ success: true, data: { contractQuota: 0, contractId: null } }),
+      ),
     }
     const mockSumAllocatedService = {
       execute: mock(() => Promise.resolve({ success: true, data: { totalAllocated: 0 } })),
@@ -121,7 +123,9 @@ describe('AdminOrganizationDetailPage', () => {
     const mockGetOrgService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockListMembersService = { execute: mock(() => Promise.resolve({ success: true })) }
     const mockContractQuotaService = {
-      execute: mock(() => Promise.resolve({ success: true, data: { contractQuota: 0, contractId: null } })),
+      execute: mock(() =>
+        Promise.resolve({ success: true, data: { contractQuota: 0, contractId: null } }),
+      ),
     }
     const mockSumAllocatedService = {
       execute: mock(() => Promise.resolve({ success: true, data: { totalAllocated: 0 } })),

@@ -34,7 +34,10 @@ export class MemberAlertsPage {
     const auth = AuthMiddleware.getAuthContext(ctx)!
     const currentOrg = ctx.get<CurrentOrganizationContext>('currentOrg')
     let orgId =
-      currentOrg?.organizationId ?? ctx.getQuery('orgId') ?? ctx.getHeader('X-Organization-Id') ?? null
+      currentOrg?.organizationId ??
+      ctx.getQuery('orgId') ??
+      ctx.getHeader('X-Organization-Id') ??
+      null
     if (!orgId) {
       const membership = await this.membershipService.execute(auth.userId)
       orgId = membership?.orgId ?? null

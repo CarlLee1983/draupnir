@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { parseBifrostSyncCron } from '../../../config/app'
+import { schedule } from '../../../config/index'
 import { DashboardServiceProvider } from '../../../src/Modules/Dashboard/Infrastructure/Providers/DashboardServiceProvider'
 import { ReportSchedule } from '../../../src/Modules/Reports/Domain/Aggregates/ReportSchedule'
 import { ReportsServiceProvider } from '../../../src/Modules/Reports/Infrastructure/Providers/ReportsServiceProvider'
@@ -59,7 +59,7 @@ describe('bootstrap registerJobs wiring', () => {
     provider.registerJobs(scheduler)
 
     const spec = scheduler.scheduled.get('bifrost-sync')?.spec
-    expect(spec?.cron).toBe(parseBifrostSyncCron('*/5 * * * *'))
+    expect(spec?.cron).toBe(schedule.bifrostSync.cron)
     expect(spec?.runOnInit).toBe(true)
     expect(spec?.maxRetries).toBe(2)
     expect(spec?.backoffMs).toBe(2000)
@@ -87,9 +87,5 @@ describe('bootstrap registerJobs wiring', () => {
 
     expect(scheduler.has('report:report-x')).toBe(true)
     expect(scheduler.has('report:report-y')).toBe(true)
-  })
-
-  it('rejects invalid BIFROST_SYNC_CRON values', () => {
-    expect(() => parseBifrostSyncCron('not-a-cron')).toThrow('Invalid BIFROST_SYNC_CRON')
   })
 })
