@@ -62,6 +62,14 @@ import { DatabaseAccessBuilder } from './wiring/DatabaseAccessBuilder'
 import { getCurrentORM } from './wiring/RepositoryFactory'
 import { initializeRegistry } from './wiring/RepositoryRegistry'
 
+export interface BootstrapHooks {
+  /**
+   * Runs after every provider register() call has populated the container but before core.bootstrap().
+   * Use this to rebind external ports to test fakes.
+   */
+  readonly afterRegister?: (core: PlanetCore) => void | Promise<void>
+}
+
 /**
  * Narrows an unknown module instance to {@link IJobRegistrar} when it exposes `registerJobs`.
  *
@@ -93,7 +101,7 @@ function isQueueRegistrar(value: unknown): value is IQueueRegistrar {
  * @param port - HTTP listen port forwarded into `buildConfig` (default **3000**).
  * @returns A fully configured `PlanetCore` ready to listen; does not call `listen()` itself.
  */
-export async function bootstrap(port = 3000): Promise<PlanetCore> {
+export async function bootstrap(port = 3000, hooks?: BootstrapHooks): Promise<PlanetCore> {
   SchemaCache.registerValidators([new ZodValidator()])
 
   const configObj = buildConfig(port)
@@ -144,6 +152,10 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
 
   for (const module of modules) {
     core.register(createGravitoServiceProvider(module))
+  }
+
+  if (hooks?.afterRegister) {
+    await hooks.afterRegister(core)
   }
 
   await core.bootstrap()

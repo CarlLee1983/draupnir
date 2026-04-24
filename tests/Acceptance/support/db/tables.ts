@@ -1,0 +1,32 @@
+/**
+ * List of tables that truncateAcceptanceTables() must empty between tests.
+ */
+export const ACCEPTANCE_TABLES: readonly string[] = [
+  'users',
+  'user_profiles',
+  'auth_tokens',
+  'email_verification_tokens',
+  'password_reset_tokens',
+  'health_checks',
+  'organizations',
+  'organization_members',
+  'organization_invitations',
+  'api_keys',
+  'app_api_keys',
+  'credit_accounts',
+  'credit_transactions',
+  'usage_records',
+  'sync_cursors',
+  'pricing_rules',
+  'quarantined_logs',
+  'alert_configs',
+  'alert_events',
+  'webhook_endpoints',
+  'alert_deliveries',
+  'report_schedules',
+  'app_modules',
+  'applications',
+  'webhook_configs',
+  'contracts',
+  'module_subscriptions',
+]
