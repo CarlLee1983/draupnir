@@ -63,9 +63,11 @@ export class KeyScope {
     if (!(other instanceof KeyScope)) return false
     if (this.rateLimitRpm !== other.rateLimitRpm) return false
     if (this.rateLimitTpm !== other.rateLimitTpm) return false
-    if (this.allowedModels === null && other.allowedModels === null) return true
-    if (this.allowedModels === null || other.allowedModels === null) return false
-    if (this.allowedModels.length !== other.allowedModels.length) return false
-    return this.allowedModels.every((m, i) => m === other.allowedModels![i])
+    const a = this.allowedModels
+    const b = other.allowedModels
+    if (a === null && b === null) return true
+    if (a === null || b === null) return false
+    if (a.length !== b.length) return false
+    return a.every((m, i) => m === b[i])
   }
 }

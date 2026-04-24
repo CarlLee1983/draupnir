@@ -6,7 +6,7 @@ export class TopUpRequest extends FormRequest {
     amount: z.string().refine(
       (val) => {
         const n = parseFloat(val)
-        return !isNaN(n) && n > 0
+        return !Number.isNaN(n) && n > 0
       },
       { message: 'Amount must be a positive number' },
     ),

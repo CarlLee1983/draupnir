@@ -25,7 +25,9 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
  * Repository Factory 函數類型
  * 每個模組為其 Repository 提供一個工廠函數
  */
-export type RepositoryFactory = (orm: string, databaseAccess: IDatabaseAccess | undefined) => any
+
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+export  type RepositoryFactory = (orm: string, databaseAccess: IDatabaseAccess | undefined) => any
 
 /**
  * Repository Registry - 集中管理所有 Repository 工廠
@@ -68,7 +70,9 @@ export class RepositoryRegistry {
    *
    * @throws 如果 Repository 類型未註冊
    */
-  create(type: string, orm: string, databaseAccess: IDatabaseAccess | undefined): any {
+  
+// biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+create(type: string, orm: string, databaseAccess: IDatabaseAccess | undefined): any {
     const factory = this.factories.get(type)
 
     if (!factory) {

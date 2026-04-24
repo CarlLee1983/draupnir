@@ -67,6 +67,7 @@ export class WebhookAlertNotifier implements IAlertNotifier {
   }
 
   private async dispatchResend(payload: AlertPayload): Promise<DeliveryResult> {
+    // biome-ignore lint/style/noNonNullAssertion: guaranteed by control flow or DOM contract
     const id = payload.resendWebhookEndpointId!
     const endpoint = await this.deps.endpointRepo.findById(id)
     if (!endpoint) {

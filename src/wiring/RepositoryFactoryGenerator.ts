@@ -57,9 +57,13 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
  * }
  */
 export type RepositoryFactoryMap = {
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   memory?: () => any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   drizzle?: (db: IDatabaseAccess) => any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   atlas?: (db: IDatabaseAccess) => any
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   prisma?: (db: IDatabaseAccess) => any
 }
 
@@ -80,6 +84,7 @@ export type RepositoryFactoryMap = {
  * registry.register('user', userFactory)
  */
 export function createRepositoryFactory(factoryMap: RepositoryFactoryMap) {
+  // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
   return (orm: string, db: IDatabaseAccess | undefined): any => {
     // 根據 ORM 類型選擇工廠
     const factory = factoryMap[orm as keyof RepositoryFactoryMap]
@@ -93,11 +98,13 @@ export function createRepositoryFactory(factoryMap: RepositoryFactoryMap) {
     // 調用工廠函數
     // memory 不需要 db，其他 ORM 需要 db
     if (orm === 'memory') {
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       return (factory as () => any)()
     } else {
       if (!db) {
         throw new Error(`❌ ORM="${orm}" 需要 DatabaseAccess，但未提供`)
       }
+      // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
       return (factory as (db: IDatabaseAccess) => any)(db)
     }
   }

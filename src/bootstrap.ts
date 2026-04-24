@@ -114,6 +114,7 @@ export async function bootstrap(port = 3000): Promise<PlanetCore> {
 
   const orbits = getOrbits({
     useDatabase,
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
     redis: redisConfig as any,
   })
 
