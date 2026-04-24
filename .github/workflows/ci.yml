@@ -149,6 +149,36 @@ jobs:
           BIFROST_MASTER_KEY: ci-test-key
           JWT_SECRET: ci-test-secret
 
+  acceptance-tests:
+    runs-on: ubuntu-latest
+    env:
+      BIFROST_API_URL: http://localhost:8080
+      BIFROST_MASTER_KEY: ci-test-key
+      JWT_SECRET: ci-test-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock', 'bun.lockb') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+      - name: Run acceptance tests
+        run: bun run test:acceptance
+      - name: Upload acceptance coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-coverage-lcov
+          path: coverage/
+          if-no-files-found: ignore
+
   di-audit:
     runs-on: ubuntu-latest
     steps:
