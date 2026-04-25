@@ -42,6 +42,8 @@
     "setup": "bun install && bash scripts/setup-hooks.sh && bun run verify",
     "troubleshoot": "bash scripts/troubleshoot.sh",
     "generate:module": "bun scripts/generate-module.ts",
+    "routes:analyze": "bun scripts/routes-analyzer.ts",
+    "verify:routes": "bun scripts/routes-analyzer.ts && bun run test:feature",
     "check:commit": "bash scripts/check-commit.sh",
     "check:i18n": "bun scripts/check-i18n-locales.ts",
     "setup:hooks": "bash scripts/setup-hooks.sh",

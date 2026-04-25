@@ -4,7 +4,7 @@
 
 ## 核心成果
 
-在 Draupnir 中，routes 驗證由 **`scripts/routes-analyzer.ts`**（靜態 regex）與 **`tests/Feature/routes-*.e2e.ts`**（動態 HTTP）組成；快照數字見 [ROUTES_VERIFICATION.md](./ROUTES_VERIFICATION.md) 與 [docs/README_ROUTES_VERIFICATION.md](./docs/README_ROUTES_VERIFICATION.md)（2026-04-13 同步）。
+在 Draupnir 中，routes 驗證由 **`scripts/routes-analyzer.ts`**（靜態 regex）與 **`tests/Feature/routes-*.e2e.ts`**（動態 HTTP）組成；快照數字見 [ROUTES_VERIFICATION.md](./ROUTES_VERIFICATION.md) 與 [docs/README_ROUTES_VERIFICATION.md](./docs/README_ROUTES_VERIFICATION.md)（2026-04-25 同步）。
 
 本文檔將此經驗整理為一套**完全可復用的方法論**，可應用於任何 Node.js/Bun API 項目。
 
@@ -163,7 +163,7 @@ def test_routes():
 $ bun run routes:analyze
 🔍 正在分析路由: src/Modules
 
-總 Routes 數: （以你的 routes-analysis.json 為準，Draupnir 快照約 43）
+總 Routes 數: （以你的 routes-analysis.json 為準，Draupnir 快照約 51）
 ```
 
 ✅ **快速驗證所有 routes 存在**
@@ -173,10 +173,7 @@ $ bun run test:feature
 ```
 
 ✅ **生成詳細驗證報告**
-```bash
-$ bun run routes:report
-✅ 報告已生成: ROUTES_REPORT.md
-```
+檢視 `routes-analysis.json` 或人工維護之 `tests/routes-validation.report.md`。
 
 ✅ **集成到 CI/CD**
 ```bash
@@ -368,10 +365,10 @@ A: 修改 `routes-analyzer.ts` 和測試文件。詳見 [完整指南](./docs/RO
 
 ## 📄 版本信息
 
-- **方法論版本**: v1.1
+- **方法論版本**: v1.2
 - **工具版本**: 與 Draupnir repo 同步
-- **驗證項目**: Draupnir v0.1.0
-- **驗證日期**: 2026-04-13
+- **驗證項目**: Draupnir v0.2.0
+- **驗證日期**: 2026-04-25
 - **驗證結果**: 見 [ROUTES_VERIFICATION.md](./ROUTES_VERIFICATION.md) 快照（分析器 + e2e）
 
 ---
