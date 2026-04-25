@@ -61,3 +61,6 @@ draupnir_ci-shm
 # Superpowers
 .superpowers/
 .npm_cache
+
+# Gravito
+.gravito-standards-export/
