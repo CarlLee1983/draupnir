@@ -9,13 +9,13 @@
 
 這條功能**已實作**，而且是目前系統資料管線的一部分：
 
-- Scheduler 會定期觸發 `BifrostSyncService.sync()`
+- Scheduler 會根據 `config/schedule.ts` 定期觸發 `BifrostSyncService.sync()`
 - `BifrostSyncService` 會向 gateway 抓 usage logs
 - 每筆 log 會被映射為 `UsageRecordInsert`
 - 成功資料會寫入本地 `usage_records`
 - 無法對應的 log 會進 `quarantined_logs`
 - 同步完成後會發 `BifrostSyncCompletedEvent`
-- Credit 與 Alerts 透過事件接續處理
+- Credit 與 Alerts 透過事件或 **Background Queue** 接續處理
 - Dashboard 與 Reports 後續只讀本地 usage read model，不需要直接打 gateway
 
 ---
@@ -248,4 +248,4 @@ Alerts 也會消費 `BifrostSyncCompletedEvent`，再評估閾值並投遞通知
 
 如果後續要做的是「更嚴格的 immutable snapshot」或「更細的分模組 usage 追蹤」，那會是新一輪設計，不是這條 pipeline 的既有行為。
 
-**最後更新**：2026-04-22
+**最後更新**：2026-04-26

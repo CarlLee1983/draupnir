@@ -1,6 +1,6 @@
 # 模組依賴圖
 
-本頁依 `src/Modules/*` 的 `@/Modules/...` 引用與 `src/wiring/index.ts` 註冊順序整理，反映**目前程式碼**的模組邊界（非理想目標架構）。
+本頁依 `src/Modules/*` 的 `@/Modules/...` 引用與 `src/bootstrap.ts` 內各模組 `*ServiceProvider` 註冊順序整理，反映**目前程式碼**的模組邊界（非理想目標架構）。
 
 ## 15 模組全景圖
 
@@ -56,7 +56,8 @@
                └──────────┘
 
 ┌──────────┐
-│ Reports  │  僅 Shared／Foundation／排程 — 不依其他業務模組
+│ Reports  │  Shared／Foundation／排程；另：`OrganizationMiddleware`、
+│          │  `Dashboard` 的 `IUsageRepository`（報表快照用量）
 └──────────┘
 ```
 
@@ -69,7 +70,7 @@
 | 模組 | 依賴 | 被依賴 | 性質 |
 |------|------|--------|------|
 | **Profile** | Shared, Auth | Auth | 用戶資料；Controller 注入 Auth 後台服務 |
-| **Organization** | Shared, AppModule, Auth | ApiKey, Credit, Dashboard, Contract, AppApiKey, DevPortal, Alerts | 組織與成員；建立組織時呼叫 AppModule 預設開通 |
+| **Organization** | Shared, AppModule, Auth | ApiKey, Credit, Dashboard, Contract, AppApiKey, DevPortal, Alerts, Reports | 組織與成員；建立組織時呼叫 AppModule 預設開通 |
 | **Auth** | Shared, Profile | Profile, Organization, ApiKey, Dashboard, Contract, AppModule, AppApiKey, Credit, DevPortal, CliApi 等（路由／服務） | 認證與 JWT |
 | **ApiKey** | Shared, Organization, Auth | Credit, Dashboard, Alerts | 用戶 API Key；Org 權限校驗 |
 | **Credit** | Shared, ApiKey, Organization, Auth | SdkApi | 額度帳戶；部分流程讀 ApiKey |
@@ -77,7 +78,7 @@
 | **AppModule** | Shared, Contract, Auth | Organization | 模組訂閱與開通；CheckModuleAccess 讀 Contract |
 | **AppApiKey** | Shared, Organization, Auth | SdkApi, DevPortal | 應用密鑰 |
 | **Health** | Shared | — | 健康檢查 |
-| **Dashboard** | Shared, ApiKey, Organization, Auth | Alerts | 儀表與用量埠（Alerts 依 `IUsageRepository`） |
+| **Dashboard** | Shared, ApiKey, Organization, Auth | Alerts, Reports | 儀表與用量埠（Alerts／Reports 依 `IUsageRepository`） |
 
 ### API 閘道與週邊（5）
 
@@ -87,7 +88,7 @@
 | **SdkApi** | Shared, AppApiKey, Credit | — | `/sdk/v1` 閘道 |
 | **DevPortal** | Shared, Organization, AppApiKey, Auth | — | 開發者入口 |
 | **Alerts** | Shared, ApiKey, Auth, Dashboard（埠）, Organization | — | 告警與 Webhook |
-| **Reports** | Shared／Foundation（排程、郵件） | — | 排程報表 PDF／寄信 |
+| **Reports** | Shared／Foundation（排程、郵件）、Dashboard（`IUsageRepository`）、Organization（路由 `OrganizationMiddleware`） | — | 排程報表 PDF／寄信 |
 
 ## 依賴關係規則
 
@@ -112,7 +113,7 @@
 
 4. **跨模組僅透過埠／應用服務**
    ```
-   Alerts → Dashboard 的 IUsageRepository（埠）✅
+   Alerts／Reports → Dashboard 的 IUsageRepository（埠）✅
    ```
 
 ### ❌ 禁止的依賴（目標）
@@ -140,13 +141,13 @@
 ### 低耦合
 
 - **Health** — 不引用其他 `Modules`。
-- **Reports** — 不引用其他業務模組，適合獨立演進。
+- **Reports** — 核心仍為排程／郵件；跨模組僅路由層 `OrganizationMiddleware` 與快照用的 Dashboard `IUsageRepository`。
 
 ### 中耦合
 
 - **ApiKey / Credit** — 透過 Organization 做授權；Credit 部分流程讀 ApiKey。
 - **CliApi / SdkApi** — 閘道型，依賴少而明確。
-- **Dashboard** — 讀模型，向外暴露 `IUsageRepository` 供 Alerts 使用。
+- **Dashboard** — 讀模型，向外暴露 `IUsageRepository` 供 Alerts、Reports 使用。
 
 ### 高耦合／協調熱點
 
@@ -200,7 +201,7 @@ Organization → AppModule → Contract → Organization
 - [ ] 不引入新的模組層循環；若必須協調，考慮事件或上移埠
 - [ ] 提供清晰的公開 API（`index.ts`）
 - [ ] 跨模組不直接暴露對方 Domain 實作細節
-- [ ] 在對應 `*ServiceProvider` 與 `src/wiring/index.ts` 註冊
+- [ ] 在對應 `*ServiceProvider` 與 `src/bootstrap.ts` 的 `modules` 陣列註冊（順序影響 DI／路由註冊）
 
 ---
 
@@ -210,4 +211,4 @@ Organization → AppModule → Contract → Organization
 - [`ddd-layered-architecture.md`](./ddd-layered-architecture.md) — 四層架構
 - [`module-boundaries.md`](../knowledge/module-boundaries.md) — 邊界約定
 - `src/Modules/*/index.ts` — 各模組公開 API
-- `src/wiring/index.ts` — HTTP 註冊與路由組裝
+- `src/bootstrap.ts` — 模組 `*ServiceProvider` 註冊順序與 `registerRoutes` 組裝
