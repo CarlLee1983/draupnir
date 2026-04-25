@@ -2,9 +2,12 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { TestApp } from '../support/TestApp'
 
 async function provisionOrganizationForContext(app: TestApp, orgId: string): Promise<void> {
-  await app.db.table('organizations').where('id', '=', orgId).update({
-    gateway_team_id: `mock_team_${orgId}`,
-  })
+  await app.db
+    .table('organizations')
+    .where('id', '=', orgId)
+    .update({
+      gateway_team_id: `mock_team_${orgId}`,
+    })
 }
 
 async function persistedHeader(
@@ -112,8 +115,16 @@ describe('Organization API contract', () => {
 
   describe('GET /api/organizations/:id', () => {
     it('pins admin success and auth failure', async () => {
-      const admin = await app.seed.user({ id: 'admin-1', email: 'admin@example.test', role: 'admin' })
-      const org = await app.seed.organization({ id: crypto.randomUUID(), name: 'Acme', slug: 'acme' })
+      const admin = await app.seed.user({
+        id: 'admin-1',
+        email: 'admin@example.test',
+        role: 'admin',
+      })
+      const org = await app.seed.organization({
+        id: crypto.randomUUID(),
+        name: 'Acme',
+        slug: 'acme',
+      })
       await provisionOrganizationForContext(app, org.id)
 
       const res = await app.http.get(`/api/organizations/${org.id}`, {
@@ -140,7 +151,11 @@ describe('Organization API contract', () => {
         email: 'manager@example.test',
         role: 'manager',
       })
-      const org = await app.seed.organization({ id: crypto.randomUUID(), name: 'Beta', slug: 'beta' })
+      const org = await app.seed.organization({
+        id: crypto.randomUUID(),
+        name: 'Beta',
+        slug: 'beta',
+      })
       await app.seed.orgMember({ orgId: org.id, userId: manager.id, role: 'manager' })
       await provisionOrganizationForContext(app, org.id)
 
@@ -176,7 +191,11 @@ describe('Organization API contract', () => {
       const url = `/api/organizations/${org.id}/members`
 
       const adminRes = await app.http.get(url, {
-        headers: await persistedHeader(app, { userId: admin.id, email: admin.email, role: 'admin' }),
+        headers: await persistedHeader(app, {
+          userId: admin.id,
+          email: admin.email,
+          role: 'admin',
+        }),
       })
       expect(adminRes.status).toBe(200)
 
@@ -220,7 +239,11 @@ describe('Organization API contract', () => {
       const url = `/api/organizations/${org.id}/invitations`
 
       const adminRes = await app.http.post(url, {
-        headers: await persistedHeader(app, { userId: admin.id, email: admin.email, role: 'admin' }),
+        headers: await persistedHeader(app, {
+          userId: admin.id,
+          email: admin.email,
+          role: 'admin',
+        }),
         body: { email: 'invitee-by-admin@example.test' },
       })
       expect(adminRes.status).toBe(201)
@@ -283,9 +306,16 @@ describe('Organization API contract', () => {
       }
 
       const invForAdmin = await createInvitation('inv-for-admin')
-      const adminRes = await app.http.delete(`/api/organizations/${org.id}/invitations/${invForAdmin}`, {
-        headers: await persistedHeader(app, { userId: admin.id, email: admin.email, role: 'admin' }),
-      })
+      const adminRes = await app.http.delete(
+        `/api/organizations/${org.id}/invitations/${invForAdmin}`,
+        {
+          headers: await persistedHeader(app, {
+            userId: admin.id,
+            email: admin.email,
+            role: 'admin',
+          }),
+        },
+      )
       expect(adminRes.status).toBe(200)
 
       const invForManager = await createInvitation('inv-for-manager')

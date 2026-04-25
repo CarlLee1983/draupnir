@@ -2,9 +2,12 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { TestApp } from '../../support/TestApp'
 
 async function provisionOrganizationForContext(app: TestApp, orgId: string): Promise<void> {
-  await app.db.table('organizations').where('id', '=', orgId).update({
-    gateway_team_id: `mock_team_${orgId}`,
-  })
+  await app.db
+    .table('organizations')
+    .where('id', '=', orgId)
+    .update({
+      gateway_team_id: `mock_team_${orgId}`,
+    })
 }
 
 async function persistedAdminHeader(app: TestApp, userId: string, email: string) {
@@ -46,7 +49,7 @@ describe('Organization access control', () => {
     await app.reset()
   })
 
-  it('lets an admin list organizations but blocks a non-member from reading someone else\'s org', async () => {
+  it("lets an admin list organizations but blocks a non-member from reading someone else's org", async () => {
     const admin = await app.seed.user({ id: 'admin-1', email: 'admin@example.test', role: 'admin' })
     const member = await app.seed.user({ id: 'user-1', email: 'member@example.test', role: 'user' })
     const org = await app.seed.organization({ id: crypto.randomUUID(), name: 'Acme', slug: 'acme' })
@@ -72,7 +75,11 @@ describe('Organization access control', () => {
   })
 
   it('blocks members from updating organizations and changing status', async () => {
-    const member = await app.seed.user({ id: 'user-2', email: 'member2@example.test', role: 'user' })
+    const member = await app.seed.user({
+      id: 'user-2',
+      email: 'member2@example.test',
+      role: 'user',
+    })
     const org = await app.seed.organization({ id: crypto.randomUUID(), name: 'Beta', slug: 'beta' })
     await app.seed.orgMember({ orgId: org.id, userId: member.id, role: 'member' })
     await provisionOrganizationForContext(app, org.id)
@@ -91,7 +98,11 @@ describe('Organization access control', () => {
   })
 
   it('returns 401 when auth is missing on protected routes', async () => {
-    const org = await app.seed.organization({ id: crypto.randomUUID(), name: 'Gamma', slug: 'gamma' })
+    const org = await app.seed.organization({
+      id: crypto.randomUUID(),
+      name: 'Gamma',
+      slug: 'gamma',
+    })
     await provisionOrganizationForContext(app, org.id)
 
     const listRes = await app.http.get('/api/organizations')
@@ -107,8 +118,16 @@ describe('Organization access control', () => {
       email: 'mgr-a-tenant@example.test',
       role: 'user',
     })
-    const orgA = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org A', slug: 'org-a' })
-    const orgB = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org B', slug: 'org-b' })
+    const orgA = await app.seed.organization({
+      id: crypto.randomUUID(),
+      name: 'Org A',
+      slug: 'org-a',
+    })
+    const orgB = await app.seed.organization({
+      id: crypto.randomUUID(),
+      name: 'Org B',
+      slug: 'org-b',
+    })
     await app.seed.orgMember({ orgId: orgA.id, userId: managerA.id, role: 'manager' })
     await provisionOrganizationForContext(app, orgA.id)
     await provisionOrganizationForContext(app, orgB.id)
@@ -127,8 +146,16 @@ describe('Organization access control', () => {
       email: 'mem-a-tenant@example.test',
       role: 'user',
     })
-    const orgA = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org A2', slug: 'org-a2' })
-    const orgB = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org B2', slug: 'org-b2' })
+    const orgA = await app.seed.organization({
+      id: crypto.randomUUID(),
+      name: 'Org A2',
+      slug: 'org-a2',
+    })
+    const orgB = await app.seed.organization({
+      id: crypto.randomUUID(),
+      name: 'Org B2',
+      slug: 'org-b2',
+    })
     await app.seed.orgMember({ orgId: orgA.id, userId: memberA.id, role: 'member' })
     await provisionOrganizationForContext(app, orgA.id)
     await provisionOrganizationForContext(app, orgB.id)
@@ -151,8 +178,16 @@ describe('Organization access control', () => {
       email: 'orgb-victim@example.test',
       role: 'user',
     })
-    const orgA = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org A3', slug: 'org-a3' })
-    const orgB = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org B3', slug: 'org-b3' })
+    const orgA = await app.seed.organization({
+      id: crypto.randomUUID(),
+      name: 'Org A3',
+      slug: 'org-a3',
+    })
+    const orgB = await app.seed.organization({
+      id: crypto.randomUUID(),
+      name: 'Org B3',
+      slug: 'org-b3',
+    })
     await app.seed.orgMember({ orgId: orgA.id, userId: managerA.id, role: 'manager' })
     await app.seed.orgMember({ orgId: orgB.id, userId: orgB_member.id, role: 'member' })
     await provisionOrganizationForContext(app, orgA.id)

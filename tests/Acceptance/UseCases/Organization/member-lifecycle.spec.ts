@@ -2,9 +2,12 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { TestApp } from '../../support/TestApp'
 
 async function provisionOrganizationForContext(app: TestApp, orgId: string): Promise<void> {
-  await app.db.table('organizations').where('id', '=', orgId).update({
-    gateway_team_id: `mock_team_${orgId}`,
-  })
+  await app.db
+    .table('organizations')
+    .where('id', '=', orgId)
+    .update({
+      gateway_team_id: `mock_team_${orgId}`,
+    })
 }
 
 async function adminHeader(app: TestApp, userId: string, email: string) {
@@ -76,10 +79,13 @@ describe('Organization member lifecycle', () => {
     expect(members.find((item) => item.userId === manager.id)?.role).toBe('manager')
     expect(members.find((item) => item.userId === member.id)?.email).toBe(member.email)
 
-    const promoteRes = await app.http.patch(`/api/organizations/${org.id}/members/${member.id}/role`, {
-      headers: await adminHeader(app, admin.id, admin.email),
-      body: { role: 'manager' },
-    })
+    const promoteRes = await app.http.patch(
+      `/api/organizations/${org.id}/members/${member.id}/role`,
+      {
+        headers: await adminHeader(app, admin.id, admin.email),
+        body: { role: 'manager' },
+      },
+    )
     expect(promoteRes.status).toBe(200)
     const promoteJson = (await promoteRes.json()) as {
       success: boolean
@@ -172,10 +178,13 @@ describe('Organization member lifecycle', () => {
     // system admin — leaving an org without any manager is never desirable.
     // Removal (admin override) is the dedicated cleanup path; covered separately
     // by 'admin can remove the last manager (cleanup path)' below.
-    const demoteRes = await app.http.patch(`/api/organizations/${org.id}/members/${manager.id}/role`, {
-      headers: await adminHeader(app, admin.id, admin.email),
-      body: { role: 'member' },
-    })
+    const demoteRes = await app.http.patch(
+      `/api/organizations/${org.id}/members/${manager.id}/role`,
+      {
+        headers: await adminHeader(app, admin.id, admin.email),
+        body: { role: 'member' },
+      },
+    )
     expect(demoteRes.status).toBe(400)
     const demoteJson = (await demoteRes.json()) as { error?: string }
     expect(demoteJson.error).toBe('CANNOT_DEMOTE_LAST_MANAGER')
@@ -263,12 +272,9 @@ describe('Organization member lifecycle', () => {
     await app.seed.orgMember({ orgId: org.id, userId: lastManager.id, role: 'manager' })
     await provisionOrganizationForContext(app, org.id)
 
-    const res = await app.http.delete(
-      `/api/organizations/${org.id}/members/${lastManager.id}`,
-      {
-        headers: await adminHeader(app, admin.id, admin.email),
-      },
-    )
+    const res = await app.http.delete(`/api/organizations/${org.id}/members/${lastManager.id}`, {
+      headers: await adminHeader(app, admin.id, admin.email),
+    })
     expect(res.status).toBe(200)
 
     const stillThere = await app.db
@@ -281,10 +287,7 @@ describe('Organization member lifecycle', () => {
     // System role decay: ex-manager who isn't a manager elsewhere should be
     // downgraded to 'member'. Mirrors the assertion pattern from the
     // 'removes a member and clears any API key assignment first' test.
-    const userRow = await app.db
-      .table('users')
-      .where('id', '=', lastManager.id)
-      .first()
+    const userRow = await app.db.table('users').where('id', '=', lastManager.id).first()
     expect(userRow?.role).toBe('member')
   })
 })
