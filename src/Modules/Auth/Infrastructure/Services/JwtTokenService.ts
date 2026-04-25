@@ -10,6 +10,8 @@
  */
 
 import jwt from 'jsonwebtoken'
+import type { IClock } from '@/Shared/Application/Ports/IClock'
+import { SystemClock } from '@/Shared/Infrastructure/Services/SystemClock'
 import type { IJwtTokenService, TokenSignPayload } from '../../Application/Ports/IJwtTokenService'
 import { AuthToken, type TokenPayload, TokenType } from '../../Domain/ValueObjects/AuthToken'
 
@@ -24,16 +26,19 @@ const REFRESH_TOKEN_EXPIRES_IN = 7 * 24 * 60 * 60
  * Service for managing JSON Web Tokens (JWT).
  */
 export class JwtTokenService implements IJwtTokenService {
+  constructor(private readonly clock: IClock = new SystemClock()) {}
+
   /**
    * Signs a new access token.
    */
   signAccessToken(payload: TokenSignPayload): AuthToken {
-    const expiresAt = new Date(Date.now() + ACCESS_TOKEN_EXPIRES_IN * 1000)
+    const now = this.clock.now()
+    const expiresAt = new Date(now.getTime() + ACCESS_TOKEN_EXPIRES_IN * 1000)
     const tokenPayload: TokenPayload = {
       ...payload,
       jti: crypto.randomUUID(),
       type: TokenType.ACCESS,
-      iat: Math.floor(Date.now() / 1000),
+      iat: Math.floor(now.getTime() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
     }
 
@@ -46,12 +51,13 @@ export class JwtTokenService implements IJwtTokenService {
    * Signs a new refresh token.
    */
   signRefreshToken(payload: TokenSignPayload): AuthToken {
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_IN * 1000)
+    const now = this.clock.now()
+    const expiresAt = new Date(now.getTime() + REFRESH_TOKEN_EXPIRES_IN * 1000)
     const tokenPayload: TokenPayload = {
       ...payload,
       jti: crypto.randomUUID(),
       type: TokenType.REFRESH,
-      iat: Math.floor(Date.now() / 1000),
+      iat: Math.floor(now.getTime() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
     }
 
@@ -65,7 +71,9 @@ export class JwtTokenService implements IJwtTokenService {
    */
   verify(token: string): TokenPayload | null {
     try {
-      const payload = jwt.verify(token, JWT_SECRET) as TokenPayload
+      const payload = jwt.verify(token, JWT_SECRET, {
+        clockTimestamp: Math.floor(this.clock.now().getTime() / 1000),
+      }) as TokenPayload
       return payload
     } catch {
       return null
@@ -93,7 +101,7 @@ export class JwtTokenService implements IJwtTokenService {
     if (!payload) {
       return false
     }
-    return payload.exp > Math.floor(Date.now() / 1000)
+    return payload.exp > Math.floor(this.clock.now().getTime() / 1000)
   }
 
   /**
@@ -104,7 +112,7 @@ export class JwtTokenService implements IJwtTokenService {
     if (!payload) {
       return -1
     }
-    const now = Math.floor(Date.now() / 1000)
+    const now = Math.floor(this.clock.now().getTime() / 1000)
     return Math.max(0, (payload.exp - now) * 1000)
   }
 

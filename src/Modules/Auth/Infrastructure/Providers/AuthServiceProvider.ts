@@ -13,6 +13,7 @@
 
 import { UserRegisteredHandler } from '@/Modules/Profile/Application/EventHandlers/UserRegisteredHandler'
 import type { IUserProfileRepository } from '@/Modules/Profile/Domain/Repositories/IUserProfileRepository'
+import type { IClock } from '@/Shared/Application/Ports/IClock'
 import { DomainEventDispatcher } from '@/Shared/Domain/DomainEventDispatcher'
 import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
@@ -76,7 +77,10 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
 
   protected override registerInfraServices(container: IContainer): void {
     container.singleton('passwordHasher', () => new ScryptPasswordHasher())
-    container.singleton('jwtTokenService', () => new JwtTokenService())
+    container.singleton(
+      'jwtTokenService',
+      (c: IContainer) => new JwtTokenService(c.make('clock') as IClock),
+    )
     container.singleton(
       'googleOAuthAdapter',
       () =>
@@ -247,8 +251,13 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
    * subscribes to `auth.user_registered` so `UserRegisteredHandler` can create profile rows.
    */
   override boot(container: IContainer): void {
-    // Middleware 初始化
-    configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
+    // Middleware 初始化（passing container-bound jwtTokenService so verification respects DI clock）
+    configureAuthMiddleware(
+      container.make('authTokenRepository') as IAuthTokenRepository,
+      container.make(
+        'jwtTokenService',
+      ) as import('../../Application/Ports/IJwtTokenService').IJwtTokenService,
+    )
 
     // Event 訂閱
     const profileRepo = container.make('profileRepository') as IUserProfileRepository

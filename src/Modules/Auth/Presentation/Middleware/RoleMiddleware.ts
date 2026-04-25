@@ -2,6 +2,7 @@
 
 import { AuthMiddleware } from '@/Shared/Infrastructure/Middleware/AuthMiddleware'
 import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
+import type { IJwtTokenService } from '../../Application/Ports/IJwtTokenService'
 import type { IAuthTokenRepository } from '../../Domain/Repositories/IAuthTokenRepository'
 
 /** Static instance of the auth middleware parser. */
@@ -11,8 +12,11 @@ let jwtParser: AuthMiddleware | null = null
  * Global configuration hook to inject the token repository into the middleware.
  * Should be called during module registration in the Service Provider.
  */
-export function configureAuthMiddleware(tokenRepository: IAuthTokenRepository): void {
-  jwtParser = new AuthMiddleware(tokenRepository)
+export function configureAuthMiddleware(
+  tokenRepository: IAuthTokenRepository,
+  jwtService?: IJwtTokenService,
+): void {
+  jwtParser = new AuthMiddleware(tokenRepository, jwtService)
 }
 
 /**
