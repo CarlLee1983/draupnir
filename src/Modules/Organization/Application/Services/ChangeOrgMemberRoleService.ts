@@ -17,6 +17,7 @@ export class ChangeOrgMemberRoleService {
     orgId: string,
     targetUserId: string,
     newRole: string,
+    requesterId?: string,
   ): Promise<OrganizationResponse> {
     try {
       const newRoleVO = new OrgMemberRole(newRole)
@@ -24,6 +25,15 @@ export class ChangeOrgMemberRoleService {
       const member = await this.memberRepository.findByUserAndOrgId(targetUserId, orgId)
       if (!member) {
         return { success: false, message: 'Member not found', error: 'MEMBER_NOT_FOUND' }
+      }
+
+      if (
+        requesterId !== undefined &&
+        targetUserId === requesterId &&
+        member.isManager() &&
+        !newRoleVO.isManager()
+      ) {
+        return { success: false, message: 'Cannot demote yourself', error: 'CANNOT_DEMOTE_SELF' }
       }
 
       const updated = member.changeRole(newRoleVO)
