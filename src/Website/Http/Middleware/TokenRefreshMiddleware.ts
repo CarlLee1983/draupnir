@@ -19,6 +19,7 @@
  * (section: web access token silent refresh / `TokenRefreshMiddleware`).
  */
 
+import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
 import type { RefreshTokenService } from '@/Modules/Auth/Application/Services/RefreshTokenService'
 import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
 import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
@@ -34,7 +35,7 @@ import type { Middleware } from '@/Shared/Presentation/IModuleRouter'
 export const REFRESHED_AUTH_TOKEN_HASH_KEY = 'refreshedAuthTokenHash'
 
 let refreshService: RefreshTokenService | null = null
-const jwtService = new JwtTokenService()
+let jwtService: IJwtTokenService = new JwtTokenService()
 
 /**
  * Injects the application {@link RefreshTokenService} used by {@link createTokenRefreshMiddleware}.
@@ -43,9 +44,18 @@ const jwtService = new JwtTokenService()
  * `make('refreshTokenService')`. If never called, the middleware no-ops when refresh would be needed.
  *
  * @param service - Bound `RefreshTokenService` instance from the DI container.
+ * @param jwt - Optional clock-aware `IJwtTokenService` instance. When provided, replaces the default
+ *   `JwtTokenService()` used internally to verify silently-refreshed access tokens. Acceptance tests
+ *   pass the container-bound instance so verification respects the injected `TestClock`.
  */
-export function configureTokenRefresh(service: RefreshTokenService): void {
+export function configureTokenRefresh(
+  service: RefreshTokenService,
+  jwt?: IJwtTokenService,
+): void {
   refreshService = service
+  if (jwt) {
+    jwtService = jwt
+  }
 }
 
 /**

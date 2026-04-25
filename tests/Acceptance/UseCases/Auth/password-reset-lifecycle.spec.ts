@@ -71,6 +71,7 @@ describe('Auth password reset lifecycle', () => {
       .where('email', '=', email)
       .first()
     expect(resetRow).toBeTruthy()
+    if (!resetRow) throw new Error('reset row missing')
     const resetToken = String(resetRow.id)
 
     const resetPageRes = await app.http.get(`/reset-password/${resetToken}`)

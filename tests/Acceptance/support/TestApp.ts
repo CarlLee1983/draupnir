@@ -7,8 +7,11 @@ import { adaptGravitoContainer } from '@/Shared/Infrastructure/Framework/Gravito
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
+import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
+import type { RefreshTokenService } from '@/Modules/Auth/Application/Services/RefreshTokenService'
 import { configureAuthMiddleware } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { configureTokenRefresh } from '@/Website/Http/Middleware/TokenRefreshMiddleware'
 import { joinPath } from '@/Website/Http/Routing/routePath'
 import { createLastResultStore, type LastResultStore } from './lastResult'
 import { InProcessHttpClient } from './http/InProcessHttpClient'
@@ -26,7 +29,15 @@ export interface CapturedEvent {
   readonly occurredAt: Date
 }
 
-const INITIAL_CLOCK_ISO = '2026-01-01T00:00:00.000Z'
+/**
+ * Anchored to wall-clock at TestApp.boot() so token rows persisted with
+ * TestClock-derived expires_at remain "in the future" relative to repository
+ * filters that still use `new Date()` (e.g. AuthTokenRepository.findByUserId).
+ * TestClock can still advance independently to drive expiry-controlled tests.
+ */
+function initialClockBaseline(): Date {
+  return new Date()
+}
 
 export class TestApp {
   readonly container: IContainer
@@ -43,11 +54,13 @@ export class TestApp {
   private readonly core: PlanetCore
   private readonly dbPath: string
   private readonly unsubscribeObserver: () => void
+  private readonly initialClock: Date
 
   private constructor(params: {
     core: PlanetCore
     container: IContainer
     clock: TestClock
+    initialClock: Date
     gateway: MockGatewayClient
     scheduler: ManualScheduler
     queue: ManualQueue
@@ -62,6 +75,7 @@ export class TestApp {
     this.core = params.core
     this.container = params.container
     this.clock = params.clock
+    this.initialClock = params.initialClock
     this.gateway = params.gateway
     this.scheduler = params.scheduler
     this.queue = params.queue
@@ -93,7 +107,8 @@ export class TestApp {
 
     DomainEventDispatcher.resetForTesting()
 
-    const clock = new TestClock(new Date(INITIAL_CLOCK_ISO))
+    const initialClock = initialClockBaseline()
+    const clock = new TestClock(initialClock)
     const gateway = new MockGatewayClient()
     const scheduler = new ManualScheduler()
     const queue = new ManualQueue()
@@ -126,7 +141,16 @@ export class TestApp {
     const container = adaptGravitoContainer(core.container)
 
     // Wire the real authTokenRepository so the middleware revocation check uses the DB.
-    configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
+    // Pass the container-bound jwtTokenService so middleware verification honors the injected TestClock.
+    const containerJwtService = container.make('jwtTokenService') as IJwtTokenService
+    configureAuthMiddleware(
+      container.make('authTokenRepository') as IAuthTokenRepository,
+      containerJwtService,
+    )
+    configureTokenRefresh(
+      container.make('refreshTokenService') as RefreshTokenService,
+      containerJwtService,
+    )
     const http = new InProcessHttpClient(core)
     const auth = new TestAuth(container)
     const seed = new TestSeed(() => container.make('database') as IDatabaseAccess, gateway)
@@ -146,6 +170,7 @@ export class TestApp {
       core,
       container,
       clock,
+      initialClock,
       gateway,
       scheduler,
       queue,
@@ -170,7 +195,7 @@ export class TestApp {
     this.scheduler.stopAll()
     this.queue.reset()
     this.events.length = 0
-    this.clock.setNow(new Date(INITIAL_CLOCK_ISO))
+    this.clock.setNow(new Date(this.initialClock.getTime()))
   }
 
   async shutdown(): Promise<void> {

@@ -8,6 +8,7 @@
  * - Allow unauthenticated requests to pass (401 response is decided by the Controller)
  */
 
+import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
 import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import { JwtTokenService } from '@/Modules/Auth/Infrastructure/Services/JwtTokenService'
 import type { IHttpContext } from '@/Shared/Presentation/IHttpContext'
@@ -49,10 +50,13 @@ export function extractRawAuthToken(ctx: IHttpContext): string | null {
 }
 
 export class AuthMiddleware {
-  private jwtService: JwtTokenService
+  private jwtService: IJwtTokenService
 
-  constructor(private authTokenRepository?: IAuthTokenRepository) {
-    this.jwtService = new JwtTokenService()
+  constructor(
+    private authTokenRepository?: IAuthTokenRepository,
+    jwtService?: IJwtTokenService,
+  ) {
+    this.jwtService = jwtService ?? new JwtTokenService()
   }
 
   /**

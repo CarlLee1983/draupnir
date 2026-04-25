@@ -251,8 +251,11 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
    * subscribes to `auth.user_registered` so `UserRegisteredHandler` can create profile rows.
    */
   override boot(container: IContainer): void {
-    // Middleware 初始化
-    configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
+    // Middleware 初始化（passing container-bound jwtTokenService so verification respects DI clock）
+    configureAuthMiddleware(
+      container.make('authTokenRepository') as IAuthTokenRepository,
+      container.make('jwtTokenService') as import('../../Application/Ports/IJwtTokenService').IJwtTokenService,
+    )
 
     // Event 訂閱
     const profileRepo = container.make('profileRepository') as IUserProfileRepository
