@@ -66,10 +66,7 @@ describe('Auth password reset lifecycle', () => {
     })
     expect(forgotRes.status).toBe(200)
 
-    const resetRow = await app.db
-      .table('password_reset_tokens')
-      .where('email', '=', email)
-      .first()
+    const resetRow = await app.db.table('password_reset_tokens').where('email', '=', email).first()
     expect(resetRow).toBeTruthy()
     if (!resetRow) throw new Error('reset row missing')
     const resetToken = String(resetRow.id)

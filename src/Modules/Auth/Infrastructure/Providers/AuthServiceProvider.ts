@@ -254,7 +254,9 @@ export class AuthServiceProvider extends ModuleServiceProvider implements IRoute
     // Middleware 初始化（passing container-bound jwtTokenService so verification respects DI clock）
     configureAuthMiddleware(
       container.make('authTokenRepository') as IAuthTokenRepository,
-      container.make('jwtTokenService') as import('../../Application/Ports/IJwtTokenService').IJwtTokenService,
+      container.make(
+        'jwtTokenService',
+      ) as import('../../Application/Ports/IJwtTokenService').IJwtTokenService,
     )
 
     // Event 訂閱

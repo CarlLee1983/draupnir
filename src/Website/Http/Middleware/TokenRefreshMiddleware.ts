@@ -48,10 +48,7 @@ let jwtService: IJwtTokenService = new JwtTokenService()
  *   `JwtTokenService()` used internally to verify silently-refreshed access tokens. Acceptance tests
  *   pass the container-bound instance so verification respects the injected `TestClock`.
  */
-export function configureTokenRefresh(
-  service: RefreshTokenService,
-  jwt?: IJwtTokenService,
-): void {
+export function configureTokenRefresh(service: RefreshTokenService, jwt?: IJwtTokenService): void {
   refreshService = service
   if (jwt) {
     jwtService = jwt

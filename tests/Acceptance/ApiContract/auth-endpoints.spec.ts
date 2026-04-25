@@ -126,10 +126,7 @@ describe('Auth API contract', () => {
     })
     expect(requestInvalid.status).toBe(422)
 
-    const resetRow = await app.db
-      .table('password_reset_tokens')
-      .where('email', '=', email)
-      .first()
+    const resetRow = await app.db.table('password_reset_tokens').where('email', '=', email).first()
     expect(resetRow).toBeTruthy()
     if (!resetRow) throw new Error('reset row missing')
     const token = String(resetRow.id)
