@@ -362,8 +362,13 @@ bun run check
 
 本模式的落地單位是「規格與測試」，不是某個流程工具。建議用以下三個輕量入口即可：
 
-1. **Issue / task 描述**：貼上 `TDD Slice Checklist`，作為開工前的完成定義。
-2. **PR description**：列出 Unit / Acceptance / API Contract 覆蓋與實際跑過的命令。
+1. **Issue / task 描述**：貼上 `TDD Slice Checklist`，作為開工前的完成定義。可直接複製 [`docs/templates/tdd-slice.md`](../../templates/tdd-slice.md)。
+2. **PR description**：列出 Unit / Acceptance / API Contract 覆蓋與實際跑過的命令；`.github/PULL_REQUEST_TEMPLATE.md` 已提供 `TDD Evidence` 區塊。
 3. **AGENTS.md / contributor docs**：要求非 trivial feature、bug fix、refactor 預設遵守 Acceptance-First TDD。
+
+測試骨架可從 `tests/Acceptance/templates/` 複製：
+
+- `use-case.spec.template.ts`：業務流程 / 跨模組 acceptance spine。
+- `api-contract.spec.template.ts`：endpoint happy path、auth failure、validation failure。
 
 可選工具如 GSD、OMX、GitHub Projects、Linear、Notion 都只能承載這份 checklist；它們不是必要條件，也不能取代測試證據。
