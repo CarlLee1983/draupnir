@@ -99,6 +99,31 @@ describe('ChangeOrgMemberRoleService', () => {
     const result = await service.execute('org-1', 'user-mem-1', 'owner')
     expect(result.success).toBe(false)
   })
+
+  it('manager 將自己降為 member 應回傳 CANNOT_DEMOTE_SELF', async () => {
+    const manager = makeMember('manager')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+    ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(manager)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+    ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(2)
+
+    const result = await service.execute('org-1', 'user-mem-1', 'member', 'user-mem-1')
+    expect(result.success).toBe(false)
+    expect(result.error).toBe('CANNOT_DEMOTE_SELF')
+  })
+
+  it('manager 將他人降為 member 不應觸發 CANNOT_DEMOTE_SELF', async () => {
+    const manager = makeMember('manager')
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+    ;(memberRepo.findByUserAndOrgId as any).mockResolvedValue(manager)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+    ;(memberRepo.countManagersByOrgId as any).mockResolvedValue(2)
+    // biome-ignore lint/suspicious/noExplicitAny: explicit any: incremental cleanup
+    ;(memberRepo.update as any).mockResolvedValue()
+
+    const result = await service.execute('org-1', 'user-mem-1', 'member', 'requester-x')
+    expect(result.error).not.toBe('CANNOT_DEMOTE_SELF')
+  })
 })
 
 describe('ChangeOrgMemberRoleService — 降級邏輯', () => {

@@ -267,12 +267,14 @@ export class OrganizationController {
   }
 
   async changeMemberRole(ctx: IHttpContext): Promise<Response> {
+    const auth = AuthMiddleware.getAuthContext(ctx)
+    if (!auth) return ctx.json({ success: false, message: 'Unauthorized' }, 401)
     const validated = validateOrganizationMemberParams(ctx)
     if (!validated.ok) return validated.response
     const orgId = validated.orgId
     const userId = validated.userId
     const body = ctx.get('validated') as ChangeMemberRoleParams
-    const result = await this.changeRoleService.execute(orgId, userId, body.role)
+    const result = await this.changeRoleService.execute(orgId, userId, body.role, auth.userId)
     return ctx.json(result, result.success ? 200 : 400)
   }
 
