@@ -4,7 +4,6 @@ import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoS
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
 import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
-import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { GetProfileService } from '../../Application/Services/GetProfileService'
 import { UpdateProfileService } from '../../Application/Services/UpdateProfileService'
 import type { IUserProfileRepository } from '../../Domain/Repositories/IUserProfileRepository'

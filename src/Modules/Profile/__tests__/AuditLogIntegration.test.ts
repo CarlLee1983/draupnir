@@ -22,7 +22,7 @@ describe('UserProfileAuditLog Integration', () => {
         }
       }
     }
-    DB.configure(testConfig)
+    DB.configure(testConfig as any)
     const connection = DB.getDefaultConnection()
     dbAccess = createAtlasDatabaseAccess()
     activityLogRepo = new AtlasActivityLogRepository(dbAccess)

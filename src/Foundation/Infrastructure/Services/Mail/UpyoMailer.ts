@@ -1,3 +1,4 @@
+import { Mailable } from '@gravito/signal'
 import { createMessage } from '@upyo/core'
 import { SmtpTransport } from '@upyo/smtp'
 import type { IMailer, MailMessage } from '../../Ports/IMailer'
@@ -14,10 +15,6 @@ interface SmtpUrlConfig {
 
 /**
  * Production-ready mailer built on Upyo's SMTP transport.
- *
- * @remarks
- * This implementation connects to an SMTP server using the provided URL
- * and uses the @upyo/smtp library for delivery.
  */
 export class UpyoMailer implements IMailer {
   private readonly transport: SmtpTransport
@@ -25,8 +22,6 @@ export class UpyoMailer implements IMailer {
 
   /**
    * Initializes the mailer with SMTP configuration.
-   *
-   * @param smtpUrl - The SMTP connection string (e.g., 'smtp://user:pass@host:port')
    */
   constructor(smtpUrl: string) {
     this.transport = new SmtpTransport(this.parseSmtpUrl(smtpUrl))
@@ -35,17 +30,36 @@ export class UpyoMailer implements IMailer {
 
   /**
    * Sends an email message via SMTP.
-   *
-   * @param message - The mail message payload
-   * @returns A promise that resolves when the mail is delivered
    */
-  async send(message: MailMessage): Promise<void> {
+  async send(message: MailMessage | Mailable): Promise<void> {
+    if (message instanceof Mailable) {
+      const envelope = await message.buildEnvelope({} as any)
+      const { html } = await message.renderContent()
+      
+      const addresses = (Array.isArray(envelope.to) ? envelope.to : [envelope.to]).filter(Boolean)
+      const to = addresses.map(a => typeof a === 'string' ? a : (a as any).address)
+
+      await this.transport.send(
+        createMessage({
+          from: envelope.from?.address ?? this.defaultFrom,
+          to: to.length === 1 ? to[0] : to,
+          subject: envelope.subject ?? '',
+          content: { html },
+        }),
+      )
+      return
+    }
+
+    if (message.template) {
+      throw new Error('UpyoMailer does not support templates directly. Use SignalMailer instead.')
+    }
+
     await this.transport.send(
       createMessage({
         from: message.from ?? this.defaultFrom,
         to: message.to as string | string[],
         subject: message.subject,
-        content: { html: message.html },
+        content: { html: message.html ?? '' },
         attachments: message.attachments?.map(
           (a) => new File([a.content], a.filename, { type: 'application/pdf' }),
         ),
