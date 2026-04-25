@@ -5,6 +5,8 @@ import {
 } from '@draupnir/bifrost-sdk'
 import { registerDocsWithGravito } from '@/Shared/Infrastructure/Framework/GravitoDocsAdapter'
 import { GravitoRedisAdapter } from '@/Shared/Infrastructure/Framework/GravitoRedisAdapter'
+import { AtlasActivityLogRepository } from '@/Shared/Infrastructure/Persistence/AtlasActivityLogRepository'
+import { getCurrentDatabaseAccess } from '@/wiring/CurrentDatabaseAccess'
 import type { IRouteRegistrar } from '@/Shared/Infrastructure/Framework/GravitoServiceProviderAdapter'
 import type { IRouteContext } from '@/Shared/Infrastructure/IRouteContext'
 import { type IContainer, ModuleServiceProvider } from '@/Shared/Infrastructure/IServiceProvider'
@@ -40,6 +42,12 @@ export class FoundationServiceProvider
   implements IRouteRegistrar, IQueueRegistrar
 {
   private container?: IContainer
+
+  protected override registerRepositories(container: IContainer): void {
+    container.singleton('activityLogRepository', () => {
+      return new AtlasActivityLogRepository(getCurrentDatabaseAccess())
+    })
+  }
 
   /**
    * Registers infrastructure services into the container.

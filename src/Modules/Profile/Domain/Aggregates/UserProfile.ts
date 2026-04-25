@@ -136,6 +136,7 @@ export class UserProfile {
       this.props.id,
       this.props.userId,
       Object.keys(fields).filter((k) => fields[k as keyof UpdateProfileFields] !== undefined),
+      fields as Record<string, unknown>,
     )
     return new UserProfile({
       ...this.props,
