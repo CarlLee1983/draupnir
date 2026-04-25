@@ -31,6 +31,7 @@
 
 - **User Profile 設計** — 完整用戶資料管理（個人資訊、偏好設定）
 - **Organization 設計** — 多租戶組織、成員邀請、角色指派
+- **[Organization Spec](./2-user-organization/organization-spec.md)** — 組織路由、授權、不變式與 middleware 行為
 - **實現進度** ✅ Phase 2 完成
 - **相關模組**：Profile、Organization
 

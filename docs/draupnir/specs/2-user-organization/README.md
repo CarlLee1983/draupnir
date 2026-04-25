@@ -8,6 +8,16 @@
 
 完整欄位、路由表、Schema 與實作對照以 [identity-design.md](../1-authentication/identity-design.md)（**最後審閱 2026-04-20**）為準。以下為快速索引：
 
+#### 組織與成員規格 — [Organization Spec](./organization-spec.md)
+
+**用途**：機械可驗收的 Organization 規格，聚焦路由、授權、不變式與 middleware 行為；作為後續 acceptance / spec-planning 的對齊基準。
+
+| 項目 | 內容 |
+|------|------|
+| **範圍** | 組織建立、查詢、狀態變更、成員管理、邀請流程、上下文 middleware |
+| **對齊原則** | 以現行程式行為為準；若未來放寬成員／組織關係，需同步修訂此文件 |
+| **相關模組** | `Organization`、`Auth`（系統角色 / JWT）、`ApiKey`（後續依賴組織上下文） |
+
 #### 2.2 Profile 模組 — [詳細設計](../1-authentication/identity-design.md#22-profile-模組規格原user-模組)
 
 **職責**：用戶個人資料與（管理員）帳戶管理
