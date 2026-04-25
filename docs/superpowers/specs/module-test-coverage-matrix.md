@@ -30,11 +30,11 @@ Generated from repository inspection on 2026-04-25.
 | Area | Current state |
 |------|---------------|
 | Module unit tests | All modules except `Health` have module-local tests. |
-| Acceptance UseCases | Present for `Auth`, `Credit`, and `Organization`. |
-| API Contract acceptance | Present for `Auth`, `Credit`, and `Organization`. |
+| Acceptance UseCases | Present for `Auth`, `Credit`, and `Organization`; Auth now includes session, logout, password reset, email verification, token expiry, and admin status-change lifecycles. |
+| API Contract acceptance | Present for `Auth`, `Credit`, and `Organization`; Auth now includes reset/verification/status endpoint contracts. |
 | Feature/OpenAPI tests | Existing broad `tests/Feature/*.e2e.ts` coverage remains as route/spec safety net. |
 | Browser E2E | Existing browser flows cover Auth, admin/member portals, CLI device flow, and dashboards. |
-| Known verification blocker | `bun run typecheck` currently fails on duplicate `sha256` import in `tests/Acceptance/support/http/TestAuth.ts`; fix before broad hardening. |
+| Known verification blocker | Duplicate `sha256` import in `tests/Acceptance/support/http/TestAuth.ts` resolved by the Auth hardening slice. |
 
 ---
 
@@ -42,7 +42,7 @@ Generated from repository inspection on 2026-04-25.
 
 | Module | Unit Coverage | Acceptance UseCase | API Contract | E2E / Feature | Priority | Main gaps to close |
 |--------|---------------|--------------------|--------------|---------------|----------|--------------------|
-| `Auth` | Good | Partial | Partial | Good | P0 | Password reset lifecycle, email verification lifecycle, token expiry/clock behavior, Google OAuth acceptance, admin status changes. |
+| `Auth` | Good | Good | Good | Good | P0 | Google OAuth acceptance remains as a follow-up because it depends on OAuth adapter contract fakes; current slice covers password reset, email verification, token expiry/clock behavior, and admin status changes. |
 | `Credit` | Good | Good | Good | Partial | P0 | Review gaps after usage/backfill changes; keep money/idempotency paths under acceptance. |
 | `Organization` | Good | Good | Partial | Good | P0 | Finish endpoint-level contract coverage for member/invitation/status/update/remove flows; verify current uncommitted acceptance changes before expanding. |
 | `ApiKey` | Good | Missing | Missing | Partial | P0 | Key lifecycle acceptance, Bifrost/gateway side effects, revoke/assign/budget/permission contract coverage. |
@@ -79,6 +79,8 @@ bun run typecheck
 2. `Organization`
 3. `ApiKey` + `AppApiKey` + `SdkApi`
 4. `Credit` gap review, not a rewrite
+
+> Auth hardening note: Password reset, email verification, token expiry, and admin status-change coverage were completed in the first implementation slice. Google OAuth acceptance should be planned separately because it needs a dedicated OAuth adapter fake and callback contract review.
 
 ### Phase 2 — P1 operational flows
 

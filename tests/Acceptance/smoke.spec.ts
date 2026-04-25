@@ -80,12 +80,12 @@ describe('Acceptance harness smoke', () => {
     expect(app.gateway.calls.createKey).toHaveLength(0)
   })
 
-  it('reset() resets clock to 2026-01-01T00:00:00Z', async () => {
+  it('reset() resets clock to 2099-01-01T00:00:00Z', async () => {
     app.clock.advance(60_000)
-    expect(app.clock.nowIso()).not.toBe('2026-01-01T00:00:00.000Z')
+    expect(app.clock.nowIso()).not.toBe('2099-01-01T00:00:00.000Z')
 
     await app.reset()
 
-    expect(app.clock.nowIso()).toBe('2026-01-01T00:00:00.000Z')
+    expect(app.clock.nowIso()).toBe('2099-01-01T00:00:00.000Z')
   })
 })

@@ -30,14 +30,12 @@ export interface CapturedEvent {
 }
 
 /**
- * Anchored to wall-clock at TestApp.boot() so token rows persisted with
- * TestClock-derived expires_at remain "in the future" relative to repository
+ * Anchor TestClock at a fixed future date so persisted `expires_at` rows
+ * (signed with TestClock) remain "in the future" relative to repository
  * filters that still use `new Date()` (e.g. AuthTokenRepository.findByUserId).
- * TestClock can still advance independently to drive expiry-controlled tests.
+ * Deterministic across runs so reset() and smoke tests stay stable.
  */
-function initialClockBaseline(): Date {
-  return new Date()
-}
+const INITIAL_CLOCK_ISO = '2099-01-01T00:00:00.000Z'
 
 export class TestApp {
   readonly container: IContainer
@@ -107,7 +105,7 @@ export class TestApp {
 
     DomainEventDispatcher.resetForTesting()
 
-    const initialClock = initialClockBaseline()
+    const initialClock = new Date(INITIAL_CLOCK_ISO)
     const clock = new TestClock(initialClock)
     const gateway = new MockGatewayClient()
     const scheduler = new ManualScheduler()
