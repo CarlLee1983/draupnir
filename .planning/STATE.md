@@ -49,6 +49,7 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260418-ui0 | A3 逾期未扣款 Backfill：新增 ranged backfill sync、usage deduction idempotency、admin manual trigger endpoint，並補 `US-CREDIT-007` | 2026-04-18 | — | [260418-ui0-docs-draupnir-specs-user-stories-backlog](.planning/quick/260418-ui0-docs-draupnir-specs-user-stories-backlog/) |
+| 260425-tdd | Acceptance-First TDD 泛式：將 DDD acceptance layer 抽象為可套用於目前與未來開發的 TDD spine、checklist、測試分層與 fake policy | 2026-04-25 | — | [260425-tdd-acceptance-first-pattern](.planning/quick/260425-tdd-acceptance-first-pattern/) |
 | 260418-u2y | Restrict AppApiKey writes to managers | 2026-04-18 | d319193 | — |
 | 260413-uzv | 修復 Auth 模組 DDD 戰術設計問題 | 2026-04-13 | 2a0ce69 | [260413-uzv-auth-ddd](.planning/quick/260413-uzv-auth-ddd/) |
 | 260413-vdk | 解耦 Auth ↔ Profile：引入 UserRegistered domain event | 2026-04-13 | 157ee29 | [260413-vdk-domain-event-userregistered-auth-profile](.planning/quick/260413-vdk-domain-event-userregistered-auth-profile/) |
@@ -62,5 +63,5 @@ Decisions are logged in PROJECT.md Key Decisions table. v1.4 highlights: `ISched
 
 ## Session continuity
 
-Last activity: 2026-04-18 - Completed quick task 260418-vty: Bifrost sync 分頁 MAX_PAGES 安全網與測試補強
+Last activity: 2026-04-25 - Completed quick task 260425-tdd: Acceptance-First TDD 泛式文件
 Next step: `/gsd-new-milestone` when ready to plan v1.5+.
