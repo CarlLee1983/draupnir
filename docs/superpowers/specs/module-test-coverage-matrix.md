@@ -30,11 +30,11 @@ Generated from repository inspection on 2026-04-25.
 | Area | Current state |
 |------|---------------|
 | Module unit tests | All modules except `Health` have module-local tests. |
-| Acceptance UseCases | Present for `Auth`, `Credit`, and `Organization`; Auth now includes session, logout, password reset, email verification, token expiry, and admin status-change lifecycles. |
-| API Contract acceptance | Present for `Auth`, `Credit`, and `Organization`; Auth now includes reset/verification/status endpoint contracts. |
+| Acceptance UseCases | Present for `Auth`, `Credit`, `Organization`, `ApiKey`, and `AppApiKey`. Auth includes session, logout, password reset, email verification, token expiry, and admin status-change lifecycles. Organization includes member lifecycle and access control. |
+| API Contract acceptance | Present for `Auth`, `Credit`, and `Organization`. |
 | Feature/OpenAPI tests | Existing broad `tests/Feature/*.e2e.ts` coverage remains as route/spec safety net. |
 | Browser E2E | Existing browser flows cover Auth, admin/member portals, CLI device flow, and dashboards. |
-| Known verification blocker | Duplicate `sha256` import in `tests/Acceptance/support/http/TestAuth.ts` resolved by the Auth hardening slice. |
+| Known verification blocker | Resolved duplicate `sha256` and uncommitted organization change debt. |
 
 ---
 
@@ -42,11 +42,11 @@ Generated from repository inspection on 2026-04-25.
 
 | Module | Unit Coverage | Acceptance UseCase | API Contract | E2E / Feature | Priority | Main gaps to close |
 |--------|---------------|--------------------|--------------|---------------|----------|--------------------|
-| `Auth` | Good | Good | Good | Good | P0 | Google OAuth acceptance remains as a follow-up because it depends on OAuth adapter contract fakes; current slice covers password reset, email verification, token expiry/clock behavior, and admin status changes. |
-| `Credit` | Good | Good | Good | Partial | P0 | Review gaps after usage/backfill changes; keep money/idempotency paths under acceptance. |
-| `Organization` | Good | Good | Partial | Good | P0 | Finish endpoint-level contract coverage for member/invitation/status/update/remove flows; verify current uncommitted acceptance changes before expanding. |
-| `ApiKey` | Good | Missing | Missing | Partial | P0 | Key lifecycle acceptance, Bifrost/gateway side effects, revoke/assign/budget/permission contract coverage. |
-| `AppApiKey` | Good | Missing | Missing | Partial | P0 | App key issue/rotate/revoke/scope acceptance and API contract; manager-only write behavior. |
+| `Auth` | Good | Good | Good | Good | P0 | Google OAuth acceptance remains as a follow-up because it depends on OAuth adapter contract fakes. |
+| `Credit` | Good | Good | Good | Partial | P0 | Review gaps after usage/backfill changes. |
+| `Organization` | Good | Good | Good | Good | P0 | Gaps closed for member lifecycle, invitation, and role-based access control. |
+| `ApiKey` | Good | Good | Partial | Partial | P0 | API contract hardening; Bifrost/gateway side effects verified via acceptance but could use explicit contract tests. |
+| `AppApiKey` | Good | Good | Partial | Partial | P0 | API contract hardening; scope/manager-only write behavior verified via acceptance. |
 | `SdkApi` | Good | Missing | Missing | Partial | P0 | SDK auth contract, app key permission failures, proxy usage/balance acceptance with real middleware. |
 | `Contract` | Good | Missing | Missing | Partial | P1 | Contract lifecycle acceptance, quota enforcement, expiry handling, API contract. |
 | `AppModule` | Partial | Missing | Missing | Partial | P1 | Module subscription/default provisioning acceptance, module access contract. |
@@ -56,7 +56,7 @@ Generated from repository inspection on 2026-04-25.
 | `CliApi` | Good | Missing | Missing | Good | P1 | Device flow acceptance across initiate/authorize/exchange/revoke, CLI API contract. |
 | `Profile` | Partial | Missing | Missing | Partial | P2 | Profile update/get contract, UserRegistered cross-module acceptance already observed via Auth but should be explicit if Profile evolves. |
 | `DevPortal` | Good | Missing | Missing | Partial | P2 | Application registration, webhook config, app key management acceptance/API contract. |
-| `Health` | Missing | N/A | Missing | Partial | P2 | Minimal health route contract; no domain/application layer expected unless behavior grows. |
+| `Health` | Missing | N/A | Missing | Partial | P2 | Minimal health route contract. |
 
 ---
 
@@ -64,38 +64,32 @@ Generated from repository inspection on 2026-04-25.
 
 ### Phase 0 — unblock and stabilize
 
-1. Fix duplicate `sha256` import in `tests/Acceptance/support/http/TestAuth.ts`.
-2. Resolve or commit the existing uncommitted Organization acceptance changes before starting broad test work.
-3. Run targeted acceptance smoke after the cleanup:
+1. Auth, Organization, and API Key hardening completed.
+2. Verified all acceptance tests pass:
 
 ```bash
-bun test tests/Acceptance/smoke.spec.ts tests/Acceptance/smoke-db.spec.ts
+bun test tests/Acceptance/
 bun run typecheck
 ```
 
 ### Phase 1 — P0 security, money, access boundaries
 
-1. `Auth`
-2. `Organization`
-3. `ApiKey` + `AppApiKey` + `SdkApi`
-4. `Credit` gap review, not a rewrite
-
-> Auth hardening note: Password reset, email verification, token expiry, and admin status-change coverage were completed in the first implementation slice. Google OAuth acceptance should be planned separately because it needs a dedicated OAuth adapter fake and callback contract review.
+1. `SdkApi`
+2. `Credit` gap review, not a rewrite
+3. `Contract` + `AppModule`
 
 ### Phase 2 — P1 operational flows
 
 1. `Alerts`
 2. `Reports`
 3. `Dashboard`
-4. `Contract` + `AppModule`
-5. `CliApi`
+4. `CliApi`
 
 ### Phase 3 — P2 support and portal flows
 
 1. `Profile`
 2. `DevPortal`
 3. `Health`
-4. Browser-only Website flows, only where lower-level tests cannot prove behavior
 
 ---
 
@@ -139,18 +133,17 @@ A module is considered “test-hardened” when:
 
 ## 7. Next suggested concrete work item
 
-With `Auth` hardening complete (password reset, email verification, token expiry, admin status changes), the next priority is **Organization** to secure multi-tenant boundaries.
+With `Auth`, `Organization`, and `ApiKey` hardening largely complete, the next priority is **SdkApi** and **Credit** review.
 
-Suggested Organization hardening slices:
+Suggested SdkApi hardening slices:
 
-1. Member lifecycle: invite → accept → verify membership → remove member.
-2. Admin/Manager permission matrix: verify that only authorized roles can change organization status or manage members.
-3. Access control contract: systematic check of all organization endpoints against admin/member/non-member roles.
+1. SDK Auth: verify that an SDK can authenticate using valid keys and is rejected with invalid ones.
+2. Permission failures: verify that an authenticated SDK is rejected when trying to access resources it doesn't have permissions for.
+3. Proxy/Balance integration: verify that SDK requests correctly check and deduct balance via the real middleware stack.
 
 Expected files:
 
 ```text
-tests/Acceptance/UseCases/Organization/member-lifecycle.spec.ts
-tests/Acceptance/UseCases/Organization/access-control-matrix.spec.ts
-tests/Acceptance/ApiContract/organization-endpoints.spec.ts
+tests/Acceptance/UseCases/SdkApi/sdk-auth-flows.spec.ts
+tests/Acceptance/ApiContract/sdk-api-endpoints.spec.ts
 ```
