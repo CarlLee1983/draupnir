@@ -45,7 +45,7 @@ describe('Organization API contract', () => {
       expect(unauthorizedJson.error).toBe('UNAUTHORIZED')
 
       const res = await app.http.post('/api/organizations', {
-        headers: app.auth.bearerHeaderFor({
+        headers: await app.auth.bearerHeaderFor({
           userId: creator.id,
           email: creator.email,
           role: 'member',
@@ -59,7 +59,7 @@ describe('Organization API contract', () => {
       expect(json.data?.redirectTo).toBe('/manager/dashboard')
 
       const validationRes = await app.http.post('/api/organizations', {
-        headers: app.auth.bearerHeaderFor({
+        headers: await app.auth.bearerHeaderFor({
           userId: creator.id,
           email: creator.email,
           role: 'member',

@@ -32,7 +32,7 @@ describe('Organization bootstrap', () => {
     await app.seed.orgMember({ orgId: 'org-existing', userId: creator.id, role: 'member' })
 
     const response = await app.http.post('/api/organizations', {
-      headers: app.auth.bearerHeaderFor({
+      headers: await app.auth.bearerHeaderFor({
         userId: creator.id,
         email: creator.email,
         role: 'member',
@@ -57,7 +57,7 @@ describe('Organization bootstrap', () => {
     })
 
     const response = await app.http.post('/api/organizations', {
-      headers: app.auth.bearerHeaderFor({
+      headers: await app.auth.bearerHeaderFor({
         userId: creator.id,
         email: creator.email,
         role: 'member',
