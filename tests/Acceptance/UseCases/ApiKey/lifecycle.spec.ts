@@ -95,9 +95,7 @@ describe('ApiKey lifecycle', () => {
     expect(calls.createKey).toHaveLength(1)
     expect(calls.createKey[0]?.teamId).toBe(`mock_team_${org.id}`)
 
-    const permissionUpdate = calls.updateKey.find(
-      (entry) => entry.request.providerConfigs != null,
-    )
+    const permissionUpdate = calls.updateKey.find((entry) => entry.request.providerConfigs != null)
     expect(permissionUpdate).toBeTruthy()
     expect(permissionUpdate?.request.providerConfigs?.[0]?.allowedModels).toContain('gpt-4o')
   })
