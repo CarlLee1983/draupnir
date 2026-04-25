@@ -14,8 +14,8 @@ import type { IQueue } from '../Ports/Queue/IQueue'
 import type { IQueueRegistrar } from '../Ports/Queue/IQueueRegistrar'
 import type { IScheduler } from '../Ports/Scheduler/IScheduler'
 import { BifrostGatewayAdapter } from '../Services/LLMGateway/implementations/BifrostGatewayAdapter'
-import { ConsoleMailer } from '../Services/Mail/ConsoleMailer'
-import { UpyoMailer } from '../Services/Mail/UpyoMailer'
+import { OrbitSignal, SmtpTransport, LogTransport } from '@gravito/signal'
+import { SignalMailer } from '../Services/Mail/SignalMailer'
 import { RedisStreamQueueAdapter } from '../Services/Queue/RedisStreamQueueAdapter'
 import { CronerScheduler } from '../Services/Scheduler/CronerScheduler'
 import { QueuedWebhookDispatcher } from '../Services/Webhook/QueuedWebhookDispatcher'
@@ -68,13 +68,36 @@ export class FoundationServiceProvider
     })
 
     container.singleton('mailer', () => {
-      const transport = process.env.EMAIL_TRANSPORT ?? 'console'
-      if (transport === 'smtp') {
+      const transportName = process.env.EMAIL_TRANSPORT ?? 'console'
+      const fromName = process.env.EMAIL_FROM_NAME ?? 'Draupnir'
+      const fromAddress = process.env.EMAIL_FROM ?? 'noreply@draupnir.local'
+
+      let transport: any
+      if (transportName === 'smtp') {
         const smtpUrl = process.env.SMTP_URL ?? 'smtp://localhost:1025'
-        return new UpyoMailer(smtpUrl)
+        const url = new URL(smtpUrl)
+        const secure = url.protocol === 'smtps:' || url.port === '465'
+        
+        transport = new SmtpTransport({
+          host: url.hostname,
+          port: url.port ? Number(url.port) : (secure ? 465 : 587),
+          secure,
+          auth: url.username ? {
+            user: decodeURIComponent(url.username),
+            pass: decodeURIComponent(url.password),
+          } : undefined
+        })
+      } else {
+        transport = new LogTransport()
       }
 
-      return new ConsoleMailer()
+      const orbit = new OrbitSignal({
+        transport,
+        from: { name: fromName, address: fromAddress },
+        devMode: process.env.NODE_ENV === 'development',
+      })
+
+      return new SignalMailer(orbit)
     })
 
     container.singleton('webhookDispatcher', (c: IContainer) => {
