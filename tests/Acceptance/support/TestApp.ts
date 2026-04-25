@@ -8,6 +8,7 @@ import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 import { MockGatewayClient } from '@/Foundation/Infrastructure/Services/LLMGateway/implementations/MockGatewayClient'
 import { configureAuthMiddleware } from '@/Modules/Auth/Presentation/Middleware/RoleMiddleware'
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
 import { joinPath } from '@/Website/Http/Routing/routePath'
 import { createLastResultStore, type LastResultStore } from './lastResult'
 import { InProcessHttpClient } from './http/InProcessHttpClient'
@@ -122,27 +123,10 @@ export class TestApp {
       },
     })
 
-    configureAuthMiddleware({
-      async save() {},
-      async findByHash() {
-        return null
-      },
-      async findByUserId() {
-        return []
-      },
-      async findRevokedByUserId() {
-        return []
-      },
-      async revoke() {},
-      async isRevoked() {
-        return false
-      },
-      async revokeAllByUserId() {},
-      async cleanupExpired() {},
-      async delete() {},
-    })
-
     const container = adaptGravitoContainer(core.container)
+
+    // Wire the real authTokenRepository so the middleware revocation check uses the DB.
+    configureAuthMiddleware(container.make('authTokenRepository') as IAuthTokenRepository)
     const http = new InProcessHttpClient(core)
     const auth = new TestAuth(container)
     const seed = new TestSeed(() => container.make('database') as IDatabaseAccess, gateway)

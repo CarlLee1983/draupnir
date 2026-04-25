@@ -39,7 +39,7 @@ describe('API Contract: /api/organizations/:orgId/credits/*', () => {
 
       const res = await app.http.post('/api/organizations/org-1/credits/topup', {
         body: { amount: '500' },
-        headers: app.auth.bearerHeaderFor({
+        headers: await app.auth.bearerHeaderFor({
           userId: 'admin-1',
           email: 'a@e.com',
           role: 'admin',
@@ -63,7 +63,7 @@ describe('API Contract: /api/organizations/:orgId/credits/*', () => {
 
       const res = await app.http.post('/api/organizations/org-1/credits/topup', {
         body: { amount: '500' },
-        headers: app.auth.bearerHeaderFor({ userId: 'u-1', email: 'u@e.com', role: 'user' }),
+        headers: await app.auth.bearerHeaderFor({ userId: 'u-1', email: 'u@e.com', role: 'user' }),
       })
 
       expect(res.status).toBe(403)
@@ -78,7 +78,7 @@ describe('API Contract: /api/organizations/:orgId/credits/*', () => {
 
       const res = await app.http.post('/api/organizations/org-1/credits/topup', {
         body: {},
-        headers: app.auth.bearerHeaderFor({
+        headers: await app.auth.bearerHeaderFor({
           userId: 'admin-1',
           email: 'a@e.com',
           role: 'admin',
@@ -98,7 +98,7 @@ describe('API Contract: /api/organizations/:orgId/credits/*', () => {
       await provisionCreditAccess(app, 'org-1', 'u-1')
 
       const res = await app.http.get('/api/organizations/org-1/credits/balance', {
-        headers: app.auth.bearerHeaderFor({ userId: 'u-1', email: 'u@e.com', role: 'user' }),
+        headers: await app.auth.bearerHeaderFor({ userId: 'u-1', email: 'u@e.com', role: 'user' }),
       })
 
       expect(res.status).toBe(200)
@@ -121,7 +121,7 @@ describe('API Contract: /api/organizations/:orgId/credits/*', () => {
       await provisionCreditAccess(app, 'org-1', 'u-2')
 
       const res = await app.http.get('/api/organizations/org-1/credits/balance', {
-        headers: app.auth.bearerHeaderFor({ userId: 'u-2', email: 'x@e.com', role: 'user' }),
+        headers: await app.auth.bearerHeaderFor({ userId: 'u-2', email: 'x@e.com', role: 'user' }),
       })
 
       expect(res.status).toBe(200)
@@ -140,7 +140,7 @@ describe('API Contract: /api/organizations/:orgId/credits/*', () => {
       await provisionCreditAccess(app, 'org-1', 'u-1')
 
       const res = await app.http.get('/api/organizations/org-1/credits/transactions', {
-        headers: app.auth.bearerHeaderFor({ userId: 'u-1', email: 'u@e.com', role: 'user' }),
+        headers: await app.auth.bearerHeaderFor({ userId: 'u-1', email: 'u@e.com', role: 'user' }),
         query: { page: 1, limit: 10 },
       })
 
@@ -167,7 +167,7 @@ describe('API Contract: /api/organizations/:orgId/credits/*', () => {
       await provisionCreditAccess(app, 'org-1', 'u-2')
 
       const res = await app.http.get('/api/organizations/org-1/credits/transactions', {
-        headers: app.auth.bearerHeaderFor({ userId: 'u-2', email: 'x@e.com', role: 'user' }),
+        headers: await app.auth.bearerHeaderFor({ userId: 'u-2', email: 'x@e.com', role: 'user' }),
       })
 
       expect(res.status).toBe(200)

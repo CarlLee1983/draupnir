@@ -31,7 +31,7 @@ describe('InProcessHttpClient', () => {
   })
 
   it('帶 admin Authorization header 通過 auth + role middleware', async () => {
-    const headers = app.auth.bearerHeaderFor({
+    const headers = await app.auth.bearerHeaderFor({
       userId: 'admin-1',
       email: 'admin@e.com',
       role: 'admin',

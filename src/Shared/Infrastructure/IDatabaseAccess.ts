@@ -109,6 +109,20 @@ export interface IQueryBuilder {
   whereBetween(column: string, range: readonly [Date | string, Date | string]): IQueryBuilder
 
   /**
+   * WHERE column IS NULL constraint.
+   * @param column - Column name.
+   * @returns Returns self to support chaining.
+   */
+  whereNull(column: string): IQueryBuilder
+
+  /**
+   * WHERE column IS NOT NULL constraint.
+   * @param column - Column name.
+   * @returns Returns self to support chaining.
+   */
+  whereNotNull(column: string): IQueryBuilder
+
+  /**
    * Applies a row-level lock (SELECT ... FOR UPDATE) to the query.
    *
    * Must be invoked inside an open transaction (via {@link IDatabaseAccess.transaction}).

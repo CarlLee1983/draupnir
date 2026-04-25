@@ -51,6 +51,16 @@ class MemoryQueryBuilder implements IQueryBuilder {
     return this
   }
 
+  whereNull(column: string): IQueryBuilder {
+    this.whereConditions.push({ column, operator: '=', value: null })
+    return this
+  }
+
+  whereNotNull(column: string): IQueryBuilder {
+    this.whereConditions.push({ column, operator: '!=', value: null })
+    return this
+  }
+
   forUpdate(): IQueryBuilder {
     // Memory adapter is single-threaded; no-op.
     return this

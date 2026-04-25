@@ -70,7 +70,7 @@ export class AuthTokenRepository implements IAuthTokenRepository {
     const rows = await this.db
       .table('auth_tokens')
       .where('user_id', '=', userId)
-      .where('revoked_at', '=', null)
+      .whereNull('revoked_at')
       .where('expires_at', '>', new Date().toISOString())
       .select()
 
@@ -84,7 +84,7 @@ export class AuthTokenRepository implements IAuthTokenRepository {
     const rows = await this.db
       .table('auth_tokens')
       .where('user_id', '=', userId)
-      .where('revoked_at', '!=', null)
+      .whereNotNull('revoked_at')
       .select()
 
     return rows.map((row) => this.mapToRecord(row))
@@ -118,7 +118,7 @@ export class AuthTokenRepository implements IAuthTokenRepository {
     await this.db
       .table('auth_tokens')
       .where('user_id', '=', userId)
-      .where('revoked_at', '=', null)
+      .whereNull('revoked_at')
       .update({
         revoked_at: new Date().toISOString(),
       })

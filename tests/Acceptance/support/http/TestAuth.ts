@@ -1,6 +1,8 @@
 import type { IDatabaseAccess } from '@/Shared/Infrastructure/IDatabaseAccess'
 import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
 import type { IJwtTokenService } from '@/Modules/Auth/Application/Ports/IJwtTokenService'
+import type { IAuthTokenRepository } from '@/Modules/Auth/Domain/Repositories/IAuthTokenRepository'
+import { sha256 } from '@/Modules/Auth/Application/Utils/sha256'
 import type { IContainer } from '@/Shared/Infrastructure/IServiceProvider'
 
 export interface TokenForArgs {
@@ -28,8 +30,30 @@ export class TestAuth {
     return token.getValue()
   }
 
-  bearerHeaderFor(args: TokenForArgs): { Authorization: string } {
-    return { Authorization: `Bearer ${this.tokenFor(args)}` }
+  /**
+   * Issues a JWT and persists it into `auth_tokens` so the real revocation
+   * middleware can find (and accept) it. Returns the Authorization header.
+   */
+  async bearerHeaderFor(args: TokenForArgs): Promise<{ Authorization: string }> {
+    const jwt = this.container.make('jwtTokenService') as IJwtTokenService
+    const authToken = jwt.signAccessToken({
+      userId: args.userId,
+      email: args.email,
+      role: args.role,
+      permissions: [...(args.permissions ?? [])],
+    })
+    const raw = authToken.getValue()
+    const tokenHash = await sha256(raw)
+    const repo = this.container.make('authTokenRepository') as IAuthTokenRepository
+    await repo.save({
+      id: crypto.randomUUID(),
+      userId: args.userId,
+      tokenHash,
+      type: 'access',
+      expiresAt: authToken.getExpiresAt(),
+      createdAt: new Date(),
+    })
+    return { Authorization: `Bearer ${raw}` }
   }
 
   async persistedBearerHeaderFor(args: TokenForArgs): Promise<{ Authorization: string }> {
