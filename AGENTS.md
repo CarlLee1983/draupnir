@@ -80,22 +80,10 @@ git worktree remove .worktree/<branch-name>
 - For parallel work, use one worktree per task to avoid branch-switching conflicts
 - Agent tooling with `isolation: "worktree"` defaults to this directory
 
-<!-- GSD:workflow-start source:GSD defaults -->
-## GSD Workflow Enforcement
-
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
-
-Use these entry points:
-- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd:debug` for investigation and bug fixing
-- `/gsd:execute-phase` for planned phase work
-
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
-<!-- GSD:workflow-end -->
-
-<!-- GSD:profile-start -->
 ## Developer Profile
 
-> Profile not yet configured. Run `/gsd:profile-user` to generate your developer profile.
-> This section is managed by `generate-claude-profile` -- do not edit manually.
-<!-- GSD:profile-end -->
+> Profile not yet configured. You can use `/gsd:profile-user` to generate one, or manually describe your preferences here.
+
+## Planning & Context (Optional)
+
+This project contains a `.planning/` directory. While not strictly bound to the GSD workflow, you may refer to the plans and roadmap there when tackling complex architectural changes.
