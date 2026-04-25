@@ -23,6 +23,14 @@ async function persistedMemberHeader(app: TestApp, userId: string, email: string
   })
 }
 
+async function persistedManagerHeader(app: TestApp, userId: string, email: string) {
+  return app.auth.persistedBearerHeaderFor({
+    userId,
+    email,
+    role: 'manager',
+  })
+}
+
 describe('Organization access control', () => {
   let app: TestApp
 
@@ -91,5 +99,69 @@ describe('Organization access control', () => {
 
     const getRes = await app.http.get(`/api/organizations/${org.id}`)
     expect(getRes.status).toBe(401)
+  })
+
+  it('manager of Org A cannot invite into Org B (cross-tenant)', async () => {
+    const managerA = await app.seed.user({
+      id: crypto.randomUUID(),
+      email: 'mgr-a-tenant@example.test',
+      role: 'user',
+    })
+    const orgA = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org A', slug: 'org-a' })
+    const orgB = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org B', slug: 'org-b' })
+    await app.seed.orgMember({ orgId: orgA.id, userId: managerA.id, role: 'manager' })
+    await provisionOrganizationForContext(app, orgA.id)
+    await provisionOrganizationForContext(app, orgB.id)
+
+    const res = await app.http.post(`/api/organizations/${orgB.id}/invitations`, {
+      headers: await persistedManagerHeader(app, managerA.id, managerA.email),
+      body: { email: 'someone@example.test' },
+    })
+    expect(res.status).toBe(403)
+    expect(((await res.json()) as { error?: string }).error).toBe('NOT_ORG_MEMBER')
+  })
+
+  it('member of Org A cannot list members of Org B (cross-tenant)', async () => {
+    const memberA = await app.seed.user({
+      id: crypto.randomUUID(),
+      email: 'mem-a-tenant@example.test',
+      role: 'user',
+    })
+    const orgA = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org A2', slug: 'org-a2' })
+    const orgB = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org B2', slug: 'org-b2' })
+    await app.seed.orgMember({ orgId: orgA.id, userId: memberA.id, role: 'member' })
+    await provisionOrganizationForContext(app, orgA.id)
+    await provisionOrganizationForContext(app, orgB.id)
+
+    const res = await app.http.get(`/api/organizations/${orgB.id}/members`, {
+      headers: await persistedMemberHeader(app, memberA.id, memberA.email),
+    })
+    expect(res.status).toBe(403)
+    expect(((await res.json()) as { error?: string }).error).toBe('NOT_ORG_MEMBER')
+  })
+
+  it('manager of Org A cannot remove a member of Org B (cross-tenant)', async () => {
+    const managerA = await app.seed.user({
+      id: crypto.randomUUID(),
+      email: 'mgr-a-cross@example.test',
+      role: 'user',
+    })
+    const orgB_member = await app.seed.user({
+      id: crypto.randomUUID(),
+      email: 'orgb-victim@example.test',
+      role: 'user',
+    })
+    const orgA = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org A3', slug: 'org-a3' })
+    const orgB = await app.seed.organization({ id: crypto.randomUUID(), name: 'Org B3', slug: 'org-b3' })
+    await app.seed.orgMember({ orgId: orgA.id, userId: managerA.id, role: 'manager' })
+    await app.seed.orgMember({ orgId: orgB.id, userId: orgB_member.id, role: 'member' })
+    await provisionOrganizationForContext(app, orgA.id)
+    await provisionOrganizationForContext(app, orgB.id)
+
+    const res = await app.http.delete(`/api/organizations/${orgB.id}/members/${orgB_member.id}`, {
+      headers: await persistedManagerHeader(app, managerA.id, managerA.email),
+    })
+    expect(res.status).toBe(403)
+    expect(((await res.json()) as { error?: string }).error).toBe('NOT_ORG_MEMBER')
   })
 })
