@@ -4,6 +4,8 @@
 **Status**: Proposed project pattern  
 **Purpose**: 將 DDD acceptance layer 抽象成可重複套用於目前與未來開發的 TDD 泛式，讓快速、AI-assisted、vibe coding 的開發仍能產出可運作且業務語意準確的功能。
 
+**Tooling stance**: 本泛式是專案開發方法，不綁定 GSD、OMX、特定 agent workflow 或特定 issue/PR 系統；任何人或工具只要遵守 checklist、測試分層與 fake policy 即可落地。
+
 **Related design**: [`2026-04-24-ddd-acceptance-testing-design.md`](./2026-04-24-ddd-acceptance-testing-design.md)
 
 ---
@@ -95,7 +97,7 @@ Verification commands:
 - [ ] bun run lint
 ```
 
-這份 checklist 是 review 與 implementation 的共同語言。若某項不適用，明確標示 `N/A`，不要默默省略。
+這份 checklist 是 review 與 implementation 的共同語言。它可以放在 issue、PR description、commit note、spec 檔註解、一般 Markdown plan，或任何團隊使用的任務系統；不需要 GSD。若某項不適用，明確標示 `N/A`，不要默默省略。
 
 ---
 
@@ -353,3 +355,15 @@ bun run check
 | Refactor | Characterization test before behavior-preserving edits |
 
 這個表是未來開發的預設規則；若跳過某層，必須在 plan 或 PR 說明理由。
+
+---
+
+## 15. Tool-Agnostic 落地方式
+
+本模式的落地單位是「規格與測試」，不是某個流程工具。建議用以下三個輕量入口即可：
+
+1. **Issue / task 描述**：貼上 `TDD Slice Checklist`，作為開工前的完成定義。
+2. **PR description**：列出 Unit / Acceptance / API Contract 覆蓋與實際跑過的命令。
+3. **AGENTS.md / contributor docs**：要求非 trivial feature、bug fix、refactor 預設遵守 Acceptance-First TDD。
+
+可選工具如 GSD、OMX、GitHub Projects、Linear、Notion 都只能承載這份 checklist；它們不是必要條件，也不能取代測試證據。
