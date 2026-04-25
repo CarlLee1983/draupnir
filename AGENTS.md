@@ -12,6 +12,12 @@ Guidance for AI coding agents. All project documentation lives in [`docs/draupni
 | Coding conventions, TypeScript strict mode, error handling | [`knowledge/coding-conventions.md`](./docs/draupnir/knowledge/coding-conventions.md) |
 | Tech stack versions & environment setup | [`knowledge/tech-stack.md`](./docs/draupnir/knowledge/tech-stack.md) |
 | Visual & UI design system | [`DESIGN.md`](./DESIGN.md) |
+| Acceptance-first TDD pattern | [`acceptance-first-tdd-pattern.md`](./docs/superpowers/specs/acceptance-first-tdd-pattern.md) |
+
+
+## Development Method
+
+Use Acceptance-First TDD for non-trivial features, bug fixes, and refactors. Keep AGENTS.md lightweight: apply the short rule here, then progressively disclose details from [`docs/superpowers/specs/acceptance-first-tdd-pattern.md`](./docs/superpowers/specs/acceptance-first-tdd-pattern.md) only when planning or implementing work.
 
 ## Design System
 
