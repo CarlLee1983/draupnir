@@ -137,22 +137,20 @@ A module is considered “test-hardened” when:
 
 ---
 
-## 7. First suggested concrete work item
+## 7. Next suggested concrete work item
 
-Start with `Auth` because it is security-critical and already has acceptance infrastructure.
+With `Auth` hardening complete (password reset, email verification, token expiry, admin status changes), the next priority is **Organization** to secure multi-tenant boundaries.
 
-Suggested first Auth hardening slices:
+Suggested Organization hardening slices:
 
-1. Password reset lifecycle: request reset → reset password → active sessions revoked → expired token rejected.
-2. Email verification lifecycle: token issued → verify → duplicate/expired token rejected.
-3. Token expiry behavior: access/refresh expiry controlled by `TestClock`.
-4. Admin status changes: suspended user cannot login or access protected routes.
+1. Member lifecycle: invite → accept → verify membership → remove member.
+2. Admin/Manager permission matrix: verify that only authorized roles can change organization status or manage members.
+3. Access control contract: systematic check of all organization endpoints against admin/member/non-member roles.
 
 Expected files:
 
 ```text
-src/Modules/Auth/__tests__/ResetPasswordService.test.ts
-tests/Acceptance/UseCases/Auth/password-reset-lifecycle.spec.ts
-tests/Acceptance/UseCases/Auth/email-verification-lifecycle.spec.ts
-tests/Acceptance/ApiContract/auth-endpoints.spec.ts
+tests/Acceptance/UseCases/Organization/member-lifecycle.spec.ts
+tests/Acceptance/UseCases/Organization/access-control-matrix.spec.ts
+tests/Acceptance/ApiContract/organization-endpoints.spec.ts
 ```

@@ -48,13 +48,15 @@ Phase 2 完成完整的使用者身份管理系統，包含三大模組：
 
 #### Domain
 
-- **PasswordResetToken** Value Object：`PasswordResetToken`（email、過期、used 等）
+- **PasswordResetToken** Value Object：`PasswordResetToken`（email、過期、used 等），驗證邏輯支援 **`IClock`** 注入以便測試時控制過期。
 - 重設流程由 **ResetPasswordService** 與 **User**／**Hasher** 協作（見 `src/Modules/Auth/Application/Services/`）
+- **JwtTokenService**：負責 JWT 簽發與驗證，目前為 **clock-aware** 並支援 `IClock` 注入，確保 Token 簽發時間與過期檢查在測試中可完全預測。
 
 #### Application Services（實作名稱）
 
 - **ForgotPasswordService**：驗證 email → 建立 token → `IPasswordResetRepository` → `IEmailService.sendPasswordReset(..., resetUrl)`
 - **ResetPasswordService**：依 token 驗證 → 更新密碼 → 標記已使用 → 撤銷既有 JWT（見服務實作）
+- **JwtTokenService**（Infrastructure / Application 邊界）：支援 IClock 控制 `iat` 與 `exp`。
 
 #### Repository
 

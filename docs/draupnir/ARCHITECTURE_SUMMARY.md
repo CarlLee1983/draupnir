@@ -73,6 +73,7 @@
 │  ├─ Database (Atlas ORM / PostgreSQL)                        │
 │  ├─ Redis (Cache, Pub/Sub & Streams MQ)                      │
 │  ├─ Security (JWT / HMAC / AES-256)                          │
+│  ├─ Utilities (IClock for time-aware testing)                │
 │  └─ Monitoring (Health Checks / Logger)                      │
 └──────────────────────────────────────────────────────────────┘
          ↓ 下游
