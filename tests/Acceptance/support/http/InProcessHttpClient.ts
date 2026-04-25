@@ -28,6 +28,10 @@ export class InProcessHttpClient {
     return this.send('POST', path, options)
   }
 
+  put(path: string, options?: RequestOptions): Promise<Response> {
+    return this.send('PUT', path, options)
+  }
+
   patch(path: string, options?: RequestOptions): Promise<Response> {
     return this.send('PATCH', path, options)
   }
@@ -51,6 +55,8 @@ export class InProcessHttpClient {
         ? await this.tester.get(target, headers)
         : method === 'POST'
           ? await this.tester.post(target, options.body, headers)
+          : method === 'PUT'
+            ? await this.tester.put(target, options.body, headers)
           : method === 'PATCH'
             ? await this.tester.patch(target, options.body, headers)
             : await this.tester.delete(target, options.body, headers)
