@@ -67,9 +67,9 @@ bun scripts/routes-analyzer.ts
 **輸出示例**:
 ```json
 {
-  "totalRoutes": 43,
-  "byMethod": { "get": 14, "post": 17, "put": 4, "patch": 5, "delete": 3 },
-  "byModule": { "Organization": 12, "AppModule": 6, ... },
+  "totalRoutes": 51,
+  "byMethod": { "get": 16, "post": 21, "put": 5, "patch": 5, "delete": 4 },
+  "byModule": { "Organization": 14, "AppModule": 6, ... },
   "routes": [
     {
       "module": "Organization",
@@ -94,7 +94,7 @@ API_BASE_URL=http://127.0.0.1:3000 bun test ./tests/Feature/routes-existence.e2e
 # 或 Draupnir：bun run test:feature
 ```
 
-**預期結果**：以控制台為準（2026-04-13：existence 檔約 49 個 `it`）。
+**預期結果**：以控制台為準（2026-04-25：existence 檔約 49 個 `it`）。
 
 ### ✅ Routes Connectivity Test
 詳細驗證認證、授權、中間件
@@ -265,7 +265,7 @@ npx husky add .husky/pre-commit "bun run verify:routes"
 
 | 操作 | 耗時 | 說明 |
 |------|------|------|
-| 分析（約 40+ routes，regex） | ~0.5s | 快速掃描 |
+| 分析（約 50+ routes，regex） | ~0.5s | 快速掃描 |
 | existence e2e（約 49 `it`） | 數秒級 | 依啟服時間 |
 | connectivity e2e（約 52 `it`） | 數秒級 | 依啟服時間 |
 | 報告生成 | 視工具而定 | Markdown |
@@ -327,7 +327,7 @@ async function benchmarkRoute(method, path) {
 ✅ **CI/CD 友好** - 一鍵集成到任何 CI/CD 系統  
 ✅ **零依賴** - 僅使用標準庫，無第三方依賴  
 ✅ **快速執行** - 靜態分析極快；HTTP e2e 視環境而定  
-✅ **可擴展** - 支持自定義規則和驗證  
+✅ **可擴展** - 支持自定義規則 and 驗證  
 
 ## 🐛 故障排除
 
@@ -377,9 +377,9 @@ MIT License - 可自由復用和修改
 
 ---
 
-**版本**: v1.1  
-**最後更新**: 2026-04-13  
+**版本**: v1.2  
+**最後更新**: 2026-04-25  
 **已驗證於**: 
-- Draupnir（分析器約 43 條匹配；Feature e2e 見 [README_ROUTES_VERIFICATION.md](./README_ROUTES_VERIFICATION.md)）
+- Draupnir（分析器約 51 條匹配；Feature e2e 見 [README_ROUTES_VERIFICATION.md](./README_ROUTES_VERIFICATION.md)）
 - Bun 1.3.10+
 - Node.js 18.x+

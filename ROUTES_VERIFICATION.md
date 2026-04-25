@@ -4,7 +4,7 @@
 
 本文件記錄 Draupnir 專案中 **routes 靜態掃描**與 **HTTP Feature e2e** 的驗證方式與快照數字。
 
-- **最後同步**：2026-04-13  
+- **最後同步**：2026-04-25  
 - **導航與命令（權威）**：[docs/README_ROUTES_VERIFICATION.md](docs/README_ROUTES_VERIFICATION.md)  
 - **方法**：`scripts/routes-analyzer.ts`（regex 抽取）+ `tests/Feature/routes-*.e2e.ts`（需執行中 API）
 
@@ -22,41 +22,41 @@ src/wiring/index.ts
 src/routes.ts
 ```
 
-### 2026-04-13 快照（來自 `routes-analysis.json`）
+### 2026-04-25 快照（來自 `routes-analysis.json`）
 
 | 項目 | 數值 |
 |------|------|
-| **總匹配路由** | 43 |
+| **總匹配路由** | 51 |
 | **掃描到路由檔的模組數** | 10 |
 
 **按模組（`byModule`）**
 
 | 模組 | Routes |
 |------|--------|
-| Organization | 12 |
+| Organization | 14 |
 | AppModule | 6 |
 | CliApi | 6 |
 | Profile | 5 |
 | AppApiKey | 4 |
+| Auth | 4 |
+| Reports | 4 |
 | ApiKey | 3 |
-| Auth | 2 |
 | Credit | 2 |
 | Health | 2 |
-| DevPortal | 1 |
-| **總計** | **43** |
+| **總計** | **51** |
 
 **按 HTTP 方法（`byMethod`）**
 
 | 方法 | 數量 |
 |------|------|
-| POST | 17 |
-| GET | 14 |
-| PUT | 4 |
+| POST | 21 |
+| GET | 16 |
+| PUT | 5 |
 | PATCH | 5 |
-| DELETE | 3 |
-| **總計** | **43** |
+| DELETE | 4 |
+| **總計** | **51** |
 
-分析器只匹配特定 `router.get/post/...` 字面樣式；若註冊寫法不同，數字可能**低於**實際路由。人類可讀的完整列表見 [tests/routes-validation.report.md](tests/routes-validation.report.md)（可能與掃描結果不完全一致，請以程式與 e2e 為準）。
+分析器只匹配特定 `router.get/post/...` 字面樣式；若註冊寫法不同，數字可能**低於**實際路由。人類可讀的完整列表見 [tests/routes-validation.report.md](tests/routes-validation.report.md)（目前手動維護數字為 68，請以程式與 e2e 為準）。
 
 ---
 
@@ -64,7 +64,7 @@ src/routes.ts
 
 ### 測試檔
 
-| 檔案 | 用途 | `it` 用例數（2026-04-13） |
+| 檔案 | 用途 | `it` 用例數（2026-04-25） |
 |------|------|---------------------------|
 | [tests/Feature/routes-existence.e2e.ts](tests/Feature/routes-existence.e2e.ts) | 非 404 存在性 | 49 |
 | [tests/Feature/routes-connectivity.e2e.ts](tests/Feature/routes-connectivity.e2e.ts) | 認證／授權行為 | 52 |

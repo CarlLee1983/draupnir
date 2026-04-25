@@ -1,31 +1,33 @@
 {
-  "timestamp": "2026-04-13T14:18:20.206Z",
-  "totalRoutes": 43,
+  "timestamp": "2026-04-25T16:07:26.334Z",
+  "totalRoutes": 51,
   "byModule": {
     "ApiKey": 3,
     "AppApiKey": 4,
     "AppModule": 6,
-    "Auth": 2,
+    "Auth": 4,
     "CliApi": 6,
     "Credit": 2,
     "DevPortal": 1,
     "Health": 2,
-    "Organization": 12,
-    "Profile": 5
+    "Organization": 14,
+    "Profile": 5,
+    "Reports": 4
   },
   "byMethod": {
     "patch": 5,
-    "post": 17,
-    "put": 4,
-    "get": 14,
-    "delete": 3
+    "post": 21,
+    "put": 5,
+    "get": 16,
+    "delete": 4
   },
   "middlewareUsage": {
-    "requireAuth": 14,
-    "createRoleMiddleware": 11,
-    "attachJwt": 1,
+    "requireAuth": 17,
+    "createRoleMiddleware": 10,
+    "attachJwt": 3,
     "...creditAccess": 2,
-    "requireOrganizationContext": 6
+    "requireOrganizationContext": 7,
+    "requireOrganizationManager": 3
   },
   "routes": [
     {
@@ -154,6 +156,16 @@
     },
     {
       "module": "Auth",
+      "file": "auth.routes.ts",
+      "method": "get",
+      "path": "/api/auth/sessions",
+      "middleware": [
+        "attachJwt"
+      ],
+      "hasValidation": false
+    },
+    {
+      "module": "Auth",
       "file": "test-seed.routes.ts",
       "method": "patch",
       "path": "/api/__test__/seed-role",
@@ -165,6 +177,16 @@
       "file": "auth.routes.ts",
       "method": "post",
       "path": "/api/auth/logout",
+      "middleware": [
+        "attachJwt"
+      ],
+      "hasValidation": false
+    },
+    {
+      "module": "Auth",
+      "file": "auth.routes.ts",
+      "method": "post",
+      "path": "/api/auth/logout-all",
       "middleware": [
         "attachJwt"
       ],
@@ -356,7 +378,7 @@
       "method": "post",
       "path": "/api/organizations",
       "middleware": [
-        "createRoleMiddleware"
+        "requireAuth"
       ],
       "hasValidation": false
     },
@@ -375,6 +397,26 @@
       "file": "organization.routes.ts",
       "method": "post",
       "path": "/api/invitations/:token/accept",
+      "middleware": [
+        "requireAuth"
+      ],
+      "hasValidation": false
+    },
+    {
+      "module": "Organization",
+      "file": "organization.routes.ts",
+      "method": "post",
+      "path": "/api/invitations/:id/accept-by-id",
+      "middleware": [
+        "requireAuth"
+      ],
+      "hasValidation": false
+    },
+    {
+      "module": "Organization",
+      "file": "organization.routes.ts",
+      "method": "post",
+      "path": "/api/invitations/:id/decline",
       "middleware": [
         "requireAuth"
       ],
@@ -439,7 +481,47 @@
         "requireAuth"
       ],
       "hasValidation": false
+    },
+    {
+      "module": "Reports",
+      "file": "report.routes.ts",
+      "method": "delete",
+      "path": "/v1/org/:orgId/reports/:reportId",
+      "middleware": [
+        "requireOrganizationManager"
+      ],
+      "hasValidation": false
+    },
+    {
+      "module": "Reports",
+      "file": "report.routes.ts",
+      "method": "get",
+      "path": "/v1/org/:orgId/reports",
+      "middleware": [
+        "requireOrganizationContext"
+      ],
+      "hasValidation": false
+    },
+    {
+      "module": "Reports",
+      "file": "report.routes.ts",
+      "method": "post",
+      "path": "/v1/org/:orgId/reports",
+      "middleware": [
+        "requireOrganizationManager"
+      ],
+      "hasValidation": false
+    },
+    {
+      "module": "Reports",
+      "file": "report.routes.ts",
+      "method": "put",
+      "path": "/v1/org/:orgId/reports/:reportId",
+      "middleware": [
+        "requireOrganizationManager"
+      ],
+      "hasValidation": false
     }
   ],
-  "summary": "\n╔════════════════════════════════════════╗\n║        Routes 分析報告                  ║\n╠════════════════════════════════════════╣\n║ 總 Routes 數:                       43 ║\n╚════════════════════════════════════════╝\n\n📊 按 HTTP 方法分類:\n  PATCH  5\n  POST   17\n  PUT    4\n  GET    14\n  DELETE 3\n\n📦 按模組分類:\n  Organization         12\n  AppModule            6\n  CliApi               6\n  Profile              5\n  AppApiKey            4\n  ApiKey               3\n  Auth                 2\n  Credit               2\n  Health               2\n  DevPortal            1\n\n🔗 中間件使用情況:\n  requireAuth                    14\n  createRoleMiddleware           11\n  requireOrganizationContext     6\n  ...creditAccess                2\n  attachJwt                      1\n\n✅ 分析完成\n"
+  "summary": "\n╔════════════════════════════════════════╗\n║        Routes 分析報告                  ║\n╠════════════════════════════════════════╣\n║ 總 Routes 數:                       51 ║\n╚════════════════════════════════════════╝\n\n📊 按 HTTP 方法分類:\n  PATCH  5\n  POST   21\n  PUT    5\n  GET    16\n  DELETE 4\n\n📦 按模組分類:\n  Organization         14\n  AppModule            6\n  CliApi               6\n  Profile              5\n  AppApiKey            4\n  Auth                 4\n  Reports              4\n  ApiKey               3\n  Credit               2\n  Health               2\n\n🔗 中間件使用情況:\n  requireAuth                    17\n  createRoleMiddleware           10\n  requireOrganizationContext     7\n  attachJwt                      3\n  requireOrganizationManager     3\n  ...creditAccess                2\n\n✅ 分析完成\n"
 }

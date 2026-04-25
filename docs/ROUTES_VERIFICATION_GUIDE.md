@@ -1,6 +1,9 @@
-# Routes 驗證完整指南
+# Routes 驗證完整指南 (v1.2)
 
-本指南涵蓋了如何在任何項目中應用相同的 routes 驗證方法論。
+本指南涵蓋了如何在任何項目中應用相同的 routes 驗證方法論，並以 Draupnir 專案作為實作參考。
+
+> **最後更新**：2026-04-25  
+> **適用環境**：Bun 1.3.10+ / Node.js 18.x+
 
 ## 目錄
 
@@ -20,22 +23,22 @@
 ```
 ┌─────────────────────────────────────┐
 │  靜態代碼分析 (Static Analysis)      │
-│  - 檢查路由定義                      │
+│  - 檢查路由定義 (Regex 掃描)          │
 │  - 驗證 Controller 映射              │
 │  - 確認中間件應用                    │
 └─────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────┐
 │  動態連接測試 (Connectivity Tests)   │
-│  - 發送實際 HTTP 請求                │
+│  - 發送實際 HTTP 請求 (Feature e2e)  │
 │  - 驗證路由存在（無 404）            │
-│  - 驗證中間件應用正確                │
+│  - 驗證中間件應用正確 (認證/授權)      │
 └─────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────┐
 │  自動化驗證套件 (Automation Suite)   │
-│  - CI/CD 集成                        │
-│  - 持續驗證                          │
+│  - CI/CD 集成 (routes-check job)     │
+│  - 持續驗證 (PR 門檻)                │
 │  - 缺陷早期發現                      │
 └─────────────────────────────────────┘
 ```
@@ -44,36 +47,31 @@
 
 ## 快速開始
 
-### 5 分鐘快速驗證
+### 5 分鐘快速驗證 (Draupnir 項目)
 
-如果你已有一個運行中的 API 項目：
+如果你正在開發 Draupnir 項目：
 
 ```bash
-# 1. 複製驗證工具到你的項目
-cp -r docs/routes-verification-tools ./
+# 1. 運行靜態分析
+bun scripts/routes-analyzer.ts
 
-# 2. 運行快速驗證
-npm run test:routes-quick
+# 2. 運行動態驗證 (自動起服並測試)
+bun run test:feature
 
-# 3. 查看結果
-# ✅ 所有 routes 存在
-# ✅ 所有連接正常
+# 3. 查看分析結果
+cat routes-analysis.json
 ```
 
-### 完整驗證流程
+### 複製到其他項目
 
 ```bash
-# 1. 分析路由結構
-npm run routes:analyze
+# 1. 複製核心工具
+cp scripts/routes-analyzer.ts your-project/scripts/
+cp tests/Feature/lib/test-client.ts your-project/tests/Feature/lib/
+cp tests/Feature/routes-existence.e2e.ts your-project/tests/Feature/
 
-# 2. 生成驗證報告
-npm run routes:report
-
-# 3. 運行自動化測試
-npm run test:routes
-
-# 4. 檢查 CI 結果
-npm run test:routes:ci
+# 2. 修改 package.json
+# 參照「配置 Package.json 命令」章節
 ```
 
 ---
@@ -82,168 +80,40 @@ npm run test:routes:ci
 
 ### 步驟 1: 準備路由掃描工具
 
-創建 `scripts/routes-analyzer.ts`：
+創建 `scripts/routes-analyzer.ts`。此工具使用正則表達式掃描路由定義：
 
 ```typescript
-import { readdirSync, readFileSync } from 'fs'
+import { readdirSync, readFileSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
-interface RouteInfo {
-  method: string
-  path: string
-  controller: string
-  middleware: string[]
-  validation?: string
-}
-
-export function analyzeRoutes(modulesDir: string): RouteInfo[] {
-  const routes: RouteInfo[] = []
-  const modules = readdirSync(modulesDir)
-
-  for (const module of modules) {
-    const routesDir = join(modulesDir, module, 'Presentation/Routes')
-    
-    try {
-      const routeFiles = readdirSync(routesDir).filter(f => f.endsWith('.ts'))
-      
-      for (const file of routeFiles) {
-        const content = readFileSync(join(routesDir, file), 'utf-8')
-        // 使用正則表達式提取路由信息
-        // router.get('/path', [middleware], (ctx) => controller.method(ctx))
-        // ... 解析邏輯
-      }
-    } catch {
-      // 模組沒有路由定義
-    }
-  }
-
-  return routes
-}
-
-// 執行分析
-const routes = analyzeRoutes('src/Modules')
-console.log(`發現 ${routes.length} 個 routes`)
+// ... 核心邏輯：掃描 src/Modules/*/Presentation/Routes/*.routes.ts
+// 匹配 router.get('/path', [middleware], handler)
 ```
 
-### 步驟 2: 建立驗證報告生成器
+> **實作參考**：查看 [scripts/routes-analyzer.ts](../scripts/routes-analyzer.ts) 以獲取完整的 Regex 匹配邏輯。
 
-創建 `scripts/routes-report-generator.ts`：
+### 步驟 2: 建立 HTTP 驗證客戶端
 
-```typescript
-import { writeFileSync } from 'fs'
-import { analyzeRoutes } from './routes-analyzer'
+在 `tests/Feature/lib/test-client.ts` 建立一個輕量級的 Fetch 包裝器，用於發送測試請求。
 
-interface Report {
-  timestamp: string
-  totalRoutes: number
-  byModule: Record<string, number>
-  byMethod: Record<string, number>
-  middlewareUsage: Record<string, number>
-  details: string
-}
+### 步驟 3: 編寫存在性測試 (Existence Test)
 
-export function generateReport(): Report {
-  const routes = analyzeRoutes('src/Modules')
-  
-  const report: Report = {
-    timestamp: new Date().toISOString(),
-    totalRoutes: routes.length,
-    byModule: {},
-    byMethod: {},
-    middlewareUsage: {},
-    details: generateMarkdown(routes),
-  }
-
-  // 統計數據
-  for (const route of routes) {
-    report.byMethod[route.method] = (report.byMethod[route.method] || 0) + 1
-    for (const mw of route.middleware) {
-      report.middlewareUsage[mw] = (report.middlewareUsage[mw] || 0) + 1
-    }
-  }
-
-  return report
-}
-
-function generateMarkdown(routes: any[]): string {
-  // 生成 markdown 格式報告
-  let md = '# Routes 驗證報告\n\n'
-  md += `生成時間: ${new Date().toISOString()}\n\n`
-  
-  // ... 詳細的報告內容
-  
-  return md
-}
-
-// 執行並保存
-const report = generateReport()
-writeFileSync('ROUTES_REPORT.md', report.details, 'utf-8')
-console.log(`報告已生成: ROUTES_REPORT.md`)
-```
-
-### 步驟 3: 創建自動化測試模板
-
-創建 `tests/routes-verification.test.ts.template`：
+創建 `tests/Feature/routes-existence.e2e.ts`。其核心原則是：**只要請求不返回 404，就代表該路由在路由表中已正確註冊。**
 
 ```typescript
-import { describe, it, expect, beforeAll } from 'bun:test'
-import { TestClient } from './lib/test-client'
-import { setupTestServer, getBaseURL } from './lib/test-server'
-
-setupTestServer()
-
-let client: TestClient
-
-beforeAll(() => {
-  client = new TestClient(getBaseURL())
-})
-
-/**
- * 自動生成的測試用例
- * 
- * 驗證每個 route 都存在且連接正常
- * 測試標準：請求不返回 404 就代表路由存在
- */
-describe('Routes Existence Verification', () => {
-  // 以下由 routes-test-generator.ts 自動生成
-  {{GENERATED_TESTS}}
+it('GET /api/users 應該存在', async () => {
+  const response = await client.get('/api/users')
+  expect(response.status).not.toBe(404)
 })
 ```
 
-### 步驟 4: 自動生成測試用例
+### 步驟 4: 自動化測試編排 (Orchestration)
 
-創建 `scripts/routes-test-generator.ts`：
-
-```typescript
-import { readFileSync, writeFileSync } from 'fs'
-import { analyzeRoutes } from './routes-analyzer'
-
-export function generateTestCases(): string {
-  const routes = analyzeRoutes('src/Modules')
-  let tests = ''
-
-  for (const route of routes) {
-    const testName = `${route.method.toUpperCase()} ${route.path} 應該存在`
-    const methodName = route.method.toLowerCase()
-    
-    tests += `
-  it('${testName}', async () => {
-    const response = await client.${methodName}('${route.path}')
-    expect(response.status).not.toBe(404)
-  })
-`
-  }
-
-  return tests
-}
-
-// 執行生成
-const template = readFileSync('tests/routes-verification.test.ts.template', 'utf-8')
-const testCode = template.replace('{{GENERATED_TESTS}}', generateTestCases())
-writeFileSync('tests/Feature/routes-verification.test.ts', testCode, 'utf-8')
-
-console.log('✅ 測試用例已生成')
-```
+在 Draupnir 中，我們使用 `scripts/test-feature.ts` 來處理：
+1. 背景啟動 API 服務 (通常使用 `ORM=memory`)。
+2. 等待服務就緒。
+3. 執行 `bun test`。
+4. 測試完成後自動關閉服務。
 
 ### 步驟 5: 配置 Package.json 命令
 
@@ -251,12 +121,8 @@ console.log('✅ 測試用例已生成')
 {
   "scripts": {
     "routes:analyze": "bun scripts/routes-analyzer.ts",
-    "routes:report": "bun scripts/routes-report-generator.ts",
-    "routes:generate-tests": "bun scripts/routes-test-generator.ts",
-    "test:routes": "bun test tests/Feature/routes-verification.test.ts",
-    "test:routes:quick": "bun test tests/Feature/routes-verification.test.ts --timeout 60000",
-    "test:routes:ci": "bun test tests/Feature/routes-verification.test.ts --bail",
-    "verify:routes": "npm run routes:analyze && npm run routes:report && npm run test:routes"
+    "test:feature": "bun scripts/test-feature.ts",
+    "verify:routes": "bun scripts/routes-analyzer.ts && bun run test:feature"
   }
 }
 ```
@@ -265,60 +131,23 @@ console.log('✅ 測試用例已生成')
 
 ## 工具和腳本
 
-### 路由分析工具
+### 路由分析工具 (`routes-analyzer.ts`)
 
-**用途**: 掃描所有路由定義，提取路由信息
+**用途**: 靜態掃描所有路由定義，提取路由信息並生成 JSON 報告。
 
 ```bash
 bun scripts/routes-analyzer.ts
 ```
 
-**輸出**:
-```json
-{
-  "totalRoutes": 68,
-  "routes": [
-    {
-      "method": "GET",
-      "path": "/api/users",
-      "controller": "UserController.list",
-      "middleware": ["requireAuth", "createRoleMiddleware('admin')"],
-      "validation": null
-    }
-  ]
-}
-```
+**輸出**: `routes-analysis.json`
 
-### 報告生成工具
+### Feature 測試編排器 (`test-feature.ts`)
 
-**用途**: 生成易讀的驗證報告
+**用途**: 自動化「啟服 -> 測試 -> 停服」流程，確保測試環境一致性。
 
 ```bash
-bun scripts/routes-report-generator.ts
+bun run test:feature
 ```
-
-**輸出**: `ROUTES_REPORT.md`
-
-包含:
-- 按模組分類的路由列表
-- 按 HTTP 方法分類的統計
-- 中間件使用情況
-- 驗證規則應用情況
-
-### 測試生成工具
-
-**用途**: 自動生成驗證測試用例
-
-```bash
-bun scripts/routes-test-generator.ts
-```
-
-**輸出**: `tests/Feature/routes-verification.test.ts`
-
-包含:
-- 每個 route 的存在驗證
-- 認證/授權驗證
-- 中間件應用驗證
 
 ---
 
@@ -326,288 +155,49 @@ bun scripts/routes-test-generator.ts
 
 ### 1. 定期運行驗證
 
-```bash
-# 開發時：每次修改路由後
-npm run test:routes
-
-# 提交前：完整驗證
-npm run verify:routes
-
-# CI/CD：自動驗證
-npm run test:routes:ci
-```
+- **開發時**：每次修改路由定義後，運行 `bun scripts/routes-analyzer.ts` 檢查是否有漏掃或寫法不規範。
+- **提交前**：運行 `bun run test:feature` 確保所有端點皆連通。
+- **CI/CD**：在 GitHub Actions 中集成 `routes-check` job。
 
 ### 2. 新增 Route 的檢查清單
 
-```markdown
-- [ ] 路由定義在 Presentation/Routes/*.routes.ts
-- [ ] Controller 方法已實現
-- [ ] 必要的中間件已應用
-- [ ] 輸入驗證 Schema 已定義
-- [ ] 測試用例已生成
-- [ ] routes:report 已通過
-- [ ] test:routes 已通過
-```
+- [ ] 路由定義在 `Presentation/Routes/*.routes.ts`
+- [ ] 寫法符合 `router.method('/path', [middleware], handler)` 規範 (以便分析器掃描)
+- [ ] 必要的中間件 (Auth, Role) 已應用
+- [ ] 在 `tests/Feature/routes-existence.e2e.ts` 補上對應的 `it` 用例
+- [ ] `verify:routes` 通過
 
-### 3. 文件組織結構
+### 3. 文件組織結構 (DDD 建議)
 
 ```
-project/
-├── src/
-│   └── Modules/
-│       └── ModuleName/
-│           └── Presentation/
-│               └── Routes/
-│                   └── moduleName.routes.ts
-├── scripts/
-│   ├── routes-analyzer.ts          # 路由分析
-│   ├── routes-report-generator.ts  # 報告生成
-│   └── routes-test-generator.ts    # 測試生成
-├── tests/
-│   ├── Feature/
-│   │   └── routes-verification.test.ts  # 自動生成
-│   └── lib/
-│       └── test-client.ts               # HTTP 客戶端
-├── docs/
-│   └── ROUTES_VERIFICATION_GUIDE.md    # 本指南
-└── package.json
-```
-
-### 4. 中間件檢查清單
-
-驗證時確保檢查：
-
-```typescript
-// ✅ 認證中間件
-[requireAuth()]  // 檢查是否存在
-
-// ✅ 角色授權
-[createRoleMiddleware('admin')]  // 檢查角色
-
-// ✅ 模組訪問控制
-[createModuleAccessMiddleware('module_name')]
-
-// ✅ 組織上下文
-[requireOrganizationContext()]
-
-// ✅ 驗證規則
-[CreateUserRequest]  // Zod Schema
-```
-
-### 5. CI/CD 集成
-
-GitHub Actions 示例：
-
-```yaml
-# .github/workflows/routes-verification.yml
-name: Routes Verification
-
-on: [push, pull_request]
-
-jobs:
-  verify:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: oven-sh/setup-bun@v1
-      
-      - name: 分析路由結構
-        run: bun scripts/routes-analyzer.ts
-      
-      - name: 生成驗證報告
-        run: bun scripts/routes-report-generator.ts
-      
-      - name: 生成測試用例
-        run: bun scripts/routes-test-generator.ts
-      
-      - name: 運行 Routes 驗證
-        run: bun test:routes:ci
-      
-      - name: 上傳報告
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: routes-report
-          path: ROUTES_REPORT.md
+src/Modules/ModuleName/
+└── Presentation/Routes/
+    └── moduleName.routes.ts
 ```
 
 ---
 
 ## 故障排除
 
-### 問題：無法掃描路由
+### 問題：分析器找不到新路由
 
-**原因**: 路由文件位置不符
+**原因**: 寫法不符合 Regex 匹配規則（例如：中間件沒用數組包裹，或 handler 換行書寫）。
 
-**解決**:
-```typescript
-// 檢查實際位置
-const routesPaths = [
-  'src/Modules/*/Presentation/Routes/*.ts',
-  'src/Routes/*.ts',
-  'app/Routes/*.ts',
-]
-```
+**解決**: 
+1. 修正路由定義寫法以符合標準。
+2. 或擴充 `scripts/routes-analyzer.ts` 中的 `patterns` 數組。
 
 ### 問題：測試返回 404
 
-**原因**: 路由未正確註冊
-
-**檢查**:
-1. 路由定義文件是否存在
-2. 路由函數是否在主文件調用
-3. HTTP 方法是否正確
-4. 路由路徑是否正確
-
-### 問題：中間件未應用
-
-**原因**: 中間件順序或註冊錯誤
-
-**檢查**:
-```typescript
-// ✅ 正確順序
-router.get('/api/users', [auth, roleCheck], handler)
-
-// ❌ 錯誤：middleware 必須是數組
-router.get('/api/users', auth, handler)
-```
-
-### 問題：驗證 Schema 失效
-
-**原因**: Schema 導入錯誤或定義不符
-
-**檢查**:
-```typescript
-// ✅ 正確
-import { CreateUserRequest } from '../Requests'
-router.post('/api/users', CreateUserRequest, handler)
-
-// ❌ 錯誤：未導入
-router.post('/api/users', [CreateUserRequest], handler)
-```
-
----
-
-## 完整工作流範例
-
-### 第一次設置
-
-```bash
-# 1. 複製工具
-cp -r draupnir/scripts ./
-cp -r draupnir/tests/lib ./tests/
-
-# 2. 分析現有 routes
-bun scripts/routes-analyzer.ts
-
-# 3. 生成報告
-bun scripts/routes-report-generator.ts
-
-# 4. 生成測試
-bun scripts/routes-test-generator.ts
-
-# 5. 運行驗證
-bun test:routes
-
-# ✅ 完成
-```
-
-### 日常開發流程
-
-```bash
-# 修改路由後
-npm run test:routes
-
-# 提交前
-npm run verify:routes
-
-# 被 PR 拒絕時
-npm run routes:report  # 檢查報告找出問題
-npm run routes:analyze # 詳細分析
-```
-
-### 故障排查流程
-
-```bash
-# 1. 查看詳細報告
-npm run routes:report
-
-# 2. 分析路由結構
-bun scripts/routes-analyzer.ts --verbose
-
-# 3. 運行單個測試
-bun test tests/Feature/routes-verification.test.ts --grep "GET /api/users"
-
-# 4. 檢查特定模組
-bun scripts/routes-analyzer.ts --module=UserModule
-```
-
----
-
-## 性能優化
-
-### 快速驗證（推薦用於開發）
-
-```bash
-# 只驗證路由存在，不檢查認證
-bun test:routes:quick
-```
-
-### 完整驗證（推薦用於 CI）
-
-```bash
-# 完整的各項檢查
-bun test:routes
-```
-
-### 並行運行
-
-```bash
-# 同時運行多個測試套件
-bun test tests/Feature/routes-verification.test.ts & \
-bun test tests/Feature/other-tests.test.ts
-```
-
----
-
-## 維護清單
-
-### 每週
-
-- [ ] 運行 `npm run verify:routes`
-- [ ] 檢查新增 routes 是否通過驗證
-- [ ] 查看 CI 報告
-
-### 每月
-
-- [ ] 更新路由分析工具
-- [ ] 檢查中間件應用趨勢
-- [ ] 清理未使用的 routes
-
-### 每季度
-
-- [ ] 重新審視驗證框架
-- [ ] 優化測試性能
-- [ ] 更新文檔
+**原因**: 
+1. 路由未在 `index.ts` 或 `wiring/` 中註冊。
+2. `API_BASE_URL` 指向錯誤。
+3. 服務未成功啟動。
 
 ---
 
 ## 相關資源
 
-- [本項目的驗證報告](../ROUTES_VERIFICATION.md)
-- [詳細的 Routes 列表](../tests/routes-validation.report.md)
-- [測試用例](../tests/Feature/routes-existence.e2e.ts)
-
----
-
-## 總結
-
-這套驗證框架可應用於任何 Node.js/Bun API 項目，能夠：
-
-✅ 自動掃描和分析所有路由  
-✅ 生成詳細驗證報告  
-✅ 自動生成驗證測試用例  
-✅ 集成到 CI/CD 管道  
-✅ 持續監控路由完整性  
-
-遵循本指南，你可以在任何項目中快速建立類似的驗證機制。
+- [📊 最新驗證報告](../ROUTES_VERIFICATION.md)
+- [導航索引](./README_ROUTES_VERIFICATION.md)
+- [快速開始](./ROUTES_VERIFICATION_QUICKSTART.md)
