@@ -95,10 +95,16 @@ describe('RemoveMemberService', () => {
     expect(result.error).toBe('CANNOT_REMOVE_SELF')
   })
 
-  it('不能移除最後一個 Manager', async () => {
+  // Admin override: 系統 admin 為了清算組織可以移除最後一位 manager。
+  // 非 admin 的拒絕路徑由 OrgMembershipRules domain 規則單元測試覆蓋
+  // （透過 orgAuth.requireOrgManager 的真實實作，非 admin 的 requester
+  // 在「只有一位 manager」的場景下無法通過授權，自然走不到 last-manager 守衛）。
+  it('admin 可以移除最後一位 Manager（用於組織清算）', async () => {
     const result = await removeService.execute(orgId, managerId, memberId, 'admin')
-    expect(result.success).toBe(false)
-    expect(result.error).toBe('CANNOT_REMOVE_LAST_MANAGER')
+    expect(result.success).toBe(true)
+
+    const stillThere = await memberRepo.findByUserAndOrgId(managerId, orgId)
+    expect(stillThere).toBeNull()
   })
 
   it('移除最後一個 org manager 後其系統角色應降為 member', async () => {

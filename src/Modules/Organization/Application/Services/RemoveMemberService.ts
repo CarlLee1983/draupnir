@@ -41,9 +41,11 @@ export class RemoveMemberService {
         return { success: false, message: 'Member not found', error: 'MEMBER_NOT_FOUND' }
       }
 
+      const isAdminRequester = requesterSystemRole === 'admin'
+
       await this.db.transaction(async (tx) => {
         const txMemberRepo = this.memberRepository.withTransaction(tx)
-        if (member.isManager()) {
+        if (member.isManager() && !isAdminRequester) {
           const managerCount = await txMemberRepo.countManagersByOrgId(orgId)
           OrgMembershipRules.assertNotLastManager(member, managerCount)
         }
