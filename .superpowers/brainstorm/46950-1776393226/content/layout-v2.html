@@ -1,0 +1,87 @@
+<h2>優化介面：個人設定 (V2 - 增強對比與層次)</h2>
+<p class="subtitle">解決全黑背景導致的閱讀疲勞，提升介面深度感</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">V1：全黑背景 (低對比)</div>
+    <div class="mockup-body" style="background: #000; padding: 24px; font-family: monospace; color: #fff;">
+      <div style="border: 1px solid #333; padding: 16px;">
+        <div style="font-weight: bold; margin-bottom: 12px;">帳號資訊</div>
+        <label style="font-size: 10px; color: #666;">顯示名稱</label>
+        <div style="border: 1px solid #333; padding: 8px; margin-top: 4px;">member@draupnir.local</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">V2：Zinc 層次結構 (推薦)</div>
+    <div class="mockup-body" style="background: #09090b; padding: 24px; font-family: 'Inter', sans-serif; color: #fafafa;">
+      <div style="background: #18181b; border: 1px solid #27272a; padding: 20px; border-radius: 4px;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+          <div>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #fff;">個人資料</h3>
+            <p style="margin: 4px 0 0; font-size: 12px; color: #a1a1aa;">管理你的公開顯示資訊</p>
+          </div>
+          <div style="width: 40px; height: 40px; background: #27272a; display: flex; align-items: center; justify-content: center; font-family: monospace; font-size: 14px; color: #6366f1; border: 1px solid #3f3f46;">ME</div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+          <label style="font-family: monospace; font-size: 11px; color: #71717a; text-transform: uppercase; letter-spacing: 0.05em;">顯示名稱</label>
+          <div style="margin-top: 6px; position: relative;">
+            <input type="text" value="member@draupnir.local" style="width: 100%; background: #09090b; border: 1px solid #27272a; padding: 10px 12px; color: #fafafa; border-radius: 2px; font-size: 14px; outline: none; box-sizing: border-box;" />
+          </div>
+        </div>
+
+        <button style="background: #6366f1; color: #fff; border: none; padding: 10px 20px; font-size: 12px; font-weight: 500; border-radius: 2px; cursor: pointer; transition: background 0.2s;">儲存變更</button>
+      </div>
+
+      <div style="margin-top: 16px; background: #18181b; border: 1px solid #27272a; padding: 20px; border-radius: 4px;">
+        <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: #fff;">安全設定</h3>
+        <p style="margin: 4px 0 20px; font-size: 12px; color: #a1a1aa;">更新你的存取密碼</p>
+        
+        <div style="margin-bottom: 12px;">
+          <label style="font-family: monospace; font-size: 11px; color: #71717a; text-transform: uppercase;">目前密碼</label>
+          <div style="margin-top: 6px; background: #09090b; border: 1px solid #27272a; padding: 10px 12px; height: 16px; border-radius: 2px;"></div>
+        </div>
+        
+        <div style="margin-bottom: 12px;">
+          <label style="font-family: monospace; font-size: 11px; color: #71717a; text-transform: uppercase;">新密碼</label>
+          <div style="margin-top: 6px; background: #09090b; border: 1px solid #27272a; padding: 10px 12px; height: 16px; border-radius: 2px;"></div>
+          <div style="display: flex; gap: 4px; margin-top: 8px;">
+            <div style="height: 3px; flex: 1; background: #22c55e;"></div>
+            <div style="height: 3px; flex: 1; background: #22c55e;"></div>
+            <div style="height: 3px; flex: 1; background: #3f3f46;"></div>
+            <div style="height: 3px; flex: 1; background: #3f3f46;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>改進細節</h3>
+  <div class="options">
+    <div class="option" data-choice="elevation">
+      <div class="letter">1</div>
+      <div class="content">
+        <h3>引入 Elevation (高度感)</h3>
+        <p>背景使用 Zinc-950，卡片使用 Zinc-900，使區塊從背景中「浮現」，更容易區分層次。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="typography">
+      <div class="letter">2</div>
+      <div class="content">
+        <h3>混合字體策略</h3>
+        <p>標籤與裝飾性文字保留 Monospace，主要內容與閱讀文字切換為 Sans-serif，兼顧風格與閱讀效率。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="feedback">
+      <div class="letter">3</div>
+      <div class="content">
+        <h3>增強狀態提示</h3>
+        <p>密碼強度改為分段進度條，相較於純文字清單更直觀。</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,68 @@
+<h2>優化「請先選擇組織」的配色方案</h2>
+<p class="subtitle">目前的紅字提示在深色背景下過於突兀（視覺上像嚴重錯誤），我們需要更協調的提示方式。</p>
+
+<div class="cards">
+  <div class="card" data-choice="indigo" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #09090b; padding: 24px; border-radius: 8px;">
+        <div style="border: 1px solid rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.05); border-radius: 8px; padding: 16px;">
+          <h4 style="color: #818cf8; margin: 0 0 4px 0; font-size: 14px;">Organization</h4>
+          <p style="color: #a5b4fc; margin: 0; font-size: 13px;">請先選擇組織</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 A：品牌靛藍 (Indigo)</h3>
+      <p>與系統主色調一致，視覺感受最為統一，傳達「引導」而非「錯誤」的訊息。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="sky" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #09090b; padding: 24px; border-radius: 8px;">
+        <div style="border: 1px solid rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.05); border-radius: 8px; padding: 16px;">
+          <h4 style="color: #38bdf8; margin: 0 0 4px 0; font-size: 14px;">Organization</h4>
+          <p style="color: #7dd3fc; margin: 0; font-size: 13px;">請先選擇組織</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 B：資訊天藍 (Sky Blue)</h3>
+      <p>標準的資訊提示色，在黑底下極具層次感且易於閱讀，感覺輕鬆自然。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="amber" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #09090b; padding: 24px; border-radius: 8px;">
+        <div style="border: 1px solid rgba(251, 191, 36, 0.3); background: rgba(251, 191, 36, 0.05); border-radius: 8px; padding: 16px;">
+          <h4 style="color: #fbbf24; margin: 0 0 4px 0; font-size: 14px;">Organization</h4>
+          <p style="color: #fcd34d; margin: 0; font-size: 13px;">請先選擇組織</p>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 C：提醒琥珀 (Amber)</h3>
+      <p>傳統的「待辦/提醒」色，暗示這是一個需要執行的步驟，且不具侵略性。</p>
+    </div>
+  </div>
+</div>
+
+<div class="pros-cons">
+  <div class="pros">
+    <h4>預期改進</h4>
+    <ul>
+      <li>降低「錯誤感」，提升使用者體驗。</li>
+      <li>在深色模式下提供更好的對比度。</li>
+      <li>統一所有 Member 頁面的提示風格。</li>
+    </ul>
+  </div>
+  <div class="cons">
+    <h4>目前的紅字問題</h4>
+    <ul>
+      <li>視覺上像是發生了嚴重故障（Destructive）。</li>
+      <li>紅色在極深色背景上對比度通常不佳或顯得髒。</li>
+      <li>容易讓使用者感到緊張。</li>
+    </ul>
+  </div>
+</div>

@@ -1,0 +1,24 @@
+<h2>Implementation Strategy</h2>
+<p class="subtitle">How we'll transition Draupnir to the new "Cleaner Lines" aesthetic.</p>
+
+<div class="options">
+  <div class="option" data-choice="theme-first" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Theme-Driven Foundation (Recommended)</h3>
+      <p>Update <code>tailwind.config.ts</code> and <code>app.css</code> with the new "Midnight Bloom" tokens (colors, spacing, Geist fonts). This ensures the "Overall" part of your request is handled consistently across all pages.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="page-first" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Dashboard-First Prototype</h3>
+      <p>Implement the new look specifically on <code>Dashboard/Index.tsx</code> first using custom classes. We'll refine the look in-situ before extracting it into global theme tokens.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 20px;">
+  <h3>Recommendation: Approach A</h3>
+  <p>Since you want to improve <strong>overall</strong> UI/UX, starting with the theme foundation is safer. It prevents "UI drift" and makes the Dashboard implementation cleaner by using standard Tailwind tokens like <code>bg-background</code> and <code>border-border</code> that are already wired to the new look.</p>
+</div>

@@ -1,0 +1,3 @@
+{"type":"click","text":"A\n    \n      AJAX 原地切換 (推薦)\n      點擊後透過 Inertia POST 到後端設定 Cookie，並自動觸發 shared props 更新，體驗最流暢。","choice":"a","id":null,"timestamp":1776934798050}
+{"type":"click","text":"B\n    \n      頁面重新整理\n      設定 Cookie 後強制 window.location.reload()，雖然有閃爍但能確保所有環境變數與 i18n 實例完全同步。","choice":"b","id":null,"timestamp":1776934798833}
+{"type":"click","text":"A\n    \n      AJAX 原地切換 (推薦)\n      點擊後透過 Inertia POST 到後端設定 Cookie，並自動觸發 shared props 更新，體驗最流暢。","choice":"a","id":null,"timestamp":1776934799349}

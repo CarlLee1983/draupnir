@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo Data Indicator Options</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600&family=Geist:wght@400;500;600;700&display=swap');
+    body { font-family: 'Geist', sans-serif; }
+    .font-mono { font-family: 'Geist Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-50 p-8">
+  <div class="max-w-4xl mx-auto space-y-12">
+    <header>
+      <h1 class="text-2xl font-bold text-slate-900">Demo Data Indicator Options</h1>
+      <p class="text-slate-500 mt-2">Which approach makes the "Demo Data" status most explicit while maintaining dashboard quality?</p>
+    </header>
+
+    <!-- Option A: Top Banner -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Option A</span>
+        <h2 class="text-lg font-semibold">Warning Banner (Internal)</h2>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+        <!-- Banner -->
+        <div class="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-amber-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <span class="text-xs font-medium text-amber-800">
+            目前顯示為範例數據。系統尚無同步紀錄，已自動生成模擬趨勢以供參考。
+          </span>
+        </div>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-slate-800 uppercase tracking-tight text-sm">System-wide Usage Trend</h3>
+            <div class="flex gap-1 bg-slate-100 p-1 rounded-md text-[10px] font-mono uppercase">
+              <span class="px-2 py-0.5 rounded bg-white shadow-sm">15d</span>
+              <span class="px-2 py-0.5 text-slate-400">30d</span>
+            </div>
+          </div>
+          <div class="h-40 bg-slate-50 rounded border border-dashed border-slate-200 flex items-center justify-center text-slate-300 font-mono text-xs text-center px-8">
+            [ Area Chart with upward trend ]
+          </div>
+        </div>
+      </div>
+      <p class="text-sm text-slate-500 italic">Adds a descriptive banner inside the chart card. Impossible to miss but takes up vertical space.</p>
+    </section>
+
+    <!-- Option B: Watermark Overlay -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Option B</span>
+        <h2 class="text-lg font-semibold">Watermark Overlay</h2>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6 relative overflow-hidden">
+        <!-- Watermark -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none select-none opacity-[0.07] rotate-[-15deg]">
+          <span class="text-8xl font-black font-mono">DEMO DATA</span>
+        </div>
+        
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-slate-800 uppercase tracking-tight text-sm">System-wide Usage Trend</h3>
+          <div class="flex gap-1 bg-slate-100 p-1 rounded-md text-[10px] font-mono uppercase">
+            <span class="px-2 py-0.5 rounded bg-white shadow-sm">15d</span>
+            <span class="px-2 py-0.5 text-slate-400">30d</span>
+          </div>
+        </div>
+        <div class="h-40 bg-slate-50 rounded border border-dashed border-slate-200 flex items-center justify-center text-slate-300 font-mono text-xs">
+          [ Area Chart with upward trend ]
+        </div>
+      </div>
+      <p class="text-sm text-slate-500 italic">Places a large "DEMO DATA" watermark behind the chart. Visually striking and clearly indicates data status without changing layout.</p>
+    </section>
+
+    <!-- Option C: High-Contrast Alert Badge -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-bold uppercase">Option C</span>
+        <h2 class="text-lg font-semibold">High-Contrast Alert Badge + Footnote</h2>
+      </div>
+      <div class="bg-white border border-slate-200 rounded-lg shadow-sm p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <h3 class="font-bold text-slate-800 uppercase tracking-tight text-sm">System-wide Usage Trend</h3>
+            <span class="bg-amber-500 text-white px-2 py-0.5 rounded-full text-[10px] font-black font-mono animate-pulse">
+              DEMO DATA / 範例數據
+            </span>
+          </div>
+          <div class="flex gap-1 bg-slate-100 p-1 rounded-md text-[10px] font-mono uppercase">
+            <span class="px-2 py-0.5 rounded bg-white shadow-sm">15d</span>
+            <span class="px-2 py-0.5 text-slate-400">30d</span>
+          </div>
+        </div>
+        <div class="h-40 bg-slate-50 rounded border border-dashed border-slate-200 flex items-center justify-center text-slate-300 font-mono text-xs">
+          [ Area Chart with upward trend ]
+        </div>
+        <p class="mt-4 text-[11px] text-amber-600 font-medium bg-amber-50 px-2 py-1 rounded inline-block">
+          Note: System has no usage history. Showing simulated trend.
+        </p>
+      </div>
+      <p class="text-sm text-slate-500 italic">Upgrades the subtle badge to a high-contrast amber badge (optional pulsing) and adds a styled footnote.</p>
+    </section>
+  </div>
+</body>
+</html>

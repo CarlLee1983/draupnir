@@ -1,0 +1,88 @@
+<h2>優化介面：個人設定</h2>
+<p class="subtitle">提升視覺層次感與操作體驗</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">目前：單欄垂直卡片</div>
+    <div class="mockup-body" style="background: #000; padding: 24px; font-family: monospace; color: #fff;">
+      <div style="border: 1px solid #333; margin-bottom: 24px;">
+        <div style="padding: 12px; border-bottom: 1px solid #333; font-weight: bold;">個人設定</div>
+        <div style="padding: 12px;">
+          <label style="font-size: 10px; color: #999;">顯示名稱</label>
+          <div style="border: 1px solid #333; padding: 8px; margin-top: 4px;">member@draupnir.local</div>
+          <button style="width: 100%; padding: 8px; margin-top: 12px; background: #6366f1; color: #fff; border: none;">儲存</button>
+        </div>
+      </div>
+      <div style="border: 1px solid #333;">
+        <div style="padding: 12px; border-bottom: 1px solid #333; font-weight: bold;">變更密碼</div>
+        <div style="padding: 12px;">
+          <div style="margin-bottom: 8px;">
+            <label style="font-size: 10px; color: #999;">目前密碼</label>
+            <div style="border: 1px solid #333; padding: 8px; margin-top: 4px; height: 16px;"></div>
+          </div>
+          <div style="margin-bottom: 8px;">
+            <label style="font-size: 10px; color: #999;">新密碼</label>
+            <div style="border: 1px solid #333; padding: 8px; margin-top: 4px; height: 16px;"></div>
+            <ul style="font-size: 9px; margin-top: 4px; color: #666; list-style: none; padding: 0;">
+              <li>至少 8 個字元</li>
+              <li>包含大寫字母</li>
+            </ul>
+          </div>
+          <button style="width: 100%; padding: 8px; margin-top: 12px; background: #333; color: #999; border: none;">更新密碼</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">建議：側邊標籤分組 / 增強層次</div>
+    <div class="mockup-body" style="background: #000; padding: 0; font-family: monospace; color: #fff; display: flex; height: 100%;">
+      <div style="width: 80px; border-right: 1px solid #333; display: flex; flex-direction: column; padding-top: 16px;">
+        <div style="padding: 8px; background: #6366f1; text-align: center; font-size: 10px;">一般</div>
+        <div style="padding: 8px; text-align: center; font-size: 10px; color: #666;">安全</div>
+      </div>
+      <div style="flex: 1; padding: 24px;">
+        <h3 style="margin-top: 0; font-size: 14px; border-left: 2px solid #6366f1; padding-left: 8px; margin-bottom: 24px;">帳號資訊</h3>
+        <div style="margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+             <div style="width: 48px; height: 48px; background: #333; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 1px solid #444;">ME</div>
+             <div>
+               <div style="font-size: 12px;">member@draupnir.local</div>
+               <div style="font-size: 10px; color: #666;">管理員權限</div>
+             </div>
+          </div>
+          <label style="font-size: 10px; color: #666; text-transform: uppercase;">顯示名稱</label>
+          <input type="text" value="member@draupnir.local" style="width: 100%; background: transparent; border: none; border-bottom: 1px solid #333; padding: 8px 0; color: #fff; outline: none; margin-top: 4px;" />
+        </div>
+        <button style="padding: 8px 16px; background: #6366f1; color: #fff; border: none; font-size: 11px; text-transform: uppercase; cursor: pointer;">更新個人資料</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>優化亮點</h3>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="tabs" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>標籤化分組 (Tabbed Layout)</h3>
+        <p>將「個人資料」與「密碼安全」分開，降低視覺疲勞並提升專注度。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="visuals" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>增強視覺回饋</h3>
+        <p>加入 Avatar 預覽、漸進式密碼強度指示器，以及更細膩的按鈕狀態。</p>
+      </div>
+    </div>
+    <div class="option" data-choice="monolithic" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>一體化滾動介面</h3>
+        <p>保留現有單頁結構，但優化卡片間距、邊框粗細與標題裝飾。</p>
+      </div>
+    </div>
+  </div>
+</div>

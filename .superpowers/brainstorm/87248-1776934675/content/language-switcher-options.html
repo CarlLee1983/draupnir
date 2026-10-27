@@ -1,0 +1,37 @@
+<h2>語系切換器設計提案</h2>
+<p class="subtitle">選擇您偏好的使用者體驗與整合位置</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>AJAX 原地切換 (推薦)</h3>
+      <p>點擊後透過 Inertia POST 到後端設定 Cookie，並自動觸發 shared props 更新，體驗最流暢。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>頁面重新整理</h3>
+      <p>設定 Cookie 後強制 window.location.reload()，雖然有閃爍但能確保所有環境變數與 i18n 實例完全同步。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>預計整合位置</h3>
+  <div class="mockup">
+    <div class="mockup-header">TopBar 預覽</div>
+    <div class="mockup-body">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#f4f4f4; border-bottom:1px solid #ddd; color: #333">
+        <div>Draupnir Logo</div>
+        <div style="display:flex; gap:15px; align-items:center;">
+          <div style="padding:4px 8px; border:1px solid #ccc; border-radius:4px; font-size:12px; cursor:pointer;">
+            🌐 語系: 中文 (繁體) ▾
+          </div>
+          <div style="width:32px; height:32px; background:#ccc; border-radius:50%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

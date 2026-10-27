@@ -1,0 +1,51 @@
+<h2>Dynamic Ethereal Hybrid</h2>
+<p class="subtitle">A system that breathes between light and dark while maintaining its "Aura" identity.</p>
+
+<div class="split">
+  <!-- Option 1: Adaptive Flow -->
+  <div class="card" data-choice="adaptive-flow" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #ffffff; padding: 0; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; overflow: hidden; height: 120px;">
+      <!-- Light half -->
+      <div style="flex: 1; background: #f8fafc; padding: 15px; border-right: 1px dashed #cbd5e1; position: relative;">
+        <div style="position: absolute; top: -20px; right: -20px; width: 60px; height: 60px; background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);"></div>
+        <div style="font-size: 8px; font-weight: bold; color: #3b82f6; margin-bottom: 4px;">LIGHT_MODE</div>
+        <div style="height: 30px; background: rgba(255,255,255,0.8); border: 1px solid rgba(0,0,0,0.05); border-radius: 4px; backdrop-filter: blur(4px);"></div>
+      </div>
+      <!-- Dark half -->
+      <div style="flex: 1; background: #030712; padding: 15px; position: relative;">
+        <div style="position: absolute; top: -20px; right: -20px; width: 60px; height: 60px; background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);"></div>
+        <div style="font-size: 8px; font-weight: bold; color: #6366f1; margin-bottom: 4px;">DARK_MODE</div>
+        <div style="height: 30px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; backdrop-filter: blur(8px);"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Adaptive Flow</h3>
+      <p>A full system that follows the user's OS preference. Shared tokens (primary, accent) remain consistent but adjust their luminosity and vibrancy for contrast.</p>
+    </div>
+  </div>
+
+  <!-- Option 2: Functional Contrast -->
+  <div class="card" data-choice="functional-contrast" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #030712; padding: 20px; border-radius: 12px; border: 1px solid #1e293b; position: relative; overflow: hidden;">
+      <!-- Main Dashboard (Dark) -->
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px; margin-bottom: 10px;">
+        <div style="font-size: 8px; opacity: 0.5; color: #fff;">DASHBOARD (IMMERSIVE)</div>
+        <div style="display: flex; gap: 4px; margin-top: 5px;">
+          <div style="flex: 1; height: 15px; background: #6366f1; border-radius: 2px;"></div>
+          <div style="flex: 1; height: 15px; background: #a855f7; border-radius: 2px;"></div>
+        </div>
+      </div>
+      <!-- Floating Modal/Panel (Light) -->
+      <div style="position: absolute; bottom: 10px; right: 10px; width: 50%; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);">
+         <div style="font-size: 7px; font-weight: bold; color: #000;">CONFIG PANEL (LIGHT)</div>
+         <div style="height: 10px; background: #f1f5f9; margin-top: 4px; border-radius: 2px;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Functional Contrast</h3>
+      <p>Uses deep dark backgrounds for high-focus data views (dashboards) and light glass panels for configuration and input-heavy tasks. High intentionality.</p>
+    </div>
+  </div>
+</div>
+
+<p style="margin-top: 30px;">A **Hybrid/Dynamic** approach ensures the system feels alive and stays readable in all conditions. Which flavor of dynamic sounds more like the vision for Draupnir?</p>

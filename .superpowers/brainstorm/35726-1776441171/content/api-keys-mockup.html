@@ -1,0 +1,71 @@
+<h2>Design Section 2: UI Consolidation (API Keys Page)</h2>
+<p class="subtitle">API Keys will now be the landing page for members, integrating balance and onboarding.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Browser: /member/api-keys</div>
+  <div class="mockup-body" style="background: #0f1117; color: white; padding: 24px;">
+    
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+      <h1 style="font-size: 24px; font-weight: bold;">API Keys</h1>
+      <button style="background: #6366f1; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">+ Create API Key</button>
+    </div>
+
+    <!-- Onboarding State (If no org) -->
+    <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; padding: 24px; margin-bottom: 24px; text-align: center;">
+      <h3 style="margin-bottom: 8px;">No Organization Yet</h3>
+      <p style="color: rgba(255,255,255,0.4); margin-bottom: 16px;">Create an organization to start generating API keys and tracking usage.</p>
+      <button style="background: #6366f1; color: white; border: none; padding: 8px 24px; border-radius: 6px;">Create My Organization</button>
+    </div>
+
+    <!-- Balance & Quick Info (If has org) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px;">
+        <div style="color: rgba(255,255,255,0.4); font-size: 12px; margin-bottom: 4px;">Balance</div>
+        <div style="font-size: 24px; font-weight: bold;">$124.50</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px;">
+        <div style="color: rgba(255,255,255,0.4); font-size: 12px; margin-bottom: 4px;">Status</div>
+        <div style="color: #10b981; font-weight: medium;">Active</div>
+      </div>
+    </div>
+
+    <!-- API Keys Table Placeholder -->
+    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">
+            <th style="padding: 12px; font-size: 14px; color: rgba(255,255,255,0.4);">Name</th>
+            <th style="padding: 12px; font-size: 14px; color: rgba(255,255,255,0.4);">Status</th>
+            <th style="padding: 12px; font-size: 14px; color: rgba(255,255,255,0.4);">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 12px;">Production Key</td>
+            <td style="padding: 12px;"><span style="background: rgba(16,185,129,0.1); color: #10b981; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Active</span></td>
+            <td style="padding: 12px; color: rgba(255,255,255,0.4);">2024-03-20</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="accept" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Looks Good</h3>
+      <p>Proceed with this layout for the consolidated page.</p>
+    </div>
+  </div>
+  <div class="option" data-choice="adjust" onclick="toggleSelect(this)">
+    <div class="letter">✎</div>
+    <div class="content">
+      <h3>Make Adjustments</h3>
+      <p>I have feedback on the layout or placement.</p>
+    </div>
+  </div>
+</div>

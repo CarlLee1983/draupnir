@@ -1,0 +1,62 @@
+<h2>Design Section 2 (REVISED): Member API Keys View</h2>
+<p class="subtitle">Members can view assigned keys and their balance, but cannot create keys.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Browser: /member/api-keys</div>
+  <div class="mockup-body" style="background: #0f1117; color: white; padding: 24px;">
+    
+    <!-- Header (NO CREATE BUTTON) -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+      <h1 style="font-size: 24px; font-weight: bold;">API Keys</h1>
+      <div style="font-size: 12px; color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); padding: 4px 12px; border-radius: 20px;">Role: Member</div>
+    </div>
+
+    <!-- Onboarding State (If no org/keys) -->
+    <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px; padding: 24px; margin-bottom: 24px; text-align: center;">
+      <h3 style="margin-bottom: 8px;">No API Keys Assigned</h3>
+      <p style="color: rgba(255,255,255,0.4); margin-bottom: 16px;">You haven't been assigned any keys yet. You can create your own organization to act as a Manager.</p>
+      <button style="background: #6366f1; color: white; border: none; padding: 8px 24px; border-radius: 6px; cursor: pointer;">Create My Organization</button>
+    </div>
+
+    <!-- Balance & Status (Visible if membership exists) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px;">
+        <div style="color: rgba(255,255,255,0.4); font-size: 12px; margin-bottom: 4px;">Personal Usage Balance</div>
+        <div style="font-size: 24px; font-weight: bold;">$0.00</div>
+      </div>
+      <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 16px;">
+        <div style="color: rgba(255,255,255,0.4); font-size: 12px; margin-bottom: 4px;">Organization</div>
+        <div style="color: rgba(255,255,255,0.6); font-weight: medium;">None</div>
+      </div>
+    </div>
+
+    <!-- API Keys Table (Assigned keys only) -->
+    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">
+            <th style="padding: 12px; font-size: 14px; color: rgba(255,255,255,0.4);">Name</th>
+            <th style="padding: 12px; font-size: 14px; color: rgba(255,255,255,0.4);">Status</th>
+            <th style="padding: 12px; font-size: 14px; color: rgba(255,255,255,0.4);">Assigned By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="3" style="padding: 24px; text-align: center; color: rgba(255,255,255,0.2); font-style: italic;">No keys found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="accept" onclick="toggleSelect(this)">
+    <div class="letter">✓</div>
+    <div class="content">
+      <h3>Correct</h3>
+      <p>This properly reflects the Member's restricted capabilities.</p>
+    </div>
+  </div>
+</div>
